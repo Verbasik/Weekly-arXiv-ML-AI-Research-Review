@@ -22,6 +22,7 @@
 📦 weekly-arxiv-ml-review
  ┣ 📂 2024
  ┃ ┣ 📂 week-01
+ ┃ ┃ ┣ 📰 paper.pdf
  ┃ ┃ ┣ 📑 review.md
  ┃ ┃ ┣ 📊 experiments.ipynb
  ┃ ┃ ┗ 📁 assets
