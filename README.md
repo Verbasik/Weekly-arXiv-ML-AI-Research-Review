@@ -20,16 +20,13 @@
 
 ```
 📦 weekly-arxiv-ml-review
- ┣ 📂 reviews
- ┃ ┣ 📂 2024
- ┃ ┃ ┣ 📂 week-01
- ┃ ┃ ┃ ┣ 📑 review.md
- ┃ ┃ ┃ ┣ 📊 experiments.ipynb
- ┃ ┃ ┃ ┗ 📁 assets
- ┃ ┃ ┗ 📂 week-XX
- ┗ 📂 templates
-   ┣ 📑 review-template.md
-   ┗ 📊 notebook-template.ipynb
+ ┣ 📂 2024
+ ┃ ┣ 📂 week-01
+ ┃ ┃ ┣ 📑 review.md
+ ┃ ┃ ┣ 📊 experiments.ipynb
+ ┃ ┃ ┗ 📁 assets
+ ┃ ┗ 📂 week-XX
+ ┣ 📂 2025
 ```
 
 ## 📋 Формат обзоров
@@ -97,9 +94,9 @@
 
 ## 📊 Статистика проекта
 
-![GitHub stats](https://img.shields.io/github/stars/yourusername/weekly-arxiv-ml-review?style=social)
-![GitHub forks](https://img.shields.io/github/forks/yourusername/weekly-arxiv-ml-review?style=social)
-![GitHub watchers](https://img.shields.io/github/watchers/yourusername/weekly-arxiv-ml-review?style=social)
+![GitHub stats](https://img.shields.io/github/stars/Verbasik/Weekly-arXiv-ML-AI-Research-Review?style=social)
+![GitHub forks](https://img.shields.io/github/forks/Verbasik/Weekly-arXiv-ML-AI-Research-Review?style=social)
+![GitHub watchers](https://img.shields.io/github/watchers/Verbasik/Weekly-arXiv-ML-AI-Research-Review?style=social)
 
 ## 📫 Контакты
 
