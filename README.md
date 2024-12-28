@@ -56,8 +56,8 @@
 
 2. **Работа с кодом:**
    ```bash
-   git clone https://github.com/yourusername/weekly-arxiv-ml-review.git
-   cd weekly-arxiv-ml-review
+   git clone https://github.com/yourusername/weekly-arxiv-ml-review.git](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review.git
+   cd Weekly-arXiv-ML-AI-Research-Review
    ```
 
 3. **Jupyter notebooks:**
