@@ -650,17 +650,17 @@ $|\text{Суперактивация}| > 20.9 + 1 \times 21.9 = 42.8$
 
 $$
   \widehat{W}_{j',k'} = 
-    \begin{cases}
-      0, & \text{если } (j' = j) \text{ и } (k' = m),\\
-      W_{j',k'}, & \text{иначе}.
-    \end{cases}
+  \begin{cases}
+  0, & \text{если } (j' = j) \text{ и } (k' = m),\\
+  W_{j',k'}, & \text{иначе}.
+  \end{cases}
 $$
 
 2. **Сравнение перплексии**: Если модель с весами $\widehat{W}$ даёт перплексию $PPL_\text{new}$, в разы превышающую исходную $PPL_\text{orig}$, то $W_{j,m}$ — супервес.  
 
 $$
   \text{Если } 
-    \frac{PPL_\text{new}}{PPL_\text{orig}} \gg 1,
+  \frac{PPL_\text{new}}{PPL_\text{orig}} \gg 1,
   \quad 
   \text{тогда } W_{j,m} \text{ — супервес.}
 $$
