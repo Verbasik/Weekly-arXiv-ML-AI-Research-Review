@@ -1,0 +1,14 @@
+# OS-specific files
+**/.DS_Store
+
+# IDE-specific files
+**/.vscode/
+
+# Virtual environment
+**/venv/
+
+# Cache files
+**/__pycache__/
+
+# Configuration files
+**/.env
