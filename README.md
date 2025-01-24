@@ -103,7 +103,7 @@
 
 - 📧 Email: verbasik2018@gmail.com
 - 🌐 LinkedIn: [Edward Verbetsky](https://www.linkedin.com/in/edward-verbetsky)
-- 💬 Telegram: [@Verbetsky_E](https://t.me/Verbetsky_E)
+- 💬 Telegram: [TheWeeklyBrief](https://t.me/TheWeeklyBrief)
 
 ## 📜 Лицензия
 
