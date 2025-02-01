@@ -1,11 +1,9 @@
 # ModernBERT: Новое поколение моделей-кодировщиков для эффективного NLP 🚀
 
 [![arXiv](https://img.shields.io/badge/arXiv-2406.XXXXX-b31b1b.svg)](https://arxiv.org/abs/2412.13663)
-[![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/main/2024/week-XX/experiments.ipynb) 
+[![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1g18LooJ32IIeeUc0cYuRqlcmOB4MiGoE?usp=sharing) 
 [![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Models-yellow)](https://huggingface.co/answerdotai/ModernBERT-base)
 [![Telegram](https://img.shields.io/badge/📢_Telegram_Channel-2CA5E0?style=flat)](https://t.me/TheWeeklyBrief)
-
-> p.s. чуть позже актуализирую ссылку на тетрадку с кодом дообучением ModerBERT
 
 ## **«Эволюция BERT наконец здесь — быстрее, умнее, с поддержкой длинного контекста»**
 
