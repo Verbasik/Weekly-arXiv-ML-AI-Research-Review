@@ -1,7 +1,5 @@
 # Evo-2: модель для генерации генома, которая знает все древо жизни.
 
-![Table_1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-10/assets/Figure_1.png)
-
 ## **История Evo 2**
 
 Позвольте мне кратко представить Arc Institute.
@@ -22,7 +20,7 @@
 
 Патрик Сю, один из основателей Arc Institute, получил степень бакалавра по молекулярной и клеточной биологии в Калифорнийском университете в Беркли в 2010 году. Затем он продолжил обучение в Гарвардском университете, где получил степень магистра по биологии и докторскую степень по биохимии, завершив докторантуру всего за один год. Будучи первым аспирантом Чжан Фэна, он внес значительный вклад в ранние исследования и разработки технологии CRISPR-Cas9.
 
-![Pictures_4.png](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-10/assets/Pictures_4.png)
+![Pictures_4.jpg](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-10/assets/Pictures_4.jpg)
 
 В декабре 2021 года Патрик Сю вместе с друзьями Патриком Коллисоном и Сильваной Конерманн основали Arc Institute. Это хорошо финансируемое учреждение, которое ценит научную свободу, создало нечто вроде Evo 2.
 
