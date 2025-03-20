@@ -1,0 +1,18 @@
+{
+    "server": {
+        "connect_type": "executable",
+        "executable": "python",
+        "args": ["MCP_Server.py"],
+        "env": {
+            "DEBUG": "1"
+        }
+    },
+    "llm": {
+        "api_url": "https://api.openai.com/v1/chat/completions",
+        "api_key": "your_api_key_here",
+        "model": "gpt-4o-mini",
+        "is_openai_compatible": true,
+        "max_tokens": 1000,
+        "temperature": 0.7
+    }
+}
