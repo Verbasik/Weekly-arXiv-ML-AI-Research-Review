@@ -43,8 +43,6 @@
 ## Ссылки
 - [Публикация от Anthropic](https://www.anthropic.com/news/model-context-protocol)
 
-#MCP #ModelContextProtocol
-
 ---
 
 <p align="center">Исследуйте вместе с нами 🚀</p>
