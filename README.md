@@ -54,6 +54,25 @@
    - Обзоры организованы по годам и неделям
    - Используйте теги для поиска по темам
 
+---
+## 📚 Обзоры
+
+| Неделя | Тема | Ссылка |
+|--------|------|--------|
+| 2024/52 | Сверхвеса в больших языковых моделях | [Ссылка](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/tree/7da90818c258704dc55d866c117bd13dded71608/2024/week-52) |
+| 2025/01_&_02 | Сравнительный анализ биологических и искусственных нейронных сетей | [Ссылка](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/tree/7da90818c258704dc55d866c117bd13dded71608/2025/week-01_&_02) |
+| 2025/03 | rStar-Math: Математическая революция для малых языковых моделей | [Ссылка](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/tree/7da90818c258704dc55d866c117bd13dded71608/2025/week-03) |
+| 2025/04 | Преемник BERT: ModernBERT | [Ссылка](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/tree/7da90818c258704dc55d866c117bd13dded71608/2025/week-04) |
+| 2025/05 | Процесс обучения в биологических и искусственных нейронных сетях | [Ссылка](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/tree/7da90818c258704dc55d866c117bd13dded71608/2025/week-05) |
+| 2025/06 | MoE: Mixture of Experts - Революция в Архитектуре AI | [Ссылка](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/tree/7da90818c258704dc55d866c117bd13dded71608/2025/week-06) |
+| 2025/07_&_08 | От генерации к рассуждению: эволюция языковых моделей от Generative Pre-trained Transformers до reasoning-систем | [Ссылка](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/tree/7da90818c258704dc55d866c117bd13dded71608/2025/week-07_&_08) |
+| 2025/09 | Native Sparse Attention: Hardware-Aligned and Natively Trainable Sparse Attention | [Ссылка](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/tree/7da90818c258704dc55d866c117bd13dded71608/2025/week-09) |
+| 2025/10 | Evo-2 — ИИ, который проектирует жизнь | [Ссылка](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/tree/7da90818c258704dc55d866c117bd13dded71608/2025/week-10) |
+| 2025/11 | Законы масштабирования дистилляции | [Ссылка](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/tree/7da90818c258704dc55d866c117bd13dded71608/2025/week-11) |
+| 2025/12 | Model Context Protocol (MCP) | [Ссылка](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/tree/7da90818c258704dc55d866c117bd13dded71608/2025/week-12) |
+
+---
+
 2. **Работа с кодом:**
    ```bash
    git clone https://github.com/yourusername/weekly-arxiv-ml-review.git](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review.git
