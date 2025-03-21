@@ -6,7 +6,7 @@
 
 Давайте сначала рассмотрим архитектуру с одним агентом.
 
-![Figure](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-12-Model_Context_Protocol/assets/Figure.png)
+![Figure](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-12/assets/Figure.png)
 
 1. Инструменты — это функции, которые определены и вызываются в текущей программе. Определение функции инструментов будет включено в системную подсказку, чтобы позволить LLM понять доступные в настоящее время инструменты.
 
@@ -65,19 +65,19 @@ Anthropic точно характеризует MCP как "эквивалент
 
 > Как говорится, картинка стоит тысячи слов. 
 
-![Figure_1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-12-Model_Context_Protocol/assets/Figure_1.jpeg)
+![Figure_1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-12/assets/Figure_1.jpeg)
 
 MCP унифицирует определения вызовов интерфейса для доступа к возможностям различных инструментов. Раньше служба (например, Slack) должна была подключаться к форматам вызовов функций, определенным несколькими пользовательскими продуктами (например, курсором). Теперь службе и клиенту нужно подключаться только к одному и тому же формату, и обеим сторонам нужно реализовать его только один раз.
 
-![Figure_2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-12-Model_Context_Protocol/assets/Figure_2.png)
+![Figure_2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-12/assets/Figure_2.png)
 
 MCP Server работает независимо на любом сервере и может иметь собственную независимую базу данных информации/ресурсов. Он не привязан к серверу Agent и может использоваться повторно, а также его легко подключать и отключать.
 
-![Figure_3](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-12-Model_Context_Protocol/assets/Figure_3.png)
+![Figure_3](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-12/assets/Figure_3.png)
 
 Исходные вызовы функций инструмента инкапсулируются с помощью MCP Server, и архитектура становится такой:
 
-![Figure_4](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-12-Model_Context_Protocol/assets/Figure_4.png)
+![Figure_4](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-12/assets/Figure_4.png)
 
 Отличие от исходного чистого вызова функции заключается в том, что архитектура более гибкая, включая:
 
@@ -110,15 +110,15 @@ MCP определяет:
 
 ### Реализация собственного MCP-сервера
 
-Создать базовый MCP-сервер достаточно просто. Вот пример сервера для работы с локальными Git репозиториями с использованием FastMCP: [GitHub 🐙](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-12-Model_Context_Protocol/MCP/MCP_Server.py)
+Создать базовый MCP-сервер достаточно просто. Вот пример сервера для работы с локальными Git репозиториями с использованием FastMCP: [GitHub 🐙](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-12/MCP/MCP_Server.py)
 
 ### Реализация клиента для работы с MCP-сервером
 
-Пример минимального клиента, который может взаимодействовать с MCP-сервером: [GitHub 🐙](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-12-Model_Context_Protocol/MCP/MCP_Client.py)
+Пример минимального клиента, который может взаимодействовать с MCP-сервером: [GitHub 🐙](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-12/MCP/MCP_Client.py)
 
 ### Конфиг файл доя клиента
 
-Пример реализации конфига: [GitHub 🐙](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-12-Model_Context_Protocol/MCP/config.json)
+Пример реализации конфига: [GitHub 🐙](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-12/MCP/config.json)
 
 ## Взаимодействие LLM моделей с MCP серверами
 
