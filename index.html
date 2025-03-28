@@ -360,6 +360,73 @@
                 container.style.margin = '0';
             });
         }
+
+        function fixBlockFormulasLayout() {
+            // Находим все блочные формулы
+            document.querySelectorAll('mjx-container[display="true"]').forEach(formula => {
+                // Проверяем родительский элемент
+                const parent = formula.parentNode;
+                
+                // Если формула внутри параграфа, списка или другого блочного элемента
+                if (parent.tagName === 'P' || parent.tagName === 'LI' || 
+                    parent.tagName === 'DIV' && !parent.classList.contains('formula-container')) {
+                    
+                    // Создаем новый контейнер для формулы
+                    const container = document.createElement('div');
+                    container.className = 'formula-container';
+                    container.style.width = '100%';
+                    container.style.textAlign = 'center';
+                    container.style.margin = '1em auto';
+                    container.style.display = 'block';
+                    
+                    // Определяем, куда вставить контейнер (после родительского элемента)
+                    const parentP = parent.tagName === 'LI' ? parent.parentNode : parent;
+                    const grandParent = parentP.parentNode;
+                    
+                    // Если формула - единственное содержимое родителя, заменяем родителя
+                    if (parent.childNodes.length === 1 || 
+                        (parent.childNodes.length === 3 && 
+                        parent.firstChild.nodeType === Node.TEXT_NODE && 
+                        parent.firstChild.textContent.trim() === '' &&
+                        parent.lastChild.nodeType === Node.TEXT_NODE && 
+                        parent.lastChild.textContent.trim() === '')) {
+                        
+                        grandParent.insertBefore(container, parentP);
+                        container.appendChild(formula);
+                        parentP.remove();
+                    } else {
+                        // В противном случае разделяем родительский элемент
+                        const index = Array.from(parent.childNodes).indexOf(formula);
+                        
+                        // Создаем клон родителя для содержимого после формулы
+                        const afterParent = parent.cloneNode(false);
+                        
+                        // Перемещаем всё содержимое после формулы в новый элемент
+                        while (parent.childNodes.length > index) {
+                            const node = parent.childNodes[index];
+                            afterParent.appendChild(node);
+                        }
+                        
+                        // Вставляем формулу между двумя частями родителя
+                        grandParent.insertBefore(container, parent.nextSibling);
+                        grandParent.insertBefore(afterParent, container.nextSibling);
+                        
+                        // Перемещаем формулу в новый контейнер
+                        container.appendChild(formula);
+                        
+                        // Удаляем пустые элементы
+                        if (afterParent.childNodes.length === 0 || 
+                            afterParent.textContent.trim() === '') {
+                            afterParent.remove();
+                        }
+                        if (parent.childNodes.length === 0 || 
+                            parent.textContent.trim() === '') {
+                            parent.remove();
+                        }
+                    }
+                }
+            });
+        }
         
         // Функция для перезагрузки MathJax
         function reloadMathJax() {
@@ -681,6 +748,8 @@
                                             checkAndFixFormulaErrors();
                                             // Центрируем ТОЛЬКО блочные формулы
                                             centerMathJaxFormulas();
+                                            // Исправляем расположение блочных формул
+                                            fixBlockFormulasLayout();
                                         })
                                         .catch(err => {
                                             console.error('Ошибка при рендеринге формул:', err);
