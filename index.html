@@ -61,31 +61,33 @@
 
         /* --- НАЧАЛО ОБНОВЛЕННЫХ СТИЛЕЙ MATHJAX --- */
 
-        /* Стиль для блочных формул (теперь inline-block) */
+        /* Стиль для блочных формул (упрощенный) */
         mjx-container[display="true"] {
-            display: inline-block !important; /* Чтобы слушаться text-align родителя/обертки */
-            margin-top: 0.5em !important;    /* Вертикальные отступы */
+            /* display: block; */ /* Не обязательно, flex-родитель справится */
+            margin-top: 0.5em !important;    /* Оставляем вертикальные отступы */
             margin-bottom: 0.5em !important;
-            margin-left: 0 !important;       /* Убираем auto, центрирование через родителя/обертку */
-            margin-right: 0 !important;
-            text-align: initial !important;  /* Выравнивание текста ВНУТРИ формулы */
+            /* margin-left/right: auto/0 - НЕ НУЖНЫ, центрирует родитель/обертка */
             max-width: 100%;                 /* Предотвратить выход за пределы */
             overflow-x: auto;                /* Прокрутка для широких формул */
             overflow-y: hidden;
-            vertical-align: middle;          /* Выравнивание по вертикали */
+            /* vertical-align: middle; */    /* Не нужно при flex */
         }
 
-        /* Класс для родителя, содержащего ТОЛЬКО блочную формулу */
-        .math-display-parent-center {
-            text-align: center;
+        /* Класс для родителя, содержащего ТОЛЬКО блочную формулу (Flexbox) */
+        .math-display-parent-flex-center {
+            display: flex;
+            justify-content: center; /* Горизонтальное центрирование */
+            /* align-items: center; */ /* Опционально: вертикальное центрирование */
         }
 
-        /* Класс для DIV-обертки, если в родителе есть и другой контент */
-        .math-display-wrapper {
-            text-align: center; /* Центрирует inline-block формулу внутри */
-            margin-top: 1em;    /* Внешние отступы для обертки */
+        /* Класс для DIV-обертки (Flexbox) */
+        .math-display-wrapper-flex-center {
+            display: flex;
+            justify-content: center; /* Горизонтальное центрирование */
+            /* align-items: center; */ /* Опционально: вертикальное центрирование */
+            margin-top: 1em;         /* Внешние отступы для обертки */
             margin-bottom: 1em;
-            clear: both;        /* На случай обтекания */
+            clear: both;             /* На случай обтекания */
         }
 
         /* Правильное отображение инлайновых формул (без изменений) */
@@ -102,8 +104,6 @@
             overflow-x: auto;
             overflow-y: hidden;
         }
-
-        /* --- КОНЕЦ ОБНОВЛЕННЫХ СТИЛЕЙ MATHJAX --- */
 
         /* --- Стили для ошибок, изображений, UI (без изменений) --- */
         .math-error { color: #d9534f; background-color: #f9f2f2; padding: 8px; border-radius: 4px; margin: 10px 0; font-family: monospace; }
