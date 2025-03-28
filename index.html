@@ -5,109 +5,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weekly Reviews</title>
     
-    <!-- Настройка marked.js для корректной обработки формул -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script>
-        // Настройки marked для сохранения формул нетронутыми
-        marked.setOptions({
-            gfm: true,
-            breaks: true,
-            sanitize: false,
-            smartLists: true
-        });
-        
-        // Создаем кастомный рендерер для обработки кода и формул
-        const renderer = new marked.Renderer();
-        const originalCode = renderer.code.bind(renderer);
-        
-        // Особая обработка блоков с математическими формулами
-        renderer.code = function(code, language) {
-            if (language === 'math' || language === 'tex') {
-                return `<div class="math-block">$$${code}$$</div>`;
-            }
-            return originalCode(code, language);
-        };
-        
-        // Сохраняем оригинальный метод обработки параграфов
-        const originalParagraph = renderer.paragraph.bind(renderer);
-        
-        // Особая обработка параграфов для защиты формул
-        renderer.paragraph = function(text) {
-            // Защищаем блоки с формулами от лишней обработки
-            const protectedText = text.replace(/\$\$([\s\S]*?)\$\$/g, function(match) {
-                return match.replace(/&/g, '&amp;')
-                            .replace(/</g, '&lt;')
-                            .replace(/>/g, '&gt;');
-            });
-            return originalParagraph(protectedText);
-        };
-        
-        marked.setOptions({ renderer: renderer });
-    </script>
+    <!-- Подключение MathJax напрямую с jsdelivr (более надежный CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
-    <!-- Расширенные настройки MathJax -->
+    <!-- Настройка marked.js -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@4.0.2/marked.min.js"></script>
+    
+    <!-- Конфигурация MathJax (должна быть ДО загрузки библиотеки) -->
     <script>
-        MathJax = {
+        window.MathJax = {
             tex: {
                 inlineMath: [['$', '$'], ['\\(', '\\)']],
                 displayMath: [['$$', '$$'], ['\\[', '\\]']],
                 processEscapes: true,
-                processEnvironments: true,
-                processRefs: true,
-                macros: {
-                    mathcal: ["\\mathcal{#1}", 1],
-                    mathbb: ["\\mathbb{#1}", 1],
-                    text: ["\\text{#1}", 1],
-                    hat: ["\\hat{#1}", 1],
-                    varepsilon: "\\varepsilon",
-                    pi: "\\pi"
-                },
-                packages: {'[+]': ['ams', 'noerrors', 'physics', 'color', 'boldsymbol', 'cancel', 'unicode']}
+                processEnvironments: true
             },
             options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
                 ignoreHtmlClass: 'tex2jax_ignore',
-                processHtmlClass: 'tex2jax_process',
-                renderActions: {
-                    findScript: [10, function (doc) {
-                        document.querySelectorAll('script[type^="math/tex"]').forEach(function(node) {
-                            const display = !!node.type.match(/; *mode=display/);
-                            const math = new doc.options.MathItem(
-                                node.textContent, doc.inputJax[0], display
-                            );
-                            const text = document.createTextNode('');
-                            node.parentNode.replaceChild(text, node);
-                            math.start = {node: text, delim: '', n: 0};
-                            math.end = {node: text, delim: '', n: 0};
-                            doc.math.push(math);
-                        });
-                    }, '']
-                }
-            },
-            svg: {
-                fontCache: 'global',
-                scale: 1.25  // Увеличиваем масштаб для лучшей читаемости сложных формул
-            },
-            startup: {
-                ready: () => {
-                    console.log('MathJax загружен и готов.');
-                    MathJax.startup.defaultReady();
-                    
-                    // Добавляем задержку для более надежного рендеринга сложных формул
-                    setTimeout(function() {
-                        MathJax.typeset();
-                    }, 500);
-                }
-            },
-            loader: {
-                load: ['[tex]/ams', '[tex]/noerrors', '[tex]/physics', '[tex]/color', 
-                       '[tex]/boldsymbol', '[tex]/cancel', '[tex]/unicode']
+                renderActions: {addMenu: []}
             }
         };
     </script>
     
-    <!-- Подключение MathJax v3 -->
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        // Настройка marked
+        document.addEventListener('DOMContentLoaded', function() {
+            // Базовые настройки marked
+            marked.setOptions({
+                gfm: true,
+                breaks: true,
+                sanitize: false,
+                smartLists: true
+            });
+            
+            // Безопасное переопределение renderer
+            const renderer = new marked.Renderer();
+            
+            // Сохраняем оригинальные методы
+            const originalCode = renderer.code.bind(renderer);
+            const originalParagraph = renderer.paragraph.bind(renderer);
+            
+            // Безопасно переопределяем функцию для обработки блоков кода
+            renderer.code = function(code, language) {
+                if (language === 'math' || language === 'tex') {
+                    return `<div class="math-block">$$${code}$$</div>`;
+                }
+                return originalCode(code, language);
+            };
+            
+            // Безопасно переопределяем функцию для параграфов
+            renderer.paragraph = function(text) {
+                // Безопасная проверка типа перед использованием метода replace
+                if (typeof text === 'string') {
+                    // Защищаем формулы от изменений
+                    return originalParagraph(text);
+                } else {
+                    // Если text не строка, просто возвращаем результат оригинального метода
+                    return originalParagraph(text);
+                }
+            };
+            
+            // Устанавливаем настроенный renderer
+            marked.setOptions({ renderer: renderer });
+        });
+    </script>
     
     <style>
         body {
@@ -275,177 +237,72 @@
             }
         }
         
-        // Функция для перезагрузки MathJax с расширенной обработкой ошибок
+        // Функция для перезагрузки MathJax
         function reloadMathJax() {
-            if (typeof MathJax !== 'undefined') {
-                try {
-                    // Очищаем предыдущий рендеринг
-                    MathJax.typesetClear();
-                    
-                    // Обновляем форматы формул в DOM для лучшей обработки
-                    document.querySelectorAll('.math-block').forEach(block => {
-                        const formula = block.textContent;
-                        // Создаем новый элемент для формулы
-                        const newBlock = document.createElement('div');
-                        newBlock.className = 'math-block';
-                        newBlock.textContent = formula;
-                        block.parentNode.replaceChild(newBlock, block);
+            try {
+                if (typeof MathJax !== 'undefined') {
+                    // Применяем ручную обработку для всех формул на странице
+                    document.querySelectorAll('#content').forEach(element => {
+                        // Найдем все элементы с формулами и добавим их в очередь типсета
+                        MathJax.typeset();
                     });
                     
-                    // Повторный рендеринг с задержкой
-                    setTimeout(() => {
-                        MathJax.typesetPromise().then(() => {
-                            console.log('MathJax успешно перезагружен');
-                        }).catch(err => {
-                            console.error('Ошибка при перезагрузке MathJax:', err);
-                            showError('Проблема с рендерингом формул. Проверьте синтаксис.');
-                        });
-                    }, 100);
-                } catch (error) {
-                    console.error('Ошибка при обработке MathJax:', error);
-                    showError('Ошибка при перезагрузке MathJax. Попробуйте обновить страницу.');
+                    showError('Формулы перезагружены успешно');
+                } else {
+                    showError('MathJax не загружен. Попробуйте обновить страницу.');
                 }
-            } else {
-                showError('MathJax не загружен. Попробуйте обновить страницу.');
+            } catch (error) {
+                console.error('Ошибка при перезагрузке MathJax:', error);
+                showError('Ошибка при перезагрузке формул.');
             }
         }
         
-        // Функция для отображения ошибок
+        // Функция для отображения сообщений
         function showError(message) {
             const errorElement = document.getElementById('error-message');
             errorElement.textContent = message;
             errorElement.style.display = 'block';
             setTimeout(() => {
                 errorElement.style.display = 'none';
-            }, 5000); // Скрыть сообщение через 5 секунд
+            }, 3000);
         }
         
-        // Улучшенная функция для загрузки Markdown-файла
+        // Упрощенная функция для загрузки Markdown-файла
         async function loadMarkdown(path) {
-            // Сохраняем текущий путь
-            currentPath = path;
-            
-            // Показываем индикатор загрузки
-            document.getElementById('loader').style.display = 'block';
-            
             try {
+                // Показываем индикатор загрузки
+                document.getElementById('loader').style.display = 'block';
+                
+                // Запрашиваем файл
                 const response = await fetch(path);
                 if (!response.ok) {
-                    throw new Error(`Ошибка загрузки файла: ${response.status} ${response.statusText}`);
+                    throw new Error(`Ошибка загрузки: ${response.status}`);
                 }
                 
                 // Получаем текст markdown
                 currentMarkdownText = await response.text();
+                currentPath = path;
                 
-                // Предварительная обработка текста для улучшения совместимости с MathJax
-                currentMarkdownText = preprocessMarkdown(currentMarkdownText);
-                
-                // Обновляем хэш URL для возможности навигации по истории
+                // Обновляем хэш URL для навигации
                 window.location.hash = path;
                 
-                // Рендерим markdown
-                renderMarkdown(currentMarkdownText);
+                // Простой рендеринг markdown
+                document.getElementById('content').innerHTML = marked.parse(currentMarkdownText);
                 
-                // Обновляем заголовок страницы на основе первого заголовка в markdown
-                updatePageTitle(currentMarkdownText);
-                
-            } catch (error) {
-                console.error('Ошибка загрузки файла:', error);
-                showError(`Ошибка загрузки файла: ${error.message}`);
-                document.getElementById('content').innerHTML = `<p class="error">Не удалось загрузить документ. Пожалуйста, попробуйте позже.</p>`;
-            } finally {
-                // Скрываем индикатор загрузки
-                document.getElementById('loader').style.display = 'none';
-            }
-        }
-        
-        // Функция предварительной обработки markdown для улучшения совместимости с MathJax
-        function preprocessMarkdown(text) {
-            // Защищаем специальные LaTeX-команды
-            return text
-                // Исправление проблем с подчеркиванием в формулах
-                .replace(/(\$\$.*?)_(.*?\$\$)/g, '$1\\_$2')
-                // Добавляем пробелы вокруг формул для лучшего распознавания
-                .replace(/([^\$])\$\$/g, '$1 $$')
-                .replace(/\$\$([^\$])/g, '$$ $1')
-                // Исправляем экранирование для команд \text
-                .replace(/\\text\{([^}]*)\}/g, '\\text{$1}');
-        }
-        
-        // Функция для обновления заголовка страницы
-        function updatePageTitle(markdownText) {
-            // Ищем первый заголовок
-            const titleMatch = markdownText.match(/^#\s+(.*?)$/m);
-            if (titleMatch && titleMatch[1]) {
-                document.title = titleMatch[1] + ' - Weekly Reviews';
-            }
-        }
-        
-        // Улучшенная функция для рендеринга Markdown в HTML
-        function renderMarkdown(markdownText) {
-            try {
-                // Преобразуем Markdown в HTML с помощью marked
-                const htmlContent = marked.parse(markdownText);
-                
-                // Обновляем содержимое
-                document.getElementById('content').innerHTML = htmlContent;
-                
-                // Обновляем исходный текст, если он открыт
-                if (document.getElementById('source-view').style.display === 'block') {
-                    document.getElementById('source-content').textContent = markdownText;
-                }
-                
-                // Запускаем MathJax для рендеринга формул с дополнительной защитой
+                // Запускаем рендеринг формул
                 setTimeout(() => {
-                    try {
-                        if (typeof MathJax !== 'undefined') {
-                            MathJax.typesetPromise().catch((err) => {
-                                console.error('Ошибка при рендеринге MathJax:', err);
-                                // Пробуем перезагрузить с базовыми настройками
-                                MathJax.typesetClear();
-                                setTimeout(() => {
-                                    MathJax.typeset();
-                                }, 300);
-                            });
-                        }
-                    } catch (mathError) {
-                        console.error('Критическая ошибка MathJax:', mathError);
+                    if (typeof MathJax !== 'undefined') {
+                        MathJax.typeset();
                     }
                 }, 200);
                 
             } catch (error) {
-                console.error('Ошибка при рендеринге markdown:', error);
-                showError('Ошибка преобразования markdown в HTML.');
+                console.error('Ошибка загрузки:', error);
+                showError(`Ошибка: ${error.message}`);
+            } finally {
+                // Скрываем индикатор загрузки
+                document.getElementById('loader').style.display = 'none';
             }
-        }
-        
-        // Функция для динамического добавления новых ссылок в навигацию
-        function addNavigationLink(path, title) {
-            const navElement = document.getElementById('navigation');
-            const linkElement = document.createElement('a');
-            linkElement.href = '#';
-            linkElement.setAttribute('data-path', path);
-            linkElement.classList.add('nav-link');
-            linkElement.textContent = title;
-            navElement.appendChild(linkElement);
-            
-            // Добавляем обработчик события для новой ссылки
-            linkElement.addEventListener('click', function(event) {
-                event.preventDefault();
-                const linkPath = this.getAttribute('data-path');
-                if (linkPath) {
-                    loadMarkdown(linkPath);
-                    setActiveLink(this);
-                }
-            });
-        }
-        
-        // Вспомогательная функция для установки активной ссылки
-        function setActiveLink(linkElement) {
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.remove('active');
-            });
-            linkElement.classList.add('active');
         }
         
         // Инициализация страницы
@@ -457,7 +314,12 @@
                     const path = this.getAttribute('data-path');
                     if (path) {
                         loadMarkdown(path);
-                        setActiveLink(this);
+                        
+                        // Выделяем активную ссылку
+                        document.querySelectorAll('.nav-link').forEach(l => {
+                            l.classList.remove('active');
+                        });
+                        this.classList.add('active');
                     }
                 });
             });
@@ -474,10 +336,10 @@
                 // Выделяем соответствующую ссылку
                 const navLink = document.querySelector(`.nav-link[data-path="${path}"]`);
                 if (navLink) {
-                    setActiveLink(navLink);
+                    navLink.classList.add('active');
                 }
             } else {
-                // Если хэша нет, загружаем первую ссылку по умолчанию
+                // Загружаем первую ссылку по умолчанию
                 const firstLink = document.querySelector('.nav-link');
                 if (firstLink) {
                     firstLink.click();
