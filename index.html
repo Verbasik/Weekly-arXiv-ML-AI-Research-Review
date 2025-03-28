@@ -96,11 +96,27 @@
             overflow-x: auto;
         }
         
-        /* Стили для формул - добавляем отступы и улучшаем читаемость */
-        .math-display {
+        /* Центрирование изображений */
+        img {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            margin: 20px auto;
+        }
+        
+        /* Стили для блочных формул - центрирование и улучшение отображения */
+        .mjx-container[jax="CHTML"][display="true"] {
+            display: block;
+            text-align: center;
+            margin: 1em 0 !important;
+            width: 100% !important;
+        }
+        
+        /* Делаем формулы прокручиваемыми на мобильных устройствах */
+        .mjx-container {
             overflow-x: auto;
-            padding: 10px 0;
-            margin: 15px 0;
+            overflow-y: hidden;
+            padding: 6px 0;
         }
         
         /* Стили для отображения ошибок формул */
@@ -113,7 +129,7 @@
             font-family: monospace;
         }
         
-        /* Добавляем стили для диагностики ошибок формул */
+        /* Стили для диагностики ошибок формул */
         .formula-error {
             background-color: #ffeeee;
             border-left: 3px solid #ff4444;
@@ -124,11 +140,28 @@
             overflow-x: auto;
         }
         
-        /* Добавляем стили для визуализации проблемных частей формул */
+        /* Стили для визуализации проблемных частей формул */
         .highlight-error {
             background-color: #ffffd0;
             padding: 2px;
             border-bottom: 1px dashed red;
+        }
+        
+        /* Контейнер для изображений с подписью */
+        .image-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .image-container img {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        
+        .image-caption {
+            font-style: italic;
+            color: #666;
+            margin-top: 8px;
         }
         
         #content {
@@ -415,6 +448,26 @@
             // 4. Исправляем проблемы с индексами
             fixed = fixed.replace(/([^\\])_(\\[^{]|[a-zA-Z0-9])/g, '$1_{$2}');
             
+            // 5. Исправляем проблемы с ограничениями в формулах (s.t.)
+            fixed = fixed.replace(/\\text\{s\.t\.\}(.*?)\|\{(.*?)\}\|/g, 
+                                 '\\text{s.t.}$1\\mid\\{$2\\}\\mid');
+            
+            // 6. Специально для формулы с is_equivalent
+            if (fixed.includes('is\\_equivalent')) {
+                fixed = fixed.replace(/\|\{o_i \| \\text\{is\\_equivalent\}(.*?)\}\|/g, 
+                                      '\\mid\\{o_i \\mid \\textrm{is\\_equivalent}$1\\}\\mid');
+            }
+            
+            // 7. Исправляем проблему с вертикальной чертой в множествах
+            fixed = fixed.replace(/\|\{([^{}|]*)\|([^{}|]*)\}\|/g, 
+                                   '\\mid\\{$1\\mid $2\\}\\mid');
+            
+            // 8. Обработка проблемных ограничений в формулах
+            if (fixed.includes('\\text{s.t}') || fixed.includes('s.t.')) {
+                fixed = fixed.replace(/\\text\{s\.t\.\}(.*?)0 < \|(.*?)\| < G/g, 
+                                     '\\text{s.t.}$1 0 < \\mid $2 \\mid < G');
+            }
+            
             return fixed;
         }
         
@@ -522,10 +575,13 @@
                             const formula = block.textContent;
                             const wrapper = document.createElement('div');
                             wrapper.className = 'math-block';
-                            wrapper.innerHTML = `$$${formula}$$`;
+                            wrapper.innerHTML = `$${formula}$`;
                             block.parentNode.replaceWith(wrapper);
                         }
                     });
+                    
+                    // Обрабатываем изображения для центрирования и добавления подписей
+                    processImages();
                     
                     // Запускаем рендеринг формул
                     setTimeout(() => {
@@ -578,6 +634,40 @@
             } finally {
                 document.getElementById('loader').style.display = 'none';
             }
+        }
+        
+        // Функция для преобразования обычных изображений в центрированные с подписями
+        function processImages() {
+            document.querySelectorAll('#content img').forEach(img => {
+                // Пропускаем, если изображение уже в контейнере
+                if (img.parentElement.classList.contains('image-container')) {
+                    return;
+                }
+                
+                // Создаем контейнер для изображения
+                const container = document.createElement('div');
+                container.className = 'image-container';
+                
+                // Получаем альтернативный текст как подпись
+                const altText = img.getAttribute('alt') || '';
+                
+                // Клонируем изображение
+                const newImg = img.cloneNode(true);
+                
+                // Добавляем изображение в контейнер
+                container.appendChild(newImg);
+                
+                // Добавляем подпись, если есть альтернативный текст
+                if (altText && !altText.startsWith('http')) {
+                    const caption = document.createElement('div');
+                    caption.className = 'image-caption';
+                    caption.textContent = altText;
+                    container.appendChild(caption);
+                }
+                
+                // Заменяем оригинальное изображение на контейнер
+                img.parentNode.replaceChild(container, img);
+            });
         }
         
         // Инициализация страницы
