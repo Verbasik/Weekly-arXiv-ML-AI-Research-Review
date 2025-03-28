@@ -10,28 +10,38 @@
     <script>
         // Настройки marked для сохранения формул нетронутыми
         marked.setOptions({
-            gfm: true,            // Поддержка GitHub Flavored Markdown
-            breaks: true,         // Преобразование символов новой строки в <br/>
-            sanitize: false,      // Важно: выключаем sanitize, чтобы сохранить формулы
-            smartLists: true      // Использовать более умные списки
+            gfm: true,
+            breaks: true,
+            sanitize: false,
+            smartLists: true
         });
         
         // Создаем кастомный рендерер для обработки кода и формул
         const renderer = new marked.Renderer();
-        // Сохраняем оригинальную функцию для рендеринга кода
         const originalCode = renderer.code.bind(renderer);
         
-        // Переопределяем функцию для рендеринга блоков кода
+        // Особая обработка блоков с математическими формулами
         renderer.code = function(code, language) {
-            // Если блок кода помечен как 'math' или 'tex', сохраняем его для MathJax
             if (language === 'math' || language === 'tex') {
                 return `<div class="math-block">$$${code}$$</div>`;
             }
-            // Иначе используем стандартный рендеринг блока кода
             return originalCode(code, language);
         };
         
-        // Применяем кастомный рендерер
+        // Сохраняем оригинальный метод обработки параграфов
+        const originalParagraph = renderer.paragraph.bind(renderer);
+        
+        // Особая обработка параграфов для защиты формул
+        renderer.paragraph = function(text) {
+            // Защищаем блоки с формулами от лишней обработки
+            const protectedText = text.replace(/\$\$([\s\S]*?)\$\$/g, function(match) {
+                return match.replace(/&/g, '&amp;')
+                            .replace(/</g, '&lt;')
+                            .replace(/>/g, '&gt;');
+            });
+            return originalParagraph(protectedText);
+        };
+        
         marked.setOptions({ renderer: renderer });
     </script>
     
@@ -44,26 +54,58 @@
                 processEscapes: true,
                 processEnvironments: true,
                 processRefs: true,
-                // Дополнительные пакеты для расширенной поддержки формул
-                packages: {'[+]': ['ams', 'noerrors', 'physics', 'color']}
+                macros: {
+                    mathcal: ["\\mathcal{#1}", 1],
+                    mathbb: ["\\mathbb{#1}", 1],
+                    text: ["\\text{#1}", 1],
+                    hat: ["\\hat{#1}", 1],
+                    varepsilon: "\\varepsilon",
+                    pi: "\\pi"
+                },
+                packages: {'[+]': ['ams', 'noerrors', 'physics', 'color', 'boldsymbol', 'cancel', 'unicode']}
             },
             options: {
                 ignoreHtmlClass: 'tex2jax_ignore',
-                processHtmlClass: 'tex2jax_process'
+                processHtmlClass: 'tex2jax_process',
+                renderActions: {
+                    findScript: [10, function (doc) {
+                        document.querySelectorAll('script[type^="math/tex"]').forEach(function(node) {
+                            const display = !!node.type.match(/; *mode=display/);
+                            const math = new doc.options.MathItem(
+                                node.textContent, doc.inputJax[0], display
+                            );
+                            const text = document.createTextNode('');
+                            node.parentNode.replaceChild(text, node);
+                            math.start = {node: text, delim: '', n: 0};
+                            math.end = {node: text, delim: '', n: 0};
+                            doc.math.push(math);
+                        });
+                    }, '']
+                }
             },
             svg: {
-                fontCache: 'global'
+                fontCache: 'global',
+                scale: 1.25  // Увеличиваем масштаб для лучшей читаемости сложных формул
             },
             startup: {
                 ready: () => {
                     console.log('MathJax загружен и готов.');
                     MathJax.startup.defaultReady();
+                    
+                    // Добавляем задержку для более надежного рендеринга сложных формул
+                    setTimeout(function() {
+                        MathJax.typeset();
+                    }, 500);
                 }
+            },
+            loader: {
+                load: ['[tex]/ams', '[tex]/noerrors', '[tex]/physics', '[tex]/color', 
+                       '[tex]/boldsymbol', '[tex]/cancel', '[tex]/unicode']
             }
         };
     </script>
     
-    <!-- Подключение MathJax -->
+    <!-- Подключение MathJax v3 -->
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
@@ -95,6 +137,11 @@
         nav a:hover {
             background-color: #f0f0f0;
             text-decoration: underline;
+        }
+        
+        nav a.active {
+            background-color: #e6f2ff;
+            font-weight: bold;
         }
         
         h1, h2, h3 {
@@ -186,7 +233,7 @@
     <!-- Навигация -->
     <nav id="navigation">
         <a href="#" data-path="2025/week-13/review.md" class="nav-link">Week 13 Review</a>
-        <!-- Добавьте ссылки на другие недели -->
+        <!-- Добавьте ссылки на другие недели по мере необходимости -->
     </nav>
 
     <!-- Элементы управления -->
@@ -228,16 +275,36 @@
             }
         }
         
-        // Функция для перезагрузки MathJax
+        // Функция для перезагрузки MathJax с расширенной обработкой ошибок
         function reloadMathJax() {
             if (typeof MathJax !== 'undefined') {
-                MathJax.typesetClear();
-                MathJax.typesetPromise().then(() => {
-                    console.log('MathJax успешно перезагружен');
-                }).catch(err => {
-                    console.error('Ошибка при перезагрузке MathJax:', err);
-                    showError('Не удалось перезагрузить формулы. Попробуйте обновить страницу.');
-                });
+                try {
+                    // Очищаем предыдущий рендеринг
+                    MathJax.typesetClear();
+                    
+                    // Обновляем форматы формул в DOM для лучшей обработки
+                    document.querySelectorAll('.math-block').forEach(block => {
+                        const formula = block.textContent;
+                        // Создаем новый элемент для формулы
+                        const newBlock = document.createElement('div');
+                        newBlock.className = 'math-block';
+                        newBlock.textContent = formula;
+                        block.parentNode.replaceChild(newBlock, block);
+                    });
+                    
+                    // Повторный рендеринг с задержкой
+                    setTimeout(() => {
+                        MathJax.typesetPromise().then(() => {
+                            console.log('MathJax успешно перезагружен');
+                        }).catch(err => {
+                            console.error('Ошибка при перезагрузке MathJax:', err);
+                            showError('Проблема с рендерингом формул. Проверьте синтаксис.');
+                        });
+                    }, 100);
+                } catch (error) {
+                    console.error('Ошибка при обработке MathJax:', error);
+                    showError('Ошибка при перезагрузке MathJax. Попробуйте обновить страницу.');
+                }
             } else {
                 showError('MathJax не загружен. Попробуйте обновить страницу.');
             }
@@ -253,7 +320,7 @@
             }, 5000); // Скрыть сообщение через 5 секунд
         }
         
-        // Функция для загрузки Markdown-файла
+        // Улучшенная функция для загрузки Markdown-файла
         async function loadMarkdown(path) {
             // Сохраняем текущий путь
             currentPath = path;
@@ -270,6 +337,9 @@
                 // Получаем текст markdown
                 currentMarkdownText = await response.text();
                 
+                // Предварительная обработка текста для улучшения совместимости с MathJax
+                currentMarkdownText = preprocessMarkdown(currentMarkdownText);
+                
                 // Обновляем хэш URL для возможности навигации по истории
                 window.location.hash = path;
                 
@@ -280,13 +350,26 @@
                 updatePageTitle(currentMarkdownText);
                 
             } catch (error) {
-                console.error('Ошибка:', error);
+                console.error('Ошибка загрузки файла:', error);
                 showError(`Ошибка загрузки файла: ${error.message}`);
                 document.getElementById('content').innerHTML = `<p class="error">Не удалось загрузить документ. Пожалуйста, попробуйте позже.</p>`;
             } finally {
                 // Скрываем индикатор загрузки
                 document.getElementById('loader').style.display = 'none';
             }
+        }
+        
+        // Функция предварительной обработки markdown для улучшения совместимости с MathJax
+        function preprocessMarkdown(text) {
+            // Защищаем специальные LaTeX-команды
+            return text
+                // Исправление проблем с подчеркиванием в формулах
+                .replace(/(\$\$.*?)_(.*?\$\$)/g, '$1\\_$2')
+                // Добавляем пробелы вокруг формул для лучшего распознавания
+                .replace(/([^\$])\$\$/g, '$1 $$')
+                .replace(/\$\$([^\$])/g, '$$ $1')
+                // Исправляем экранирование для команд \text
+                .replace(/\\text\{([^}]*)\}/g, '\\text{$1}');
         }
         
         // Функция для обновления заголовка страницы
@@ -298,7 +381,7 @@
             }
         }
         
-        // Функция для рендеринга Markdown в HTML
+        // Улучшенная функция для рендеринга Markdown в HTML
         function renderMarkdown(markdownText) {
             try {
                 // Преобразуем Markdown в HTML с помощью marked
@@ -312,13 +395,24 @@
                     document.getElementById('source-content').textContent = markdownText;
                 }
                 
-                // Запускаем MathJax для рендеринга формул
-                if (typeof MathJax !== 'undefined') {
-                    MathJax.typesetPromise().catch((err) => {
-                        console.error('Ошибка при рендеринге MathJax:', err);
-                        showError('Возникла проблема при отображении математических формул.');
-                    });
-                }
+                // Запускаем MathJax для рендеринга формул с дополнительной защитой
+                setTimeout(() => {
+                    try {
+                        if (typeof MathJax !== 'undefined') {
+                            MathJax.typesetPromise().catch((err) => {
+                                console.error('Ошибка при рендеринге MathJax:', err);
+                                // Пробуем перезагрузить с базовыми настройками
+                                MathJax.typesetClear();
+                                setTimeout(() => {
+                                    MathJax.typeset();
+                                }, 300);
+                            });
+                        }
+                    } catch (mathError) {
+                        console.error('Критическая ошибка MathJax:', mathError);
+                    }
+                }, 200);
+                
             } catch (error) {
                 console.error('Ошибка при рендеринге markdown:', error);
                 showError('Ошибка преобразования markdown в HTML.');
@@ -334,32 +428,45 @@
             linkElement.classList.add('nav-link');
             linkElement.textContent = title;
             navElement.appendChild(linkElement);
+            
+            // Добавляем обработчик события для новой ссылки
+            linkElement.addEventListener('click', function(event) {
+                event.preventDefault();
+                const linkPath = this.getAttribute('data-path');
+                if (linkPath) {
+                    loadMarkdown(linkPath);
+                    setActiveLink(this);
+                }
+            });
         }
         
-        // Добавляем обработчики событий при загрузке страницы
+        // Вспомогательная функция для установки активной ссылки
+        function setActiveLink(linkElement) {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            linkElement.classList.add('active');
+        }
+        
+        // Инициализация страницы
         document.addEventListener('DOMContentLoaded', function() {
-            // Обработчик клика на навигационные ссылки
+            // Обработчики для навигационных ссылок
             document.querySelectorAll('.nav-link').forEach(link => {
                 link.addEventListener('click', function(event) {
                     event.preventDefault();
                     const path = this.getAttribute('data-path');
                     if (path) {
                         loadMarkdown(path);
-                        
-                        // Выделяем активную ссылку
-                        document.querySelectorAll('.nav-link').forEach(link => {
-                            link.classList.remove('active');
-                        });
-                        this.classList.add('active');
+                        setActiveLink(this);
                     }
                 });
             });
             
-            // Добавляем обработчики для кнопок
+            // Обработчики для кнопок
             document.getElementById('reload-mathjax').addEventListener('click', reloadMathJax);
             document.getElementById('toggle-source').addEventListener('click', toggleSourceView);
             
-            // Проверяем, есть ли хэш в URL
+            // Загрузка контента при инициализации
             if (window.location.hash) {
                 const path = window.location.hash.substring(1);
                 loadMarkdown(path);
@@ -367,7 +474,7 @@
                 // Выделяем соответствующую ссылку
                 const navLink = document.querySelector(`.nav-link[data-path="${path}"]`);
                 if (navLink) {
-                    navLink.classList.add('active');
+                    setActiveLink(navLink);
                 }
             } else {
                 // Если хэша нет, загружаем первую ссылку по умолчанию
@@ -376,16 +483,6 @@
                     firstLink.click();
                 }
             }
-            
-            // Добавляем стиль для активной ссылки
-            const style = document.createElement('style');
-            style.textContent = `
-                .nav-link.active {
-                    background-color: #e6f2ff;
-                    font-weight: bold;
-                }
-            `;
-            document.head.appendChild(style);
         });
     </script>
 </body>
