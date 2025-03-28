@@ -104,15 +104,7 @@
             margin: 20px auto;
         }
         
-        /* Стили для блочных формул - центрирование и улучшение отображения */
-        .mjx-container[jax="CHTML"][display="true"] {
-            display: block;
-            text-align: center;
-            margin: 1em 0 !important;
-            width: 100% !important;
-        }
-
-        /* Принудительное центрирование формул - работает для всех версий MathJax */
+        /* Принудительное центрирование ТОЛЬКО блочных формул */
         .mjx-container[jax="CHTML"][display="true"],
         .mjx-container[jax="SVG"][display="true"] {
             display: block !important;
@@ -121,9 +113,8 @@
             max-width: 100% !important;
         }
 
-        /* Центрирование для формул с двойным знаком доллара */
+        /* Центрирование только для формул с двойным знаком доллара */
         .math-block, 
-        mjx-container, 
         mjx-container[display="true"] {
             display: block !important;
             text-align: center !important;
@@ -131,11 +122,23 @@
             width: auto !important;
         }
         
+        /* Правильное отображение инлайновых формул */
+        mjx-container:not([display="true"]) {
+            display: inline !important;
+            text-align: initial !important;
+            margin: 0 !important;
+            vertical-align: middle !important;
+        }
+        
         /* Делаем формулы прокручиваемыми на мобильных устройствах */
         .mjx-container {
             overflow-x: auto;
             overflow-y: hidden;
-            padding: 6px 0;
+        }
+        
+        /* Отступы для инлайновых формул */
+        p > mjx-container:not([display="true"]) {
+            padding: 0 0.2em;
         }
         
         /* Стили для отображения ошибок формул */
@@ -311,8 +314,9 @@
             }
         }
 
+        // Функция для центрирования только блочных формул MathJax
         function centerMathJaxFormulas() {
-            // Центрирование для всех типов контейнеров MathJax
+            // Центрируем только блочные формулы (display="true")
             document.querySelectorAll('.mjx-container[display="true"], mjx-container[display="true"]').forEach(container => {
                 // Применяем стили для центрирования
                 container.style.display = 'block';
@@ -329,6 +333,22 @@
                     parent.insertBefore(wrapper, container);
                     wrapper.appendChild(container);
                 }
+            });
+            
+            // Центрируем div с классом math-block
+            document.querySelectorAll('.math-block').forEach(block => {
+                block.style.textAlign = 'center';
+                block.style.margin = '1em auto';
+            });
+            
+            // Убеждаемся, что инлайновые формулы НЕ центрируются
+            document.querySelectorAll('mjx-container:not([display="true"]), .mjx-container:not([display="true"])').forEach(container => {
+                container.style.display = 'inline';
+                container.style.textAlign = 'initial';
+                container.style.margin = '0';
+                // Убираем любые стили, которые могли быть применены к инлайновым формулам
+                container.style.width = '';
+                container.style.maxWidth = '';
             });
         }
         
@@ -354,6 +374,8 @@
                                     
                                     // Проверяем наличие ошибок после перезагрузки
                                     checkAndFixFormulaErrors();
+                                    // Применяем центрирование только для блочных формул
+                                    centerMathJaxFormulas();
                                 })
                                 .catch(err => {
                                     console.error('Ошибка при рендеринге формул:', err);
@@ -362,6 +384,7 @@
                         } else if (typeof MathJax.Hub !== 'undefined') {
                             // Fallback для старых версий MathJax
                             MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+                            MathJax.Hub.Queue(centerMathJaxFormulas);
                             showError('Формулы перезагружены (старый метод)');
                         } else {
                             // Если не удается найти подходящий метод, используем обновление документа
@@ -369,6 +392,7 @@
                                 typeof MathJax.startup.document !== 'undefined') {
                                 MathJax.startup.document.clear();
                                 MathJax.startup.document.updateDocument();
+                                setTimeout(centerMathJaxFormulas, 100);
                                 showError('Формулы обновлены');
                             } else {
                                 showError('Не удалось определить метод перезагрузки формул');
@@ -628,7 +652,8 @@
                             const formula = block.textContent;
                             const wrapper = document.createElement('div');
                             wrapper.className = 'math-block';
-                            wrapper.innerHTML = `$${formula}$`;
+                            // Используем двойной доллар для блочной формулы
+                            wrapper.innerHTML = `$$${formula}$$`;
                             block.parentNode.replaceWith(wrapper);
                         }
                     });
@@ -645,7 +670,7 @@
                                         .then(() => {
                                             // Проверяем наличие ошибок после рендеринга
                                             checkAndFixFormulaErrors();
-                                            // Дополнительная обработка для центрирования формул
+                                            // Центрируем ТОЛЬКО блочные формулы
                                             centerMathJaxFormulas();
                                         })
                                         .catch(err => {
@@ -655,6 +680,8 @@
                                                 try {
                                                     MathJax.startup.document.clear();
                                                     MathJax.startup.document.updateDocument();
+                                                    // Повторная попытка центрирования
+                                                    setTimeout(centerMathJaxFormulas, 100);
                                                 } catch (innerErr) {
                                                     console.error('Критическая ошибка MathJax:', innerErr);
                                                 }
@@ -663,10 +690,12 @@
                                 } else if (typeof MathJax.Hub !== 'undefined') {
                                     // Для старых версий MathJax
                                     MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+                                    MathJax.Hub.Queue(centerMathJaxFormulas);
                                 } else {
                                     // Для других версий
                                     MathJax.startup.document.clear();
                                     MathJax.startup.document.updateDocument();
+                                    setTimeout(centerMathJaxFormulas, 100);
                                 }
                             } catch (err) {
                                 console.error('Ошибка MathJax API:', err);
