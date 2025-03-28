@@ -1,50 +1,182 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weekly Reviews</title>
-    <!-- Настройки MathJax -->
+    
+    <!-- Настройка marked.js для корректной обработки формул -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        // Настройки marked для сохранения формул нетронутыми
+        marked.setOptions({
+            gfm: true,            // Поддержка GitHub Flavored Markdown
+            breaks: true,         // Преобразование символов новой строки в <br/>
+            sanitize: false,      // Важно: выключаем sanitize, чтобы сохранить формулы
+            smartLists: true      // Использовать более умные списки
+        });
+        
+        // Создаем кастомный рендерер для обработки кода и формул
+        const renderer = new marked.Renderer();
+        // Сохраняем оригинальную функцию для рендеринга кода
+        const originalCode = renderer.code.bind(renderer);
+        
+        // Переопределяем функцию для рендеринга блоков кода
+        renderer.code = function(code, language) {
+            // Если блок кода помечен как 'math' или 'tex', сохраняем его для MathJax
+            if (language === 'math' || language === 'tex') {
+                return `<div class="math-block">$$${code}$$</div>`;
+            }
+            // Иначе используем стандартный рендеринг блока кода
+            return originalCode(code, language);
+        };
+        
+        // Применяем кастомный рендерер
+        marked.setOptions({ renderer: renderer });
+    </script>
+    
+    <!-- Расширенные настройки MathJax -->
     <script>
         MathJax = {
             tex: {
                 inlineMath: [['$', '$'], ['\\(', '\\)']],
-                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true,
+                processRefs: true,
+                // Дополнительные пакеты для расширенной поддержки формул
+                packages: {'[+]': ['ams', 'noerrors', 'physics', 'color']}
+            },
+            options: {
+                ignoreHtmlClass: 'tex2jax_ignore',
+                processHtmlClass: 'tex2jax_process'
             },
             svg: {
                 fontCache: 'global'
+            },
+            startup: {
+                ready: () => {
+                    console.log('MathJax загружен и готов.');
+                    MathJax.startup.defaultReady();
+                }
             }
         };
     </script>
+    
     <!-- Подключение MathJax -->
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <!-- Подключение marked.js -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
-            margin: 20px;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            max-width: 1000px;
+            margin: 0 auto;
         }
+        
         nav {
             margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
         }
+        
         nav a {
-            margin-right: 10px;
+            margin-right: 15px;
             text-decoration: none;
             color: #007BFF;
+            padding: 5px 10px;
+            border-radius: 4px;
         }
+        
         nav a:hover {
+            background-color: #f0f0f0;
             text-decoration: underline;
         }
+        
         h1, h2, h3 {
             color: #333;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
         }
+        
         code {
-            background-color: #f4f4f4;
+            background-color: #f6f8fa;
             padding: 2px 5px;
             border-radius: 3px;
+            font-family: Consolas, Monaco, monospace;
+        }
+        
+        pre {
+            background-color: #f6f8fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        
+        .math-block {
+            overflow-x: auto;
+            padding: 10px 0;
+            margin: 15px 0;
+        }
+        
+        #content {
+            padding: 20px 0;
+        }
+        
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid #007BFF;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+        }
+        
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background-color: #0056b3;
+        }
+        
+        .error-message {
+            color: #d9534f;
+            background-color: #f9f2f2;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            display: none;
+        }
+        
+        #source-view {
+            margin-top: 30px;
+            display: none;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            padding: 15px;
         }
     </style>
 </head>
@@ -52,42 +184,197 @@
     <h1>Weekly Reviews</h1>
 
     <!-- Навигация -->
-    <nav>
-        <a href="#" onclick="loadMarkdown('2025/week-13/review.md')">Week 13 Review</a>
+    <nav id="navigation">
+        <a href="#" data-path="2025/week-13/review.md" class="nav-link">Week 13 Review</a>
         <!-- Добавьте ссылки на другие недели -->
     </nav>
+
+    <!-- Элементы управления -->
+    <div class="controls">
+        <button id="reload-mathjax" onclick="reloadMathJax()">Перезагрузить формулы</button>
+        <button id="toggle-source" onclick="toggleSourceView()">Показать/скрыть исходный текст</button>
+    </div>
+
+    <!-- Индикатор загрузки -->
+    <div id="loader" class="loader"></div>
+    
+    <!-- Сообщение об ошибке -->
+    <div id="error-message" class="error-message"></div>
 
     <!-- Контент -->
     <div id="content">
         <p>Выберите документ из списка выше.</p>
     </div>
+    
+    <!-- Контейнер для исходного текста -->
+    <div id="source-view">
+        <h3>Исходный Markdown</h3>
+        <pre id="source-content"></pre>
+    </div>
 
     <script>
-        // Функция для загрузки Markdown-файла
-        async function loadMarkdown(url) {
-            try {
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error(`Ошибка загрузки файла: ${response.status}`);
-                }
-                const markdownText = await response.text();
-                renderMarkdown(markdownText);
-            } catch (error) {
-                console.error('Ошибка:', error);
-                document.getElementById('content').innerHTML = `<p>Ошибка загрузки файла: ${error.message}</p>`;
+        // Хранилище для исходного текста
+        let currentMarkdownText = '';
+        let currentPath = '';
+        
+        // Функция для показа/скрытия исходного текста
+        function toggleSourceView() {
+            const sourceView = document.getElementById('source-view');
+            if (sourceView.style.display === 'none' || sourceView.style.display === '') {
+                sourceView.style.display = 'block';
+                document.getElementById('source-content').textContent = currentMarkdownText;
+            } else {
+                sourceView.style.display = 'none';
             }
         }
-
+        
+        // Функция для перезагрузки MathJax
+        function reloadMathJax() {
+            if (typeof MathJax !== 'undefined') {
+                MathJax.typesetClear();
+                MathJax.typesetPromise().then(() => {
+                    console.log('MathJax успешно перезагружен');
+                }).catch(err => {
+                    console.error('Ошибка при перезагрузке MathJax:', err);
+                    showError('Не удалось перезагрузить формулы. Попробуйте обновить страницу.');
+                });
+            } else {
+                showError('MathJax не загружен. Попробуйте обновить страницу.');
+            }
+        }
+        
+        // Функция для отображения ошибок
+        function showError(message) {
+            const errorElement = document.getElementById('error-message');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+            setTimeout(() => {
+                errorElement.style.display = 'none';
+            }, 5000); // Скрыть сообщение через 5 секунд
+        }
+        
+        // Функция для загрузки Markdown-файла
+        async function loadMarkdown(path) {
+            // Сохраняем текущий путь
+            currentPath = path;
+            
+            // Показываем индикатор загрузки
+            document.getElementById('loader').style.display = 'block';
+            
+            try {
+                const response = await fetch(path);
+                if (!response.ok) {
+                    throw new Error(`Ошибка загрузки файла: ${response.status} ${response.statusText}`);
+                }
+                
+                // Получаем текст markdown
+                currentMarkdownText = await response.text();
+                
+                // Обновляем хэш URL для возможности навигации по истории
+                window.location.hash = path;
+                
+                // Рендерим markdown
+                renderMarkdown(currentMarkdownText);
+                
+                // Обновляем заголовок страницы на основе первого заголовка в markdown
+                updatePageTitle(currentMarkdownText);
+                
+            } catch (error) {
+                console.error('Ошибка:', error);
+                showError(`Ошибка загрузки файла: ${error.message}`);
+                document.getElementById('content').innerHTML = `<p class="error">Не удалось загрузить документ. Пожалуйста, попробуйте позже.</p>`;
+            } finally {
+                // Скрываем индикатор загрузки
+                document.getElementById('loader').style.display = 'none';
+            }
+        }
+        
+        // Функция для обновления заголовка страницы
+        function updatePageTitle(markdownText) {
+            // Ищем первый заголовок
+            const titleMatch = markdownText.match(/^#\s+(.*?)$/m);
+            if (titleMatch && titleMatch[1]) {
+                document.title = titleMatch[1] + ' - Weekly Reviews';
+            }
+        }
+        
         // Функция для рендеринга Markdown в HTML
         function renderMarkdown(markdownText) {
-            const htmlContent = marked.parse(markdownText); // Преобразуем Markdown в HTML
-            document.getElementById('content').innerHTML = htmlContent;
-
-            // После рендеринга вызываем MathJax для обработки формул
-            MathJax.typesetPromise().catch((err) => {
-                console.error('Ошибка при рендеринге MathJax:', err);
-            });
+            try {
+                // Преобразуем Markdown в HTML с помощью marked
+                const htmlContent = marked.parse(markdownText);
+                
+                // Обновляем содержимое
+                document.getElementById('content').innerHTML = htmlContent;
+                
+                // Обновляем исходный текст, если он открыт
+                if (document.getElementById('source-view').style.display === 'block') {
+                    document.getElementById('source-content').textContent = markdownText;
+                }
+                
+                // Запускаем MathJax для рендеринга формул
+                if (typeof MathJax !== 'undefined') {
+                    MathJax.typesetPromise().catch((err) => {
+                        console.error('Ошибка при рендеринге MathJax:', err);
+                        showError('Возникла проблема при отображении математических формул.');
+                    });
+                }
+            } catch (error) {
+                console.error('Ошибка при рендеринге markdown:', error);
+                showError('Ошибка преобразования markdown в HTML.');
+            }
         }
-    </script>
-</body>
-</html>
+        
+        // Обработчик клика по навигационным ссылкам
+        document.addEventListener('click', function(event) {
+            // Проверяем, был ли клик по навигационной ссылке
+            if (event.target.classList.contains('nav-link')) {
+                event.preventDefault();
+                const path = event.target.getAttribute('data-path');
+                if (path) {
+                    loadMarkdown(path);
+                    
+                    // Выделяем активную ссылку
+                    document.querySelectorAll('.nav-link').forEach(link => {
+                        link.classList.remove('active');
+                    });
+                    event.target.classList.add('active');
+                }
+            }
+        });
+        
+        // Функция для динамического добавления новых ссылок в навигацию
+        function addNavigationLink(path, title) {
+            const navElement = document.getElementById('navigation');
+            const linkElement = document.createElement('a');
+            linkElement.href = '#';
+            linkElement.setAttribute('data-path', path);
+            linkElement.classList.add('nav-link');
+            linkElement.textContent = title;
+            navElement.appendChild(linkElement);
+        }
+        
+        // Загрузка начальной страницы на основе хэша URL
+        document.addEventListener('DOMContentLoaded', function() {
+            // Проверяем, есть ли хэш в URL
+            if (window.location.hash) {
+                const path = window.location.hash.substring(1);
+                loadMarkdown(path);
+                
+                // Выделяем соответствующую ссылку
+                const navLink = document.querySelector(`.nav-link[data-path="${path}"]`);
+                if (navLink) {
+                    navLink.classList.add('active');
+                }
+            }
+            
+            // Добавляем стиль для активной ссылки
+            const style = document.createElement('style');
+            style.textContent = `
+                .nav-link.active {
+                    background-color: #e6f2ff;
+                    font-weight: bold;
+                }
+            `;
+            document.head.appendChild(style);
+        });
