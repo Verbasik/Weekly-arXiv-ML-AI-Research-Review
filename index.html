@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Review</title>
+    <title>Weekly Reviews</title>
     <!-- Подключение MathJax -->
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -14,6 +14,17 @@
             font-family: Arial, sans-serif;
             line-height: 1.6;
             margin: 20px;
+        }
+        nav {
+            margin-bottom: 20px;
+        }
+        nav a {
+            margin-right: 10px;
+            text-decoration: none;
+            color: #007BFF;
+        }
+        nav a:hover {
+            text-decoration: underline;
         }
         h1, h2, h3 {
             color: #333;
@@ -26,20 +37,32 @@
     </style>
 </head>
 <body>
+    <h1>Weekly Reviews</h1>
+
+    <!-- Навигация -->
+    <nav>
+        <a href="#" onclick="loadMarkdown('2025/week-13/review.md')">Week 13 Review</a>
+        <a href="#" onclick="loadMarkdown('2025/week-13/summary.md')">Week 13 Summary</a>
+        <a href="#" onclick="loadMarkdown('2025/week-12/review.md')">Week 12 Review</a>
+        <a href="#" onclick="loadMarkdown('2025/week-12/summary.md')">Week 12 Summary</a>
+        <!-- Добавьте ссылки на другие недели -->
+    </nav>
+
+    <!-- Контент -->
     <div id="content">
-        <!-- Содержимое review.md будет загружено сюда -->
+        <p>Выберите документ из списка выше.</p>
     </div>
 
     <script>
         // Функция для загрузки Markdown-файла
-        async function loadMarkdownFile(url) {
+        async function loadMarkdown(url) {
             try {
                 const response = await fetch(url);
                 if (!response.ok) {
                     throw new Error(`Ошибка загрузки файла: ${response.status}`);
                 }
                 const markdownText = await response.text();
-                return markdownText;
+                renderMarkdown(markdownText);
             } catch (error) {
                 console.error('Ошибка:', error);
                 document.getElementById('content').innerHTML = `<p>Ошибка загрузки файла: ${error.message}</p>`;
@@ -48,23 +71,12 @@
 
         // Функция для рендеринга Markdown в HTML
         function renderMarkdown(markdownText) {
-            // Преобразуем Markdown в HTML
-            const htmlContent = marked.parse(markdownText);
+            const htmlContent = marked.parse(markdownText); // Преобразуем Markdown в HTML
             document.getElementById('content').innerHTML = htmlContent;
 
             // После рендеринга вызываем MathJax для обработки формул
             MathJax.typesetPromise();
         }
-
-        // Основная функция
-        async function init() {
-            const markdownUrl = 'review.md';
-            const markdownText = await loadMarkdownFile(markdownUrl);
-            renderMarkdown(markdownText);
-        }
-
-        // Запуск при загрузке страницы
-        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
