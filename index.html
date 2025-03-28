@@ -515,144 +515,83 @@
         // Функция для исправления специфичных проблем с формулами
         function fixSpecificFormulaIssues(formula) {
             let fixed = formula;
-
-            // 0. Замена \text{is_equivalent} на \operatorname{is_equivalent} (с экранированием _)
-            // Делаем это до обработки |...|, чтобы \operatorname был на месте
-            fixed = fixed.replace(/\\text\{is_equivalent\}/g, '\\operatorname{is\\_equivalent}');
-            // Общее правило для \operatorname с подчеркиванием, если оно не было экранировано ранее
-            fixed = fixed.replace(/\\operatorname\{([a-zA-Z]+)_([a-zA-Z]+)\}/g, (match, p1, p2) => `\\operatorname{${p1}\\_${p2}}`);
-
-
-            // 1. Исправляем несоответствия в формуле J_DAPO (если есть)
+    
+            // 1. Исправляем несоответствия в формуле из примера
             if (formula.includes('J_{DAPO}(\\theta)')) {
-                // Пример специфичного исправления, оставлен как есть
+                // Заменяем проблемную часть на известную рабочую версию
                 fixed = fixed.replace(
                     /J_{DAPO}\(\\theta\) = \\mathbb{E}_{.*?}/g,
                     'J_{DAPO}(\\theta) = \\mathbb{E}_{(q,a) \\sim \\mathcal{D}, \\{o_i\\}_{i=1}^G \\sim \\pi_{\\theta,\\text{old}}(\\cdot|q)}'
                 );
             }
-
-            // 2. Исправляем проблемы с двойными фигурными скобками
+            
+            // 2. Исправляем проблемы с фигурными скобками в формулах
             fixed = fixed.replace(/\{\{([^{}]*)\}\}/g, '{$1}');
-
-            // 3. Исправляем проблемы с многоточием
+            
+            // 3. Исправляем проблемы с многоточием в формулах
             fixed = fixed.replace(/\.\.\./g, '\\ldots');
-
-            // 4. Исправляем проблемы с индексами без скобок (осторожно, может быть рискованно)
-            // fixed = fixed.replace(/([^\\])_(\\[^{]|[a-zA-Z0-9])(?![a-zA-Z0-9{])/g, '$1_{$2}'); // Пока закомментировано
-
-            // 5. Улучшенное исправление для | { ... | ... } | -> \lvert { ... \mid ... } \rvert
-            // Ищем конструкцию | { набор | условие } | с необязательными пробелами
-            fixed = fixed.replace(/\| \s* \{ ([^{}|]+?) \| (.*?) \} \s* \|/g, (match, setElements, condition) => {
-                // Убираем лишние пробелы у элементов и условия
-                setElements = setElements.trim();
-                condition = condition.trim();
-
-                // Заменяем | на \mid только внутри условия.
-                // Это упрощенная замена, которая может не работать идеально во всех сложных случаях.
-                // Стараемся не заменять | если это часть другой команды, например \|
-                let safeCondition = condition.replace(/ (?<!\\)\| /g, ' \\mid '); // Заменяем | окруженный пробелами
-                safeCondition = safeCondition.replace(/^\| /g, '\\mid '); // В начале условия
-                safeCondition = safeCondition.replace(/ \|$/g, ' \\mid'); // В конце условия
-
-                // Убедимся, что is_equivalent обработан правильно
-                 safeCondition = safeCondition.replace(/\\operatorname\{is\\_equivalent\}\(([^)]+)\)/g, (m, args) => {
-                     // Аргументы могут содержать запятые, но не должны содержать | как разделитель
-                     return `\\operatorname{is\\_equivalent}(${args.replace(/\|/g, ',')})`; // Заменяем | на , если он там есть
-                 });
-
-                return `\\lvert \\{ ${setElements} \\mid ${safeCondition} \\} \rvert`;
-            });
-            // Исправление для случая с \textcolor
-             fixed = fixed.replace(/(\\textcolor\{red\}\{.*?) \| \s* \{ ([^{}|]+?) \| (.*?) \} \s* \| (.*\})/g, (match, startColor, setElements, condition, endColor) => {
-                 setElements = setElements.trim();
-                 condition = condition.trim();
-                 let safeCondition = condition.replace(/ (?<!\\)\| /g, ' \\mid ');
-                 safeCondition = safeCondition.replace(/^\| /g, '\\mid ');
-                 safeCondition = safeCondition.replace(/ \|$/g, ' \\mid');
-                 safeCondition = safeCondition.replace(/\\operatorname\{is\\_equivalent\}\(([^)]+)\)/g, (m, args) => {
-                     return `\\operatorname{is\\_equivalent}(${args.replace(/\|/g, ',')})`;
-                 });
-                 return `${startColor} \\lvert \\{ ${setElements} \\mid ${safeCondition} \\} \rvert ${endColor}`;
-             });
-
-
-            // 6. Исправление индексов вида {var} -> _{var} для \mathbb{E}, \min, \max
-            fixed = fixed.replace(/(\\mathbb\{E\}|\\min|\\max)\{([^{}]+)\}/g, '$1_{$2}');
-            // Исправление для \mathbb{E}_{p(y|x)} где индекс уже содержит | (которая могла быть экранирована)
-            fixed = fixed.replace(/(\\mathbb\{E\})_\{p\(y\\\|x\)\}/g, '$1_{p(y|x)}'); // Если | была экранирована
-            fixed = fixed.replace(/(\\mathbb\{E\})_\{p\(y\|x\)\}/g, '$1_{p(y|x)}'); // Если | не была экранирована
-
-            // 7. Исправление индексов вида q{\theta} -> q_{\theta} (более точно)
-            fixed = fixed.replace(/([a-zA-Z])\{(\\theta)\}/g, '$1_{\\theta}'); // Конкретно для \theta
-            // Можно добавить другие частые случаи одиночных символов в индексе: {i}, {j}, {k}, {n}, {t}
-            fixed = fixed.replace(/([a-zA-Z])\{([ijknt])\}/g, '$1_{$2}');
-            // Исправление oi -> o_i (если это предполагалось)
-            fixed = fixed.replace(/([a-zA-Z])([a-zA-Z])(?!\w)/g, (match, p1, p2) => {
-                 // Применяем только к известным случаям, например 'oi' -> 'o_i'
-                 if (match === 'oi') return 'o_i';
-                 return match;
-            });
-
-
-            // Старые правила 6, 7, 8 заменены/улучшены выше.
-
-            // 8. Исправляем проблемы с ограничениями в формулах (s.t.) - если правило 5 не сработало
-             if (fixed.includes('\\text{s.t.}') || fixed.includes('s.t.')) {
-                 // Пример: s.t. 0 < |{...}| < G
-                 fixed = fixed.replace(/(\\text\{s\.t\.\}|s\.t\.)\s+(0\s*<\s*)\| \s* \{ ([^{}|]+?) \| (.*?) \} \s* \| (\s*<\s*G)/g,
-                                      '$1 $2 \\lvert \\{ $3 \\mid $4 \\} \rvert $5');
-             }
-
+            
+            // 4. Исправляем проблемы с индексами
+            fixed = fixed.replace(/([^\\])_(\\[^{]|[a-zA-Z0-9])/g, '$1_{$2}');
+            
+            // 5. Исправляем проблемы с символом * вместо подстрочного индекса _
+            fixed = fixed.replace(/([a-zA-Z0-9])\*{([^{}]+)}/g, '$1_{$2}');
+            
+            // 6. Заменяем одиночные * на подстрочный индекс
+            fixed = fixed.replace(/(\\min|\\max)\*{([^{}]+)}/g, '$1_{$2}');
+            fixed = fixed.replace(/(\\mathbb{[^{}]+})\*{([^{}]+)}/g, '$1_{$2}');
+            
+            // 7. Исправляем проблемы с ограничениями в формулах (s.t.)
+            fixed = fixed.replace(/\\text\{s\.t\.\}(.*?)\|\{(.*?)\}\|/g, 
+                                '\\text{s.t.}$1\\mid\\{$2\\}\\mid');
+            
+            // 8. Специально для формулы с is_equivalent
+            if (fixed.includes('is\\_equivalent') || fixed.includes('is_equivalent')) {
+                fixed = fixed.replace(/\|\{o_i \| \\text\{is\\_equivalent\}(.*?)\}\|/g, 
+                                    '\\mid\\{o_i \\mid \\textrm{is\\_equivalent}$1\\}\\mid');
+                fixed = fixed.replace(/\|\{o_i \| \\text\{is_equivalent\}(.*?)\}\|/g, 
+                                    '\\mid\\{o_i \\mid \\textrm{is_equivalent}$1\\}\\mid');
+                fixed = fixed.replace(/\|\{o_i \| is\\_equivalent(.*?)\}\|/g, 
+                                    '\\mid\\{o_i \\mid \\textrm{is\\_equivalent}$1\\}\\mid');
+                fixed = fixed.replace(/\|\{o_i \| is_equivalent(.*?)\}\|/g, 
+                                    '\\mid\\{o_i \\mid \\textrm{is_equivalent}$1\\}\\mid');
+            }
+            
+            // 9. Исправляем проблему с вертикальной чертой в множествах - общее правило
+            fixed = fixed.replace(/\|\{([^{}|]*)\|([^{}|]*)\}\|/g, 
+                                '\\mid\\{$1\\mid $2\\}\\mid');
+            
+            // 10. Замена всех одиночных вертикальных черт на \mid
+            fixed = fixed.replace(/([^\\])\|([^|])/g, '$1\\mid$2');
+            
+            // 11. Обработка проблемных ограничений в формулах
+            if (fixed.includes('\\text{s.t}') || fixed.includes('s.t.')) {
+                fixed = fixed.replace(/\\text\{s\.t\.\}(.*?)0 < \|(.*?)\| < G/g, 
+                                    '\\text{s.t.}$1 0 < \\mid $2 \\mid < G');
+            }
+            
+            // 12. Исправление звездочек в индексах переменных
+            fixed = fixed.replace(/o\*i/g, 'o_i');
+            fixed = fixed.replace(/o\*j/g, 'o_j');
+            
             return fixed;
         }
-
-        // Улучшенная функция предобработки формулы
+        
+        // Функция для предобработки формулы
         function preprocessFormula(formula) {
-            let processed = formula.trim(); // Убираем лишние пробелы по краям
-
-            // Шаг 1: Защита команд и конструкций, которые могут содержать символы,
-            // мешающие дальнейшей обработке (например, _)
-            const protectedParts = [];
-            const protect = (regex, type) => {
-                processed = processed.replace(regex, (match) => {
-                    const id = protectedParts.length;
-                    protectedParts.push({ match, type });
-                    return `PROTECTED_${type}_${id}`;
-                });
-            };
-
-            // Защищаем основные LaTeX-команды, которые могут содержать текст с _
-            protect(/\\(operatorname|text|mathbf|boldsymbol|mathrm|textrm|textit|texttt)\{([^{}]*?)\}/g, 'CMD');
-            // Защищаем \href (если используется)
-            protect(/\\href\{([^{}]*?)\}\{([^{}]*?)\}/g, 'HREF');
-            // Защищаем URL или пути, если они случайно попали внутрь формулы
-            protect(/https?:\/\/\S+/g, 'URL');
-            protect(/\b[a-zA-Z0-9_\-\/]+\.(md|png|jpg|jpeg|gif)\b/g, 'PATH');
-
-            // Шаг 2: Экранируем "свободные" подчеркивания (не после \ и не внутри защищенных блоков)
-            // Используем negative lookbehind (?<!\\) чтобы не экранировать уже экранированные \_
-            processed = processed.replace(/(?<!\\)_/g, '\\_');
-
-            // Шаг 3: Восстанавливаем защищенные части
-            // Идем в обратном порядке, чтобы индексы не сбивались при заменах
-            for (let i = protectedParts.length - 1; i >= 0; i--) {
-                let originalMatch = protectedParts[i].match;
-                // Важно: При восстановлении НЕ убираем экранирование (\_) из оригинального совпадения,
-                // так как оно могло быть там намеренно или добавлено на Шаге 2 до защиты блока.
-                // fixSpecificFormulaIssues ожидает, что в \operatorname{is\_equivalent} будет \_
-                processed = processed.replace(`PROTECTED_${protectedParts[i].type}_${i}`, originalMatch);
-            }
-
-            // Шаг 4: Исправляем \mathbf на \boldsymbol (частая ошибка)
-            processed = processed.replace(/\\mathbf{([^{}]+)}/g, '\\boldsymbol{$1}');
-
-            // Шаг 5: Вызов специфичных исправлений
+            // Базовая предобработка
+            let processed = formula
+                // Экранируем подчеркивания, если они не экранированы
+                .replace(/([^\\])_/g, '$1\\_')
+                // Исправляем распространенные ошибки в формулах
+                .replace(/\\mathbf{([^{}]+)}/g, '\\boldsymbol{$1}');
+            
+            // Исправляем специфичные проблемы
             processed = fixSpecificFormulaIssues(processed);
-
-            // Шаг 6: Исправление баланса скобок \left \right
+            
+            // Проверяем и исправляем баланс скобок
             processed = repairBracketBalance(processed);
-
+            
             return processed;
         }
         
