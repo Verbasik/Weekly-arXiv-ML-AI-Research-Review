@@ -5,32 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weekly Reviews</title>
     
-    <!-- Конфигурация MathJax (должна быть ДО загрузки библиотеки) -->
+    <!-- Конфигурация MathJax -->
     <script>
         window.MathJax = {
             tex: {
                 inlineMath: [['$', '$'], ['\\(', '\\)']],
                 displayMath: [['$$', '$$'], ['\\[', '\\]']],
-                processEscapes: true,
-                processEnvironments: true
+                processEscapes: true
             },
             options: {
-                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
-                ignoreHtmlClass: 'tex2jax_ignore'
-            },
-            startup: {
-                pageReady: function() {
-                    return MathJax.startup.defaultPageReady();
-                }
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
             }
         };
     </script>
     
-    <!-- Подключение MathJax ПОСЛЕ его конфигурации -->
+    <!-- Подключение MathJax -->
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
     
-    <!-- Используем современную версию marked с UMD форматом -->
-    <script src="https://cdn.jsdelivr.net/npm/marked@3.0.7/marked.min.js"></script>
+    <!-- Подключение marked - используем CDN с актуальной версией -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <style>
         body {
@@ -202,18 +195,25 @@
         function reloadMathJax() {
             try {
                 if (typeof MathJax !== 'undefined') {
-                    MathJax.texReset();
-                    MathJax.typesetClear();
-                    MathJax.startup.document.clear();
-                    MathJax.startup.document.updateDocument();
-                    
-                    showError('Формулы перезагружены успешно');
+                    // Для MathJax v3
+                    if (typeof MathJax.typesetPromise === 'function') {
+                        MathJax.typesetPromise()
+                            .then(() => showError('Формулы перезагружены успешно'))
+                            .catch(err => {
+                                console.error('Ошибка MathJax:', err);
+                                showError('Ошибка при обработке формул');
+                            });
+                    } else {
+                        // Альтернативный метод - перезагрузка всего документа
+                        MathJax.Hub?.Queue(["Typeset", MathJax.Hub]);
+                        showError('Формулы перезагружены');
+                    }
                 } else {
-                    showError('MathJax не загружен. Попробуйте обновить страницу.');
+                    showError('MathJax не загружен');
                 }
             } catch (error) {
-                console.error('Ошибка при перезагрузке MathJax:', error);
-                showError('Ошибка при перезагрузке формул.');
+                console.error('Ошибка при перезагрузке формул:', error);
+                showError('Не удалось перезагрузить формулы');
             }
         }
         
@@ -227,37 +227,21 @@
             }, 3000);
         }
         
-        // Функция для предобработки Markdown с защитой формул
+        // Функция для предобработки Markdown для защиты формул
         function preprocessMarkdown(text) {
-            // Защита блоков с формулами
-            return text.replace(/(\$\$[\s\S]*?\$\$)/g, function(match) {
-                return match.replace(/_/g, '\\_');
-            });
+            // Предобработка: защищаем символы внутри блоков с формулами
+            return text
+                .replace(/(\$\$[\s\S]*?\$\$)/g, match => {
+                    // Заменяем проблемные символы внутри формул
+                    return match.replace(/_/g, '\\_');
+                })
+                .replace(/(\$[^\$]+\$)/g, match => {
+                    // То же для инлайновых формул
+                    return match.replace(/_/g, '\\_');
+                });
         }
         
-        // Улучшенная функция для рендеринга Markdown
-        function renderMarkdown(text) {
-            try {
-                // Настройка marked для обработки формул
-                const renderer = {
-                    code(code, infostring) {
-                        if (infostring === 'math' || infostring === 'tex') {
-                            return `<div class="math-block">$$${code}$$</div>`;
-                        }
-                        return `<pre><code class="language-${infostring}">${code}</code></pre>`;
-                    }
-                };
-                
-                // Обработка Markdown в HTML с новым API marked
-                const html = marked.parse(text, { renderer });
-                return html;
-            } catch (error) {
-                console.error('Ошибка при рендеринге Markdown:', error);
-                return `<p class="error">Ошибка при рендеринге: ${error.message}</p>`;
-            }
-        }
-        
-        // Загрузка Markdown-файла
+        // Функция для загрузки Markdown-файла
         async function loadMarkdown(path) {
             try {
                 // Показываем индикатор загрузки
@@ -273,32 +257,38 @@
                 currentMarkdownText = await response.text();
                 currentPath = path;
                 
-                // Предобработка markdown для защиты формул
+                // Обрабатываем markdown для защиты формул
                 const processedMarkdown = preprocessMarkdown(currentMarkdownText);
                 
                 // Обновляем хэш URL для навигации
                 window.location.hash = path;
                 
-                // Рендерим markdown в HTML
-                document.getElementById('content').innerHTML = renderMarkdown(processedMarkdown);
+                // Рендерим markdown в HTML с помощью простого API
+                const html = marked.parse(processedMarkdown, {
+                    mangle: false,
+                    headerIds: false // Отключаем генерацию id для заголовков
+                });
                 
-                // Обрабатываем формулы с MathJax
-                if (typeof MathJax !== 'undefined') {
-                    setTimeout(() => {
-                        try {
-                            MathJax.startup.document.clear();
-                            MathJax.startup.document.updateDocument();
-                        } catch (error) {
-                            console.error('Ошибка при обработке формул:', error);
+                document.getElementById('content').innerHTML = html;
+                
+                // Запускаем MathJax для обработки формул
+                setTimeout(() => {
+                    if (typeof MathJax !== 'undefined') {
+                        if (typeof MathJax.typesetPromise === 'function') {
+                            MathJax.typesetPromise().catch(err => {
+                                console.error('Ошибка рендеринга формул:', err);
+                            });
+                        } else if (MathJax.Hub) {
+                            MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
                         }
-                    }, 200);
-                }
+                    }
+                }, 100);
                 
             } catch (error) {
                 console.error('Ошибка загрузки:', error);
                 showError(`Ошибка: ${error.message}`);
                 document.getElementById('content').innerHTML = 
-                    `<p class="error">Не удалось загрузить документ: ${error.message}</p>`;
+                    `<p>Не удалось загрузить документ: ${error.message}</p>`;
             } finally {
                 // Скрываем индикатор загрузки
                 document.getElementById('loader').style.display = 'none';
