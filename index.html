@@ -124,10 +124,24 @@
             padding-bottom: 0.25em;
         }
 
+        /* Дополнительные стили для особо проблемных формул */
+        .math-replacement {
+            display: block;
+            width: 100%;
+            margin: 1em auto;
+            padding: 0.5em 0;
+            text-align: center;
+        }
+
         /* Переопределение стилей списка, содержащего формулы */
         li mjx-container[display="true"] {
-            margin-left: -2em !important;
-            width: calc(100% + 2em) !important;
+            display: block !important;
+            width: 100% !important;
+            text-align: center !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+            position: relative;
+            overflow-x: auto;
         }
         
         /* Правильное отображение инлайновых формул */
@@ -380,11 +394,10 @@
                             MathJax.typesetPromise()
                                 .then(() => {
                                     showError('Формулы перезагружены успешно');
-                                    
-                                    // Проверяем наличие ошибок после перезагрузки
-                                    checkAndFixFormulaErrors();
                                     // Применяем центрирование только для блочных формул
                                     centerMathJaxFormulas();
+                                    // Проверяем наличие ошибок после перезагрузки
+                                    checkAndFixFormulaErrors();
                                 })
                                 .catch(err => {
                                     console.error('Ошибка при рендеринге формул:', err);
@@ -440,370 +453,382 @@
                 // Находим родительский элемент формулы
                 const formulaElement = errorElement.closest('.mjx-container');
                 if (formulaElement) {
+                    // Получаем исходную формулу из атрибута
+                    const originalFormula = formulaElement.getAttribute('data-formula') || '';
+                    
+                    // Определяем, блочная ли это формула
+                    const isDisplayFormula = formulaElement.getAttribute('display') === 'true';
+                    
                     // Создаём элемент для диагностики ошибок
                     const diagnosticElement = document.createElement('div');
                     diagnosticElement.className = 'formula-error';
                     diagnosticElement.textContent = 'Ошибка в формуле: ' + errorText;
                     
-                    // Получаем текст формулы из атрибута
-                    const formulaText = formulaElement.getAttribute('data-formula') || '';
-                    if (formulaText) {
-                        diagnosticElement.textContent += '\nФормула: ' + formulaText;
+                    if (originalFormula) {
+                        diagnosticElement.textContent += '\nИсходная формула: ' + originalFormula;
                     }
                     
-                    // Вставляем элемент сразу после формулы
-                    formulaElement.after(diagnosticElement);
+                    // Пытаемся исправить формулу
+                    let fixedFormula = '';
+                    let wasFixed = false;
+                    
+                    if (originalFormula) {
+                        // Применяем специальные правила исправления формул
+                        fixedFormula = applyFormulaFixes(originalFormula);
+                        
+                        // Проверяем, было ли внесено исправление
+                        wasFixed = fixedFormula !== originalFormula;
+                        
+                        if (wasFixed) {
+                            diagnosticElement.textContent += '\nИсправленная формула: ' + fixedFormula;
+                            
+                            // Создаем новый контейнер для исправленной формулы
+                            const fixedContainer = document.createElement('div');
+                            fixedContainer.className = 'fixed-formula';
+                            fixedContainer.style.margin = '1em auto';
+                            fixedContainer.style.padding = '0.5em 0';
+                            fixedContainer.style.border = '1px dashed #ccc';
+                            fixedContainer.style.borderRadius = '4px';
+                            fixedContainer.style.textAlign = 'center';
+                            
+                            // Добавляем исправленную формулу с правильными разделителями
+                            if (isDisplayFormula) {
+                                fixedContainer.innerHTML = `$$${fixedFormula}$$`;
+                            } else {
+                                fixedContainer.innerHTML = `$${fixedFormula}$`;
+                            }
+                            
+                            // Вставляем исправленную формулу после диагностического элемента
+                            formulaElement.parentNode.insertBefore(fixedContainer, formulaElement.nextSibling);
+                            formulaElement.parentNode.insertBefore(diagnosticElement, fixedContainer);
+                            
+                            // Добавляем исправленную формулу в очередь для рендеринга MathJax
+                            setTimeout(() => {
+                                if (typeof MathJax !== 'undefined') {
+                                    try {
+                                        // Используем наиболее подходящий метод в зависимости от доступного API MathJax
+                                        if (typeof MathJax.typesetPromise === 'function') {
+                                            MathJax.typesetPromise([fixedContainer]).catch(err => {
+                                                console.error('Ошибка при рендеринге исправленной формулы:', err);
+                                            });
+                                        } else if (typeof MathJax.Hub !== 'undefined') {
+                                            MathJax.Hub.Queue(["Typeset", MathJax.Hub, fixedContainer]);
+                                        } else if (typeof MathJax.startup !== 'undefined') {
+                                            MathJax.startup.document.options.elements = [fixedContainer];
+                                            MathJax.startup.document.updateDocument();
+                                        }
+                                    } catch (err) {
+                                        console.error('Ошибка API MathJax:', err);
+                                    }
+                                }
+                            }, 100);
+                            
+                            // Скрываем оригинальную формулу с ошибкой
+                            formulaElement.style.display = 'none';
+                        } else {
+                            // Если исправить не удалось, просто добавляем диагностику
+                            formulaElement.after(diagnosticElement);
+                            
+                            // Предлагаем альтернативный механизм отображения для сложных формул
+                            suggestAlternativeDisplay(formulaElement, originalFormula, isDisplayFormula);
+                        }
+                    } else {
+                        // Если формула не найдена, просто добавляем диагностику
+                        formulaElement.after(diagnosticElement);
+                    }
                 }
             });
+            
+            // Проверяем, есть ли специфические проблемные формулы и исправляем их напрямую
+            fixSpecificProblemFormulas();
         }
-        
-        // Функция для проверки баланса скобок
-        function checkBracketBalance(formula) {
-            const brackets = {
-                '\\left(': '\\right)',
-                '\\left[': '\\right]',
-                '\\left\\{': '\\right\\}',
-                '\\left|': '\\right|',
-                '\\left\\|': '\\right\\|',
-                '\\left\\langle': '\\right\\rangle',
-                '\\left\\lfloor': '\\right\\rfloor',
-                '\\left\\lceil': '\\right\\rceil'
-            };
-            
-            // Упрощенная проверка - подсчитываем количество \left и \right
-            const leftCount = (formula.match(/\\left/g) || []).length;
-            const rightCount = (formula.match(/\\right/g) || []).length;
-            
-            if (leftCount !== rightCount) {
-                return {
-                    balanced: false,
-                    leftCount,
-                    rightCount,
-                    diff: leftCount - rightCount
-                };
-            }
-            
-            return { balanced: true };
-        }
-        
-        // Функция для исправления баланса скобок
-        function repairBracketBalance(formula) {
-            // Проверяем баланс
-            const result = checkBracketBalance(formula);
-            
-            if (result.balanced) {
-                return formula; // Ничего исправлять не нужно
-            }
-            
-            let newFormula = formula;
-            
-            // Случай 1: Больше \left, чем \right
-            if (result.diff > 0) {
-                // Добавляем недостающие \right.
-                newFormula += ' ' + '\\right.'.repeat(result.diff);
-            }
-            
-            // Случай 2: Больше \right, чем \left
-            else if (result.diff < 0) {
-                // Добавляем недостающие \left. в начало
-                newFormula = '\\left. '.repeat(-result.diff) + newFormula;
-            }
-            
-            return newFormula;
-        }
-        
-        // Функция для исправления специфичных проблем с формулами
-        function fixSpecificFormulaIssues(formula) {
+
+        // Функция для применения всех правил исправления к формуле
+        function applyFormulaFixes(formula) {
             let fixed = formula;
             
-            // 1. Исправляем несоответствия в формуле из примера
-            if (formula.includes('J_{DAPO}(\\theta)')) {
-                // Заменяем проблемную часть на известную рабочую версию
-                fixed = fixed.replace(
-                    /J_{DAPO}\(\\theta\) = \\mathbb{E}_{.*?}/g,
-                    'J_{DAPO}(\\theta) = \\mathbb{E}_{(q,a) \\sim \\mathcal{D}, \\{o_i\\}_{i=1}^G \\sim \\pi_{\\theta,\\text{old}}(\\cdot|q)}'
-                );
+            // 1. Исправляем проблемы с использованием \text{...} для текста с подчеркиванием
+            if (fixed.includes('is\\_equivalent') || fixed.includes('\\_')) {
+                fixed = fixed.replace(/\\text\{([^}]*?\\_[^}]*?)\}/g, '\\textrm{$1}');
             }
             
-            // 2. Исправляем проблемы с фигурными скобками в формулах
+            // 2. Исправляем проблемы с вертикальными чертами
+            if (fixed.includes('|{')) {
+                // Корректные левые и правые вертикальные черты для множеств
+                fixed = fixed.replace(/\|\{/g, '\\left|\\{');
+                fixed = fixed.replace(/\}\|/g, '\\}\\right|');
+                
+                // Обработка специфичных конструкций с множествами
+                fixed = fixed.replace(/\|\{([^|{}]*)\|([^|{}]*)\}\|/g, '\\left|\\{$1\\mid $2\\}\\right|');
+                fixed = fixed.replace(/\|\{([^|{}]*) \| ([^|{}]*)\}\|/g, '\\left|\\{$1 \\mid $2\\}\\right|');
+            }
+            
+            // 3. Исправляем проблему с is_equivalent
+            if (fixed.includes('is\\_equivalent')) {
+                fixed = fixed.replace(/is\\_equivalent/g, '\\text{is\\_equiv}');
+                fixed = fixed.replace(/\\text\{is\\_equiv\}/g, '\\textrm{is\\_equiv}');
+            }
+            
+            // 4. Исправляем проблемы с min и max с индексами
+            if (fixed.includes('\\min_') || fixed.includes('\\max_')) {
+                fixed = fixed.replace(/\\min_\{?\\theta\}?/g, '\\operatorname{min}_{\\theta}');
+                fixed = fixed.replace(/\\max_\{?\\theta\}?/g, '\\operatorname{max}_{\\theta}');
+            }
+            
+            // 5. Исправляем проблемы с командой \rightarrow
+            if (fixed.includes('\\rightarrow')) {
+                fixed = fixed.replace(/\\rightarrow/g, '\\to');
+            }
+            
+            // 6. Исправляем проблемы с s.t.
+            if (fixed.includes('s.t.') || fixed.includes('\\text{s.t.}')) {
+                fixed = fixed.replace(/\\text\{s\.t\.\}(.*?)0 < \|/g, '\\text{s.t.}$1 0 < \\left|');
+            }
+            
+            // 7. Исправляем проблемы с командой \textcolor
+            if (fixed.includes('\\textcolor')) {
+                fixed = fixed.replace(/\\textcolor\{([^{}]*)\}\{([^{}]*)\}/g, '\\color{$1}{$2}');
+            }
+            
+            // 8. Исправляем проблемы с индексами и подчеркиваниями
+            fixed = fixed.replace(/([^\\])_(\\?[a-zA-Z0-9])/g, '$1_{$2}');
+            fixed = fixed.replace(/([a-zA-Z])_([a-zA-Z])([^a-zA-Z\{\}])/g, '$1_{$2}$3');
+            
+            // 9. Исправляем проблемы с двойными фигурными скобками
             fixed = fixed.replace(/\{\{([^{}]*)\}\}/g, '{$1}');
             
-            // 3. Исправляем проблемы с многоточием в формулах
-            fixed = fixed.replace(/\.\.\./g, '\\ldots');
+            // 10. Исправляем проблемы с незакрытыми или несбалансированными скобками
+            fixed = balanceBrackets(fixed);
             
-            // 4. Исправляем проблемы с индексами
-            fixed = fixed.replace(/([^\\])_(\\[^{]|[a-zA-Z0-9])/g, '$1_{$2}');
+            return fixed;
+        }
+
+        // Функция для балансировки скобок в формулах
+        function balanceBrackets(formula) {
+            // Счетчики для разных типов скобок
+            const counters = {
+                '{': 0,
+                '}': 0,
+                '[': 0,
+                ']': 0,
+                '(': 0,
+                ')': 0
+            };
             
-            // 5. Исправляем проблемы с ограничениями в формулах (s.t.)
-            fixed = fixed.replace(/\\text\{s\.t\.\}(.*?)\|\{(.*?)\}\|/g, 
-                                 '\\text{s.t.}$1\\mid\\{$2\\}\\mid');
-            
-            // 6. Специально для формулы с is_equivalent
-            if (fixed.includes('is\\_equivalent')) {
-                fixed = fixed.replace(/\|\{o_i \| \\text\{is\\_equivalent\}(.*?)\}\|/g, 
-                                      '\\mid\\{o_i \\mid \\textrm{is\\_equivalent}$1\\}\\mid');
+            // Подсчитываем количество скобок каждого типа
+            for (let i = 0; i < formula.length; i++) {
+                const char = formula[i];
+                if (counters.hasOwnProperty(char)) {
+                    counters[char]++;
+                }
             }
             
-            // 7. Исправляем проблему с вертикальной чертой в множествах
-            fixed = fixed.replace(/\|\{([^{}|]*)\|([^{}|]*)\}\|/g, 
-                                   '\\mid\\{$1\\mid $2\\}\\mid');
+            // Исправляем несбалансированные скобки
+            let fixed = formula;
             
-            // 8. Обработка проблемных ограничений в формулах
-            if (fixed.includes('\\text{s.t}') || fixed.includes('s.t.')) {
-                fixed = fixed.replace(/\\text\{s\.t\.\}(.*?)0 < \|(.*?)\| < G/g, 
-                                     '\\text{s.t.}$1 0 < \\mid $2 \\mid < G');
+            // Добавляем недостающие закрывающие скобки
+            if (counters['{'] > counters['}']) {
+                fixed += '}'.repeat(counters['{'] - counters['}']);
+            }
+            if (counters['['] > counters[']']) {
+                fixed += ']'.repeat(counters['['] - counters[']']);
+            }
+            if (counters['('] > counters[')']) {
+                fixed += ')'.repeat(counters['('] - counters[')']);
+            }
+            
+            // Добавляем недостающие открывающие скобки (в начало)
+            if (counters['}'] > counters['{']) {
+                fixed = '{'.repeat(counters['}'] - counters['{']) + fixed;
+            }
+            if (counters[']'] > counters['[']) {
+                fixed = '['.repeat(counters[']'] - counters['[']) + fixed;
+            }
+            if (counters[')'] > counters['(']) {
+                fixed = '('.repeat(counters[')'] - counters['(']) + fixed;
+            }
+            
+            // Также проверяем балансировку \left и \right
+            const leftCount = (fixed.match(/\\left/g) || []).length;
+            const rightCount = (fixed.match(/\\right/g) || []).length;
+            
+            if (leftCount > rightCount) {
+                fixed += '\\right.'.repeat(leftCount - rightCount);
+            } else if (rightCount > leftCount) {
+                fixed = '\\left.'.repeat(rightCount - leftCount) + fixed;
             }
             
             return fixed;
         }
-        
-        // Функция для предобработки формулы
-        function preprocessFormula(formula) {
-            // Базовая предобработка
-            let processed = formula
-                // Экранируем подчеркивания, если они не экранированы
-                .replace(/([^\\])_/g, '$1\\_')
-                // Исправляем распространенные ошибки в формулах
-                .replace(/\\mathbf{([^{}]+)}/g, '\\boldsymbol{$1}');
+
+        // Функция для предложения альтернативного отображения формулы
+        function suggestAlternativeDisplay(formulaElement, formula, isDisplayFormula) {
+            // Создаем контейнер для альтернативного отображения
+            const altContainer = document.createElement('div');
+            altContainer.className = 'alternative-formula';
+            altContainer.style.margin = '1em auto';
+            altContainer.style.padding = '0.5em';
+            altContainer.style.backgroundColor = '#f9f9f9';
+            altContainer.style.border = '1px solid #ddd';
+            altContainer.style.borderRadius = '4px';
+            altContainer.style.textAlign = 'center';
             
-            // Исправляем специфичные проблемы
-            processed = fixSpecificFormulaIssues(processed);
+            // Предлагаем различные альтернативные варианты формулы
+            const alternatives = generateAlternatives(formula);
             
-            // Проверяем и исправляем баланс скобок
-            processed = repairBracketBalance(processed);
+            // Создаем заголовок
+            const header = document.createElement('div');
+            header.style.marginBottom = '0.5em';
+            header.style.fontWeight = 'bold';
+            header.textContent = 'Альтернативные варианты формулы:';
+            altContainer.appendChild(header);
             
-            return processed;
-        }
-        
-        // Улучшенная функция предобработки Markdown для защиты сложных формул
-        function preprocessMarkdown(text) {
-            // Вначале выделяем все блоки с формулами
-            const blockFormulas = [];
-            const inlineFormulas = [];
-            
-            // Временно заменяем блоки формул на плейсхолдеры
-            let processedText = text.replace(/(\$\$[\s\S]*?\$\$)/g, (match, p1, offset) => {
-                const id = blockFormulas.length;
-                blockFormulas.push(p1);
-                return `BLOCK_FORMULA_${id}`;
-            });
-            
-            // Временно заменяем инлайн формулы на плейсхолдеры
-            processedText = processedText.replace(/(\$[^\$\n]+\$)/g, (match, p1) => {
-                const id = inlineFormulas.length;
-                inlineFormulas.push(p1);
-                return `INLINE_FORMULA_${id}`;
-            });
-            
-            // Обрабатываем блочные формулы
-            for (let i = 0; i < blockFormulas.length; i++) {
-                // Очищаем формулу от $$ в начале и конце для обработки
-                let formulaContent = blockFormulas[i].slice(2, -2);
+            // Добавляем каждый альтернативный вариант
+            alternatives.forEach((alt, index) => {
+                const variantContainer = document.createElement('div');
+                variantContainer.className = 'formula-variant';
+                variantContainer.style.margin = '0.5em 0';
+                variantContainer.style.padding = '0.5em';
+                variantContainer.style.border = '1px solid #eee';
+                variantContainer.style.borderRadius = '3px';
                 
-                // Применяем предобработку формулы
-                formulaContent = preprocessFormula(formulaContent);
-                
-                // Возвращаем $$ обратно
-                blockFormulas[i] = `$$${formulaContent}$$`;
-            }
-            
-            // Обрабатываем инлайн формулы
-            for (let i = 0; i < inlineFormulas.length; i++) {
-                // Очищаем формулу от $ в начале и конце
-                let formulaContent = inlineFormulas[i].slice(1, -1);
-                
-                // Применяем предобработку формулы
-                formulaContent = preprocessFormula(formulaContent);
-                
-                // Возвращаем $ обратно
-                inlineFormulas[i] = `$${formulaContent}$`;
-            }
-            
-            // Возвращаем формулы обратно в текст
-            for (let i = 0; i < blockFormulas.length; i++) {
-                processedText = processedText.replace(`BLOCK_FORMULA_${i}`, blockFormulas[i]);
-            }
-            
-            for (let i = 0; i < inlineFormulas.length; i++) {
-                processedText = processedText.replace(`INLINE_FORMULA_${i}`, inlineFormulas[i]);
-            }
-            
-            return processedText;
-        }
-        
-        // Функция для загрузки Markdown-файла с улучшенной обработкой формул
-        async function loadMarkdown(path) {
-            try {
-                document.getElementById('loader').style.display = 'block';
-                
-                const response = await fetch(path);
-                if (!response.ok) {
-                    throw new Error(`Ошибка загрузки: ${response.status}`);
+                // Добавляем формулу с соответствующими разделителями
+                if (isDisplayFormula) {
+                    variantContainer.innerHTML = `<div>Вариант ${index + 1}:</div><div>$$${alt}$$</div>`;
+                } else {
+                    variantContainer.innerHTML = `<div>Вариант ${index + 1}:</div><div>$${alt}$</div>`;
                 }
                 
-                currentMarkdownText = await response.text();
-                currentPath = path;
-                
-                // Предобрабатываем формулы
-                const processedMarkdown = preprocessMarkdown(currentMarkdownText);
-                
-                window.location.hash = path;
-                
-                try {
-                    // Рендерим markdown
-                    const html = marked.parse(processedMarkdown);
-                    document.getElementById('content').innerHTML = html;
-                    
-                    // Обрабатываем блоки кода с формулами
-                    document.querySelectorAll('pre code').forEach(block => {
-                        if (block.className.includes('language-math') || 
-                            block.className.includes('language-tex')) {
-                            const formula = block.textContent;
-                            const wrapper = document.createElement('div');
-                            wrapper.className = 'math-block';
-                            // Используем двойной доллар для блочной формулы
-                            wrapper.innerHTML = `$$${formula}$$`;
-                            block.parentNode.replaceWith(wrapper);
+                altContainer.appendChild(variantContainer);
+            });
+            
+            // Добавляем контейнер с альтернативами после формулы с ошибкой
+            formulaElement.parentNode.insertBefore(altContainer, formulaElement.nextSibling);
+            
+            // Запускаем рендеринг MathJax для альтернативных вариантов
+            setTimeout(() => {
+                if (typeof MathJax !== 'undefined') {
+                    try {
+                        if (typeof MathJax.typesetPromise === 'function') {
+                            MathJax.typesetPromise([altContainer]).catch(err => {
+                                console.error('Ошибка при рендеринге альтернативных формул:', err);
+                            });
+                        } else if (typeof MathJax.Hub !== 'undefined') {
+                            MathJax.Hub.Queue(["Typeset", MathJax.Hub, altContainer]);
+                        } else if (typeof MathJax.startup !== 'undefined') {
+                            MathJax.startup.document.options.elements = [altContainer];
+                            MathJax.startup.document.updateDocument();
                         }
-                    });
-                    
-                    // Обрабатываем изображения для центрирования и добавления подписей
-                    processImages();
-                    
-                    // Запускаем рендеринг формул
-                    setTimeout(() => {
-                        if (typeof MathJax !== 'undefined') {
-                            try {
-                                if (typeof MathJax.typesetPromise === 'function') {
-                                    MathJax.typesetPromise()
-                                        .then(() => {
-                                            // Проверяем наличие ошибок после рендеринга
-                                            checkAndFixFormulaErrors();
-                                            // Центрируем ТОЛЬКО блочные формулы
-                                            centerMathJaxFormulas();
-                                        })
-                                        .catch(err => {
-                                            console.error('Ошибка при рендеринге формул:', err);
-                                            // При ошибке пытаемся восстановиться
-                                            setTimeout(() => {
-                                                try {
-                                                    MathJax.startup.document.clear();
-                                                    MathJax.startup.document.updateDocument();
-                                                    // Повторная попытка центрирования
-                                                    setTimeout(centerMathJaxFormulas, 100);
-                                                } catch (innerErr) {
-                                                    console.error('Критическая ошибка MathJax:', innerErr);
-                                                }
-                                            }, 100);
-                                        });
-                                } else if (typeof MathJax.Hub !== 'undefined') {
-                                    // Для старых версий MathJax
-                                    MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
-                                    MathJax.Hub.Queue(centerMathJaxFormulas);
-                                } else {
-                                    // Для других версий
-                                    MathJax.startup.document.clear();
-                                    MathJax.startup.document.updateDocument();
-                                    setTimeout(centerMathJaxFormulas, 100);
-                                }
-                            } catch (err) {
-                                console.error('Ошибка MathJax API:', err);
-                            }
-                        }
-                    }, 100);
-                    
-                } catch (renderError) {
-                    console.error('Ошибка при рендеринге markdown:', renderError);
-                    showError(`Ошибка рендеринга: ${renderError.message}`);
-                    
-                    // Fallback: рендеринг как обычный текст
-                    document.getElementById('content').innerHTML = 
-                        `<pre>${processedMarkdown.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>`;
+                    } catch (err) {
+                        console.error('Ошибка API MathJax при рендеринге альтернатив:', err);
+                    }
                 }
-                
-            } catch (error) {
-                console.error('Ошибка загрузки:', error);
-                showError(`Ошибка: ${error.message}`);
-            } finally {
-                document.getElementById('loader').style.display = 'none';
-            }
+            }, 200);
         }
-        
-        // Функция для преобразования обычных изображений в центрированные с подписями
-        function processImages() {
-            document.querySelectorAll('#content img').forEach(img => {
-                // Пропускаем, если изображение уже в контейнере
-                if (img.parentElement.classList.contains('image-container')) {
-                    return;
-                }
-                
-                // Создаем контейнер для изображения
-                const container = document.createElement('div');
-                container.className = 'image-container';
-                
-                // Получаем альтернативный текст как подпись
-                const altText = img.getAttribute('alt') || '';
-                
-                // Клонируем изображение
-                const newImg = img.cloneNode(true);
-                
-                // Добавляем изображение в контейнер
-                container.appendChild(newImg);
-                
-                // Добавляем подпись, если есть альтернативный текст
-                if (altText && !altText.startsWith('http')) {
-                    const caption = document.createElement('div');
-                    caption.className = 'image-caption';
-                    caption.textContent = altText;
-                    container.appendChild(caption);
-                }
-                
-                // Заменяем оригинальное изображение на контейнер
-                img.parentNode.replaceChild(container, img);
-            });
+
+        // Функция для генерации альтернативных вариантов формулы
+        function generateAlternatives(formula) {
+            const alternatives = [];
+            
+            // Вариант 1: Замена проблемных конструкций на более простые
+            let alt1 = formula
+                .replace(/\|\{([^}]*)\}\|/g, '\\mid\\{$1\\}\\mid')
+                .replace(/is\\_equivalent/g, '\\text{is\\_equivalent}')
+                .replace(/\\min_\{?\\theta\}?/g, '\\min\\limits_{\\theta}')
+                .replace(/\\max_\{?\\theta\}?/g, '\\max\\limits_{\\theta}');
+            alternatives.push(alt1);
+            
+            // Вариант 2: Использование разных обозначений
+            let alt2 = formula
+                .replace(/\|\{([^}|]*) \| ([^}|]*)\}\|/g, '\\left| S(\\{$1 : $2\\}) \\right|')
+                .replace(/is\\_equivalent/g, '\\text{equiv}')
+                .replace(/\\rightarrow \\min_\{?\\theta\}?/g, '\\xrightarrow{\\min_{\\theta}}')
+                .replace(/\\rightarrow \\max_\{?\\theta\}?/g, '\\xrightarrow{\\max_{\\theta}}');
+            alternatives.push(alt2);
+            
+            // Вариант 3: Использование более явных команд MathJax
+            let alt3 = formula
+                .replace(/\|\{([^}]*)\}\|/g, '\\lvert\\lbrace $1 \\rbrace\\rvert')
+                .replace(/is\\_equivalent/g, '\\mathrm{is\\_equivalent}')
+                .replace(/\\textcolor\{([^{}]*)\}\{([^{}]*)\}/g, '\\textcolor{$1}{$2}')
+                .replace(/\\min_\{?\\theta\}?/g, '\\underset{\\theta}{\\min}')
+                .replace(/\\max_\{?\\theta\}?/g, '\\underset{\\theta}{\\max}')
+                .replace(/\\rightarrow/g, '\\longrightarrow');
+            alternatives.push(alt3);
+            
+            return alternatives;
         }
-        
-        // Инициализация страницы
-        document.addEventListener('DOMContentLoaded', function() {
-            // Обработчики для навигационных ссылок
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.addEventListener('click', function(event) {
-                    event.preventDefault();
-                    const path = this.getAttribute('data-path');
-                    if (path) {
-                        loadMarkdown(path);
+
+        // Функция для исправления конкретных известных проблемных формул
+        function fixSpecificProblemFormulas() {
+            // Список конкретных проблемных формул и их исправленные версии
+            const specificFixes = [
+                {
+                    // Проблемная формула: s.t. с is_equivalent
+                    pattern: /\$\$\\text\{s\.t\.\}.*?0 < \|\{o_i \| \\text\{is\\_equivalent\}.*?\}\| < G.*?\$\$/g,
+                    replacement: `$$\\text{s.t.}\\ 0 < \\left|\\{o_i \\mid \\textrm{is\\_equiv}(a, o_i)\\}\\right| < G$$`
+                },
+                {
+                    // Проблемная формула: s.t. с is_equivalent и textcolor
+                    pattern: /\$\$\\text\{s\.t\.\}\\textcolor\{red\}\{.*?0 < \|\{o_i \| \\text\{is\\_equivalent\}.*?\}\| < G\}.*?\$\$/g,
+                    replacement: `$$\\text{s.t.}\\ \\color{red}{0 < \\left|\\{o_i \\mid \\textrm{is\\_equiv}(a, o_i)\\}\\right| < G}$$`
+                },
+                {
+                    // Проблемная формула: L(p(y|x), q_theta) -> min_theta
+                    pattern: /\$\$L\(p\(y\|x\), q_\{\\theta\}\(y\|x\)\) \\rightarrow \\min_\{\\theta\}.*?\$\$/g,
+                    replacement: `$$L(p(y|x), q_{\\theta}(y|x)) \\to \\operatorname{min}_{\\theta}$$`
+                },
+                {
+                    // Проблемная формула: E_p(y|x) [log q_theta] -> max_theta
+                    pattern: /\$\$\\mathbb\{E\}_\{p\(y\|x\)\} \[\\log q_\{\\theta\}\(y\|x\)\] \\rightarrow \\max_\{\\theta\}.*?\$\$/g,
+                    replacement: `$$\\mathbb{E}_{p(y|x)} [\\log q_{\\theta}(y|x)] \\to \\operatorname{max}_{\\theta}$$`
+                }
+            ];
+            
+            // Ищем проблемные формулы в тексте и заменяем их
+            specificFixes.forEach(fix => {
+                // Ищем все элементы, которые могут содержать исходный текст формулы
+                document.querySelectorAll('p, li, div').forEach(element => {
+                    if (fix.pattern.test(element.innerHTML)) {
+                        // Сохраняем оригинальное содержимое
+                        const originalContent = element.innerHTML;
                         
-                        // Выделяем активную ссылку
-                        document.querySelectorAll('.nav-link').forEach(l => {
-                            l.classList.remove('active');
-                        });
-                        this.classList.add('active');
+                        // Выполняем замену
+                        const newContent = originalContent.replace(fix.pattern, fix.replacement);
+                        
+                        // Обновляем содержимое, если была выполнена замена
+                        if (newContent !== originalContent) {
+                            element.innerHTML = newContent;
+                            
+                            // Добавляем индикатор исправления
+                            const indicator = document.createElement('small');
+                            indicator.style.display = 'block';
+                            indicator.style.textAlign = 'center';
+                            indicator.style.color = '#666';
+                            indicator.textContent = '(формула исправлена автоматически)';
+                            element.appendChild(indicator);
+                            
+                            // Запускаем рендеринг MathJax для этого элемента
+                            setTimeout(() => {
+                                if (typeof MathJax !== 'undefined') {
+                                    try {
+                                        if (typeof MathJax.typesetPromise === 'function') {
+                                            MathJax.typesetPromise([element]).catch(err => {
+                                                console.error('Ошибка при рендеринге исправленной формулы:', err);
+                                            });
+                                        } else if (typeof MathJax.Hub !== 'undefined') {
+                                            MathJax.Hub.Queue(["Typeset", MathJax.Hub, element]);
+                                        } else if (typeof MathJax.startup !== 'undefined') {
+                                            MathJax.startup.document.options.elements = [element];
+                                            MathJax.startup.document.updateDocument();
+                                        }
+                                    } catch (err) {
+                                        console.error('Ошибка API MathJax при рендеринге исправленных формул:', err);
+                                    }
+                                }
+                            }, 200);
+                        }
                     }
                 });
             });
-            
-            // Обработчики для кнопок
-            document.getElementById('reload-mathjax').addEventListener('click', reloadMathJax);
-            document.getElementById('toggle-source').addEventListener('click', toggleSourceView);
-            
-            // Загрузка контента при инициализации
-            if (window.location.hash) {
-                const path = window.location.hash.substring(1);
-                loadMarkdown(path);
-                
-                // Выделяем соответствующую ссылку
-                const navLink = document.querySelector(`.nav-link[data-path="${path}"]`);
-                if (navLink) {
-                    navLink.classList.add('active');
-                }
-            } else {
-                // Загружаем первую ссылку по умолчанию
-                const firstLink = document.querySelector('.nav-link');
-                if (firstLink) {
-                    firstLink.click();
-                }
-            }
-        });
-    </script>
-</body>
-</html>
+        }
