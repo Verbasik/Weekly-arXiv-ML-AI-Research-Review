@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review</title>
+    <!-- Подключение MathJax -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Подключение marked.js -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div id="content">
+        <!-- Содержимое review.md будет загружено сюда -->
+    </div>
+
+    <script>
+        // Функция для загрузки Markdown-файла
+        async function loadMarkdownFile(url) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`Ошибка загрузки файла: ${response.status}`);
+                }
+                const markdownText = await response.text();
+                return markdownText;
+            } catch (error) {
+                console.error('Ошибка:', error);
+                document.getElementById('content').innerHTML = `<p>Ошибка загрузки файла: ${error.message}</p>`;
+            }
+        }
+
+        // Функция для рендеринга Markdown в HTML
+        function renderMarkdown(markdownText) {
+            // Преобразуем Markdown в HTML
+            const htmlContent = marked.parse(markdownText);
+            document.getElementById('content').innerHTML = htmlContent;
+
+            // После рендеринга вызываем MathJax для обработки формул
+            MathJax.typesetPromise();
+        }
+
+        // Основная функция
+        async function init() {
+            const markdownUrl = 'review.md';
+            const markdownText = await loadMarkdownFile(markdownUrl);
+            renderMarkdown(markdownText);
+        }
+
+        // Запуск при загрузке страницы
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
