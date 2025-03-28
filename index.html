@@ -111,6 +111,25 @@
             margin: 1em 0 !important;
             width: 100% !important;
         }
+
+        /* Принудительное центрирование формул - работает для всех версий MathJax */
+        .mjx-container[jax="CHTML"][display="true"],
+        .mjx-container[jax="SVG"][display="true"] {
+            display: block !important;
+            text-align: center !important;
+            margin: 1em auto !important;
+            max-width: 100% !important;
+        }
+
+        /* Центрирование для формул с двойным знаком доллара */
+        .math-block, 
+        mjx-container, 
+        mjx-container[display="true"] {
+            display: block !important;
+            text-align: center !important;
+            margin: 1em auto !important;
+            width: auto !important;
+        }
         
         /* Делаем формулы прокручиваемыми на мобильных устройствах */
         .mjx-container {
@@ -234,7 +253,7 @@
         <a href="#" data-path="2025/week-06/review.md" class="nav-link">Week 06 Review</a>
 
         <a href="#" data-path="2025/week-07_&_08/review.md" class="nav-link">Week 07 & 08  Review</a>
-        
+
         <a href="#" data-path="2025/week-09/review.md" class="nav-link">Week 09 Review</a>
         <a href="#" data-path="2025/week-10/review.md" class="nav-link">Week 10 Review</a>
         <a href="#" data-path="2025/week-11/review.md" class="nav-link">Week 11 Review</a>
@@ -290,6 +309,27 @@
             } else {
                 sourceView.style.display = 'none';
             }
+        }
+
+        function centerMathJaxFormulas() {
+            // Центрирование для всех типов контейнеров MathJax
+            document.querySelectorAll('.mjx-container[display="true"], mjx-container[display="true"]').forEach(container => {
+                // Применяем стили для центрирования
+                container.style.display = 'block';
+                container.style.textAlign = 'center';
+                container.style.margin = '1em auto';
+                container.style.width = 'auto';
+                
+                // Проверяем родительский элемент и при необходимости оборачиваем в div
+                const parent = container.parentNode;
+                if (parent && parent.nodeName !== 'DIV' && parent.nodeName !== 'P') {
+                    const wrapper = document.createElement('div');
+                    wrapper.style.textAlign = 'center';
+                    wrapper.style.margin = '1em auto';
+                    parent.insertBefore(wrapper, container);
+                    wrapper.appendChild(container);
+                }
+            });
         }
         
         // Функция для перезагрузки MathJax
@@ -605,6 +645,8 @@
                                         .then(() => {
                                             // Проверяем наличие ошибок после рендеринга
                                             checkAndFixFormulaErrors();
+                                            // Дополнительная обработка для центрирования формул
+                                            centerMathJaxFormulas();
                                         })
                                         .catch(err => {
                                             console.error('Ошибка при рендеринге формул:', err);
