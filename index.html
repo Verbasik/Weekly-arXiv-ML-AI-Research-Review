@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weekly Reviews</title>
-    <!-- Подключение MathJax -->
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Подключение KaTeX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body);"></script>
     <!-- Подключение marked.js -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
@@ -42,9 +43,6 @@
     <!-- Навигация -->
     <nav>
         <a href="#" onclick="loadMarkdown('2025/week-13/review.md')">Week 13 Review</a>
-        <a href="#" onclick="loadMarkdown('2025/week-13/summary.md')">Week 13 Summary</a>
-        <a href="#" onclick="loadMarkdown('2025/week-12/review.md')">Week 12 Review</a>
-        <a href="#" onclick="loadMarkdown('2025/week-12/summary.md')">Week 12 Summary</a>
         <!-- Добавьте ссылки на другие недели -->
     </nav>
 
