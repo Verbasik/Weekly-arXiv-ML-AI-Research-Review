@@ -191,8 +191,8 @@
 
     <!-- Элементы управления -->
     <div class="controls">
-        <button id="reload-mathjax" onclick="reloadMathJax()">Перезагрузить формулы</button>
-        <button id="toggle-source" onclick="toggleSourceView()">Показать/скрыть исходный текст</button>
+        <button id="reload-mathjax">Перезагрузить формулы</button>
+        <button id="toggle-source">Показать/скрыть исходный текст</button>
     </div>
 
     <!-- Индикатор загрузки -->
@@ -325,24 +325,6 @@
             }
         }
         
-        // Обработчик клика по навигационным ссылкам
-        document.addEventListener('click', function(event) {
-            // Проверяем, был ли клик по навигационной ссылке
-            if (event.target.classList.contains('nav-link')) {
-                event.preventDefault();
-                const path = event.target.getAttribute('data-path');
-                if (path) {
-                    loadMarkdown(path);
-                    
-                    // Выделяем активную ссылку
-                    document.querySelectorAll('.nav-link').forEach(link => {
-                        link.classList.remove('active');
-                    });
-                    event.target.classList.add('active');
-                }
-            }
-        });
-        
         // Функция для динамического добавления новых ссылок в навигацию
         function addNavigationLink(path, title) {
             const navElement = document.getElementById('navigation');
@@ -354,8 +336,29 @@
             navElement.appendChild(linkElement);
         }
         
-        // Загрузка начальной страницы на основе хэша URL
+        // Добавляем обработчики событий при загрузке страницы
         document.addEventListener('DOMContentLoaded', function() {
+            // Обработчик клика на навигационные ссылки
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    const path = this.getAttribute('data-path');
+                    if (path) {
+                        loadMarkdown(path);
+                        
+                        // Выделяем активную ссылку
+                        document.querySelectorAll('.nav-link').forEach(link => {
+                            link.classList.remove('active');
+                        });
+                        this.classList.add('active');
+                    }
+                });
+            });
+            
+            // Добавляем обработчики для кнопок
+            document.getElementById('reload-mathjax').addEventListener('click', reloadMathJax);
+            document.getElementById('toggle-source').addEventListener('click', toggleSourceView);
+            
             // Проверяем, есть ли хэш в URL
             if (window.location.hash) {
                 const path = window.location.hash.substring(1);
@@ -365,6 +368,12 @@
                 const navLink = document.querySelector(`.nav-link[data-path="${path}"]`);
                 if (navLink) {
                     navLink.classList.add('active');
+                }
+            } else {
+                // Если хэша нет, загружаем первую ссылку по умолчанию
+                const firstLink = document.querySelector('.nav-link');
+                if (firstLink) {
+                    firstLink.click();
                 }
             }
             
@@ -378,3 +387,6 @@
             `;
             document.head.appendChild(style);
         });
+    </script>
+</body>
+</html>
