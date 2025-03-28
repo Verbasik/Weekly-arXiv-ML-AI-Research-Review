@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weekly Reviews</title>
-
+    
     <!-- Настройки MathJax -->
     <script>
         window.MathJax = {
@@ -14,7 +14,9 @@
                 processEscapes: true,
                 processEnvironments: true,
                 packages: {'[+]': ['ams', 'noerrors', 'physics', 'color', 'boldsymbol', 'mhchem']},
+                // Отключаем строгую проверку ошибок для более устойчивого рендеринга
                 macros: {
+                    // Определяем собственные макросы для упрощения некоторых выражений
                     bm: ["\\boldsymbol{#1}", 1]
                 }
             },
@@ -25,87 +27,254 @@
             },
             svg: {
                 fontCache: 'global',
-                scale: 1.1 // Немного увеличим масштаб формул
+                scale: 1.1
             },
             startup: {
-                typeset: true // Автоматический рендеринг при загрузке
+                typeset: true
             }
         };
     </script>
-
+    
     <!-- Используем полную версию MathJax с тихой обработкой ошибок -->
-    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" async></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+    
     <!-- Используем стабильную версию marked -->
     <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
-
+    
     <style>
-        /* --- Общие стили --- */
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             line-height: 1.6;
             margin: 0;
             padding: 20px;
             color: #333;
-            background-color: #fdfdfd; /* Слегка серый фон */
-            max-width: 1000px; /* Ограничение ширины контента */
-            margin: 20px auto; /* Центрирование на больших экранах */
+            max-width: 1000px;
+            margin: 0 auto;
         }
-
-        h1, h2, h3, h4, h5, h6 {
+        
+        nav {
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        nav a {
+            margin-right: 15px;
+            text-decoration: none;
+            color: #007BFF;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        
+        nav a:hover {
+            background-color: #f0f0f0;
+            text-decoration: underline;
+        }
+        
+        nav a.active {
+            background-color: #e6f2ff;
+            font-weight: bold;
+        }
+        
+        h1, h2, h3 {
             color: #333;
             margin-top: 1.5em;
             margin-bottom: 0.5em;
-            line-height: 1.3;
         }
-        h1 { font-size: 2em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
-        h2 { font-size: 1.6em; border-bottom: 1px solid #eee; padding-bottom: 0.3em; }
-        h3 { font-size: 1.3em; }
-        h4 { font-size: 1.1em; }
+        
+        code {
+            background-color: #f6f8fa;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: Consolas, Monaco, monospace;
+        }
+        
+        pre {
+            background-color: #f6f8fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        
+        /* Центрирование изображений */
+        img {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            margin: 20px auto;
+        }
+        
+        /* Принудительное центрирование ТОЛЬКО блочных формул */
+        mjx-container[display="true"] {
+        position: relative;
+        display: block !important;
+        text-align: center !important;
+        margin: 1em auto !important;
+        width: 100% !important;
+        clear: both;
+        }
 
-        a {
-            color: #007BFF;
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-
-        p {
-            margin-bottom: 1em;
+        /* Принудительное размещение блочных формул на отдельной строке */
+        .mjx-container[display="true"] {
+            overflow-x: auto;
+            overflow-y: hidden;
+            margin-top: 0.75em !important;
+            margin-bottom: 0.75em !important;
+            padding-top: 0.25em;
+            padding-bottom: 0.25em;
         }
 
-        ul, ol {
-            padding-left: 2em;
-            margin-bottom: 1em;
+        /* Переопределение стилей списка, содержащего формулы */
+        li mjx-container[display="true"] {
+            margin-left: -2em !important;
+            width: calc(100% + 2em) !important;
         }
-        li {
-            margin-bottom: 0.4em;
+        
+        /* Правильное отображение инлайновых формул */
+        mjx-container:not([display="true"]) {
+            display: inline !important;
+            text-align: initial !important;
+            margin: 0 !important;
+            vertical-align: middle !important;
+        }
+        
+        /* Делаем формулы прокручиваемыми на мобильных устройствах */
+        .mjx-container {
+            overflow-x: auto;
+            overflow-y: hidden;
+        }
+        
+        /* Отступы для инлайновых формул */
+        p > mjx-container:not([display="true"]) {
+            padding: 0 0.2em;
+        }
+        
+        /* Стили для отображения ошибок формул */
+        .math-error {
+            color: #d9534f;
+            background-color: #f9f2f2;
+            padding: 8px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+        
+        /* Стили для диагностики ошибок формул */
+        .formula-error {
+            background-color: #ffeeee;
+            border-left: 3px solid #ff4444;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        
+        /* Стили для визуализации проблемных частей формул */
+        .highlight-error {
+            background-color: #ffffd0;
+            padding: 2px;
+            border-bottom: 1px dashed red;
+        }
+        
+        /* Контейнер для изображений с подписью */
+        .image-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .image-container img {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        
+        .image-caption {
+            font-style: italic;
+            color: #666;
+            margin-top: 8px;
+        }
+        
+        #content {
+            padding: 20px 0;
+        }
+        
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid #007BFF;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+        }
+        
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background-color: #0056b3;
+        }
+        
+        .error-message {
+            color: #d9534f;
+            background-color: #f9f2f2;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            display: none;
+        }
+        
+        #source-view {
+            margin-top: 30px;
+            display: none;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            padding: 15px;
         }
 
-        /* --- Стили для навигации --- */
         #navigation {
             padding: 0;
             border: 1px solid #e0e0e0;
             border-radius: 8px;
             margin-bottom: 20px;
             background-color: #fff;
-            max-height: 450px; /* Ограничение высоты для скролла */
+            max-height: 450px;
             overflow-y: auto;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
         }
 
         .year-group {
-            margin-bottom: 0;
+            margin-bottom: 10px;
             border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
         }
         .year-group:last-child {
             border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
         }
 
-        .year-group summary {
-            cursor: pointer;
-            outline: none;
+
+        .year-title {
+            margin: 0;
             padding: 12px 15px;
             font-size: 1.1em;
             font-weight: bold;
@@ -115,46 +284,20 @@
             position: sticky;
             top: 0;
             z-index: 1;
-            list-style: none;
-            display: flex;
-            align-items: center;
         }
-        .year-group summary::-webkit-details-marker { display: none; }
-
-        .year-group summary::before {
-            content: '▶ ';
-            display: inline-block;
-            margin-right: 8px;
-            font-size: 0.8em;
-            transition: transform 0.2s ease-in-out;
-        }
-
-        .year-group[open] > summary::before { transform: rotate(90deg); }
-        .year-group[open] > summary { border-bottom: 1px solid #eee; }
 
         #navigation .nav-link {
             display: block;
-            padding: 10px 20px 10px 35px; /* Отступ слева для вложенных ссылок */
+            padding: 10px 20px;
             text-decoration: none;
             color: #007bff;
             transition: background-color 0.2s ease, color 0.2s ease;
-            font-size: 0.95em;
+            font-size: 0.9em;
             border-top: 1px solid #f5f5f5;
         }
 
-        /* Убираем верхнюю границу у первой ссылки в группе/навигации */
-        .year-group > .nav-link:first-of-type,
-        .year-group > details:first-of-type + .nav-link,
-        #navigation > .nav-link:first-child {
+        .year-group .nav-link:first-of-type {
             border-top: none;
-        }
-
-        /* Стили для ссылки README */
-        #navigation > .nav-link[data-path="README.md"] {
-             padding: 12px 20px; /* Стандартный отступ */
-             font-weight: bold;
-             background-color: #f8f9fa;
-             border-bottom: 1px solid #eee;
         }
 
         #navigation .nav-link:hover {
@@ -168,297 +311,53 @@
             font-weight: bold;
         }
 
-        /* --- Стили для кода --- */
-        code:not(pre code) { /* Инлайн-код */
-            background-color: #f0f0f0; /* Чуть темнее фон */
-            padding: 0.2em 0.4em; /* Паддинги */
-            border-radius: 3px;
-            font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
-            font-size: 0.9em;
-            color: #333;
-            word-wrap: break-word; /* Перенос длинных слов */
-        }
-
-        pre {
-            background-color: #f6f8fa;
-            padding: 15px;
-            border-radius: 5px;
-            overflow-x: auto;
-            border: 1px solid #e0e0e0;
-            margin-bottom: 1em;
-        }
-        pre code {
-             background-color: transparent;
-             padding: 0;
-             border-radius: 0;
-             font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
-             font-size: 0.9em;
-             border: none;
-             color: #24292e; /* Цвет текста кода */
-             line-height: 1.45; /* Межстрочный интервал в коде */
-        }
-
-        /* --- Стили для MathJax --- */
-        /* Принудительное центрирование ТОЛЬКО блочных формул */
-        mjx-container[display="true"] {
-            position: relative;
-            display: block !important;
-            text-align: center !important;
-            margin: 1em auto !important;
-            width: 100% !important;
-            clear: both;
-            overflow-x: auto;
-            overflow-y: hidden;
-            padding-top: 0.25em;
-            padding-bottom: 0.25em;
-        }
-
-        /* Обертка для центрирования формул в списках (добавляется JS) */
-        .formula-wrapper {
-            text-align: center;
-            width: 100%;
-            margin-left: -2em; /* Компенсируем отступ списка */
-            margin-right: 0;
-            margin-top: 1em;
-            margin-bottom: 1em;
-        }
-
-        /* Правильное отображение инлайновых формул */
-        mjx-container:not([display="true"]) {
-            display: inline !important;
-            text-align: initial !important;
-            margin: 0 !important;
-            vertical-align: middle !important;
-            padding: 0 0.1em;
-        }
-
-        /* Делаем формулы прокручиваемыми */
-        .mjx-container {
-            overflow-x: auto;
-            overflow-y: hidden;
-            -webkit-overflow-scrolling: touch; /* Плавный скролл на iOS */
-        }
-
-        /* Стили для диагностики ошибок формул */
-        .formula-error {
-            background-color: #ffeeee;
-            border: 1px solid #ff4444;
-            border-left: 3px solid #ff4444;
-            padding: 10px;
-            margin: 10px 0;
-            font-family: monospace;
-            white-space: pre-wrap;
-            overflow-x: auto;
-            color: #cc0000;
-            font-size: 0.9em;
-        }
-        /* Стиль для самой формулы с ошибкой */
-        mjx-container.mathjax-error-source {
-             outline: 2px solid #ff4444;
-             background-color: #fff0f0;
-        }
-
-        /* --- Стили для изображений --- */
-        .image-container {
-            text-align: center;
-            margin: 25px 0; /* Увеличили отступы */
-        }
-        .image-container img {
-            max-width: 100%;
-            height: auto;
-            margin: 0 auto;
-            border-radius: 4px; /* Слегка скруглим углы */
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1); /* Небольшая тень */
-        }
-        .image-caption {
-            font-style: italic;
-            color: #666;
-            margin-top: 10px; /* Отступ подписи */
-            font-size: 0.9em;
-        }
-
-        /* --- Стили для таблиц --- */
-        #content table {
-            border-collapse: collapse;
-            margin: 1.5em 0; /* Отступы */
-            width: 100%;
-            border: 1px solid #dfe2e5;
-            font-size: 0.95em; /* Немного уменьшим шрифт в таблицах */
-        }
-        #content th, #content td {
-            border: 1px solid #dfe2e5;
-            padding: 10px 14px; /* Увеличили паддинги */
-            text-align: left; /* Выравнивание по левому краю */
-        }
-        #content th {
-            background-color: #f6f8fa;
-            font-weight: 600; /* Полужирный */
-        }
-        #content tr:nth-child(even) {
-            background-color: #f6f8fa; /* Зебра */
-        }
-        #content tr:hover {
-            background-color: #f0f6ff; /* Подсветка строки при наведении */
-        }
-
-        /* --- Элементы управления и статус --- */
-        .controls {
-            margin: 20px 0;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        button {
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 4px;
+        .year-group summary {
             cursor: pointer;
-            font-size: 0.9em;
-            transition: background-color 0.2s ease;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        button:active {
-            background-color: #004085;
+            outline: none;
         }
 
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-radius: 50%;
-            border-top: 4px solid #007BFF;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
+        .year-group summary::-webkit-details-marker {
             display: none;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+
+        .year-group summary::before {
+            content: '▶ ';
+            display: inline-block;
+            margin-right: 5px;
+            transition: transform 0.2s ease-in-out;
         }
 
-        .status-message { /* Переименовали из error-message */
-            padding: 10px 15px;
-            border-radius: 4px;
-            margin: 15px 0;
-            display: none; /* По умолчанию скрыто */
-            border: 1px solid transparent;
-            font-size: 0.95em;
+        .year-group[open] summary::before {
+            transform: rotate(90deg);
         }
-        .status-message.error { /* Стиль для ошибок */
-            color: #721c24;
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
-        }
-        .status-message.success { /* Стиль для успеха */
-            color: #155724;
-            background-color: #d4edda;
-            border-color: #c3e6cb;
-        }
-        .status-message.info { /* Стиль для информации */
-            color: #004085;
-            background-color: #cce5ff;
-            border-color: #b8daff;
-        }
-
-        /* --- Исходный код --- */
-        #source-view {
-            margin-top: 30px;
-            display: none;
-            border: 1px solid #e0e0e0;
-            border-radius: 5px;
-            padding: 15px;
-            background-color: #fdfdfd;
-        }
-        #source-view h3 {
-            margin-top: 0;
-            margin-bottom: 10px;
-            font-size: 1.2em;
-        }
-        #source-content {
-            white-space: pre-wrap; /* Перенос строк в исходнике */
-            word-wrap: break-word;
-            font-size: 0.85em; /* Мелкий шрифт для исходника */
-            color: #444;
-        }
-
-        /* --- Адаптивность --- */
-        @media (max-width: 768px) {
-            body {
-                padding: 15px;
-                margin: 0; /* Убираем внешние отступы на мобильных */
-            }
-            h1 { font-size: 1.8em; }
-            h2 { font-size: 1.4em; }
-            #navigation {
-                max-height: 300px; /* Уменьшаем высоту навигации */
-            }
-            .controls {
-                justify-content: center; /* Центрируем кнопки */
-            }
-            #content table {
-                font-size: 0.9em; /* Еще немного уменьшим шрифт таблиц */
-            }
-            #content th, #content td {
-                padding: 8px 10px;
-            }
-        }
-
     </style>
 </head>
 <body>
-    <h1>Weekly arXiv ML/AI Research Review</h1>
+    <h1>Weekly Reviews</h1>
 
     <!-- Навигация -->
     <nav id="navigation">
-        <!-- Ссылка на README добавлена первой -->
         <a href="#" data-path="README.md" class="nav-link">README</a>
-
-        <details class="year-group" open> <!-- По умолчанию открыто -->
-            <summary class="year-title">2024</summary>
-            <a href="#" data-path="2024/week-52/review.md" class="nav-link">Week 52</a>
-            <!-- Добавьте другие недели 2024 года сюда -->
-        </details>
-
-        <details class="year-group" open> <!-- По умолчанию открыто -->
-            <summary class="year-title">2025</summary>
-            <a href="#" data-path="2025/week-01_&_02/review.md" class="nav-link">Week 01 & 02</a>
-            <a href="#" data-path="2025/week-03/review.md" class="nav-link">Week 03</a>
-            <a href="#" data-path="2025/week-04/review.md" class="nav-link">Week 04</a>
-            <a href="#" data-path="2025/week-05/review.md" class="nav-link">Week 05</a>
-            <a href="#" data-path="2025/week-06/review.md" class="nav-link">Week 06</a>
-            <a href="#" data-path="2025/week-07_&_08/review.md" class="nav-link">Week 07 & 08</a>
-            <a href="#" data-path="2025/week-09/review.md" class="nav-link">Week 09</a>
-            <a href="#" data-path="2025/week-10/review.md" class="nav-link">Week 10</a>
-            <a href="#" data-path="2025/week-11/review.md" class="nav-link">Week 11</a>
-            <a href="#" data-path="2025/week-12/review.md" class="nav-link">Week 12</a>
-            <a href="#" data-path="2025/week-13/review.md" class="nav-link">Week 13</a>
-            <!-- Добавьте ссылки на другие недели по мере необходимости -->
-        </details>
-        <!-- Добавьте другие годы сюда в таком же формате <details> -->
+        <!-- Добавьте ссылки на другие недели по мере необходимости -->
     </nav>
 
     <!-- Элементы управления -->
     <div class="controls">
         <button id="reload-mathjax">Перезагрузить формулы</button>
-        <button id="toggle-source">Показать/скрыть исходный Markdown</button>
+        <button id="toggle-source">Показать/скрыть исходный текст</button>
     </div>
 
     <!-- Индикатор загрузки -->
     <div id="loader" class="loader"></div>
-
-    <!-- Сообщение о статусе/ошибке -->
-    <div id="status-message" class="status-message"></div>
+    
+    <!-- Сообщение об ошибке -->
+    <div id="error-message" class="error-message"></div>
 
     <!-- Контент -->
     <div id="content">
-        <p>Загрузка...</p> <!-- Стартовое сообщение -->
+        <p>Выберите документ из списка выше.</p>
     </div>
-
+    
     <!-- Контейнер для исходного текста -->
     <div id="source-view">
         <h3>Исходный Markdown</h3>
@@ -468,402 +367,511 @@
     <script>
         // Инициализация marked
         document.addEventListener('DOMContentLoaded', function() {
-            if (typeof marked !== 'undefined') {
-                marked.use({
-                    mangle: false, // Не изменять email-адреса
-                    headerIds: false, // Не генерировать id для заголовков автоматически
-                    breaks: true, // Преобразовывать одинарные переносы строк в <br>
-                    gfm: true // Включить GitHub Flavored Markdown (таблицы, зачеркивание и т.д.)
-                });
-            } else {
-                console.error("Marked.js не загружен!");
-                showStatus("Ошибка: Библиотека для рендеринга Markdown не загружена.", true, 0); // Показать ошибку навсегда
-            }
+            // Настраиваем marked на безопасную работу
+            marked.use({
+                mangle: false,
+                headerIds: false,
+                breaks: true
+            });
         });
-
-        // Глобальные переменные
+        
+        // Хранилище для исходного текста
         let currentMarkdownText = '';
         let currentPath = '';
-        let statusTimeoutId = null; // Для управления таймером скрытия сообщений
-
-        // --- Функции управления UI ---
-
+        
+        // Функция для показа/скрытия исходного текста
         function toggleSourceView() {
             const sourceView = document.getElementById('source-view');
-            const sourceContent = document.getElementById('source-content');
             if (sourceView.style.display === 'none' || sourceView.style.display === '') {
-                sourceContent.textContent = currentMarkdownText; // Обновляем текст перед показом
                 sourceView.style.display = 'block';
+                document.getElementById('source-content').textContent = currentMarkdownText;
             } else {
                 sourceView.style.display = 'none';
             }
         }
 
-        function showStatus(message, isError = false, duration = 3000) {
-            const messageElement = document.getElementById('status-message');
-            if (!messageElement) return;
-
-            // Очищаем предыдущий таймер, если он есть
-            if (statusTimeoutId) {
-                clearTimeout(statusTimeoutId);
-                statusTimeoutId = null;
-            }
-
-            messageElement.textContent = message;
-            // Убираем все классы статусов перед добавлением нужного
-            messageElement.classList.remove('error', 'success', 'info');
-
-            if (isError) {
-                messageElement.classList.add('error');
-            } else {
-                // Можно добавить 'success' или 'info' по необходимости
-                messageElement.classList.add('info'); // По умолчанию используем 'info'
-            }
-
-            messageElement.style.display = 'block';
-
-            // Скрываем сообщение через 'duration' миллисекунд, если duration > 0
-            if (duration > 0) {
-                statusTimeoutId = setTimeout(() => {
-                    messageElement.style.display = 'none';
-                    statusTimeoutId = null;
-                }, duration);
-            }
-        }
-
-        function setActiveNavLink(path) {
-            const navigation = document.getElementById('navigation');
-            if (!navigation) return;
-
-            navigation.querySelectorAll('.nav-link').forEach(link => {
-                if (link.getAttribute('data-path') === path) {
-                    link.classList.add('active');
-                    const detailsParent = link.closest('details.year-group');
-                    if (detailsParent && !detailsParent.open) {
-                        detailsParent.open = true; // Разворачиваем группу
-                    }
-                    // Плавная прокрутка к активному элементу в навигации
-                    link.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
-                } else {
-                    link.classList.remove('active');
-                }
-            });
-        }
-
-        // --- Функции обработки контента (Markdown, MathJax, Изображения, Ссылки) ---
-
+        // Функция для центрирования только блочных формул MathJax
         function centerMathJaxFormulas() {
-             if (typeof MathJax === 'undefined') return; // Проверка на всякий случай
-
-             document.querySelectorAll('mjx-container[display="true"]').forEach(container => {
-                // Базовые стили центрирования уже заданы в CSS
-                // Дополнительная логика для списков
+            // Центрируем только блочные формулы
+            document.querySelectorAll('.mjx-container[display="true"], mjx-container[display="true"]').forEach(container => {
+                // Базовые стили центрирования
+                container.style.display = 'block';
+                container.style.textAlign = 'center';
+                container.style.margin = '1em auto';
+                container.style.width = '100%';
+                
+                // Проверяем, находится ли формула внутри списка
                 const listItem = container.closest('li');
                 if (listItem) {
+                    // Обрабатываем формулы внутри списков
+                    container.style.marginLeft = '0';
+                    container.style.width = '100%';
+                    
+                    // Создаем контейнер для центрирования, если его нет
                     if (!container.parentNode.classList.contains('formula-wrapper')) {
                         const wrapper = document.createElement('div');
                         wrapper.className = 'formula-wrapper';
+                        wrapper.style.textAlign = 'center';
+                        wrapper.style.width = '100%';
+                        wrapper.style.marginLeft = '-2em';
+                        wrapper.style.marginRight = '0';
                         container.parentNode.insertBefore(wrapper, container);
                         wrapper.appendChild(container);
-                        // Стили для wrapper и mjx-container внутри него заданы в CSS
                     }
                 }
             });
-             // Стили для инлайновых формул также заданы в CSS
+            
+            // Убеждаемся, что инлайновые формулы НЕ центрируются
+            document.querySelectorAll('mjx-container:not([display="true"])').forEach(container => {
+                container.style.display = 'inline';
+                container.style.textAlign = 'initial';
+                container.style.margin = '0';
+            });
         }
-
+        
+        // Функция для перезагрузки MathJax
         function reloadMathJax() {
-            const contentElement = document.getElementById('content');
-            if (!contentElement || typeof MathJax === 'undefined' || !MathJax.typesetPromise) {
-                showStatus('MathJax не готов для перезагрузки.', true);
-                return;
+            try {
+                if (typeof MathJax !== 'undefined') {
+                    // Очищаем и перерисовываем формулы
+                    try {
+                        // Попытка использовать современное API MathJax 3
+                        if (typeof MathJax.texReset === 'function') {
+                            MathJax.texReset();
+                        }
+                        if (typeof MathJax.typesetClear === 'function') {
+                            MathJax.typesetClear();
+                        }
+                        
+                        // Запускаем рендеринг
+                        if (typeof MathJax.typesetPromise === 'function') {
+                            MathJax.typesetPromise()
+                                .then(() => {
+                                    showError('Формулы перезагружены успешно');
+                                    
+                                    // Проверяем наличие ошибок после перезагрузки
+                                    checkAndFixFormulaErrors();
+                                    // Применяем центрирование только для блочных формул
+                                    centerMathJaxFormulas();
+                                })
+                                .catch(err => {
+                                    console.error('Ошибка при рендеринге формул:', err);
+                                    showError('Проблема с рендерингом некоторых формул');
+                                });
+                        } else if (typeof MathJax.Hub !== 'undefined') {
+                            // Fallback для старых версий MathJax
+                            MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+                            MathJax.Hub.Queue(centerMathJaxFormulas);
+                            showError('Формулы перезагружены (старый метод)');
+                        } else {
+                            // Если не удается найти подходящий метод, используем обновление документа
+                            if (typeof MathJax.startup !== 'undefined' && 
+                                typeof MathJax.startup.document !== 'undefined') {
+                                MathJax.startup.document.clear();
+                                MathJax.startup.document.updateDocument();
+                                setTimeout(centerMathJaxFormulas, 100);
+                                showError('Формулы обновлены');
+                            } else {
+                                showError('Не удалось определить метод перезагрузки формул');
+                            }
+                        }
+                    } catch (err) {
+                        console.error('Ошибка MathJax API:', err);
+                        showError('Возникла ошибка при обновлении формул');
+                    }
+                } else {
+                    showError('MathJax не загружен. Попробуйте обновить страницу.');
+                }
+            } catch (error) {
+                console.error('Ошибка при перезагрузке MathJax:', error);
+                showError('Не удалось перезагрузить формулы');
             }
-
-            showStatus('Перезагрузка формул...', false, 2000); // Информационное сообщение
-            clearFormulaErrors(); // Очищаем старые ошибки
-
-            MathJax.typesetPromise([contentElement])
-                .then(() => {
-                    showStatus('Формулы успешно перезагружены.', false);
-                    checkAndDisplayFormulaErrors();
-                    centerMathJaxFormulas();
-                })
-                .catch(err => {
-                    console.error('Ошибка при перезагрузке MathJax:', err);
-                    showStatus('Ошибка при перезагрузке формул.', true);
-                    checkAndDisplayFormulaErrors(); // Показать ошибки даже если рендеринг упал
-                });
         }
-
-        function clearFormulaErrors() {
-             document.querySelectorAll('.formula-error').forEach(el => el.remove());
-             document.querySelectorAll('.mathjax-error-source').forEach(el => {
-                 el.classList.remove('mathjax-error-source');
-             });
+        
+        // Функция для отображения сообщений
+        function showError(message) {
+            const errorElement = document.getElementById('error-message');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+            setTimeout(() => {
+                errorElement.style.display = 'none';
+            }, 3000);
         }
-
-        function checkAndDisplayFormulaErrors() {
-            if (typeof MathJax === 'undefined') return;
-            document.querySelectorAll('mjx-merror').forEach(errorElement => {
-                const errorText = errorElement.getAttribute('title') || errorElement.textContent; // Получаем текст ошибки
-                const formulaContainer = errorElement.closest('mjx-container');
-                if (formulaContainer && !formulaContainer.classList.contains('mathjax-error-source')) { // Проверяем, не обработана ли уже
-                    formulaContainer.classList.add('mathjax-error-source'); // Помечаем контейнер
-
+        
+        // Функция для проверки и исправления ошибок формул после рендеринга
+        function checkAndFixFormulaErrors() {
+            // Находим все элементы с ошибками MathJax
+            document.querySelectorAll('.mjx-merror').forEach(errorElement => {
+                // Получаем текст ошибки
+                const errorText = errorElement.textContent;
+                
+                // Находим родительский элемент формулы
+                const formulaElement = errorElement.closest('.mjx-container');
+                if (formulaElement) {
+                    // Создаём элемент для диагностики ошибок
                     const diagnosticElement = document.createElement('div');
                     diagnosticElement.className = 'formula-error';
-                    diagnosticElement.textContent = 'Ошибка MathJax: ' + errorText;
-
-                    // Попытка получить исходный TeX
-                    const texSource = formulaContainer.querySelector('script[type^="math/tex"]');
-                    if (texSource) {
-                         diagnosticElement.textContent += '\nИсходный код: ' + texSource.textContent.trim();
-                    } else {
-                         const originalFormula = formulaContainer.getAttribute('data-original-formula');
-                         if (originalFormula) {
-                             diagnosticElement.textContent += '\nИсходный код: ' + originalFormula.trim();
-                         }
+                    diagnosticElement.textContent = 'Ошибка в формуле: ' + errorText;
+                    
+                    // Получаем текст формулы из атрибута
+                    const formulaText = formulaElement.getAttribute('data-formula') || '';
+                    if (formulaText) {
+                        diagnosticElement.textContent += '\nФормула: ' + formulaText;
                     }
-                    // Вставляем сообщение об ошибке после контейнера формулы
-                    formulaContainer.parentNode.insertBefore(diagnosticElement, formulaContainer.nextSibling);
+                    
+                    // Вставляем элемент сразу после формулы
+                    formulaElement.after(diagnosticElement);
                 }
             });
         }
-
-        // --- Функции предобработки формул (упрощенные, можно расширить) ---
-        function repairBracketBalance(formula) {
-            const leftCount = (formula.match(/\\left[\(\[\{]/g) || []).length;
-            const rightCount = (formula.match(/\\right[\)\]\}]/g) || []).length;
-            const diff = leftCount - rightCount;
-            if (diff > 0) return formula + ' \\right.'.repeat(diff);
-            if (diff < 0) return '\\left. '.repeat(-diff) + formula;
-            return formula;
+        
+        // Функция для проверки баланса скобок
+        function checkBracketBalance(formula) {
+            const brackets = {
+                '\\left(': '\\right)',
+                '\\left[': '\\right]',
+                '\\left\\{': '\\right\\}',
+                '\\left|': '\\right|',
+                '\\left\\|': '\\right\\|',
+                '\\left\\langle': '\\right\\rangle',
+                '\\left\\lfloor': '\\right\\rfloor',
+                '\\left\\lceil': '\\right\\rceil'
+            };
+            
+            // Упрощенная проверка - подсчитываем количество \left и \right
+            const leftCount = (formula.match(/\\left/g) || []).length;
+            const rightCount = (formula.match(/\\right/g) || []).length;
+            
+            if (leftCount !== rightCount) {
+                return {
+                    balanced: false,
+                    leftCount,
+                    rightCount,
+                    diff: leftCount - rightCount
+                };
+            }
+            
+            return { balanced: true };
         }
-
+        
+        // Функция для исправления баланса скобок
+        function repairBracketBalance(formula) {
+            // Проверяем баланс
+            const result = checkBracketBalance(formula);
+            
+            if (result.balanced) {
+                return formula; // Ничего исправлять не нужно
+            }
+            
+            let newFormula = formula;
+            
+            // Случай 1: Больше \left, чем \right
+            if (result.diff > 0) {
+                // Добавляем недостающие \right.
+                newFormula += ' ' + '\\right.'.repeat(result.diff);
+            }
+            
+            // Случай 2: Больше \right, чем \left
+            else if (result.diff < 0) {
+                // Добавляем недостающие \left. в начало
+                newFormula = '\\left. '.repeat(-result.diff) + newFormula;
+            }
+            
+            return newFormula;
+        }
+        
+        // Функция для исправления специфичных проблем с формулами
+        function fixSpecificFormulaIssues(formula) {
+            let fixed = formula;
+            
+            // 1. Исправляем несоответствия в формуле из примера
+            if (formula.includes('J_{DAPO}(\\theta)')) {
+                // Заменяем проблемную часть на известную рабочую версию
+                fixed = fixed.replace(
+                    /J_{DAPO}\(\\theta\) = \\mathbb{E}_{.*?}/g,
+                    'J_{DAPO}(\\theta) = \\mathbb{E}_{(q,a) \\sim \\mathcal{D}, \\{o_i\\}_{i=1}^G \\sim \\pi_{\\theta,\\text{old}}(\\cdot|q)}'
+                );
+            }
+            
+            // 2. Исправляем проблемы с фигурными скобками в формулах
+            fixed = fixed.replace(/\{\{([^{}]*)\}\}/g, '{$1}');
+            
+            // 3. Исправляем проблемы с многоточием в формулах
+            fixed = fixed.replace(/\.\.\./g, '\\ldots');
+            
+            // 4. Исправляем проблемы с индексами
+            fixed = fixed.replace(/([^\\])_(\\[^{]|[a-zA-Z0-9])/g, '$1_{$2}');
+            
+            // 5. Исправляем проблемы с ограничениями в формулах (s.t.)
+            fixed = fixed.replace(/\\text\{s\.t\.\}(.*?)\|\{(.*?)\}\|/g, 
+                                 '\\text{s.t.}$1\\mid\\{$2\\}\\mid');
+            
+            // 6. Специально для формулы с is_equivalent
+            if (fixed.includes('is\\_equivalent')) {
+                fixed = fixed.replace(/\|\{o_i \| \\text\{is\\_equivalent\}(.*?)\}\|/g, 
+                                      '\\mid\\{o_i \\mid \\textrm{is\\_equivalent}$1\\}\\mid');
+            }
+            
+            // 7. Исправляем проблему с вертикальной чертой в множествах
+            fixed = fixed.replace(/\|\{([^{}|]*)\|([^{}|]*)\}\|/g, 
+                                   '\\mid\\{$1\\mid $2\\}\\mid');
+            
+            // 8. Обработка проблемных ограничений в формулах
+            if (fixed.includes('\\text{s.t}') || fixed.includes('s.t.')) {
+                fixed = fixed.replace(/\\text\{s\.t\.\}(.*?)0 < \|(.*?)\| < G/g, 
+                                     '\\text{s.t.}$1 0 < \\mid $2 \\mid < G');
+            }
+            
+            return fixed;
+        }
+        
+        // Функция для предобработки формулы
         function preprocessFormula(formula) {
-            let processed = formula.trim();
-            // Простое экранирование некоторых символов (можно улучшить регулярками)
-            processed = processed.replace(/([^\\])_/g, '$1\\_'); // Экранируем _
-            processed = processed.replace(/([^\\])&/g, '$1\\&'); // Экранируем &
-            processed = processed.replace(/\\mathbf{/g, '\\boldsymbol{'); // Замена на boldsymbol
-            processed = repairBracketBalance(processed); // Балансировка скобок
+            // Базовая предобработка
+            let processed = formula
+                // Экранируем подчеркивания, если они не экранированы
+                .replace(/([^\\])_/g, '$1\\_')
+                // Исправляем распространенные ошибки в формулах
+                .replace(/\\mathbf{([^{}]+)}/g, '\\boldsymbol{$1}');
+            
+            // Исправляем специфичные проблемы
+            processed = fixSpecificFormulaIssues(processed);
+            
+            // Проверяем и исправляем баланс скобок
+            processed = repairBracketBalance(processed);
+            
             return processed;
         }
-
+        
+        // Улучшенная функция предобработки Markdown для защиты сложных формул
         function preprocessMarkdown(text) {
-            // Простая замена для $$...$$ и $...$
-            // Заменяем блочные формулы
-            text = text.replace(/\$\$([\s\S]*?)\$\$/gs, (match, formulaContent) => {
-                const processed = preprocessFormula(formulaContent);
-                // Добавляем data-атрибут с оригинальной формулой для диагностики
-                return `<div data-original-formula="${formulaContent.replace(/"/g, '"')}">$$${processed}$$</div>`;
+            // Вначале выделяем все блоки с формулами
+            const blockFormulas = [];
+            const inlineFormulas = [];
+            
+            // Временно заменяем блоки формул на плейсхолдеры
+            let processedText = text.replace(/(\$\$[\s\S]*?\$\$)/g, (match, p1, offset) => {
+                const id = blockFormulas.length;
+                blockFormulas.push(p1);
+                return `BLOCK_FORMULA_${id}`;
             });
-            // Заменяем инлайн формулы
-            text = text.replace(/\$([^\$\n]+?)\$/g, (match, formulaContent) => {
-                 // Проверяем, не является ли это частью блочной формулы
-                 if (match.startsWith('$$') || match.endsWith('$$')) return match;
-                 const processed = preprocessFormula(formulaContent);
-                 // Добавляем data-атрибут
-                 return `<span data-original-formula="${formulaContent.replace(/"/g, '"')}">$${processed}$</span>`;
+            
+            // Временно заменяем инлайн формулы на плейсхолдеры
+            processedText = processedText.replace(/(\$[^\$\n]+\$)/g, (match, p1) => {
+                const id = inlineFormulas.length;
+                inlineFormulas.push(p1);
+                return `INLINE_FORMULA_${id}`;
             });
-            return text;
+            
+            // Обрабатываем блочные формулы
+            for (let i = 0; i < blockFormulas.length; i++) {
+                // Очищаем формулу от $$ в начале и конце для обработки
+                let formulaContent = blockFormulas[i].slice(2, -2);
+                
+                // Применяем предобработку формулы
+                formulaContent = preprocessFormula(formulaContent);
+                
+                // Возвращаем $$ обратно
+                blockFormulas[i] = `$$${formulaContent}$$`;
+            }
+            
+            // Обрабатываем инлайн формулы
+            for (let i = 0; i < inlineFormulas.length; i++) {
+                // Очищаем формулу от $ в начале и конце
+                let formulaContent = inlineFormulas[i].slice(1, -1);
+                
+                // Применяем предобработку формулы
+                formulaContent = preprocessFormula(formulaContent);
+                
+                // Возвращаем $ обратно
+                inlineFormulas[i] = `$${formulaContent}$`;
+            }
+            
+            // Возвращаем формулы обратно в текст
+            for (let i = 0; i < blockFormulas.length; i++) {
+                processedText = processedText.replace(`BLOCK_FORMULA_${i}`, blockFormulas[i]);
+            }
+            
+            for (let i = 0; i < inlineFormulas.length; i++) {
+                processedText = processedText.replace(`INLINE_FORMULA_${i}`, inlineFormulas[i]);
+            }
+            
+            return processedText;
         }
-        // --- Конец функций предобработки формул ---
-
+        
+        // Функция для загрузки Markdown-файла с улучшенной обработкой формул
+        async function loadMarkdown(path) {
+            try {
+                document.getElementById('loader').style.display = 'block';
+                
+                const response = await fetch(path);
+                if (!response.ok) {
+                    throw new Error(`Ошибка загрузки: ${response.status}`);
+                }
+                
+                currentMarkdownText = await response.text();
+                currentPath = path;
+                
+                // Предобрабатываем формулы
+                const processedMarkdown = preprocessMarkdown(currentMarkdownText);
+                
+                window.location.hash = path;
+                
+                try {
+                    // Рендерим markdown
+                    const html = marked.parse(processedMarkdown);
+                    document.getElementById('content').innerHTML = html;
+                    
+                    // Обрабатываем блоки кода с формулами
+                    document.querySelectorAll('pre code').forEach(block => {
+                        if (block.className.includes('language-math') || 
+                            block.className.includes('language-tex')) {
+                            const formula = block.textContent;
+                            const wrapper = document.createElement('div');
+                            wrapper.className = 'math-block';
+                            // Используем двойной доллар для блочной формулы
+                            wrapper.innerHTML = `$$${formula}$$`;
+                            block.parentNode.replaceWith(wrapper);
+                        }
+                    });
+                    
+                    // Обрабатываем изображения для центрирования и добавления подписей
+                    processImages();
+                    
+                    // Запускаем рендеринг формул
+                    setTimeout(() => {
+                        if (typeof MathJax !== 'undefined') {
+                            try {
+                                if (typeof MathJax.typesetPromise === 'function') {
+                                    MathJax.typesetPromise()
+                                        .then(() => {
+                                            // Проверяем наличие ошибок после рендеринга
+                                            checkAndFixFormulaErrors();
+                                            // Центрируем ТОЛЬКО блочные формулы
+                                            centerMathJaxFormulas();
+                                        })
+                                        .catch(err => {
+                                            console.error('Ошибка при рендеринге формул:', err);
+                                            // При ошибке пытаемся восстановиться
+                                            setTimeout(() => {
+                                                try {
+                                                    MathJax.startup.document.clear();
+                                                    MathJax.startup.document.updateDocument();
+                                                    // Повторная попытка центрирования
+                                                    setTimeout(centerMathJaxFormulas, 100);
+                                                } catch (innerErr) {
+                                                    console.error('Критическая ошибка MathJax:', innerErr);
+                                                }
+                                            }, 100);
+                                        });
+                                } else if (typeof MathJax.Hub !== 'undefined') {
+                                    // Для старых версий MathJax
+                                    MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+                                    MathJax.Hub.Queue(centerMathJaxFormulas);
+                                } else {
+                                    // Для других версий
+                                    MathJax.startup.document.clear();
+                                    MathJax.startup.document.updateDocument();
+                                    setTimeout(centerMathJaxFormulas, 100);
+                                }
+                            } catch (err) {
+                                console.error('Ошибка MathJax API:', err);
+                            }
+                        }
+                    }, 100);
+                    
+                } catch (renderError) {
+                    console.error('Ошибка при рендеринге markdown:', renderError);
+                    showError(`Ошибка рендеринга: ${renderError.message}`);
+                    
+                    // Fallback: рендеринг как обычный текст
+                    document.getElementById('content').innerHTML = 
+                        `<pre>${processedMarkdown.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>`;
+                }
+                
+            } catch (error) {
+                console.error('Ошибка загрузки:', error);
+                showError(`Ошибка: ${error.message}`);
+            } finally {
+                document.getElementById('loader').style.display = 'none';
+            }
+        }
+        
+        // Функция для преобразования обычных изображений в центрированные с подписями
         function processImages() {
             document.querySelectorAll('#content img').forEach(img => {
-                if (img.closest('.image-container')) return; // Пропускаем уже обработанные
-
+                // Пропускаем, если изображение уже в контейнере
+                if (img.parentElement.classList.contains('image-container')) {
+                    return;
+                }
+                
+                // Создаем контейнер для изображения
                 const container = document.createElement('div');
                 container.className = 'image-container';
+                
+                // Получаем альтернативный текст как подпись
                 const altText = img.getAttribute('alt') || '';
+                
+                // Клонируем изображение
                 const newImg = img.cloneNode(true);
+                
+                // Добавляем изображение в контейнер
                 container.appendChild(newImg);
-
-                if (altText && !/^(http|www)/.test(altText)) { // Не показываем URL как подпись
+                
+                // Добавляем подпись, если есть альтернативный текст
+                if (altText && !altText.startsWith('http')) {
                     const caption = document.createElement('div');
                     caption.className = 'image-caption';
                     caption.textContent = altText;
                     container.appendChild(caption);
                 }
+                
+                // Заменяем оригинальное изображение на контейнер
                 img.parentNode.replaceChild(container, img);
             });
         }
-
-        function processContentLinks() {
-            const contentElement = document.getElementById('content');
-            if (!contentElement) return;
-
-            contentElement.querySelectorAll('a').forEach(link => {
-                let href = link.getAttribute('href');
-                if (!href) return;
-
-                const isLocalMd = href.endsWith('.md') && !href.startsWith('http') && !href.startsWith('#') && !href.startsWith('mailto:');
-                const isExternal = href.startsWith('http');
-
-                if (isLocalMd) {
-                    // Открываем локальные .md в новой вкладке с хэшем
-                    link.setAttribute('href', `index.html#${href}`);
-                    link.setAttribute('target', '_blank');
-                    link.setAttribute('title', `Открыть ${href.split('/').pop()} в новой вкладке`); // Подсказка с именем файла
-                } else if (isExternal) {
-                    // Внешние ссылки тоже в новой вкладке + безопасность
-                    link.setAttribute('target', '_blank');
-                    link.setAttribute('rel', 'noopener noreferrer');
-                }
-                // Якоря (#...) и другие ссылки остаются без изменений
-            });
-        }
-
-        // --- Основная функция загрузки ---
-
-        async function loadMarkdown(path) {
-            const loader = document.getElementById('loader');
-            const contentElement = document.getElementById('content');
-            const sourceView = document.getElementById('source-view');
-
-            loader.style.display = 'block';
-            contentElement.innerHTML = ''; // Очищаем перед загрузкой
-            sourceView.style.display = 'none';
-            currentMarkdownText = '';
-            clearFormulaErrors(); // Очищаем ошибки от предыдущего контента
-            showStatus(`Загрузка ${path}...`, false, 1500);
-
-            try {
-                const response = await fetch(path);
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status} - ${response.statusText}`);
-                }
-
-                currentMarkdownText = await response.text();
-                currentPath = path;
-
-                // Обновляем хэш, только если он отличается (избегаем лишних записей в истории)
-                if (window.location.hash !== `#${path}`) {
-                     // Используем replaceState, чтобы не засорять историю при начальной загрузке/ошибках
-                     // history.replaceState(null, '', `#${path}`);
-                     // Или просто меняем хэш
-                     window.location.hash = path;
-                }
-
-                // 1. Предобработка Markdown (для формул)
-                const preprocessedMd = preprocessMarkdown(currentMarkdownText);
-
-                // 2. Рендеринг Markdown в HTML
-                if (typeof marked !== 'undefined') {
-                    contentElement.innerHTML = marked.parse(preprocessedMd);
-                } else {
-                    // Fallback, если marked не загрузился
-                    contentElement.innerHTML = `<pre>${currentMarkdownText.replace(/</g, "<").replace(/>/g, ">")}</pre>`;
-                    showStatus("Предупреждение: Markdown не был отрендерен, показан исходный текст.", true);
-                }
-
-
-                // 3. Постобработка HTML (изображения, ссылки)
-                processImages();
-                processContentLinks();
-
-                // 4. Рендеринг MathJax
-                if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
-                    MathJax.typesetPromise([contentElement])
-                        .then(() => {
-                            checkAndDisplayFormulaErrors();
-                            centerMathJaxFormulas();
-                            console.log(`MathJax обработал ${path}`);
-                        })
-                        .catch(err => {
-                            console.error(`Ошибка MathJax при обработке ${path}:`, err);
-                            showStatus('Ошибка при рендеринге некоторых формул.', true);
-                            checkAndDisplayFormulaErrors();
-                        });
-                } else if (typeof MathJax === 'undefined') {
-                     console.warn("MathJax не определен, формулы не будут отрендерены.");
-                }
-
-            } catch (error) {
-                console.error(`Ошибка загрузки или обработки ${path}:`, error);
-                contentElement.innerHTML = `<div class="status-message error" style="display: block;">Не удалось загрузить файл "${path}".<br>Ошибка: ${error.message}</div>`;
-                showStatus(`Ошибка загрузки ${path}`, true, 5000);
-                // Сбрасываем хэш, если загрузка не удалась, чтобы URL соответствовал ошибке
-                // history.replaceState(null, '', window.location.pathname + window.location.search);
-            } finally {
-                loader.style.display = 'none';
-                // Прокрутка к началу контента после загрузки
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-        }
-
-        // --- Инициализация и обработчики событий ---
-
+        
+        // Инициализация страницы
         document.addEventListener('DOMContentLoaded', function() {
-            const navigation = document.getElementById('navigation');
-
-            // Обработчик кликов по навигации (делегирование событий)
-            if (navigation) {
-                navigation.addEventListener('click', function(event) {
-                    const link = event.target.closest('.nav-link');
-                    if (link && navigation.contains(link)) {
-                        event.preventDefault();
-                        const path = link.getAttribute('data-path');
-                        if (path && path !== currentPath) {
-                            loadMarkdown(path);
-                            setActiveNavLink(path);
-                        } else if (path === currentPath) {
-                            // Клик по активной ссылке - просто прокрутить вверх
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                        }
+            // Обработчики для навигационных ссылок
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    const path = this.getAttribute('data-path');
+                    if (path) {
+                        loadMarkdown(path);
+                        
+                        // Выделяем активную ссылку
+                        document.querySelectorAll('.nav-link').forEach(l => {
+                            l.classList.remove('active');
+                        });
+                        this.classList.add('active');
                     }
                 });
-            } else {
-                console.error("Элемент навигации #navigation не найден!");
-            }
-
-
-            // Обработчики кнопок
-            const reloadBtn = document.getElementById('reload-mathjax');
-            const toggleSourceBtn = document.getElementById('toggle-source');
-            if (reloadBtn) reloadBtn.addEventListener('click', reloadMathJax);
-            if (toggleSourceBtn) toggleSourceBtn.addEventListener('click', toggleSourceView);
-
-            // Начальная загрузка контента
-            let initialPath = "README.md"; // По умолчанию
+            });
+            
+            // Обработчики для кнопок
+            document.getElementById('reload-mathjax').addEventListener('click', reloadMathJax);
+            document.getElementById('toggle-source').addEventListener('click', toggleSourceView);
+            
+            // Загрузка контента при инициализации
             if (window.location.hash) {
-                const hashPath = decodeURIComponent(window.location.hash.substring(1)); // Декодируем на случай спецсимволов
-                // Проверяем, есть ли такой путь в навигации
-                if (document.querySelector(`.nav-link[data-path="${hashPath}"]`)) {
-                     initialPath = hashPath;
-                } else {
-                     console.warn(`Хэш "${hashPath}" не найден в навигации, загружаем ${initialPath}.`);
-                     // Очищаем некорректный хэш
-                     history.replaceState(null, '', window.location.pathname + window.location.search);
+                const path = window.location.hash.substring(1);
+                loadMarkdown(path);
+                
+                // Выделяем соответствующую ссылку
+                const navLink = document.querySelector(`.nav-link[data-path="${path}"]`);
+                if (navLink) {
+                    navLink.classList.add('active');
+                }
+            } else {
+                // Загружаем первую ссылку по умолчанию
+                const firstLink = document.querySelector('.nav-link');
+                if (firstLink) {
+                    firstLink.click();
                 }
             }
-
-            loadMarkdown(initialPath);
-            setActiveNavLink(initialPath);
-
-             // Следим за изменениями хэша (кнопки назад/вперед браузера)
-             window.addEventListener('hashchange', () => {
-                 const newPath = decodeURIComponent(window.location.hash.substring(1)) || "README.md";
-                 // Загружаем, только если хэш действительно изменился и не соответствует текущему пути
-                 if (newPath !== currentPath) {
-                     // Проверяем, есть ли такой путь в навигации перед загрузкой
-                     if (document.querySelector(`.nav-link[data-path="${newPath}"]`)) {
-                         loadMarkdown(newPath);
-                         setActiveNavLink(newPath);
-                     } else {
-                         console.warn(`Попытка перехода по хэшу "${newPath}", который не найден в навигации.`);
-                         // Можно вернуть хэш к предыдущему значению или загрузить README
-                         // history.replaceState(null, '', `#${currentPath}`); // Вернуть старый хэш
-                         if (currentPath !== "README.md") { // Если текущий не README, загружаем README
-                             loadMarkdown("README.md");
-                             setActiveNavLink("README.md");
-                         }
-                     }
-                 }
-             });
         });
-
     </script>
 </body>
 </html>
