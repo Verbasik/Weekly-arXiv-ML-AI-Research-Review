@@ -70,6 +70,7 @@
 | 2025/10 | Evo-2 — ИИ, который проектирует жизнь | [Ссылка](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/tree/7da90818c258704dc55d866c117bd13dded71608/2025/week-10) |
 | 2025/11 | Законы масштабирования дистилляции | [Ссылка](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/tree/7da90818c258704dc55d866c117bd13dded71608/2025/week-11) |
 | 2025/12 | Model Context Protocol (MCP) | [Ссылка](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/tree/7da90818c258704dc55d866c117bd13dded71608/2025/week-12) |
+| 2025/13 | Model Context Protocol (MCP) | [Ссылка](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/tree/7da90818c258704dc55d866c117bd13dded71608/2025/week-12) |  DAPO: RL-алгоритм для обучения больших языковых моделей | [Обзор](2025/week-13/review.md) |
 
 ---
 
