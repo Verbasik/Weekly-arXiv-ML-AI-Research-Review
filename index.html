@@ -5,25 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weekly Reviews</title>
     
-    <!-- Конфигурация MathJax -->
+    <!-- Настройки MathJax должны идти ДО загрузки библиотеки -->
     <script>
         window.MathJax = {
             tex: {
                 inlineMath: [['$', '$'], ['\\(', '\\)']],
                 displayMath: [['$$', '$$'], ['\\[', '\\]']],
-                processEscapes: true
+                processEscapes: true,
+                processEnvironments: true,
+                // Добавляем расширенные пакеты для сложных формул
+                packages: {'[+]': ['ams', 'noerrors', 'physics', 'color', 'boldsymbol', 'mhchem']}
             },
             options: {
-                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+                ignoreHtmlClass: 'tex2jax_ignore',
+                processHtmlClass: 'tex2jax_process'
+            },
+            svg: {
+                fontCache: 'global',
+                scale: 1.1  // Увеличиваем масштаб для лучшей читаемости
+            },
+            // Повышаем надежность рендеринга
+            startup: {
+                typeset: true,
+                ready: function() {
+                    MathJax.startup.defaultReady();
+                }
             }
         };
     </script>
     
-    <!-- Подключение MathJax -->
-    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <!-- Используем полную версию MathJax -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
     
-    <!-- Подключение marked - используем CDN с актуальной версией -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Используем стабильную версию marked -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
     
     <style>
         body {
@@ -80,10 +95,21 @@
             overflow-x: auto;
         }
         
-        .math-block {
+        /* Стили для формул - добавляем отступы и улучшаем читаемость */
+        .math-display {
             overflow-x: auto;
             padding: 10px 0;
             margin: 15px 0;
+        }
+        
+        /* Стили для отображения ошибок формул */
+        .math-error {
+            color: #d9534f;
+            background-color: #f9f2f2;
+            padding: 8px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: monospace;
         }
         
         #content {
@@ -176,6 +202,16 @@
     </div>
 
     <script>
+        // Инициализация marked
+        document.addEventListener('DOMContentLoaded', function() {
+            // Настраиваем marked на безопасную работу
+            marked.use({
+                mangle: false,
+                headerIds: false,
+                breaks: true
+            });
+        });
+        
         // Хранилище для исходного текста
         let currentMarkdownText = '';
         let currentPath = '';
@@ -195,24 +231,34 @@
         function reloadMathJax() {
             try {
                 if (typeof MathJax !== 'undefined') {
-                    // Для MathJax v3
-                    if (typeof MathJax.typesetPromise === 'function') {
+                    // Очищаем и перерисовываем формулы
+                    try {
+                        MathJax.texReset();
+                        MathJax.typesetClear();
                         MathJax.typesetPromise()
-                            .then(() => showError('Формулы перезагружены успешно'))
+                            .then(() => {
+                                showError('Формулы перезагружены успешно');
+                            })
                             .catch(err => {
-                                console.error('Ошибка MathJax:', err);
-                                showError('Ошибка при обработке формул');
+                                console.error('Ошибка при рендеринге формул:', err);
+                                showError('Проблема с рендерингом некоторых формул');
                             });
-                    } else {
-                        // Альтернативный метод - перезагрузка всего документа
-                        MathJax.Hub?.Queue(["Typeset", MathJax.Hub]);
-                        showError('Формулы перезагружены');
+                    } catch (err) {
+                        console.error('Ошибка MathJax API:', err);
+                        // Альтернативный подход для перезагрузки
+                        document.querySelectorAll('.math').forEach(node => {
+                            node.classList.add('math-refresh');
+                        });
+                        
+                        MathJax.startup.document.clear();
+                        MathJax.startup.document.updateDocument();
+                        showError('Формулы обновлены (альтернативный метод)');
                     }
                 } else {
-                    showError('MathJax не загружен');
+                    showError('MathJax не загружен. Попробуйте обновить страницу.');
                 }
             } catch (error) {
-                console.error('Ошибка при перезагрузке формул:', error);
+                console.error('Ошибка при перезагрузке MathJax:', error);
                 showError('Не удалось перезагрузить формулы');
             }
         }
@@ -227,70 +273,140 @@
             }, 3000);
         }
         
-        // Функция для предобработки Markdown для защиты формул
+        // Улучшенная функция предобработки Markdown для защиты сложных формул
         function preprocessMarkdown(text) {
-            // Предобработка: защищаем символы внутри блоков с формулами
-            return text
-                .replace(/(\$\$[\s\S]*?\$\$)/g, match => {
-                    // Заменяем проблемные символы внутри формул
-                    return match.replace(/_/g, '\\_');
-                })
-                .replace(/(\$[^\$]+\$)/g, match => {
-                    // То же для инлайновых формул
-                    return match.replace(/_/g, '\\_');
-                });
+            // Вначале выделяем все блоки с формулами
+            const blockFormulas = [];
+            const inlineFormulas = [];
+            
+            // Временно заменяем блоки формул на плейсхолдеры
+            let processedText = text.replace(/(\$\$[\s\S]*?\$\$)/g, (match, p1, offset) => {
+                const id = blockFormulas.length;
+                blockFormulas.push(p1);
+                return `BLOCK_FORMULA_${id}`;
+            });
+            
+            // Временно заменяем инлайн формулы на плейсхолдеры
+            processedText = processedText.replace(/(\$[^\$\n]+\$)/g, (match, p1) => {
+                const id = inlineFormulas.length;
+                inlineFormulas.push(p1);
+                return `INLINE_FORMULA_${id}`;
+            });
+            
+            // Обрабатываем формулы для лучшей совместимости
+            for (let i = 0; i < blockFormulas.length; i++) {
+                // Обрабатываем специальные символы
+                blockFormulas[i] = blockFormulas[i]
+                    // Экранируем подчеркивания внутри формул
+                    .replace(/([^\\])_/g, '$1\\_')
+                    // Обеспечиваем правильные отступы между формулами
+                    .replace(/\$\$\s*\n\s*\$\$/g, '$$\n\n$$')
+                    // Заменяем символы | на \vert для надежности
+                    .replace(/\|\s*([^|]*?)\s*\|/g, '\\left|$1\\right|')
+                    // Улучшаем поддержку подстрочных индексов
+                    .replace(/_{(\d+)}/g, '_{$1}')
+                    // Улучшаем поддержку надстрочных индексов
+                    .replace(/\^{(\d+)}/g, '^{$1}');
+            }
+            
+            // Аналогично обрабатываем инлайн формулы
+            for (let i = 0; i < inlineFormulas.length; i++) {
+                inlineFormulas[i] = inlineFormulas[i]
+                    .replace(/([^\\])_/g, '$1\\_')
+                    .replace(/\|\s*([^|]*?)\s*\|/g, '\\left|$1\\right|');
+            }
+            
+            // Возвращаем формулы обратно в текст
+            for (let i = 0; i < blockFormulas.length; i++) {
+                processedText = processedText.replace(`BLOCK_FORMULA_${i}`, blockFormulas[i]);
+            }
+            
+            for (let i = 0; i < inlineFormulas.length; i++) {
+                processedText = processedText.replace(`INLINE_FORMULA_${i}`, inlineFormulas[i]);
+            }
+            
+            return processedText;
         }
         
-        // Функция для загрузки Markdown-файла
+        // Функция для загрузки Markdown-файла с улучшенной обработкой формул
         async function loadMarkdown(path) {
             try {
-                // Показываем индикатор загрузки
                 document.getElementById('loader').style.display = 'block';
                 
-                // Запрашиваем файл
                 const response = await fetch(path);
                 if (!response.ok) {
                     throw new Error(`Ошибка загрузки: ${response.status}`);
                 }
                 
-                // Получаем текст markdown
                 currentMarkdownText = await response.text();
                 currentPath = path;
                 
-                // Обрабатываем markdown для защиты формул
+                // Предобрабатываем формулы
                 const processedMarkdown = preprocessMarkdown(currentMarkdownText);
                 
-                // Обновляем хэш URL для навигации
                 window.location.hash = path;
                 
-                // Рендерим markdown в HTML с помощью простого API
-                const html = marked.parse(processedMarkdown, {
-                    mangle: false,
-                    headerIds: false // Отключаем генерацию id для заголовков
-                });
-                
-                document.getElementById('content').innerHTML = html;
-                
-                // Запускаем MathJax для обработки формул
-                setTimeout(() => {
-                    if (typeof MathJax !== 'undefined') {
-                        if (typeof MathJax.typesetPromise === 'function') {
-                            MathJax.typesetPromise().catch(err => {
-                                console.error('Ошибка рендеринга формул:', err);
-                            });
-                        } else if (MathJax.Hub) {
-                            MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+                try {
+                    // Рендерим markdown с новым API
+                    const html = marked.parse(processedMarkdown);
+                    document.getElementById('content').innerHTML = html;
+                    
+                    // Отслеживаем ошибки рендеринга формул
+                    const mathJaxErrors = [];
+                    
+                    // Обрабатываем блоки кода с формулами
+                    document.querySelectorAll('pre code').forEach(block => {
+                        if (block.className.includes('language-math') || 
+                            block.className.includes('language-tex')) {
+                            const formula = block.textContent;
+                            const wrapper = document.createElement('div');
+                            wrapper.className = 'math-block';
+                            wrapper.innerHTML = `$$${formula}$$`;
+                            block.parentNode.replaceWith(wrapper);
                         }
-                    }
-                }, 100);
+                    });
+                    
+                    // Рендеринг формул с обработкой ошибок
+                    setTimeout(() => {
+                        if (typeof MathJax !== 'undefined') {
+                            try {
+                                MathJax.typesetPromise()
+                                    .catch(err => {
+                                        console.error('Ошибка при рендеринге формул:', err);
+                                        
+                                        // Отмечаем проблемные формулы
+                                        document.querySelectorAll('#content .math').forEach(math => {
+                                            if (math.querySelector('.mjx-merror')) {
+                                                math.classList.add('math-error');
+                                            }
+                                        });
+                                    });
+                            } catch (err) {
+                                console.error('Ошибка MathJax:', err);
+                                // Альтернативный подход
+                                try {
+                                    MathJax.startup.document.clear();
+                                    MathJax.startup.document.updateDocument();
+                                } catch (innerErr) {
+                                    console.error('Критическая ошибка MathJax:', innerErr);
+                                }
+                            }
+                        }
+                    }, 100);
+                    
+                } catch (renderError) {
+                    console.error('Ошибка при рендеринге markdown:', renderError);
+                    showError(`Ошибка рендеринга: ${renderError.message}`);
+                    
+                    // Fallback: рендеринг как обычный текст
+                    document.getElementById('content').innerHTML = 
+                        `<pre>${processedMarkdown.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>`;
+                }
                 
             } catch (error) {
                 console.error('Ошибка загрузки:', error);
                 showError(`Ошибка: ${error.message}`);
-                document.getElementById('content').innerHTML = 
-                    `<p>Не удалось загрузить документ: ${error.message}</p>`;
             } finally {
-                // Скрываем индикатор загрузки
                 document.getElementById('loader').style.display = 'none';
             }
         }
