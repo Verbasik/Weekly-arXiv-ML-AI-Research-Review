@@ -105,21 +105,29 @@
         }
         
         /* Принудительное центрирование ТОЛЬКО блочных формул */
-        .mjx-container[jax="CHTML"][display="true"],
-        .mjx-container[jax="SVG"][display="true"] {
-            display: block !important;
-            text-align: center !important;
-            margin: 1em auto !important;
-            max-width: 100% !important;
+        mjx-container[display="true"] {
+        position: relative;
+        display: block !important;
+        text-align: center !important;
+        margin: 1em auto !important;
+        width: 100% !important;
+        clear: both;
         }
 
-        /* Центрирование только для формул с двойным знаком доллара */
-        .math-block, 
-        mjx-container[display="true"] {
-            display: block !important;
-            text-align: center !important;
-            margin: 1em auto !important;
-            width: auto !important;
+        /* Принудительное размещение блочных формул на отдельной строке */
+        .mjx-container[display="true"] {
+            overflow-x: auto;
+            overflow-y: hidden;
+            margin-top: 0.75em !important;
+            margin-bottom: 0.75em !important;
+            padding-top: 0.25em;
+            padding-bottom: 0.25em;
+        }
+
+        /* Переопределение стилей списка, содержащего формулы */
+        li mjx-container[display="true"] {
+            margin-left: -2em !important;
+            width: calc(100% + 2em) !important;
         }
         
         /* Правильное отображение инлайновых формул */
@@ -316,39 +324,40 @@
 
         // Функция для центрирования только блочных формул MathJax
         function centerMathJaxFormulas() {
-            // Центрируем только блочные формулы (display="true")
+            // Центрируем только блочные формулы
             document.querySelectorAll('.mjx-container[display="true"], mjx-container[display="true"]').forEach(container => {
-                // Применяем стили для центрирования
+                // Базовые стили центрирования
                 container.style.display = 'block';
                 container.style.textAlign = 'center';
                 container.style.margin = '1em auto';
-                container.style.width = 'auto';
+                container.style.width = '100%';
                 
-                // Проверяем родительский элемент и при необходимости оборачиваем в div
-                const parent = container.parentNode;
-                if (parent && parent.nodeName !== 'DIV' && parent.nodeName !== 'P') {
-                    const wrapper = document.createElement('div');
-                    wrapper.style.textAlign = 'center';
-                    wrapper.style.margin = '1em auto';
-                    parent.insertBefore(wrapper, container);
-                    wrapper.appendChild(container);
+                // Проверяем, находится ли формула внутри списка
+                const listItem = container.closest('li');
+                if (listItem) {
+                    // Обрабатываем формулы внутри списков
+                    container.style.marginLeft = '0';
+                    container.style.width = '100%';
+                    
+                    // Создаем контейнер для центрирования, если его нет
+                    if (!container.parentNode.classList.contains('formula-wrapper')) {
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'formula-wrapper';
+                        wrapper.style.textAlign = 'center';
+                        wrapper.style.width = '100%';
+                        wrapper.style.marginLeft = '-2em';
+                        wrapper.style.marginRight = '0';
+                        container.parentNode.insertBefore(wrapper, container);
+                        wrapper.appendChild(container);
+                    }
                 }
             });
             
-            // Центрируем div с классом math-block
-            document.querySelectorAll('.math-block').forEach(block => {
-                block.style.textAlign = 'center';
-                block.style.margin = '1em auto';
-            });
-            
             // Убеждаемся, что инлайновые формулы НЕ центрируются
-            document.querySelectorAll('mjx-container:not([display="true"]), .mjx-container:not([display="true"])').forEach(container => {
+            document.querySelectorAll('mjx-container:not([display="true"])').forEach(container => {
                 container.style.display = 'inline';
                 container.style.textAlign = 'initial';
                 container.style.margin = '0';
-                // Убираем любые стили, которые могли быть применены к инлайновым формулам
-                container.style.width = '';
-                container.style.maxWidth = '';
             });
         }
         
