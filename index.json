@@ -5,100 +5,100 @@
         "weeks": [
           {
             "week": "week-01_&_02",
-            "title": "Week 01 & 02",
+            "title": "Week 01 & 02: LLM vs Bio",
             "date": "Jan 1-14, 2025",
-            "tags": ["LLMs"],
-            "description": "Initial exploration of new architectures for language models.",
+            "tags": ["LLMs", "Bio"],
+            "description": "Сравнительный анализ биологических и искусственных нейронных сетей.",
             "papers": 1,
             "notebooks": 1
           },
           {
             "week": "week-03",
-            "title": "Week 03",
+            "title": "Week 03: rStar-Math",
             "date": "Jan 15-21, 2025",
             "tags": ["Math Reasoning", "Small LLMs"],
-            "description": "rStar-Math: Small LLMs Can Master Math Reasoning with Self-Evolved Deep Thinking.",
+            "description": "rStar-Math: Математическая революция для малых языковых моделей.",
             "papers": 1,
             "notebooks": 1
           },
           {
             "week": "week-04",
-            "title": "Week 04",
+            "title": "Week 04: ModernBERT",
             "date": "Jan 22-28, 2025",
             "tags": ["Encoders", "Efficiency"],
-            "description": "A Modern Bidirectional Encoder for Fast, Memory Efficient, and Long Context Finetuning and Inference.",
+            "description": "Преемник BERT: ModernBERT.",
             "papers": 1,
             "notebooks": 2
           },
           {
             "week": "week-05",
-            "title": "Week 05",
+            "title": "Week 05: Bio vs LLM",
             "date": "Jan 29-Feb 4, 2025",
-            "tags": ["Deep Learning", "NLP"],
-            "description": "Advancements in neural network architectures with focus on natural language processing tasks.",
+            "tags": ["Deep Learning", "NLP", "Bio"],
+            "description": "Процесс обучения в биологических и искусственных нейронных сетях.",
             "papers": 1,
             "notebooks": 1
           },
           {
             "week": "week-06",
-            "title": "Week 06",
+            "title": "Week 06: MoE",
             "date": "Feb 5-11, 2025",
             "tags": ["DeepSpeed", "MoE", "Efficient Training"],
-            "description": "DeepSpeed-MoE: Advancing Mixture-of-Experts Inference and Training to Power Next-Generation AI Scale.",
+            "description": "MoE: Mixture of Experts - Революция в Архитектуре AI.",
             "papers": 1,
             "notebooks": 1
           },
           {
             "week": "week-07_&_08",
-            "title": "Week 07 & 08",
+            "title": "Week 07 & 08: DeepSeek R1",
             "date": "Feb 12-25, 2025",
-            "tags": ["Transformers", "Architecture"],
-            "description": "In-depth analysis of recent transformer model architecture improvements and optimizations.",
+            "tags": ["Transformers", "Architecture", "DeepSeek-V3", "DeepSeek R1"],
+            "description": "От генерации к рассуждению: эволюция языковых моделей от Generative Pre-trained Transformers до reasoning-систем.",
             "papers": 2,
             "notebooks": 1
           },
           {
             "week": "week-09",
-            "title": "Week 09",
+            "title": "Week 09: Native Sparse Attention",
             "date": "Feb 26-Mar 4, 2025",
-            "tags": ["Attention Mechanisms", "Efficiency"],
-            "description": "Native Sparse Attention: Improving efficiency in transformer models with novel attention mechanisms.",
+            "tags": ["Attention Mechanisms", "DeepSeek"],
+            "description": "Native Sparse Attention: новый вид разреженного внимания от DeepSeek.",
             "papers": 1,
             "notebooks": 1
           },
           {
             "week": "week-10",
-            "title": "Week 10",
+            "title": "Week 10: Evo-2",
             "date": "Mar 5-11, 2025",
-            "tags": ["Genomics", "CRISPR"],
-            "description": "CRISPR-CAS9 технология и ее применение. Genome modeling and design across all domains of life with Evo 2.",
+            "tags": ["Transformers", "Bio"],
+            "description": "Evo-2 — ИИ, который проектирует жизнь.",
             "papers": 2,
             "notebooks": 1
           },
           {
             "week": "week-11",
-            "title": "Week 11",
+            "title": "Week 11: Scaling Laws",
             "date": "Mar 12-18, 2025",
             "tags": ["Distillation", "Scaling Laws"],
-            "description": "Distillation Scaling Laws: Understanding the relationship between model size, training, and knowledge transfer.",
+            "description": "Законы масштабирования дистилляции.",
             "papers": 1,
             "notebooks": 1
           },
           {
             "week": "week-12",
-            "title": "Week 12",
+            "title": "Week 12: MCP",
             "date": "Mar 19-25, 2025",
-            "tags": ["Multi-modal", "Computer Vision"],
-            "description": "Exploration of multi-modal learning approaches combining vision and language understanding.",
+            "tags": ["Protocol", "Ai Agents"],
+            "description": "Model Context Protocol (MCP).",
             "papers": 1,
             "notebooks": 1
           },
           {
             "week": "week-13",
-            "title": "Week 13",
+            "title": "Week 13: DAPO",
             "date": "Mar 26-Apr 1, 2025",
             "tags": ["Reinforcement Learning", "LLMs"],
-            "description": "DAPO: An Open-Source LLM Reinforcement Learning System at Scale.",
+            "description": "DAPO: революционный RL-алгоритм от ByteDance.",
             "papers": 1,
             "notebooks": 1
           }
@@ -109,10 +109,10 @@
         "weeks": [
           {
             "week": "week-52",
-            "title": "Week 52",
+            "title": "Week 52: Superweights",
             "date": "Dec 23-31, 2024",
             "tags": ["LLMs", "Weight Analysis"],
-            "description": "THE SUPER WEIGHT IN LARGE LANGUAGE MODELS: Detailed analysis of weight distribution and its impact on model performance.",
+            "description": "Исследование «Супервесов» в больших языковых моделях (LLM)",
             "papers": 1,
             "notebooks": 1
           }
