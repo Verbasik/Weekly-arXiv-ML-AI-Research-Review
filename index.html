@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -303,6 +304,7 @@
             text-decoration: none;
             font-weight: 500;
             transition: all 0.3s;
+            cursor: pointer;
         }
 
         .btn-primary {
@@ -405,6 +407,7 @@
             overflow: hidden;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
         }
 
         .week-card:hover {
@@ -591,14 +594,14 @@
 
         /* MathJax styles */
         .MathJax {
-            color: #333;
+            color: white !important;
             font-size: 1.1em;
         }
 
         .MathJax_Display {
             margin: 1em 0;
             padding: 1em;
-            background-color: #f8f9fa;
+            background-color: var(--primary-color);
             border-left: 4px solid var(--secondary-color);
             border-radius: 0 4px 4px 0;
         }
@@ -649,6 +652,63 @@
         .back-to-top:hover {
             background-color: #2980b9;
             transform: translateY(-3px);
+        }
+
+        .error-message {
+            color: var(--accent-color);
+            text-align: center;
+            padding: 2rem;
+            font-size: 1.1rem;
+        }
+
+        /* Modal for markdown preview */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            overflow: auto;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 900px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            color: var(--accent-color);
+        }
+
+        /* Animation for modal */
+        @keyframes modalopen {
+            from {opacity: 0; transform: translateY(-50px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+
+        .modal-content {
+            animation: modalopen 0.3s ease-out;
         }
     </style>
 </head>
@@ -726,7 +786,7 @@
                 <section id="home">
                     <h2>Welcome to Weekly arXiv ML/AI Research Review</h2>
                     <p>This repository represents a weekly collection of arXiv paper reviews in the field of machine learning and artificial intelligence. Each week I select one significant publication for detailed analysis and practical implementation.</p>
-                    
+                                        
                     <h3>Project Goals:</h3>
                     <ul>
                         <li>Systematic study of cutting-edge research in ML/AI</li>
@@ -740,7 +800,7 @@
                     <h2 class="year-title">2025 Papers</h2>
                     <div class="weeks-grid">
                         <!-- Week 01 & 02 -->
-                        <div class="week-card">
+                        <div class="week-card" data-week="week-01_&_02" data-year="2025">
                             <div class="week-card-header">
                                 <h3 class="week-card-title">Week 01 & 02</h3>
                             </div>
@@ -750,7 +810,7 @@
                                     <span><i class="fas fa-tag"></i> LLMs</span>
                                 </div>
                                 <p class="week-card-desc">Initial exploration of new architectures for language models.</p>
-                                <a href="#week-01_&_02" class="btn btn-outline">Read Review</a>
+                                <button class="btn btn-outline read-review">Read Review</button>
                             </div>
                             <div class="week-card-footer">
                                 <span><i class="far fa-file-alt"></i> 1 Paper</span>
@@ -759,7 +819,7 @@
                         </div>
 
                         <!-- Week 03 -->
-                        <div class="week-card">
+                        <div class="week-card" data-week="week-03" data-year="2025">
                             <div class="week-card-header">
                                 <h3 class="week-card-title">Week 03</h3>
                             </div>
@@ -770,7 +830,7 @@
                                     <span><i class="fas fa-tag"></i> Small LLMs</span>
                                 </div>
                                 <p class="week-card-desc">rStar-Math: Small LLMs Can Master Math Reasoning with Self-Evolved Deep Thinking.</p>
-                                <a href="#week-03" class="btn btn-outline">Read Review</a>
+                                <button class="btn btn-outline read-review">Read Review</button>
                             </div>
                             <div class="week-card-footer">
                                 <span><i class="far fa-file-alt"></i> 1 Paper</span>
@@ -779,7 +839,7 @@
                         </div>
 
                         <!-- Week 04 -->
-                        <div class="week-card">
+                        <div class="week-card" data-week="week-04" data-year="2025">
                             <div class="week-card-header">
                                 <h3 class="week-card-title">Week 04</h3>
                             </div>
@@ -790,9 +850,7 @@
                                     <span><i class="fas fa-tag"></i> Efficiency</span>
                                 </div>
                                 <p class="week-card-desc">A Modern Bidirectional Encoder for Fast, Memory Efficient, and Long Context Finetuning and Inference.</p>
-                                <div class="week-card-actions">
-                                    <a href="#week-04" class="btn btn-outline">Read Review</a>
-                                </div>
+                                <button class="btn btn-outline read-review">Read Review</button>
                             </div>
                             <div class="week-card-footer">
                                 <span><i class="far fa-file-alt"></i> 1 Paper</span>
@@ -801,7 +859,7 @@
                         </div>
 
                         <!-- Week 10 -->
-                        <div class="week-card">
+                        <div class="week-card" data-week="week-10" data-year="2025">
                             <div class="week-card-header">
                                 <h3 class="week-card-title">Week 10</h3>
                             </div>
@@ -812,9 +870,7 @@
                                     <span><i class="fas fa-tag"></i> CRISPR</span>
                                 </div>
                                 <p class="week-card-desc">CRISPR-CAS9 технология и ее применение. Genome modeling and design across all domains of life with Evo 2.</p>
-                                <div class="week-card-actions">
-                                    <a href="#week-10" class="btn btn-outline">Read Review</a>
-                                </div>
+                                <button class="btn btn-outline read-review">Read Review</button>
                             </div>
                             <div class="week-card-footer">
                                 <span><i class="far fa-file-alt"></i> 2 Papers</span>
@@ -823,51 +879,20 @@
                         </div>
                     </div>
                 </section>
-
-                <section id="paper-content" style="display: none;">
-                    <div class="paper-header">
-                        <h1 class="paper-title" id="paper-title">Paper Title</h1>
-                        <div class="paper-meta">
-                            <span><i class="fas fa-user"></i> Authors</span>
-                            <span><i class="fas fa-calendar"></i> Published Date</span>
-                            <span><i class="fas fa-tags"></i> Tags</span>
-                        </div>
-                        <div class="paper-actions">
-                            <a href="#" class="btn btn-primary"><i class="fas fa-file-pdf"></i> PDF</a>
-                            <a href="#" class="btn btn-outline"><i class="fas fa-code"></i> Notebook</a>
-                            <a href="#" class="btn btn-outline"><i class="fas fa-download"></i> Assets</a>
-                        </div>
-                    </div>
-
-                    <div class="tabs">
-                        <div class="tab active" data-tab="review">Review</div>
-                        <div class="tab" data-tab="experiments">Experiments</div>
-                        <div class="tab" data-tab="summary">Summary</div>
-                    </div>
-
-                    <div class="tab-content active" id="review-tab">
-                        <div class="loader"></div>
-                        <div class="markdown-body" id="markdown-content">
-                            <!-- Markdown content will be loaded here -->
-                        </div>
-                    </div>
-
-                    <div class="tab-content" id="experiments-tab">
-                        <p>Experimental implementations and code will be displayed here.</p>
-                    </div>
-
-                    <div class="tab-content" id="summary-tab">
-                        <p>Key takeaways and summary of the paper will be displayed here.</p>
-                    </div>
-
-                    <div class="paper-nav">
-                        <a href="#" id="prev-paper"><i class="fas fa-arrow-left"></i> Previous Paper</a>
-                        <a href="#" id="next-paper">Next Paper <i class="fas fa-arrow-right"></i></a>
-                    </div>
-                </section>
             </div>
         </div>
     </main>
+
+    <!-- Modal for displaying markdown content -->
+    <div id="markdown-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="loader"></div>
+            <div class="markdown-body" id="markdown-content">
+                <!-- Markdown content will be loaded here -->
+            </div>
+        </div>
+    </div>
 
     <footer>
         <div class="container footer-content">
@@ -914,70 +939,282 @@
         <i class="fas fa-arrow-up"></i>
     </div>
 
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                packages: {'[+]': ['boldsymbol']}
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+                ignoreHtmlClass: 'tex2jax_ignore'
+            },
+            loader: {load: ['[tex]/boldsymbol']}
+        };
+    </script>
+
     <!-- MathJax for LaTeX rendering -->
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
+    <!-- Marked.js for markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <script>
-        // Sample markdown content with LaTeX
-        const sampleMarkdown = `# Sample Paper Review
+        // Конфигурация для GitHub API
+        const GITHUB_REPO = 'Verbasik/Weekly-arXiv-ML-AI-Research-Review';
+        const GITHUB_BRANCH = 'main'; // Или 'master', в зависимости от репозитория
 
-This is a sample review demonstrating LaTeX rendering in markdown.
-
-## Key Equations
-
-The main equation in the paper is:
-
-$$ E = mc^2 $$
-
-Another important formula:
-
-\\[ \\nabla \\cdot \\mathbf{D} = \\rho \\]
-
-Inline math: \\( \\frac{1}{2} \\pi r^2 \\)
-
-## Methodology
-
-The paper proposes a novel approach based on:
-
-1. **First Principle**: 
-   $$ \\mathcal{L}(\\theta) = \\sum_{i=1}^n (y_i - f_\\theta(x_i))^2 $$
-
-2. **Second Principle**:
-   \\[ \\text{KL}(p||q) = \\sum_x p(x) \\log \\frac{p(x)}{q(x)} \\]
-
-## Results
-
-The experimental results show significant improvement:
-
-$$ \\text{Accuracy} = 98.7\\% \\pm 0.5\\% $$
-
-With p-value:
-
-\\[ p < 0.001 \\]
-
-## Conclusion
-
-The paper makes important contributions to the field, as demonstrated by the mathematical foundations above.
-`;
-
-        // Function to load markdown content
-        function loadMarkdownContent(markdown) {
-            const contentDiv = document.getElementById('markdown-content');
-            contentDiv.innerHTML = markdown;
+        // Функция для загрузки данных из index.json
+        async function loadWeeksData() {
+            const jsonUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/index.json`;
             
-            // Process LaTeX in the loaded content
-            if (typeof MathJax !== 'undefined') {
-                MathJax.typesetPromise([contentDiv]).then(() => {
-                    document.querySelector('.loader').style.display = 'none';
+            try {
+                const response = await fetch(jsonUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Очистить существующие секции с годами
+                document.querySelectorAll('.year-section').forEach(section => {
+                    if (section.id !== 'home') {
+                        section.remove();
+                    }
                 });
-            } else {
-                document.querySelector('.loader').style.display = 'none';
+                
+                // Создать секции для каждого года и заполнить их карточками
+                for (const yearData of data.years) {
+                    const year = yearData.year;
+                    const yearSection = createYearSection(year);
+                    
+                    for (const weekData of yearData.weeks) {
+                        createWeekCard(yearSection, year, weekData);
+                    }
+                }
+                
+                // Обновить фильтры в боковой панели
+                updateYearFilters(data.years.map(y => y.year));
+            } catch (error) {
+                console.error('Error loading weeks data:', error);
+                // Показать сообщение об ошибке на странице
+                const content = document.querySelector('.content');
+                content.innerHTML += `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Could not load data from the repository. Please check your connection or try again later.</p>
+                        <p>Error: ${error.message}</p>
+                    </div>
+                `;
             }
         }
 
-        // Tab switching functionality
-        document.querySelectorAll('.tab').forEach(tab => {
+        // Функция для создания секции года
+        function createYearSection(year) {
+            const content = document.querySelector('.content');
+            
+            const yearSection = document.createElement('section');
+            yearSection.id = year;
+            yearSection.className = 'year-section';
+            
+            yearSection.innerHTML = `
+                <h2 class="year-title">${year} Papers</h2>
+                <div class="weeks-grid"></div>
+            `;
+            
+            content.appendChild(yearSection);
+            return yearSection;
+        }
+
+        // Функция для создания карточки недели
+        function createWeekCard(yearSection, year, weekData) {
+            const weeksGrid = yearSection.querySelector('.weeks-grid');
+            
+            const card = document.createElement('div');
+            card.className = 'week-card';
+            card.setAttribute('data-week', weekData.week);
+            card.setAttribute('data-year', year);
+            
+            // Формирование тегов
+            const tagsHtml = weekData.tags && weekData.tags.length ? 
+                weekData.tags.map(tag => `<span><i class="fas fa-tag"></i> ${tag}</span>`).join('') :
+                '';
+            
+            // Формирование даты
+            const dateHtml = weekData.date ? 
+                `<span><i class="far fa-calendar"></i> ${weekData.date}</span>` :
+                '';
+            
+            card.innerHTML = `
+                <div class="week-card-header">
+                    <h3 class="week-card-title">${weekData.title}</h3>
+                </div>
+                <div class="week-card-body">
+                    <div class="week-card-meta">
+                        ${dateHtml}
+                        ${tagsHtml}
+                    </div>
+                    <p class="week-card-desc">${weekData.description || 'No description available.'}</p>
+                    <button class="btn btn-outline read-review">Read Review</button>
+                </div>
+                <div class="week-card-footer">
+                    <span><i class="far fa-file-alt"></i> ${weekData.papers} Paper${weekData.papers !== 1 ? 's' : ''}</span>
+                    <span><i class="far fa-file-code"></i> ${weekData.notebooks !== undefined ? `${weekData.notebooks} Notebook${weekData.notebooks !== 1 ? 's' : ''}` : 'Notebook'}</span>
+                </div>
+            `;
+            
+            weeksGrid.appendChild(card);
+            
+            // Добавить обработчик события для кнопки
+            card.querySelector('.read-review').addEventListener('click', async (e) => {
+                e.preventDefault();
+                
+                const title = card.querySelector('.week-card-title').textContent;
+                
+                // Set modal title
+                document.querySelector('.modal-content h2')?.remove();
+                const titleElement = document.createElement('h2');
+                titleElement.textContent = title;
+                markdownContent.prepend(titleElement);
+                
+                // Show modal
+                modal.style.display = 'block';
+                
+                // Load the markdown content
+                await loadMarkdownFromGitHub(year, weekData.week);
+                
+                // Update URL hash
+                window.location.hash = `#${year}/${weekData.week}`;
+            });
+        }
+
+        // Функция для обновления фильтров годов в боковой панели
+        function updateYearFilters(years) {
+            const yearFilterList = document.querySelector('.sidebar ul:first-of-type');
+            yearFilterList.innerHTML = '';
+            
+            years.forEach(year => {
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.href = `#${year}`;
+                a.textContent = year;
+                if (year === years[0]) {
+                    a.className = 'active';
+                }
+                li.appendChild(a);
+                yearFilterList.appendChild(li);
+            });
+            
+            // Обновить обработчики событий для фильтров
+            document.querySelectorAll('.sidebar a[href^="#"]').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // Убрать класс active со всех ссылок
+                    document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+                    // Добавить класс active к нажатой ссылке
+                    this.classList.add('active');
+                });
+            });
+        }
+
+        // Загрузить данные при загрузке страницы
+        window.addEventListener('load', loadWeeksData);
+
+        // Get modal elements
+        const modal = document.getElementById('markdown-modal');
+        const closeModal = document.querySelector('.close-modal');
+        const markdownContent = document.getElementById('markdown-content');
+        const loader = document.querySelector('.loader');
+
+        // Function to load markdown content from GitHub
+        async function loadMarkdownFromGitHub(year, week) {
+            const reviewUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/${year}/${week}/review.md`;
+            
+            // Show loading spinner
+            loader.style.display = 'block';
+            markdownContent.innerHTML = '';
+
+            try {
+                const response = await fetch(reviewUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const markdown = await response.text();
+                
+                // Render markdown to HTML
+                const html = marked.parse(markdown);
+                markdownContent.innerHTML = html;
+                
+                // Process LaTeX in the loaded content
+                if (typeof MathJax !== 'undefined') {
+                    MathJax.typesetPromise([markdownContent]).then(() => {
+                        loader.style.display = 'none';
+                    });
+                } else {
+                    loader.style.display = 'none';
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Error loading markdown:', error);
+                markdownContent.innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Could not load the review file. Please check if it exists in the repository.</p>
+                        <p>Error: ${error.message}</p>
+                    </div>
+                `;
+                loader.style.display = 'none';
+                return false;
+            }
+        }
+
+        // Event listeners for "Read Review" buttons
+        document.querySelectorAll('.read-review').forEach(button => {
+            button.addEventListener('click', async (e) => {
+                e.preventDefault();
+                
+                const card = button.closest('.week-card');
+                const year = card.getAttribute('data-year');
+                const week = card.getAttribute('data-week');
+                const title = card.querySelector('.week-card-title').textContent;
+                
+                // Set modal title
+                document.querySelector('.modal-content h2')?.remove();
+                const titleElement = document.createElement('h2');
+                titleElement.textContent = title;
+                markdownContent.prepend(titleElement);
+                
+                // Show modal
+                modal.style.display = 'block';
+                
+                // Load the markdown content
+                await loadMarkdownFromGitHub(year, week);
+                
+                // Update URL hash
+                window.location.hash = `#${year}/${week}`;
+            });
+        });
+
+        // Close modal when clicking on X
+        closeModal.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        // Close modal when clicking outside of it
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Tab switching functionality (if needed)
+        document.querySelectorAll('.tab')?.forEach(tab => {
             tab.addEventListener('click', () => {
                 // Remove active class from all tabs and content
                 document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -987,39 +1224,6 @@ The paper makes important contributions to the field, as demonstrated by the mat
                 tab.classList.add('active');
                 const tabId = tab.getAttribute('data-tab');
                 document.getElementById(`${tabId}-tab`).classList.add('active');
-                
-                // If review tab is clicked, ensure content is loaded
-                if (tabId === 'review') {
-                    document.querySelector('.loader').style.display = 'block';
-                    setTimeout(() => {
-                        loadMarkdownContent(sampleMarkdown);
-                    }, 500);
-                }
-            });
-        });
-
-        // Show paper content when a week card is clicked
-        document.querySelectorAll('.week-card').forEach(card => {
-            card.addEventListener('click', (e) => {
-                if (!e.target.classList.contains('btn')) {
-                    document.querySelector('#home').style.display = 'none';
-                    document.querySelector('#2025').style.display = 'none';
-                    
-                    const paperContent = document.querySelector('#paper-content');
-                    paperContent.style.display = 'block';
-                    
-                    // Set paper title based on clicked card
-                    const title = card.querySelector('.week-card-title').textContent;
-                    document.querySelector('#paper-title').textContent = title;
-                    
-                    // Show loading spinner
-                    document.querySelector('.loader').style.display = 'block';
-                    
-                    // Load sample markdown after a delay
-                    setTimeout(() => {
-                        loadMarkdownContent(sampleMarkdown);
-                    }, 500);
-                }
             });
         });
 
@@ -1056,8 +1260,25 @@ The paper makes important contributions to the field, as demonstrated by the mat
             // In a real implementation, you would filter and display matching papers
         }
 
-        // Initialize with home content
-        loadMarkdownContent(sampleMarkdown);
+        // Check URL hash on page load
+        window.addEventListener('load', () => {
+            const hash = window.location.hash;
+            
+            if (hash && hash.includes('/')) {
+                // Format: #2025/week-03
+                const parts = hash.substring(1).split('/');
+                const year = parts[0];
+                const week = parts[1];
+                
+                // Find the corresponding card
+                const card = document.querySelector(`.week-card[data-year="${year}"][data-week="${week}"]`);
+                
+                if (card) {
+                    // Simulate click on the "Read Review" button
+                    card.querySelector('.read-review').click();
+                }
+            }
+        });
     </script>
 </body>
 </html>
