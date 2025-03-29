@@ -52,7 +52,9 @@
 
 Заходите на сайт [GitHub Pages](https://verbasik.github.io/Weekly-arXiv-ML-AI-Research-Review/) и выбирайте интересующий вас обзор.
 
-![]()
+![](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/images/main.png)
+
+> Не все формулы пока идеально рендерятся, но мы работаем над этим!
 
 ## 🤝 Участие в проекте
 
