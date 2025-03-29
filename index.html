@@ -784,15 +784,15 @@
 
             <div class="content">
                 <section id="home">
-                    <h2>Welcome to Weekly arXiv ML/AI Research Review</h2>
-                    <p>This repository represents a weekly collection of arXiv paper reviews in the field of machine learning and artificial intelligence. Each week I select one significant publication for detailed analysis and practical implementation.</p>
+                    <h2>Welcome to "The Weekly Research Brief" 📰 </h2>
+                    <p>Этот репозиторий представляет собой еженедельную коллекцию обзоров статей с arXiv и Daily Papers Hugging Face в области машинного обучения и искусственного интеллекта. Каждую неделю я буду выбирать одну значимую публикацию для детального анализа и практической реализации.</p>
                                         
-                    <h3>Project Goals:</h3>
+                    <h3>🎯 Цели проекта:</h3>
                     <ul>
-                        <li>Systematic study of cutting-edge research in ML/AI</li>
-                        <li>Creating accessible and understandable reviews of complex scientific papers</li>
-                        <li>Practical implementation of described methods and algorithms</li>
-                        <li>Forming a knowledge base for researchers and enthusiasts</li>
+                        <li>Систематическое изучение передовых исследований в области AI;</li>
+                        <li>Создание доступных и понятных обзоров сложных научных работ;</li>
+                        <li>Практическая реализация описанных методов и алгоритмов;</li>
+                        <li>Формирование базы знаний для исследователей и энтузиастов.</li>
                     </ul>
                 </section>
 
@@ -945,13 +945,27 @@
                 inlineMath: [['$', '$'], ['\\(', '\\)']],
                 displayMath: [['$$', '$$'], ['\\[', '\\]']],
                 processEscapes: true,
-                packages: {'[+]': ['boldsymbol']}
+                processEnvironments: true,
+                packages: {'[+]': ['ams', 'noerrors', 'boldsymbol', 'newcommand']}
+            },
+            svg: {
+                fontCache: 'global',
+                scale: 1.1,
             },
             options: {
                 skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
-                ignoreHtmlClass: 'tex2jax_ignore'
+                ignoreHtmlClass: 'tex2jax_ignore',
+                processHtmlClass: 'tex2jax_process'
             },
-            loader: {load: ['[tex]/boldsymbol']}
+            loader: {
+                load: ['[tex]/ams', '[tex]/noerrors', '[tex]/boldsymbol', '[tex]/newcommand']
+            },
+            startup: {
+                typeset: false,
+                ready: function() {
+                    MathJax.startup.defaultReady();
+                }
+            }
         };
     </script>
 
@@ -965,7 +979,7 @@
     <script>
         // Конфигурация для GitHub API
         const GITHUB_REPO = 'Verbasik/Weekly-arXiv-ML-AI-Research-Review';
-        const GITHUB_BRANCH = 'main'; // Или 'master', в зависимости от репозитория
+        const GITHUB_BRANCH = 'develop';
 
         // Функция для загрузки данных из index.json
         async function loadWeeksData() {
