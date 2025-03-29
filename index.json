@@ -1,0 +1,122 @@
+{
+    "years": [
+      {
+        "year": "2025",
+        "weeks": [
+          {
+            "week": "week-01_&_02",
+            "title": "Week 01 & 02",
+            "date": "Jan 1-14, 2025",
+            "tags": ["LLMs"],
+            "description": "Initial exploration of new architectures for language models.",
+            "papers": 1,
+            "notebooks": 1
+          },
+          {
+            "week": "week-03",
+            "title": "Week 03",
+            "date": "Jan 15-21, 2025",
+            "tags": ["Math Reasoning", "Small LLMs"],
+            "description": "rStar-Math: Small LLMs Can Master Math Reasoning with Self-Evolved Deep Thinking.",
+            "papers": 1,
+            "notebooks": 1
+          },
+          {
+            "week": "week-04",
+            "title": "Week 04",
+            "date": "Jan 22-28, 2025",
+            "tags": ["Encoders", "Efficiency"],
+            "description": "A Modern Bidirectional Encoder for Fast, Memory Efficient, and Long Context Finetuning and Inference.",
+            "papers": 1,
+            "notebooks": 2
+          },
+          {
+            "week": "week-05",
+            "title": "Week 05",
+            "date": "Jan 29-Feb 4, 2025",
+            "tags": ["Deep Learning", "NLP"],
+            "description": "Advancements in neural network architectures with focus on natural language processing tasks.",
+            "papers": 1,
+            "notebooks": 1
+          },
+          {
+            "week": "week-06",
+            "title": "Week 06",
+            "date": "Feb 5-11, 2025",
+            "tags": ["DeepSpeed", "MoE", "Efficient Training"],
+            "description": "DeepSpeed-MoE: Advancing Mixture-of-Experts Inference and Training to Power Next-Generation AI Scale.",
+            "papers": 1,
+            "notebooks": 1
+          },
+          {
+            "week": "week-07_&_08",
+            "title": "Week 07 & 08",
+            "date": "Feb 12-25, 2025",
+            "tags": ["Transformers", "Architecture"],
+            "description": "In-depth analysis of recent transformer model architecture improvements and optimizations.",
+            "papers": 2,
+            "notebooks": 1
+          },
+          {
+            "week": "week-09",
+            "title": "Week 09",
+            "date": "Feb 26-Mar 4, 2025",
+            "tags": ["Attention Mechanisms", "Efficiency"],
+            "description": "Native Sparse Attention: Improving efficiency in transformer models with novel attention mechanisms.",
+            "papers": 1,
+            "notebooks": 1
+          },
+          {
+            "week": "week-10",
+            "title": "Week 10",
+            "date": "Mar 5-11, 2025",
+            "tags": ["Genomics", "CRISPR"],
+            "description": "CRISPR-CAS9 технология и ее применение. Genome modeling and design across all domains of life with Evo 2.",
+            "papers": 2,
+            "notebooks": 1
+          },
+          {
+            "week": "week-11",
+            "title": "Week 11",
+            "date": "Mar 12-18, 2025",
+            "tags": ["Distillation", "Scaling Laws"],
+            "description": "Distillation Scaling Laws: Understanding the relationship between model size, training, and knowledge transfer.",
+            "papers": 1,
+            "notebooks": 1
+          },
+          {
+            "week": "week-12",
+            "title": "Week 12",
+            "date": "Mar 19-25, 2025",
+            "tags": ["Multi-modal", "Computer Vision"],
+            "description": "Exploration of multi-modal learning approaches combining vision and language understanding.",
+            "papers": 1,
+            "notebooks": 1
+          },
+          {
+            "week": "week-13",
+            "title": "Week 13",
+            "date": "Mar 26-Apr 1, 2025",
+            "tags": ["Reinforcement Learning", "LLMs"],
+            "description": "DAPO: An Open-Source LLM Reinforcement Learning System at Scale.",
+            "papers": 1,
+            "notebooks": 1
+          }
+        ]
+      },
+      {
+        "year": "2024",
+        "weeks": [
+          {
+            "week": "week-52",
+            "title": "Week 52",
+            "date": "Dec 23-31, 2024",
+            "tags": ["LLMs", "Weight Analysis"],
+            "description": "THE SUPER WEIGHT IN LARGE LANGUAGE MODELS: Detailed analysis of weight distribution and its impact on model performance.",
+            "papers": 1,
+            "notebooks": 1
+          }
+        ]
+      }
+    ]
+  }
