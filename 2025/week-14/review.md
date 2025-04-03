@@ -723,7 +723,7 @@ DEFAULT_EMBED_DIM = 256
 DEFAULT_NUM_HEADS = 8
 DEFAULT_MLP_DIM = 1024
 DEFAULT_WINDOW_SIZE = 4
-LOOKBACK_SIZE = 2  # Размер окна для просмотра назад
+LOOKBACK_SIZE = 2   # Размер окна для просмотра назад
 LOOKAHEAD_SIZE = 1  # Размер окна для просмотра вперёд
 
 
@@ -990,8 +990,8 @@ def train_step(
     # Позиции изображений следуют за текстом
     # Позиции аудио следуют за изображениями
     pos_ids = torch.cat([
-        torch.arange(text.size(1)),                       # Позиции для текста
-        torch.zeros(image_feats.size(1)) + text.size(1),  # Позиции для изображений
+        torch.arange(text.size(1)),                           # Позиции для текста
+        torch.zeros(image_feats.size(1)) + text.size(1),      # Позиции для изображений
         torch.arange(audio_feats.size(1)) + text.size(1) + 1  # Позиции для аудио
     ])
     
