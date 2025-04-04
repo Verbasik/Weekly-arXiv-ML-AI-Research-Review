@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly arXiv ML/AI Research Review</title>
+    <!-- External CSS Libraries -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.2.0/github-markdown.min.css">
+    <!-- Your Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true,
+                packages: {'[+]': ['ams', 'noerrors', 'boldsymbol', 'newcommand']}
+            },
+            svg: {
+                fontCache: 'global',
+                scale: 1.1,
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+                ignoreHtmlClass: 'tex2jax_ignore',
+                processHtmlClass: 'tex2jax_process'
+            },
+            loader: {
+                load: ['[tex]/ams', '[tex]/noerrors', '[tex]/boldsymbol', '[tex]/newcommand']
+            },
+            startup: {
+                typeset: false, // We will call typeset manually after loading content
+                ready: function() {
+                    MathJax.startup.defaultReady();
+                }
+            }
+        };
+    </script>
+    <!-- MathJax Library -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Marked.js for markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+</head>
+<body>
+    <header>
+        <div class="container header-content">
+            <div>
+                <div class="logo">
+                    <i class="fas fa-brain"></i>
+                    <span>Weekly arXiv ML/AI Research Review</span>
+                </div>
+                <div class="tagline">"Чем больше я знаю, тем больше я понимаю, что ничего не знаю"</div>
+            </div>
+            <div class="badges">
+                <span class="badge"><i class="fas fa-star"></i> Awesome</span>
+                <span class="badge"><i class="fas fa-heart"></i> Made With Love</span>
+                <span class="badge"><i class="fas fa-code"></i> Open Source</span>
+            </div>
+        </div>
+    </header>
+
+    <nav>
+        <div class="container nav-container">
+            <ul class="nav-links">
+                <li><a href="#home"><i class="fas fa-home"></i> Home</a></li>
+                <li class="dropdown">
+                    <a href="#years"><i class="fas fa-calendar-alt"></i> Years <i class="fas fa-chevron-down"></i></a>
+                    <div class="dropdown-content">
+                        <!-- Links will be populated by JS -->
+                        <a href="#2025">2025</a>
+                        <a href="#2024">2024</a>
+                    </div>
+                </li>
+                <li><a href="#about"><i class="fas fa-info-circle"></i> About</a></li>
+                <li><a href="#contribute"><i class="fas fa-hands-helping"></i> Contribute</a></li>
+                <li><a href="#contact"><i class="fas fa-envelope"></i> Contact</a></li>
+            </ul>
+            <div class="search-bar">
+                <input type="text" placeholder="Search papers...">
+                <button><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="sidebar-layout">
+            <aside class="sidebar">
+                <h3><i class="fas fa-filter"></i> Filter by Year</h3>
+                <ul>
+                    <!-- Year links will be populated by JS -->
+                    <li><a href="#2025" class="active">2025</a></li>
+                    <li><a href="#2024">2024</a></li>
+                </ul>
+
+                <h3><i class="fas fa-tags"></i> Popular Tags</h3>
+                <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                    <span class="tag">LLMs</span>
+                    <span class="tag">Deep Learning</span>
+                    <span class="tag">NLP</span>
+                    <span class="tag">Computer Vision</span>
+                    <span class="tag">Reinforcement Learning</span>
+                    <span class="tag">Transformers</span>
+                    <span class="tag">Genomics</span>
+                    <span class="tag">Efficient Training</span>
+                </div>
+
+                <h3><i class="fas fa-fire"></i> Trending Papers</h3>
+                <ul>
+                    <!-- Trending links could also be dynamic -->
+                    <li><a href="#paper1">Distillation Scaling Laws</a></li>
+                    <li><a href="#paper2">rStar-Math</a></li>
+                    <li><a href="#paper3">DeepSpeed-MoE</a></li>
+                    <li><a href="#paper4">CRISPR-CAS9 технология</a></li>
+                </ul>
+            </aside>
+
+            <div class="content">
+                <section id="home">
+                    <h2>Welcome to "The Weekly Research Brief" 📰 </h2>
+                    <p>Этот репозиторий представляет собой еженедельную коллекцию обзоров статей с arXiv и Daily Papers Hugging Face в области машинного обучения и искусственного интеллекта. Каждую неделю я буду выбирать одну значимую публикацию для детального анализа и практической реализации.</p>
+
+                    <h3>🎯 Цели проекта:</h3>
+                    <ul>
+                        <li>Систематическое изучение передовых исследований в области AI;</li>
+                        <li>Создание доступных и понятных обзоров сложных научных работ;</li>
+                        <li>Практическая реализация описанных методов и алгоритмов;</li>
+                        <li>Формирование базы знаний для исследователей и энтузиастов.</li>
+                    </ul>
+                </section>
+
+                <!-- Year sections will be dynamically added here by script.js -->
+                <!-- Example structure (will be removed/replaced by JS) -->
+                <!--
+                <section id="2025" class="year-section">
+                    <h2 class="year-title">2025 Papers</h2>
+                    <div class="weeks-grid">
+                        Placeholder for week cards...
+                    </div>
+                </section>
+                 -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal for displaying markdown content -->
+    <div id="markdown-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">×</span>
+            <div class="loader"></div>
+            <!-- Title will be added dynamically by JS -->
+            <div class="markdown-body" id="markdown-content">
+                <!-- Markdown content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container footer-content">
+            <div class="footer-column">
+                <h3>About</h3>
+                <p>Weekly collection of arXiv paper reviews in ML/AI with practical implementations.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-github"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fas fa-envelope"></i></a>
+                </div>
+            </div>
+            <div class="footer-column">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#2025">2025 Papers</a></li>
+                    <li><a href="#2024">2024 Papers</a></li>
+                    <li><a href="#about">About Project</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Resources</h3>
+                <ul>
+                    <li><a href="https://arxiv.org/">arXiv</a></li>
+                    <li><a href="https://paperswithcode.com/">Papers With Code</a></li>
+                    <li><a href="https://github.com/">GitHub</a></li>
+                    <li><a href="https://colab.research.google.com/">Google Colab</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Contribute</h3>
+                <p>Found an error or want to contribute? Submit a pull request on GitHub!</p>
+                <a href="#" class="btn btn-outline" style="color: white; border-color: white;"><i class="fab fa-github"></i> GitHub Repo</a>
+            </div>
+        </div>
+        <div class="copyright">
+            © 2025 Weekly arXiv ML/AI Research Review. All rights reserved.
+        </div>
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
+    <!-- Your Custom JavaScript -->
+    <!-- defer attribute ensures script executes after HTML parsing -->
+    <script src="script.js" defer></script>
+
+</body>
+</html>
