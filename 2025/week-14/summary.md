@@ -8,7 +8,14 @@
 5. Методология обучения  
 6. Производительность и бенчмарки  
 7. Практическое применение  
-8. Заключение  
+8. Заключение
+
+### **TWRB_FM 📻**
+
+<audio controls>
+  <source src="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/raw/refs/heads/develop/2025/week-14/TWRB_FM.mp3" type="audio/mpeg">
+  Ваш браузер не поддерживает аудиоэлемент.
+</audio>
 
 ## Введение
 
