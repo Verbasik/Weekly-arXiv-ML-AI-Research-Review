@@ -6,7 +6,7 @@ const GITHUB_BRANCH = 'master';
 
 // Функция для загрузки данных из index.json
 async function loadWeeksData() {
-    const jsonUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/index.json`;
+    const jsonUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/web/index.json`;
     const content = document.querySelector('.content'); // Кешируем элемент
 
     try {
