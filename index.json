@@ -101,6 +101,15 @@
             "description": "DAPO: революционный RL-алгоритм от ByteDance.",
             "papers": 1,
             "notebooks": 1
+          },
+          {
+            "week": "week-14",
+            "title": "Week 14: Qwen2.5-Omni",
+            "date": "Mar 31-Apr 6, 2025",
+            "tags": ["Qwen", "Multimodal", "LLMs"],
+            "description": "Qwen2.5-Omni: Мультимодальная модель нового поколения.",
+            "papers": 1,
+            "notebooks": 1
           }
         ]
       },

@@ -10,10 +10,10 @@
 7. Практическое применение  
 8. Заключение
 
-### **TWRB_FM**
+### **TWRB_FM 📻**
 
 <audio controls>
-  <source src="https://example.com/audio.mp3" type="audio/mpeg">
+  <source src="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/raw/refs/heads/develop/2025/week-14/TWRB_FM.mp3" type="audio/mpeg">
   Ваш браузер не поддерживает аудиоэлемент.
 </audio>
 
