@@ -1,0 +1,464 @@
+/* mobile-optimizations.css */
+/* Оптимизация сайта "Weekly arXiv ML/AI Research Review" для мобильных устройств */
+
+/* ==================== МОБИЛЬНАЯ НАВИГАЦИЯ ==================== */
+/* Стили для гамбургер-меню */
+.menu-toggle {
+    display: none;
+    font-size: 1.8rem;
+    color: white;
+    cursor: pointer;
+    padding: 0.5rem;
+    margin-left: auto;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 101;
+}
+
+/* ==================== МЕДИА-ЗАПРОСЫ ДЛЯ РАЗНЫХ УСТРОЙСТВ ==================== */
+
+/* Планшеты и маленькие десктопы */
+@media (max-width: 992px) {
+    .sidebar-layout {
+        grid-template-columns: 220px 1fr;
+        gap: 1.5rem;
+    }
+    
+    .weeks-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .container {
+        padding: 0 15px;
+    }
+    
+    .logo {
+        font-size: 1.6rem;
+    }
+    
+    .modal-content {
+        width: 90%;
+        margin: 3% auto;
+    }
+}
+
+/* Мобильные устройства (малые планшеты и смартфоны) */
+@media (max-width: 768px) {
+    /* Общие стили для мобильных */
+    html {
+        touch-action: manipulation; /* Улучшает производительность жестов */
+    }
+    
+    body {
+        -webkit-text-size-adjust: 100%; /* Предотвращает автоматическое масштабирование текста */
+    }
+    
+    /* Отключаем hover-состояния на сенсорных устройствах */
+    .btn:hover, .nav-links a:hover, .sidebar a:hover, .social-links a:hover, 
+    .week-card:hover, .back-to-top:hover {
+        transition: none;
+        transform: none;
+        box-shadow: none;
+    }
+    
+    /* Активное состояние для кнопок */
+    .btn:active, .nav-links a:active, .sidebar a:active, .social-links a:active {
+        transform: scale(0.98);
+        opacity: 0.8;
+    }
+    
+    /* Улучшение работы с формами */
+    input, select, textarea, button {
+        font-size: 16px; /* Предотвращает масштабирование при фокусе на iOS */
+    }
+    
+    /* Мобильная навигация */
+    .menu-toggle {
+        display: flex;
+    }
+    
+    .nav-container {
+        flex-direction: column;
+        position: relative;
+        padding: 0.5rem;
+    }
+    
+    .nav-container .search-bar {
+        margin: 0.5rem 0;
+        width: 100%;
+        order: 3;
+    }
+    
+    .search-bar input {
+        flex-grow: 1;
+        min-height: 40px;
+    }
+    
+    .search-bar button {
+        min-height: 40px;
+        min-width: 40px;
+    }
+    
+    /* Меню в мобильном виде */
+    .nav-links {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        background-color: var(--dark-color);
+        transition: all 0.3s ease;
+        order: 2;
+    }
+    
+    .nav-links.mobile-active {
+        display: flex;
+    }
+    
+    .nav-links li {
+        width: 100%;
+    }
+    
+    .nav-links a {
+        width: 100%;
+        padding: 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        min-height: 44px; /* Оптимальный размер для тапа */
+        font-size: 1rem;
+    }
+    
+    /* Модификация выпадающих списков */
+    .dropdown-content {
+        width: 100%;
+        position: static;
+        opacity: 1;
+        visibility: hidden;
+        display: none;
+        box-shadow: none;
+        border-left: 4px solid var(--secondary-color);
+        background-color: rgba(0, 0, 0, 0.2);
+    }
+    
+    .dropdown-content a {
+        padding-left: 2rem;
+        font-size: 0.95rem;
+        color: rgba(255, 255, 255, 0.85) !important;
+    }
+    
+    /* Класс для активации выпадающего списка на мобильных */
+    .dropdown.tap-active .dropdown-content {
+        visibility: visible;
+        display: block;
+    }
+    
+    /* Изменения в основном контенте */
+    .sidebar-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .weeks-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .content {
+        padding: 1.5rem 1rem;
+    }
+    
+    /* Боковая панель становится аккордеоном на мобильных */
+    .sidebar {
+        position: static;
+        margin-bottom: 1.5rem;
+    }
+    
+    .sidebar h3 {
+        cursor: pointer;
+        position: relative;
+        padding-right: 30px;
+        margin-bottom: 0.75rem;
+    }
+    
+    .sidebar h3::after {
+        content: "+";
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.2rem;
+    }
+    
+    .sidebar h3.open::after {
+        content: "-";
+    }
+    
+    .sidebar ul, .sidebar div {
+        display: none;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
+    }
+    
+    .sidebar h3.open + ul, .sidebar h3.open + div {
+        display: block;
+        max-height: 500px; /* Достаточно большое значение */
+        margin-bottom: 1rem;
+    }
+    
+    .sidebar a, .sidebar .tag {
+        min-height: 40px;
+        display: flex;
+        align-items: center;
+    }
+}
+
+/* Смартфоны и малые устройства */
+@media (max-width: 576px) {
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+        padding: 1rem 0;
+    }
+    
+    .logo {
+        font-size: 1.5rem;
+        justify-content: center;
+    }
+    
+    .tagline {
+        margin-top: 0.5rem;
+    }
+    
+    .badges {
+        margin-top: 1rem;
+        justify-content: center;
+    }
+    
+    .content {
+        padding: 1rem;
+    }
+    
+    /* Модальные окна на маленьких экранах */
+    .modal-content {
+        width: 95%;
+        margin: 2% auto;
+        padding: 1rem;
+        max-height: 92vh;
+    }
+    
+    .markdown-body {
+        padding: 0.75rem;
+    }
+    
+    /* Увеличение размера тапаемых элементов */
+    .btn, .tab, .week-card-footer span, .social-links a {
+        padding: 0.75rem;
+        min-height: 44px; /* Минимальный размер для тапа */
+    }
+    
+    .close-modal {
+        font-size: 2rem;
+        padding: 0.5rem;
+        min-width: 44px;
+        min-height: 44px;
+        right: 5px;
+        top: 5px;
+    }
+    
+    /* Улучшение таблиц в markdown */
+    .markdown-body table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    /* Улучшение изображений в markdown */
+    .markdown-body img {
+        max-width: 100%;
+        height: auto;
+    }
+    
+    /* Улучшение навигации по статьям */
+    .paper-nav {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .paper-nav a {
+        justify-content: center;
+    }
+    
+    /* Week cards */
+    .week-card-footer {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .week-card-header {
+        padding: 0.75rem;
+    }
+    
+    .week-card-body {
+        padding: 0.75rem;
+    }
+    
+    .week-card-title {
+        font-size: 1.1rem;
+    }
+}
+
+/* Очень маленькие экраны */
+@media (max-width: 375px) {
+    .logo {
+        font-size: 1.1rem;
+    }
+    
+    .tagline {
+        font-size: 0.85rem;
+    }
+    
+    .badges {
+        display: none; /* Скрываем для экономии места */
+    }
+    
+    .week-card-meta {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .week-card-footer span {
+        font-size: 0.85rem;
+    }
+    
+    .paper-meta {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    /* Улучшения для маленьких модальных окон */
+    .modal-content {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        border-radius: 0;
+        max-height: 100vh;
+    }
+    
+    /* Уменьшаем размер h2 и h3 */
+    .content h2 {
+        font-size: 1.4rem;
+    }
+    
+    .content h3 {
+        font-size: 1.2rem;
+    }
+}
+
+/* ==================== УЛУЧШЕНИЯ ДЛЯ МОДАЛЬНЫХ ОКОН ==================== */
+.modal-swipe-indicator {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .modal-swipe-indicator {
+        display: block;
+        width: 40px;
+        height: 5px;
+        background-color: #ddd;
+        margin: 5px auto 15px;
+        border-radius: 3px;
+    }
+    
+    .modal-dragging .modal-content {
+        transition: transform 0.05s;
+    }
+    
+    .modal-content {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+    
+    .modal-title-mobile {
+        margin-right: 40px; /* Space for the close button */
+    }
+    
+    /* Улучшения для маленьких экранов */
+    #markdown-content code {
+        word-break: break-word;
+        white-space: pre-wrap;
+    }
+    
+    .markdown-body pre {
+        overflow-x: auto;
+    }
+}
+
+/* ==================== УЛУЧШЕНИЯ ДОСТУПНОСТИ ==================== */
+@media (max-width: 768px) {
+    /* Увеличиваем контрастность и разборчивость текста */
+    .week-card-meta, .paper-meta, .footer-column p {
+        color: #555; /* Немного темнее для лучшего контраста */
+    }
+    
+    /* Увеличиваем контрастные зоны для тапа */
+    .btn, .tab, .nav-links a, .sidebar a, .week-card-title, 
+    .close-modal, .back-to-top, .social-links a {
+        position: relative;
+    }
+    
+    .btn::after, .tab::after, .nav-links a::after, .sidebar a::after,
+    .week-card-title::after, .close-modal::after, .back-to-top::after,
+    .social-links a::after {
+        content: "";
+        position: absolute;
+        top: -5px;
+        left: -5px;
+        right: -5px;
+        bottom: -5px;
+        z-index: -1;
+    }
+    
+    /* Усиление анимаций состояний */
+    .btn:active, .nav-links a:active, .sidebar a:active, 
+    .social-links a:active, .week-card:active {
+        opacity: 0.7;
+        transition: opacity 0.1s;
+    }
+}
+
+/* ==================== УЛУЧШЕНИЯ ДЛЯ ТЕМЫ ==================== */
+@media (prefers-color-scheme: dark) {
+    /* Только базовая поддержка темной темы */
+    .modal-content {
+        background-color: #1a1a1a;
+        color: #eee;
+    }
+    
+    .close-modal {
+        color: #ddd;
+    }
+    
+    .modal-swipe-indicator {
+        background-color: #555;
+    }
+}
+
+/* ==================== ИСПРАВЛЕНИЯ ОШИБОК ==================== */
+/* Предотвращение горизонтального скролла на всех устройствах */
+html, body {
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
+/* Исправление проблем с отображением позиционированных элементов на iOS */
+.fixed-ios {
+    -webkit-transform: translateZ(0);
+}
+
+/* Исправление касаний для мобильного Safari */
+@supports (-webkit-touch-callout: none) {
+    .btn, .nav-links a, .sidebar a, .social-links a, 
+    .close-modal, .back-to-top, .week-card, .tab {
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+    }
+}
