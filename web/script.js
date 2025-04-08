@@ -1,382 +1,302 @@
 // script.js
 
-// Конфигурация для GitHub API
+// Конфигурация GitHub
 const GITHUB_REPO = 'Verbasik/Weekly-arXiv-ML-AI-Research-Review';
-const GITHUB_BRANCH = 'master';
+const GITHUB_BRANCH = 'master'; // Или 'main', если ветка называется так
 
-// Функция для загрузки данных из index.json
+// Получение основных элементов DOM
+const contentElement = document.querySelector('.content');
+const modal = document.getElementById('markdown-modal');
+const markdownContent = document.getElementById('markdown-content');
+const closeModalButton = modal ? modal.querySelector('.close-modal') : null;
+const loader = modal ? modal.querySelector('.loader') : null;
+const backToTopButton = document.getElementById('back-to-top');
+const searchInput = document.querySelector('.search-bar input');
+const searchButton = document.querySelector('.search-bar button');
+
+// --- Загрузка и отображение данных ---
+
 async function loadWeeksData() {
     const jsonUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/web/index.json`;
-    const content = document.querySelector('.content'); // Кешируем элемент
+
+    if (!contentElement) {
+        console.error("Content element not found.");
+        return;
+    }
 
     try {
         const response = await fetch(jsonUrl);
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
 
-        // Очистить существующие секции с годами (кроме #home)
-        document.querySelectorAll('.year-section').forEach(section => {
-            if (section.id !== 'home') {
-                section.remove();
-            }
+        // Очистка старых секций
+        contentElement.querySelectorAll('.year-section:not(#home)').forEach(section => section.remove());
+
+        // Создание секций и карточек
+        data.years.forEach(yearData => {
+            const yearSection = createYearSection(yearData.year, contentElement);
+            yearData.weeks.forEach(weekData => {
+                createWeekCard(yearSection, yearData.year, weekData);
+            });
         });
 
-        // Создать секции для каждого года и заполнить их карточками
-        for (const yearData of data.years) {
-            const year = yearData.year;
-            const yearSection = createYearSection(year, content); // Передаем content
-
-            for (const weekData of yearData.weeks) {
-                createWeekCard(yearSection, year, weekData);
-            }
-        }
-
-        // Обновить фильтры в боковой панели
         updateYearFilters(data.years.map(y => y.year));
-
-        // Проверить хэш URL после загрузки данных
-        checkUrlHash();
+        checkUrlHash(); // Проверяем хэш после загрузки и рендеринга
 
     } catch (error) {
         console.error('Error loading weeks data:', error);
-        // Показать сообщение об ошибке на странице
-        if (content) {
-            content.innerHTML += `
-                <div class="error-message">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <p>Could not load data from the repository. Please check your connection or try again later.</p>
-                    <p>Error: ${error.message}</p>
-                </div>
-            `;
-        }
+        contentElement.innerHTML += `<div class="error-message"><p>Could not load data. Error: ${error.message}</p></div>`;
     }
 }
 
-// Функция для создания секции года
-function createYearSection(year, contentElement) {
+function createYearSection(year, parentElement) {
     const yearSection = document.createElement('section');
     yearSection.id = year;
     yearSection.className = 'year-section';
-
     yearSection.innerHTML = `
         <h2 class="year-title">${year} Papers</h2>
         <div class="weeks-grid"></div>
     `;
-
-    if (contentElement) {
-        contentElement.appendChild(yearSection);
-    }
+    parentElement.appendChild(yearSection);
     return yearSection;
 }
 
-// Функция для создания карточки недели
 function createWeekCard(yearSection, year, weekData) {
     const weeksGrid = yearSection.querySelector('.weeks-grid');
-    if (!weeksGrid) return; // Добавлена проверка
+    if (!weeksGrid) return;
 
     const card = document.createElement('div');
     card.className = 'week-card';
     card.setAttribute('data-week', weekData.week);
     card.setAttribute('data-year', year);
 
-    // Формирование тегов
-    const tagsHtml = weekData.tags && weekData.tags.length ?
-        weekData.tags.map(tag => `<span><i class="fas fa-tag"></i> ${tag}</span>`).join('') :
-        '';
-
-    // Формирование даты
-    const dateHtml = weekData.date ?
-        `<span><i class="far fa-calendar"></i> ${weekData.date}</span>` :
-        '';
+    const tagsHtml = weekData.tags?.map(tag => `<span><i class="fas fa-tag"></i> ${tag}</span>`).join('') || '';
+    const dateHtml = weekData.date ? `<span><i class="far fa-calendar"></i> ${weekData.date}</span>` : '';
+    const notebooksText = weekData.notebooks !== undefined ? `${weekData.notebooks} Notebook${weekData.notebooks !== 1 ? 's' : ''}` : 'Notebook';
 
     card.innerHTML = `
         <div class="week-card-header">
             <h3 class="week-card-title">${weekData.title}</h3>
         </div>
         <div class="week-card-body">
-            <div class="week-card-meta">
-                ${dateHtml}
-                ${tagsHtml}
-            </div>
+            <div class="week-card-meta">${dateHtml} ${tagsHtml}</div>
             <p class="week-card-desc">${weekData.description || 'No description available.'}</p>
             <button class="btn btn-outline read-review">Read Review</button>
         </div>
         <div class="week-card-footer">
             <span><i class="far fa-file-alt"></i> ${weekData.papers} Paper${weekData.papers !== 1 ? 's' : ''}</span>
-            <span><i class="far fa-file-code"></i> ${weekData.notebooks !== undefined ? `${weekData.notebooks} Notebook${weekData.notebooks !== 1 ? 's' : ''}` : 'Notebook'}</span>
+            <span><i class="far fa-file-code"></i> ${notebooksText}</span>
         </div>
     `;
-
     weeksGrid.appendChild(card);
 
-    // Добавить обработчик события для кнопки
-    const readReviewButton = card.querySelector('.read-review');
-    if (readReviewButton) {
-        readReviewButton.addEventListener('click', async (e) => {
-            e.preventDefault();
-            openReviewModal(year, weekData.week, weekData.title);
-        });
-    }
+    // Обработчик для кнопки чтения обзора
+    card.querySelector('.read-review')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        openReviewModal(year, weekData.week, weekData.title);
+    });
 }
 
-// Функция для открытия модального окна с обзором
-async function openReviewModal(year, week, title) {
-    const modal = document.getElementById('markdown-modal');
-    const markdownContent = document.getElementById('markdown-content');
-    if (!modal || !markdownContent) return;
-
-    // Set modal title dynamically
-    const existingTitle = modal.querySelector('.modal-content h2');
-    if (existingTitle) existingTitle.remove(); // Remove old title if exists
-
-    const titleElement = document.createElement('h2');
-    titleElement.textContent = title;
-    titleElement.style.marginTop = '0'; // Add some style if needed
-    titleElement.style.marginBottom = '1rem';
-    markdownContent.before(titleElement); // Insert title before content area
-
-    // Show modal
-    modal.style.display = 'block';
-
-    // Load the markdown content
-    await loadMarkdownFromGitHub(year, week);
-
-    // Update URL hash
-    window.location.hash = `#${year}/${week}`;
-}
-
-
-// Функция для обновления фильтров годов в боковой панели
 function updateYearFilters(years) {
     const yearFilterList = document.querySelector('.sidebar ul:first-of-type');
-    if (!yearFilterList) return; // Добавлена проверка
+    if (!yearFilterList) return;
 
-    yearFilterList.innerHTML = ''; // Очищаем список
-
-    years.sort((a, b) => b - a); // Сортируем года по убыванию
-
-    years.forEach((year, index) => {
+    yearFilterList.innerHTML = '';
+    years.sort((a, b) => b - a).forEach((year, index) => {
         const li = document.createElement('li');
         const a = document.createElement('a');
         a.href = `#${year}`;
         a.textContent = year;
-        if (index === 0) { // Делаем первый (самый новый) год активным
-            a.className = 'active';
-        }
+        if (index === 0) a.className = 'active'; // Первый год активный по умолчанию
         li.appendChild(a);
         yearFilterList.appendChild(li);
-    });
 
-    // Обновить обработчики событий для фильтров
-    document.querySelectorAll('.sidebar a[href^="#"]').forEach(link => {
-        // Удаляем старые обработчики, если они были
-        link.replaceWith(link.cloneNode(true));
-    });
-    // Добавляем новые обработчики
-    document.querySelectorAll('.sidebar a[href^="#"]').forEach(link => {
-        link.addEventListener('click', function(e) {
-            // Убрать класс active со всех ссылок в этом списке
-            yearFilterList.querySelectorAll('a').forEach(a => a.classList.remove('active'));
-            // Добавить класс active к нажатой ссылке
+        // Обработчик клика для фильтра
+        a.addEventListener('click', function(e) {
+            // Не предотвращаем стандартное поведение якоря (e.preventDefault()),
+            // чтобы URL обновлялся и можно было использовать history.back/forward.
+            // Просто обновляем активный класс.
+            yearFilterList.querySelectorAll('a').forEach(link => link.classList.remove('active'));
             this.classList.add('active');
-
-            // Плавная прокрутка к секции года (если она есть)
-            const targetId = this.getAttribute('href');
-            const targetElement = document.querySelector(targetId);
-            if (targetElement) {
-                // e.preventDefault(); // Предотвращаем стандартный переход по якорю, если нужна плавная прокрутка
-                // targetElement.scrollIntoView({ behavior: 'smooth' });
-            }
+            // Плавная прокрутка к секции (опционально)
+            // const targetElement = document.getElementById(this.getAttribute('href').substring(1));
+            // if (targetElement) targetElement.scrollIntoView({ behavior: 'smooth' });
         });
     });
 }
 
-// Get modal elements (лучше делать это один раз)
-const modal = document.getElementById('markdown-modal');
-const closeModal = document.querySelector('.close-modal');
-const markdownContent = document.getElementById('markdown-content');
-const loader = document.querySelector('.loader');
+// --- Модальное окно и рендеринг Markdown/MathJax ---
 
-// Function to load markdown content from GitHub
 async function loadMarkdownFromGitHub(year, week) {
     const reviewUrl = `https://raw.githubusercontent.com/${GITHUB_REPO}/${GITHUB_BRANCH}/${year}/${week}/review.md`;
 
-    if (!loader || !markdownContent) return false; // Добавлена проверка
+    if (!markdownContent || !loader) {
+        console.error("Markdown content area or loader not found.");
+        return false;
+    }
 
-    // Show loading spinner
     loader.style.display = 'block';
-    markdownContent.innerHTML = ''; // Очищаем предыдущее содержимое
+    markdownContent.innerHTML = '';
 
     try {
         const response = await fetch(reviewUrl);
+        if (!response.ok) throw new Error(`Failed to fetch review. Status: ${response.status}`);
+        let markdown = await response.text();
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        // 1. Изоляция формул MathJax
+        const mathPlaceholders = {};
+        let placeholderId = 0;
+        const mathRegex = /(\$\$[\s\S]*?\$\$|\\\[[\s\S]*?\\\]|\$(?:[^$\\]|\\.)*?\$|\\\((?:[^)\\]|\\.)*?\\\))/g;
+        markdown = markdown.replace(mathRegex, (match) => {
+            const id = `mathjax-placeholder-${placeholderId++}`;
+            mathPlaceholders[id] = match;
+            return `<span id="${id}" style="display: none;"></span>`; // Плейсхолдер
+        });
 
-        const markdown = await response.text();
+        // 2. Преобразование Markdown в HTML
+        if (typeof marked === 'undefined') throw new Error("Marked.js library not loaded.");
+        const html = marked.parse(markdown);
 
-        // Render markdown to HTML using Marked.js (убедитесь, что Marked.js загружен)
-        if (typeof marked !== 'undefined') {
-            const html = marked.parse(markdown);
-            markdownContent.innerHTML = html;
-        } else {
-            console.error("Marked.js library is not loaded.");
-            markdownContent.innerHTML = '<p>Error: Markdown library not loaded.</p>';
-        }
+        // 3. Вставка HTML
+        markdownContent.innerHTML = html;
 
+        // 4. Восстановление формул
+        Object.keys(mathPlaceholders).forEach(id => {
+            const placeholderElement = markdownContent.querySelector(`#${id}`);
+            if (placeholderElement) {
+                placeholderElement.replaceWith(document.createTextNode(mathPlaceholders[id]));
+            }
+        });
 
-        // Process LaTeX in the loaded content using MathJax (убедитесь, что MathJax загружен и сконфигурирован)
+        // 5. Рендеринг MathJax
         if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
-            // Очищаем предыдущие обработанные элементы MathJax, если необходимо
-            MathJax.texReset && MathJax.texReset();
-            MathJax.typesetClear && MathJax.typesetClear([markdownContent]);
-
+            MathJax.texReset?.();
+            MathJax.typesetClear?.([markdownContent]);
             await MathJax.typesetPromise([markdownContent]);
-        } else if (typeof MathJax !== 'undefined' && MathJax.Hub) {
-             // Для MathJax v2 (если используется)
-             MathJax.Hub.Queue(["Typeset", MathJax.Hub, markdownContent]);
         } else {
-            console.warn("MathJax library is not loaded or configured properly.");
+            console.warn("MathJax 3 not found or not configured.");
         }
 
-        loader.style.display = 'none'; // Hide loader after processing
+        loader.style.display = 'none';
         return true;
 
     } catch (error) {
-        console.error('Error loading markdown:', error);
-        markdownContent.innerHTML = `
-            <div class="error-message">
-                <i class="fas fa-exclamation-triangle"></i>
-                <p>Could not load the review file. Please check if it exists in the repository.</p>
-                <p>Path: ${year}/${week}/review.md</p>
-                <p>Error: ${error.message}</p>
-            </div>
-        `;
+        console.error('Error loading or processing markdown:', error);
+        markdownContent.innerHTML = `<div class="error-message"><h4>Error</h4><p>${error.message}</p></div>`;
         loader.style.display = 'none';
         return false;
     }
 }
 
-// Event listeners (добавляем после определения функций)
+async function openReviewModal(year, week, title) {
+    if (!modal || !markdownContent) return;
 
-// Close modal when clicking on X
-if (closeModal) {
-    closeModal.addEventListener('click', () => {
-        if (modal) modal.style.display = 'none';
-    });
+    // Установка заголовка
+    const modalContentDiv = modal.querySelector('.modal-content');
+    let titleElement = modalContentDiv?.querySelector('h2.modal-title');
+    if (!titleElement) {
+        titleElement = document.createElement('h2');
+        titleElement.className = 'modal-title';
+        titleElement.style.marginTop = '0';
+        titleElement.style.marginBottom = '1rem';
+        modalContentDiv?.insertBefore(titleElement, markdownContent);
+    }
+    titleElement.textContent = title;
+
+    modal.style.display = 'block';
+    const success = await loadMarkdownFromGitHub(year, week);
+
+    if (success) {
+        // Обновляем хэш только при успехе
+        window.location.hash = `#${year}/${week}`;
+    }
+    // Не сбрасываем хэш при ошибке, чтобы пользователь видел, что пытался открыть
 }
 
-// Close modal when clicking outside of it
-window.addEventListener('click', (e) => {
-    if (e.target === modal) {
+function checkUrlHash() {
+    const hash = window.location.hash;
+    if (hash && hash.startsWith('#') && hash.includes('/')) {
+        const parts = hash.substring(1).split('/');
+        if (parts.length === 2 && parts[0] && parts[1]) {
+            const year = parts[0];
+            const week = parts[1];
+
+            // Ищем карточку для заголовка (может не найтись, если DOM еще не готов)
+            const card = document.querySelector(`.week-card[data-year="${year}"][data-week="${week}"]`);
+            const title = card?.querySelector('.week-card-title')?.textContent || `Review ${year}/${week}`;
+
+            // Открываем модальное окно, если оно еще не открыто для этого хэша
+            const currentModalTitle = modal?.querySelector('.modal-content h2.modal-title');
+            if (modal && (modal.style.display !== 'block' || !currentModalTitle || currentModalTitle.textContent !== title)) {
+                 openReviewModal(year, week, title);
+            }
+        } else {
+             // Хэш не соответствует формату, закрываем окно
+             if (modal && modal.style.display === 'block') {
+                 closeModal();
+             }
+        }
+    } else {
+        // Хэш пуст или не содержит '/', закрываем окно
+        if (modal && modal.style.display === 'block') {
+            closeModal();
+        }
+    }
+}
+
+function closeModal() {
+    if (modal) {
         modal.style.display = 'none';
+        if (markdownContent) markdownContent.innerHTML = ''; // Очищаем контент
+        // Сбрасываем хэш, чтобы при обновлении страницы окно не открылось снова
+        history.pushState("", document.title, window.location.pathname + window.location.search);
+    }
+}
+
+// --- Обработчики событий ---
+
+// Закрытие модального окна
+closeModalButton?.addEventListener('click', closeModal);
+window.addEventListener('click', (event) => {
+    if (event.target === modal) {
+        closeModal();
+    }
+});
+window.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && modal && modal.style.display === 'block') {
+        closeModal();
     }
 });
 
-// Tab switching functionality (если используется)
-document.querySelectorAll('.tab')?.forEach(tab => {
-    tab.addEventListener('click', () => {
-        // Remove active class from all tabs and content in the same group
-        const tabGroup = tab.closest('.tabs'); // Находим родительский контейнер табов
-        if (!tabGroup) return;
 
-        tabGroup.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        const contentContainer = tabGroup.nextElementSibling; // Предполагаем, что контент идет сразу после табов
-        if (contentContainer) {
-            contentContainer.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        }
-
-        // Add active class to clicked tab and corresponding content
-        tab.classList.add('active');
-        const tabId = tab.getAttribute('data-tab');
-        const targetContent = document.getElementById(`${tabId}-tab`);
-        if (targetContent) {
-            targetContent.classList.add('active');
-        }
-    });
-});
-
-// Back to top button functionality
-const backToTopButton = document.getElementById('back-to-top');
+// Кнопка "Наверх"
 if (backToTopButton) {
     window.addEventListener('scroll', () => {
-        if (window.pageYOffset > 300) {
-            backToTopButton.classList.add('visible');
-        } else {
-            backToTopButton.classList.remove('visible');
-        }
+        backToTopButton.classList.toggle('visible', window.pageYOffset > 300);
     });
-
     backToTopButton.addEventListener('click', () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 }
 
-// Search functionality
-const searchInput = document.querySelector('.search-bar input');
-const searchButton = document.querySelector('.search-bar button');
-
+// Поиск (заглушка)
 function performSearch(query) {
-    alert(`Search functionality is not implemented yet. You searched for: ${query}`);
-    // Здесь должна быть логика поиска/фильтрации карточек
-    // Например, можно пройтись по всем .week-card и скрыть те, что не соответствуют запросу
+    if (!query) return;
+    alert(`Search functionality is not implemented. You searched for: ${query}`);
+    // TODO: Реализовать логику поиска/фильтрации карточек
 }
 
-if (searchButton && searchInput) {
-    searchButton.addEventListener('click', () => {
-        performSearch(searchInput.value.trim());
-    });
-
-    searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            performSearch(searchInput.value.trim());
-        }
-    });
-}
-
-// Check URL hash on page load and when hash changes
-function checkUrlHash() {
-    const hash = window.location.hash;
-
-    if (hash && hash.includes('/')) {
-        // Format: #YYYY/week-XX
-        const parts = hash.substring(1).split('/');
-        if (parts.length === 2) {
-            const year = parts[0];
-            const week = parts[1];
-
-            // Find the corresponding card
-            const card = document.querySelector(`.week-card[data-year="${year}"][data-week="${week}"]`);
-
-            if (card) {
-                const title = card.querySelector('.week-card-title')?.textContent || 'Review';
-                // Открываем модальное окно
-                openReviewModal(year, week, title);
-
-                // Прокручиваем до карточки (опционально)
-                // card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            } else {
-                 console.warn(`Card not found for hash: ${hash}`);
-                 // Можно закрыть модальное окно, если оно было открыто
-                 if (modal) modal.style.display = 'none';
-            }
-        }
-    } else {
-        // Если хэш не соответствует формату или пуст, закрываем модальное окно
-        if (modal) modal.style.display = 'none';
-    }
-}
-
-// Initial load
-window.addEventListener('DOMContentLoaded', () => {
-    loadWeeksData(); // Загружаем данные после загрузки DOM
-    // checkUrlHash(); // Проверяем хэш после загрузки данных (перенесено в loadWeeksData)
+searchButton?.addEventListener('click', () => {
+    if (searchInput) performSearch(searchInput.value.trim());
 });
 
-// Listen for hash changes to open/close modal
+searchInput?.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && searchInput) {
+        performSearch(searchInput.value.trim());
+    }
+});
+
+// --- Инициализация ---
+
+window.addEventListener('DOMContentLoaded', loadWeeksData);
 window.addEventListener('hashchange', checkUrlHash);

@@ -94,6 +94,22 @@ nav {
     align-items: center;
 }
 
+.nav-left {
+    display: flex;
+    align-items: center;
+}
+
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    margin-right: 0.5rem;
+}
+
 .nav-links {
     display: flex;
     list-style: none;
