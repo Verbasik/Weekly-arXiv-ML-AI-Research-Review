@@ -66,23 +66,32 @@
 
     <nav>
         <div class="container nav-container">
-            <ul class="nav-links">
-                <li><a href="#home"><i class="fas fa-home"></i> Home</a></li>
-                <li class="dropdown">
-                    <a href="#years"><i class="fas fa-calendar-alt"></i> Years <i class="fas fa-chevron-down"></i></a>
-                    <div class="dropdown-content">
-                        <!-- Links will be populated by JS -->
-                        <a href="#2025">2025</a>
-                        <a href="#2024">2024</a>
-                    </div>
-                </li>
-                <li><a href="#about"><i class="fas fa-info-circle"></i> About</a></li>
-                <li><a href="#contribute"><i class="fas fa-hands-helping"></i> Contribute</a></li>
-                <li><a href="#contact"><i class="fas fa-envelope"></i> Contact</a></li>
-            </ul>
-            <div class="search-bar">
-                <input type="text" placeholder="Search papers...">
-                <button><i class="fas fa-search"></i></button>
+            <div class="nav-left">
+                <!-- Бургер-меню для мобильных устройств -->
+                <button class="menu-toggle" id="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <ul class="nav-links" id="nav-links">
+                    <li><a href="#home"><i class="fas fa-home"></i> Home</a></li>
+                    <li class="dropdown">
+                        <a href="#years"><i class="fas fa-calendar-alt"></i> Years <i class="fas fa-chevron-down"></i></a>
+                        <div class="dropdown-content">
+                            <a href="#2025">2025</a>
+                            <a href="#2024">2024</a>
+                        </div>
+                    </li>
+                    <li><a href="#about"><i class="fas fa-info-circle"></i> About</a></li>
+                    <li><a href="#contribute"><i class="fas fa-hands-helping"></i> Contribute</a></li>
+                    <li><a href="#contact"><i class="fas fa-envelope"></i> Contact</a></li>
+                </ul>
+            </div>
+            
+            <div class="nav-right">
+                <div class="search-bar">
+                    <input type="text" placeholder="Search papers...">
+                    <button><i class="fas fa-search"></i></button>
+                </div>
             </div>
         </div>
     </nav>
