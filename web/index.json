@@ -110,6 +110,15 @@
             "description": "Qwen2.5-Omni: Мультимодальная модель нового поколения.",
             "papers": 1,
             "notebooks": 1
+          },
+          {
+            "week": "week-15",
+            "title": "Week 15: Google DeepMind",
+            "date": "Apr 7-Apr 13, 2025",
+            "tags": ["LLMs", "KnowledgeAcquisition", "HallucinationsInAI"],
+            "description": "Как LLM выучивают факты и почему они галлюцинируют?",
+            "papers": 1,
+            "notebooks": 0
           }
         ]
       },
