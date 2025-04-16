@@ -17,12 +17,6 @@ A2A (Agent-to-Agent) — это библиотека для организаци
 - ✅ **Типизированный интерфейс** с использованием Pydantic для валидации данных
 - ✅ **Расширяемая архитектура** для добавления новых типов агентов
 
-## 🚀 Установка
-
-```bash
-pip install a2a-common
-```
-
 ## 🏗️ Архитектура
 
 A2A использует модель клиент-сервер для взаимодействия между агентами:
@@ -94,7 +88,7 @@ print(f"Описание: {agent_card.description}")
 ```python
 from common.server import A2AServer
 from common.server import InMemoryTaskManager
-from common.types import AgentCard, AgentCapabilities, AgentSkill
+from common.types  import AgentCard, AgentCapabilities, AgentSkill
 
 # Создание менеджера задач
 task_manager = InMemoryTaskManager()
@@ -130,7 +124,7 @@ server.start()
 
 ```python
 from common.server import InMemoryTaskManager
-from common.types import TaskState, TaskStatus, Message, TextPart
+from common.types  import TaskState, TaskStatus, Message, TextPart
 
 class MyTaskManager(InMemoryTaskManager):
     async def on_send_task(self, request):
@@ -205,143 +199,6 @@ success = await sender.send_push_notification(
     "https://example.com/webhook",
     {"event": "update", "id": "task123"}
 )
-```
-
-## 📝 Примеры использования
-
-### Создание агента и обработка задач
-
-```python
-import asyncio
-from common.server import A2AServer, InMemoryTaskManager
-from common.types import (
-    AgentCard, AgentCapabilities, AgentSkill,
-    TaskState, TaskStatus, Message, TextPart
-)
-
-class CalculatorTaskManager(InMemoryTaskManager):
-    async def on_send_task(self, request):
-        # Получение параметров запроса
-        task_params = request.params
-        
-        # Создание задачи
-        task = await self.upsert_task(task_params)
-        
-        # Получение выражения из сообщения
-        message = task_params.message
-        expression = message.parts[0].text
-        
-        try:
-            # Вычисление результата
-            result = str(eval(expression))
-            
-            # Создание сообщения с результатом
-            response_message = Message(
-                role="agent",
-                parts=[TextPart(text=f"Результат: {result}")]
-            )
-            
-            # Обновление статуса задачи
-            task = await self.update_store(
-                task.id,
-                TaskStatus(
-                    state=TaskState.COMPLETED,
-                    message=response_message
-                ),
-                None
-            )
-            
-            # Возврат ответа
-            return self.create_response(request.id, task)
-        except Exception as e:
-            # Обработка ошибки
-            error_message = Message(
-                role="agent",
-                parts=[TextPart(text=f"Ошибка: {str(e)}")]
-            )
-            
-            # Обновление статуса задачи
-            task = await self.update_store(
-                task.id,
-                TaskStatus(
-                    state=TaskState.FAILED,
-                    message=error_message
-                ),
-                None
-            )
-            
-            # Возврат ответа
-            return self.create_response(request.id, task)
-
-async def main():
-    # Создание менеджера задач
-    task_manager = CalculatorTaskManager()
-    
-    # Определение карточки агента
-    agent_card = AgentCard(
-        name="CalculatorAgent",
-        url="http://localhost:5000",
-        version="1.0.0",
-        capabilities=AgentCapabilities(streaming=True),
-        skills=[
-            AgentSkill(
-                id="calculator",
-                name="Калькулятор",
-                description="Выполняет математические расчеты"
-            )
-        ]
-    )
-    
-    # Создание сервера
-    server = A2AServer(
-        host="0.0.0.0",
-        port=5000,
-        agent_card=agent_card,
-        task_manager=task_manager
-    )
-    
-    # Запуск сервера
-    server.start()
-
-if __name__ == "__main__":
-    asyncio.run(main())
-```
-
-### Использование клиента для взаимодействия с агентом
-
-```python
-import asyncio
-from common.client import A2AClient, A2ACardResolver
-from common.types import Message, TextPart
-
-async def main():
-    # Получение карточки агента
-    resolver = A2ACardResolver("http://localhost:5000")
-    agent_card = resolver.get_agent_card()
-    
-    # Создание клиента
-    client = A2AClient(agent_card=agent_card)
-    
-    # Создание сообщения с выражением для вычисления
-    message = Message(
-        role="user",
-        parts=[TextPart(text="2 + 2 * 2")]
-    )
-    
-    # Отправка задачи
-    response = await client.send_task({
-        "id": "task123",
-        "sessionId": "session456",
-        "message": message
-    })
-    
-    # Вывод результата
-    print(f"Статус задачи: {response.result.status.state}")
-    if response.result.status.message:
-        print(f"Ответ агента: {response.result.status.message.parts[0].text}")
-
-if __name__ == "__main__":
-    asyncio.run(main())
 ```
 
 ## 📚 API Reference
