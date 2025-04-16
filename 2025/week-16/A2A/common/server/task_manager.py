@@ -803,7 +803,7 @@ class InMemoryTaskManager(TaskManager):
             for subscriber in current_subscribers:
                 await subscriber.put(task_update_event)
 
-async def dequeue_events_for_sse(
+    async def dequeue_events_for_sse(
         self, request_id: str, task_id: str, sse_event_queue: asyncio.Queue
     ) -> Union[AsyncIterable[SendTaskStreamingResponse], JSONRPCResponse]:
         """
