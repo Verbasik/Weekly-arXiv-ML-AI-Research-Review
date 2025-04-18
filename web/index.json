@@ -119,6 +119,15 @@
             "description": "Как LLM выучивают факты и почему они галлюцинируют?",
             "papers": 1,
             "notebooks": 0
+          },
+          {
+            "week": "week-16",
+            "title": "Week 16: Agent2Agent",
+            "date": "Apr 14-Apr 20, 2025",
+            "tags": ["Google", "Protocol", "A2A", "Ai Agents"],
+            "description": "Эра мультиагентов? Google запускает A2A.",
+            "papers": 1,
+            "example": "A2A: Communication Framework"
           }
         ]
       },
