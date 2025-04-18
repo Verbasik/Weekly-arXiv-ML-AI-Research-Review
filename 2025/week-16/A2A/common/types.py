@@ -46,13 +46,13 @@ class TaskState(str, Enum):
         >>> TaskState.COMPLETED
         <TaskState.COMPLETED: 'completed'>
     """
-    SUBMITTED = "submitted"  # Задача отправлена
-    WORKING = "working"      # Задача выполняется
+    SUBMITTED = "submitted"            # Задача отправлена
+    WORKING = "working"                # Задача выполняется
     INPUT_REQUIRED = "input-required"  # Требуется ввод от пользователя
-    COMPLETED = "completed"  # Задача успешно завершена
-    CANCELED = "canceled"    # Задача отменена
-    FAILED = "failed"        # Задача завершилась с ошибкой
-    UNKNOWN = "unknown"      # Неизвестное состояние
+    COMPLETED = "completed"            # Задача успешно завершена
+    CANCELED = "canceled"              # Задача отменена
+    FAILED = "failed"                  # Задача завершилась с ошибкой
+    UNKNOWN = "unknown"                # Неизвестное состояние
 
 
 # Классы частей сообщений
