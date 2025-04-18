@@ -73,6 +73,7 @@ function createWeekCard(yearSection, year, weekData) {
     const tagsHtml = weekData.tags?.map(tag => `<span><i class="fas fa-tag"></i> ${tag}</span>`).join('') || '';
     const dateHtml = weekData.date ? `<span><i class="far fa-calendar"></i> ${weekData.date}</span>` : '';
     const notebooksText = weekData.notebooks !== undefined ? `${weekData.notebooks} Notebook${weekData.notebooks !== 1 ? 's' : ''}` : 'Notebook';
+    const exampleHtml = weekData.example ? `<p class="week-card-example"><strong>Пример:</strong> ${weekData.example}</p>` : '';
 
     card.innerHTML = `
         <div class="week-card-header">
@@ -81,6 +82,21 @@ function createWeekCard(yearSection, year, weekData) {
         <div class="week-card-body">
             <div class="week-card-meta">${dateHtml} ${tagsHtml}</div>
             <p class="week-card-desc">${weekData.description || 'No description available.'}</p>
+            <button class="btn btn-outline read-review">Read Review</button>
+        </div>
+        <div class="week-card-footer">
+            <span><i class="far fa-file-alt"></i> ${weekData.papers} Paper${weekData.papers !== 1 ? 's' : ''}</span>
+            <span><i class="far fa-file-code"></i> ${notebooksText}</span>
+        </div>
+    `;
+    card.innerHTML = `
+        <div class="week-card-header">
+            <h3 class="week-card-title">${weekData.title}</h3>
+        </div>
+        <div class="week-card-body">
+            <div class="week-card-meta">${dateHtml} ${tagsHtml}</div>
+            <p class="week-card-desc">${weekData.description || 'No description available.'}</p>
+            ${exampleHtml}
             <button class="btn btn-outline read-review">Read Review</button>
         </div>
         <div class="week-card-footer">
