@@ -72,9 +72,20 @@ function createWeekCard(yearSection, year, weekData) {
 
     const tagsHtml = weekData.tags?.map(tag => `<span><i class="fas fa-tag"></i> ${tag}</span>`).join('') || '';
     const dateHtml = weekData.date ? `<span><i class="far fa-calendar"></i> ${weekData.date}</span>` : '';
-    const notebooksText = weekData.notebooks !== undefined ? `${weekData.notebooks} Notebook${weekData.notebooks !== 1 ? 's' : ''}` : 'Notebook';
-    const exampleHtml = weekData.example ? `<p class="week-card-example"><strong>Пример:</strong> ${weekData.example}</p>` : '';
-
+    const footerItems = [
+        `<span><i class="far fa-file-alt"></i> ${weekData.papers} Paper${weekData.papers !== 1 ? 's' : ''}</span>`
+    ];
+    
+    if (weekData.notebooks !== undefined) {
+        const notebooksText = `${weekData.notebooks} Notebook${weekData.notebooks !== 1 ? 's' : ''}`;
+        footerItems.push(`<span><i class="far fa-file-code"></i> ${notebooksText}</span>`);
+    }
+    
+    if (weekData.code !== undefined) {
+        const codeText = `${weekData.code} Code${weekData.code !== 1 ? ' files' : ' file'}`;
+        footerItems.push(`<span><i class="fas fa-code"></i> ${codeText}</span>`);
+    }
+    
     card.innerHTML = `
         <div class="week-card-header">
             <h3 class="week-card-title">${weekData.title}</h3>
@@ -85,25 +96,10 @@ function createWeekCard(yearSection, year, weekData) {
             <button class="btn btn-outline read-review">Read Review</button>
         </div>
         <div class="week-card-footer">
-            <span><i class="far fa-file-alt"></i> ${weekData.papers} Paper${weekData.papers !== 1 ? 's' : ''}</span>
-            <span><i class="far fa-file-code"></i> ${notebooksText}</span>
+            ${footerItems.join('')}
         </div>
     `;
-    card.innerHTML = `
-        <div class="week-card-header">
-            <h3 class="week-card-title">${weekData.title}</h3>
-        </div>
-        <div class="week-card-body">
-            <div class="week-card-meta">${dateHtml} ${tagsHtml}</div>
-            <p class="week-card-desc">${weekData.description || 'No description available.'}</p>
-            ${exampleHtml}
-            <button class="btn btn-outline read-review">Read Review</button>
-        </div>
-        <div class="week-card-footer">
-            <span><i class="far fa-file-alt"></i> ${weekData.papers} Paper${weekData.papers !== 1 ? 's' : ''}</span>
-            <span><i class="far fa-file-code"></i> ${notebooksText}</span>
-        </div>
-    `;
+    
     weeksGrid.appendChild(card);
 
     // Обработчик для кнопки чтения обзора
