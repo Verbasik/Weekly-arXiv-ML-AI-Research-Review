@@ -127,7 +127,7 @@
             "tags": ["Google", "Protocol", "A2A", "Ai Agents"],
             "description": "Эра мультиагентов? Google запускает A2A.",
             "papers": 1,
-            "example": "A2A: Communication Framework"
+            "code": 1
           }
         ]
       },
