@@ -72,20 +72,35 @@ function createWeekCard(yearSection, year, weekData) {
 
     const tagsHtml = weekData.tags?.map(tag => `<span><i class="fas fa-tag"></i> ${tag}</span>`).join('') || '';
     const dateHtml = weekData.date ? `<span><i class="far fa-calendar"></i> ${weekData.date}</span>` : '';
-    const footerItems = [
-        `<span><i class="far fa-file-alt"></i> ${weekData.papers} Paper${weekData.papers !== 1 ? 's' : ''}</span>`
-    ];
-    
-    if (weekData.notebooks !== undefined) {
+
+    const footerItems = [];
+
+    // Papers
+    if (weekData.papers !== undefined) {
+        const paperText = `${weekData.papers} Paper${weekData.papers !== 1 ? 's' : ''}`;
+        footerItems.push(`<span><i class="far fa-file-alt"></i> ${paperText}</span>`);
+    }
+
+    // Notebooks
+    if (weekData.notebooks !== undefined && weekData.notebook_path) {
+        const notebooksText = `${weekData.notebooks} Notebook${weekData.notebooks !== 1 ? 's' : ''}`;
+        const notebookUrl = `https://github.com/${GITHUB_REPO}/tree/${GITHUB_BRANCH}/${weekData.notebook_path}`;
+        footerItems.push(`<a href="${notebookUrl}" target="_blank"><i class="far fa-file-code"></i> ${notebooksText}</a>`);
+    } else if (weekData.notebooks !== undefined) {
         const notebooksText = `${weekData.notebooks} Notebook${weekData.notebooks !== 1 ? 's' : ''}`;
         footerItems.push(`<span><i class="far fa-file-code"></i> ${notebooksText}</span>`);
     }
-    
-    if (weekData.code !== undefined) {
-        const codeText = `${weekData.code} Code${weekData.code !== 1 ? ' files' : ' file'}`;
+
+    // Code files
+    if (weekData.code !== undefined && weekData.code_path) {
+        const codeText = `${weekData.code} Code${weekData.code !== 1 ? ' files' : ''}`;
+        const codeUrl = `https://github.com/${GITHUB_REPO}/tree/${GITHUB_BRANCH}/${weekData.code_path}`;
+        footerItems.push(`<a href="${codeUrl}" target="_blank"><i class="fas fa-code"></i> ${codeText}</a>`);
+    } else if (weekData.code !== undefined) {
+        const codeText = `${weekData.code} Code${weekData.code !== 1 ? ' files' : ''}`;
         footerItems.push(`<span><i class="fas fa-code"></i> ${codeText}</span>`);
     }
-    
+
     card.innerHTML = `
         <div class="week-card-header">
             <h3 class="week-card-title">${weekData.title}</h3>
@@ -99,10 +114,10 @@ function createWeekCard(yearSection, year, weekData) {
             ${footerItems.join('')}
         </div>
     `;
-    
+
     weeksGrid.appendChild(card);
 
-    // Обработчик для кнопки чтения обзора
+    // Обработчик для кнопки "Read Review"
     card.querySelector('.read-review')?.addEventListener('click', (e) => {
         e.preventDefault();
         openReviewModal(year, weekData.week, weekData.title);
