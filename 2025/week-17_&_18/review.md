@@ -1049,7 +1049,7 @@ $\sigma(x) = \frac{1}{1 + e^{-x}}$
 
 Гиперболический тангенс (tanh) — вторая ключевая функция активации в архитектуре LSTM. Она используется в двух важных местах: при создании кандидат-вектора и при формировании выходного скрытого состояния.
 
-![Image_07.png](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/LSTM/Image_07.jpg)
+![Image_07.png](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_%26_18/assets/LSTM/Image_07.JPG)
 
 **Математическое определение функции tanh:**
 
@@ -1556,6 +1556,8 @@ $$
 **Пример:** При обработке текста, если предложение меняет тему, вентиль сброса может установить низкие значения, чтобы "забыть" контекст предыдущей темы при формировании нового кандидат-вектора.
 
 #### Вентиль обновления (update gate)
+
+![Image_02.png](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/GRU/Image_02.jpg)
 
 Вентиль обновления $z_t$ определяет, насколько сильно каждый элемент скрытого состояния должен быть обновлен:
 
