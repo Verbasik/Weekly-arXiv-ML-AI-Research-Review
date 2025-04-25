@@ -2095,11 +2095,11 @@ $$
 
 **Дискретизация для практических вычислений:**
 
-Уравнения состояний, описанные выше, имеют непрерывный вид, что является проблемой из-за того, что на вход мы хотели бы подавать дискретные данные. Поэтому, нам необходимо дискретизировать SSM. Для решения используется техника названием «экстраполятор нулевого порядка», которая работает следующим образом: когда мы получаем на вход дискретный сигнал, то удерживаем его значение до тех пор, пока не получим новый.
+Исходные уравнения состояний представлены в непрерывной форме, что требует их преобразования для обработки дискретных входных данных. Для этого применяется метод экстраполяции нулевого порядка (Zero-Order Hold, ZOH). Его принцип заключается в удержании значения дискретного входного сигнала до поступления следующего отсчёта.
 
 ![Визуальное пояснение работы экстраполятора нулевого порядка при переходе от дискретного вида к непрерывному](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/SSM/Image_04.png)
 
-Для использования в нейронных сетях непрерывная модель дискретизируется с определенным шагом дискретизации $\Delta$, данный шаг является обучаемым параметром. Существуют различные методы дискретизации, но один из наиболее распространенных — метод нулевого порядка (Zero-Order Hold, ZOH). Он представляет собой разрешение входного сигнала. Математически, экстраполятор нулевого порядка для нашего случая описывается следующим образом:
+В контексте нейронных сетей дискретизация выполняется с обучаемым шагом $\Delta$. Метод ZOH обеспечивает аппроксимацию входного сигнала путём его квантования. Формально, для системы с параметрами $(A, B, C)$ преобразование описывается следующими соотношениями:
 
 $$
 \begin{align}
@@ -2116,27 +2116,514 @@ $$
 - $\bar{B} = (\Delta A)^{-1}(\exp(\Delta A) - I)\Delta B$ — дискретизированная матрица входного преобразования
 
 ```python
-# b — размер батча
-# l — длина входной последовательности
-# d_in — размер эмбеддинга входных данных
-# n — размер тензоров B и C
-# u — входные данные
+"""
+Модуль для преобразования непрерывных систем в дискретные и их анализа.
 
-# Дискретизация матрицы A
-deltaA = torch.exp(einsum(delta, A, 'b l d_in, d_in n -> b l d_in n'))
+Функциональное назначение:
+-----------------------------
+Данный программный код предоставляет инструменты для:
+1. Преобразования непрерывных систем, заданных в пространстве состояний,
+   в дискретные с использованием метода Zero-Order Hold (ZOH)
+2. Моделирования поведения дискретных систем
+3. Визуализации результатов дискретизации и анализа влияния шага дискретизации
+4. Демонстрации принципа работы экстраполятора нулевого порядка
 
-# Дискретизация матрицы B
-deltaB_u = einsum(delta, B, u, 'b l d_in, b l n, b l d_in -> b l d_in n')
-x = torch.zeros((b, d_in, n), device=deltaA.device)
-ys = []
+Основные функции:
+- continuous_to_discrete: преобразует непрерывную систему в дискретную
+- simulate_discrete_system: моделирует поведение дискретной системы
+- visualize_zoh: визуализирует принцип работы ZOH
+- plot_system_response: отображает входные/выходные сигналы и состояния системы
+- example_discretization_effect: демонстрирует влияние шага дискретизации
+"""
 
-# Проходимся по всей последовательности и получаем выходы
-for i in range(l):
-   x = deltaA[:, i] * x + deltaB_u[:, i]
-   y = einsum(x, C[:, i, :], 'b d_in n, b n -> b d_in')
-   ys.append(y)
-y = torch.stack(ys, dim=1)
-y = y + u * D
+# Стандартные библиотеки
+from typing import Tuple, Optional, List, Any
+
+# Сторонние библиотеки
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Научные вычисления
+from scipy.linalg import expm
+
+
+def continuous_to_discrete(
+    A: np.ndarray,
+    B: np.ndarray,
+    C: np.ndarray,
+    D: Optional[np.ndarray] = None,
+    delta: float = 1.0
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Преобразует непрерывную систему в дискретную с использованием ZOH (Zero-Order Hold).
+
+    Description:
+    ---------------
+        Выполняет дискретизацию системы, заданной в пространстве состояний,
+        используя метод Zero-Order Hold. Метод предполагает, что входной сигнал
+        постоянен между моментами дискретизации.
+
+    Args:
+    ---------------
+        A: Матрица динамики состояния непрерывной системы (n x n)
+        B: Матрица входного преобразования непрерывной системы (n x m)
+        C: Матрица выходного преобразования (p x n)
+        D: Матрица прямой связи (p x m), по умолчанию нулевая матрица
+        delta: Шаг дискретизации (по умолчанию 1.0)
+
+    Returns:
+    ---------------
+        Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+            A_d: Дискретизированная матрица динамики (n x n)
+            B_d: Дискретизированная матрица входного преобразования (n x m)
+            C_d: Матрица выходного преобразования (p x n)
+            D_d: Матрица прямой связи (p x m)
+
+    Raises:
+    ---------------
+        ValueError: Если размерности матриц не согласованы
+
+    Examples:
+    ---------------
+        >>> A = np.array([[0, 1], [-1, -0.5]])
+        >>> B = np.array([[0], [1]])
+        >>> C = np.array([[1, 0]])
+        >>> A_d, B_d, C_d, D_d = continuous_to_discrete(A, B, C)
+    """
+    # Проверка размерностей матриц
+    if A.shape[0] != A.shape[1]:
+        raise ValueError("Матрица A должна быть квадратной")
+    if A.shape[0] != B.shape[0]:
+        raise ValueError("Количество строк в матрицах A и B должно совпадать")
+    if C.shape[1] != A.shape[0]:
+        raise ValueError(
+            "Количество столбцов в матрице C должно равняться количеству строк в матрице A"
+        )
+
+    n = A.shape[0]  # Размерность состояния
+    m = B.shape[1]  # Размерность входа
+    p = C.shape[0]  # Размерность выхода
+
+    # Вычисление дискретизированной матрицы динамики: A_d = exp(delta * A)
+    A_d = expm(delta * A)
+
+    # Вычисление дискретизированной матрицы входа
+    # Для случаев, когда A близка к сингулярной матрице,
+    # используем альтернативный подход
+    if np.linalg.cond(A) > 1e12:
+        # Аппроксимация для плохо обусловленных матриц
+        B_d = delta * B
+    else:
+        # Расширяем матрицу для вычисления через матричную экспоненту
+        n_aug = n + m
+        M = np.zeros((n_aug, n_aug))
+        M[:n, :n] = delta * A
+        M[:n, n:] = delta * B
+
+        # Вычисляем exp(M)
+        EM = expm(M)
+
+        # Извлекаем B_d из результата
+        B_d = EM[:n, n:]
+
+    # C и D не изменяются при дискретизации
+    C_d = C
+    D_d = D if D is not None else np.zeros((p, m))
+
+    return A_d, B_d, C_d, D_d
+
+
+def simulate_discrete_system(
+    A: np.ndarray,
+    B: np.ndarray,
+    C: np.ndarray,
+    D: np.ndarray,
+    x: np.ndarray,
+    h0: Optional[np.ndarray] = None
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Моделирует дискретную систему состояний.
+
+    Description:
+    ---------------
+        Моделирует поведение дискретной системы, заданной в пространстве состояний,
+        по уравнениям:
+        h_t = A * h_{t-1} + B * x_t
+        y_t = C * h_t + D * x_t
+
+    Args:
+    ---------------
+        A: Дискретизированная матрица динамики (n x n)
+        B: Дискретизированная матрица входного преобразования (n x m)
+        C: Матрица выходного преобразования (p x n)
+        D: Матрица прямой связи (p x m)
+        x: Входной сигнал (T x m) или (T,) для одномерного входа
+        h0: Начальное состояние системы (n,), по умолчанию нулевой вектор
+
+    Returns:
+    ---------------
+        Tuple[np.ndarray, np.ndarray]:
+            h: Состояния системы на каждом временном шаге (T x n)
+            y: Выходы системы на каждом временном шаге (T x p)
+
+    Raises:
+    ---------------
+        ValueError: Если размерности входных данных не согласованы
+
+    Examples:
+    ---------------
+        >>> A = np.array([[0.9, 0.1], [0, 0.8]])
+        >>> B = np.array([[1], [0.5]])
+        >>> C = np.array([[1, 0]])
+        >>> D = np.array([[0]])
+        >>> x = np.ones((100, 1))
+        >>> h, y = simulate_discrete_system(A, B, C, D, x)
+    """
+    # Проверка размерностей матриц
+    n = A.shape[0]  # Размерность состояния
+    m = B.shape[1]  # Размерность входа
+    p = C.shape[0]  # Размерность выхода
+
+    # Преобразование x в 2D массив, если он 1D
+    if x.ndim == 1:
+        x = x.reshape(-1, 1)
+
+    # Проверка размерности входного сигнала
+    T = x.shape[0]  # Количество временных шагов
+    if x.shape[1] != m:
+        raise ValueError(
+            f"Размерность входного сигнала ({x.shape[1]}) не совпадает с ожидаемой ({m})"
+        )
+
+    # Инициализация массивов для состояний и выходов
+    h = np.zeros((T, n))
+    y = np.zeros((T, p))
+
+    # Установка начального состояния
+    if h0 is not None:
+        if len(h0) != n:
+            raise ValueError(
+                f"Размерность начального состояния ({len(h0)}) не совпадает с ожидаемой ({n})"
+            )
+        h[0] = h0
+
+    # Вычисление выхода для начального момента времени
+    y[0] = C @ h[0] + D @ x[0]
+
+    # Моделирование системы для каждого временного шага
+    for t in range(1, T):
+        h[t] = A @ h[t-1] + B @ x[t]
+        y[t] = C @ h[t] + D @ x[t]
+
+    return h, y
+
+
+def visualize_zoh(
+    continuous_time: np.ndarray,
+    discrete_time: np.ndarray,
+    signal: np.ndarray,
+    title: str = "Экстраполяция нулевого порядка (ZOH)"
+) -> plt.Figure:
+    """
+    Визуализирует принцип работы экстраполятора нулевого порядка (ZOH).
+
+    Description:
+    ---------------
+        Демонстрирует, как дискретный сигнал преобразуется в непрерывный
+        с помощью метода Zero-Order Hold, который сохраняет значение сигнала
+        постоянным между моментами дискретизации.
+
+    Args:
+    ---------------
+        continuous_time: Массив непрерывного времени для отображения
+        discrete_time: Массив дискретных временных отсчетов
+        signal: Дискретный сигнал, соответствующий discrete_time
+        title: Заголовок графика (по умолчанию "Экстраполяция нулевого порядка (ZOH)")
+
+    Returns:
+    ---------------
+        plt.Figure: Объект фигуры matplotlib с графиком
+
+    Examples:
+    ---------------
+        >>> continuous_time = np.linspace(0, 2, 1000)
+        >>> discrete_time = np.arange(0, 2.1, 0.1)
+        >>> signal = np.sin(2 * np.pi * 0.5 * discrete_time)
+        >>> fig = visualize_zoh(continuous_time, discrete_time, signal)
+    """
+    # Преобразуем сигнал в одномерный, если он 2D
+    if signal.ndim > 1:
+        signal = signal.flatten()
+
+    # Создание интерполированного сигнала с помощью ZOH
+    zoh_signal = np.zeros_like(continuous_time)
+    for i, t in enumerate(continuous_time):
+        idx = np.searchsorted(discrete_time, t, side='right') - 1
+        if idx >= 0 and idx < len(signal):
+            zoh_signal[i] = signal[idx]
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+
+    # Построение дискретных точек
+    ax.scatter(
+        discrete_time, signal, color='red', s=80, zorder=3, label='Дискретные отсчеты'
+    )
+
+    # Построение интерполированного сигнала ZOH
+    ax.step(
+        continuous_time, zoh_signal, where='post', color='blue',
+        linestyle='-', linewidth=2, alpha=0.7, label='ZOH интерполяция'
+    )
+
+    # Добавление вертикальных линий для дискретных моментов времени
+    for t in discrete_time:
+        ax.axvline(x=t, color='gray', linestyle='--', linewidth=1, alpha=0.5)
+
+    ax.set_title(title, fontsize=14)
+    ax.set_xlabel('Время', fontsize=12)
+    ax.set_ylabel('Амплитуда', fontsize=12)
+    ax.grid(True, alpha=0.3)
+    ax.legend(fontsize=10)
+
+    return fig
+
+
+def plot_system_response(
+    time: np.ndarray,
+    x: np.ndarray,
+    h: np.ndarray,
+    y: np.ndarray,
+    title: str = "Отклик системы"
+) -> plt.Figure:
+    """
+    Визуализирует входные данные, состояния и выходные данные системы.
+
+    Description:
+    ---------------
+        Создает три графика, отображающие:
+        1. Входной сигнал системы
+        2. Состояния системы
+        3. Выходной сигнал системы
+
+    Args:
+    ---------------
+        time: Массив временных отсчетов
+        x: Входной сигнал системы (T x m)
+        h: Состояния системы (T x n)
+        y: Выходы системы (T x p)
+        title: Заголовок графика (по умолчанию "Отклик системы")
+
+    Returns:
+    ---------------
+        plt.Figure: Объект фигуры matplotlib с графиками
+
+    Examples:
+    ---------------
+        >>> time = np.arange(0, 10, 0.1)
+        >>> x = np.sin(time).reshape(-1, 1)
+        >>> h = np.random.randn(len(time), 2)
+        >>> y = np.cos(time).reshape(-1, 1)
+        >>> fig = plot_system_response(time, x, h, y)
+    """
+    # Преобразование в 2D массивы, если они 1D
+    if x.ndim == 1:
+        x = x.reshape(-1, 1)
+    if y.ndim == 1:
+        y = y.reshape(-1, 1)
+
+    fig, axs = plt.subplots(3, 1, figsize=(12, 10), sharex=True)
+
+    # Построение входного сигнала
+    for i in range(x.shape[1]):
+        axs[0].plot(
+            time, x[:, i], linewidth=2, label=f'x_{i+1}' if x.shape[1] > 1 else 'x'
+        )
+        axs[0].step(time, x[:, i], linewidth=1, linestyle='--', alpha=0.7, where='post')
+    axs[0].set_title('Входной сигнал', fontsize=14)
+    axs[0].set_ylabel('Амплитуда', fontsize=12)
+    axs[0].grid(True, alpha=0.3)
+    if x.shape[1] > 1:
+        axs[0].legend()
+
+    # Построение состояний системы
+    for i in range(h.shape[1]):
+        axs[1].plot(time, h[:, i], linewidth=2, label=f'h_{i+1}')
+    axs[1].set_title('Состояния системы', fontsize=14)
+    axs[1].set_ylabel('Амплитуда', fontsize=12)
+    axs[1].grid(True, alpha=0.3)
+    axs[1].legend()
+
+    # Построение выходного сигнала
+    for i in range(y.shape[1]):
+        axs[2].plot(
+            time, y[:, i], linewidth=2, label=f'y_{i+1}' if y.shape[1] > 1 else 'y'
+        )
+    axs[2].set_title('Выходной сигнал', fontsize=14)
+    axs[2].set_xlabel('Время', fontsize=12)
+    axs[2].set_ylabel('Амплитуда', fontsize=12)
+    axs[2].grid(True, alpha=0.3)
+    if y.shape[1] > 1:
+        axs[2].legend()
+
+    plt.tight_layout()
+    plt.suptitle(title, fontsize=16)
+    plt.subplots_adjust(top=0.92)
+
+    return fig
+
+
+def example_discretization_effect(
+    A: np.ndarray,
+    B: np.ndarray,
+    C: np.ndarray,
+    D: np.ndarray,
+    delta_values: List[float],
+    T_sim: float = 10
+) -> plt.Figure:
+    """
+    Демонстрирует влияние шага дискретизации на отклик системы.
+
+    Description:
+    ---------------
+        Сравнивает отклики системы при разных шагах дискретизации,
+        демонстрируя, как выбор delta влияет на точность моделирования.
+
+    Args:
+    ---------------
+        A: Матрица динамики состояния непрерывной системы (n x n)
+        B: Матрица входного преобразования непрерывной системы (n x m)
+        C: Матрица выходного преобразования (p x n)
+        D: Матрица прямой связи (p x m)
+        delta_values: Список значений шага дискретизации для сравнения
+        T_sim: Время симуляции в секундах (по умолчанию 10)
+
+    Returns:
+    ---------------
+        plt.Figure: Объект фигуры matplotlib с графиком сравнения
+
+    Examples:
+    ---------------
+        >>> A = np.array([[0, 1], [-1, -0.5]])
+        >>> B = np.array([[0], [1]])
+        >>> C = np.array([[1, 0]])
+        >>> D = np.array([[0]])
+        >>> delta_values = [0.01, 0.05, 0.1, 0.2, 0.5]
+        >>> fig = example_discretization_effect(A, B, C, D, delta_values)
+    """
+    # Создаем фигуру для сравнения
+    plt.figure(figsize=(14, 8))
+
+    # Цветовая схема для разных значений delta
+    colors = plt.cm.viridis(np.linspace(0, 1, len(delta_values)))
+
+    for i, delta in enumerate(delta_values):
+        # Создаем входной сигнал с текущим delta
+        T = int(T_sim / delta) + 1
+        t = np.arange(0, T) * delta
+
+        # Ступенчатый сигнал с синусоидой
+        x = np.zeros((T, 1))
+        # Ступенчатый вход с 0.5 сек
+        x[int(0.5/delta):] = 1.0
+
+        # Дискретизация системы
+        A_d, B_d, C_d, D_d = continuous_to_discrete(A, B, C, D, delta)
+
+        # Моделирование системы
+        h, y = simulate_discrete_system(A_d, B_d, C_d, D_d, x)
+
+        # Отображаем выходной сигнал
+        plt.plot(t, y, color=colors[i], label=f'delta = {delta}', linewidth=2)
+
+    plt.title('Влияние шага дискретизации на отклик системы', fontsize=14)
+    plt.xlabel('Время (сек)', fontsize=12)
+    plt.ylabel('Выход системы', fontsize=12)
+    plt.grid(True, alpha=0.3)
+    plt.legend()
+    plt.tight_layout()
+
+    return plt.gcf()
+
+
+def run_example() -> None:
+    """
+    Запускает демонстрационный пример работы модуля.
+
+    Description:
+    ---------------
+        Демонстрирует:
+        1. Процесс дискретизации системы
+        2. Моделирование дискретной системы
+        3. Визуализацию принципа ZOH
+        4. Влияние шага дискретизации на отклик системы
+    """
+    print("Демонстрация дискретизации уравнений состояния методом ZOH")
+    print("=" * 60)
+
+    # Определение параметров непрерывной системы
+    # Пример: демпфированный осциллятор
+    A = np.array([
+        [0, 1],
+        [-1, -0.5]  # ω² = 1, ζ = 0.25
+    ])
+    B = np.array([[0], [1]])
+    C = np.array([[1, 0]])
+    D = np.array([[0]])
+
+    print("Непрерывная система:")
+    print("A =\n", A)
+    print("B =\n", B)
+    print("C =\n", C)
+    print("D =\n", D)
+
+    # Шаг дискретизации
+    delta = 0.1
+
+    # Дискретизация системы
+    A_d, B_d, C_d, D_d = continuous_to_discrete(A, B, C, D, delta)
+
+    print("\nДискретизированная система (delta =", delta, "):")
+    print("A_d =\n", A_d)
+    print("B_d =\n", B_d)
+    print("C_d =\n", C_d)
+    print("D_d =\n", D_d)
+
+    # Создание входного сигнала
+    T = 100  # Количество временных шагов
+    time = np.arange(0, T) * delta
+
+    # Ступенчатый сигнал с последующей синусоидой
+    x = np.zeros((T, 1))
+    # Ступенчатый вход с 10-го по 50-й шаг
+    x[10:50] = 1.0
+    # Синусоида
+    x[50:] = np.sin(2 * np.pi * 0.1 * (np.arange(50, T))).reshape(-1, 1)
+
+    # Моделирование системы
+    h, y = simulate_discrete_system(A_d, B_d, C_d, D_d, x)
+
+    # Визуализация результатов
+    fig1 = plot_system_response(time, x, h, y, title="Отклик дискретизированной системы")
+
+    # Демонстрация экстраполяции нулевого порядка
+    continuous_time = np.linspace(0, 2, 1000)
+    discrete_time = np.arange(0, 2.1, delta)
+    discrete_signal = np.sin(2 * np.pi * 0.5 * discrete_time)
+
+    fig2 = visualize_zoh(
+        continuous_time, discrete_time, discrete_signal,
+        title=f"Экстраполяция нулевого порядка (ZOH) с delta = {delta}"
+    )
+
+    # Показать влияние разных шагов дискретизации
+    delta_values = [0.01, 0.05, 0.1, 0.2, 0.5]
+    fig3 = example_discretization_effect(A, B, C, D, delta_values)
+
+    plt.show()
+
+
+if __name__ == "__main__":
+    run_example()
 ```
 
 **Параметризация в SSM для глубокого обучения:**
@@ -2216,6 +2703,18 @@ $$
 - **Матрица $C$** определяет, как скрытое состояние влияет на выходной сигнал.
 
 - **Матрица $D$** (если используется) позволяет входному сигналу напрямую влиять на выходной сигнал.
+
+![Итоговая схема работы SSM](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/SSM/Image_05.png)
+
+Таким образом, вся система работает так:
+
+- Входной сигнал сначала умножается на матрицу B, которая описывает, как входные сигналы влияют на систему;
+
+- Происходит обновление скрытого состояния. Мы умножаем состояние на матрицу A, которая описывает, как связаны все внутренние состояния. Матрица A применяется перед созданием представлений состояний и обновляется после того, как представление было обновлено;
+
+- Затем, мы используем матрицу C, чтобы описать перевод в выходной сигнал;
+
+- Матрица D — это Skip Connection, который используется, для борьбы с затуханием градиентов внутри сети.
 
 #### Аналитическое решение в непрерывном времени
 
