@@ -131,6 +131,18 @@
             "notebook_path": null,
             "code_path": "2025/week-16/A2A"
           }
+          ,
+          {
+            "week": "week-17_&_18",
+            "title": "Week 17 & 18: Nemotron-H",
+            "date": "Apr 21-May 4, 2025",
+            "tags": ["Nvidia", "Mamba", "Transformers", "Hybrid"],
+            "description": "Mamba 2 + Transformer = Nemotron H",
+            "papers": 1,
+            "code": null,
+            "notebook_path": null,
+            "code_path": null
+          }
         ]
       },
       {
