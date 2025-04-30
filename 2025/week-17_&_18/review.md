@@ -5,7 +5,7 @@
 ### **TWRB_FM 📻**
 
 <audio controls>
-  <source src="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/raw/refs/heads/develop/2025/week-17_&_18/TWRB_FM.mp3" type="audio/mpeg">
+  <source src="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/raw/refs/heads/develop/2025/week-17_&_18/TWRB_FM.wav" type="audio/mpeg">
   Ваш браузер не поддерживает аудиоэлемент.
 </audio>
 
