@@ -142,6 +142,16 @@
             "code": null,
             "notebook_path": null,
             "code_path": null
+          }          ,
+          {
+            "week": "week-19",
+            "title": "Week 17 & 18: Nemotron-H",
+            "date": "May 05-May 11, 2025",
+            "tags": ["ML", "ICon", "Framework", "Algorithms"],
+            "description": "I-Con: периодическая таблица машинного обучения",
+            "papers": 1,
+            "notebooks": 2,
+            "notebook_path": "2025/week-19"
           }
         ]
       },
