@@ -130,8 +130,7 @@
             "code": 1,
             "notebook_path": null,
             "code_path": "2025/week-16/A2A"
-          }
-          ,
+          },
           {
             "week": "week-17_&_18",
             "title": "Week 17 & 18: Nemotron-H",
@@ -142,16 +141,26 @@
             "code": null,
             "notebook_path": null,
             "code_path": null
-          }          ,
+          },
           {
             "week": "week-19",
-            "title": "week-19: I-Con",
+            "title": "week 19: I-Con",
             "date": "May 05-May 11, 2025",
             "tags": ["ML", "ICon", "Framework", "Algorithms"],
             "description": "I-Con: периодическая таблица машинного обучения",
             "papers": 1,
             "notebooks": 2,
             "notebook_path": "2025/week-19"
+          },
+          {
+            "week": "week-20_&_21",
+            "title": "week 20 & 21: Continuous Thought Machines",
+            "date": "May 12-May 25, 2025",
+            "tags": ["ML", "SakanaAI", "Architecture", "CTM"],
+            "description": "Continuous Thought Machine - архитектура, вдохновленная биологическими нейронными процессами",
+            "papers": 1,
+            "notebooks": 1,
+            "notebook_path": "2025/week-20_&_21/example.ipynb"
           }
         ]
       },
