@@ -153,14 +153,14 @@
             "notebook_path": "2025/week-19"
           },
           {
-            "week": "week-20_&_21",
-            "title": "week 20 & 21: Continuous Thought Machines",
+            "week": "week-20",
+            "title": "week 20: Continuous Thought Machines",
             "date": "May 12-May 25, 2025",
             "tags": ["ML", "SakanaAI", "Architecture", "CTM"],
             "description": "Continuous Thought Machine - архитектура, вдохновленная биологическими нейронными процессами",
             "papers": 1,
             "notebooks": 1,
-            "notebook_path": "2025/week-20_&_21/example.ipynb"
+            "notebook_path": "2025/week-20/example.ipynb"
           }
         ]
       },

@@ -16,7 +16,7 @@
 ### **TWRB_FM 📻**
 
 <audio controls>
-  <source src="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/raw/refs/heads/develop/2025/week-20_&_21/TWRB_FM.wav" type="audio/mpeg">
+  <source src="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/raw/refs/heads/develop/2025/week-20/TWRB_FM.wav" type="audio/mpeg">
   Ваш браузер не поддерживает аудиоэлемент.
 </audio>
 
@@ -36,7 +36,7 @@
 2. *модели уровня нейрона* (Neuron-Level Models, NLMs) – отдельные параметры для каждого нейрона, обрабатывающие историю входных сигналов во времени; 
 3. *представление синхронизации нейронов* – использование **синхронности в активациях** непосредственно в качестве латентного признакового пространства для принятия решений. Ниже мы подробно рассмотрим компоненты CTM и их математическую формализацию.
 
-![Рисунок 1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-20_&_21/assets/Image_01.jpeg)
+![Рисунок 1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-20/assets/Image_01.jpeg)
 
 **Рис. 1:** Архитектура Continuous Thought Machine (CTM) с обозначением основных компонентов.  
 
