@@ -144,7 +144,7 @@
           },
           {
             "week": "week-19",
-            "title": "week 19: I-Con",
+            "title": "Week 19: I-Con",
             "date": "May 05-May 11, 2025",
             "tags": ["ML", "ICon", "Framework", "Algorithms"],
             "description": "I-Con: периодическая таблица машинного обучения",
@@ -154,13 +154,23 @@
           },
           {
             "week": "week-20",
-            "title": "week 20: Continuous Thought Machines",
-            "date": "May 12-May 25, 2025",
+            "title": "Week 20: Continuous Thought Machines",
+            "date": "May 12-May 18, 2025",
             "tags": ["ML", "SakanaAI", "Architecture", "CTM"],
             "description": "Continuous Thought Machine - архитектура, вдохновленная биологическими нейронными процессами",
             "papers": 1,
             "notebooks": 1,
             "notebook_path": "2025/week-20/example.ipynb"
+          },
+          {
+            "week": "week-21",
+            "title": "Week 21: RNN, LSTM & Transformers",
+            "date": "May 19-May 25, 2025",
+            "tags": ["Practical", "ML", "Architecture"],
+            "description": "Репозиторий с интерактивными Jupyter-туториалами по машинному обучению",
+            "papers": 0,
+            "notebooks": 5,
+            "notebook_path": "2025/week-21"
           }
         ]
       },
