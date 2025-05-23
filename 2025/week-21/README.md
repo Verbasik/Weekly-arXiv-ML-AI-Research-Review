@@ -1,6 +1,6 @@
 [![Made With Love](https://img.shields.io/badge/Made%20With-Love-orange.svg)](https://github.com/chetanraj/awesome-github-badges)
 [![Open Source](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://opensource.org/)
-[![Telegram Channel](https://img.shields.io/badge/Telegram-TTWRB-blue)](https://t.me/TheWeeklyBrief)
+[![Telegram Channel](https://img.shields.io/badge/Telegram-TWRB-blue)](https://t.me/TheWeeklyBrief)
 
 # 📘 Генеративные Модели и Трансформеры — Практикум в Jupyter
 
