@@ -1,7 +1,7 @@
 [![arXiv](https://img.shields.io/badge/arXiv-2505.05522-b31b1b.svg)](https://arxiv.org/abs/2505.05522)
 [![SakanaAI](https://img.shields.io/badge/SakanaAI-purple)](https://pub.sakana.ai/ctm/)
 [![GitHub](https://img.shields.io/badge/GitHub-black)](https://github.com/SakanaAI/continuous-thought-machines/)
-[![Telegram Channel](https://img.shields.io/badge/Telegram-TTWRB-blue)](https://t.me/TheWeeklyBrief)
+[![Telegram Channel](https://img.shields.io/badge/Telegram-TWRB-blue)](https://t.me/TheWeeklyBrief)
 
 # Машины непрерывного мышления (CTM) — революционная нейросетевая архитектура с биологическим вдохновением
 
