@@ -171,6 +171,16 @@
             "papers": 0,
             "notebooks": 5,
             "notebook_path": "2025/week-21"
+          },
+          {
+            "week": "week-22",
+            "title": "Week 22: Inference-Time Scaling for Generalist Reward Modeling",
+            "date": "May 26-Jun 01, 2025",
+            "tags": ["DeepSeek", "ReinforcementLearning", "RewardModel"],
+            "description": "Генеративное моделирование вознаграждений (GRM) с техникой Inference-Time Scaling (ITS)",
+            "papers": 1,
+            "notebooks": 0,
+            "code": 0
           }
         ]
       },
