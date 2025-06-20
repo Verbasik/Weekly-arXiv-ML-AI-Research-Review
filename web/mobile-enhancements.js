@@ -186,7 +186,7 @@
     }
     
     /**
-     * Инициализация аккордеона для боковой панели на мобильных устройств
+     * Инициализация аккордеона для боковой панели на мобильных устройствах
      */
     function initSidebarAccordion() {
         if (!isMobile()) return;
@@ -531,7 +531,7 @@
         // Обработка 'popstate' событий для корректного закрытия модальных окон
         window.addEventListener('popstate', function() {
             const modal = getElement(CONFIG.selectors.modal.container);
-            if (modal && modal.style.display === 'block') {
+            if (modal && modal.style.display === 'flex') {
                 // Если URL изменился и модальное окно открыто, закрываем его
                 if (!window.location.hash.includes('/')) {
                     modal.style.display = 'none';
@@ -544,7 +544,7 @@
         window.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 const modal = getElement(CONFIG.selectors.modal.container);
-                if (modal && modal.style.display === 'block') {
+                if (modal && modal.style.display === 'flex') {
                     modal.style.display = 'none';
                     document.body.style.overflow = '';
                 }
