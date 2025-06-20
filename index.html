@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weekly arXiv ML/AI Research Review</title>
+    <title>The Weekly Research Brief</title>
     <!-- External CSS Libraries -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.2.0/github-markdown.min.css">
-    <link rel="stylesheet" href="web/style.css">
-    <link rel="stylesheet" href="web/mobile-optimizations.css">
+    <!-- Google Fonts for Modern Typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Glassmorphism Styles -->
+    <link rel="stylesheet" href="web/web/glassmorphism-style.css">
 
     <!-- MathJax Configuration -->
     <script>
@@ -44,7 +46,6 @@
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <!-- Marked.js for markdown rendering -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
 </head>
 <body>
     <header>
@@ -52,7 +53,7 @@
             <div>
                 <div class="logo">
                     <i class="fas fa-brain"></i>
-                    <span>Weekly arXiv ML/AI Research Review</span>
+                    <span>The Weekly Research Brief</span>
                 </div>
                 <div class="tagline">"Чем больше я знаю, тем больше я понимаю, что ничего не знаю"</div>
             </div>
@@ -66,13 +67,8 @@
 
     <nav>
         <div class="container nav-container">
-            <div class="nav-left">
-                <!-- Бургер-меню для мобильных устройств -->
-                <button class="menu-toggle" id="menu-toggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-                
-                <ul class="nav-links" id="nav-links">
+            <div class="nav-content">
+                <ul class="nav-links">
                     <li><a href="#home"><i class="fas fa-home"></i> Home</a></li>
                     <li class="dropdown">
                         <a href="#years"><i class="fas fa-calendar-alt"></i> Years <i class="fas fa-chevron-down"></i></a>
@@ -85,9 +81,7 @@
                     <li><a href="#contribute"><i class="fas fa-hands-helping"></i> Contribute</a></li>
                     <li><a href="#contact"><i class="fas fa-envelope"></i> Contact</a></li>
                 </ul>
-            </div>
-            
-            <div class="nav-right">
+                
                 <div class="search-bar">
                     <input type="text" placeholder="Search papers...">
                     <button><i class="fas fa-search"></i></button>
@@ -99,46 +93,50 @@
     <main class="container">
         <div class="sidebar-layout">
             <aside class="sidebar">
-                <h3><i class="fas fa-filter"></i> Filter by Year</h3>
-                <ul>
-                    <!-- Year links will be populated by JS -->
-                    <li><a href="#2025" class="active">2025</a></li>
-                    <li><a href="#2024">2024</a></li>
-                </ul>
-
-                <h3><i class="fas fa-tags"></i> Popular Tags</h3>
-                <div style="display: flex; flex-wrap: wrap; gap: 5px;">
-                    <span class="tag">LLMs</span>
-                    <span class="tag">Deep Learning</span>
-                    <span class="tag">NLP</span>
-                    <span class="tag">Computer Vision</span>
-                    <span class="tag">Reinforcement Learning</span>
-                    <span class="tag">Transformers</span>
-                    <span class="tag">Genomics</span>
-                    <span class="tag">Efficient Training</span>
+                <div class="sidebar-section">
+                    <h3><i class="fas fa-filter"></i> Filter by Year</h3>
+                    <ul>
+                        <li><a href="#2025" class="active">2025</a></li>
+                        <li><a href="#2024">2024</a></li>
+                    </ul>
                 </div>
 
-                <h3><i class="fas fa-fire"></i> Trending Papers</h3>
-                <ul>
-                    <!-- Trending links could also be dynamic -->
-                    <li><a href="#paper1">Distillation Scaling Laws</a></li>
-                    <li><a href="#paper2">rStar-Math</a></li>
-                    <li><a href="#paper3">DeepSpeed-MoE</a></li>
-                    <li><a href="#paper4">CRISPR-CAS9 технология</a></li>
-                </ul>
+                <div class="sidebar-section">
+                    <h3><i class="fas fa-tags"></i> Popular Tags</h3>
+                    <div class="tags-container">
+                        <span class="tag">LLMs</span>
+                        <span class="tag">Deep Learning</span>
+                        <span class="tag">NLP</span>
+                        <span class="tag">Computer Vision</span>
+                        <span class="tag">Reinforcement Learning</span>
+                        <span class="tag">Transformers</span>
+                        <span class="tag">Genomics</span>
+                        <span class="tag">Efficient Training</span>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3><i class="fas fa-fire"></i> Trending Papers</h3>
+                    <ul>
+                        <li><a href="#paper1">Distillation Scaling Laws</a></li>
+                        <li><a href="#paper2">rStar-Math</a></li>
+                        <li><a href="#paper3">DeepSpeed-MoE</a></li>
+                        <li><a href="#paper4">CRISPR-CAS9 технология</a></li>
+                    </ul>
+                </div>
             </aside>
 
             <div class="content">
                 <section id="home">
-                    <h2>Welcome to "The Weekly Research Brief" 📰 </h2>
+                    <h1>Welcome to "The Weekly Research Brief" 📰</h1>
                     <p>Этот репозиторий представляет собой еженедельную коллекцию обзоров статей с arXiv и Daily Papers Hugging Face в области машинного обучения и искусственного интеллекта. Каждую неделю я буду выбирать одну значимую публикацию для детального анализа и практической реализации.</p>
 
                     <h3>🎯 Цели проекта:</h3>
                     <ul>
-                        <li>Систематическое изучение передовых исследований в области AI;</li>
-                        <li>Создание доступных и понятных обзоров сложных научных работ;</li>
-                        <li>Практическая реализация описанных методов и алгоритмов;</li>
-                        <li>Формирование базы знаний для исследователей и энтузиастов.</li>
+                        <li>Систематическое изучение передовых исследований в области AI</li>
+                        <li>Создание доступных и понятных обзоров сложных научных работ</li>
+                        <li>Практическая реализация описанных методов и алгоритмов</li>
+                        <li>Формирование базы знаний для исследователей и энтузиастов</li>
                     </ul>
                 </section>
 
@@ -201,11 +199,13 @@
             <div class="footer-column">
                 <h3>Contribute</h3>
                 <p>Found an error or want to contribute? Submit a pull request on GitHub!</p>
-                <a href="#" class="btn btn-outline" style="color: white; border-color: white;"><i class="fab fa-github"></i> GitHub Repo</a>
+                <a href="#" style="color: white; border-color: white; text-decoration: none; padding: 8px 16px; border: 1px solid; border-radius: 8px; display: inline-block; margin-top: 8px;">
+                    <i class="fab fa-github"></i> GitHub Repo
+                </a>
             </div>
         </div>
         <div class="copyright">
-            © 2025 Weekly arXiv ML/AI Research Review. All rights reserved.
+            © 2025 TWRB. All rights reserved.
         </div>
     </footer>
 
@@ -214,5 +214,17 @@
     </div>
     <script src="web/script.js" defer></script>
     <script src="web/mobile-enhancements.js" defer></script>
+
+    <!-- 3D Background Objects -->
+    <div class="bg-3d-objects">
+        <div class="sphere sphere-1"></div>
+        <div class="sphere sphere-2"></div>
+        <div class="sphere sphere-3"></div>
+        <div class="ring ring-1"></div>
+        <div class="ring ring-2"></div>
+        <div class="floating-orb orb-1"></div>
+        <div class="floating-orb orb-2"></div>
+        <div class="floating-orb orb-3"></div>
+    </div>
 </body>
-</html>
+</html> 

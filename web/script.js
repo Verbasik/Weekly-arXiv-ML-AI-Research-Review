@@ -2,7 +2,7 @@
 
 // Конфигурация GitHub
 const GITHUB_REPO = 'Verbasik/Weekly-arXiv-ML-AI-Research-Review';
-const GITHUB_BRANCH = 'master'; // Или 'main', если ветка называется так
+const GITHUB_BRANCH = 'develop'; // Или 'main', если ветка называется так
 
 // Получение основных элементов DOM
 const contentElement = document.querySelector('.content');
@@ -230,7 +230,8 @@ async function openReviewModal(year, week, title) {
     }
     titleElement.textContent = title;
 
-    modal.style.display = 'block';
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
     const success = await loadMarkdownFromGitHub(year, week);
 
     if (success) {
@@ -254,18 +255,18 @@ function checkUrlHash() {
 
             // Открываем модальное окно, если оно еще не открыто для этого хэша
             const currentModalTitle = modal?.querySelector('.modal-content h2.modal-title');
-            if (modal && (modal.style.display !== 'block' || !currentModalTitle || currentModalTitle.textContent !== title)) {
+            if (modal && (modal.style.display !== 'flex' || !currentModalTitle || currentModalTitle.textContent !== title)) {
                  openReviewModal(year, week, title);
             }
         } else {
              // Хэш не соответствует формату, закрываем окно
-             if (modal && modal.style.display === 'block') {
+             if (modal && modal.style.display === 'flex') {
                  closeModal();
              }
         }
     } else {
         // Хэш пуст или не содержит '/', закрываем окно
-        if (modal && modal.style.display === 'block') {
+        if (modal && modal.style.display === 'flex') {
             closeModal();
         }
     }
@@ -274,6 +275,7 @@ function checkUrlHash() {
 function closeModal() {
     if (modal) {
         modal.style.display = 'none';
+        document.body.style.overflow = '';
         if (markdownContent) markdownContent.innerHTML = ''; // Очищаем контент
         // Сбрасываем хэш, чтобы при обновлении страницы окно не открылось снова
         history.pushState("", document.title, window.location.pathname + window.location.search);
@@ -290,7 +292,7 @@ window.addEventListener('click', (event) => {
     }
 });
 window.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && modal && modal.style.display === 'block') {
+    if (event.key === 'Escape' && modal && modal.style.display === 'flex') {
         closeModal();
     }
 });
