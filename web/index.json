@@ -181,6 +181,26 @@
             "papers": 1,
             "notebooks": 0,
             "code": 0
+          },
+          {
+            "week": "week-23-25",
+            "title": "Week 23-25: Сессия",
+            "date": "",
+            "tags": ["Study"],
+            "description": "",
+            "papers": 0,
+            "notebooks": 0,
+            "code": 0
+          },
+          {
+            "week": "week-26",
+            "title": "Week 26: Large Language Diffusion Models",
+            "date": "Jun 23-Jun 29, 2025",
+            "tags": ["LLDM", "Gemini Diffusion", "Mercury Coder", "LLaDA", "Eso-LM"],
+            "description": "Диффузионные языковые модели (Diffusion LM) - альтернатива классическим трансформерам?",
+            "papers": 1,
+            "notebooks": 0,
+            "code": 0
           }
         ]
       },
