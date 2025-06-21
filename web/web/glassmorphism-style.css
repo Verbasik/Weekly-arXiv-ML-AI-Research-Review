@@ -8,12 +8,12 @@
     --glass-shadow: rgba(0, 0, 0, 0.1);
     
     /* Gradient Colors */
-    --gradient-orange: #ff7b54;
+    --gradient-orange: rgba(255, 123, 84, 0.65);
     --gradient-coral: #ff9a8b;
-    --gradient-blue: #a8edea;
+    --gradient-blue: rgba(168, 237, 234, 0.4);
     --gradient-peach: #ffd89b;
-    --gradient-purple: #d299c2;
-    --gradient-mint: #89f7fe;
+    --gradient-purple: rgba(210, 153, 194, 0.7);
+    --gradient-mint: rgba(137, 247, 254, 0.3);
     
     /* Text Colors */
     --text-primary: #2d3748;
@@ -41,14 +41,13 @@ body {
     line-height: 1.6;
     color: var(--text-primary);
     overflow-x: hidden;
-    background: linear-gradient(135deg, 
-        var(--gradient-peach) 0%, 
-        var(--gradient-coral) 25%, 
-        var(--gradient-blue) 50%, 
-        var(--gradient-mint) 75%, 
-        var(--gradient-purple) 100%);
-    background-size: 400% 400%;
-    animation: gradientShift 15s ease infinite;
+    background: 
+        linear-gradient(135deg, 
+            var(--gradient-blue) 0%, 
+            var(--gradient-mint) 100%),
+        linear-gradient(135deg, 
+            rgba(248, 250, 252, 0.8) 0%, 
+            rgba(241, 245, 249, 0.9) 100%);
     min-height: 100vh;
     position: relative;
 }
@@ -69,9 +68,9 @@ body::before {
     width: 200%;
     height: 200%;
     background: 
-        radial-gradient(circle at 20% 20%, rgba(255, 123, 84, 0.3) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(168, 237, 234, 0.3) 0%, transparent 50%),
-        radial-gradient(circle at 40% 70%, rgba(255, 216, 155, 0.2) 0%, transparent 50%);
+        radial-gradient(circle at 20% 20%, rgba(168, 237, 234, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(137, 247, 254, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 70%, rgba(168, 237, 234, 0.1) 0%, transparent 50%);
     animation: float 20s ease-in-out infinite;
     z-index: -2;
 }
@@ -85,9 +84,9 @@ body::after {
     right: 0;
     bottom: 0;
     background-image: 
-        radial-gradient(circle at 15% 85%, rgba(255, 154, 139, 0.4) 0%, transparent 25%),
-        radial-gradient(circle at 85% 15%, rgba(137, 247, 254, 0.4) 0%, transparent 25%),
-        radial-gradient(circle at 70% 60%, rgba(210, 153, 194, 0.3) 0%, transparent 20%);
+        radial-gradient(circle at 15% 85%, rgba(137, 247, 254, 0.2) 0%, transparent 25%),
+        radial-gradient(circle at 85% 15%, rgba(168, 237, 234, 0.2) 0%, transparent 25%),
+        radial-gradient(circle at 70% 60%, rgba(137, 247, 254, 0.15) 0%, transparent 20%);
     animation: float 25s ease-in-out infinite reverse;
     z-index: -1;
     pointer-events: none;
@@ -143,13 +142,13 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.35);
     border-radius: 24px;
     padding: 24px 32px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
 }
 
 .logo {
@@ -221,15 +220,15 @@ nav {
 }
 
 .nav-content {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.25);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.35);
     border-radius: 20px;
     padding: 12px 24px;
     display: flex;
     align-items: center;
     gap: 32px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
     width: 100%;
     max-width: 1152px; /* Match header-content width (1200px - 48px padding) */
 }
@@ -385,13 +384,13 @@ main {
 }
 
 .sidebar-section {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.25);
     backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.4);
     border-radius: 20px;
     padding: 24px;
     margin-bottom: 24px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), inset 0 0 20px rgba(0, 0, 0, 0.08);
 }
 
 .sidebar h3 {
@@ -440,24 +439,20 @@ main {
 
 .tag {
     padding: 6px 12px;
-    background: linear-gradient(135deg, 
-        rgba(255, 123, 84, 0.2), 
-        rgba(255, 154, 139, 0.2));
-    border: 1px solid rgba(255, 123, 84, 0.3);
+    background: linear-gradient(135deg, var(--gradient-orange), var(--gradient-coral));
+    border: 1px solid rgba(255, 123, 84, 0.5);
     border-radius: 20px;
     font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--text-primary);
+    font-weight: 600;
+    color: white;
     cursor: pointer;
     transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(255, 123, 84, 0.3);
 }
 
 .tag:hover {
-    background: linear-gradient(135deg, 
-        rgba(255, 123, 84, 0.3), 
-        rgba(255, 154, 139, 0.3));
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(255, 123, 84, 0.2);
+    box-shadow: 0 4px 15px rgba(255, 123, 84, 0.4);
 }
 
 /* Content Area */
@@ -467,13 +462,13 @@ main {
 
 /* Home Section */
 #home {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.35);
     border-radius: 24px;
     padding: 40px;
     margin-bottom: 40px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15), inset 0 0 20px rgba(0, 0, 0, 0.08);
     position: relative;
     overflow: hidden;
 }
@@ -485,7 +480,7 @@ main {
     right: 0;
     width: 200px;
     height: 200px;
-    background: radial-gradient(circle, rgba(168, 237, 234, 0.3) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(137, 247, 254, 0.15) 0%, transparent 70%);
     border-radius: 50%;
     transform: translate(50%, -50%);
 }
@@ -566,12 +561,12 @@ main {
 
 /* Week Card Styles */
 .week-card {
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.35);
     border-radius: 20px;
     padding: 0;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), inset 0 0 20px rgba(0, 0, 0, 0.08);
     transition: all 0.4s ease;
     cursor: pointer;
     position: relative;
@@ -594,8 +589,8 @@ main {
 
 .week-card:hover {
     transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-    background: rgba(255, 255, 255, 0.18);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.28);
 }
 
 .week-card-header {
@@ -630,10 +625,10 @@ main {
 }
 
 .week-card-meta .tag {
-    background: linear-gradient(135deg, 
-        rgba(168, 237, 234, 0.3), 
-        rgba(137, 247, 254, 0.3));
-    border: 1px solid rgba(168, 237, 234, 0.4);
+    background: linear-gradient(135deg, var(--gradient-orange), var(--gradient-coral));
+    border: 1px solid rgba(255, 123, 84, 0.5);
+    color: white;
+    box-shadow: 0 2px 8px rgba(255, 123, 84, 0.3);
 }
 
 .week-card-body {
@@ -645,6 +640,7 @@ main {
     line-height: 1.6;
     color: var(--text-secondary);
     margin-bottom: 20px;
+    font-weight: 600;
 }
 
 .read-review {
@@ -1338,5 +1334,9 @@ footer {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
+    }
+    
+    body {
+        animation: none !important;
     }
 } 
