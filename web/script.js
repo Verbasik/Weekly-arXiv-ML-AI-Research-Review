@@ -54,7 +54,7 @@ function createYearSection(year, parentElement) {
     yearSection.id = year;
     yearSection.className = 'year-section';
     yearSection.innerHTML = `
-        <h2 class="year-title">${year} Papers</h2>
+        <h2 class="year-title section-heading">${year} Papers</h2>
         <div class="weeks-grid"></div>
     `;
     parentElement.appendChild(yearSection);
@@ -70,7 +70,7 @@ function createWeekCard(yearSection, year, weekData) {
     card.setAttribute('data-week', weekData.week);
     card.setAttribute('data-year', year);
 
-    const tagsHtml = weekData.tags?.map(tag => `<span><i class="fas fa-tag"></i> ${tag}</span>`).join('') || '';
+    const tagsHtml = weekData.tags?.map(tag => `<span class="mono"><i class="fas fa-tag"></i> ${tag}</span>`).join('') || '';
     const dateHtml = weekData.date ? `<span><i class="far fa-calendar"></i> ${weekData.date}</span>` : '';
 
     const footerItems = [];
@@ -108,7 +108,7 @@ function createWeekCard(yearSection, year, weekData) {
         <div class="week-card-body">
             <div class="week-card-meta">${dateHtml} ${tagsHtml}</div>
             <p class="week-card-desc">${weekData.description || 'No description available.'}</p>
-            <button class="btn btn-outline read-review">Read Review</button>
+            <button class="gradient-button read-review">Read Review</button>
         </div>
         <div class="week-card-footer">
             ${footerItems.join('')}
