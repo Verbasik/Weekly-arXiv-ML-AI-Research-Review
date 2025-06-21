@@ -141,6 +141,8 @@ Mamba демонстрирует выдающуюся производитель
 
 Теперь запишем формулы, описывающие переход от шага $t-1$ к шагу $t$:
 
+{% raw %}
+
 $$
 \boxed{%
 \begin{aligned}
@@ -148,6 +150,8 @@ h_t &= \sigma_h\!\bigl(W_{xh}x_t + W_{hh}h_{t-1} + b_h\bigr), & h_0&=\mathbf0,\\
 y_t &= \sigma_y\!\bigl(W_{hy}h_t + b_y\bigr).
 \end{aligned}}
 $$
+
+{% endraw %}
 
 **Пояснения:**
 
