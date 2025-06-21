@@ -64,6 +64,11 @@
 html {
     font-size: 16px;
     scroll-behavior: smooth;
+    overflow-x: hidden !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 body {
@@ -72,9 +77,13 @@ body {
     line-height: var(--line-height-base);
     color: var(--text);
     background-color: var(--bg);
-    overflow-x: hidden;
+    overflow-x: hidden !important;
     position: relative;
     min-height: 100vh;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
     
     /* Улучшенный рендеринг шрифтов */
     -webkit-font-smoothing: antialiased;
@@ -130,6 +139,15 @@ p {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 var(--spacing-3);
+}
+
+/* Выравнивание границ для согласованного layout */
+:root {
+    /* Добавляем переменные для точного выравнивания */
+    --content-max-width: 1200px;
+    --content-padding: var(--spacing-3);
+    --sidebar-width: 280px;
+    --sidebar-gap: var(--spacing-4);
 }
 
 /* Gradient Button Component */
@@ -218,10 +236,10 @@ p {
 
 /* ==================== HEADER ==================== */
 header {
-    padding: var(--spacing-4) 0;
+    padding: var(--spacing-4) 0 0 0;
     position: relative;
     z-index: var(--z-header);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    /* Убираем border-bottom, чтобы не было линии */
 }
 
 .header-content {
@@ -287,33 +305,67 @@ header {
 
 /* ==================== NAVIGATION ==================== */
 nav {
-    background: var(--surface);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    /* Убираем фон с nav, чтобы он был прозрачным */
+    background: transparent;
+    border-bottom: none;
     position: sticky;
     top: 0;
     z-index: var(--z-header);
-    backdrop-filter: blur(20px);
+    /* РАДИКАЛЬНЫЙ СБРОС ВСЕХ СТИЛЕЙ */
+    overflow-x: hidden !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    padding: var(--spacing-2) 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    transform: none !important;
 }
 
 .nav-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: var(--spacing-2) 0;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    max-width: var(--content-max-width) !important;
+    margin: 0 auto !important;
+    padding: var(--spacing-2) var(--content-padding) !important;
+    /* ПРИНУДИТЕЛЬНОЕ ОГРАНИЧЕНИЕ ШИРИНЫ */
+    width: 100% !important;
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    
+    /* СТЕКЛЯННЫЙ БЛОК КАК У ДРУГИХ ЭЛЕМЕНТОВ */
+    background: var(--surface) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: var(--border-radius) !important;
+    backdrop-filter: blur(20px) !important;
+    box-shadow: var(--shadow-elev1) !important;
 }
 
 .nav-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    gap: var(--spacing-4);
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+    gap: var(--spacing-4) !important;
+    /* ПРИНУДИТЕЛЬНЫЙ КОНТРОЛЬ ПЕРЕПОЛНЕНИЯ */
+    min-width: 0 !important;
+    flex-wrap: nowrap !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
 }
 
 .nav-links {
     display: flex;
     list-style: none;
     gap: var(--spacing-3);
+    /* Диагностика: позволяем сжиматься */
+    flex-shrink: 1;
+    min-width: 0;
 }
 
 .nav-links a {
@@ -400,7 +452,8 @@ nav {
     padding: 8px var(--spacing-2);
     font-size: var(--font-size-sm);
     flex: 1;
-    min-width: 200px;
+    min-width: 150px; /* Уменьшил минимальную ширину */
+    max-width: 250px; /* Добавил максимальную ширину */
 }
 
 .search-bar input::placeholder {
@@ -446,11 +499,16 @@ main {
     padding: var(--spacing-4) 0;
 }
 
+/* Main больше не нуждается в .container классе, так как .sidebar-layout управляет выравниванием */
+
 .sidebar-layout {
     display: grid;
-    grid-template-columns: 280px 1fr;
-    gap: var(--spacing-4);
+    grid-template-columns: var(--sidebar-width) 1fr;
+    gap: var(--sidebar-gap);
     align-items: start;
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: 0 var(--content-padding);
 }
 
 /* Sidebar */
@@ -912,9 +970,14 @@ footer {
 
 /* ==================== RESPONSIVE DESIGN ==================== */
 @media (max-width: 1024px) {
+    :root {
+        --sidebar-width: 240px;
+        --sidebar-gap: var(--spacing-3);
+    }
+    
     .sidebar-layout {
-        grid-template-columns: 240px 1fr;
-        gap: var(--spacing-3);
+        grid-template-columns: var(--sidebar-width) 1fr;
+        gap: var(--sidebar-gap);
     }
 }
 
@@ -923,10 +986,11 @@ footer {
         --font-size-base: 16px;
         --font-size-2xl: 36px;
         --font-size-3xl: 48px;
+        --content-padding: var(--spacing-2);
     }
     
     .container {
-        padding: 0 var(--spacing-2);
+        padding: 0 var(--content-padding);
     }
     
     .header-content {
@@ -985,7 +1049,12 @@ footer {
     }
     
     .search-bar input {
-        min-width: 120px;
+        min-width: 100px;
+        max-width: 150px;
+    }
+    
+    .nav-links {
+        gap: var(--spacing-2);
     }
     
     .week-card-footer {
@@ -1019,6 +1088,10 @@ footer {
         --shadow-elev3: 0 8px 32px rgba(0,0,0,0.8);
     }
 }
+
+
+
+
 
 /* ==================== MARKDOWN CONTENT STYLES ==================== */
 .modal-content .markdown-body {
