@@ -15,7 +15,7 @@ export class GitHubDataSource {
      * Получает данные из index.json
      */
     async fetchData() {
-        const jsonUrl = `${this.baseUrl}/web/index.json`;
+        const jsonUrl = `${this.baseUrl}/web/infrastructure/data/index.json`;
         
         try {
             const response = await fetchWithRetry(jsonUrl, {}, 'данные статей');
