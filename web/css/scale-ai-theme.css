@@ -492,6 +492,7 @@ nav {
     -webkit-text-fill-color: transparent;
     background-clip: text;
     margin-bottom: var(--spacing-3);
+    font-size: var(--font-size-2xl);
 }
 
 /* ==================== MAIN CONTENT ==================== */
@@ -613,18 +614,24 @@ main {
     -webkit-text-fill-color: transparent;
     background-clip: text;
     margin-bottom: var(--spacing-3);
+    font-size: var(--font-size-2xl);
+}
+
+#home ul {
+    list-style: none;
+    margin-left: 0;
+    padding-left: 0;
 }
 
 #home ul li {
     margin-bottom: var(--spacing-1);
-    position: relative;
-    padding-left: var(--spacing-3);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-1);
 }
 
 #home ul li::before {
     content: "→";
-    position: absolute;
-    left: 0;
     color: #AA4CE9;
     font-weight: 600;
 }
