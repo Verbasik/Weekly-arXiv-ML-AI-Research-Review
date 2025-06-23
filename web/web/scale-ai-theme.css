@@ -968,6 +968,175 @@ footer {
     margin: var(--spacing-3) 0;
 }
 
+/* ==================== УЛУЧШЕННЫЙ ERROR HANDLING UI ==================== */
+.error-message.enhanced {
+    background: var(--surface);
+    border: 1px solid rgba(255, 71, 71, 0.4);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-4);
+    margin: var(--spacing-3) 0;
+    box-shadow: var(--shadow-elev2);
+    backdrop-filter: blur(20px);
+}
+
+.error-header h4 {
+    color: #ff6b6b;
+    margin-bottom: var(--spacing-2);
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-1);
+}
+
+.error-body {
+    margin-bottom: var(--spacing-3);
+}
+
+.error-body p {
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-1);
+    line-height: var(--line-height-relaxed);
+}
+
+.offline-notice {
+    color: #ffa726 !important;
+    font-style: italic;
+    font-size: var(--font-size-sm);
+    margin-top: var(--spacing-2) !important;
+    padding: var(--spacing-1) var(--spacing-2);
+    background: rgba(255, 167, 38, 0.1);
+    border-radius: var(--border-radius-small);
+    border-left: 3px solid #ffa726;
+}
+
+.error-actions {
+    display: flex;
+    gap: var(--spacing-2);
+    flex-wrap: wrap;
+}
+
+.error-actions .gradient-button {
+    min-width: 140px;
+    font-size: var(--font-size-sm);
+}
+
+.error-actions .gradient-button.secondary {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-secondary);
+}
+
+.error-actions .gradient-button.secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--text);
+}
+
+/* ==================== УЛУЧШЕННЫЕ ИНДИКАТОРЫ ЗАГРУЗКИ ==================== */
+.loading-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-6);
+    text-align: center;
+    background: var(--surface);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius);
+    margin: var(--spacing-3) 0;
+    backdrop-filter: blur(20px);
+}
+
+.loading-indicator p {
+    color: var(--text-secondary);
+    margin-top: var(--spacing-2);
+    font-size: var(--font-size-base);
+}
+
+.loading-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-5);
+    text-align: center;
+}
+
+.loading-content p {
+    color: var(--text-secondary);
+    margin-top: var(--spacing-2);
+    font-size: var(--font-size-base);
+}
+
+.loading-tip {
+    font-size: var(--font-size-sm) !important;
+    color: var(--text-muted) !important;
+    font-style: italic;
+    margin-top: var(--spacing-1) !important;
+}
+
+/* Анимированный loader с улучшенным дизайном */
+.loader {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    border-top: 3px solid;
+    border-top-color: #AA4CE9;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+    position: relative;
+}
+
+.loader::after {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    border: 1px solid rgba(170, 76, 233, 0.1);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.1); }
+}
+
+/* ==================== NETWORK STATUS INDICATOR ==================== */
+.network-status {
+    position: fixed;
+    top: var(--spacing-2);
+    right: var(--spacing-2);
+    padding: var(--spacing-1) var(--spacing-2);
+    border-radius: var(--border-radius-small);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    z-index: var(--z-modal);
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.network-status.online {
+    background: rgba(76, 175, 80, 0.9);
+    color: white;
+    opacity: 0;
+}
+
+.network-status.offline {
+    background: rgba(244, 67, 54, 0.9);
+    color: white;
+    opacity: 1;
+}
+
+.network-status.reconnecting {
+    background: rgba(255, 152, 0, 0.9);
+    color: white;
+    opacity: 1;
+}
+
 /* ==================== RESPONSIVE DESIGN ==================== */
 @media (max-width: 1024px) {
     :root {

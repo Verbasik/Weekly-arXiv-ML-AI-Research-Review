@@ -4,6 +4,207 @@
 const GITHUB_REPO = 'Verbasik/Weekly-arXiv-ML-AI-Research-Review';
 const GITHUB_BRANCH = 'develop'; // Или 'main', если ветка называется так
 
+// ==================== УЛУЧШЕННЫЙ ERROR HANDLING ==================== 
+
+// Конфигурация для retry механизма
+const RETRY_CONFIG = {
+    maxRetries: 3,
+    baseDelay: 1000, // 1 секунда
+    maxDelay: 10000, // 10 секунд
+    backoffFactor: 2
+};
+
+// Утилиты для error handling
+const ErrorHandler = {
+    // Проверка подключения к интернету
+    isOnline: () => navigator.onLine,
+    
+    // Определение типа ошибки
+    classifyError: (error, response = null) => {
+        if (!navigator.onLine) {
+            return { type: 'offline', severity: 'high', retryable: true };
+        }
+        
+        if (response) {
+            if (response.status === 404) {
+                return { type: 'not_found', severity: 'medium', retryable: false };
+            }
+            if (response.status >= 500) {
+                return { type: 'server_error', severity: 'high', retryable: true };
+            }
+            if (response.status === 403) {
+                return { type: 'forbidden', severity: 'medium', retryable: false };
+            }
+            if (response.status >= 400) {
+                return { type: 'client_error', severity: 'medium', retryable: false };
+            }
+        }
+        
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            return { type: 'network', severity: 'high', retryable: true };
+        }
+        
+        return { type: 'unknown', severity: 'medium', retryable: true };
+    },
+    
+    // Генерация пользовательских сообщений
+    getUserMessage: (errorType, context = '') => {
+        const messages = {
+            offline: {
+                title: '🌐 Нет подключения к интернету',
+                message: 'Проверьте подключение к сети и попробуйте снова.',
+                action: 'Повторить попытку'
+            },
+            not_found: {
+                title: '📄 Контент не найден',
+                message: `${context} не найден. Возможно, он еще не опубликован или был перемещен.`,
+                action: 'Вернуться к списку'
+            },
+            server_error: {
+                title: '⚠️ Ошибка сервера',
+                message: 'Временные проблемы с сервером. Мы работаем над их устранением.',
+                action: 'Повторить попытку'
+            },
+            forbidden: {
+                title: '🔒 Доступ ограничен',
+                message: 'У вас нет прав для просмотра этого контента.',
+                action: 'Вернуться к списку'
+            },
+            client_error: {
+                title: '❌ Ошибка запроса',
+                message: 'Произошла ошибка при загрузке данных.',
+                action: 'Повторить попытку'
+            },
+            network: {
+                title: '🌐 Проблемы с сетью',
+                message: 'Не удается подключиться к серверу. Проверьте интернет-соединение.',
+                action: 'Повторить попытку'
+            },
+            unknown: {
+                title: '⚠️ Неизвестная ошибка',
+                message: 'Произошла непредвиденная ошибка. Попробуйте обновить страницу.',
+                action: 'Повторить попытку'
+            }
+        };
+        
+        return messages[errorType] || messages.unknown;
+    },
+    
+    // Задержка с экспоненциальным backoff
+    delay: (attempt) => {
+        const delay = Math.min(
+            RETRY_CONFIG.baseDelay * Math.pow(RETRY_CONFIG.backoffFactor, attempt),
+            RETRY_CONFIG.maxDelay
+        );
+        return new Promise(resolve => setTimeout(resolve, delay));
+    }
+};
+
+// Улучшенная функция fetch с retry
+async function fetchWithRetry(url, options = {}, context = '') {
+    let lastError = null;
+    let lastResponse = null;
+    
+    for (let attempt = 0; attempt <= RETRY_CONFIG.maxRetries; attempt++) {
+        try {
+            // Проверяем подключение перед запросом
+            if (!ErrorHandler.isOnline()) {
+                throw new Error('No internet connection');
+            }
+            
+            // Создаем AbortController для timeout (совместимость с старыми браузерами)
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 секунд timeout
+            
+            const response = await fetch(url, {
+                ...options,
+                signal: controller.signal
+            });
+            
+            clearTimeout(timeoutId);
+            
+            lastResponse = response;
+            
+            if (!response.ok) {
+                const errorInfo = ErrorHandler.classifyError(null, response);
+                
+                // Если ошибка не требует retry, выбрасываем сразу
+                if (!errorInfo.retryable) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                // Если это последняя попытка, выбрасываем ошибку
+                if (attempt === RETRY_CONFIG.maxRetries) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                // Ждем перед следующей попыткой
+                console.warn(`Attempt ${attempt + 1} failed, retrying in ${RETRY_CONFIG.baseDelay * Math.pow(RETRY_CONFIG.backoffFactor, attempt)}ms...`);
+                await ErrorHandler.delay(attempt);
+                continue;
+            }
+            
+            return response;
+            
+        } catch (error) {
+            lastError = error;
+            
+            // Если это AbortError (timeout), классифицируем как network error
+            if (error.name === 'AbortError') {
+                lastError = new Error('Request timeout');
+            }
+            
+            const errorInfo = ErrorHandler.classifyError(lastError, lastResponse);
+            
+            // Если ошибка не требует retry или это последняя попытка
+            if (!errorInfo.retryable || attempt === RETRY_CONFIG.maxRetries) {
+                throw lastError;
+            }
+            
+            // Ждем перед следующей попыткой
+            console.warn(`Attempt ${attempt + 1} failed: ${lastError.message}, retrying in ${RETRY_CONFIG.baseDelay * Math.pow(RETRY_CONFIG.backoffFactor, attempt)}ms...`);
+            await ErrorHandler.delay(attempt);
+        }
+    }
+    
+    throw lastError;
+}
+
+// Создание улучшенного error UI
+function createErrorUI(errorType, context = '', onRetry = null, onBack = null) {
+    const userMessage = ErrorHandler.getUserMessage(errorType, context);
+    
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'error-message enhanced';
+    
+    errorDiv.innerHTML = `
+        <div class="error-header">
+            <h4>${userMessage.title}</h4>
+        </div>
+        <div class="error-body">
+            <p>${userMessage.message}</p>
+            ${!ErrorHandler.isOnline() ? '<p class="offline-notice">📡 Ожидание подключения к интернету...</p>' : ''}
+        </div>
+        <div class="error-actions">
+            ${onRetry ? `<button class="gradient-button retry-button">${userMessage.action}</button>` : ''}
+            ${onBack ? '<button class="gradient-button secondary back-button">← Назад к списку</button>' : ''}
+        </div>
+    `;
+    
+    // Добавляем обработчики событий
+    if (onRetry) {
+        const retryButton = errorDiv.querySelector('.retry-button');
+        retryButton?.addEventListener('click', onRetry);
+    }
+    
+    if (onBack) {
+        const backButton = errorDiv.querySelector('.back-button');
+        backButton?.addEventListener('click', onBack);
+    }
+    
+    return errorDiv;
+}
+
 // Получение основных элементов DOM
 const contentElement = document.querySelector('.content');
 const modal = document.getElementById('markdown-modal');
@@ -24,10 +225,21 @@ async function loadWeeksData() {
         return;
     }
 
+    // Показываем индикатор загрузки
+    const loadingIndicator = document.createElement('div');
+    loadingIndicator.className = 'loading-indicator';
+    loadingIndicator.innerHTML = `
+        <div class="loader"></div>
+        <p>Загрузка статей...</p>
+    `;
+    contentElement.appendChild(loadingIndicator);
+
     try {
-        const response = await fetch(jsonUrl);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const response = await fetchWithRetry(jsonUrl, {}, 'данные статей');
         const data = await response.json();
+
+        // Удаляем индикатор загрузки
+        loadingIndicator.remove();
 
         // Очистка старых секций
         contentElement.querySelectorAll('.year-section:not(#home)').forEach(section => section.remove());
@@ -45,7 +257,36 @@ async function loadWeeksData() {
 
     } catch (error) {
         console.error('Error loading weeks data:', error);
-        contentElement.innerHTML += `<div class="error-message"><p>Could not load data. Error: ${error.message}</p></div>`;
+        
+        // Удаляем индикатор загрузки
+        loadingIndicator.remove();
+        
+        // Определяем тип ошибки
+        const errorInfo = ErrorHandler.classifyError(error);
+        
+        // Создаем улучшенный error UI
+        const errorUI = createErrorUI(
+            errorInfo.type, 
+            'данные статей',
+            () => {
+                // Retry callback
+                errorUI.remove();
+                loadWeeksData();
+            },
+            null // Нет кнопки "Назад" для главной загрузки
+        );
+        
+        contentElement.appendChild(errorUI);
+        
+        // Автоматическая попытка перезагрузки при восстановлении соединения
+        if (errorInfo.type === 'offline') {
+            const handleOnline = () => {
+                errorUI.remove();
+                loadWeeksData();
+                window.removeEventListener('online', handleOnline);
+            };
+            window.addEventListener('online', handleOnline);
+        }
     }
 }
 
@@ -162,13 +403,25 @@ async function loadMarkdownFromGitHub(year, week) {
         return false;
     }
 
+    // Улучшенный индикатор загрузки
     loader.style.display = 'block';
-    markdownContent.innerHTML = '';
+    markdownContent.innerHTML = `
+        <div class="loading-content">
+            <div class="loader"></div>
+            <p>Загрузка статьи "${year}/${week}"...</p>
+            <p class="loading-tip">💡 Обычно это занимает несколько секунд</p>
+        </div>
+    `;
 
     try {
-        const response = await fetch(reviewUrl);
-        if (!response.ok) throw new Error(`Failed to fetch review. Status: ${response.status}`);
+        // Используем улучшенную функцию fetch с retry
+        const response = await fetchWithRetry(reviewUrl, {}, `статья "${year}/${week}"`);
         let markdown = await response.text();
+
+        // Проверяем, что markdown не пустой
+        if (!markdown.trim()) {
+            throw new Error('Статья пуста или не содержит контента');
+        }
 
         // 1. Изоляция формул MathJax
         const mathPlaceholders = {};
@@ -181,8 +434,16 @@ async function loadMarkdownFromGitHub(year, week) {
         });
 
         // 2. Преобразование Markdown в HTML
-        if (typeof marked === 'undefined') throw new Error("Marked.js library not loaded.");
-        const html = marked.parse(markdown);
+        if (typeof marked === 'undefined') {
+            throw new Error("Библиотека Marked.js не загружена. Попробуйте обновить страницу.");
+        }
+        
+        let html;
+        try {
+            html = marked.parse(markdown);
+        } catch (markdownError) {
+            throw new Error(`Ошибка обработки Markdown: ${markdownError.message}`);
+        }
 
         // 3. Вставка HTML
         markdownContent.innerHTML = html;
@@ -196,12 +457,17 @@ async function loadMarkdownFromGitHub(year, week) {
         });
 
         // 5. Рендеринг MathJax
-        if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
-            MathJax.texReset?.();
-            MathJax.typesetClear?.([markdownContent]);
-            await MathJax.typesetPromise([markdownContent]);
-        } else {
-            console.warn("MathJax 3 not found or not configured.");
+        try {
+            if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+                MathJax.texReset?.();
+                MathJax.typesetClear?.([markdownContent]);
+                await MathJax.typesetPromise([markdownContent]);
+            } else {
+                console.warn("MathJax 3 not found or not configured.");
+            }
+        } catch (mathJaxError) {
+            console.warn("MathJax rendering failed:", mathJaxError);
+            // Не выбрасываем ошибку, так как статья может отображаться без формул
         }
 
         loader.style.display = 'none';
@@ -209,8 +475,37 @@ async function loadMarkdownFromGitHub(year, week) {
 
     } catch (error) {
         console.error('Error loading or processing markdown:', error);
-        markdownContent.innerHTML = `<div class="error-message"><h4>Error</h4><p>${error.message}</p></div>`;
+        
+        // Определяем тип ошибки
+        const errorInfo = ErrorHandler.classifyError(error);
+        
+        // Создаем улучшенный error UI для модального окна
+        const errorUI = createErrorUI(
+            errorInfo.type,
+            `статья "${year}/${week}"`,
+            () => {
+                // Retry callback
+                loadMarkdownFromGitHub(year, week);
+            },
+            () => {
+                // Back callback - закрываем модальное окно
+                closeModal();
+            }
+        );
+        
+        markdownContent.innerHTML = '';
+        markdownContent.appendChild(errorUI);
         loader.style.display = 'none';
+        
+        // Автоматическая попытка перезагрузки при восстановлении соединения
+        if (errorInfo.type === 'offline') {
+            const handleOnline = () => {
+                loadMarkdownFromGitHub(year, week);
+                window.removeEventListener('online', handleOnline);
+            };
+            window.addEventListener('online', handleOnline);
+        }
+        
         return false;
     }
 }
@@ -325,7 +620,163 @@ searchInput?.addEventListener('keypress', (e) => {
     }
 });
 
+// ==================== NETWORK STATUS MONITORING ====================
+
+// Создание индикатора статуса сети
+function createNetworkStatusIndicator() {
+    const indicator = document.createElement('div');
+    indicator.className = 'network-status online';
+    indicator.innerHTML = '🌐 Онлайн';
+    document.body.appendChild(indicator);
+    return indicator;
+}
+
+// Управление статусом сети
+function initNetworkMonitoring() {
+    const indicator = createNetworkStatusIndicator();
+    
+    // Обработчики событий сети
+    window.addEventListener('online', () => {
+        indicator.className = 'network-status online';
+        indicator.innerHTML = '🌐 Подключение восстановлено';
+        
+        // Скрываем индикатор через 3 секунды
+        setTimeout(() => {
+            indicator.style.opacity = '0';
+        }, 3000);
+        
+        console.log('Network connection restored');
+    });
+    
+    window.addEventListener('offline', () => {
+        indicator.className = 'network-status offline';
+        indicator.innerHTML = '📡 Нет подключения';
+        indicator.style.opacity = '1';
+        
+        console.log('Network connection lost');
+    });
+    
+    // Проверяем начальное состояние
+    if (!navigator.onLine) {
+        indicator.className = 'network-status offline';
+        indicator.innerHTML = '📡 Нет подключения';
+        indicator.style.opacity = '1';
+    }
+}
+
+// ==================== УЛУЧШЕННАЯ ИНИЦИАЛИЗАЦИЯ ====================
+
+// Функция инициализации с error handling
+async function initializeApp() {
+    try {
+        // Инициализируем мониторинг сети
+        initNetworkMonitoring();
+        
+        // Загружаем данные
+        await loadWeeksData();
+        
+        // Проверяем URL hash
+        checkUrlHash();
+        
+        console.log('Application initialized successfully');
+        
+    } catch (error) {
+        console.error('Failed to initialize application:', error);
+        
+        // Показываем критическую ошибку
+        if (contentElement) {
+            const criticalError = createErrorUI(
+                'unknown',
+                'приложение',
+                () => {
+                    window.location.reload();
+                },
+                null
+            );
+            
+            contentElement.innerHTML = '';
+            contentElement.appendChild(criticalError);
+        }
+    }
+}
+
+// Улучшенная функция обработки поиска
+function performSearch(query) {
+    if (!query) return;
+    
+    // Временная заглушка с улучшенным UX
+    const searchModal = document.createElement('div');
+    searchModal.className = 'modal';
+    searchModal.style.display = 'flex';
+    
+    searchModal.innerHTML = `
+        <div class="modal-content" style="max-width: 500px;">
+            <span class="close-modal">×</span>
+            <h2>🔍 Поиск</h2>
+            <p>Функция поиска находится в разработке.</p>
+            <p><strong>Ваш запрос:</strong> "${query}"</p>
+            <div style="margin-top: 20px;">
+                <p><strong>Пока что вы можете:</strong></p>
+                <ul style="text-align: left; margin-top: 10px;">
+                    <li>Просматривать статьи по годам в боковой панели</li>
+                    <li>Использовать теги для фильтрации</li>
+                    <li>Просматривать популярные статьи</li>
+                </ul>
+            </div>
+            <button class="gradient-button" onclick="this.closest('.modal').remove()">Понятно</button>
+        </div>
+    `;
+    
+    document.body.appendChild(searchModal);
+    
+    // Обработчик закрытия
+    searchModal.querySelector('.close-modal').addEventListener('click', () => {
+        searchModal.remove();
+    });
+    
+    // Закрытие по клику вне модального окна
+    searchModal.addEventListener('click', (e) => {
+        if (e.target === searchModal) {
+            searchModal.remove();
+        }
+    });
+}
+
 // --- Инициализация ---
 
-window.addEventListener('DOMContentLoaded', loadWeeksData);
+// Используем улучшенную инициализацию
+window.addEventListener('DOMContentLoaded', initializeApp);
 window.addEventListener('hashchange', checkUrlHash);
+
+// Добавляем обработчик для unhandled promise rejections
+window.addEventListener('unhandledrejection', (event) => {
+    console.error('Unhandled promise rejection:', event.reason);
+    
+    // Предотвращаем показ ошибки в консоли браузера
+    event.preventDefault();
+    
+    // Можно добавить уведомление пользователю о проблеме
+    const notification = document.createElement('div');
+    notification.className = 'error-notification';
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: rgba(244, 67, 54, 0.9);
+        color: white;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        z-index: 10000;
+        max-width: 300px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    `;
+    notification.innerHTML = '⚠️ Произошла неожиданная ошибка';
+    
+    document.body.appendChild(notification);
+    
+    // Удаляем уведомление через 5 секунд
+    setTimeout(() => {
+        notification.remove();
+    }, 5000);
+});
