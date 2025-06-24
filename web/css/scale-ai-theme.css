@@ -1239,6 +1239,494 @@ footer {
     }
 }
 
+/* ==================== ABOUT PAGE STYLES ==================== */
+
+/* About Content Layout */
+.about-content {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: var(--spacing-4) 0;
+}
+
+/* About section styling with right margin for titles */
+.about-content .glass-surface {
+    padding: var(--spacing-4);
+}
+
+.about-content .glass-surface h2.section-heading {
+    margin-left: var(--spacing-3);
+    margin-bottom: var(--spacing-4);
+}
+
+/* About Hero Section */
+.about-hero {
+    text-align: center;
+    padding: var(--spacing-6) 0;
+    margin-bottom: var(--spacing-4);
+}
+
+.hero-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-4);
+}
+
+.avatar-section {
+    display: flex;
+    justify-content: center;
+    margin-bottom: var(--spacing-2);
+}
+
+.avatar-placeholder {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: var(--accent-grad);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: white;
+    box-shadow: var(--shadow-elev2);
+    animation: gradientBreath 8s linear infinite;
+}
+
+.hero-text {
+    max-width: 800px;
+}
+
+.hero-description {
+    font-size: var(--font-size-lg);
+    line-height: var(--line-height-relaxed);
+    margin-bottom: var(--spacing-3);
+    color: var(--text-secondary);
+}
+
+.current-position {
+    background: var(--surface);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-3);
+    backdrop-filter: blur(20px);
+    box-shadow: var(--shadow-elev1);
+}
+
+.current-position h3 {
+    color: var(--text);
+    margin-bottom: var(--spacing-1);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-1);
+    justify-content: center;
+}
+
+.current-position p {
+    color: var(--text-muted);
+    font-size: var(--font-size-lg);
+    margin: 0;
+}
+
+/* Timeline Styles */
+.timeline {
+    position: relative;
+    padding-left: var(--spacing-4);
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, var(--accent-grad));
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: var(--spacing-4);
+    padding-left: var(--spacing-4);
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -28px;
+    top: 8px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    z-index: 1;
+}
+
+.timeline-marker.current {
+    background: var(--accent-grad);
+    border-color: white;
+    box-shadow: 0 0 20px rgba(170, 76, 233, 0.5);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.timeline-content h3 {
+    color: var(--text);
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--spacing-1);
+}
+
+.timeline-content .company {
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.timeline-content .period {
+    color: #AA4CE9;
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    margin-bottom: var(--spacing-1);
+}
+
+.timeline-content .description {
+    color: var(--text-secondary);
+    line-height: var(--line-height-relaxed);
+}
+
+/* Education Grid */
+.education-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-3);
+    margin-top: var(--spacing-3);
+}
+
+.education-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-3);
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.education-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-elev2);
+    border-color: rgba(170, 76, 233, 0.3);
+}
+
+.education-icon {
+    font-size: 2.5rem;
+    color: #AA4CE9;
+    margin-bottom: var(--spacing-2);
+}
+
+.education-card h3 {
+    color: var(--text);
+    margin-bottom: var(--spacing-1);
+}
+
+.education-card .university {
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.education-card .location {
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+    margin-bottom: 8px;
+}
+
+.education-card .specialization {
+    color: var(--text);
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+    margin-bottom: 4px;
+}
+
+.education-card .focus {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    font-style: italic;
+    margin-bottom: 8px;
+}
+
+.education-card .year {
+    color: #AA4CE9;
+    font-weight: 600;
+    font-size: var(--font-size-lg);
+}
+
+/* Courses Grid */
+.courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: var(--spacing-3);
+    margin-top: var(--spacing-3);
+}
+
+.course-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-3);
+    transition: all 0.3s ease;
+}
+
+.course-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-elev2);
+    border-color: rgba(170, 76, 233, 0.3);
+}
+
+.course-icon {
+    font-size: 2rem;
+    color: #AA4CE9;
+    margin-bottom: var(--spacing-2);
+}
+
+.course-card h3 {
+    color: var(--text);
+    margin-bottom: var(--spacing-1);
+    font-size: var(--font-size-base);
+}
+
+.course-card .provider {
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-bottom: var(--spacing-2);
+}
+
+.course-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Research & Interests */
+.interests-content {
+    margin-top: var(--spacing-3);
+}
+
+.current-research {
+    margin-bottom: var(--spacing-4);
+}
+
+.current-research h3 {
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-1);
+    margin-bottom: var(--spacing-2);
+}
+
+.research-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-3);
+    border-left: 4px solid var(--accent-grad);
+}
+
+.research-card h4 {
+    color: var(--text);
+    margin-bottom: var(--spacing-1);
+    font-size: var(--font-size-lg);
+}
+
+.research-card p {
+    color: var(--text-secondary);
+    line-height: var(--line-height-relaxed);
+    margin-bottom: var(--spacing-2);
+}
+
+.research-results {
+    background: rgba(170, 76, 233, 0.1);
+    border: 1px solid rgba(170, 76, 233, 0.2);
+    border-radius: var(--border-radius-small);
+    padding: var(--spacing-2);
+    margin: var(--spacing-2) 0;
+}
+
+.research-results h5 {
+    color: #AA4CE9;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    margin-bottom: var(--spacing-1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.research-results ul {
+    margin: 0;
+    padding-left: var(--spacing-3);
+    color: var(--text-secondary);
+}
+
+.research-results li {
+    margin-bottom: 8px;
+    line-height: var(--line-height-relaxed);
+}
+
+.research-results li:last-child {
+    margin-bottom: 0;
+}
+
+.research-results strong {
+    color: #AA4CE9;
+    font-weight: 600;
+}
+
+.research-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.interests-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-3);
+}
+
+.interest-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-3);
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.interest-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-elev2);
+    border-color: rgba(170, 76, 233, 0.3);
+}
+
+.interest-icon {
+    font-size: 2.5rem;
+    color: #AA4CE9;
+    margin-bottom: var(--spacing-2);
+}
+
+.interest-card h3 {
+    color: var(--text);
+    margin-bottom: var(--spacing-1);
+}
+
+.interest-card p {
+    color: var(--text-secondary);
+    line-height: var(--line-height-relaxed);
+}
+
+/* Philosophy Section */
+.philosophy-content blockquote {
+    background: rgba(255, 255, 255, 0.05);
+    border-left: 4px solid var(--accent-grad);
+    padding: var(--spacing-3);
+    margin: var(--spacing-3) 0;
+    border-radius: var(--border-radius-small);
+    font-style: italic;
+    font-size: var(--font-size-lg);
+    color: var(--text-secondary);
+}
+
+.principles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-3);
+    margin-top: var(--spacing-3);
+}
+
+.principle-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-3);
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.principle-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-elev2);
+    border-color: rgba(170, 76, 233, 0.3);
+}
+
+.principle-card i {
+    font-size: 2rem;
+    color: #AA4CE9;
+    margin-bottom: var(--spacing-2);
+    display: block;
+}
+
+.principle-card h3 {
+    color: var(--text);
+    margin-bottom: var(--spacing-1);
+}
+
+.principle-card p {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-relaxed);
+}
+
+/* Active navigation link */
+.nav-links a.active {
+    color: var(--text);
+    background: rgba(170, 76, 233, 0.2);
+    border-color: rgba(170, 76, 233, 0.3);
+}
+
+/* Responsive adjustments for About page */
+@media (max-width: 768px) {
+    .about-content {
+        padding: var(--spacing-2);
+    }
+    
+    .hero-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .avatar-placeholder {
+        width: 100px;
+        height: 100px;
+        font-size: 2.5rem;
+    }
+    
+    .hero-description {
+        font-size: var(--font-size-base);
+    }
+    
+    .timeline {
+        padding-left: var(--spacing-3);
+    }
+    
+    .timeline-item {
+        padding-left: var(--spacing-3);
+    }
+    
+    .timeline-marker {
+        left: -24px;
+    }
+    
+    .education-grid,
+    .courses-grid,
+    .interests-grid,
+    .principles-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .course-tags,
+    .research-tags {
+        justify-content: center;
+    }
+}
+
 /* ==================== ACCESSIBILITY ==================== */
 @media (prefers-reduced-motion: reduce) {
     *,
