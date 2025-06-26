@@ -10,7 +10,8 @@
             "tags": ["LLMs", "Bio"],
             "description": "Сравнительный анализ биологических и искусственных нейронных сетей.",
             "papers": 1,
-            "notebooks": 1
+            "notebooks": 0,
+            "code": 0
           },
           {
             "week": "week-03",
@@ -19,7 +20,8 @@
             "tags": ["Math Reasoning", "Small LLMs"],
             "description": "rStar-Math: Математическая революция для малых языковых моделей.",
             "papers": 1,
-            "notebooks": 1
+            "notebooks": 0,
+            "code": 0
           },
           {
             "week": "week-04",
@@ -28,7 +30,8 @@
             "tags": ["Encoders", "Efficiency"],
             "description": "Преемник BERT: ModernBERT.",
             "papers": 1,
-            "notebooks": 2
+            "notebooks": 2,
+            "code": 0
           },
           {
             "week": "week-05",
@@ -37,7 +40,8 @@
             "tags": ["Deep Learning", "NLP", "Bio"],
             "description": "Процесс обучения в биологических и искусственных нейронных сетях.",
             "papers": 1,
-            "notebooks": 1
+            "notebooks": 0,
+            "code": 0
           },
           {
             "week": "week-06",
@@ -46,7 +50,8 @@
             "tags": ["DeepSpeed", "MoE", "Efficient Training"],
             "description": "MoE: Mixture of Experts - Революция в Архитектуре AI.",
             "papers": 1,
-            "notebooks": 1
+            "notebooks": 0,
+            "code": 0
           },
           {
             "week": "week-07_&_08",
@@ -54,8 +59,9 @@
             "date": "Feb 12-25, 2025",
             "tags": ["Transformers", "Architecture", "DeepSeek-V3", "DeepSeek R1"],
             "description": "От генерации к рассуждению: эволюция языковых моделей от Generative Pre-trained Transformers до reasoning-систем.",
-            "papers": 2,
-            "notebooks": 1
+            "papers": 1,
+            "notebooks": 0,
+            "code": 0
           },
           {
             "week": "week-09",
@@ -64,7 +70,8 @@
             "tags": ["Attention Mechanisms", "DeepSeek"],
             "description": "Native Sparse Attention: новый вид разреженного внимания от DeepSeek.",
             "papers": 1,
-            "notebooks": 1
+            "notebooks": 0,
+            "code": 0
           },
           {
             "week": "week-10",
@@ -72,8 +79,9 @@
             "date": "Mar 5-11, 2025",
             "tags": ["Transformers", "Bio"],
             "description": "Evo-2 — ИИ, который проектирует жизнь.",
-            "papers": 2,
-            "notebooks": 1
+            "papers": 1,
+            "notebooks": 0,
+            "code": 0
           },
           {
             "week": "week-11",
@@ -82,7 +90,8 @@
             "tags": ["Distillation", "Scaling Laws"],
             "description": "Законы масштабирования дистилляции.",
             "papers": 1,
-            "notebooks": 1
+            "notebooks": 0,
+            "code": 0
           },
           {
             "week": "week-12",
@@ -91,7 +100,9 @@
             "tags": ["Protocol", "Ai Agents"],
             "description": "Model Context Protocol (MCP).",
             "papers": 1,
-            "notebooks": 1
+            "notebooks": 0,
+            "code": 1,
+            "code_path": "2025/week-12/MCP"
           },
           {
             "week": "week-13",
@@ -100,7 +111,10 @@
             "tags": ["Reinforcement Learning", "LLMs"],
             "description": "DAPO: революционный RL-алгоритм от ByteDance.",
             "papers": 1,
-            "notebooks": 1
+            "notebooks": 2,
+            "code": 0,
+            "notebook_path": "2025/week-13/experiments"
+
           },
           {
             "week": "week-14",
@@ -109,7 +123,8 @@
             "tags": ["Qwen", "Multimodal", "LLMs"],
             "description": "Qwen2.5-Omni: Мультимодальная модель нового поколения.",
             "papers": 1,
-            "notebooks": 1
+            "notebooks": 0,
+            "code": 0
           },
           {
             "week": "week-15",
@@ -118,7 +133,8 @@
             "tags": ["LLMs", "KnowledgeAcquisition", "HallucinationsInAI"],
             "description": "Как LLM выучивают факты и почему они галлюцинируют?",
             "papers": 1,
-            "notebooks": 0
+            "notebooks": 0,
+            "code": 0
           },
           {
             "week": "week-16",
@@ -127,8 +143,8 @@
             "tags": ["Google", "Protocol", "A2A", "Ai Agents"],
             "description": "Эра мультиагентов? Google запускает A2A.",
             "papers": 1,
+            "notebooks": 0,
             "code": 1,
-            "notebook_path": null,
             "code_path": "2025/week-16/A2A"
           },
           {
@@ -138,9 +154,8 @@
             "tags": ["Nvidia", "Mamba", "Transformers", "Hybrid"],
             "description": "Mamba 2 + Transformer = Nemotron H",
             "papers": 1,
-            "code": null,
-            "notebook_path": null,
-            "code_path": null
+            "notebooks": 0,
+            "code": 0
           },
           {
             "week": "week-19",
@@ -150,6 +165,7 @@
             "description": "I-Con: периодическая таблица машинного обучения",
             "papers": 1,
             "notebooks": 2,
+            "code": 0,
             "notebook_path": "2025/week-19"
           },
           {
@@ -160,6 +176,7 @@
             "description": "Continuous Thought Machine - архитектура, вдохновленная биологическими нейронными процессами",
             "papers": 1,
             "notebooks": 1,
+            "code": 0,
             "notebook_path": "2025/week-20/example.ipynb"
           },
           {
@@ -170,6 +187,7 @@
             "description": "Репозиторий с интерактивными Jupyter-туториалами по машинному обучению",
             "papers": 0,
             "notebooks": 5,
+            "code": 0,
             "notebook_path": "2025/week-21"
           },
           {
@@ -185,9 +203,9 @@
           {
             "week": "week-23-25",
             "title": "Week 23-25: Сессия",
-            "date": "",
+            "date": "Jun 02-Jun 22, 2025",
             "tags": ["Study"],
-            "description": "",
+            "description": "В этот период технические обзоры не ожидаются, так как началась сессия.",
             "papers": 0,
             "notebooks": 0,
             "code": 0
@@ -214,7 +232,9 @@
             "tags": ["LLMs", "Weight Analysis"],
             "description": "Исследование «Супервесов» в больших языковых моделях (LLM)",
             "papers": 1,
-            "notebooks": 1
+            "notebooks": 1,
+            "code": 0,
+            "notebook_path": "2024/week-52/experiments.ipynb"
           }
         ]
       }

@@ -54,7 +54,11 @@ Eso-LMs представляют новую структуру обучения,
 
 Eso-LM достигают современного уровня перплексии среди дискретных диффузионных моделей на стандартных бенчмарках. На наборе данных One Billion Words, Eso-LM (A) превосходит предыдущие модели MDLM примерно на 1 PPL даже в чистой конфигурации MDM ($a_0$ = 1). Возможность плавной интерполяции позволяет точно настраивать компромисс между качеством и скоростью: более низкие значения $a_0$ (более похожие на AR) обычно дают лучшую перплексию, приближаясь к производительности чистых авторегрессионных моделей.
 
+![Figure_03](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-26/assets/Figure_03.png)
+
 ### Эффективность вывода
+
+![Figure_04](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-26/assets/Figure_04.svg)
 
 Прорывное достижение состоит в обеспечении KV-кеширования для маскированных диффузионных моделей. Eso-LM (B) демонстрирует выдающееся ускорение по сравнению со стандартными MDM:
 
@@ -68,7 +72,7 @@ Eso-LM достигают современного уровня перплекс
 
 ### Парето-фронтир "скорость-качество"
 
-![Figure_03](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-26/assets/Figure_03.png)
+![Figure_05](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-26/assets/Figure_05.png)
 
 *Рисунок 2: Парето-фронтир, сравнивающий перплексию генерации со средней продолжительностью выборки. Eso-LM устанавливают новый современный уровень по всему спектру "скорость-качество", при этом различные значения $a_0$ обучения предлагают оптимальные компромиссы для разных вычислительных бюджетов.
 
