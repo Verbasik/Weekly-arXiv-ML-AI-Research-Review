@@ -1,0 +1,38 @@
+{
+    "projects": [
+        {
+            "id": "openai-cs-agents-demo",
+            "title": "OpenAI Customer Service Agents Demo",
+            "date": "2024",
+            "tags": ["OpenAI", "Customer Service", "Multi-Agent", "Demo"],
+            "description": "Полнофункциональная демонстрация интерфейса агентов обслуживания клиентов, построенного на базе SDK агентов OpenAI. Включает современный бэкенд на Python и интерактивный интерфейс на Next.js для визуализации процесса работы мультиагентных систем.",
+            "notebooks": 1,
+            "code": 1,
+            "demo": 1,
+            "notebook_path": "agents-under-hood/openai-cs-agents-demo/CookBook.ipynb",
+            "code_path": "agents-under-hood/openai-cs-agents-demo",
+            "demo_url": "http://localhost:3000",
+            "github_stars": "⭐ New",
+            "difficulty": "Intermediate",
+            "technologies": ["OpenAI", "Python", "FastAPI", "Next.js", "TypeScript", "React"],
+            "features": [
+                "Полная интеграция с OpenAI Agents SDK",
+                "Современный веб-интерфейс с визуализацией диалогов",
+                "RESTful API для управления агентами",
+                "Real-time обновления состояния агентов",
+                "Готовая архитектура для масштабирования",
+                "Подробная документация и примеры использования"
+            ]
+        }
+    ],
+    "metadata": {
+        "total_projects": 1,
+        "last_updated": "2025-01-01",
+        "categories": [
+            "Multi-Agent Systems",
+            "Customer Service",
+            "OpenAI SDK",
+            "Web Interfaces"
+        ]
+    }
+} 
