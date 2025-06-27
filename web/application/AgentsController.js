@@ -25,8 +25,8 @@ export class AgentsController {
         // DOM элементы
         this.contentElement = document.querySelector('.content');
         this.modalElement = document.getElementById('markdown-modal');
-        this.searchInput = document.querySelector('.search-bar input');
-        this.searchButton = document.querySelector('.search-bar button');
+        this.searchInput = document.querySelector('.nav-content .search-bar input');
+        this.searchButton = document.querySelector('.nav-content .search-bar button');
         this.backToTopButton = document.getElementById('back-to-top');
         
         // Компоненты презентации
@@ -118,17 +118,17 @@ export class AgentsController {
         
         console.log('🔧 Created card element:', cardElement);
         
-        const projectsGrid = projectsSection.querySelector('.projects-grid');
-        console.log('🔧 Projects grid found:', projectsGrid);
+        const weeksGrid = projectsSection.querySelector('.weeks-grid');
+        console.log('🔧 Weeks grid found:', weeksGrid);
         
-        if (projectsGrid) {
-            projectsGrid.appendChild(cardElement);
-            console.log('🔧 Card added to projects grid');
+        if (weeksGrid) {
+            weeksGrid.appendChild(cardElement);
+            console.log('🔧 Card added to weeks grid');
             
             // Сохраняем ссылку на карточку для управления
             this.projectCards.set(project.getId(), projectCard);
         } else {
-            console.error('❌ Projects grid not found!');
+            console.error('❌ Weeks grid not found!');
         }
     }
 
@@ -138,10 +138,10 @@ export class AgentsController {
     _createProjectsSection() {
         const projectsSection = document.createElement('section');
         projectsSection.id = 'projects';
-        projectsSection.className = 'projects-section';
+        projectsSection.className = 'year-section'; // используем тот же класс что и на главной
         projectsSection.innerHTML = `
-            <h2 class="section-heading">🚀 Agents Projects</h2>
-            <div class="projects-grid"></div>
+            <h2 class="year-title section-heading">Agents Projects</h2>
+            <div class="weeks-grid"></div>
         `;
         this.contentElement.appendChild(projectsSection);
         return projectsSection;
@@ -331,7 +331,7 @@ export class AgentsController {
      * Очищает старые секции
      */
     _clearOldSections() {
-        this.contentElement.querySelectorAll('.projects-section').forEach(section => section.remove());
+        this.contentElement.querySelectorAll('.year-section:not(#home)').forEach(section => section.remove());
         this.projectCards.clear();
     }
 
