@@ -260,17 +260,6 @@
     box-shadow: 0 8px 20px rgba(255, 107, 53, 0.4);
 }
 
-/* Container Layout for Agents */
-.container.sidebar-layout {
-    display: grid;
-    grid-template-columns: var(--sidebar-width, 280px) 1fr;
-    gap: var(--sidebar-gap, 2rem);
-    align-items: start;
-    max-width: var(--content-max-width, 1400px);
-    margin: 0 auto;
-    padding: 0 var(--content-padding, 1rem);
-}
-
 /* Projects Grid */
 .projects-grid {
     display: grid;
