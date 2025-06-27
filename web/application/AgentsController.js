@@ -72,7 +72,9 @@ export class AgentsController {
 
         try {
             // Получаем данные через сервис
+            console.log('🔧 Loading projects data...');
             const projects = await this.service.getAllProjects();
+            console.log('🔧 Loaded projects:', projects.length, projects);
 
             // Удаляем индикатор загрузки
             loadingIndicator.remove();
@@ -81,10 +83,15 @@ export class AgentsController {
             this._clearOldSections();
 
             // Создаем секцию проектов
+            console.log('🔧 Creating projects section...');
             const projectsSection = this._createProjectsSection();
+            console.log('🔧 Projects section created:', projectsSection);
+            
+            console.log('🔧 Adding project cards...');
             projects.forEach(project => {
                 this._createAndAddProjectCard(projectsSection, project);
             });
+            console.log('🔧 All project cards added');
 
             // Обновляем фильтры в боковой панели
             await this._updateSidebarFilters(projects);
@@ -104,15 +111,24 @@ export class AgentsController {
      * Создает и добавляет карточку проекта
      */
     _createAndAddProjectCard(projectsSection, project) {
+        console.log('🔧 Creating project card for:', project.getId(), project.title);
+        
         const projectCard = new ProjectCard(project, this.githubConfig);
         const cardElement = projectCard.createElement();
         
+        console.log('🔧 Created card element:', cardElement);
+        
         const projectsGrid = projectsSection.querySelector('.projects-grid');
+        console.log('🔧 Projects grid found:', projectsGrid);
+        
         if (projectsGrid) {
             projectsGrid.appendChild(cardElement);
+            console.log('🔧 Card added to projects grid');
             
             // Сохраняем ссылку на карточку для управления
             this.projectCards.set(project.getId(), projectCard);
+        } else {
+            console.error('❌ Projects grid not found!');
         }
     }
 
@@ -125,7 +141,7 @@ export class AgentsController {
         projectsSection.className = 'projects-section';
         projectsSection.innerHTML = `
             <h2 class="section-heading">🚀 Agents Projects</h2>
-            <div class="projects-grid weeks-grid"></div>
+            <div class="projects-grid"></div>
         `;
         this.contentElement.appendChild(projectsSection);
         return projectsSection;
