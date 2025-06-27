@@ -1,0 +1,244 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Memory Bank Learning Journal - Customer Service Agents Demo
+
+## Выученные паттерны и знания
+
+### Дата: 2024-01-XX - Инициализация банка памяти
+
+#### Архитектурные инсайты
+1. **Multi-Agent Pattern для специализации**
+   - Каждый агент имеет четкую область ответственности
+   - Triage Agent служит единой точкой входа и маршрутизации
+   - Handoff механизм обеспечивает плавную передачу контекста
+
+2. **Guardrails как first-class citizens**
+   - Проактивная защита на уровне входных данных
+   - Визуальная индикация в UI повышает transparency
+   - Композиция нескольких типов guardrails (relevance + jailbreak)
+
+3. **State Management в multi-agent системах**
+   - Centralized state через conversation store
+   - Immutable context updates для предсказуемости
+   - Event-driven architecture для real-time updates
+
+#### Технические находки
+1. **OpenAI Agents SDK Integration**
+   - Runner.run() как центральный оркестратор
+   - Structured output через Pydantic models
+   - Exception handling для guardrail violations
+
+2. **FastAPI + Next.js Integration**
+   - CORS configuration важен для development
+   - Concurrent development scripts упрощают workflow
+   - TypeScript interfaces для API contract
+
+3. **UI/UX для AI Systems**
+   - Real-time agent visualization повышает понимание
+   - Event stream display помогает в debugging
+   - Guardrail indicators создают доверие к системе
+
+#### Полезные паттерны кодирования
+
+**Agent Definition Pattern:**
+```python
+agent = Agent(
+    name="domain_agent",
+    instructions="Clear domain-specific instructions",
+    tools=[relevant_tools],
+    handoffs=[Handoff(target_agent, condition)],
+    input_guardrails=[protection_mechanisms]
+)
+```
+
+**Context Propagation:**
+```python
+result = await Runner.run(
+    agent=current_agent,
+    input_items=conversation_history,
+    context=shared_context  # Key insight: context is everything
+)
+```
+
+**React Component Pattern for AI:**
+```typescript
+const AgentComponent = ({ agent, isActive }) => (
+  <Card className={`agent-card ${isActive ? 'active' : ''}`}>
+    <StatusIndicator status={agent.status} />
+    <AgentInfo agent={agent} />
+  </Card>
+);
+```
+
+#### Предпочтения пользователя (пока не выявлены)
+*Будут добавляться по мере работы с пользователем*
+
+#### Анти-паттерны, которых следует избегать
+1. **Direct agent-to-agent communication** - нарушает принцип orchestration
+2. **Mutable shared state** - создает race conditions
+3. **Blocking UI operations** - ухудшает UX
+
+#### Важные зависимости и их роли
+- `openai-agents`: Core functionality - критически важен
+- `fastapi`: Modern Python web framework - стандарт индустрии
+- `pydantic`: Data validation - обеспечивает type safety
+- `next.js`: React framework - отличный DX
+- `@radix-ui`: Accessible components - important for inclusive design
+
+#### Масштабируемость и производительность
+**Узкие места:**
+- In-memory conversation store
+- Lack of request batching
+- No caching layer
+
+**Потенциальные решения:**
+- Redis для state persistence
+- Request/response caching
+- Connection pooling для OpenAI API
+
+#### Образовательная ценность проекта
+- Отличный starter template для multi-agent систем
+- Демонстрирует best practices OpenAI Agents SDK
+- Показывает integration patterns для AI + Web
+
+---
+
+## Следующие области для изучения
+1. Production deployment patterns для AI applications
+2. Monitoring и observability для agent systems
+3. Testing strategies для non-deterministic AI behavior
+4. Security best practices для AI-powered applications
+
+## Заметки для будущих итераций
+- Проект готов для educational use
+- Хорошая база для customization под конкретные домены
+- Архитектура масштабируется при правильной реализации persistence layer
+
+### Дата: 2024-01-11 - Диагностика проблемы с OpenAI API
+
+#### Техническая проблема и решение
+**Проблема**: OPENAI_API_KEY не загружался из .env файла
+**Решение**: 
+1. Добавил `from dotenv import load_dotenv` и `load_dotenv()` в api.py
+2. Исправил порядок инициализации logger'а (был использован до определения)
+3. Добавил диагностику загрузки переменных окружения
+
+#### Обнаруженное ограничение
+**OpenAI API региональные ограничения**: 
+- Ошибка 403 "Country, region, or territory not supported"
+- API ключ корректен, но доступ заблокирован по геолокации
+- Это не техническая проблема кода, а политика OpenAI
+
+#### Полезные паттерны отладки
+
+**Диагностика переменных окружения:**
+```python
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+# Проверка загрузки
+if not os.getenv("OPENAI_API_KEY"):
+    logger.error("API key not found!")
+else:
+    logger.info("API key loaded successfully")
+```
+
+**Правильный порядок инициализации в FastAPI:**
+```python
+# 1. Импорты
+from dotenv import load_dotenv
+import logging
+
+# 2. Загрузка .env
+load_dotenv()
+
+# 3. Импорты модулей проекта
+from main import agents
+
+# 4. Настройка логирования
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# 5. Проверки и диагностика
+if not os.getenv("API_KEY"):
+    logger.error("API key missing!")
+```
+
+#### Важные инсайты
+- **Environment Variables**: Всегда проверять загрузку переменных окружения
+- **Order Matters**: Порядок импортов и инициализации критически важен
+- **External Dependencies**: API могут иметь региональные ограничения
+- **Error Diagnosis**: 403 ошибки не всегда означают проблемы с аутентификацией
+
+# Банк знаний и паттернов проекта
+
+## Выученные паттерны
+
+### 1. Предпочтения пользователя в стиле кода
+- **Обнаружено**: Пользователь требует строгого соблюдения PEP8 и расширенной документации
+- **Паттерн**: Все функции должны иметь docstrings в формате Description/Args/Returns/Raises
+- **Важность**: Критическая для приемки кода
+
+### 2. Структура банка памяти
+- **Обнаружено**: Эффективность работы зависит от актуальности activeContext.md
+- **Паттерн**: Всегда обновлять activeContext.md после значительных изменений
+- **Важность**: Высокая для непрерывности работы
+
+### 3. Управление зависимостями
+- **Обнаружено**: Проект использует Python venv и требует явного управления зависимостями
+- **Паттерн**: Всегда проверять requirements.txt и устанавливать зависимости в venv
+- **Важность**: Критическая для работоспособности
+
+### 4. Стиль кода и рефакторинг
+- **Обнаружено**: Пользователь предъявляет высокие требования к качеству кода
+- **Паттерн**: 
+  - Группировать импорты по категориям с комментариями
+  - Добавлять описание модуля в тройных кавычках
+  - Соблюдать лимит 79 символов на строку
+  - Использовать развернутые комментарии на русском языке
+  - Добавлять краткие комментарии над функциями
+  - Полные docstrings для всех функций и классов
+- **Важность**: Критическая для приемки кода
+
+### 5. Обработка ошибок окружения
+- **Обнаружено**: Проект чувствителен к настройке окружения (API ключи, venv)
+- **Паттерн**: Всегда проверять загрузку переменных окружения и добавлять диагностику
+- **Важность**: Высокая для стабильности
+
+### 6. Региональные ограничения OpenAI
+- **Обнаружено**: OpenAI API может быть недоступен в некоторых регионах
+- **Паттерн**: Учитывать географические ограничения при работе с OpenAI API
+- **Важность**: Средняя для планирования
+
+### 7. Локализация промптов агентов
+- **Обнаружено**: Пользователь предпочитает русскоязычные промпты для агентов
+- **Паттерн**: 
+  - Переводить системные инструкции агентов на русский язык
+  - Сохранять техническую терминологию в переводе
+  - Заменять английские метки на русские (например, "[unknown]" → "[неизвестно]")
+  - Сохранять структуру и логику промптов при переводе
+  - Использовать обращение "ты" к агентам для более естественного тона
+- **Важность**: Высокая для пользовательского опыта
+
+## Технические особенности
+
+### Архитектура проекта
+- Multi-agent система с FastAPI backend и Next.js frontend
+- Использует OpenAI Agents SDK для обработки запросов
+- In-memory хранилище состояний (не для production)
+
+### Стек технологий
+- **Backend**: Python 3.11+, FastAPI, OpenAI Agents SDK, Pydantic
+- **Frontend**: Next.js 14, TypeScript, Tailwind CSS
+- **Инфраструктура**: Docker-ready, CORS настроен для localhost:3000
+
+### Паттерны разработки
+- RESTful API с единственным endpoint `/chat`
+- Guardrails система для безопасности
+- Event-driven архитектура для отслеживания действий агентов
+- Handoff pattern для передачи управления между агентами
