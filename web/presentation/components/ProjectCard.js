@@ -8,40 +8,17 @@ export class ProjectCard {
         this.githubConfig = githubConfig;
         this.dataSource = dataSource;
         this.element = null;
-        this.config = null;
-        this.configLoaded = false;
     }
 
     /**
-     * Загружает конфигурацию асинхронно
+     * Создает DOM элемент карточки - УПРОЩЕННАЯ ВЕРСИЯ КАК В WEEKCARD
      */
-    async _loadConfig() {
-        if (this.dataSource && this.dataSource.getConfig) {
-            try {
-                this.config = await this.dataSource.getConfig();
-                this.configLoaded = true;
-            } catch (error) {
-                console.warn('Failed to load config in ProjectCard:', error);
-                this.configLoaded = true;
-            }
-        } else {
-            this.configLoaded = true;
-        }
-    }
-
-    /**
-     * Создает DOM элемент карточки
-     */
-    async createElement() {
-        // Дожидаемся загрузки конфигурации
-        if (!this.configLoaded) {
-            await this._loadConfig();
-        }
-
+    createElement() {
         const card = document.createElement('div');
         card.className = 'week-card project-card';
-        card.innerHTML = this._getCardHTML();
+        card.setAttribute('data-project', this.project.getId());
         
+        card.innerHTML = this._getCardHTML();
         this._attachEventListeners(card);
         this.element = card;
         
@@ -49,11 +26,12 @@ export class ProjectCard {
     }
 
     /**
-     * Генерирует HTML содержимое карточки
+     * Генерирует HTML содержимое карточки - УПРОЩЕННАЯ ВЕРСИЯ
      */
     _getCardHTML() {
         const meta = this.project.getFormattedMeta();
-        const resources = this.project.getFormattedResources(this.githubConfig.githubRepo, this.githubConfig.githubBranch, this.config);
+        // НЕ ИСПОЛЬЗУЕМ СЛОЖНУЮ КОНФИГУРАЦИЮ - передаем null для fallback
+        const resources = this.project.getFormattedResources(this.githubConfig.githubRepo, this.githubConfig.githubBranch, null);
         
         return `
             <div class="week-card-header">
@@ -64,7 +42,7 @@ export class ProjectCard {
             </div>
             <div class="week-card-body">
                 <p class="week-card-desc">${this.project.description}</p>
-                <button class="read-review">Read Review</button>
+                <button class="gradient-button read-review">Read Review</button>
             </div>
             <div class="week-card-footer">
                 ${resources.map(resource => this._getResourceHTML(resource)).join('')}
@@ -81,40 +59,17 @@ export class ProjectCard {
     }
 
     /**
-     * Создает HTML для ресурса с учетом конфигурации поведения
+     * Создает HTML для ресурса - УПРОЩЕННАЯ ВЕРСИЯ КАК НА ГЛАВНОЙ СТРАНИЦЕ
      */
     _getResourceHTML(resource) {
         if (!resource.url) {
             return `<span class="disabled"><i class="${resource.icon}"></i> ${resource.text}</span>`;
         }
 
-        // Определяем поведение кнопки из конфигурации
-        const behavior = this._getResourceBehavior(resource.type);
-        
-        if (behavior === 'modal') {
-            // Для модального окна создаем кнопку вместо ссылки
-            return `<button class="resource-button modal-trigger" data-resource-type="${resource.type}" data-url="${resource.url}">
-                <i class="${resource.icon}"></i> ${resource.text}
-            </button>`;
-        } else {
-            // Для redirect создаем ссылку с target="_blank"
-            return `<a href="${resource.url}" target="_blank" rel="noopener noreferrer" class="resource-link">
-                <i class="${resource.icon}"></i> ${resource.text}
-            </a>`;
-        }
-    }
-
-    /**
-     * Определяет поведение ресурса из конфигурации
-     */
-    _getResourceBehavior(resourceType) {
-        if (!this.config || !this.config.buttons) {
-            // Fallback: если нет конфигурации, по умолчанию redirect
-            return 'redirect';
-        }
-
-        const buttonConfig = this.config.buttons[resourceType];
-        return buttonConfig ? buttonConfig.behavior : 'redirect';
+        // ПРОСТАЯ ЛОГИКА КАК В WEEKCARD - ВСЕГДА ССЫЛКИ
+        return `<a href="${resource.url}" target="_blank" rel="noopener noreferrer" class="resource-link">
+            <i class="${resource.icon}"></i> ${resource.text}
+        </a>`;
     }
 
     /**
@@ -140,27 +95,17 @@ export class ProjectCard {
             });
         });
 
-        // Обработчики для кнопок модального окна
-        const modalTriggers = card.querySelectorAll('.modal-trigger');
-        modalTriggers.forEach(button => {
-            button.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const resourceType = button.getAttribute('data-resource-type');
-                if (resourceType === 'paper') {
-                    this._onReadReview(); // Paper открывается через модальное окно как Read Review
-                }
-            });
+        // УПРОЩЕННАЯ ЛОГИКА - НЕ БЛОКИРУЕМ КЛИКИ ПО ССЫЛКАМ КАК НА ГЛАВНОЙ СТРАНИЦЕ
+        // Обработчик для клика по карточке (открытие по клику на карточку)
+        card.addEventListener('click', (e) => {
+            // Проверяем, что клик не по ссылке или кнопке - КАК В WEEKCARD
+            if (!e.target.closest('a') && !e.target.closest('button')) {
+                this._onReadReview();
+            }
         });
 
-        // Обработчики для внешних ссылок - убираем любые блокировки
-        const resourceLinks = card.querySelectorAll('.resource-link');
-        resourceLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                // Позволяем браузеру нормально перейти по ссылке
-                console.log('Opening resource link:', link.href);
-                // НЕ вызываем e.preventDefault() или e.stopPropagation()
-            });
-        });
+        // Добавляем курсор pointer для интерактивности
+        card.style.cursor = 'pointer';
     }
 
     /**

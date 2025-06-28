@@ -173,7 +173,7 @@ export class Project {
                 if (config && config.urls && config.urls.code_base) {
                     resource.url = config.urls.code_base
                         .replace('{repo}', githubRepo)
-                        .replace('{branch}', branch)
+                        .replace('{branch}', branch)  
                         .replace('{code_path}', this.code_path);
                 } else {
                     resource.url = this.getCodeUrl(githubRepo, branch);
