@@ -9,22 +9,35 @@ export class ProjectCard {
         this.dataSource = dataSource;
         this.element = null;
         this.config = null;
-        this._loadConfig();
+        this.configLoaded = false;
     }
 
     /**
-     * Загружает конфигурацию
+     * Загружает конфигурацию асинхронно
      */
     async _loadConfig() {
         if (this.dataSource && this.dataSource.getConfig) {
-            this.config = this.dataSource.getConfig();
+            try {
+                this.config = await this.dataSource.getConfig();
+                this.configLoaded = true;
+            } catch (error) {
+                console.warn('Failed to load config in ProjectCard:', error);
+                this.configLoaded = true;
+            }
+        } else {
+            this.configLoaded = true;
         }
     }
 
     /**
      * Создает DOM элемент карточки
      */
-    createElement() {
+    async createElement() {
+        // Дожидаемся загрузки конфигурации
+        if (!this.configLoaded) {
+            await this._loadConfig();
+        }
+
         const card = document.createElement('div');
         card.className = 'week-card project-card';
         card.innerHTML = this._getCardHTML();
@@ -68,16 +81,40 @@ export class ProjectCard {
     }
 
     /**
-     * Создает HTML для ресурса
+     * Создает HTML для ресурса с учетом конфигурации поведения
      */
     _getResourceHTML(resource) {
-        if (resource.url) {
-            return `<a href="${resource.url}" target="_blank" rel="noopener noreferrer">
-                <i class="${resource.icon}"></i> ${resource.text}
-            </a>`;
-        } else {
+        if (!resource.url) {
             return `<span class="disabled"><i class="${resource.icon}"></i> ${resource.text}</span>`;
         }
+
+        // Определяем поведение кнопки из конфигурации
+        const behavior = this._getResourceBehavior(resource.type);
+        
+        if (behavior === 'modal') {
+            // Для модального окна создаем кнопку вместо ссылки
+            return `<button class="resource-button modal-trigger" data-resource-type="${resource.type}" data-url="${resource.url}">
+                <i class="${resource.icon}"></i> ${resource.text}
+            </button>`;
+        } else {
+            // Для redirect создаем ссылку с target="_blank"
+            return `<a href="${resource.url}" target="_blank" rel="noopener noreferrer" class="resource-link">
+                <i class="${resource.icon}"></i> ${resource.text}
+            </a>`;
+        }
+    }
+
+    /**
+     * Определяет поведение ресурса из конфигурации
+     */
+    _getResourceBehavior(resourceType) {
+        if (!this.config || !this.config.buttons) {
+            // Fallback: если нет конфигурации, по умолчанию redirect
+            return 'redirect';
+        }
+
+        const buttonConfig = this.config.buttons[resourceType];
+        return buttonConfig ? buttonConfig.behavior : 'redirect';
     }
 
     /**
@@ -103,12 +140,25 @@ export class ProjectCard {
             });
         });
 
-        // Обработчики для внешних ссылок - убираем preventDefault чтобы они работали
-        const resourceLinks = card.querySelectorAll('.week-card-footer a');
+        // Обработчики для кнопок модального окна
+        const modalTriggers = card.querySelectorAll('.modal-trigger');
+        modalTriggers.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const resourceType = button.getAttribute('data-resource-type');
+                if (resourceType === 'paper') {
+                    this._onReadReview(); // Paper открывается через модальное окно как Read Review
+                }
+            });
+        });
+
+        // Обработчики для внешних ссылок - убираем любые блокировки
+        const resourceLinks = card.querySelectorAll('.resource-link');
         resourceLinks.forEach(link => {
             link.addEventListener('click', (e) => {
-                // Не останавливаем событие, позволяем браузеру перейти по ссылке
-                console.log('Navigating to:', link.href);
+                // Позволяем браузеру нормально перейти по ссылке
+                console.log('Opening resource link:', link.href);
+                // НЕ вызываем e.preventDefault() или e.stopPropagation()
             });
         });
     }
