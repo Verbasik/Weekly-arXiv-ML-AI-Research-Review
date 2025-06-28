@@ -3,6 +3,7 @@
 
 # IDE-specific files
 **/.vscode/
+**/.cursor/
 
 # Virtual environment
 **/venv/
