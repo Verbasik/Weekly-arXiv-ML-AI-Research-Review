@@ -30,46 +30,35 @@ export class ProjectCard {
         const meta = this.project.getFormattedMeta();
         const resources = this.project.getFormattedResources(this.githubConfig.githubRepo, this.githubConfig.githubBranch);
         
+        // Формируем HTML для метаданных
+        const metaHTML = meta.map(item => {
+            if (item.type === 'tag') {
+                return `<span class="mono"><i class="${item.icon}"></i> ${item.text}</span>`;
+            }
+            return `<span><i class="${item.icon}"></i> ${item.text}</span>`;
+        }).join('');
+
+        // Формируем HTML для ресурсов в футере (как в WeekCard)
+        const resourcesHTML = resources.map(resource => {
+            if (resource.url) {
+                return `<a href="${resource.url}" target="_blank" rel="noopener noreferrer"><i class="${resource.icon}"></i> ${resource.text}</a>`;
+            }
+            return `<span><i class="${resource.icon}"></i> ${resource.text}</span>`;
+        }).join('');
+
         return `
             <div class="week-card-header">
                 <h3 class="week-card-title">${this.project.title}</h3>
-                <div class="week-card-meta">
-                    ${meta.map(item => this._getMetaItemHTML(item)).join('')}
-                </div>
             </div>
             
             <div class="week-card-body">
+                <div class="week-card-meta">${metaHTML}</div>
                 <p class="week-card-desc">${this.project.getSummary()}</p>
-                
-                ${this.project.technologies.length > 0 ? `
-                    <div class="tech-stack">
-                        <h4><i class="fas fa-cogs"></i> Tech Stack:</h4>
-                        <div class="tech-tags">
-                            ${this.project.technologies.map(tech => `<span class="tech-tag">${tech}</span>`).join('')}
-                        </div>
-                    </div>
-                ` : ''}
-                
-                ${this.project.features.length > 0 ? `
-                    <div class="features-list">
-                        <h4><i class="fas fa-star"></i> Key Features:</h4>
-                        <ul>
-                            ${this.project.features.slice(0, 3).map(feature => `<li>${feature}</li>`).join('')}
-                            ${this.project.features.length > 3 ? '<li>...и многое другое</li>' : ''}
-                        </ul>
-                    </div>
-                ` : ''}
-                
-                <button class="read-review gradient-button">
-                    <i class="fas fa-rocket"></i> Explore Project
-                </button>
+                <button class="gradient-button read-review">Read Review</button>
             </div>
             
             <div class="week-card-footer">
-                ${resources.map(resource => this._getResourceHTML(resource)).join('')}
-                <div class="difficulty-indicator" style="background-color: ${this.project.getDifficultyColor()}">
-                    <i class="fas fa-chart-line"></i> ${this.project.difficulty}
-                </div>
+                ${resourcesHTML}
             </div>
         `;
     }
@@ -101,26 +90,29 @@ export class ProjectCard {
     _attachEventListeners(card) {
         const readButton = card.querySelector('.read-review');
         if (readButton) {
-            readButton.addEventListener('click', () => {
+            readButton.addEventListener('click', (e) => {
+                e.preventDefault();
                 this._onReadReview();
             });
         }
 
-        // Hover эффекты для технологий
-        const techTags = card.querySelectorAll('.tech-tag');
-        techTags.forEach(tag => {
-            tag.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this._onTechClick(tag.textContent);
-            });
+        // Обработчик для клика по карточке (открытие по клику на карточку)
+        card.addEventListener('click', (e) => {
+            // Проверяем, что клик не по ссылке или кнопке
+            if (!e.target.closest('a') && !e.target.closest('button')) {
+                this._onReadReview();
+            }
         });
+
+        // Добавляем курсор pointer для интерактивности
+        card.style.cursor = 'pointer';
     }
 
     /**
-     * Обработчик клика на "Explore Project"
+     * Обработчик клика на "Read Review"
      */
     _onReadReview() {
-        // Отправляем custom event для открытия модального окна
+        // Отправляем custom event для открытия модального окна (как в WeekCard)
         const event = new CustomEvent('projectCardClicked', {
             detail: {
                 projectId: this.project.getId(),
@@ -212,11 +204,11 @@ export class ProjectCard {
     }
 
     /**
-     * Подсвечивает текст в карточке
+     * Подсвечивает карточку при поиске
      */
     highlight(searchTerm) {
-        if (!this.element) return;
-        
+        if (!this.element || !searchTerm) return;
+
         const title = this.element.querySelector('.week-card-title');
         const description = this.element.querySelector('.week-card-desc');
         
@@ -234,7 +226,7 @@ export class ProjectCard {
      */
     removeHighlight() {
         if (!this.element) return;
-        
+
         const title = this.element.querySelector('.week-card-title');
         const description = this.element.querySelector('.week-card-desc');
         
@@ -248,7 +240,7 @@ export class ProjectCard {
     }
 
     /**
-     * Подсвечивает поисковый запрос в тексте
+     * Подсвечивает текст поискового запроса
      */
     _highlightText(text, searchTerm) {
         if (!searchTerm) return text;

@@ -374,6 +374,12 @@ export class ResearchController {
             event.preventDefault();
             this._showErrorNotification('⚠️ Произошла неожиданная ошибка');
         });
+
+        // Обработчик кастомного события открытия из WeekCard
+        document.addEventListener('openReview', (event) => {
+            const { year, weekId, title } = event.detail;
+            this.modal.open(year, weekId, title);
+        });
     }
 
     /**
