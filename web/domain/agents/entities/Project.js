@@ -11,10 +11,8 @@ export class Project {
         description = '',
         notebooks = 0,
         code = 0,
-        demo = 0,
         notebook_path = null,
         code_path = null,
-        demo_url = null,
         github_stars = '',
         difficulty = 'Beginner',
         technologies = [],
@@ -27,10 +25,8 @@ export class Project {
         this.description = description;
         this.notebooks = notebooks;
         this.code = code;
-        this.demo = demo;
         this.notebook_path = notebook_path;
         this.code_path = code_path;
-        this.demo_url = demo_url;
         this.github_stars = github_stars;
         this.difficulty = difficulty;
         this.technologies = technologies;
@@ -41,7 +37,7 @@ export class Project {
      * Проверяет, есть ли у проекта доступные ресурсы
      */
     hasResources() {
-        return this.notebooks > 0 || this.code > 0 || this.demo > 0;
+        return this.notebooks > 0 || this.code > 0;
     }
 
     /**
@@ -49,7 +45,7 @@ export class Project {
      */
     getNotebookUrl(githubRepo, branch) {
         if (!this.notebook_path) return null;
-        return `https://github.com/${githubRepo}/blob/${branch}/${this.notebook_path}`;
+        return `https://github.com/${githubRepo}/tree/${branch}/${this.notebook_path}`;
     }
 
     /**
@@ -117,10 +113,10 @@ export class Project {
     /**
      * Форматирует ресурсы для отображения в футере карточки
      */
-    getFormattedResources(githubRepo, branch) {
+    getFormattedResources(githubRepo, branch, config = null) {
         const resources = [];
 
-        // Paper (добавляем для соответствия структуре главной страницы)
+        // Paper
         if (this.code_path) {
             const paperText = `Paper`;
             const resource = {
@@ -129,13 +125,19 @@ export class Project {
                 type: 'paper'
             };
             
-            // Используем README.md как paper
-            resource.url = `https://raw.githubusercontent.com/${githubRepo}/${branch}/${this.code_path}/README.md`;
+            if (config && config.urls && config.urls.paper_base) {
+                resource.url = config.urls.paper_base
+                    .replace('{repo}', githubRepo)
+                    .replace('{branch}', branch)
+                    .replace('{code_path}', this.code_path);
+            } else {
+                resource.url = `https://raw.githubusercontent.com/${githubRepo}/${branch}/${this.code_path}/README.md`;
+            }
             
             resources.push(resource);
         }
 
-        // Notebooks
+        // Notebooks - ссылка на GitHub tree как на главной странице
         if (this.notebooks !== undefined && this.notebooks > 0) {
             const notebooksText = `${this.notebooks} Notebook${this.notebooks !== 1 ? 's' : ''}`;
             const resource = {
@@ -145,13 +147,20 @@ export class Project {
             };
             
             if (this.notebook_path) {
-                resource.url = this.getNotebookUrl(githubRepo, branch);
+                if (config && config.urls && config.urls.notebook_base) {
+                    resource.url = config.urls.notebook_base
+                        .replace('{repo}', githubRepo)
+                        .replace('{branch}', branch)
+                        .replace('{notebook_path}', this.notebook_path);
+                } else {
+                    resource.url = this.getNotebookUrl(githubRepo, branch);
+                }
             }
             
             resources.push(resource);
         }
 
-        // Code files
+        // Code files - ссылка на GitHub tree как на главной странице
         if (this.code !== undefined && this.code > 0) {
             const codeText = `Code Files`;
             const resource = {
@@ -161,23 +170,14 @@ export class Project {
             };
             
             if (this.code_path) {
-                resource.url = this.getCodeUrl(githubRepo, branch);
-            }
-            
-            resources.push(resource);
-        }
-
-        // Demo (оставляем как дополнительную возможность)
-        if (this.demo !== undefined && this.demo > 0) {
-            const demoText = `Live Demo`;
-            const resource = {
-                icon: 'fas fa-external-link-alt',
-                text: demoText,
-                type: 'demo'
-            };
-            
-            if (this.demo_url) {
-                resource.url = this.demo_url;
+                if (config && config.urls && config.urls.code_base) {
+                    resource.url = config.urls.code_base
+                        .replace('{repo}', githubRepo)
+                        .replace('{branch}', branch)
+                        .replace('{code_path}', this.code_path);
+                } else {
+                    resource.url = this.getCodeUrl(githubRepo, branch);
+                }
             }
             
             resources.push(resource);

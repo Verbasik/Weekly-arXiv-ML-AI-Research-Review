@@ -3,10 +3,22 @@
  * Компонент карточки проекта для Agents секции
  */
 export class ProjectCard {
-    constructor(project, githubConfig) {
+    constructor(project, githubConfig, dataSource = null) {
         this.project = project;
         this.githubConfig = githubConfig;
+        this.dataSource = dataSource;
         this.element = null;
+        this.config = null;
+        this._loadConfig();
+    }
+
+    /**
+     * Загружает конфигурацию
+     */
+    async _loadConfig() {
+        if (this.dataSource && this.dataSource.getConfig) {
+            this.config = this.dataSource.getConfig();
+        }
     }
 
     /**
@@ -28,51 +40,35 @@ export class ProjectCard {
      */
     _getCardHTML() {
         const meta = this.project.getFormattedMeta();
-        const resources = this.project.getFormattedResources(this.githubConfig.githubRepo, this.githubConfig.githubBranch);
+        const resources = this.project.getFormattedResources(this.githubConfig.githubRepo, this.githubConfig.githubBranch, this.config);
         
-        // Формируем HTML для метаданных
-        const metaHTML = meta.map(item => {
-            if (item.type === 'tag') {
-                return `<span class="mono"><i class="${item.icon}"></i> ${item.text}</span>`;
-            }
-            return `<span><i class="${item.icon}"></i> ${item.text}</span>`;
-        }).join('');
-
-        // Формируем HTML для ресурсов в футере (как в WeekCard)
-        const resourcesHTML = resources.map(resource => {
-            if (resource.url) {
-                return `<a href="${resource.url}" target="_blank" rel="noopener noreferrer"><i class="${resource.icon}"></i> ${resource.text}</a>`;
-            }
-            return `<span><i class="${resource.icon}"></i> ${resource.text}</span>`;
-        }).join('');
-
         return `
             <div class="week-card-header">
                 <h3 class="week-card-title">${this.project.title}</h3>
+                <div class="week-card-meta">
+                    ${meta.map(item => this._getMetaItemHTML(item)).join('')}
+                </div>
             </div>
-            
             <div class="week-card-body">
-                <div class="week-card-meta">${metaHTML}</div>
-                <p class="week-card-desc">${this.project.getSummary()}</p>
-                <button class="gradient-button read-review">Read Review</button>
+                <p class="week-card-desc">${this.project.description}</p>
+                <button class="read-review">Read Review</button>
             </div>
-            
             <div class="week-card-footer">
-                ${resourcesHTML}
+                ${resources.map(resource => this._getResourceHTML(resource)).join('')}
             </div>
         `;
     }
 
     /**
-     * Генерирует HTML для элемента метаданных
+     * Создает HTML для элемента метаданных
      */
     _getMetaItemHTML(item) {
-        const className = item.type ? `meta-${item.type}` : '';
-        return `<span class="meta-item ${className}"><i class="${item.icon}"></i> ${item.text}</span>`;
+        const typeClass = item.type ? `meta-${item.type}` : '';
+        return `<span class="meta-item ${typeClass}"><i class="${item.icon}"></i> ${item.text}</span>`;
     }
 
     /**
-     * Генерирует HTML для ресурса
+     * Создает HTML для ресурса
      */
     _getResourceHTML(resource) {
         if (resource.url) {
@@ -80,64 +76,69 @@ export class ProjectCard {
                 <i class="${resource.icon}"></i> ${resource.text}
             </a>`;
         } else {
-            return `<span><i class="${resource.icon}"></i> ${resource.text}</span>`;
+            return `<span class="disabled"><i class="${resource.icon}"></i> ${resource.text}</span>`;
         }
     }
 
     /**
-     * Добавляет обработчики событий
+     * Привязывает обработчики событий
      */
     _attachEventListeners(card) {
-        const readButton = card.querySelector('.read-review');
-        if (readButton) {
-            readButton.addEventListener('click', (e) => {
-                e.preventDefault();
+        // Обработчик для кнопки "Read Review"
+        const readReviewButton = card.querySelector('.read-review');
+        if (readReviewButton) {
+            readReviewButton.addEventListener('click', (e) => {
+                e.stopPropagation();
                 this._onReadReview();
             });
         }
 
-        // Обработчик для клика по карточке (открытие по клику на карточку)
-        card.addEventListener('click', (e) => {
-            // Проверяем, что клик не по ссылке или кнопке
-            if (!e.target.closest('a') && !e.target.closest('button')) {
-                this._onReadReview();
-            }
+        // Обработчики для тегов технологий (если есть)
+        const techTags = card.querySelectorAll('.tech-tag');
+        techTags.forEach(tag => {
+            tag.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const technology = tag.textContent.trim();
+                this._onTechClick(technology);
+            });
         });
 
-        // Добавляем курсор pointer для интерактивности
-        card.style.cursor = 'pointer';
+        // Обработчики для внешних ссылок - убираем preventDefault чтобы они работали
+        const resourceLinks = card.querySelectorAll('.week-card-footer a');
+        resourceLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                // Не останавливаем событие, позволяем браузеру перейти по ссылке
+                console.log('Navigating to:', link.href);
+            });
+        });
     }
 
     /**
-     * Обработчик клика на "Read Review"
+     * Обработчик нажатия на "Read Review"
      */
     _onReadReview() {
-        // Отправляем custom event для открытия модального окна (как в WeekCard)
+        // Создаем и отправляем кастомное событие
         const event = new CustomEvent('projectCardClicked', {
             detail: {
                 projectId: this.project.getId(),
                 title: this.project.title
-            }
+            },
+            bubbles: true
         });
         
         document.dispatchEvent(event);
-        console.log(`Opening project: ${this.project.getId()}`);
     }
 
     /**
-     * Обработчик клика на технологию
+     * Обработчик клика по технологии
      */
     _onTechClick(technology) {
-        const event = new CustomEvent('technologyFilter', {
-            detail: { technology }
-        });
-        
-        document.dispatchEvent(event);
         console.log(`Filter by technology: ${technology}`);
+        // Здесь можно добавить логику фильтрации по технологии
     }
 
     /**
-     * Обновляет данные карточки
+     * Обновляет карточку новыми данными проекта
      */
     update(project) {
         this.project = project;
@@ -148,7 +149,7 @@ export class ProjectCard {
     }
 
     /**
-     * Проверяет, соответствует ли карточка поисковому запросу
+     * Проверяет соответствие поисковому запросу
      */
     matchesSearch(query) {
         const searchTerm = query.toLowerCase();
@@ -161,14 +162,14 @@ export class ProjectCard {
     }
 
     /**
-     * Проверяет, есть ли у карточки указанный тег
+     * Проверяет наличие тега
      */
     hasTag(tag) {
         return this.project.hasTag(tag);
     }
 
     /**
-     * Проверяет технологию
+     * Проверяет наличие технологии
      */
     hasTechnology(tech) {
         return this.project.technologies.some(technology => 
@@ -177,7 +178,7 @@ export class ProjectCard {
     }
 
     /**
-     * Проверяет сложность
+     * Проверяет уровень сложности
      */
     hasDifficulty(difficulty) {
         return this.project.difficulty === difficulty;
@@ -189,7 +190,7 @@ export class ProjectCard {
     show() {
         if (this.element) {
             this.element.style.display = 'block';
-            this.element.classList.remove('hidden');
+            this.element.style.opacity = '1';
         }
     }
 
@@ -199,26 +200,24 @@ export class ProjectCard {
     hide() {
         if (this.element) {
             this.element.style.display = 'none';
-            this.element.classList.add('hidden');
+            this.element.style.opacity = '0';
         }
     }
 
     /**
-     * Подсвечивает карточку при поиске
+     * Подсвечивает поисковый термин
      */
     highlight(searchTerm) {
         if (!this.element || !searchTerm) return;
 
-        const title = this.element.querySelector('.week-card-title');
-        const description = this.element.querySelector('.week-card-desc');
-        
-        if (title) {
-            title.innerHTML = this._highlightText(this.project.title, searchTerm);
-        }
-        
-        if (description) {
-            description.innerHTML = this._highlightText(this.project.getSummary(), searchTerm);
-        }
+        const elements = this.element.querySelectorAll('.week-card-title, .week-card-desc');
+        elements.forEach(element => {
+            const originalText = element.textContent;
+            const highlightedText = this._highlightText(originalText, searchTerm);
+            if (highlightedText !== originalText) {
+                element.innerHTML = highlightedText;
+            }
+        });
     }
 
     /**
@@ -227,25 +226,19 @@ export class ProjectCard {
     removeHighlight() {
         if (!this.element) return;
 
-        const title = this.element.querySelector('.week-card-title');
-        const description = this.element.querySelector('.week-card-desc');
-        
-        if (title) {
-            title.textContent = this.project.title;
-        }
-        
-        if (description) {
-            description.textContent = this.project.getSummary();
-        }
+        const highlightedElements = this.element.querySelectorAll('.highlight');
+        highlightedElements.forEach(element => {
+            const parent = element.parentNode;
+            parent.replaceChild(document.createTextNode(element.textContent), element);
+            parent.normalize();
+        });
     }
 
     /**
-     * Подсвечивает текст поискового запроса
+     * Подсвечивает текст
      */
     _highlightText(text, searchTerm) {
-        if (!searchTerm) return text;
-        
         const regex = new RegExp(`(${searchTerm})`, 'gi');
-        return text.replace(regex, '<mark>$1</mark>');
+        return text.replace(regex, '<span class="highlight">$1</span>');
     }
 } 

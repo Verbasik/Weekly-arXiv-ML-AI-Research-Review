@@ -2,65 +2,90 @@ import { ErrorHandler, fetchWithRetry } from '../error/ErrorHandler.js';
 
 /**
  * Agents Data Source - Infrastructure Layer
- * Реализация источника данных для Agents проектов
+ * Источник данных для получения информации об agents проектах
  */
 export class AgentsDataSource {
     constructor(config) {
         this.githubRepo = config.githubRepo;
         this.githubBranch = config.githubBranch;
-        this.baseUrl = `https://raw.githubusercontent.com/${this.githubRepo}/${this.githubBranch}`;
+        this.config = null;
+        this._loadConfig();
     }
 
     /**
-     * Получает данные из agents-index.json
+     * Загружает конфигурацию
      */
-    async fetchData() {
-        const jsonUrl = `${this.baseUrl}/web/infrastructure/data/agents-index.json`;
-        
+    async _loadConfig() {
         try {
-            const response = await fetchWithRetry(jsonUrl, {}, 'данные agents проектов');
-            const data = await response.json();
-            
-            if (!data.projects || !Array.isArray(data.projects)) {
-                throw new Error('Invalid data format: projects array is missing');
-            }
-            
-            console.log('✅ Agents data loaded successfully from GitHub');
-            return data;
+            const response = await fetch('web/infrastructure/data/agents-config.json');
+            const configData = await response.json();
+            this.config = configData.config;
         } catch (error) {
-            console.warn('⚠️ GitHub fetch failed, trying local fallback:', error.message);
-            try {
-                return await this._fetchLocalData();
-            } catch (localError) {
-                console.error('❌ Failed to load agents data from both GitHub and local:', localError);
-                throw new Error(`Failed to fetch agents data: ${error.message}`);
-            }
+            console.warn('Failed to load agents config, using defaults:', error);
+            // Fallback конфигурация
+            this.config = {
+                github: {
+                    repo: this.githubRepo,
+                    branch: this.githubBranch
+                },
+                urls: {
+                    paper_base: `https://raw.githubusercontent.com/${this.githubRepo}/${this.githubBranch}/{code_path}/README.md`,
+                    notebook_base: `https://github.com/${this.githubRepo}/tree/${this.githubBranch}/{notebook_path}`,
+                    code_base: `https://github.com/${this.githubRepo}/tree/${this.githubBranch}/{code_path}`
+                }
+            };
         }
     }
 
     /**
-     * Загружает данные из локального файла (для разработки)
+     * Получает конфигурацию
+     */
+    getConfig() {
+        return this.config;
+    }
+
+    /**
+     * Получает данные agents проектов
+     */
+    async fetchData() {
+        try {
+            // Сначала пробуем загрузить удаленно
+            const response = await fetch(`https://raw.githubusercontent.com/${this.githubRepo}/${this.githubBranch}/web/infrastructure/data/agents-index.json`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            return await response.json();
+        } catch (error) {
+            console.warn('Failed to fetch remote agents data, trying local:', error.message);
+            return await this._fetchLocalData();
+        }
+    }
+
+    /**
+     * Резервная загрузка локальных данных
      */
     async _fetchLocalData() {
         try {
-            const response = await fetch('/web/infrastructure/data/agents-index.json');
+            const response = await fetch('web/infrastructure/data/agents-index.json');
             
             if (!response.ok) {
-                throw new Error(`Local file not found: HTTP ${response.status}`);
+                throw new Error(`HTTP ${response.status}: Failed to load local agents data`);
             }
             
-            const data = await response.json();
-            
-            if (!data.projects || !Array.isArray(data.projects)) {
-                throw new Error('Invalid local data format: projects array is missing');
-            }
-            
-            console.log('✅ Agents data loaded successfully from local file');
-            return data;
-            
+            return await response.json();
         } catch (error) {
-            console.error('❌ Failed to load local agents data:', error);
-            throw new Error(`Failed to fetch local agents data: ${error.message}`);
+            console.error('Failed to load local agents data:', error);
+            // Возвращаем пустую структуру как fallback
+            return {
+                projects: [],
+                metadata: {
+                    total_projects: 0,
+                    last_updated: new Date().toISOString(),
+                    categories: []
+                }
+            };
         }
     }
 
@@ -68,52 +93,48 @@ export class AgentsDataSource {
      * Получает markdown контент для проекта
      */
     async fetchMarkdown(projectId) {
-        const reviewUrl = `${this.baseUrl}/agents-under-hood/${projectId}/README.md`;
-        
         try {
-            const response = await fetchWithRetry(reviewUrl, {}, `проект "${projectId}"`);
-            let markdown = await response.text();
+            // Сначала пробуем удаленно
+            const response = await fetch(`https://raw.githubusercontent.com/${this.githubRepo}/${this.githubBranch}/agents-under-hood/${projectId}/README.md`);
             
-            if (!markdown.trim()) {
-                throw new Error('Обзор проекта пуст или не содержит контента');
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
             
-            console.log(`✅ Markdown loaded successfully for ${projectId} from GitHub`);
-            return markdown;
+            return await response.text();
         } catch (error) {
-            console.warn(`⚠️ GitHub markdown fetch failed for ${projectId}, trying local fallback:`, error.message);
-            try {
-                return await this._fetchLocalMarkdown(projectId);
-            } catch (localError) {
-                console.error(`❌ Failed to load markdown for ${projectId} from both GitHub and local:`, localError);
-                throw new Error(`Failed to fetch markdown for ${projectId}: ${error.message}`);
-            }
+            console.warn('Failed to fetch remote markdown, trying local:', error.message);
+            return await this._fetchLocalMarkdown(projectId);
         }
     }
 
     /**
-     * Загружает markdown из локального файла (для разработки)
+     * Резервная загрузка локального markdown
      */
     async _fetchLocalMarkdown(projectId) {
         try {
-            const response = await fetch(`/agents-under-hood/${projectId}/README.md`);
+            // Пробуем найти локальный файл
+            const response = await fetch(`../agents-under-hood/${projectId}/README.md`);
             
             if (!response.ok) {
-                throw new Error(`Local markdown not found: HTTP ${response.status}`);
+                throw new Error(`HTTP ${response.status}: Local markdown not found`);
             }
             
-            let markdown = await response.text();
-            
-            if (!markdown.trim()) {
-                throw new Error('Local markdown is empty');
-            }
-            
-            console.log(`✅ Markdown loaded successfully for ${projectId} from local file`);
-            return markdown;
-            
+            return await response.text();
         } catch (error) {
-            console.error(`❌ Failed to load local markdown for ${projectId}:`, error);
-            throw new Error(`Failed to fetch local markdown for ${projectId}: ${error.message}`);
+            console.error(`Failed to load markdown for ${projectId}:`, error);
+            
+            // Fallback контент
+            return `# ${projectId}
+            
+Контент проекта временно недоступен.
+
+Попробуйте:
+1. Обновить страницу
+2. Проверить подключение к интернету
+3. Посетить [репозиторий проекта](https://github.com/${this.githubRepo})
+
+Ошибка: ${error.message}`;
         }
     }
 
@@ -122,7 +143,9 @@ export class AgentsDataSource {
      */
     async checkProjectHealth(projectId) {
         try {
-            const response = await fetch(`https://api.github.com/repos/${this.githubRepo}/contents/agents-under-hood/${projectId}?ref=${this.githubBranch}`);
+            const response = await fetch(`https://api.github.com/repos/${this.githubRepo}/contents/agents-under-hood/${projectId}`, {
+                method: 'HEAD'
+            });
             return response.ok;
         } catch (error) {
             return false;
@@ -134,28 +157,36 @@ export class AgentsDataSource {
      */
     async getProjectInfo(projectId) {
         try {
-            const response = await fetch(`https://api.github.com/repos/${this.githubRepo}/contents/agents-under-hood/${projectId}?ref=${this.githubBranch}`);
+            const response = await fetch(`https://api.github.com/repos/${this.githubRepo}/contents/agents-under-hood/${projectId}`);
+            
             if (!response.ok) {
-                throw new Error(`GitHub API error: ${response.status}`);
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
+            
             return await response.json();
         } catch (error) {
-            throw new Error(`Failed to fetch project info: ${error.message}`);
+            console.warn(`Failed to fetch project info for ${projectId}:`, error.message);
+            return null;
         }
     }
 
     /**
-     * Получает список файлов в директории проекта
+     * Получает список файлов проекта
      */
     async getProjectContents(projectId) {
         try {
-            const response = await fetch(`https://api.github.com/repos/${this.githubRepo}/contents/agents-under-hood/${projectId}?ref=${this.githubBranch}`);
-            if (!response.ok) {
-                throw new Error(`GitHub API error: ${response.status}`);
+            const info = await this.getProjectInfo(projectId);
+            if (info && Array.isArray(info)) {
+                return info.filter(item => item.type === 'file').map(file => ({
+                    name: file.name,
+                    path: file.path,
+                    download_url: file.download_url
+                }));
             }
-            return await response.json();
+            return [];
         } catch (error) {
-            throw new Error(`Failed to fetch project contents: ${error.message}`);
+            console.warn(`Failed to get project contents for ${projectId}:`, error.message);
+            return [];
         }
     }
 } 
