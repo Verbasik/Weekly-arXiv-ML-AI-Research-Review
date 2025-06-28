@@ -120,6 +120,21 @@ export class Project {
     getFormattedResources(githubRepo, branch) {
         const resources = [];
 
+        // Paper (добавляем для соответствия структуре главной страницы)
+        if (this.code_path) {
+            const paperText = `Paper`;
+            const resource = {
+                icon: 'far fa-file-alt',
+                text: paperText,
+                type: 'paper'
+            };
+            
+            // Используем README.md как paper
+            resource.url = `https://raw.githubusercontent.com/${githubRepo}/${branch}/${this.code_path}/README.md`;
+            
+            resources.push(resource);
+        }
+
         // Notebooks
         if (this.notebooks !== undefined && this.notebooks > 0) {
             const notebooksText = `${this.notebooks} Notebook${this.notebooks !== 1 ? 's' : ''}`;
@@ -138,7 +153,7 @@ export class Project {
 
         // Code files
         if (this.code !== undefined && this.code > 0) {
-            const codeText = `Source Code`;
+            const codeText = `Code Files`;
             const resource = {
                 icon: 'fas fa-code',
                 text: codeText,
@@ -152,7 +167,7 @@ export class Project {
             resources.push(resource);
         }
 
-        // Demo
+        // Demo (оставляем как дополнительную возможность)
         if (this.demo !== undefined && this.demo > 0) {
             const demoText = `Live Demo`;
             const resource = {

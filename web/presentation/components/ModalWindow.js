@@ -2,51 +2,66 @@ import { ErrorHandler, createErrorUI } from '../../infrastructure/error/ErrorHan
 
 /**
  * Modal Window Component - Presentation Layer
- * Компонент для отображения модального окна с markdown контентом
+ * Универсальный компонент модального окна для отображения markdown контента
  */
 export class ModalWindow {
-    constructor(modalElement, researchService) {
+    constructor(modalElement, service) {
         this.modal = modalElement;
-        this.researchService = researchService;
-        this.markdownContent = modalElement.querySelector('#markdown-content');
-        this.loader = modalElement.querySelector('.loader');
-        this.closeButton = modalElement.querySelector('.close-modal');
+        this.service = service; // Может быть ResearchService или AgentsService
+        this.markdownContent = modalElement?.querySelector('#markdown-content') || modalElement?.querySelector('.markdown-body');
+        this.loader = modalElement?.querySelector('.loader');
+        
+        // Определяем тип сервиса
+        this.serviceType = this._detectServiceType(service);
         
         this._initializeEventListeners();
+    }
+
+    /**
+     * Определяет тип сервиса
+     */
+    _detectServiceType(service) {
+        if (service && typeof service.getWeekMarkdown === 'function') {
+            return 'research';
+        } else if (service && typeof service.getProjectMarkdown === 'function') {
+            return 'agents';
+        }
+        console.warn('Unknown service type, defaulting to research');
+        return 'research';
     }
 
     /**
      * Инициализирует обработчики событий
      */
     _initializeEventListeners() {
-        // Закрытие по кнопке
-        if (this.closeButton) {
-            this.closeButton.addEventListener('click', () => this.close());
+        if (!this.modal) return;
+
+        // Закрытие по клику на X
+        const closeButton = this.modal.querySelector('.close-modal');
+        if (closeButton) {
+            closeButton.addEventListener('click', () => {
+                this.close();
+            });
         }
 
-        // Закрытие по клику вне модального окна
-        this.modal.addEventListener('click', (event) => {
-            if (event.target === this.modal) {
+        // Закрытие по клику на фон
+        this.modal.addEventListener('click', (e) => {
+            if (e.target === this.modal) {
                 this.close();
             }
         });
 
         // Закрытие по Escape
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape' && this.isOpen()) {
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.isOpen()) {
                 this.close();
             }
-        });
-
-        // Обработчик кастомного события открытия
-        document.addEventListener('openReview', (event) => {
-            const { year, weekId, title } = event.detail;
-            this.open(year, weekId, title);
         });
     }
 
     /**
      * Открывает модальное окно
+     * Универсальный метод для research и agents
      */
     async open(year, weekId, title) {
         if (!this.modal || !this.markdownContent) return;
@@ -58,7 +73,7 @@ export class ModalWindow {
         this.modal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
 
-        // Загружаем контент
+        // Загружаем контент в зависимости от типа сервиса
         const success = await this._loadMarkdown(year, weekId);
 
         if (success) {
@@ -102,17 +117,31 @@ export class ModalWindow {
 
         // Показываем индикатор загрузки
         this.loader.style.display = 'block';
+        
+        // Разные сообщения для разных типов контента
+        const loadingMessage = this.serviceType === 'agents' 
+            ? `Загрузка проекта "${year}"...`
+            : `Загрузка статьи "${year}/${weekId}"...`;
+            
         this.markdownContent.innerHTML = `
             <div class="loading-content">
                 <div class="loader"></div>
-                <p>Загрузка статьи "${year}/${weekId}"...</p>
+                <p>${loadingMessage}</p>
                 <p class="loading-tip">💡 Обычно это занимает несколько секунд</p>
             </div>
         `;
 
         try {
-            // Получаем markdown через сервис
-            const markdown = await this.researchService.getWeekMarkdown(year, weekId);
+            let markdown;
+            
+            // Получаем markdown в зависимости от типа сервиса
+            if (this.serviceType === 'agents') {
+                // Для агентов year содержит projectId
+                markdown = await this.service.getProjectMarkdown(year);
+            } else {
+                // Для исследований
+                markdown = await this.service.getWeekMarkdown(year, weekId);
+            }
             
             // Обрабатываем markdown
             const html = await this._processMarkdown(markdown);
@@ -132,10 +161,15 @@ export class ModalWindow {
             // Определяем тип ошибки
             const errorInfo = ErrorHandler.classifyError(error);
             
+            // Разные сообщения ошибок для разных типов контента
+            const errorContext = this.serviceType === 'agents' 
+                ? `проект "${year}"`
+                : `статья "${year}/${weekId}"`;
+            
             // Создаем улучшенный error UI
             const errorUI = createErrorUI(
                 errorInfo.type,
-                `статья "${year}/${weekId}"`,
+                errorContext,
                 () => {
                     // Retry callback
                     this._loadMarkdown(year, weekId);
@@ -245,49 +279,56 @@ export class ModalWindow {
      * Обновляет URL с хешем
      */
     _updateUrl(year, weekId) {
-        window.location.hash = `#${year}/${weekId}`;
+        if (this.serviceType === 'agents') {
+            // Для агентов используем только projectId
+            window.location.hash = `#agents/${year}`;
+        } else {
+            // Для исследований используем year/weekId
+            window.location.hash = `#${year}/${weekId}`;
+        }
     }
 
     /**
      * Сбрасывает URL
      */
     _resetUrl() {
-        history.pushState("", document.title, window.location.pathname + window.location.search);
+        history.replaceState(null, null, ' ');
     }
 
     /**
-     * Проверяет URL хеш и открывает модальное окно если нужно
+     * Проверяет URL hash и открывает соответствующий контент
      */
     checkUrlHash() {
-        const hash = window.location.hash;
-        if (hash && hash.startsWith('#') && hash.includes('/')) {
-            const parts = hash.substring(1).split('/');
-            if (parts.length === 2 && parts[0] && parts[1]) {
-                const year = parts[0];
-                const weekId = parts[1];
+        const hash = window.location.hash.substring(1); // Убираем #
+        if (!hash) return;
 
-                // Проверяем, не открыто ли уже это модальное окно
-                const currentModalTitle = this.modal?.querySelector('.modal-content h2.modal-title');
-                const expectedTitle = `Review ${year}/${weekId}`;
-                
-                if (!this.isOpen() || !currentModalTitle || !currentModalTitle.textContent.includes(`${year}/${weekId}`)) {
-                    // Пытаемся найти заголовок из карточки
-                    const card = document.querySelector(`.week-card[data-year="${year}"][data-week="${weekId}"]`);
-                    const title = card?.querySelector('.week-card-title')?.textContent || expectedTitle;
-                    
-                    this.open(year, weekId, title);
-                }
-            } else {
-                // Хеш не соответствует формату, закрываем окно
-                if (this.isOpen()) {
-                    this.close();
-                }
+        if (hash.startsWith('agents/')) {
+            // Обработка URL для агентов: #agents/projectId
+            const projectId = hash.substring(7); // Убираем 'agents/'
+            if (projectId && this.serviceType === 'agents') {
+                // Нужно получить title проекта из сервиса
+                this._openProjectFromHash(projectId);
             }
-        } else {
-            // Хеш пуст или не содержит '/', закрываем окно
-            if (this.isOpen()) {
-                this.close();
+        } else if (hash.includes('/')) {
+            // Обработка URL для исследований: #year/weekId
+            const [year, weekId] = hash.split('/');
+            if (year && weekId && this.serviceType === 'research') {
+                this.open(year, weekId, `${year} / ${weekId}`);
             }
+        }
+    }
+
+    /**
+     * Открывает проект из hash URL
+     */
+    async _openProjectFromHash(projectId) {
+        try {
+            const project = await this.service.getProjectData(projectId);
+            if (project) {
+                this.open(projectId, projectId, project.title);
+            }
+        } catch (error) {
+            console.error('Error opening project from hash:', error);
         }
     }
 } 
