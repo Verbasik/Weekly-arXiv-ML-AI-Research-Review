@@ -88,9 +88,10 @@ export class AgentsController {
             console.log('🔧 Projects section created:', projectsSection);
             
             console.log('🔧 Adding project cards...');
-            projects.forEach(project => {
-                this._createAndAddProjectCard(projectsSection, project);
-            });
+            // Создаем карточки асинхронно, дожидаясь каждой
+            for (const project of projects) {
+                await this._createAndAddProjectCard(projectsSection, project);
+            }
             console.log('🔧 All project cards added');
 
             // Обновляем фильтры в боковой панели
@@ -110,11 +111,11 @@ export class AgentsController {
     /**
      * Создает и добавляет карточку проекта
      */
-    _createAndAddProjectCard(projectsSection, project) {
+    async _createAndAddProjectCard(projectsSection, project) {
         console.log('🔧 Creating project card for:', project.getId(), project.title);
         
         const projectCard = new ProjectCard(project, this.githubConfig, this.dataSource);
-        const cardElement = projectCard.createElement();
+        const cardElement = await projectCard.createElement(); // Дожидаемся создания карточки
         
         console.log('🔧 Created card element:', cardElement);
         

@@ -9,7 +9,22 @@ export class AgentsDataSource {
         this.githubRepo = config.githubRepo;
         this.githubBranch = config.githubBranch;
         this.config = null;
-        this._loadConfig();
+        this.configLoaded = false;
+        // Запускаем загрузку конфигурации, но не блокируем конструктор
+        this._initializeConfig();
+    }
+
+    /**
+     * Инициализирует загрузку конфигурации
+     */
+    async _initializeConfig() {
+        try {
+            await this._loadConfig();
+            this.configLoaded = true;
+        } catch (error) {
+            console.warn('Failed to initialize config:', error);
+            this.configLoaded = true; // Отмечаем как загруженную с fallback
+        }
     }
 
     /**
@@ -32,15 +47,46 @@ export class AgentsDataSource {
                     paper_base: `https://raw.githubusercontent.com/${this.githubRepo}/${this.githubBranch}/{code_path}/README.md`,
                     notebook_base: `https://github.com/${this.githubRepo}/tree/${this.githubBranch}/{notebook_path}`,
                     code_base: `https://github.com/${this.githubRepo}/tree/${this.githubBranch}/{code_path}`
+                },
+                buttons: {
+                    paper: {
+                        text: "Paper",
+                        icon: "far fa-file-alt",
+                        behavior: "modal",
+                        url_template: "paper_base"
+                    },
+                    notebooks: {
+                        text: "{count} Notebook{plural}",
+                        icon: "far fa-file-code", 
+                        behavior: "redirect",
+                        url_template: "notebook_base"
+                    },
+                    code: {
+                        text: "Code Files",
+                        icon: "fas fa-code",
+                        behavior: "redirect", 
+                        url_template: "code_base"
+                    }
                 }
             };
         }
     }
 
     /**
-     * Получает конфигурацию
+     * Получает конфигурацию (с ожиданием загрузки если нужно)
      */
-    getConfig() {
+    async getConfig() {
+        // Ждем завершения загрузки конфигурации
+        if (!this.configLoaded) {
+            await this._initializeConfig();
+        }
+        return this.config;
+    }
+
+    /**
+     * Получает конфигурацию синхронно (может вернуть null если не загружена)
+     */
+    getConfigSync() {
         return this.config;
     }
 

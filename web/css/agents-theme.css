@@ -266,4 +266,48 @@
         break-inside: avoid;
         margin-bottom: 2rem;
     }
+}
+
+/* Resource Button Styles */
+.resource-button {
+    background: var(--accent-grad);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius-small);
+    padding: 4px 8px;
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    text-decoration: none;
+}
+
+.resource-button:hover {
+    filter: brightness(110%);
+    transform: translateY(-1px);
+}
+
+.resource-button:active {
+    transform: translateY(0);
+}
+
+.resource-link {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: var(--border-radius-small);
+    transition: all 0.3s ease;
+}
+
+.resource-link:hover {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
 } 
