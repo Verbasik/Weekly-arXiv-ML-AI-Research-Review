@@ -32,7 +32,7 @@ export class AgentsDataSource {
      */
     async _loadConfig() {
         try {
-            const response = await fetch('web/infrastructure/data/agents-config.json');
+            const response = await fetch('infrastructure/data/agents-config.json');
             const configData = await response.json();
             this.config = configData.config;
         } catch (error) {
@@ -114,7 +114,7 @@ export class AgentsDataSource {
      */
     async _fetchLocalData() {
         try {
-            const response = await fetch('web/infrastructure/data/agents-index.json');
+            const response = await fetch('infrastructure/data/agents-index.json');
             
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: Failed to load local agents data`);
