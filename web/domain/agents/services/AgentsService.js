@@ -224,7 +224,6 @@ export class AgentsService {
         // Баллы за ресурсы
         score += (project.notebooks || 0) * 2;
         score += (project.code || 0) * 3;
-        score += (project.demo || 0) * 4; // Demo весит больше
         
         // Баллы за сложность
         const difficultyScores = {

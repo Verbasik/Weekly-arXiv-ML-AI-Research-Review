@@ -55,7 +55,6 @@ export class AgentsRepository {
             totalProjects: projects.length,
             totalNotebooks: projects.reduce((total, project) => total + (project.notebooks || 0), 0),
             totalCode: projects.reduce((total, project) => total + (project.code || 0), 0),
-            totalDemos: projects.reduce((total, project) => total + (project.demo || 0), 0),
             projectStatistics: projects.map(project => ({
                 id: project.getId(),
                 title: project.title,

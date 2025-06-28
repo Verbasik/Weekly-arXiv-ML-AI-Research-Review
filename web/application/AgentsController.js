@@ -113,7 +113,7 @@ export class AgentsController {
     _createAndAddProjectCard(projectsSection, project) {
         console.log('🔧 Creating project card for:', project.getId(), project.title);
         
-        const projectCard = new ProjectCard(project, this.githubConfig);
+        const projectCard = new ProjectCard(project, this.githubConfig, this.dataSource);
         const cardElement = projectCard.createElement();
         
         console.log('🔧 Created card element:', cardElement);
