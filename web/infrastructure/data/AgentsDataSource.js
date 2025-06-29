@@ -139,57 +139,49 @@ export class AgentsDataSource {
      * Получает markdown контент для проекта
      */
     async fetchMarkdown(projectId) {
-        // 1) Список потенциальных имен файлов для markdown контента
-        const remoteCandidates = [
-            `https://raw.githubusercontent.com/${this.githubRepo}/${this.githubBranch}/agents-under-hood/${projectId}/review.md`,
-            `https://raw.githubusercontent.com/${this.githubRepo}/${this.githubBranch}/agents-under-hood/${projectId}/README.md`
-        ];
-
-        // Пытаемся последовательно загрузить каждый файл удалённо
-        for (const url of remoteCandidates) {
-            try {
-                const response = await fetch(url);
-                if (response.ok) {
-                    return await response.text();
-                }
-            } catch (err) {
-                // Игнорируем ошибку и пробуем следующий вариант
+        try {
+            // Сначала пробуем удаленно
+            const response = await fetch(`https://raw.githubusercontent.com/${this.githubRepo}/${this.githubBranch}/agents-under-hood/${projectId}/review.md`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
+            
+            return await response.text();
+        } catch (error) {
+            console.warn('Failed to fetch remote markdown, trying local:', error.message);
+            return await this._fetchLocalMarkdown(projectId);
         }
-
-        // Если все удалённые попытки не увенчались успехом — пробуем локальные файлы
-        return await this._fetchLocalMarkdown(projectId);
     }
 
     /**
      * Резервная загрузка локального markdown
      */
     async _fetchLocalMarkdown(projectId) {
-        const localCandidates = [
-            `../agents-under-hood/${projectId}/review.md`,
-            `../agents-under-hood/${projectId}/README.md`
-        ];
-
-        for (const path of localCandidates) {
-            try {
-                const response = await fetch(path);
-                if (response.ok) {
-                    return await response.text();
-                }
-            } catch (err) {
-                // Переходим к следующему кандидату
+        try {
+            // Пробуем найти локальный файл
+            const response = await fetch(`../agents-under-hood/${projectId}/review.md`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: Local markdown not found`);
             }
-        }
-
-        // Если ничего не найдено — выводим fallback контент
-        return `# ${projectId}
-
+            
+            return await response.text();
+        } catch (error) {
+            console.error(`Failed to load markdown for ${projectId}:`, error);
+            
+            // Fallback контент
+            return `# ${projectId}
+            
 Контент проекта временно недоступен.
 
 Попробуйте:
 1. Обновить страницу
 2. Проверить подключение к интернету
-3. Посетить [репозиторий проекта](https://github.com/${this.githubRepo})`;
+3. Посетить [репозиторий проекта](https://github.com/${this.githubRepo})
+
+Ошибка: ${error.message}`;
+        }
     }
 
     /**
