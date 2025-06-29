@@ -3,6 +3,7 @@
 
 # IDE-specific files
 **/.vscode/
+**/.cursor/
 
 # Virtual environment
 **/venv/
@@ -11,4 +12,4 @@
 **/__pycache__/
 
 # Configuration files
-**/.env
+**/.env.cursor/

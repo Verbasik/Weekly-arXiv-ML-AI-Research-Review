@@ -7,10 +7,12 @@
     <!-- External CSS Libraries -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.2.0/github-markdown.min.css">
-    <!-- Google Fonts for Modern Typography -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Glassmorphism Styles -->
-    <link rel="stylesheet" href="web/web/glassmorphism-style.css">
+    <!-- Google Fonts for Modern Typography & Scale AI Deep-tech -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Scale AI Theme -->
+    <link rel="stylesheet" href="web/css/scale-ai-theme.css">
+    <!-- Mobile Optimizations -->
+    <link rel="stylesheet" href="web/css/mobile-optimizations.css">
 
     <!-- MathJax Configuration -->
     <script>
@@ -66,10 +68,11 @@
     </header>
 
     <nav>
-        <div class="container nav-container">
+        <div class="nav-container">
             <div class="nav-content">
                 <ul class="nav-links">
                     <li><a href="#home"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="web/agents.html"><i class="fas fa-robot"></i> Agents</a></li>
                     <li class="dropdown">
                         <a href="#years"><i class="fas fa-calendar-alt"></i> Years <i class="fas fa-chevron-down"></i></a>
                         <div class="dropdown-content">
@@ -77,7 +80,7 @@
                             <a href="#2024">2024</a>
                         </div>
                     </li>
-                    <li><a href="#about"><i class="fas fa-info-circle"></i> About</a></li>
+                    <li><a href="web/about.html"><i class="fas fa-info-circle"></i> About</a></li>
                     <li><a href="#contribute"><i class="fas fa-hands-helping"></i> Contribute</a></li>
                     <li><a href="#contact"><i class="fas fa-envelope"></i> Contact</a></li>
                 </ul>
@@ -90,7 +93,7 @@
         </div>
     </nav>
 
-    <main class="container">
+    <main>
         <div class="sidebar-layout">
             <aside class="sidebar">
                 <div class="sidebar-section">
@@ -127,11 +130,13 @@
             </aside>
 
             <div class="content">
-                <section id="home">
-                    <h1>Welcome to "The Weekly Research Brief" 📰</h1>
+                <section id="home" class="hero">
+                    <h1 class="section-heading">Welcome to<br/>"The Weekly Research Brief"</h1>
                     <p>Этот репозиторий представляет собой еженедельную коллекцию обзоров статей с arXiv и Daily Papers Hugging Face в области машинного обучения и искусственного интеллекта. Каждую неделю я буду выбирать одну значимую публикацию для детального анализа и практической реализации.</p>
 
-                    <h3>🎯 Цели проекта:</h3>
+                    <hr class="glow-divider">
+
+                    <h3 class="section-heading">🎯 Цели проекта:</h3>
                     <ul>
                         <li>Систематическое изучение передовых исследований в области AI</li>
                         <li>Создание доступных и понятных обзоров сложных научных работ</li>
@@ -212,19 +217,9 @@
     <div class="back-to-top" id="back-to-top">
         <i class="fas fa-arrow-up"></i>
     </div>
-    <script src="web/script.js" defer></script>
-    <script src="web/mobile-enhancements.js" defer></script>
+    <!-- New DDD Architecture -->
+    <script type="module" src="web/main.js"></script>
+    <script src="web/presentation/mobile-enhancements.js" defer></script>
 
-    <!-- 3D Background Objects -->
-    <div class="bg-3d-objects">
-        <div class="sphere sphere-1"></div>
-        <div class="sphere sphere-2"></div>
-        <div class="sphere sphere-3"></div>
-        <div class="ring ring-1"></div>
-        <div class="ring ring-2"></div>
-        <div class="floating-orb orb-1"></div>
-        <div class="floating-orb orb-2"></div>
-        <div class="floating-orb orb-3"></div>
-    </div>
 </body>
 </html> 

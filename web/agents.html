@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agents Under Hood - The Weekly Research Brief</title>
+    <!-- External CSS Libraries -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.2.0/github-markdown.min.css">
+    <!-- Google Fonts for Modern Typography & Scale AI Deep-tech -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Scale AI Theme -->
+    <link rel="stylesheet" href="css/scale-ai-theme.css">
+    <!-- Mobile Optimizations -->
+    <link rel="stylesheet" href="css/mobile-optimizations.css">
+    <!-- Agents Theme -->
+    <link rel="stylesheet" href="css/agents-theme.css">
+    <!-- Markdown Integration -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="../images/main.png">
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Agents Under Hood - Практические проекты и обзоры мультиагентных систем, инструментов ИИ и современных технологий машинного обучения.">
+    <meta name="keywords" content="AI agents, мультиагентные системы, OpenAI, машинное обучение, искусственный интеллект, обзоры, проекты">
+    <meta name="author" content="Edward Verbetsky">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://cyberrunner.github.io/Weekly-arXiv-ML-AI-Research-Review/web/agents.html">
+    <meta property="og:title" content="Agents Under Hood - AI Agents Research & Projects">
+    <meta property="og:description" content="Изучаем и разбираем современные мультиагентные системы на практике">
+    <meta property="og:image" content="https://cyberrunner.github.io/Weekly-arXiv-ML-AI-Research-Review/images/main.png">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://cyberrunner.github.io/Weekly-arXiv-ML-AI-Research-Review/web/agents.html">
+    <meta property="twitter:title" content="Agents Under Hood - AI Agents Research & Projects">
+    <meta property="twitter:description" content="Изучаем и разбираем современные мультиагентные системы на практике">
+    <meta property="twitter:image" content="https://cyberrunner.github.io/Weekly-arXiv-ML-AI-Research-Review/images/main.png">
+</head>
+<body>
+
+    
+    <!-- Header with brand bar (same as main page) -->
+    <header>
+        <div class="container header-content">
+            <div>
+                <div class="logo">
+                    <i class="fas fa-robot"></i>
+                    <span>The Weekly Research Brief</span>
+                </div>
+                <div class="tagline">Agents Under Hood - Изучаем мультиагентные системы на практике</div>
+            </div>
+            <div class="badges">
+                <span class="badge"><i class="fas fa-star"></i> Awesome</span>
+                <span class="badge"><i class="fas fa-heart"></i> Made With Love</span>
+                <span class="badge"><i class="fas fa-code"></i> Open Source</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation (same structure as main page) -->
+    <nav>
+        <div class="nav-container">
+            <div class="nav-content">
+                <ul class="nav-links">
+                    <li><a href="../index.html"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="#agents" class="active"><i class="fas fa-robot"></i> Agents</a></li>
+                    <li class="dropdown">
+                        <a href="../index.html#years"><i class="fas fa-calendar-alt"></i> Years <i class="fas fa-chevron-down"></i></a>
+                        <div class="dropdown-content">
+                            <a href="../index.html#2025">2025</a>
+                            <a href="../index.html#2024">2024</a>
+                        </div>
+                    </li>
+                    <li><a href="about.html"><i class="fas fa-info-circle"></i> About</a></li>
+                    <li><a href="#contribute"><i class="fas fa-hands-helping"></i> Contribute</a></li>
+                    <li><a href="#contact"><i class="fas fa-envelope"></i> Contact</a></li>
+                </ul>
+                
+                <div class="search-bar">
+                    <input type="text" placeholder="Search agents...">
+                    <button><i class="fas fa-search"></i></button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+
+    
+    <!-- Main Container (same structure as main page) -->
+    <main>
+        <div class="sidebar-layout">
+            <!-- Sidebar (same structure as main page) -->
+            <aside class="sidebar">
+                <div class="sidebar-section">
+                    <h3><i class="fas fa-filter"></i> Filter by Type</h3>
+                    <ul>
+                        <li><a href="#all" class="active">All Projects</a></li>
+                        <li><a href="#demos">Demos</a></li>
+                        <li><a href="#tutorials">Tutorials</a></li>
+                    </ul>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3><i class="fas fa-tags"></i> Popular Tags</h3>
+                    <div class="tags-container">
+                        <!-- Теги будут добавлены динамически -->
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3><i class="fas fa-fire"></i> Featured Projects</h3>
+                    <ul>
+                        <!-- Рекомендации будут добавлены динамически -->
+                    </ul>
+                </div>
+            </aside>
+            
+            <!-- Main Content -->
+            <div class="content">
+                <!-- Hero Section (inside content like main page) -->
+                <section id="home" class="hero">
+                    <h1 class="section-heading">Agents Under Hood</h1>
+                    <p>Практические проекты мультиагентных систем для изучения современных подходов к искусственному интеллекту. Каждый проект включает полный код, документацию и живые демонстрации.</p>
+
+                    <hr class="glow-divider">
+
+                    <h3 class="section-heading">🎯 Что мы изучаем:</h3>
+                    <ul>
+                        <li>Мультиагентные системы и их архитектуры</li>
+                        <li>Практическое применение OpenAI API и инструментов</li>
+                        <li>Современные фреймворки для разработки AI-агентов</li>
+                        <li>Интеграция различных AI-сервисов в единые решения</li>
+                    </ul>
+                </section>
+
+                <!-- Projects sections will be dynamically added here -->
+            </div>
+        </div>
+    </main>
+    
+    <!-- Back to Top Button (same as main page) -->
+    <div class="back-to-top" id="back-to-top">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+    
+    <!-- Modal Window -->
+    <div id="markdown-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">×</span>
+            <div class="loader"></div>
+            <!-- Title will be added dynamically by JS -->
+            <div class="markdown-body" id="markdown-content">
+                <!-- Markdown content will be loaded here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer (same structure as main page) -->
+    <footer>
+        <div class="container footer-content">
+            <div class="footer-column">
+                <h3>About</h3>
+                <p>Weekly collection of arXiv paper reviews in ML/AI with practical implementations and agent projects.</p>
+                <div class="social-links">
+                    <a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i></a>
+                    <a href="https://linkedin.com/in/edwardverbetsky" target="_blank" rel="noopener noreferrer"><i class="fab fa-linkedin"></i></a>
+                    <a href="mailto:edward.verbetsky@gmail.com"><i class="fas fa-envelope"></i></a>
+                </div>
+            </div>
+            <div class="footer-column">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="#agents">Agents</a></li>
+                    <li><a href="../index.html#2025">2025 Papers</a></li>
+                    <li><a href="about.html">About Project</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Resources</h3>
+                <ul>
+                    <li><a href="https://arxiv.org/">arXiv</a></li>
+                    <li><a href="https://paperswithcode.com/">Papers With Code</a></li>
+                    <li><a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/tree/develop/agents-under-hood" target="_blank">Agents GitHub</a></li>
+                    <li><a href="https://colab.research.google.com/">Google Colab</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Contribute</h3>
+                <p>Found an error or want to contribute? Submit a pull request on GitHub!</p>
+                <a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review" target="_blank" rel="noopener noreferrer" style="color: white; border-color: white; text-decoration: none; padding: 8px 16px; border: 1px solid; border-radius: 8px; display: inline-block; margin-top: 8px;">
+                    <i class="fab fa-github"></i> GitHub Repo
+                </a>
+            </div>
+        </div>
+        <div class="copyright">
+            © 2025 TWRB. All rights reserved.
+        </div>
+    </footer>
+    
+    <!-- JavaScript Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/typescript.min.js"></script>
+    
+    <!-- Application Scripts -->
+    <script type="module">
+        import { AgentsController } from './application/AgentsController.js';
+        
+        // Конфигурация приложения
+        const config = {
+            githubRepo: 'Verbasik/Weekly-arXiv-ML-AI-Research-Review',
+            githubBranch: 'develop'
+        };
+        
+        // Инициализация приложения
+        const app = new AgentsController(config);
+        
+        // Запуск после загрузки DOM
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Инициализируем приложение
+            await app.initialize();
+        });
+        
+
+    </script>
+    
+    <!-- Mobile Enhancements -->
+    <script src="presentation/mobile-enhancements.js" defer></script>
+
+</body>
+</html> 

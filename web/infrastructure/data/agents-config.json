@@ -1,0 +1,39 @@
+{
+    "config": {
+        "github": {
+            "repo": "Verbasik/Weekly-arXiv-ML-AI-Research-Review",
+            "branch": "develop"
+        },
+        "urls": {
+            "paper_base": "https://raw.githubusercontent.com/{repo}/{branch}/{code_path}/README.md",
+            "notebook_base": "https://github.com/{repo}/tree/{branch}/{notebook_path}",
+            "code_base": "https://github.com/{repo}/tree/{branch}/{code_path}"
+        },
+        "buttons": {
+            "paper": {
+                "text": "Paper",
+                "icon": "far fa-file-alt",
+                "behavior": "modal",
+                "url_template": "paper_base"
+            },
+            "notebooks": {
+                "text": "{count} Notebook{plural}",
+                "icon": "far fa-file-code", 
+                "behavior": "redirect",
+                "url_template": "notebook_base"
+            },
+            "code": {
+                "text": "Code Files",
+                "icon": "fas fa-code",
+                "behavior": "redirect", 
+                "url_template": "code_base"
+            }
+        },
+        "display": {
+            "show_live_demo": false,
+            "show_paper_count": false,
+            "show_notebook_count": true,
+            "show_code_count": false
+        }
+    }
+} 
