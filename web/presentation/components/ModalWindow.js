@@ -26,7 +26,6 @@ export class ModalWindow {
         } else if (service && typeof service.getProjectMarkdown === 'function') {
             return 'agents';
         }
-        console.warn('Unknown service type, defaulting to research');
         return 'research';
     }
 

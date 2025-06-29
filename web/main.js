@@ -14,15 +14,11 @@ const APP_CONFIG = {
 // Главная функция инициализации
 async function initializeApplication() {
     try {
-        console.log('🚀 Initializing Weekly Research Brief with DDD Architecture...');
-        
         // Создаем контроллер приложения
         const researchController = new ResearchController(APP_CONFIG);
         
         // Инициализируем приложение
         await researchController.initialize();
-        
-        console.log('✅ Application successfully initialized');
         
     } catch (error) {
         console.error('❌ Failed to initialize application:', error);
@@ -73,7 +69,6 @@ window.addEventListener('load', function() {
     setTimeout(() => {
         // Если приложение еще не инициализировано, пробуем еще раз
         if (!document.querySelector('.year-section')) {
-            console.log('🔄 Retrying application initialization...');
             initializeApplication();
         }
     }, 500);

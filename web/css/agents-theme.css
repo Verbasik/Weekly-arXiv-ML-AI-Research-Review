@@ -150,36 +150,28 @@
     padding: 2rem 0;
 }
 
-/* Loading Indicator for Agents */
-.loading-indicator {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 3rem;
-    color: var(--text-color);
+/* Card overlay link (делает всю карточку кликабельной) */
+.card-overlay-link {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    text-decoration: none;
+    background: transparent;
+    /* Чтобы не мешать внутренним элементам */
+    cursor: pointer;
 }
 
-.loading-indicator .loader {
-    width: 50px;
-    height: 50px;
-    border: 4px solid rgba(255, 107, 53, 0.2);
-    border-top: 4px solid var(--primary-color);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 1rem;
+/* Сохраняем интерактивность внутренних кнопок/ссылок */
+.project-card .gradient-button,
+.project-card a.resource-link {
+    position: relative;
+    z-index: 3;
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.loading-indicator p {
-    font-size: 1.1rem;
-    font-weight: 500;
-    margin: 0;
-}
+/* Loading Indicator inherits from main theme */
 
 /* Keep project-specific styles minimal */
 

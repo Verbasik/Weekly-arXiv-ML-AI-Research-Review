@@ -42,11 +42,13 @@ export class ProjectCard {
             </div>
             <div class="week-card-body">
                 <p class="week-card-desc">${this.project.description}</p>
-                <button class="gradient-button read-review">Read Review</button>
+                <button type="button" class="gradient-button read-review">Read Review</button>
             </div>
             <div class="week-card-footer">
                 ${resources.map(resource => this._getResourceHTML(resource)).join('')}
             </div>
+            <!-- Невидимый оверлей-ссылка для клика по всей карточке -->
+            <a href="#agents/${this.project.getId()}" class="card-overlay-link" aria-label="Open ${this.project.title}"></a>
         `;
     }
 
@@ -128,7 +130,6 @@ export class ProjectCard {
      * Обработчик клика по технологии
      */
     _onTechClick(technology) {
-        console.log(`Filter by technology: ${technology}`);
         // Здесь можно добавить логику фильтрации по технологии
     }
 
