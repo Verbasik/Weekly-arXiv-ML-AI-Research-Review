@@ -12,4 +12,4 @@
 **/__pycache__/
 
 # Configuration files
-**/.env
+**/.env.cursor/
