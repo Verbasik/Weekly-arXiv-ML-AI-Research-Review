@@ -1,5 +1,5 @@
 [![arXiv](https://img.shields.io/badge/arXiv-2506.01928-b31b1b.svg)](https://arxiv.org/abs/2506.01928)
-[![GitHub](https://img.shields.io/badge/GitHub-Eso-LMs-brightgreen)](https://github.com/s-sahoo/Eso-LMs)
+[![GitHub](https://img.shields.io/badge/GitHub-Eso--LMs-black?logo=github)](https://github.com/s-sahoo/Eso-LMs)
 [![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Models-yellow)](https://huggingface.co/collections/sahoo-diffusion/eso-lms-6838e86cb2c49f45302f0092)
 [![Telegram Channel](https://img.shields.io/badge/Telegram-TheWeeklyBrief-blue)](https://t.me/TheWeeklyBrief)
 

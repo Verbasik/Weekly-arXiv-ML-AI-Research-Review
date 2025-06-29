@@ -11,7 +11,7 @@
 
 2. Интерфейс на Next.js для визуализации процесса работы агентов с чат-интерфейсом.
 
-![Скриншот демонстрации](screenshot.jpg)
+![Скриншот демонстрации](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/agents-under-hood/openai-cs-agents-demo/assets/screenshot.jpg)
 
 ## Использование
 
