@@ -54,8 +54,6 @@ export class ResearchController {
             // Проверяем URL hash
             this.modal.checkUrlHash();
             
-            console.log('Research application initialized successfully');
-            
         } catch (error) {
             console.error('Failed to initialize research application:', error);
             this._showCriticalError(error);
@@ -202,7 +200,7 @@ export class ResearchController {
                 });
             }
         } catch (error) {
-            console.warn('Failed to load popular tags:', error);
+            // Сбой загрузки тегов не критичен
         }
     }
 
@@ -232,7 +230,7 @@ export class ResearchController {
                 });
             }
         } catch (error) {
-            console.warn('Failed to load trending papers:', error);
+            // Сбой загрузки trending статей не критичен
         }
     }
 
@@ -304,7 +302,6 @@ export class ResearchController {
             return;
         }
 
-        console.log(`Searching for: ${query}`);
         // Здесь будет реализована логика поиска
     }
 
@@ -531,16 +528,12 @@ export class ResearchController {
             setTimeout(() => {
                 indicator.style.opacity = '0';
             }, 3000);
-            
-            console.log('Network connection restored');
         });
         
         window.addEventListener('offline', () => {
             indicator.className = 'network-status offline';
             indicator.innerHTML = '📡 Нет подключения';
             indicator.style.opacity = '1';
-            
-            console.log('Network connection lost');
         });
         
         // Проверяем начальное состояние

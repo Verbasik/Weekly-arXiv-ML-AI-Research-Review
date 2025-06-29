@@ -45,12 +45,10 @@ export class AgentsController {
      */
     async initialize() {
         try {
-            console.log('🚀 Initializing Agents Under Hood...');
-            
             // Загружаем данные и рендерим интерфейс
             await this._loadAndRenderData();
-            
-            console.log('✅ Agents application initialized successfully');
+            // Проверяем URL hash (позволяет открывать #agents/{projectId} напрямую)
+            this.modal.checkUrlHash();
             
         } catch (error) {
             console.error('❌ Failed to initialize agents application:', error);
@@ -72,9 +70,7 @@ export class AgentsController {
 
         try {
             // Получаем данные через сервис
-            console.log('🔧 Loading projects data...');
             const projects = await this.service.getAllProjects();
-            console.log('🔧 Loaded projects:', projects.length, projects);
 
             // Удаляем индикатор загрузки
             loadingIndicator.remove();
@@ -83,16 +79,12 @@ export class AgentsController {
             this._clearOldSections();
 
             // Создаем секцию проектов
-            console.log('🔧 Creating projects section...');
             const projectsSection = this._createProjectsSection();
-            console.log('🔧 Projects section created:', projectsSection);
             
-            console.log('🔧 Adding project cards...');
             // Создаем карточки синхронно
             for (const project of projects) {
                 this._createAndAddProjectCard(projectsSection, project);
             }
-            console.log('🔧 All project cards added');
 
             // Обновляем фильтры в боковой панели
             await this._updateSidebarFilters(projects);
@@ -112,19 +104,13 @@ export class AgentsController {
      * Создает и добавляет карточку проекта - СИНХРОННАЯ ВЕРСИЯ
      */
     _createAndAddProjectCard(projectsSection, project) {
-        console.log('🔧 Creating project card for:', project.getId(), project.title);
-        
         const projectCard = new ProjectCard(project, this.githubConfig, this.dataSource);
         const cardElement = projectCard.createElement(); // Синхронное создание карточки
         
-        console.log('🔧 Created card element:', cardElement);
-        
         const weeksGrid = projectsSection.querySelector('.weeks-grid');
-        console.log('🔧 Weeks grid found:', weeksGrid);
         
         if (weeksGrid) {
             weeksGrid.appendChild(cardElement);
-            console.log('🔧 Card added to weeks grid');
             
             // Сохраняем ссылку на карточку для управления
             this.projectCards.set(project.getId(), projectCard);
@@ -183,7 +169,7 @@ export class AgentsController {
                 });
             }
         } catch (error) {
-            console.warn('Failed to load popular tags:', error);
+            // Сбой загрузки тегов не критичен
         }
     }
 
@@ -213,7 +199,7 @@ export class AgentsController {
                 });
             }
         } catch (error) {
-            console.warn('Failed to load featured projects:', error);
+            // Сбой загрузки featured проектов не критичен
         }
     }
 
@@ -269,7 +255,6 @@ export class AgentsController {
 
         this.currentSearchQuery = query;
         this._applyCurrentFilter();
-        console.log(`Searching for: ${query}`);
     }
 
     /**
