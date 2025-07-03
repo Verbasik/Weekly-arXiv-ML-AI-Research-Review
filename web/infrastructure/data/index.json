@@ -219,6 +219,16 @@
             "papers": 1,
             "notebooks": 0,
             "code": 0
+          },
+          {
+            "week": "week-27",
+            "title": "Week 27: Text-to-LoRA",
+            "date": "Jun 30-July 06, 2025",
+            "tags": ["Sakana AI", "TextToLoRA", "Hypernetwork", "Finetuning"],
+            "description": "Text-to-LoRA от Sakana AI: генерация адаптеров ПРОСТО ИЗ ТЕКСТА! ",
+            "papers": 1,
+            "notebooks": 0,
+            "code": 0
           }
         ]
       },
