@@ -1,5 +1,5 @@
 [![arXiv](https://img.shields.io/badge/arXiv-2506.01928-b31b1b.svg)](https://arxiv.org/abs/2506.06105)
-[![GitHub](https://img.shields.io/badge/GitHub-Eso--LMs-black?logo=github)](https://github.com/SakanaAI/text-to-lora)
+[![GitHub](https://img.shields.io/badge/GitHub-text-to-lora-black?logo=github)](https://github.com/SakanaAI/text-to-lora)
 [![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Models-yellow)](https://huggingface.co/SakanaAI)
 [![Telegram Channel](https://img.shields.io/badge/Telegram-TheWeeklyBrief-blue)](https://t.me/TheWeeklyBrief)
 
