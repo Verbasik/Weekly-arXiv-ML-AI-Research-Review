@@ -1,3 +1,15 @@
+# Text-to-LoRA: мгновенная адаптация трансформеров
+
+---
+
+### **TWRB_FM 📻**
+
+<audio controls>
+  <source src="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/raw/refs/heads/develop/2025/week-27/TWRB_FM.wav" type="audio/mpeg">
+  Ваш браузер не поддерживает аудиоэлемент.
+</audio>
+
+---
 
 # Введение
 
