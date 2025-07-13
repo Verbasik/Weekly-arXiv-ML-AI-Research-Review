@@ -225,10 +225,23 @@
             "title": "Week 27: Text-to-LoRA",
             "date": "Jun 30-July 06, 2025",
             "tags": ["Sakana AI", "TextToLoRA", "Hypernetwork", "Finetuning"],
-            "description": "Text-to-LoRA от Sakana AI: генерация адаптеров ПРОСТО ИЗ ТЕКСТА! ",
+            "description": "Text-to-LoRA от Sakana AI: генерация адаптеров ПРОСТО ИЗ ТЕКСТА!",
             "papers": 1,
             "notebooks": 0,
             "code": 0
+          },
+          {
+
+            "week": "week-28",
+            "title": "Week 28: OpenAI Agents SDK",
+            "date": "July 07-July 13, 2025",
+            "tags": ["OpenAI", "AIAgents", "AgentsSDK", "MAS"],
+            "description": "OpenAI Agents SDK: быстрый старт или дорогой «черный ящик»?",
+            "papers": 0,
+            "notebooks": 1,
+            "notebook_path": "agents-under-hood/openai-cs-agents-demo/CookBook.ipynb",
+            "code": 1,
+            "code_path": "agents-under-hood/openai-cs-agents-demo"
           }
         ]
       },
