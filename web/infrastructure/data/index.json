@@ -242,6 +242,17 @@
             "notebook_path": "agents-under-hood/openai-cs-agents-demo/CookBook.ipynb",
             "code": 1,
             "code_path": "agents-under-hood/openai-cs-agents-demo"
+          },
+          {
+
+            "week": "week-29",
+            "title": "Week 29: MoE-Монстр Kimi-K2!",
+            "date": "July 13-July 13, 2025",
+            "tags": [],
+            "description": "",
+            "papers": 0,
+            "notebooks": 0,
+            "code": 0
           }
         ]
       },
