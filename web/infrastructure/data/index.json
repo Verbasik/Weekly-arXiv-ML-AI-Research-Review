@@ -242,6 +242,17 @@
             "notebook_path": "agents-under-hood/openai-cs-agents-demo/CookBook.ipynb",
             "code": 1,
             "code_path": "agents-under-hood/openai-cs-agents-demo"
+          },
+          {
+
+            "week": "week-29",
+            "title": "Week 29: Kimi-K2 - MoE-Монстр с триллионом параметров",
+            "date": "July 14-July 20, 2025",
+            "tags": ["Moonshot AI", "Kimi-K2", "LLMs", "MoE", "Agentic AI"],
+            "description": "🔥 MoE-Монстр Kimi-K2! Новая опенсорсная звезда от Китая с 1 триллионом параметров.",
+            "papers": 1,
+            "notebooks": 0,
+            "code": 0
           }
         ]
       },
