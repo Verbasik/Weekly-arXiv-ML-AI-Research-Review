@@ -1,7 +1,7 @@
 [![arXiv](https://img.shields.io/badge/arXiv-2506.01928-b31b1b.svg)](https://arxiv.org/abs/2506.06105)
-[![GitHub](https://img.shields.io/badge/GitHub-Kimi-K2-black?logo=github)](https://github.com/MoonshotAI/Kimi-K2)
+[![GitHub](https://img.shields.io/badge/GitHub-kimi-k2-black?logo=github)](https://github.com/MoonshotAI/Kimi-K2)
 [![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Models-yellow)](https://huggingface.co/collections/moonshotai/kimi-k2-6871243b990f2af5ba60617d)
-[![kimi.com](https://img.shields.io/badge/Kimi-K2-purple?logo=kimi)](https://www.kimi.com/)
+[![Kimi](https://img.shields.io/badge/Kimi-K2-purple)](https://www.kimi.com/)
 [![Telegram Channel](https://img.shields.io/badge/Telegram-TheWeeklyBrief-blue)](https://t.me/TheWeeklyBrief)
 
 # Kimi-K2: MoE-Монстр с триллионом параметров
