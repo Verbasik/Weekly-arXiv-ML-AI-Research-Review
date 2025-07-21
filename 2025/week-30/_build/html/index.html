@@ -1,0 +1,663 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Математические основы машинного обучения &#8212; Mathematical Foundations for Machine Learning</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=3a394b7d" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-9S2CQ3B60T"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-9S2CQ3B60T');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-9S2CQ3B60T');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'index';</script>
+    <link rel="icon" href="_static/logo.png"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Производная" href="chapter-0/derivative.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="#">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">Mathematical Foundations for Machine Learning</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1 current active">
+                <a class="reference internal" href="#">
+                    Математические основы машинного обучения
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Chapter 0. Mathematical Foundations</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="chapter-0/derivative.html"><strong>Производная</strong></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/issues/new?title=Issue%20on%20page%20%2Findex.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/index.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Математические основы машинного обучения</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Глава 0. Математические основы классических алгоритмов</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Фундаментальные концепции для понимания алгоритмов машинного обучения</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Почему эти концепции критически важны</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">Что вы изучите</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">Применение в классических алгоритмах</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">Предварительные требования</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">Следующие шаги</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="id1">
+<h1>Математические основы машинного обучения<a class="headerlink" href="#id1" title="Link to this heading">#</a></h1>
+<p>Книга Jupyter ноутбуков, посвященная фундаментальным математическим концепциям, без которых невозможно понять классические алгоритмы машинного обучения. В этом обзоре мы рассматриваем базовые математические инструменты, которые лежат в основе всех алгоритмов оптимизации в машинном обучении. Удачного изучения! – Verbasik</p>
+<p><a class="reference external" href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review"><img alt="" src="https://img.shields.io/github/stars/Verbasik/Weekly-arXiv-ML-AI-Research-Review?style=social" /></a>
+<a class="reference external" href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review"><img alt="" src="https://img.shields.io/github/forks/Verbasik/Weekly-arXiv-ML-AI-Research-Review?style=social" /></a></p>
+<section id="id2">
+<h2>Глава 0. Математические основы классических алгоритмов<a class="headerlink" href="#id2" title="Link to this heading">#</a></h2>
+<p>Прежде чем погружаться в алгоритмы машинного обучения, необходимо овладеть двумя ключевыми математическими концепциями: производными и градиентами. Эти инструменты являются фундаментальными строительными блоками для понимания того, как работают алгоритмы оптимизации, используемые в машинном обучении.</p>
+<section id="id3">
+<h3>Фундаментальные концепции для понимания алгоритмов машинного обучения<a class="headerlink" href="#id3" title="Link to this heading">#</a></h3>
+<p>В этом обзоре мы сосредоточимся на двух ключевых концепциях, без которых невозможно понять классические алгоритмы машинного обучения:</p>
+<ol class="arabic simple">
+<li><p><strong>Производные</strong> — основной инструмент для анализа изменений функций</p></li>
+<li><p><strong>Градиенты функций</strong> — многомерное расширение производных, критическое для оптимизации</p></li>
+</ol>
+<p>Эти концепции образуют математический фундамент для таких алгоритмов как:</p>
+<ul class="simple">
+<li><p>Линейная и логистическая регрессия</p></li>
+<li><p>Метод градиентного спуска</p></li>
+<li><p>Нейронные сети и обратное распространение ошибки</p></li>
+<li><p>Методы оптимизации функций потерь</p></li>
+</ul>
+<div class="sd-container-fluid sd-sphinx-override sd-mb-4 text-center docutils">
+<div class="sd-row sd-row-cols-1 sd-row-cols-xs-1 sd-row-cols-sm-1 sd-row-cols-md-1 sd-row-cols-lg-1 sd-g-3 sd-g-xs-3 sd-g-sm-3 sd-g-md-3 sd-g-lg-3 docutils">
+<div class="sd-col sd-d-flex-row docutils">
+<div class="sd-card sd-sphinx-override sd-w-100 sd-shadow-sm sd-card-hover docutils">
+<div class="sd-card-header bg-light docutils">
+<p class="sd-card-text"><strong>Производные и их применение в машинном обучении</strong></p>
+</div>
+<div class="sd-card-body docutils">
+<p class="sd-card-text">Производные — ключевой инструмент для понимания алгоритмов оптимизации. В этом ноутбуке рассматриваются:</p>
+<ul class="simple">
+<li><p class="sd-card-text">Определение и геометрическая интерпретация производных</p></li>
+<li><p class="sd-card-text">Правила дифференцирования</p></li>
+<li><p class="sd-card-text">Связь с оптимизацией функций потерь</p></li>
+<li><p class="sd-card-text">Применение в градиентном спуске</p></li>
+<li><p class="sd-card-text">Критические точки и их роль в обучении моделей</p></li>
+<li><p class="sd-card-text">Направление наискорейшего спуска</p></li>
+</ul>
+</div>
+<div class="sd-card-footer docutils">
+<p class="sd-card-text">Jupyter Notebook <span class="fas fa-arrow-right"></span></p>
+</div>
+<a class="sd-stretched-link sd-hide-link-text reference external" href="/chapter-0/derivative"><span>/chapter-0/derivative</span></a></div>
+</div>
+</div>
+</div>
+</section>
+<section id="id4">
+<h3>Почему эти концепции критически важны<a class="headerlink" href="#id4" title="Link to this heading">#</a></h3>
+<p><strong>Производные и градиенты</strong> являются основой всех алгоритмов оптимизации в машинном обучении:</p>
+<ol class="arabic simple">
+<li><p><strong>Производные</strong> позволяют нам:</p>
+<ul class="simple">
+<li><p>Определять направление уменьшения ошибки модели</p></li>
+<li><p>Находить оптимальные параметры моделей</p></li>
+<li><p>Анализировать скорость сходимости алгоритмов</p></li>
+<li><p>Понимать чувствительность модели к изменениям параметров</p></li>
+</ul>
+</li>
+<li><p><strong>Градиенты функций</strong> позволяют:</p>
+<ul class="simple">
+<li><p>Работать с многомерными функциями потерь</p></li>
+<li><p>Определять направление наискорейшего спуска</p></li>
+<li><p>Оптимизировать модели с множеством параметров</p></li>
+<li><p>Реализовывать эффективные алгоритмы обучения</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="id5">
+<h3>Что вы изучите<a class="headerlink" href="#id5" title="Link to this heading">#</a></h3>
+<p>В этой главе вы изучите:</p>
+<ol class="arabic simple">
+<li><p><strong>Производные</strong>:</p>
+<ul class="simple">
+<li><p>Математическое определение и интуитивное понимание</p></li>
+<li><p>Геометрическая интерпретация как наклон касательной</p></li>
+<li><p>Правила дифференцирования</p></li>
+<li><p>Применение к функциям потерь</p></li>
+</ul>
+</li>
+<li><p><strong>Градиенты</strong>:</p>
+<ul class="simple">
+<li><p>Расширение понятия производной на многомерный случай</p></li>
+<li><p>Векторная природа градиента</p></li>
+<li><p>Направление наискорейшего возрастания/убывания</p></li>
+<li><p>Применение в методах оптимизации</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="id6">
+<h3>Применение в классических алгоритмах<a class="headerlink" href="#id6" title="Link to this heading">#</a></h3>
+<p>После освоения этих концепций вы сможете понять, как работают:</p>
+<ul class="simple">
+<li><p><strong>Линейная регрессия</strong>: Оптимизация методом наименьших квадратов</p></li>
+<li><p><strong>Логистическая регрессия</strong>: Максимизация правдоподобия</p></li>
+<li><p><strong>Градиентный спуск</strong>: Итеративная оптимизация параметров</p></li>
+<li><p><strong>Стохастический градиентный спуск</strong>: Эффективная оптимизация на больших данных</p></li>
+<li><p><strong>Нейронные сети</strong>: Обратное распространение ошибки</p></li>
+</ul>
+</section>
+<section id="id7">
+<h3>Предварительные требования<a class="headerlink" href="#id7" title="Link to this heading">#</a></h3>
+<p>Для понимания материала необходимы базовые знания:</p>
+<ul class="simple">
+<li><p>Функций одной и нескольких переменных</p></li>
+<li><p>Элементарной алгебры и тригонометрии</p></li>
+<li><p>Основ линейной алгебры (для градиентов)</p></li>
+</ul>
+</section>
+<section id="id8">
+<h3>Следующие шаги<a class="headerlink" href="#id8" title="Link to this heading">#</a></h3>
+<p>После освоения этих фундаментальных концепций вы будете готовы к изучению:</p>
+<ul class="simple">
+<li><p>Продвинутых методов оптимизации (Adam, RMSProp, Momentum)</p></li>
+<li><p>Регуляризации и предотвращения переобучения</p></li>
+<li><p>Архитектур нейронных сетей</p></li>
+<li><p>Современных алгоритмов глубокого обучения</p></li>
+</ul>
+<p>Математический фундамент, заложенный здесь, является необходимым условием для глубокого понимания всех алгоритмов машинного обучения.</p>
+</section>
+</section>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+    <a class="right-next"
+       href="chapter-0/derivative.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title"><strong>Производная</strong></p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Глава 0. Математические основы классических алгоритмов</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Фундаментальные концепции для понимания алгоритмов машинного обучения</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Почему эти концепции критически важны</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">Что вы изучите</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">Применение в классических алгоритмах</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">Предварительные требования</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">Следующие шаги</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Verbasik
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
