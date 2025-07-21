@@ -1,0 +1,905 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Производная &#8212; Mathematical Foundations for Machine Learning</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=3a394b7d" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-9S2CQ3B60T"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-9S2CQ3B60T');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-9S2CQ3B60T');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'chapter-0/derivative';</script>
+    <link rel="icon" href="../_static/logo.png"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Математические основы машинного обучения" href="../index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">Mathematical Foundations for Machine Learning</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../index.html">
+                    Математические основы машинного обучения
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Chapter 0. Mathematical Foundations</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#"><strong>Производная</strong></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/issues/new?title=Issue%20on%20page%20%2Fchapter-0/derivative.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/chapter-0/derivative.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Производная</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#"><strong>Производная</strong></a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Объяснение:</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Математическая формализация:</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id4"><strong>Нахождение касательной к графику функции и расчет углового коэффициента</strong></a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">Примеры интерпретации углового коэффициента</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id6"><strong>Положительный угловой коэффициент:</strong></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id7"><strong>Отрицательный угловой коэффициент:</strong></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id8"><strong>Нулевой угловой коэффициент:</strong></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">Пример из физики:</a></li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id10"><strong>Геометрический смысл производной</strong></a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id11">Пример из физики (продолжение):</a></li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id12">Дополнения:</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id13"><strong>Формулы дифференцирования</strong>:</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id14"><strong>Связь монотонности и производной</strong>:</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id15"><strong>Вторая производная и выпуклость функции</strong></a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id16"><strong>Алгоритм нахождения экстремумов функции</strong></a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id17">Шаг 1: Нахождение производной функции</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id18">Шаг 2: Нахождение критических точек</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id19">Шаг 3: Исследование знака производной</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id20">Шаг 4: Классификация экстремумов</a></li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id21">Пример алгоритма на практике:</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id22">Шаг 1: Нахождение производной функции</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id23">Шаг 2: Нахождение критических точек</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id24">Шаг 3: Исследование знака производной</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id25">Шаг 4: Классификация экстремумов</a></li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id26">Пример из физики:</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id27"><strong>Теорема о композиций функций</strong></a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id28"><strong>Точки перегиба</strong></a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id29"><strong>Анализ функции</strong></a></li>
+</ul>
+
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="id1">
+<h1><strong>Производная</strong><a class="headerlink" href="#id1" title="Link to this heading">#</a></h1>
+<p>Производная функции в точке — это число, характеризующее скорость роста функции в этой точке. Обозначается <span class="math notranslate nohighlight">\(f'(x_0)\)</span>.</p>
+</section>
+<section id="id2">
+<h1>Объяснение:<a class="headerlink" href="#id2" title="Link to this heading">#</a></h1>
+<p><strong>Предел функции в точке и на бесконечности:</strong>
+Предел функции в точке — это значение, к которому стремится функция по мере приближения аргумента к некоторому значению. Обозначается как <span class="math notranslate nohighlight">\(\lim\limits_{x \to x_0} f(x) = L\)</span>. Для непрерывной функции предел в любой точке совпадает со значением функции в этой точке.</p>
+<p><strong>Производная функции:</strong>
+Производная функции <span class="math notranslate nohighlight">\(f(x)\)</span> в точке <span class="math notranslate nohighlight">\(x_0\)</span> — это предел отношения приращения функции к приращению аргумента при стремлении приращения аргумента к нулю:
+$<span class="math notranslate nohighlight">\(
+f'(x_0) = \lim\limits_{\Delta x \to 0} \frac{f(x_0 + \Delta x) - f(x_0)}{\Delta x}
+\)</span>$</p>
+</section>
+<section id="id3">
+<h1>Математическая формализация:<a class="headerlink" href="#id3" title="Link to this heading">#</a></h1>
+<ol class="arabic simple">
+<li><p><strong>Определение производной:</strong>
+$<span class="math notranslate nohighlight">\(
+f'(x_0) = \lim\limits_{\Delta x \to 0} \frac{\Delta y}{\Delta x} = \lim\limits_{\Delta x \to 0} \frac{f(x_0 + \Delta x) - f(x_0)}{\Delta x}
+\)</span>$</p></li>
+<li><p><strong>Касательная к графику функции:</strong>
+Касательная к графику функции <span class="math notranslate nohighlight">\(y = f(x)\)</span> в точке <span class="math notranslate nohighlight">\(x_0\)</span> — это прямая, которая “прикасается” к графику в этой точке и имеет тот же наклон, что и график. Угловой коэффициент касательной равен значению производной в этой точке.</p></li>
+</ol>
+</section>
+<section id="id4">
+<h1><strong>Нахождение касательной к графику функции и расчет углового коэффициента</strong><a class="headerlink" href="#id4" title="Link to this heading">#</a></h1>
+<ol class="arabic">
+<li><p><strong>Уравнение касательной:</strong>
+Уравнение касательной к графику функции <span class="math notranslate nohighlight">\(y = f(x)\)</span> в точке <span class="math notranslate nohighlight">\(x_0\)</span> можно записать в следующем виде:</p>
+<p><span class="math notranslate nohighlight">\(
+y = f(x_0) + f'(x_0)(x - x_0)
+\)</span></p>
+<p>где <span class="math notranslate nohighlight">\(f(x_0)\)</span> — значение функции в точке <span class="math notranslate nohighlight">\(x_0\)</span>, а <span class="math notranslate nohighlight">\(f'(x_0)\)</span> — значение производной функции в точке <span class="math notranslate nohighlight">\(x_0\)</span>.</p>
+</li>
+<li><p><strong>Пример расчета:</strong></p>
+<p>Рассмотрим функцию <span class="math notranslate nohighlight">\(f(x) = x^2\)</span>. Найдем уравнение касательной в точке <span class="math notranslate nohighlight">\(x_0 = 1\)</span>.</p>
+<ul class="simple">
+<li><p>Находим значение функции в этой точке: <span class="math notranslate nohighlight">\(f(1) = 1^2 = 1\)</span>.</p></li>
+<li><p>Находим производную функции: <span class="math notranslate nohighlight">\(f'(x) = 2x\)</span>, следовательно, <span class="math notranslate nohighlight">\(f'(1) = 2 \cdot 1 = 2\)</span>.</p></li>
+<li><p>Подставляем значения в уравнение касательной:
+$<span class="math notranslate nohighlight">\(
+y = 1 + 2(x - 1)
+\)</span><span class="math notranslate nohighlight">\(
+Таким образом, уравнение касательной имеет вид:
+\)</span><span class="math notranslate nohighlight">\(
+y = 2x - 1
+\)</span>$</p></li>
+</ul>
+</li>
+</ol>
+</section>
+<section id="id5">
+<h1>Примеры интерпретации углового коэффициента<a class="headerlink" href="#id5" title="Link to this heading">#</a></h1>
+<section id="id6">
+<h2><strong>Положительный угловой коэффициент:</strong><a class="headerlink" href="#id6" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Если <span class="math notranslate nohighlight">\(f'(x_0) &gt; 0\)</span>, то функция возрастает в точке <span class="math notranslate nohighlight">\(x_0\)</span>. Чем больше значение <span class="math notranslate nohighlight">\(f'(x_0)\)</span>, тем круче поднимается график функции.</p></li>
+</ul>
+</section>
+<section id="id7">
+<h2><strong>Отрицательный угловой коэффициент:</strong><a class="headerlink" href="#id7" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Если <span class="math notranslate nohighlight">\(f'(x_0) &lt; 0\)</span>, то функция убывает в точке <span class="math notranslate nohighlight">\(x_0\)</span>. Чем меньше значение <span class="math notranslate nohighlight">\(f'(x_0)\)</span> (по модулю), тем круче опускается график функции.</p></li>
+</ul>
+</section>
+<section id="id8">
+<h2><strong>Нулевой угловой коэффициент:</strong><a class="headerlink" href="#id8" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Если <span class="math notranslate nohighlight">\(f'(x_0) = 0\)</span>, то касательная горизонтальна, и график функции в данной точке имеет горизонтальный наклон. Это может указывать на экстремум (максимум или минимум) функции в этой точке.</p></li>
+</ul>
+</section>
+<section id="id9">
+<h2>Пример из физики:<a class="headerlink" href="#id9" title="Link to this heading">#</a></h2>
+<p>Рассмотрим движение автомобиля по прямой линии. Пусть координата автомобиля в момент времени <span class="math notranslate nohighlight">\(t\)</span> задаётся функцией <span class="math notranslate nohighlight">\(s(t) = 5t^2 + 2t + 1\)</span>, где <span class="math notranslate nohighlight">\(s\)</span> — путь, пройденный автомобилем в метрах, а <span class="math notranslate nohighlight">\(t\)</span> — время в секундах.</p>
+<ol class="arabic simple">
+<li><p><strong>Нахождение скорости:</strong>
+Скорость <span class="math notranslate nohighlight">\(v(t)\)</span> — это первая производная координаты <span class="math notranslate nohighlight">\(s(t)\)</span> по времени <span class="math notranslate nohighlight">\(t\)</span>:
+$<span class="math notranslate nohighlight">\(
+v(t) = s'(t) = \frac{d}{dt}(5t^2 + 2t + 1) = 10t + 2
+\)</span>$</p></li>
+<li><p><strong>Нахождение ускорения:</strong>
+Ускорение <span class="math notranslate nohighlight">\(a(t)\)</span> — это первая производная скорости <span class="math notranslate nohighlight">\(v(t)\)</span> по времени <span class="math notranslate nohighlight">\(t\)</span>:
+$<span class="math notranslate nohighlight">\(
+a(t) = v'(t) = \frac{d}{dt}(10t + 2) = 10
+\)</span><span class="math notranslate nohighlight">\(
+Таким образом, ускорение автомобиля постоянно и равно \)</span>10$ м/с².</p></li>
+</ol>
+</section>
+</section>
+<section id="id10">
+<h1><strong>Геометрический смысл производной</strong><a class="headerlink" href="#id10" title="Link to this heading">#</a></h1>
+<p>Производная функции в точке также имеет геометрический смысл: она определяет наклон касательной к графику функции в этой точке. Наклон касательной показывает, как быстро и в каком направлении изменяется функция в данной точке.</p>
+<section id="id11">
+<h2>Пример из физики (продолжение):<a class="headerlink" href="#id11" title="Link to this heading">#</a></h2>
+<p>Возвращаясь к примеру с движением автомобиля, можно построить график функции <span class="math notranslate nohighlight">\(s(t) = 5t^2 + 2t + 1\)</span> и найти касательную в точке <span class="math notranslate nohighlight">\(t_0 = 1\)</span> секунда:</p>
+<ul class="simple">
+<li><p>Значение функции в этой точке: <span class="math notranslate nohighlight">\(s(1) = 5(1)^2 + 2(1) + 1 = 8\)</span> метра.</p></li>
+<li><p>Значение производной (скорости) в этой точке: <span class="math notranslate nohighlight">\(v(1) = 10(1) + 2 = 12\)</span> м/с.</p></li>
+</ul>
+<p>Уравнение касательной:
+$<span class="math notranslate nohighlight">\(
+s = 8 + 12(t - 1)
+\)</span>$</p>
+<p>Это уравнение показывает, как изменяется пройденный путь в окрестности <span class="math notranslate nohighlight">\(t = 1\)</span> секунда. Таким образом, геометрически производная представляет собой наклон касательной к кривой, описывающей движение автомобиля.</p>
+</section>
+</section>
+<section id="id12">
+<h1>Дополнения:<a class="headerlink" href="#id12" title="Link to this heading">#</a></h1>
+<p>Чем меньше приращение, тем больше кривая в точке похожа на свою касательную и тем ближе её мгновенная скорость к скорости роста прямой. При бесконечно малом приращении аргумента они становятся неразличимы.
+$<span class="math notranslate nohighlight">\(
+f'(x_0) = k = \tan \alpha,
+\)</span><span class="math notranslate nohighlight">\(
+где \)</span>k$ — угловой коэффициент касательной в данной точке.</p>
+<p>Численное значение производной в точке <span class="math notranslate nohighlight">\(x_0\)</span> зависит от <span class="math notranslate nohighlight">\(x_0\)</span>, поэтому производная функции тоже является функцией.</p>
+<p>У кусочных функций чаще всего нет производной в точке склейки (только в ней).</p>
+<p>Взятие производной также называется дифференцированием.</p>
+</section>
+<section id="id13">
+<h1><strong>Формулы дифференцирования</strong>:<a class="headerlink" href="#id13" title="Link to this heading">#</a></h1>
+<p><span class="math notranslate nohighlight">\(
+(c \cdot f(x))' = c \cdot f'(x),
+\)</span>
+где <span class="math notranslate nohighlight">\(c \in \mathbb{R}\)</span>,</p>
+<p><span class="math notranslate nohighlight">\(
+(f(x) \pm g(x))' = f'(x) \pm g'(x),
+\)</span></p>
+<p><span class="math notranslate nohighlight">\(
+(f(x) \cdot g(x))' = f'(x) \cdot g(x) + f(x) \cdot g'(x),
+\)</span></p>
+<p><span class="math notranslate nohighlight">\(
+\left( \frac{f(x)}{g(x)} \right)' = \frac{f'(x) \cdot g(x) - f(x) \cdot g'(x)}{g^2(x)},
+\)</span></p>
+<p><span class="math notranslate nohighlight">\(
+(f \circ g)' = (f(g(x)))' = f'(g(x)) \cdot g'(x).
+\)</span></p>
+<p>Чтобы численно вычислить значение производной функции <span class="math notranslate nohighlight">\(f(x)\)</span> в точке <span class="math notranslate nohighlight">\(x_0\)</span> в Python, надо:</p>
+<ol class="arabic simple">
+<li><p>выбрать маленькое значение приращения <span class="math notranslate nohighlight">\(dx\)</span>, оптимально использовать <span class="math notranslate nohighlight">\(dx = 10^{-8}\)</span>,</p></li>
+<li><p>найти <span class="math notranslate nohighlight">\(f(x_0)\)</span>,</p></li>
+<li><p>найти <span class="math notranslate nohighlight">\(f(x_0 + dx)\)</span>,</p></li>
+<li><p>вычислить значение производной в точке по определению:
+$<span class="math notranslate nohighlight">\(
+f'(x_0) \approx \frac{f(x_0 + dx) - f(x_0)}{dx}.
+\)</span>$</p></li>
+</ol>
+</section>
+<section id="id14">
+<h1><strong>Связь монотонности и производной</strong>:<a class="headerlink" href="#id14" title="Link to this heading">#</a></h1>
+<ol class="arabic simple">
+<li><p>Если <span class="math notranslate nohighlight">\(f'(x) &gt; 0\)</span> на интервале <span class="math notranslate nohighlight">\((a, b)\)</span>, то функция <span class="math notranslate nohighlight">\(f(x)\)</span> возрастает на этом интервале.</p></li>
+<li><p>Если <span class="math notranslate nohighlight">\(f'(x) &lt; 0\)</span> на интервале <span class="math notranslate nohighlight">\((a, b)\)</span>, то функция <span class="math notranslate nohighlight">\(f(x)\)</span> убывает на этом интервале.</p></li>
+<li><p>Если <span class="math notranslate nohighlight">\(f'(x) = 0\)</span> в точке <span class="math notranslate nohighlight">\(x = x_0\)</span> и производная меняет знак в этой точке, то <span class="math notranslate nohighlight">\(x_0\)</span> является точкой экстремума функции <span class="math notranslate nohighlight">\(f(x)\)</span>.</p></li>
+</ol>
+</section>
+<section id="id15">
+<h1><strong>Вторая производная и выпуклость функции</strong><a class="headerlink" href="#id15" title="Link to this heading">#</a></h1>
+<p>В прошлых уроках мы обсуждали, как связан тип монотонности функции со знаком её производной. Оказывается, тип выпуклости тоже связан с производной, но уже не с первой, а со второй.</p>
+<p><strong>Вторая производная функции</strong> — это производная, взятая от производной данной функции. Обозначается как <span class="math notranslate nohighlight">\(f''(x)\)</span>.</p>
+<p>Физический смысл второй производной — это скорость изменения скорости, то есть ускорение функции. Можно вычислять производные и более высоких порядков: третьего, четвёртого и так далее. Для третьего порядка используют обозначение <span class="math notranslate nohighlight">\(f'''(x)\)</span>, а для четвёртого и далее вместо штрихов пишут число в скобках: <span class="math notranslate nohighlight">\(f^{(4)}(x)\)</span> или <span class="math notranslate nohighlight">\(f^{(IV)}(x)\)</span>. Скобки показывают, что цифра — это не степень, а порядок производной.</p>
+<p><strong>Пример:</strong> Давайте вычислим вторую производную функции <span class="math notranslate nohighlight">\(y = 7x^3 - 13x^2 + 2\)</span>. Сначала находим первую производную: <span class="math notranslate nohighlight">\(y' = 21x^2 - 26x\)</span>. Теперь дифференцируем первую производную, чтобы получить вторую: <span class="math notranslate nohighlight">\(y'' = 42x - 26\)</span>.</p>
+<p><strong>Связь с выпуклостью:</strong> Вторая производная связана с типом выпуклости функции:</p>
+<ul class="simple">
+<li><p>Если <span class="math notranslate nohighlight">\(f''(x_0) &gt; 0\)</span>, то точка <span class="math notranslate nohighlight">\(x_0\)</span> лежит на выпуклом вниз участке графика.</p></li>
+<li><p>Если <span class="math notranslate nohighlight">\(f''(x_0) &lt; 0\)</span>, то точка <span class="math notranslate nohighlight">\(x_0\)</span> лежит на выпуклом вверх участке графика.</p></li>
+</ul>
+<p>Это можно запомнить следующим образом: если вторая производная положительна, функция “улыбается” (выпукла вниз), если отрицательна — “грустит” (выпукла вверх).</p>
+<p><strong>Обратные утверждения:</strong></p>
+<ul class="simple">
+<li><p>Если функция выпукла вниз на участке графика, то на этом участке её вторая производная положительна.</p></li>
+<li><p>Если функция выпукла вверх, то её вторая производная отрицательна.</p></li>
+</ul>
+</section>
+<section id="id16">
+<h1><strong>Алгоритм нахождения экстремумов функции</strong><a class="headerlink" href="#id16" title="Link to this heading">#</a></h1>
+<section id="id17">
+<h2>Шаг 1: Нахождение производной функции<a class="headerlink" href="#id17" title="Link to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p>Определите производную функции <span class="math notranslate nohighlight">\( f(x) \)</span>:
+$<span class="math notranslate nohighlight">\(
+f'(x)
+\)</span>$</p></li>
+</ol>
+</section>
+<section id="id18">
+<h2>Шаг 2: Нахождение критических точек<a class="headerlink" href="#id18" title="Link to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p>Найдите значения <span class="math notranslate nohighlight">\( x \)</span>, при которых производная функции равна нулю:
+$<span class="math notranslate nohighlight">\(
+f'(x) = 0
+\)</span>$</p></li>
+</ol>
+</section>
+<section id="id19">
+<h2>Шаг 3: Исследование знака производной<a class="headerlink" href="#id19" title="Link to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p>Разделите числовую прямую на интервалы, используя найденные критические точки.</p></li>
+<li><p>Определите знак производной <span class="math notranslate nohighlight">\( f'(x) \)</span> на каждом из интервалов.</p></li>
+</ol>
+</section>
+<section id="id20">
+<h2>Шаг 4: Классификация экстремумов<a class="headerlink" href="#id20" title="Link to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p>Если производная <span class="math notranslate nohighlight">\( f'(x) \)</span> меняет знак с положительного на отрицательный в критической точке, эта точка является локальным максимумом.</p></li>
+<li><p>Если производная <span class="math notranslate nohighlight">\( f'(x) \)</span> меняет знак с отрицательного на положительный в критической точке, эта точка является локальным минимумом.</p></li>
+</ol>
+</section>
+</section>
+<section id="id21">
+<h1>Пример алгоритма на практике:<a class="headerlink" href="#id21" title="Link to this heading">#</a></h1>
+<p>Рассмотрим функцию <span class="math notranslate nohighlight">\( f(x) = x^3 - 3x^2 + 2 \)</span>.</p>
+<section id="id22">
+<h2>Шаг 1: Нахождение производной функции<a class="headerlink" href="#id22" title="Link to this heading">#</a></h2>
+<div class="math notranslate nohighlight">
+\[
+   f'(x) = 3x^2 - 6x
+   \]</div>
+</section>
+<section id="id23">
+<h2>Шаг 2: Нахождение критических точек<a class="headerlink" href="#id23" title="Link to this heading">#</a></h2>
+<div class="math notranslate nohighlight">
+\[
+   3x^2 - 6x = 0 \implies 3x(x - 2) = 0 \implies x = 0 \text{ или } x = 2
+   \]</div>
+</section>
+<section id="id24">
+<h2>Шаг 3: Исследование знака производной<a class="headerlink" href="#id24" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>На интервале <span class="math notranslate nohighlight">\( (-\infty, 0) \)</span>: <span class="math notranslate nohighlight">\( f'(x) = 3x^2 - 6x &gt; 0 \)</span> (функция возрастает).</p></li>
+<li><p>На интервале <span class="math notranslate nohighlight">\( (0, 2) \)</span>: <span class="math notranslate nohighlight">\( f'(x) = 3x^2 - 6x &lt; 0 \)</span> (функция убывает).</p></li>
+<li><p>На интервале <span class="math notranslate nohighlight">\( (2, \infty) \)</span>: <span class="math notranslate nohighlight">\( f'(x) = 3x^2 - 6x &gt; 0 \)</span> (функция возрастает).</p></li>
+</ul>
+</section>
+<section id="id25">
+<h2>Шаг 4: Классификация экстремумов<a class="headerlink" href="#id25" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>В точке <span class="math notranslate nohighlight">\( x = 0 \)</span>: <span class="math notranslate nohighlight">\( f'(x) \)</span> меняет знак с положительного на отрицательный (локальный максимум).</p></li>
+<li><p>В точке <span class="math notranslate nohighlight">\( x = 2 \)</span>: <span class="math notranslate nohighlight">\( f'(x) \)</span> меняет знак с отрицательного на положительный (локальный минимум).</p></li>
+</ul>
+<p>Таким образом, функция <span class="math notranslate nohighlight">\( f(x) \)</span> имеет локальный максимум в точке <span class="math notranslate nohighlight">\( x = 0 \)</span> и локальный минимум в точке <span class="math notranslate nohighlight">\( x = 2 \)</span>.</p>
+</section>
+</section>
+<section id="id26">
+<h1>Пример из физики:<a class="headerlink" href="#id26" title="Link to this heading">#</a></h1>
+<p>Рассмотрим движение объекта, координата которого задана функцией <span class="math notranslate nohighlight">\(s(t) = t^3 - 6t^2 + 9t + 1\)</span>. Найдём точки максимальной и минимальной скорости.</p>
+<ol class="arabic simple">
+<li><p>Находим скорость <span class="math notranslate nohighlight">\(v(t)\)</span>:
+$<span class="math notranslate nohighlight">\(
+v(t) = s'(t) = 3t^2 - 12t + 9
+\)</span>$</p></li>
+<li><p>Решаем уравнение <span class="math notranslate nohighlight">\(v'(t) = 0\)</span>:
+$<span class="math notranslate nohighlight">\(
+3t^2 - 12t + 9 = 0 \implies t^2 - 4t + 3 = 0 \implies t = 1 \text{ или } t = 3
+\)</span>$</p></li>
+<li><p>Исследуем знак ускорения <span class="math notranslate nohighlight">\(a(t) = v'(t)\)</span> на интервалах <span class="math notranslate nohighlight">\((0, 1)\)</span>, <span class="math notranslate nohighlight">\((1, 3)\)</span> и <span class="math notranslate nohighlight">\((3, \infty)\)</span>:</p>
+<ul class="simple">
+<li><p>На интервале <span class="math notranslate nohighlight">\((0, 1)\)</span>: <span class="math notranslate nohighlight">\(a(t) = 6t - 12 &lt; 0\)</span> (скорость убывает).</p></li>
+<li><p>На интервале <span class="math notranslate nohighlight">\((1, 3)\)</span>: <span class="math notranslate nohighlight">\(a(t) = 6t - 12 &gt; 0\)</span> (скорость возрастает).</p></li>
+<li><p>На интервале <span class="math notranslate nohighlight">\((3, \infty)\)</span>: <span class="math notranslate nohighlight">\(a(t) = 6t - 12 &gt; 0\)</span> (скорость возрастает).</p></li>
+</ul>
+</li>
+</ol>
+<p>Таким образом, в точке <span class="math notranslate nohighlight">\(t = 1\)</span> объект имеет минимальную скорость, а в точке <span class="math notranslate nohighlight">\(t = 3\)</span> — максимальную.</p>
+</section>
+<section id="id27">
+<h1><strong>Теорема о композиций функций</strong><a class="headerlink" href="#id27" title="Link to this heading">#</a></h1>
+<ol class="arabic simple">
+<li><p>Если к функции <span class="math notranslate nohighlight">\(f\)</span> применяется возрастающая функция <span class="math notranslate nohighlight">\(g\)</span>, то композиция <span class="math notranslate nohighlight">\(g \circ f\)</span> имеет экстремумы при тех же аргументах, что и исходная функция <span class="math notranslate nohighlight">\(f\)</span>. При этом сохраняется и их тип.</p></li>
+<li><p>Если к <span class="math notranslate nohighlight">\(f\)</span> применяется убывающая функция <span class="math notranslate nohighlight">\(p\)</span>, то композиция <span class="math notranslate nohighlight">\(p \circ f\)</span> имеет экстремумы при тех же аргументах, что и исходная функция <span class="math notranslate nohighlight">\(f\)</span>, но меняется их тип.</p></li>
+<li><p>Если к <span class="math notranslate nohighlight">\(f\)</span> применяется немонотонная функция, то сделать быстрый вывод об экстремумах их композиции нельзя.</p></li>
+</ol>
+<p>То есть если функция <span class="math notranslate nohighlight">\(f\)</span> имела точку минимума в <span class="math notranslate nohighlight">\(x = 3\)</span>, то после применения к ней возрастающей функции <span class="math notranslate nohighlight">\(g\)</span> получится <span class="math notranslate nohighlight">\(g \circ f\)</span>, у которой, согласно теореме, тоже будет точка минимума при <span class="math notranslate nohighlight">\(x = 3\)</span>.</p>
+<p>А если к той же функции применить убывающую функцию <span class="math notranslate nohighlight">\(p\)</span>, то для <span class="math notranslate nohighlight">\(p \circ f\)</span> точка <span class="math notranslate nohighlight">\(x = 3\)</span> будет являться уже точкой максимума. То есть она остаётся экстремальной, но меняет тип.</p>
+<p>Важно! Сами значения функций в точках экстремума будут разные, поскольку <span class="math notranslate nohighlight">\(f(x) \neq g \circ f(x)\)</span>.</p>
+</section>
+<section id="id28">
+<h1><strong>Точки перегиба</strong><a class="headerlink" href="#id28" title="Link to this heading">#</a></h1>
+<p>Точка перегиба — это аргумент <span class="math notranslate nohighlight">\(x \in D(y)\)</span>, при котором меняется тип выпуклости: функция из выпуклой вверх становится выпуклой вниз или наоборот.</p>
+<p>У значения <span class="math notranslate nohighlight">\(y\)</span> в этой точке специального имени нет, если его хотят найти, то так и пишут: «найдите значение функции в точке перегиба».</p>
+<p>У некоторых функций точка перегиба видна сразу: например, для <span class="math notranslate nohighlight">\(y = -x^3\)</span> это точка <span class="math notranslate nohighlight">\(x = 0\)</span>. Здесь функция сначала была выпуклой вниз, а потом стала выпуклой вверх.</p>
+<p>Однако точки перегиба не всегда так просто определить на глаз, поэтому нужен формальный аналитический способ. И он связан со второй производной!</p>
+<p>Тут есть некоторая аналогия с точками экстремума и с их связью с первой производной. Давайте вспомним, как обстояли дела там:</p>
+<ul class="simple">
+<li><p>если точка <span class="math notranslate nohighlight">\(x_0\)</span> экстремальная, то производная в точке равна нулю или не существует;</p></li>
+<li><p>если производная в точке равна нулю или не существует, то точка будет «кандидатом» в экстремальные, но нет гарантий, что она такой окажется.</p></li>
+</ul>
+<p>Похожим образом связаны точки перегиба и вторая производная:</p>
+<ul class="simple">
+<li><p>если точка <span class="math notranslate nohighlight">\(x_0\)</span> является точкой перегиба, то <span class="math notranslate nohighlight">\(f''(x_0) = 0\)</span> или не существует в точке <span class="math notranslate nohighlight">\(x_0\)</span>;</p></li>
+<li><p>если <span class="math notranslate nohighlight">\(f''(x_0) = 0\)</span> или не существует в точке <span class="math notranslate nohighlight">\(x_0\)</span>, то точка будет «кандидатом» на звание точки перегиба, но нет гарантий, что она таковой окажется.</p></li>
+</ul>
+</section>
+<section id="id29">
+<h1><strong>Анализ функции</strong><a class="headerlink" href="#id29" title="Link to this heading">#</a></h1>
+<p>Анализировать функцию мы будем, добывая данные по следующему списку:</p>
+<ol class="arabic simple">
+<li><p>Область определения функции.</p></li>
+<li><p>Асимптоты: вертикальные и горизонтальные.</p></li>
+<li><p>Промежутки монотонности и экстремумы.</p></li>
+<li><p>Наибольшее и наименьшее значения.</p></li>
+<li><p>Выпуклость и точки перегиба.</p></li>
+</ol>
+<ul class="simple">
+<li><p>Иногда уже на этом этапе можно построить график. Если данных не хватает,
+то можно исследовать функцию дополнительно:</p></li>
+</ul>
+<ol class="arabic simple" start="6">
+<li><p>Точки пересечения с осями координат. Если их найти сложно, то этот пункт пропускают.</p></li>
+<li><p>Множество значений функции.</p></li>
+<li><p>Если данных всё ещё недостаточно, составляют таблицу значений функции
+в дополнительных точках.</p></li>
+</ol>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./chapter-0"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="../index.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Математические основы машинного обучения</p>
+      </div>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#"><strong>Производная</strong></a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Объяснение:</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Математическая формализация:</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id4"><strong>Нахождение касательной к графику функции и расчет углового коэффициента</strong></a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">Примеры интерпретации углового коэффициента</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id6"><strong>Положительный угловой коэффициент:</strong></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id7"><strong>Отрицательный угловой коэффициент:</strong></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id8"><strong>Нулевой угловой коэффициент:</strong></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">Пример из физики:</a></li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id10"><strong>Геометрический смысл производной</strong></a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id11">Пример из физики (продолжение):</a></li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id12">Дополнения:</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id13"><strong>Формулы дифференцирования</strong>:</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id14"><strong>Связь монотонности и производной</strong>:</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id15"><strong>Вторая производная и выпуклость функции</strong></a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id16"><strong>Алгоритм нахождения экстремумов функции</strong></a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id17">Шаг 1: Нахождение производной функции</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id18">Шаг 2: Нахождение критических точек</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id19">Шаг 3: Исследование знака производной</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id20">Шаг 4: Классификация экстремумов</a></li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id21">Пример алгоритма на практике:</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id22">Шаг 1: Нахождение производной функции</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id23">Шаг 2: Нахождение критических точек</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id24">Шаг 3: Исследование знака производной</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id25">Шаг 4: Классификация экстремумов</a></li>
+</ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id26">Пример из физики:</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id27"><strong>Теорема о композиций функций</strong></a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id28"><strong>Точки перегиба</strong></a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id29"><strong>Анализ функции</strong></a></li>
+</ul>
+
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Verbasik
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
