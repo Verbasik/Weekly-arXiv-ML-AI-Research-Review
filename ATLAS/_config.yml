@@ -1,0 +1,49 @@
+# Настройки книги
+# Подробнее на https://jupyterbook.org/customize/config.html
+
+title: ATLAS
+author: Verbasik
+
+# Принудительное выполнение ноутбуков при каждой сборке.
+# См. https://jupyterbook.org/content/execute.html
+execute:
+  execute_notebooks: force
+  # execute_notebooks: 'off'
+  # execute_notebooks: cache
+
+# Определение имени выходного файла LaTeX для сборки PDF
+latex:
+  latex_documents:
+    targetname: book.tex
+
+# Информация о том, где книга находится в интернете
+repository:
+  url: https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review  # Онлайн расположение нашей книги
+  path_to_book: ATLAS                                                  # Путь к книге относительно корня репозитория
+  branch: main                                                         # Какая ветка репозитория должна использоваться при создании ссылок
+
+# Добавление кнопок GitHub к вашей книге
+# См. https://jupyterbook.org/customize/config.html#add-a-link-to-your-repository
+html:
+  favicon: logo.jpg
+  use_issues_button: true
+  use_repository_button: true
+  extra_css: 
+    - _static/custom.css'
+  analytics:
+    google_analytics_id: G-9S2CQ3B60T
+
+sphinx:
+  recursive_update: true
+  config:
+    language: ru
+#     html_theme: pydata_sphinx_theme
+    # html_theme: furo
+    html_show_copyright: false
+    html_context:
+      default_mode: light
+  extra_extensions:
+    - 'sphinx.ext.autodoc'
+    - 'sphinx.ext.mathjax'
+  html_theme_options:
+    sidebar_toggle: false
