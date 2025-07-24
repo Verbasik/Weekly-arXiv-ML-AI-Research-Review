@@ -32,7 +32,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
@@ -417,8 +417,9 @@ document.write(`
 <h2>Функция и её график<a class="headerlink" href="#id2" title="Ссылка на этот заголовок">#</a></h2>
 <p>Представьте, как вы катаетесь на велосипеде: разгоняетесь, тормозите и едете с постоянной скоростью. Скорость велосипеда меняется с течением времени — это и есть пример функции времени.</p>
 <p><strong>Функция</strong> — это математическое правило, которое принимает на вход число (аргумент) и возвращает определённый результат. В нашем примере результатом будет скорость велосипеда, а аргументом — время движения.</p>
-<p>Если представить зависимость скорости от времени в виде формулы, она примет следующий вид:<br />
-<span class="math notranslate nohighlight">\(V = f(t)\)</span>.</p>
+<p>Если представить зависимость скорости от времени в виде формулы, она примет следующий вид:</p>
+<div class="math notranslate nohighlight">
+\[V = f(t)\]</div>
 <p>Распишем значения этой формулы:</p>
 <ul>
 <li><p><strong>Скорость велосипеда (V)</strong> — зависимая переменная, которая изменяется с течением времени. Например:</p>
@@ -445,6 +446,9 @@ document.write(`
 <li><p>По горизонтальной оси <span class="math notranslate nohighlight">\(X\)</span> откладываем <strong>время движения</strong></p></li>
 <li><p>По вертикальной оси <span class="math notranslate nohighlight">\(Y\)</span> — <strong>скорость велосипеда</strong></p></li>
 </ul>
+<blockquote>
+<div><p>Для наглядности, сделаем график более естественным, пускай он будет местами возрастающий, местами убывающий.</p>
+</div></blockquote>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Создаем markdown-ячейку с встроенным графиком</span>
@@ -502,7 +506,7 @@ document.write(`
 \[
 \Delta y = f(x + \Delta x) − f(x)
 \]</div>
-<p>Где:</p>
+<p>где:</p>
 <ul class="simple">
 <li><p><span class="math notranslate nohighlight">\(f(x)\)</span> — значение функции в исходной точке</p></li>
 <li><p><span class="math notranslate nohighlight">\(f(x + \Delta x)\)</span> — значение функции в точке, смещённой на <span class="math notranslate nohighlight">\(\Delta x\)</span></p></li>
