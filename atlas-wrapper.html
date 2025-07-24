@@ -101,8 +101,39 @@
     </header>
     
     <main>
-        <iframe src="ATLAS/_build/html/index.html" class="atlas-container" title="ATLAS - Algorithm Templates for Live AI Scripts"></iframe>
+        <iframe id="atlas-iframe" src="ATLAS/_build/html/index.html" class="atlas-container" title="ATLAS - Algorithm Templates for Live AI Scripts"></iframe>
     </main>
+    
+    <script>
+        // Функция для установки темной темы в iframe
+        function setDarkThemeInIframe() {
+            const iframe = document.getElementById('atlas-iframe');
+            
+            // Когда iframe загрузится
+            iframe.onload = function() {
+                try {
+                    // Получаем доступ к документу внутри iframe
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    
+                    // Устанавливаем темную тему через атрибуты HTML
+                    iframeDoc.documentElement.dataset.mode = "dark";
+                    iframeDoc.documentElement.dataset.theme = "dark";
+                    
+                    // Устанавливаем темную тему в localStorage iframe
+                    const iframeWindow = iframe.contentWindow;
+                    iframeWindow.localStorage.setItem("mode", "dark");
+                    iframeWindow.localStorage.setItem("theme", "dark");
+                    
+                    console.log("[ATLAS Wrapper] Установлена темная тема для ATLAS");
+                } catch (error) {
+                    console.error("[ATLAS Wrapper] Ошибка при установке темной темы:", error);
+                }
+            };
+        }
+        
+        // Вызываем функцию при загрузке страницы
+        window.addEventListener('DOMContentLoaded', setDarkThemeInIframe);
+    </script>
     
     <footer class="atlas-footer">
         <div>© 2025 The Weekly Research Brief. ATLAS - интерактивная визуализация алгоритмов машинного обучения.</div>
