@@ -4,6 +4,15 @@
 format: jb-book
 root: index
 parts:
-  - caption: Chapter 0. Mathematical Foundations
+  - caption: Введение
     chapters:
-    - file: Chapter-1/gradient-descent
+    - file: Chapter-1/00-introduction
+
+  - caption: Глава 1. Функция — отправная точка
+    chapters:
+    - file: Chapter-1/01-functions
+    - file: Chapter-1/01-math
+
+  - caption: Глава 2. Предел функции
+    chapters:
+    - file: Chapter-1/02-limit
