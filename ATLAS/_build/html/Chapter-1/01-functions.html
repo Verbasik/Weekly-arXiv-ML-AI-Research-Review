@@ -1,0 +1,996 @@
+
+<!DOCTYPE html>
+
+
+<html lang="ru" data-content_root="../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Функция - начало &#8212; ATLAS</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="../_static/documentation_options.js?v=576a2c22"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script src="../_static/translations.js?v=9bfe3ffa"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-9S2CQ3B60T"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-9S2CQ3B60T');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-9S2CQ3B60T');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'Chapter-1/01-functions';</script>
+    <link rel="index" title="Алфавитный указатель" href="../genindex.html" />
+    <link rel="search" title="Поиск" href="../search.html" />
+    <link rel="next" title="Анализ и формализация понятия функции" href="01-math.html" />
+    <link rel="prev" title="От функций к градиенту" href="00-introduction.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="ru"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Перейти к основному содержанию</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">ATLAS</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Поиск" aria-label="Поиск" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Поиск</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../index.html">
+                    ATLAS: Algorithm Templates for Live AI Scripts
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Введение</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="00-introduction.html">От функций к градиенту</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Глава 1. Функция — отправная точка</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Функция - начало</a></li>
+<li class="toctree-l1"><a class="reference internal" href="01-math.html">Анализ и формализация понятия функции</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Глава 2. Предел функции</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="02-limit.html">Предел функции — финишная прямая</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Исходный репозиторий"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/issues/new?title=Issue%20on%20page%20%2FChapter-1/01-functions.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Открыть вопрос"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Загрузите эту страницу">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/Chapter-1/01-functions.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Скачать исходный файл"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Распечатать в PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Полноэкранный режим"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="светлая/темная" aria-label="светлая/темная" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Поиск" aria-label="Поиск" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Функция - начало</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Содержание </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Функция и её график</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Анализ изменения скорости велосипеда</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Понятие приращения</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">Скорость изменения функции</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="id1">
+<h1>Функция - начало<a class="headerlink" href="#id1" title="Ссылка на этот заголовок">#</a></h1>
+<section id="id2">
+<h2>Функция и её график<a class="headerlink" href="#id2" title="Ссылка на этот заголовок">#</a></h2>
+<p>Представьте, как вы катаетесь на велосипеде: разгоняетесь, тормозите и едете с постоянной скоростью. Скорость велосипеда меняется с течением времени — это и есть пример функции времени.</p>
+<p><strong>Функция</strong> — это математическое правило, которое принимает на вход число (аргумент) и возвращает определённый результат. В нашем примере результатом будет скорость велосипеда, а аргументом — время движения.</p>
+<p>Если представить зависимость скорости от времени в виде формулы, она примет следующий вид:<br />
+<span class="math notranslate nohighlight">\(V = f(t)\)</span>.</p>
+<p>Распишем значения этой формулы:</p>
+<ul>
+<li><p><strong>Скорость велосипеда (V)</strong> — зависимая переменная, которая изменяется с течением времени. Например:</p>
+<ul class="simple">
+<li><p>в начале поездки: <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">км/ч</span></code></p></li>
+<li><p>через 5 минут: <code class="docutils literal notranslate"><span class="pre">20</span> <span class="pre">км/ч</span></code></p></li>
+<li><p>через 10 минут: <code class="docutils literal notranslate"><span class="pre">30</span> <span class="pre">км/ч</span></code></p></li>
+</ul>
+</li>
+<li><p><strong>Время (t)</strong> — независимая переменная, которую мы задаём самостоятельно. Она служит аргументом функции.</p></li>
+<li><p><strong>Функция <span class="math notranslate nohighlight">\(f(t)\)</span></strong> описывает зависимость скорости от времени. Например:<br />
+<span class="math notranslate nohighlight">\(f(t) = 3t + 2\)</span>.</p>
+<p>Эта функция означает, что:</p>
+<ul class="simple">
+<li><p>каждую минуту скорость увеличивается на <code class="docutils literal notranslate"><span class="pre">3</span> <span class="pre">км/ч</span></code></p></li>
+<li><p>начальная скорость (при <code class="docutils literal notranslate"><span class="pre">t</span> <span class="pre">=</span> <span class="pre">0</span></code>): <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">км/ч</span></code><br />
+Тогда через 5 минут скорость будет равна:<br />
+<code class="docutils literal notranslate"><span class="pre">3</span> <span class="pre">×</span> <span class="pre">5</span> <span class="pre">+</span> <span class="pre">2</span> <span class="pre">=</span> <span class="pre">17</span> <span class="pre">км/ч</span></code>.</p></li>
+</ul>
+</li>
+</ul>
+<p>Построим график изменения скорости велосипеда в двумерной системе координат <span class="math notranslate nohighlight">\(X\)</span> и <span class="math notranslate nohighlight">\(Y\)</span>:</p>
+<ul class="simple">
+<li><p>По горизонтальной оси <span class="math notranslate nohighlight">\(X\)</span> откладываем <strong>время движения</strong></p></li>
+<li><p>По вертикальной оси <span class="math notranslate nohighlight">\(Y\)</span> — <strong>скорость велосипеда</strong></p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Импорт библиотек</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">plotly.graph_objects</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">go</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">plotly.express</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">px</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">plotly.subplots</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_subplots</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">create_speed_function</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Функция скорости велосипеда с сильными изгибами</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Создаем сложную кривую с крутыми изгибами</span>
+    <span class="n">base</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">t</span> <span class="o">+</span> <span class="mi">2</span>                                   <span class="c1"># Базовый линейный тренд</span>
+    <span class="n">wave1</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">t</span> <span class="o">*</span> <span class="mf">0.8</span><span class="p">)</span>                        <span class="c1"># Основная волна</span>
+    <span class="n">wave2</span> <span class="o">=</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">t</span> <span class="o">*</span> <span class="mf">1.2</span><span class="p">)</span>                        <span class="c1"># Дополнительная волна</span>
+    <span class="n">steepness</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">t</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">t</span> <span class="o">*</span> <span class="mf">0.3</span><span class="p">)</span>  <span class="c1"># Компонент для крутых изгибов</span>
+    
+    <span class="k">return</span> <span class="n">base</span> <span class="o">+</span> <span class="n">wave1</span> <span class="o">+</span> <span class="n">wave2</span> <span class="o">+</span> <span class="n">steepness</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_data</span><span class="p">(</span><span class="n">t_max</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">points</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Генерирует данные для графика</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">t_max</span><span class="p">,</span> <span class="n">points</span><span class="p">)</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">create_speed_function</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">t</span><span class="p">,</span> <span class="n">v</span>
+
+<span class="c1"># Генерация данных</span>
+<span class="n">t</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">generate_data</span><span class="p">()</span>
+
+<span class="c1"># Создание основного графика</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">()</span>
+
+<span class="c1"># Основная линия графика с градиентом</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="n">t</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="n">v</span><span class="p">,</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;lines&#39;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Скорость велосипеда&#39;</span><span class="p">,</span>
+    <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+        <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#6366f1&#39;</span><span class="p">,</span>
+        <span class="n">width</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+        <span class="n">shape</span><span class="o">=</span><span class="s1">&#39;spline&#39;</span>
+    <span class="p">),</span>
+    <span class="n">fill</span><span class="o">=</span><span class="s1">&#39;tonexty&#39;</span><span class="p">,</span>
+    <span class="n">fillcolor</span><span class="o">=</span><span class="s1">&#39;rgba(99, 102, 241, 0.1)&#39;</span><span class="p">,</span>
+    <span class="n">hovertemplate</span><span class="o">=</span><span class="s1">&#39;&lt;b&gt;Время:&lt;/b&gt; %</span><span class="si">{x:.1f}</span><span class="s1"> мин&lt;br&gt;&#39;</span> <span class="o">+</span>
+                  <span class="s1">&#39;&lt;b&gt;Скорость:&lt;/b&gt; %</span><span class="si">{y:.1f}</span><span class="s1"> км/ч&lt;br&gt;&#39;</span> <span class="o">+</span>
+                  <span class="s1">&#39;&lt;extra&gt;&lt;/extra&gt;&#39;</span>
+<span class="p">))</span>
+
+<span class="c1"># Добавление точек для ключевых значений</span>
+<span class="n">key_points</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">20</span><span class="p">]</span>
+<span class="n">key_speeds</span> <span class="o">=</span> <span class="p">[</span><span class="n">create_speed_function</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">key_points</span><span class="p">]</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="n">key_points</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="n">key_speeds</span><span class="p">,</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;markers+text&#39;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Ключевые точки&#39;</span><span class="p">,</span>
+    <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+        <span class="n">size</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#ef4444&#39;</span><span class="p">,</span>
+        <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;circle&#39;</span><span class="p">,</span>
+        <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="p">),</span>
+    <span class="n">text</span><span class="o">=</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">v</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1"> км/ч&#39;</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">key_speeds</span><span class="p">],</span>
+    <span class="n">textposition</span><span class="o">=</span><span class="s1">&#39;top center&#39;</span><span class="p">,</span>
+    <span class="n">textfont</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#374151&#39;</span><span class="p">),</span>
+    <span class="n">hovertemplate</span><span class="o">=</span><span class="s1">&#39;&lt;b&gt;Время:&lt;/b&gt; %</span><span class="si">{x}</span><span class="s1"> мин&lt;br&gt;&#39;</span> <span class="o">+</span>
+                  <span class="s1">&#39;&lt;b&gt;Скорость:&lt;/b&gt; %</span><span class="si">{y:.1f}</span><span class="s1"> км/ч&lt;br&gt;&#39;</span> <span class="o">+</span>
+                  <span class="s1">&#39;&lt;extra&gt;&lt;/extra&gt;&#39;</span>
+<span class="p">))</span>
+
+<span class="c1"># Настройка макета</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+    <span class="n">title</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+        <span class="n">text</span><span class="o">=</span><span class="s1">&#39;🚴 Скорость велосипеда в зависимости от времени&#39;</span><span class="p">,</span>
+        <span class="n">font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">24</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#1f2937&#39;</span><span class="p">),</span>
+        <span class="n">x</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="mf">0.95</span>
+    <span class="p">),</span>
+    <span class="n">xaxis</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Время (минуты)&#39;</span><span class="p">,</span>
+            <span class="n">font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#374151&#39;</span><span class="p">)</span>
+        <span class="p">),</span>
+        <span class="n">gridcolor</span><span class="o">=</span><span class="s1">&#39;rgba(0,0,0,0.1)&#39;</span><span class="p">,</span>
+        <span class="n">zerolinecolor</span><span class="o">=</span><span class="s1">&#39;rgba(0,0,0,0.2)&#39;</span><span class="p">,</span>
+        <span class="n">showgrid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="nb">range</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">]</span>
+    <span class="p">),</span>
+    <span class="n">yaxis</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Скорость (км/ч)&#39;</span><span class="p">,</span>
+            <span class="n">font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#374151&#39;</span><span class="p">)</span>
+        <span class="p">),</span>
+        <span class="n">gridcolor</span><span class="o">=</span><span class="s1">&#39;rgba(0,0,0,0.1)&#39;</span><span class="p">,</span>
+        <span class="n">zerolinecolor</span><span class="o">=</span><span class="s1">&#39;rgba(0,0,0,0.2)&#39;</span><span class="p">,</span>
+        <span class="n">showgrid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="nb">range</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">65</span><span class="p">]</span>
+    <span class="p">),</span>
+    <span class="n">plot_bgcolor</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span>
+    <span class="n">paper_bgcolor</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span>
+    <span class="n">font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">family</span><span class="o">=</span><span class="s1">&#39;Arial, sans-serif&#39;</span><span class="p">),</span>
+    <span class="n">showlegend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">legend</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+        <span class="n">x</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="mf">0.98</span><span class="p">,</span>
+        <span class="n">bgcolor</span><span class="o">=</span><span class="s1">&#39;rgba(255,255,255,0.8)&#39;</span><span class="p">,</span>
+        <span class="n">bordercolor</span><span class="o">=</span><span class="s1">&#39;rgba(0,0,0,0.1)&#39;</span><span class="p">,</span>
+        <span class="n">borderwidth</span><span class="o">=</span><span class="mi">1</span>
+    <span class="p">),</span>
+    <span class="n">margin</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">l</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">80</span><span class="p">),</span>
+    <span class="n">hovermode</span><span class="o">=</span><span class="s1">&#39;x unified&#39;</span>
+<span class="p">)</span>
+
+<span class="c1"># Добавление аннотаций</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">add_annotation</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="mf">0.85</span><span class="p">,</span>
+    <span class="n">xref</span><span class="o">=</span><span class="s1">&#39;paper&#39;</span><span class="p">,</span>
+    <span class="n">yref</span><span class="o">=</span><span class="s1">&#39;paper&#39;</span><span class="p">,</span>
+    <span class="n">text</span><span class="o">=</span><span class="s1">&#39;f(t) = 3t + 2&#39;</span><span class="p">,</span>
+    <span class="n">showarrow</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#6366f1&#39;</span><span class="p">),</span>
+    <span class="n">bgcolor</span><span class="o">=</span><span class="s1">&#39;rgba(99, 102, 241, 0.1)&#39;</span><span class="p">,</span>
+    <span class="n">bordercolor</span><span class="o">=</span><span class="s1">&#39;#6366f1&#39;</span><span class="p">,</span>
+    <span class="n">borderwidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">borderpad</span><span class="o">=</span><span class="mi">4</span>
+<span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">add_annotation</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="mf">0.75</span><span class="p">,</span>
+    <span class="n">xref</span><span class="o">=</span><span class="s1">&#39;paper&#39;</span><span class="p">,</span>
+    <span class="n">yref</span><span class="o">=</span><span class="s1">&#39;paper&#39;</span><span class="p">,</span>
+    <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Начальная скорость: 2 км/ч&lt;br&gt;Увеличение: 3 км/ч за каждую минуту&#39;</span><span class="p">,</span>
+    <span class="n">showarrow</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#6b7280&#39;</span><span class="p">),</span>
+    <span class="n">align</span><span class="o">=</span><span class="s1">&#39;center&#39;</span>
+<span class="p">)</span>
+
+<span class="c1"># Создаем директорию для сохранения графиков, если её нет</span>
+<span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="s1">&#39;../_static/plots&#39;</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Сохраняем график как HTML файл</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">write_html</span><span class="p">(</span><span class="s1">&#39;../_static/plots/speed_plot.html&#39;</span><span class="p">,</span> <span class="n">include_plotlyjs</span><span class="o">=</span><span class="s1">&#39;cdn&#39;</span><span class="p">,</span> <span class="n">full_html</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># Отображаем график в ноутбуке</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1"># Создаем markdown-ячейку с встроенным графиком</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">Markdown</span>
+<span class="n">display</span><span class="p">(</span><span class="n">Markdown</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">&lt;div class=&quot;plotly-plot&quot;&gt;</span>
+<span class="s2">    &lt;iframe src=&quot;../_static/plots/speed_plot.html&quot; width=&quot;100%&quot; height=&quot;600px&quot; frameborder=&quot;0&quot;&gt;&lt;/iframe&gt;</span>
+<span class="s2">&lt;/div&gt;</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="plotly-plot">
+    <iframe src="../_static/plots/speed_plot.html" width="100%" height="600px" frameborder="0"></iframe>
+</div>
+</div>
+</div>
+<p>Мы вспомнили понятие функции, и теперь давайте рассмотрим изменение скорости велосипеда в разные промежутки времени. Для этого разберём два понятия: приращение аргумента и приращение функции.</p>
+<p>Отметим на графике точки <strong>A</strong> и <strong>B</strong>, опустим из них перпендикуляры на оси <strong>X</strong> и <strong>Y</strong>. Точки пересечения этих перпендикуляров с осями будут координатами точек <strong>A</strong> и <strong>B</strong>. Пусть точка <strong>A</strong> имеет координаты <span class="math notranslate nohighlight">\((x_1, y_1)\)</span>, а точка <strong>B</strong> — <span class="math notranslate nohighlight">\((x_2, y_2)\)</span>:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Генерация данных</span>
+<span class="n">t</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">generate_data</span><span class="p">()</span>
+
+<span class="c1"># Выбираем точки A и B</span>
+<span class="n">x1</span><span class="p">,</span> <span class="n">x2</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span>  <span class="c1"># Время в минутах</span>
+<span class="n">y1</span><span class="p">,</span> <span class="n">y2</span> <span class="o">=</span> <span class="n">create_speed_function</span><span class="p">(</span><span class="n">x1</span><span class="p">),</span> <span class="n">create_speed_function</span><span class="p">(</span><span class="n">x2</span><span class="p">)</span>
+
+<span class="c1"># Создание основного графика</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">go</span><span class="o">.</span><span class="n">Figure</span><span class="p">()</span>
+
+<span class="c1"># Основная линия графика с градиентом</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="n">t</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="n">v</span><span class="p">,</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;lines&#39;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Скорость велосипеда&#39;</span><span class="p">,</span>
+    <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+        <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#6366f1&#39;</span><span class="p">,</span>
+        <span class="n">width</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+        <span class="n">shape</span><span class="o">=</span><span class="s1">&#39;spline&#39;</span><span class="p">,</span>
+        <span class="n">smoothing</span><span class="o">=</span><span class="mf">1.3</span>
+    <span class="p">),</span>
+    <span class="n">fill</span><span class="o">=</span><span class="s1">&#39;tonexty&#39;</span><span class="p">,</span>
+    <span class="n">fillcolor</span><span class="o">=</span><span class="s1">&#39;rgba(99, 102, 241, 0.1)&#39;</span><span class="p">,</span>
+    <span class="n">hovertemplate</span><span class="o">=</span><span class="s1">&#39;&lt;b&gt;Время:&lt;/b&gt; %</span><span class="si">{x:.1f}</span><span class="s1"> мин&lt;br&gt;&#39;</span> <span class="o">+</span>
+                  <span class="s1">&#39;&lt;b&gt;Скорость:&lt;/b&gt; %</span><span class="si">{y:.1f}</span><span class="s1"> км/ч&lt;br&gt;&#39;</span> <span class="o">+</span>
+                  <span class="s1">&#39;&lt;extra&gt;&lt;/extra&gt;&#39;</span>
+<span class="p">))</span>
+
+<span class="c1"># Добавление точек A и B</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">],</span>
+    <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="n">y1</span><span class="p">,</span> <span class="n">y2</span><span class="p">],</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;markers+text&#39;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Ключевые точки&#39;</span><span class="p">,</span>
+    <span class="n">marker</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+        <span class="n">size</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#ef4444&#39;</span><span class="p">,</span>
+        <span class="n">symbol</span><span class="o">=</span><span class="s1">&#39;circle&#39;</span><span class="p">,</span>
+        <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="p">),</span>
+    <span class="n">text</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">],</span>
+    <span class="n">textposition</span><span class="o">=</span><span class="s1">&#39;top right&#39;</span><span class="p">,</span>
+    <span class="n">textfont</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#374151&#39;</span><span class="p">),</span>
+    <span class="n">hovertemplate</span><span class="o">=</span><span class="s1">&#39;&lt;b&gt;Точка %</span><span class="si">{text}</span><span class="s1">:&lt;/b&gt;&lt;br&gt;&#39;</span> <span class="o">+</span>
+                  <span class="s1">&#39;&lt;b&gt;Время:&lt;/b&gt; %</span><span class="si">{x:.1f}</span><span class="s1"> мин&lt;br&gt;&#39;</span> <span class="o">+</span>
+                  <span class="s1">&#39;&lt;b&gt;Скорость:&lt;/b&gt; %</span><span class="si">{y:.1f}</span><span class="s1"> км/ч&lt;br&gt;&#39;</span> <span class="o">+</span>
+                  <span class="s1">&#39;&lt;extra&gt;&lt;/extra&gt;&#39;</span>
+<span class="p">))</span>
+
+<span class="c1"># Добавление перпендикуляров и проекций</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="n">x1</span><span class="p">,</span> <span class="n">x1</span><span class="p">],</span>
+    <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">y1</span><span class="p">],</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;lines&#39;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Проекция A&#39;</span><span class="p">,</span>
+    <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;#ef4444&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dash</span><span class="o">=</span><span class="s1">&#39;dash&#39;</span><span class="p">),</span>
+    <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">hoverinfo</span><span class="o">=</span><span class="s1">&#39;skip&#39;</span>
+<span class="p">))</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="n">x2</span><span class="p">,</span> <span class="n">x2</span><span class="p">],</span>
+    <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">y2</span><span class="p">],</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;lines&#39;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Проекция B&#39;</span><span class="p">,</span>
+    <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;#ef4444&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dash</span><span class="o">=</span><span class="s1">&#39;dash&#39;</span><span class="p">),</span>
+    <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">hoverinfo</span><span class="o">=</span><span class="s1">&#39;skip&#39;</span>
+<span class="p">))</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">x1</span><span class="p">],</span>
+    <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="n">y1</span><span class="p">,</span> <span class="n">y1</span><span class="p">],</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;lines&#39;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Проекция A&#39;</span><span class="p">,</span>
+    <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;#ef4444&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dash</span><span class="o">=</span><span class="s1">&#39;dash&#39;</span><span class="p">),</span>
+    <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">hoverinfo</span><span class="o">=</span><span class="s1">&#39;skip&#39;</span>
+<span class="p">))</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">add_trace</span><span class="p">(</span><span class="n">go</span><span class="o">.</span><span class="n">Scatter</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">x2</span><span class="p">],</span>
+    <span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="n">y2</span><span class="p">,</span> <span class="n">y2</span><span class="p">],</span>
+    <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;lines&#39;</span><span class="p">,</span>
+    <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Проекция B&#39;</span><span class="p">,</span>
+    <span class="n">line</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;#ef4444&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dash</span><span class="o">=</span><span class="s1">&#39;dash&#39;</span><span class="p">),</span>
+    <span class="n">showlegend</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">hoverinfo</span><span class="o">=</span><span class="s1">&#39;skip&#39;</span>
+<span class="p">))</span>
+
+<span class="c1"># Добавление аннотаций для координат</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">add_annotation</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="n">y1</span><span class="p">,</span>
+    <span class="n">text</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;y₁ = </span><span class="si">{</span><span class="n">y1</span><span class="si">:</span><span class="s1">.1f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+    <span class="n">showarrow</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">xanchor</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">,</span>
+    <span class="n">xshift</span><span class="o">=-</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#374151&#39;</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">add_annotation</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="n">y2</span><span class="p">,</span>
+    <span class="n">text</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;y₂ = </span><span class="si">{</span><span class="n">y2</span><span class="si">:</span><span class="s1">.1f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+    <span class="n">showarrow</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">xanchor</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">,</span>
+    <span class="n">xshift</span><span class="o">=-</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#374151&#39;</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">add_annotation</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="n">x1</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">text</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;x₁ = </span><span class="si">{</span><span class="n">x1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+    <span class="n">showarrow</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">yanchor</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span>
+    <span class="n">yshift</span><span class="o">=-</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#374151&#39;</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">add_annotation</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="n">x2</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">text</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;x₂ = </span><span class="si">{</span><span class="n">x2</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+    <span class="n">showarrow</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">yanchor</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span>
+    <span class="n">yshift</span><span class="o">=-</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#374151&#39;</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Настройка макета</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">update_layout</span><span class="p">(</span>
+    <span class="n">title</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+        <span class="n">text</span><span class="o">=</span><span class="s1">&#39;🚴 Приращение скорости велосипеда&#39;</span><span class="p">,</span>
+        <span class="n">font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">24</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#1f2937&#39;</span><span class="p">),</span>
+        <span class="n">x</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="mf">0.95</span>
+    <span class="p">),</span>
+    <span class="n">xaxis</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Время (минуты)&#39;</span><span class="p">,</span>
+            <span class="n">font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#374151&#39;</span><span class="p">)</span>
+        <span class="p">),</span>
+        <span class="n">gridcolor</span><span class="o">=</span><span class="s1">&#39;rgba(0,0,0,0.1)&#39;</span><span class="p">,</span>
+        <span class="n">zerolinecolor</span><span class="o">=</span><span class="s1">&#39;rgba(0,0,0,0.2)&#39;</span><span class="p">,</span>
+        <span class="n">showgrid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="nb">range</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">21</span><span class="p">]</span>
+    <span class="p">),</span>
+    <span class="n">yaxis</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Скорость (км/ч)&#39;</span><span class="p">,</span>
+            <span class="n">font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#374151&#39;</span><span class="p">)</span>
+        <span class="p">),</span>
+        <span class="n">gridcolor</span><span class="o">=</span><span class="s1">&#39;rgba(0,0,0,0.1)&#39;</span><span class="p">,</span>
+        <span class="n">zerolinecolor</span><span class="o">=</span><span class="s1">&#39;rgba(0,0,0,0.2)&#39;</span><span class="p">,</span>
+        <span class="n">showgrid</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="nb">range</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">65</span><span class="p">]</span>
+    <span class="p">),</span>
+    <span class="n">plot_bgcolor</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span>
+    <span class="n">paper_bgcolor</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">,</span>
+    <span class="n">font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">family</span><span class="o">=</span><span class="s1">&#39;Arial, sans-serif&#39;</span><span class="p">),</span>
+    <span class="n">showlegend</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">legend</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+        <span class="n">x</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span>
+        <span class="n">y</span><span class="o">=</span><span class="mf">0.98</span><span class="p">,</span>
+        <span class="n">bgcolor</span><span class="o">=</span><span class="s1">&#39;rgba(255,255,255,0.8)&#39;</span><span class="p">,</span>
+        <span class="n">bordercolor</span><span class="o">=</span><span class="s1">&#39;rgba(0,0,0,0.1)&#39;</span><span class="p">,</span>
+        <span class="n">borderwidth</span><span class="o">=</span><span class="mi">1</span>
+    <span class="p">),</span>
+    <span class="n">margin</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">l</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mi">80</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">80</span><span class="p">),</span>
+    <span class="n">hovermode</span><span class="o">=</span><span class="s1">&#39;x unified&#39;</span>
+<span class="p">)</span>
+
+<span class="c1"># Добавление аннотаций с пояснениями</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">add_annotation</span><span class="p">(</span>
+    <span class="n">x</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="mf">0.98</span><span class="p">,</span>
+    <span class="n">xref</span><span class="o">=</span><span class="s1">&#39;paper&#39;</span><span class="p">,</span>
+    <span class="n">yref</span><span class="o">=</span><span class="s1">&#39;paper&#39;</span><span class="p">,</span>
+    <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Приращение аргумента: Δx = x₂ - x₁&lt;br&gt;Приращение функции: Δy = y₂ - y₁&#39;</span><span class="p">,</span>
+    <span class="n">showarrow</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">font</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;#6366f1&#39;</span><span class="p">),</span>
+    <span class="n">bgcolor</span><span class="o">=</span><span class="s1">&#39;rgba(99, 102, 241, 0.1)&#39;</span><span class="p">,</span>
+    <span class="n">bordercolor</span><span class="o">=</span><span class="s1">&#39;#6366f1&#39;</span><span class="p">,</span>
+    <span class="n">borderwidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">borderpad</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">align</span><span class="o">=</span><span class="s1">&#39;center&#39;</span>
+<span class="p">)</span>
+
+<span class="c1"># Сохраняем график как HTML файл</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">write_html</span><span class="p">(</span><span class="s1">&#39;../_static/plots/delta_speed_plot.html&#39;</span><span class="p">,</span> <span class="n">include_plotlyjs</span><span class="o">=</span><span class="s1">&#39;cdn&#39;</span><span class="p">,</span> <span class="n">full_html</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<span class="c1"># Отображаем график в ноутбуке</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1"># Создаем markdown-ячейку с встроенным графиком</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">Markdown</span>
+<span class="n">display</span><span class="p">(</span><span class="n">Markdown</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">&lt;div class=&quot;plotly-plot&quot;&gt;</span>
+<span class="s2">    &lt;iframe src=&quot;../_static/plots/delta_speed_plot.html&quot; width=&quot;100%&quot; height=&quot;600px&quot; frameborder=&quot;0&quot;&gt;&lt;/iframe&gt;</span>
+<span class="s2">&lt;/div&gt;</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="plotly-plot">
+    <iframe src="../_static/plots/delta_speed_plot.html" width="100%" height="600px" frameborder="0"></iframe>
+</div>
+</div>
+</div>
+</section>
+<section id="id3">
+<h2>Анализ изменения скорости велосипеда<a class="headerlink" href="#id3" title="Ссылка на этот заголовок">#</a></h2>
+<p>На графике в момент времени <span class="math notranslate nohighlight">\(x_1\)</span> скорость велосипеда равна <span class="math notranslate nohighlight">\(y_1\)</span>, а в момент времени <span class="math notranslate nohighlight">\(x_2\)</span> она становится равной <span class="math notranslate nohighlight">\(y_2\)</span>. За промежуток времени <span class="math notranslate nohighlight">\(\Delta x = x_2 − x_1\)</span> скорость изменяется на следующую величину <span class="math notranslate nohighlight">\(\Delta y = y_2 − y_1\)</span>.</p>
+<section id="id4">
+<h3>Понятие приращения<a class="headerlink" href="#id4" title="Ссылка на этот заголовок">#</a></h3>
+<p><strong>Приращение аргумента</strong> — разность между двумя значениями аргумента. В нашем случае это изменение времени между двумя точками измерения скорости: если мы измеряем скорость в начале движения и через 5 минут, приращение аргумента составит 5 минут. В системе координат <span class="math notranslate nohighlight">\(XY\)</span> оно обозначается как <span class="math notranslate nohighlight">\(\Delta x\)</span>, где <span class="math notranslate nohighlight">\(\Delta\)</span> (дельта) — символ приращения.</p>
+<p><strong>Приращение функции</strong> — изменение значения функции при изменении аргумента. В нашем примере это изменение скорости между двумя точками измерения. Например:</p>
+<ul class="simple">
+<li><p>Если скорость в начале движения была <span class="math notranslate nohighlight">\(0\)</span> км/ч</p></li>
+<li><p>А через 5 минут стала <span class="math notranslate nohighlight">\(20\)</span> км/ч</p></li>
+<li><p>То приращение функции составит <span class="math notranslate nohighlight">\(20\)</span> км/ч</p></li>
+</ul>
+<p>В системе координат <span class="math notranslate nohighlight">\(XY\)</span> оно обозначается как <span class="math notranslate nohighlight">\(\Delta y\)</span>.</p>
+<p>Для функции <span class="math notranslate nohighlight">\(y = f(x)\)</span> приращение вычисляется по формуле:</p>
+<div class="math notranslate nohighlight">
+\[
+\Delta y = f(x + \Delta x) − f(x)
+\]</div>
+<p>Где:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(f(x)\)</span> — значение функции в исходной точке</p></li>
+<li><p><span class="math notranslate nohighlight">\(f(x + \Delta x)\)</span> — значение функции в точке, смещённой на <span class="math notranslate nohighlight">\(\Delta x\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\Delta x\)</span> — приращение аргумента</p></li>
+<li><p><span class="math notranslate nohighlight">\(\Delta y\)</span> — приращение функции</p></li>
+</ul>
+</section>
+<section id="id5">
+<h3>Скорость изменения функции<a class="headerlink" href="#id5" title="Ссылка на этот заголовок">#</a></h3>
+<p>Приращение аргумента и функции позволяет определить <strong>скорость изменения функции</strong>:</p>
+<ul class="simple">
+<li><p>Если <span class="math notranslate nohighlight">\(\Delta y &gt; 0\)</span> — велосипед ускоряется</p></li>
+<li><p>Если <span class="math notranslate nohighlight">\(\Delta y &lt; 0\)</span> — замедляется</p></li>
+<li><p>Если <span class="math notranslate nohighlight">\(\Delta y = 0\)</span> — движется с постоянной скоростью</p></li>
+</ul>
+<p>Скорость изменения вычисляется как отношение:</p>
+<div class="math notranslate nohighlight">
+\[
+\text{Скорость изменения} = \frac{\Delta y}{\Delta x}
+\]</div>
+<p><strong>Важно!</strong> Точность увеличивается при уменьшении <span class="math notranslate nohighlight">\(\Delta x\)</span>. Для максимальной точности нужно рассматривать малые значения <span class="math notranslate nohighlight">\(\Delta x\)</span>.</p>
+</section>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./Chapter-1"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="00-introduction.html"
+       title="предыдущая страница">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">назад</p>
+        <p class="prev-next-title">От функций к градиенту</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="01-math.html"
+       title="следующая страница">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">вперёд</p>
+        <p class="prev-next-title">Анализ и формализация понятия функции</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Содержание
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Функция и её график</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Анализ изменения скорости велосипеда</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Понятие приращения</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">Скорость изменения функции</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+По Verbasik
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

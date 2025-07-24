@@ -2,3 +2,12 @@ jupyter-book
 matplotlib
 numpy
 pydata-sphinx-theme<0.15.3
+marimo
+plotly
+seaborn
+scipy
+sympy
+scikit-learn
+ipywidgets
+celluloid
+pandas
