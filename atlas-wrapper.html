@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATLAS - Algorithm Templates for Live AI Scripts</title>
+    
+    <!-- External CSS Libraries -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts for Modern Typography & Scale AI Deep-tech -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Scale AI Theme -->
+    <link rel="stylesheet" href="web/css/scale-ai-theme.css">
+    <!-- Mobile Optimizations -->
+    <link rel="stylesheet" href="web/css/mobile-optimizations.css">
+    
+    <style>
+        /* Специальные стили для обертки ATLAS */
+        .atlas-container {
+            width: 100%;
+            height: calc(100vh - 160px); /* Высота минус шапка и подвал */
+            border: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .atlas-header {
+            background-color: var(--surface);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding: var(--spacing-2) 0;
+        }
+        
+        .atlas-header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-4);
+        }
+        
+        .back-link {
+            display: flex;
+            align-items: center;
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .back-link:hover {
+            opacity: 0.8;
+        }
+        
+        .back-link i {
+            margin-right: 8px;
+        }
+        
+        .atlas-title {
+            display: flex;
+            align-items: center;
+        }
+        
+        .atlas-title i {
+            background-image: var(--accent-grad);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-size: 24px;
+            margin-right: 12px;
+        }
+        
+        .atlas-title span {
+            font-size: 20px;
+            font-weight: 700;
+        }
+        
+        .atlas-footer {
+            background-color: var(--surface);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding: var(--spacing-2) 0;
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <header class="atlas-header">
+        <div class="atlas-header-content">
+            <a href="index.html" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+                Вернуться на главную
+            </a>
+            <div class="atlas-title">
+                <i class="fas fa-chart-line"></i>
+                <span>ATLAS: Algorithm Templates for Live AI Scripts</span>
+            </div>
+            <div></div> <!-- Пустой блок для выравнивания -->
+        </div>
+    </header>
+    
+    <main>
+        <iframe src="ATLAS/_build/html/index.html" class="atlas-container" title="ATLAS - Algorithm Templates for Live AI Scripts"></iframe>
+    </main>
+    
+    <footer class="atlas-footer">
+        <div>© 2025 The Weekly Research Brief. ATLAS - интерактивная визуализация алгоритмов машинного обучения.</div>
+    </footer>
+</body>
+</html> 
