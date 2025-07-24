@@ -16,3 +16,4 @@ parts:
   - caption: Глава 2. Предел функции
     chapters:
     - file: Chapter-1/02-limit
+    - file: Chapter-1/02-math
