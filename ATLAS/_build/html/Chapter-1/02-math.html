@@ -32,7 +32,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
@@ -455,12 +455,13 @@ document.write(`
 <section id="id4">
 <h3>2.2. Определение предела функции в точке по Гейне (на языке последовательностей)<a class="headerlink" href="#id4" title="Ссылка на этот заголовок">#</a></h3>
 <p>Этот подход связывает понятие предела функции с уже известным понятием предела числовой последовательности.</p>
-<p><strong>Определение 2 (по Гейне):</strong> Число <span class="math notranslate nohighlight">\(A\)</span> называется пределом функции <span class="math notranslate nohighlight">\(f(x)\)</span> в точке <span class="math notranslate nohighlight">\(a\)</span>, если для любой последовательности <span class="math notranslate nohighlight">\(\{x_n\}\)</span> такой, что <span class="math notranslate nohighlight">\(x_n \to a\)</span> при <span class="math notranslate nohighlight">\(n \to \infty\)</span> (и при этом <span class="math notranslate nohighlight">\(x_n \neq a\)</span> для всех <span class="math notranslate nohighlight">\(n\)</span>), соответствующая последовательность значений функции <span class="math notranslate nohighlight">\(\{f(x_n)\}\)</span> сходится к числу <span class="math notranslate nohighlight">\(A\)</span>.</p>
-<p>Символически:
-$<span class="math notranslate nohighlight">\(
+<p><strong>Определение 2 (по Гейне):</strong> число <span class="math notranslate nohighlight">\(A\)</span> называется пределом функции <span class="math notranslate nohighlight">\(f(x)\)</span> в точке <span class="math notranslate nohighlight">\(a\)</span>, если для любой последовательности <span class="math notranslate nohighlight">\(\{x_n\}\)</span> такой, что <span class="math notranslate nohighlight">\(x_n \to a\)</span> при <span class="math notranslate nohighlight">\(n \to \infty\)</span> (и при этом <span class="math notranslate nohighlight">\(x_n \neq a\)</span> для всех <span class="math notranslate nohighlight">\(n\)</span>), соответствующая последовательность значений функции <span class="math notranslate nohighlight">\(\{f(x_n)\}\)</span> сходится к числу <span class="math notranslate nohighlight">\(A\)</span>.</p>
+<p>Символически:</p>
+<div class="math notranslate nohighlight">
+\[
 \lim_{x \to a} f(x) = A \iff \forall \{x_n\}_{n=1}^\infty \ (x_n \to a, x_n \neq a) \implies \lim_{n \to \infty} f(x_n) = A
-\)</span>$</p>
-<p><strong>Эквивалентность определений:</strong> Теорема об эквивалентности определений по Коши и по Гейне является центральной в теории пределов. Она утверждает, что если предел существует в смысле одного определения, то он существует и в смысле другого, и их значения совпадают. Это позволяет в зависимости от задачи выбирать наиболее удобное определение для доказательства теорем или решения примеров.</p>
+\]</div>
+<p><strong>Эквивалентность определений:</strong> теорема об эквивалентности определений по Коши и по Гейне является центральной в теории пределов. Она утверждает, что если предел существует в смысле одного определения, то он существует и в смысле другого, и их значения совпадают. Это позволяет в зависимости от задачи выбирать наиболее удобное определение для доказательства теорем или решения примеров.</p>
 </section>
 </section>
 <section id="id5">
@@ -469,39 +470,41 @@ $<span class="math notranslate nohighlight">\(
 <section id="id6">
 <h3>3.1. Односторонние пределы<a class="headerlink" href="#id6" title="Ссылка на этот заголовок">#</a></h3>
 <ul class="simple">
-<li><p><strong>Предел слева:</strong> Число <span class="math notranslate nohighlight">\(A\)</span> называется пределом функции <span class="math notranslate nohighlight">\(f(x)\)</span> в точке <span class="math notranslate nohighlight">\(a\)</span> слева, если для любого <span class="math notranslate nohighlight">\(\varepsilon &gt; 0\)</span> найдётся такое <span class="math notranslate nohighlight">\(\delta &gt; 0\)</span>, что для всех <span class="math notranslate nohighlight">\(x\)</span> из интервала <span class="math notranslate nohighlight">\((a - \delta, a)\)</span> выполняется неравенство <span class="math notranslate nohighlight">\(|f(x) - A| &lt; \varepsilon\)</span>. Обозначается: $<span class="math notranslate nohighlight">\(\lim_{x \to a-} f(x)\)</span>$</p></li>
-<li><p><strong>Предел справа:</strong> Аналогично, для <span class="math notranslate nohighlight">\(x\)</span> из интервала <span class="math notranslate nohighlight">\((a, a + \delta)\)</span>. Обозначается: $<span class="math notranslate nohighlight">\(\lim_{x \to a+} f(x)\)</span>$</p></li>
+<li><p><strong>Предел слева:</strong> число <span class="math notranslate nohighlight">\(A\)</span> называется пределом функции <span class="math notranslate nohighlight">\(f(x)\)</span> в точке <span class="math notranslate nohighlight">\(a\)</span> слева, если для любого <span class="math notranslate nohighlight">\(\varepsilon &gt; 0\)</span> найдётся такое <span class="math notranslate nohighlight">\(\delta &gt; 0\)</span>, что для всех <span class="math notranslate nohighlight">\(x\)</span> из интервала <span class="math notranslate nohighlight">\((a - \delta, a)\)</span> выполняется неравенство <span class="math notranslate nohighlight">\(|f(x) - A| &lt; \varepsilon\)</span>. Обозначается: $<span class="math notranslate nohighlight">\(\lim_{x \to a-} f(x)\)</span>$</p></li>
+<li><p><strong>Предел справа:</strong> аналогично, для <span class="math notranslate nohighlight">\(x\)</span> из интервала <span class="math notranslate nohighlight">\((a, a + \delta)\)</span>. Обозначается: $<span class="math notranslate nohighlight">\(\lim_{x \to a+} f(x)\)</span>$</p></li>
 </ul>
-<p><strong>Критерий существования предела:</strong> Предел функции в точке <span class="math notranslate nohighlight">\(a\)</span> существует и равен <span class="math notranslate nohighlight">\(A\)</span> тогда и только тогда, когда существуют и равны друг другу оба односторонних предела, и их общее значение есть <span class="math notranslate nohighlight">\(A\)</span>.</p>
+<p><strong>Критерий существования предела:</strong> предел функции в точке <span class="math notranslate nohighlight">\(a\)</span> существует и равен <span class="math notranslate nohighlight">\(A\)</span> тогда и только тогда, когда существуют и равны друг другу оба односторонних предела, и их общее значение есть <span class="math notranslate nohighlight">\(A\)</span>.</p>
 </section>
 <section id="id7">
 <h3>3.2. Предел на бесконечности<a class="headerlink" href="#id7" title="Ссылка на этот заголовок">#</a></h3>
 <p>Это понятие формализует поведение функции при неограниченном возрастании (или убывании) аргумента.</p>
-<p><strong>Определение (по Коши):</strong> Число <span class="math notranslate nohighlight">\(A\)</span> называется пределом функции <span class="math notranslate nohighlight">\(f(x)\)</span> при <span class="math notranslate nohighlight">\(x \to +\infty\)</span>, если для любого <span class="math notranslate nohighlight">\(\varepsilon &gt; 0\)</span> найдётся такое число <span class="math notranslate nohighlight">\(M &gt; 0\)</span>, что для всех <span class="math notranslate nohighlight">\(x &gt; M\)</span> выполняется неравенство <span class="math notranslate nohighlight">\(|f(x) - A| &lt; \varepsilon\)</span>.
-$<span class="math notranslate nohighlight">\(\lim_{x \to +\infty} f(x) = A\)</span><span class="math notranslate nohighlight">\(
-Аналогично определяется предел при \)</span>x \to -\infty<span class="math notranslate nohighlight">\( (требуется \)</span>x &lt; -M$).</p>
+<p><strong>Определение (по Коши):</strong> число <span class="math notranslate nohighlight">\(A\)</span> называется пределом функции <span class="math notranslate nohighlight">\(f(x)\)</span> при <span class="math notranslate nohighlight">\(x \to +\infty\)</span>, если для любого <span class="math notranslate nohighlight">\(\varepsilon &gt; 0\)</span> найдётся такое число <span class="math notranslate nohighlight">\(M &gt; 0\)</span>, что для всех <span class="math notranslate nohighlight">\(x &gt; M\)</span> выполняется неравенство <span class="math notranslate nohighlight">\(|f(x) - A| &lt; \varepsilon\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[\lim_{x \to +\infty} f(x) = A\]</div>
+<p>Аналогично определяется предел при <span class="math notranslate nohighlight">\(x \to -\infty\)</span> (требуется <span class="math notranslate nohighlight">\(x &lt; -M\)</span>).</p>
 </section>
 <section id="id8">
 <h3>3.3. Бесконечные пределы<a class="headerlink" href="#id8" title="Ссылка на этот заголовок">#</a></h3>
 <p>Это случай, когда значения функции неограниченно возрастают (или убывают).</p>
-<p><strong>Определение (по Коши):</strong> Говорят, что предел функции <span class="math notranslate nohighlight">\(f(x)\)</span> в точке <span class="math notranslate nohighlight">\(a\)</span> равен <span class="math notranslate nohighlight">\(+\infty\)</span>, если для любого сколь угодно большого числа <span class="math notranslate nohighlight">\(E &gt; 0\)</span> найдётся такое <span class="math notranslate nohighlight">\(\delta &gt; 0\)</span>, что для всех <span class="math notranslate nohighlight">\(x\)</span>, удовлетворяющих условию <span class="math notranslate nohighlight">\(0 &lt; |x - a| &lt; \delta\)</span>, выполняется неравенство <span class="math notranslate nohighlight">\(f(x) &gt; E\)</span>.
-$<span class="math notranslate nohighlight">\(\lim_{x \to a} f(x) = +\infty\)</span><span class="math notranslate nohighlight">\(
-Аналогично определяются пределы, равные \)</span>-\infty<span class="math notranslate nohighlight">\( и \)</span>\infty$.</p>
+<p><strong>Определение (по Коши):</strong> говорят, что предел функции <span class="math notranslate nohighlight">\(f(x)\)</span> в точке <span class="math notranslate nohighlight">\(a\)</span> равен <span class="math notranslate nohighlight">\(+\infty\)</span>, если для любого сколь угодно большого числа <span class="math notranslate nohighlight">\(E &gt; 0\)</span> найдётся такое <span class="math notranslate nohighlight">\(\delta &gt; 0\)</span>, что для всех <span class="math notranslate nohighlight">\(x\)</span>, удовлетворяющих условию <span class="math notranslate nohighlight">\(0 &lt; |x - a| &lt; \delta\)</span>, выполняется неравенство <span class="math notranslate nohighlight">\(f(x) &gt; E\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[\lim_{x \to a} f(x) = +\infty\]</div>
+<p>Аналогично определяются пределы, равные <span class="math notranslate nohighlight">\(-\infty\)</span> и <span class="math notranslate nohighlight">\(\infty\)</span>.</p>
 </section>
 </section>
 <section id="id9">
 <h2>4. Основные теоремы о пределах<a class="headerlink" href="#id9" title="Ссылка на этот заголовок">#</a></h2>
 <p>На основе формальных определений доказывается ряд фундаментальных свойств пределов, которые являются рабочим инструментом для их вычисления.</p>
 <ul class="simple">
-<li><p><strong>Теорема о единственности предела:</strong> Если предел функции в точке существует, то он единственен.</p></li>
-<li><p><strong>Арифметические свойства:</strong> Если существуют <span class="math notranslate nohighlight">\(\lim_{x \to a} f(x) = A\)</span> и <span class="math notranslate nohighlight">\(\lim_{x \to a} g(x) = B\)</span>, то:</p>
+<li><p><strong>Теорема о единственности предела:</strong> если предел функции в точке существует, то он единственен.</p></li>
+<li><p><strong>Арифметические свойства:</strong> если существуют <span class="math notranslate nohighlight">\(\lim_{x \to a} f(x) = A\)</span> и <span class="math notranslate nohighlight">\(\lim_{x \to a} g(x) = B\)</span>, то:</p>
 <ul>
 <li><p><span class="math notranslate nohighlight">\(\lim_{x \to a} (f(x) \pm g(x)) = A \pm B\)</span></p></li>
 <li><p><span class="math notranslate nohighlight">\(\lim_{x \to a} (f(x) \cdot g(x)) = A \cdot B\)</span></p></li>
 <li><p><span class="math notranslate nohighlight">\(\lim_{x \to a} \frac{f(x)}{g(x)} = \frac{A}{B}\)</span> (при условии, что <span class="math notranslate nohighlight">\(B \neq 0\)</span>).</p></li>
 </ul>
 </li>
-<li><p><strong>Теорема о «двух милиционерах» (Squeeze Theorem):</strong> Если в некоторой проколотой окрестности точки <span class="math notranslate nohighlight">\(a\)</span> выполняются неравенства <span class="math notranslate nohighlight">\(g(x) \leq f(x) \leq h(x)\)</span>, и при этом <span class="math notranslate nohighlight">\(\lim_{x \to a} g(x) = \lim_{x \to a} h(x) = A\)</span>, то <span class="math notranslate nohighlight">\(\lim_{x \to a} f(x) = A\)</span>. Эта теорема чрезвычайно важна для вычисления пределов тригонометрических и других сложных функций.</p></li>
+<li><p><strong>Теорема о «двух милиционерах» (Squeeze Theorem):</strong> если в некоторой проколотой окрестности точки <span class="math notranslate nohighlight">\(a\)</span> выполняются неравенства <span class="math notranslate nohighlight">\(g(x) \leq f(x) \leq h(x)\)</span>, и при этом <span class="math notranslate nohighlight">\(\lim_{x \to a} g(x) = \lim_{x \to a} h(x) = A\)</span>, то <span class="math notranslate nohighlight">\(\lim_{x \to a} f(x) = A\)</span>. Эта теорема чрезвычайно важна для вычисления пределов тригонометрических и других сложных функций.</p></li>
 </ul>
 </section>
 <section id="id10">
