@@ -1,0 +1,651 @@
+
+<!DOCTYPE html>
+
+
+<html lang="ru" data-content_root="../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Анализ и формализация понятия предела функции &#8212; ATLAS</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="../_static/documentation_options.js?v=576a2c22"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script src="../_static/translations.js?v=9bfe3ffa"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-9S2CQ3B60T"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-9S2CQ3B60T');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-9S2CQ3B60T');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'Chapter-1/02-math';</script>
+    <link rel="index" title="Алфавитный указатель" href="../genindex.html" />
+    <link rel="search" title="Поиск" href="../search.html" />
+    <link rel="prev" title="Предел функции — финишная прямая" href="02-limit.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="ru"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Перейти к основному содержанию</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">ATLAS</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Поиск" aria-label="Поиск" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Поиск</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../index.html">
+                    🚀 Что такое ATLAS?
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Введение</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="00-introduction.html">От функций к градиенту</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Глава 1. Функция — отправная точка</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="01-functions.html">Функция - начало</a></li>
+<li class="toctree-l1"><a class="reference internal" href="01-math.html">Анализ и формализация понятия функции</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Глава 2. Предел функции</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="02-limit.html">Предел функции — финишная прямая</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Анализ и формализация понятия предела функции</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Исходный репозиторий"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/issues/new?title=Issue%20on%20page%20%2FChapter-1/02-math.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Открыть вопрос"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Загрузите эту страницу">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/Chapter-1/02-math.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Скачать исходный файл"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Распечатать в PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Полноэкранный режим"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="светлая/темная" aria-label="светлая/темная" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Поиск" aria-label="Поиск" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Анализ и формализация понятия предела функции</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Содержание </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">1. Интуитивное представление и исторический контекст</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">2. Формализация: два эквивалентных подхода</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#varepsilon-delta">2.1. Определение предела функции в точке по Коши (на языке <span class="math notranslate nohighlight">\(\varepsilon\)</span>-<span class="math notranslate nohighlight">\(\delta\)</span>)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">2.2. Определение предела функции в точке по Гейне (на языке последовательностей)</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">3. Расширение понятия предела</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">3.1. Односторонние пределы</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">3.2. Предел на бесконечности</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">3.3. Бесконечные пределы</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">4. Основные теоремы о пределах</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">Заключение</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="id1">
+<h1>Анализ и формализация понятия предела функции<a class="headerlink" href="#id1" title="Ссылка на этот заголовок">#</a></h1>
+<p>Понятие предела функции является фундаментальным камнем, на котором строятся здания дифференциального и интегрального исчислений, а также многих других разделов современного математического анализа. Его формализация, прошедшая долгий путь от интуитивных представлений до строгого определения, стала одним из величайших достижений математики XIX века.</p>
+<section id="id2">
+<h2>1. Интуитивное представление и исторический контекст<a class="headerlink" href="#id2" title="Ссылка на этот заголовок">#</a></h2>
+<p>Идея предельного перехода неявно присутствовала в работах античных математиков, например, в методе исчерпывания Архимеда. Однако в современном понимании она начала формироваться в трудах Исаака Ньютона и Готфрида Лейбница при создании основ дифференциального и интегрального исчислений в <span class="math notranslate nohighlight">\(XVII\)</span> веке. Они оперировали понятием «бесконечно малых величин», что было интуитивно понятно, но не имело строгого логического обоснования и приводило к парадоксам.</p>
+<p>Потребность в строгом определении предела стала очевидной в <span class="math notranslate nohighlight">\(XIX\)</span> веке, когда математики столкнулись с функциями, ведущими себя «патологически» (например, разрывными во всех точках). Решающий вклад в формализацию этого понятия внесли Огюстен Луи Коши и Карл Вейерштрасс.</p>
+</section>
+<section id="id3">
+<h2>2. Формализация: два эквивалентных подхода<a class="headerlink" href="#id3" title="Ссылка на этот заголовок">#</a></h2>
+<p>Существуют два канонических и эквивалентных друг другу определения предела функции в точке: определение на языке «эпсилон-дельта» (по Коши) и определение на языке последовательностей (по Гейне).</p>
+<section id="varepsilon-delta">
+<h3>2.1. Определение предела функции в точке по Коши (на языке <span class="math notranslate nohighlight">\(\varepsilon\)</span>-<span class="math notranslate nohighlight">\(\delta\)</span>)<a class="headerlink" href="#varepsilon-delta" title="Ссылка на этот заголовок">#</a></h3>
+<p>Это определение является наиболее распространённым и фундаментальным. Оно строго формулирует идею о том, что значения функции <span class="math notranslate nohighlight">\(f(x)\)</span> могут быть сколь угодно близки к числу <span class="math notranslate nohighlight">\(A\)</span>, если значения аргумента <span class="math notranslate nohighlight">\(x\)</span> достаточно близки к точке <span class="math notranslate nohighlight">\(a\)</span>.</p>
+<p><strong>Определение 1 (по Коши):</strong> число <span class="math notranslate nohighlight">\(A\)</span> называется пределом функции <span class="math notranslate nohighlight">\(f(x)\)</span> в точке <span class="math notranslate nohighlight">\(a\)</span> (или при <span class="math notranslate nohighlight">\(x \to a\)</span>), если для любого сколь угодно малого положительного числа <span class="math notranslate nohighlight">\(\varepsilon\)</span> (эпсилон) найдётся такое положительное число <span class="math notranslate nohighlight">\(\delta\)</span> (дельта), зависящее от <span class="math notranslate nohighlight">\(\varepsilon\)</span>, что для всех <span class="math notranslate nohighlight">\(x\)</span>, удовлетворяющих условию <span class="math notranslate nohighlight">\(0 &lt; |x - a| &lt; \delta\)</span>, выполняется неравенство <span class="math notranslate nohighlight">\(|f(x) - A| &lt; \varepsilon\)</span>.</p>
+<p>Символически это записывается так:</p>
+<div class="math notranslate nohighlight">
+\[
+\lim_{x \to a} f(x) = A \iff \forall \varepsilon &gt; 0 \ \exists \delta(\varepsilon) &gt; 0 \ : \ \forall x \ (0 &lt; |x - a| &lt; \delta \implies |f(x) - A| &lt; \varepsilon)
+\]</div>
+<p><strong>Пояснение ключевых моментов:</strong></p>
+<ul class="simple">
+<li><p><strong><span class="math notranslate nohighlight">\(\forall \varepsilon &gt; 0\)</span>:</strong> мы должны уметь обеспечивать <em>любую</em> степень близости <span class="math notranslate nohighlight">\(f(x)\)</span> к <span class="math notranslate nohighlight">\(A\)</span>. Эпсилон задаёт «коридор» <span class="math notranslate nohighlight">\((A - \varepsilon, A + \varepsilon)\)</span> вокруг предельного значения <span class="math notranslate nohighlight">\(A\)</span>.</p></li>
+<li><p><strong><span class="math notranslate nohighlight">\(\exists \delta &gt; 0\)</span>:</strong> наша задача — найти такой «коридор» <span class="math notranslate nohighlight">\((a - \delta, a + \delta)\)</span> вокруг точки <span class="math notranslate nohighlight">\(a\)</span>, чтобы для любого <span class="math notranslate nohighlight">\(x\)</span> из этого коридора (кроме, возможно, самой точки <span class="math notranslate nohighlight">\(a\)</span>), его образ <span class="math notranslate nohighlight">\(f(x)\)</span> попадал в заданный <span class="math notranslate nohighlight">\(\varepsilon\)</span>-коридор.</p></li>
+<li><p><strong><span class="math notranslate nohighlight">\(0 &lt; |x - a|\)</span>:</strong> это условие подчёркивает, что мы рассматриваем поведение функции в <em>окрестности</em> точки <span class="math notranslate nohighlight">\(a\)</span>, но не в самой точке <span class="math notranslate nohighlight">\(a\)</span>. Значение функции <span class="math notranslate nohighlight">\(f(a)\)</span> может быть не определено или не совпадать с пределом.</p></li>
+</ul>
+<p><strong>Пример:</strong> докажем по определению, что <span class="math notranslate nohighlight">\(\lim_{x \to 2} (3x + 1) = 7\)</span>.</p>
+<ul class="simple">
+<li><p>Зафиксируем произвольное <span class="math notranslate nohighlight">\(\varepsilon &gt; 0\)</span>. Наша цель — найти такое <span class="math notranslate nohighlight">\(\delta &gt; 0\)</span>, чтобы из <span class="math notranslate nohighlight">\(0 &lt; |x - 2| &lt; \delta\)</span> следовало <span class="math notranslate nohighlight">\(|(3x + 1) - 7| &lt; \varepsilon\)</span>.</p></li>
+<li><p>Преобразуем последнее неравенство: <span class="math notranslate nohighlight">\(|3x - 6| &lt; \varepsilon \iff 3|x - 2| &lt; \varepsilon \iff |x - 2| &lt; \varepsilon/3\)</span>.</p></li>
+<li><p>Таким образом, если мы выберем <span class="math notranslate nohighlight">\(\delta = \varepsilon/3\)</span>, то для всех <span class="math notranslate nohighlight">\(x\)</span>, удовлетворяющих условию <span class="math notranslate nohighlight">\(|x - 2| &lt; \delta\)</span>, будет выполняться <span class="math notranslate nohighlight">\(|x - 2| &lt; \varepsilon/3\)</span>, что эквивалентно <span class="math notranslate nohighlight">\(|(3x + 1) - 7| &lt; \varepsilon\)</span>.</p></li>
+<li><p>Следовательно, по определению Коши, предел равен <span class="math notranslate nohighlight">\(7\)</span>.</p></li>
+</ul>
+</section>
+<section id="id4">
+<h3>2.2. Определение предела функции в точке по Гейне (на языке последовательностей)<a class="headerlink" href="#id4" title="Ссылка на этот заголовок">#</a></h3>
+<p>Этот подход связывает понятие предела функции с уже известным понятием предела числовой последовательности.</p>
+<p><strong>Определение 2 (по Гейне):</strong> число <span class="math notranslate nohighlight">\(A\)</span> называется пределом функции <span class="math notranslate nohighlight">\(f(x)\)</span> в точке <span class="math notranslate nohighlight">\(a\)</span>, если для любой последовательности <span class="math notranslate nohighlight">\(\{x_n\}\)</span> такой, что <span class="math notranslate nohighlight">\(x_n \to a\)</span> при <span class="math notranslate nohighlight">\(n \to \infty\)</span> (и при этом <span class="math notranslate nohighlight">\(x_n \neq a\)</span> для всех <span class="math notranslate nohighlight">\(n\)</span>), соответствующая последовательность значений функции <span class="math notranslate nohighlight">\(\{f(x_n)\}\)</span> сходится к числу <span class="math notranslate nohighlight">\(A\)</span>.</p>
+<p>Символически:</p>
+<div class="math notranslate nohighlight">
+\[
+\lim_{x \to a} f(x) = A \iff \forall \{x_n\}_{n=1}^\infty \ (x_n \to a, x_n \neq a) \implies \lim_{n \to \infty} f(x_n) = A
+\]</div>
+<p><strong>Эквивалентность определений:</strong> теорема об эквивалентности определений по Коши и по Гейне является центральной в теории пределов. Она утверждает, что если предел существует в смысле одного определения, то он существует и в смысле другого, и их значения совпадают. Это позволяет в зависимости от задачи выбирать наиболее удобное определение для доказательства теорем или решения примеров.</p>
+<blockquote>
+<div><p>Для просмотра видео включите VPN</p>
+</div></blockquote>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTML</span>
+
+<span class="n">video_url</span> <span class="o">=</span> <span class="s2">&quot;https://www.youtube.com/embed/gCyRR20hcew?list=PLZjXXN70PH5ilxFCrbVJyNofV0_yC2IgH&quot;</span>
+<span class="n">HTML</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&lt;iframe width=&quot;560&quot; height=&quot;315&quot; src=&quot;</span><span class="si">{</span><span class="n">video_url</span><span class="si">}</span><span class="s1">&quot; frameborder=&quot;0&quot; allowfullscreen&gt;&lt;/iframe&gt;&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/me/Library/Python/3.9/lib/python/site-packages/IPython/core/display.py:431: UserWarning: Consider using IPython.display.IFrame instead
+  warnings.warn(&quot;Consider using IPython.display.IFrame instead&quot;)
+</pre></div>
+</div>
+<div class="output text_html"><iframe width="560" height="315" src="https://www.youtube.com/embed/gCyRR20hcew?list=PLZjXXN70PH5ilxFCrbVJyNofV0_yC2IgH" frameborder="0" allowfullscreen></iframe></div></div>
+</div>
+</section>
+</section>
+<section id="id5">
+<h2>3. Расширение понятия предела<a class="headerlink" href="#id5" title="Ссылка на этот заголовок">#</a></h2>
+<p>Определения Коши и Гейне обобщаются на другие случаи.</p>
+<section id="id6">
+<h3>3.1. Односторонние пределы<a class="headerlink" href="#id6" title="Ссылка на этот заголовок">#</a></h3>
+<ul class="simple">
+<li><p><strong>Предел слева:</strong> число <span class="math notranslate nohighlight">\(A\)</span> называется пределом функции <span class="math notranslate nohighlight">\(f(x)\)</span> в точке <span class="math notranslate nohighlight">\(a\)</span> слева, если для любого <span class="math notranslate nohighlight">\(\varepsilon &gt; 0\)</span> найдётся такое <span class="math notranslate nohighlight">\(\delta &gt; 0\)</span>, что для всех <span class="math notranslate nohighlight">\(x\)</span> из интервала <span class="math notranslate nohighlight">\((a - \delta, a)\)</span> выполняется неравенство <span class="math notranslate nohighlight">\(|f(x) - A| &lt; \varepsilon\)</span>. Обозначается: <span class="math notranslate nohighlight">\(\lim_{x \to a-} f(x)\)</span></p></li>
+<li><p><strong>Предел справа:</strong> аналогично, для <span class="math notranslate nohighlight">\(x\)</span> из интервала <span class="math notranslate nohighlight">\((a, a + \delta)\)</span>. Обозначается: <span class="math notranslate nohighlight">\(\lim_{x \to a+} f(x)\)</span></p></li>
+</ul>
+<p><strong>Критерий существования предела:</strong> предел функции в точке <span class="math notranslate nohighlight">\(a\)</span> существует и равен <span class="math notranslate nohighlight">\(A\)</span> тогда и только тогда, когда существуют и равны друг другу оба односторонних предела, и их общее значение есть <span class="math notranslate nohighlight">\(A\)</span>.</p>
+</section>
+<section id="id7">
+<h3>3.2. Предел на бесконечности<a class="headerlink" href="#id7" title="Ссылка на этот заголовок">#</a></h3>
+<p>Это понятие формализует поведение функции при неограниченном возрастании (или убывании) аргумента.</p>
+<p><strong>Определение (по Коши):</strong> число <span class="math notranslate nohighlight">\(A\)</span> называется пределом функции <span class="math notranslate nohighlight">\(f(x)\)</span> при <span class="math notranslate nohighlight">\(x \to +\infty\)</span>, если для любого <span class="math notranslate nohighlight">\(\varepsilon &gt; 0\)</span> найдётся такое число <span class="math notranslate nohighlight">\(M &gt; 0\)</span>, что для всех <span class="math notranslate nohighlight">\(x &gt; M\)</span> выполняется неравенство <span class="math notranslate nohighlight">\(|f(x) - A| &lt; \varepsilon\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[\lim_{x \to +\infty} f(x) = A\]</div>
+<p>Аналогично определяется предел при <span class="math notranslate nohighlight">\(x \to -\infty\)</span> (требуется <span class="math notranslate nohighlight">\(x &lt; -M\)</span>).</p>
+</section>
+<section id="id8">
+<h3>3.3. Бесконечные пределы<a class="headerlink" href="#id8" title="Ссылка на этот заголовок">#</a></h3>
+<p>Это случай, когда значения функции неограниченно возрастают (или убывают).</p>
+<p><strong>Определение (по Коши):</strong> говорят, что предел функции <span class="math notranslate nohighlight">\(f(x)\)</span> в точке <span class="math notranslate nohighlight">\(a\)</span> равен <span class="math notranslate nohighlight">\(+\infty\)</span>, если для любого сколь угодно большого числа <span class="math notranslate nohighlight">\(E &gt; 0\)</span> найдётся такое <span class="math notranslate nohighlight">\(\delta &gt; 0\)</span>, что для всех <span class="math notranslate nohighlight">\(x\)</span>, удовлетворяющих условию <span class="math notranslate nohighlight">\(0 &lt; |x - a| &lt; \delta\)</span>, выполняется неравенство <span class="math notranslate nohighlight">\(f(x) &gt; E\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[\lim_{x \to a} f(x) = +\infty\]</div>
+<p>Аналогично определяются пределы, равные <span class="math notranslate nohighlight">\(-\infty\)</span> и <span class="math notranslate nohighlight">\(\infty\)</span>.</p>
+</section>
+</section>
+<section id="id9">
+<h2>4. Основные теоремы о пределах<a class="headerlink" href="#id9" title="Ссылка на этот заголовок">#</a></h2>
+<p>На основе формальных определений доказывается ряд фундаментальных свойств пределов, которые являются рабочим инструментом для их вычисления.</p>
+<ul class="simple">
+<li><p><strong>Теорема о единственности предела:</strong> если предел функции в точке существует, то он единственен.</p></li>
+<li><p><strong>Арифметические свойства:</strong> если существуют <span class="math notranslate nohighlight">\(\lim_{x \to a} f(x) = A\)</span> и <span class="math notranslate nohighlight">\(\lim_{x \to a} g(x) = B\)</span>, то:</p>
+<ul>
+<li><p><span class="math notranslate nohighlight">\(\lim_{x \to a} (f(x) \pm g(x)) = A \pm B\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\lim_{x \to a} (f(x) \cdot g(x)) = A \cdot B\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(\lim_{x \to a} \frac{f(x)}{g(x)} = \frac{A}{B}\)</span> (при условии, что <span class="math notranslate nohighlight">\(B \neq 0\)</span>).</p></li>
+</ul>
+</li>
+<li><p><strong>Теорема о «двух милиционерах» (Squeeze Theorem):</strong> если в некоторой проколотой окрестности точки <span class="math notranslate nohighlight">\(a\)</span> выполняются неравенства <span class="math notranslate nohighlight">\(g(x) \leq f(x) \leq h(x)\)</span>, и при этом <span class="math notranslate nohighlight">\(\lim_{x \to a} g(x) = \lim_{x \to a} h(x) = A\)</span>, то <span class="math notranslate nohighlight">\(\lim_{x \to a} f(x) = A\)</span>. Эта теорема чрезвычайно важна для вычисления пределов тригонометрических и других сложных функций.</p></li>
+</ul>
+</section>
+<section id="id10">
+<h2>Заключение<a class="headerlink" href="#id10" title="Ссылка на этот заголовок">#</a></h2>
+<p>Формализация понятия предела функции, выполненная Коши и Вейерштрассом, стала переломным моментом в истории математики. Она не только обеспечила строгую логическую базу для дифференциального и интегрального исчислений, но и открыла путь к развитию таких областей, как теория функций, функциональный анализ и топология. Определение на языке «<span class="math notranslate nohighlight">\(\varepsilon\)</span>-<span class="math notranslate nohighlight">\(\delta\)</span>» является квинтэссенцией математической строгости, требующей глубокого понимания кванторов всеобщности и существования, и служит эталоном для построения других фундаментальных понятий в математическом анализе.</p>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./Chapter-1"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="02-limit.html"
+       title="предыдущая страница">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">назад</p>
+        <p class="prev-next-title">Предел функции — финишная прямая</p>
+      </div>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Содержание
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">1. Интуитивное представление и исторический контекст</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">2. Формализация: два эквивалентных подхода</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#varepsilon-delta">2.1. Определение предела функции в точке по Коши (на языке <span class="math notranslate nohighlight">\(\varepsilon\)</span>-<span class="math notranslate nohighlight">\(\delta\)</span>)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">2.2. Определение предела функции в точке по Гейне (на языке последовательностей)</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">3. Расширение понятия предела</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">3.1. Односторонние пределы</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">3.2. Предел на бесконечности</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">3.3. Бесконечные пределы</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">4. Основные теоремы о пределах</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">Заключение</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+По Verbasik
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

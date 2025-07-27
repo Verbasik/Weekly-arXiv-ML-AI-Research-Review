@@ -253,6 +253,17 @@
             "papers": 1,
             "notebooks": 0,
             "code": 0
+          },
+          {
+            "week": "week-30",
+            "title": "Week 30: ATLAS",
+            "date": "July 21-July 27, 2025",
+            "tags": ["ATLAS", "Math", "ML", "AI"],
+            "description": "ATLAS: готовы пройти путь от математического фундамента к градиентному спуску?",
+            "papers": 0,
+            "notebooks": 1,
+            "code": 0,
+            "notebook_path": "2025/week-30/review.md"
           }
         ]
       },
