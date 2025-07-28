@@ -17,3 +17,7 @@ parts:
     chapters:
     - file: Chapter-1/02-limit
     - file: Chapter-1/02-math
+
+  - caption: Глава 3. Производная
+    chapters:
+    - file: Chapter-1/03-derivative

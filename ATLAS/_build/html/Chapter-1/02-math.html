@@ -32,7 +32,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
@@ -76,6 +76,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'Chapter-1/02-math';</script>
     <link rel="index" title="Алфавитный указатель" href="../genindex.html" />
     <link rel="search" title="Поиск" href="../search.html" />
+    <link rel="next" title="Производная — узнаём скорость в любой момент" href="03-derivative.html" />
     <link rel="prev" title="Предел функции — финишная прямая" href="02-limit.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="ru"/>
@@ -198,6 +199,10 @@
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="02-limit.html">Предел функции — финишная прямая</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Анализ и формализация понятия предела функции</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Глава 3. Производная</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="03-derivative.html">Производная — узнаём скорость в любой момент</a></li>
 </ul>
 
     </div>
@@ -470,16 +475,16 @@ document.write(`
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTML</span>
 
 <span class="n">video_url</span> <span class="o">=</span> <span class="s2">&quot;https://www.youtube.com/embed/gCyRR20hcew?list=PLZjXXN70PH5ilxFCrbVJyNofV0_yC2IgH&quot;</span>
-<span class="n">HTML</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&lt;iframe width=&quot;560&quot; height=&quot;315&quot; src=&quot;</span><span class="si">{</span><span class="n">video_url</span><span class="si">}</span><span class="s1">&quot; frameborder=&quot;0&quot; allowfullscreen&gt;&lt;/iframe&gt;&#39;</span><span class="p">)</span>
+<span class="n">HTML</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&lt;iframe width=&quot;720&quot; height=&quot;315&quot; src=&quot;</span><span class="si">{</span><span class="n">video_url</span><span class="si">}</span><span class="s1">&quot; frameborder=&quot;0&quot; allowfullscreen&gt;&lt;/iframe&gt;&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/me/Library/Python/3.9/lib/python/site-packages/IPython/core/display.py:431: UserWarning: Consider using IPython.display.IFrame instead
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/me/Documents/TWRB/ATLAS/venv/lib/python3.9/site-packages/IPython/core/display.py:431: UserWarning: Consider using IPython.display.IFrame instead
   warnings.warn(&quot;Consider using IPython.display.IFrame instead&quot;)
 </pre></div>
 </div>
-<div class="output text_html"><iframe width="560" height="315" src="https://www.youtube.com/embed/gCyRR20hcew?list=PLZjXXN70PH5ilxFCrbVJyNofV0_yC2IgH" frameborder="0" allowfullscreen></iframe></div></div>
+<div class="output text_html"><iframe width="720" height="315" src="https://www.youtube.com/embed/gCyRR20hcew?list=PLZjXXN70PH5ilxFCrbVJyNofV0_yC2IgH" frameborder="0" allowfullscreen></iframe></div></div>
 </div>
 </section>
 </section>
@@ -570,6 +575,15 @@ document.write(`
         <p class="prev-next-subtitle">назад</p>
         <p class="prev-next-title">Предел функции — финишная прямая</p>
       </div>
+    </a>
+    <a class="right-next"
+       href="03-derivative.html"
+       title="следующая страница">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">вперёд</p>
+        <p class="prev-next-title">Производная — узнаём скорость в любой момент</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
     </a>
 </div>
                 </footer>
