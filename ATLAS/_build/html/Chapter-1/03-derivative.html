@@ -32,7 +32,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
@@ -76,6 +76,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'Chapter-1/03-derivative';</script>
     <link rel="index" title="Алфавитный указатель" href="../genindex.html" />
     <link rel="search" title="Поиск" href="../search.html" />
+    <link rel="next" title="Анализ и формализация понятия производной" href="03-math.html" />
     <link rel="prev" title="Анализ и формализация понятия предела функции" href="02-math.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="ru"/>
@@ -202,6 +203,7 @@
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Глава 3. Производная</span></p>
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Производная — узнаём скорость в любой момент</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03-math.html">Анализ и формализация понятия производной</a></li>
 </ul>
 
     </div>
@@ -428,7 +430,25 @@ document.write(`
 </ul>
 <p>Линия, которая соединяет <strong>A</strong> и <strong>B</strong> (секущая), почти перестает пересекать график, она почти просто <em>касается</em> его в одной точке.</p>
 <p>Этот процесс «бесконечного приближения» вам уже знаком — это <strong>предел</strong>! Мы заставляем промежуток времени <span class="math notranslate nohighlight">\(\Delta x\)</span> стремиться к нулю, чтобы поймать то самое значение скорости в одно-единственное мгновение.</p>
-<p>![Анимированный пример](<video src="https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/ATLAS/video/Derivative.mp4" title="Анимированный пример"><a href="https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/ATLAS/video/Derivative.mp4">Анимированный пример</a></video>)</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">display</span><span class="p">,</span> <span class="n">IFrame</span>
+<span class="n">display</span><span class="p">(</span><span class="n">IFrame</span><span class="p">(</span><span class="n">src</span><span class="o">=</span><span class="s2">&quot;https://rutube.ru/play/embed/e137062a3f0c33bdbed6bf0ebfe75a59&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">840</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">315</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html">
+        <iframe
+            width="840"
+            height="315"
+            src="https://rutube.ru/play/embed/e137062a3f0c33bdbed6bf0ebfe75a59"
+            frameborder="0"
+            allowfullscreen
+            
+        ></iframe>
+        </div></div>
+</div>
 </section>
 <section id="id3">
 <h2>Что такое производная? Проще некуда!<a class="headerlink" href="#id3" title="Ссылка на этот заголовок">#</a></h2>
@@ -469,7 +489,7 @@ document.write(`
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/me/Documents/TWRB/ATLAS/venv/lib/python3.9/site-packages/IPython/core/display.py:431: UserWarning: Consider using IPython.display.IFrame instead
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/Users/me/Library/Python/3.9/lib/python/site-packages/IPython/core/display.py:431: UserWarning: Consider using IPython.display.IFrame instead
   warnings.warn(&quot;Consider using IPython.display.IFrame instead&quot;)
 </pre></div>
 </div>
@@ -516,6 +536,15 @@ document.write(`
         <p class="prev-next-subtitle">назад</p>
         <p class="prev-next-title">Анализ и формализация понятия предела функции</p>
       </div>
+    </a>
+    <a class="right-next"
+       href="03-math.html"
+       title="следующая страница">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">вперёд</p>
+        <p class="prev-next-title">Анализ и формализация понятия производной</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
     </a>
 </div>
                 </footer>
