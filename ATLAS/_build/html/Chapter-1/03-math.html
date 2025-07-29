@@ -436,10 +436,11 @@ document.write(`
 <p>2.1. Предел функции в точке и на бесконечности:<br />
 Предел функции в точке — это значение, к которому стремится функция по мере приближения аргумента к некоторому значению. Обозначается как <span class="math notranslate nohighlight">\(\lim\limits_{x \to x_0} f(x) = L\)</span>. Для непрерывной функции предел в любой точке совпадает со значением функции в этой точке.</p>
 <p>2.2. Производная функции:<br />
-Производная функции <span class="math notranslate nohighlight">\(f(x)\)</span> в точке <span class="math notranslate nohighlight">\(x_0\)</span> — это предел отношения приращения функции к приращению аргумента при стремлении приращения аргумента к нулю:<br />
-$<span class="math notranslate nohighlight">\(
+Производная функции <span class="math notranslate nohighlight">\(f(x)\)</span> в точке <span class="math notranslate nohighlight">\(x_0\)</span> — это предел отношения приращения функции к приращению аргумента при стремлении приращения аргумента к нулю:</p>
+<div class="math notranslate nohighlight">
+\[
 f'(x_0) = \lim\limits_{\Delta x \to 0} \frac{f(x_0 + \Delta x) - f(x_0)}{\Delta x}
-\)</span>$</p>
+\]</div>
 </section>
 <section id="id4">
 <h2>3. Математическая формализация<a class="headerlink" href="#id4" title="Ссылка на этот заголовок">#</a></h2>
@@ -453,24 +454,28 @@ f'(x_0) = \lim\limits_{\Delta x \to 0} \frac{\Delta y}{\Delta x} = \lim\limits_{
 <section id="id5">
 <h2>4. Нахождение касательной к графику функции и расчет углового коэффициента<a class="headerlink" href="#id5" title="Ссылка на этот заголовок">#</a></h2>
 <p>4.1. Уравнение касательной:<br />
-Уравнение касательной к графику функции <span class="math notranslate nohighlight">\(y = f(x)\)</span> в точке <span class="math notranslate nohighlight">\(x_0\)</span> можно записать в следующем виде:<br />
-$<span class="math notranslate nohighlight">\(
+Уравнение касательной к графику функции <span class="math notranslate nohighlight">\(y = f(x)\)</span> в точке <span class="math notranslate nohighlight">\(x_0\)</span> можно записать в следующем виде:</p>
+<div class="math notranslate nohighlight">
+\[
 y = f(x_0) + f'(x_0)(x - x_0)
-\)</span><span class="math notranslate nohighlight">\(  
-где \)</span>f(x_0)<span class="math notranslate nohighlight">\( — значение функции в точке \)</span>x_0<span class="math notranslate nohighlight">\(, а \)</span>f“(x_0)<span class="math notranslate nohighlight">\( — значение производной функции в точке \)</span>x_0$.</p>
+\]</div>
+<p>где <span class="math notranslate nohighlight">\(f(x_0)\)</span> — значение функции в точке <span class="math notranslate nohighlight">\(x_0\)</span>, а <span class="math notranslate nohighlight">\(f'(x_0)\)</span> — значение производной функции в точке <span class="math notranslate nohighlight">\(x_0\)</span>.</p>
 <p>4.2. Пример расчета:<br />
 Рассмотрим функцию <span class="math notranslate nohighlight">\(f(x) = x^2\)</span>. Найдем уравнение касательной в точке <span class="math notranslate nohighlight">\(x_0 = 1\)</span>.</p>
-<ul class="simple">
+<ul>
 <li><p>Находим значение функции в этой точке: <span class="math notranslate nohighlight">\(f(1) = 1^2 = 1\)</span>.</p></li>
 <li><p>Находим производную функции: <span class="math notranslate nohighlight">\(f'(x) = 2x\)</span>, следовательно, <span class="math notranslate nohighlight">\(f'(1) = 2 \cdot 1 = 2\)</span>.</p></li>
-<li><p>Подставляем значения в уравнение касательной:<br />
-$<span class="math notranslate nohighlight">\(
-y = 1 + 2(x - 1)
-\)</span><span class="math notranslate nohighlight">\(  
-Таким образом, уравнение касательной имеет вид:  
-\)</span><span class="math notranslate nohighlight">\(
-y = 2x - 1
-\)</span>$</p></li>
+<li><p>Подставляем значения в уравнение касательной:</p>
+<div class="math notranslate nohighlight">
+\[
+  y = 1 + 2(x - 1)
+  \]</div>
+<p>Таким образом, уравнение касательной имеет вид:</p>
+<div class="math notranslate nohighlight">
+\[
+  y = 2x - 1
+  \]</div>
+</li>
 </ul>
 </section>
 <section id="id6">
@@ -492,16 +497,18 @@ y = 2x - 1
 <h2>6. Пример из физики<a class="headerlink" href="#id7" title="Ссылка на этот заголовок">#</a></h2>
 <p>Рассмотрим движение автомобиля по прямой линии. Пусть координата автомобиля в момент времени <span class="math notranslate nohighlight">\(t\)</span> задаётся функцией <span class="math notranslate nohighlight">\(s(t) = 5t^2 + 2t + 1\)</span>, где <span class="math notranslate nohighlight">\(s\)</span> — путь, пройденный автомобилем в метрах, а <span class="math notranslate nohighlight">\(t\)</span> — время в секундах.</p>
 <p>6.1. Нахождение скорости:<br />
-Скорость <span class="math notranslate nohighlight">\(v(t)\)</span> — это первая производная координаты <span class="math notranslate nohighlight">\(s(t)\)</span> по времени <span class="math notranslate nohighlight">\(t\)</span>:<br />
-$<span class="math notranslate nohighlight">\(
+Скорость <span class="math notranslate nohighlight">\(v(t)\)</span> — это первая производная координаты <span class="math notranslate nohighlight">\(s(t)\)</span> по времени <span class="math notranslate nohighlight">\(t\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[
 v(t) = s'(t) = \frac{d}{dt}(5t^2 + 2t + 1) = 10t + 2
-\)</span>$</p>
+\]</div>
 <p>6.2. Нахождение ускорения:<br />
-Ускорение <span class="math notranslate nohighlight">\(a(t)\)</span> — это первая производная скорости <span class="math notranslate nohighlight">\(v(t)\)</span> по времени <span class="math notranslate nohighlight">\(t\)</span>:<br />
-$<span class="math notranslate nohighlight">\(
+Ускорение <span class="math notranslate nohighlight">\(a(t)\)</span> — это первая производная скорости <span class="math notranslate nohighlight">\(v(t)\)</span> по времени <span class="math notranslate nohighlight">\(t\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[
 a(t) = v'(t) = \frac{d}{dt}(10t + 2) = 10
-\)</span><span class="math notranslate nohighlight">\(  
-Таким образом, ускорение автомобиля постоянно и равно \)</span>10$ м/с².</p>
+\]</div>
+<p>Таким образом, ускорение автомобиля постоянно и равно <span class="math notranslate nohighlight">\(10\)</span> м/с².</p>
 </section>
 <section id="id8">
 <h2>7. Геометрический смысл производной<a class="headerlink" href="#id8" title="Ссылка на этот заголовок">#</a></h2>
@@ -512,19 +519,21 @@ a(t) = v'(t) = \frac{d}{dt}(10t + 2) = 10
 <li><p>Значение функции в этой точке: <span class="math notranslate nohighlight">\(s(1) = 5(1)^2 + 2(1) + 1 = 8\)</span> метра.</p></li>
 <li><p>Значение производной (скорости) в этой точке: <span class="math notranslate nohighlight">\(v(1) = 10(1) + 2 = 12\)</span> м/с.</p></li>
 </ul>
-<p>Уравнение касательной:<br />
-$<span class="math notranslate nohighlight">\(
+<p>Уравнение касательной:</p>
+<div class="math notranslate nohighlight">
+\[
 s = 8 + 12(t - 1)
-\)</span>$</p>
+\]</div>
 <p>Это уравнение показывает, как изменяется пройденный путь в окрестности <span class="math notranslate nohighlight">\(t = 1\)</span> секунда. Таким образом, геометрически производная представляет собой наклон касательной к кривой, описывающей движение автомобиля.</p>
 </section>
 <section id="id9">
 <h2>8. Дополнения<a class="headerlink" href="#id9" title="Ссылка на этот заголовок">#</a></h2>
-<p>Чем меньше приращение, тем больше кривая в точке похожа на свою касательную и тем ближе её мгновенная скорость к скорости роста прямой. При бесконечно малом приращении аргумента они становятся неразличимы.<br />
-$<span class="math notranslate nohighlight">\(
+<p>Чем меньше приращение, тем больше кривая в точке похожа на свою касательную и тем ближе её мгновенная скорость к скорости роста прямой. При бесконечно малом приращении аргумента они становятся неразличимы.</p>
+<div class="math notranslate nohighlight">
+\[
 f'(x_0) = k = \tan \alpha,
-\)</span><span class="math notranslate nohighlight">\(  
-где \)</span>k$ — угловой коэффициент касательной в данной точке.</p>
+\]</div>
+<p>где <span class="math notranslate nohighlight">\(k\)</span> — угловой коэффициент касательной в данной точке.</p>
 <p>Численное значение производной в точке <span class="math notranslate nohighlight">\(x_0\)</span> зависит от <span class="math notranslate nohighlight">\(x_0\)</span>, поэтому производная функции тоже является функцией.</p>
 <p>У кусочных функций чаще всего нет производной в точке склейки (только в ней).</p>
 <p>Взятие производной также называется дифференцированием.</p>
@@ -557,11 +566,12 @@ f'(x_0) = k = \tan \alpha,
 <li><p>выбрать маленькое значение приращения <span class="math notranslate nohighlight">\(dx\)</span>, оптимально использовать <span class="math notranslate nohighlight">\(dx = 10^{-8}\)</span>,</p></li>
 <li><p>найти <span class="math notranslate nohighlight">\(f(x_0)\)</span>,</p></li>
 <li><p>найти <span class="math notranslate nohighlight">\(f(x_0 + dx)\)</span>,</p></li>
-<li><p>вычислить значение производной в точке по определению:<br />
-$<span class="math notranslate nohighlight">\(
-f'(x_0) \approx \frac{f(x_0 + dx) - f(x_0)}{dx}.
-\)</span>$</p></li>
+<li><p>вычислить значение производной в точке по определению:</p></li>
 </ol>
+<div class="math notranslate nohighlight">
+\[
+f'(x_0) \approx \frac{f(x_0 + dx) - f(x_0)}{dx}.
+\]</div>
 </section>
 <section id="id11">
 <h2>10. Связь монотонности и производной<a class="headerlink" href="#id11" title="Ссылка на этот заголовок">#</a></h2>
@@ -592,18 +602,22 @@ f'(x_0) \approx \frac{f(x_0 + dx) - f(x_0)}{dx}.
 <section id="id13">
 <h2>12. Алгоритм нахождения экстремумов функции<a class="headerlink" href="#id13" title="Ссылка на этот заголовок">#</a></h2>
 <p>12.1. Шаг 1: Нахождение производной функции</p>
-<ol class="arabic simple">
-<li><p>Определите производную функции <span class="math notranslate nohighlight">\( f(x) \)</span>:<br />
-$<span class="math notranslate nohighlight">\(
-f'(x)
-\)</span>$</p></li>
+<ol class="arabic">
+<li><p>Определите производную функции <span class="math notranslate nohighlight">\( f(x) \)</span>:</p>
+<div class="math notranslate nohighlight">
+\[
+   f'(x)
+   \]</div>
+</li>
 </ol>
 <p>12.2. Шаг 2: Нахождение критических точек</p>
-<ol class="arabic simple">
-<li><p>Найдите значения <span class="math notranslate nohighlight">\( x \)</span>, при которых производная функции равна нулю:<br />
-$<span class="math notranslate nohighlight">\(
-f'(x) = 0
-\)</span>$</p></li>
+<ol class="arabic">
+<li><p>Найдите значения <span class="math notranslate nohighlight">\( x \)</span>, при которых производная функции равна нулю:</p>
+<div class="math notranslate nohighlight">
+\[
+   f'(x) = 0
+   \]</div>
+</li>
 </ol>
 <p>12.3. Шаг 3: Исследование знака производной</p>
 <ol class="arabic simple">
@@ -617,14 +631,16 @@ f'(x) = 0
 </ol>
 <p>12.5. Пример алгоритма на практике:<br />
 Рассмотрим функцию <span class="math notranslate nohighlight">\( f(x) = x^3 - 3x^2 + 2 \)</span>.</p>
-<p>Шаг 1: Нахождение производной функции<br />
-$<span class="math notranslate nohighlight">\(
-   f'(x) = 3x^2 - 6x
-   \)</span>$</p>
-<p>Шаг 2: Нахождение критических точек<br />
-$<span class="math notranslate nohighlight">\(
-   3x^2 - 6x = 0 \implies 3x(x - 2) = 0 \implies x = 0 \text{ или } x = 2
-   \)</span>$</p>
+<p>Шаг 1: Нахождение производной функции</p>
+<div class="math notranslate nohighlight">
+\[
+f'(x) = 3x^2 - 6x
+\]</div>
+<p>Шаг 2: Нахождение критических точек</p>
+<div class="math notranslate nohighlight">
+\[
+3x^2 - 6x = 0 \implies 3x(x - 2) = 0 \implies x = 0 \text{ или } x = 2
+\]</div>
 <p>Шаг 3: Исследование знака производной</p>
 <ul class="simple">
 <li><p>На интервале <span class="math notranslate nohighlight">\( (-\infty, 0) \)</span>: <span class="math notranslate nohighlight">\( f'(x) = 3x^2 - 6x &gt; 0 \)</span> (функция возрастает).</p></li>
@@ -641,15 +657,19 @@ $<span class="math notranslate nohighlight">\(
 <section id="id14">
 <h2>13. Пример из физики<a class="headerlink" href="#id14" title="Ссылка на этот заголовок">#</a></h2>
 <p>Рассмотрим движение объекта, координата которого задана функцией <span class="math notranslate nohighlight">\(s(t) = t^3 - 6t^2 + 9t + 1\)</span>. Найдём точки максимальной и минимальной скорости.</p>
-<ol class="arabic simple">
-<li><p>Находим скорость <span class="math notranslate nohighlight">\(v(t)\)</span>:<br />
-$<span class="math notranslate nohighlight">\(
-v(t) = s'(t) = 3t^2 - 12t + 9
-\)</span>$</p></li>
-<li><p>Решаем уравнение <span class="math notranslate nohighlight">\(v'(t) = 0\)</span>:<br />
-$<span class="math notranslate nohighlight">\(
-3t^2 - 12t + 9 = 0 \implies t^2 - 4t + 3 = 0 \implies t = 1 \text{ или } t = 3
-\)</span>$</p></li>
+<ol class="arabic">
+<li><p>Находим скорость <span class="math notranslate nohighlight">\(v(t)\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[
+   v(t) = s'(t) = 3t^2 - 12t + 9
+   \]</div>
+</li>
+<li><p>Решаем уравнение <span class="math notranslate nohighlight">\(v'(t) = 0\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[
+   3t^2 - 12t + 9 = 0 \implies t^2 - 4t + 3 = 0 \implies t = 1 \text{ или } t = 3
+   \]</div>
+</li>
 <li><p>Исследуем знак ускорения <span class="math notranslate nohighlight">\(a(t) = v'(t)\)</span> на интервалах <span class="math notranslate nohighlight">\((0, 1)\)</span>, <span class="math notranslate nohighlight">\((1, 3)\)</span> и <span class="math notranslate nohighlight">\((3, \infty)\)</span>:</p>
 <ul class="simple">
 <li><p>На интервале <span class="math notranslate nohighlight">\((0, 1)\)</span>: <span class="math notranslate nohighlight">\(a(t) = 6t - 12 &lt; 0\)</span> (скорость убывает).</p></li>
