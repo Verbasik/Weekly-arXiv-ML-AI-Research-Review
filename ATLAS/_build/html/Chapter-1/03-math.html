@@ -32,7 +32,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
@@ -203,6 +203,11 @@
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="03-derivative.html">Производная — узнаём скорость в любой момент</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Анализ и формализация понятия производной</a></li>
+
+
+
+
+
 </ul>
 
     </div>
@@ -398,23 +403,18 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">1. Производная</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">2. Объяснение</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">3. Математическая формализация</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">4. Нахождение касательной к графику функции и расчет углового коэффициента</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">5. Примеры интерпретации углового коэффициента</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">6. Пример из физики</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">7. Геометрический смысл производной</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">8. Дополнения</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">9. Формулы дифференцирования</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id11">10. Связь монотонности и производной</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id12">11. Вторая производная и выпуклость функции</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id13">12. Алгоритм нахождения экстремумов функции</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id14">13. Пример из физики</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id15">14. Теорема о композиций функций</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id16">15. Точки перегиба</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id17">16. Анализ функции</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Анализ и формализация понятия производной</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">1. Предпосылки: Задачи о касательной и мгновенной скорости</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">1.1. Геометрическая задача: Построение касательной к кривой</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">1.2. Физическая задача: Определение мгновенной скорости</a></li>
 </ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">2. Формальное определение производной</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">3. Дифференцируемость и непрерывность</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">4. Дифференциал функции</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">Заключение</a></li>
+</ul>
+
             </nav>
         </div>
     </div>
@@ -427,308 +427,127 @@ document.write(`
                   
   <section id="id1">
 <h1>Анализ и формализация понятия производной<a class="headerlink" href="#id1" title="Ссылка на этот заголовок">#</a></h1>
-<section id="id2">
-<h2>1. Производная<a class="headerlink" href="#id2" title="Ссылка на этот заголовок">#</a></h2>
-<p>Производная функции в точке — это число, характеризующее скорость роста функции в этой точке. Обозначается <span class="math notranslate nohighlight">\(f'(x_0)\)</span>.</p>
 </section>
+<section id="id2">
+<h1>1. Предпосылки: Задачи о касательной и мгновенной скорости<a class="headerlink" href="#id2" title="Ссылка на этот заголовок">#</a></h1>
+<p>Аппарат дифференциального исчисления, разработанный в трудах Исаака Ньютона и Готфрида Лейбница в XVII веке, возник не на пустом месте. Он стал ответом на давно стоявшие перед математиками и физиками вопросы. Рассмотрим два ключевых из них.</p>
 <section id="id3">
-<h2>2. Объяснение<a class="headerlink" href="#id3" title="Ссылка на этот заголовок">#</a></h2>
-<p>2.1. Предел функции в точке и на бесконечности:<br />
-Предел функции в точке — это значение, к которому стремится функция по мере приближения аргумента к некоторому значению. Обозначается как <span class="math notranslate nohighlight">\(\lim\limits_{x \to x_0} f(x) = L\)</span>. Для непрерывной функции предел в любой точке совпадает со значением функции в этой точке.</p>
-<p>2.2. Производная функции:<br />
-Производная функции <span class="math notranslate nohighlight">\(f(x)\)</span> в точке <span class="math notranslate nohighlight">\(x_0\)</span> — это предел отношения приращения функции к приращению аргумента при стремлении приращения аргумента к нулю:</p>
+<h2>1.1. Геометрическая задача: Построение касательной к кривой<a class="headerlink" href="#id3" title="Ссылка на этот заголовок">#</a></h2>
+<p>Рассмотрим произвольную плоскую кривую, заданную как график функции <span class="math notranslate nohighlight">\(y = f(x)\)</span>. Что такое касательная к этой кривой в некоторой точке <span class="math notranslate nohighlight">\(M_0(x_0, y_0)\)</span>? Интуитивно мы представляем ее как прямую, которая «прикасается» к кривой в данной точке, наилучшим образом повторяя ее направление в бесконечно малой окрестности этой точки.</p>
+<p>Для формализации этого понятия воспользуемся методом секущих. Возьмем на кривой еще одну точку <span class="math notranslate nohighlight">\(M_1(x_0 + \Delta x, y_0 + \Delta y)\)</span>, где <span class="math notranslate nohighlight">\(\Delta x\)</span> — некоторое приращение аргумента, а <span class="math notranslate nohighlight">\(\Delta y = f(x_0 + \Delta x) - f(x_0)\)</span> — соответствующее приращение функции. Проведем через точки <span class="math notranslate nohighlight">\(M_0\)</span> и <span class="math notranslate nohighlight">\(M_1\)</span> прямую, называемую <strong>секущей</strong>.</p>
+<p>Угловой коэффициент этой секущей, который определяет тангенс угла ее наклона к оси абсцисс, вычисляется тривиально:</p>
 <div class="math notranslate nohighlight">
-\[
-f'(x_0) = \lim\limits_{\Delta x \to 0} \frac{f(x_0 + \Delta x) - f(x_0)}{\Delta x}
-\]</div>
+\[k_{\text{сек}} = \tan \varphi = \frac{\Delta y}{\Delta x} = \frac{f(x_0 + \Delta x) - f(x_0)}{\Delta x}\]</div>
+<p>Теперь будем неограниченно приближать точку <span class="math notranslate nohighlight">\(M_1\)</span> к точке <span class="math notranslate nohighlight">\(M_0\)</span> вдоль кривой. Это эквивалентно устремлению приращения аргумента <span class="math notranslate nohighlight">\(\Delta x\)</span> к нулю. Если при этом угловой коэффициент секущей <span class="math notranslate nohighlight">\(k_{\text{сек}}\)</span> стремится к некоторому определенному конечному пределу, то этот предел и есть угловой коэффициент искомой касательной.</p>
+<div class="math notranslate nohighlight">
+\[k_{\text{кас}} = \lim_{\Delta x \to 0} k_{\text{сек}} = \lim_{\Delta x \to 0} \frac{f(x_0 + \Delta x) - f(x_0)}{\Delta x}\]</div>
+<p>Таким образом, <strong>геометрический смысл</strong> величины, которую мы собираемся определить, заключается в том, что она равна угловому коэффициенту касательной к графику функции в данной точке.</p>
 </section>
 <section id="id4">
-<h2>3. Математическая формализация<a class="headerlink" href="#id4" title="Ссылка на этот заголовок">#</a></h2>
-<p>3.1. Определение производной:<br />
-$<span class="math notranslate nohighlight">\(
-f'(x_0) = \lim\limits_{\Delta x \to 0} \frac{\Delta y}{\Delta x} = \lim\limits_{\Delta x \to 0} \frac{f(x_0 + \Delta x) - f(x_0)}{\Delta x}
-\)</span>$</p>
-<p>3.2. Касательная к графику функции:<br />
-Касательная к графику функции <span class="math notranslate nohighlight">\(y = f(x)\)</span> в точке <span class="math notranslate nohighlight">\(x_0\)</span> — это прямая, которая «прикасается» к графику в этой точке и имеет тот же наклон, что и график. Угловой коэффициент касательной равен значению производной в этой точке.</p>
+<h2>1.2. Физическая задача: Определение мгновенной скорости<a class="headerlink" href="#id4" title="Ссылка на этот заголовок">#</a></h2>
+<p>Рассмотрим материальную точку, движущуюся прямолинейно по закону <span class="math notranslate nohighlight">\(s = s(t)\)</span>, где <span class="math notranslate nohighlight">\(s\)</span> — координата точки в момент времени <span class="math notranslate nohighlight">\(t\)</span>. За промежуток времени от <span class="math notranslate nohighlight">\(t_0\)</span> до <span class="math notranslate nohighlight">\(t_0 + \Delta t\)</span> точка пройдет путь <span class="math notranslate nohighlight">\(\Delta s = s(t_0 + \Delta t) - s(t_0)\)</span>.</p>
+<p><strong>Средняя скорость</strong> движения за этот промежуток времени определяется как отношение пройденного пути ко времени, за которое он был пройден:</p>
+<div class="math notranslate nohighlight">
+\[v_{\text{ср}} = \frac{\Delta s}{\Delta t} = \frac{s(t_0 + \Delta t) - s(t_0)}{\Delta t}\]</div>
+<p>Однако средняя скорость не дает информации о скорости движения в конкретный момент времени <span class="math notranslate nohighlight">\(t_0\)</span>. Чтобы определить <strong>мгновенную (или истинную) скорость</strong>, мы должны рассмотреть предел, к которому стремится средняя скорость, когда промежуток времени <span class="math notranslate nohighlight">\(\Delta t\)</span> стягивается в точку, то есть <span class="math notranslate nohighlight">\(\Delta t \to 0\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[v(t_0) = \lim_{\Delta t \to 0} v_{\text{ср}} = \lim_{\Delta t \to 0} \frac{s(t_0 + \Delta t) - s(t_0)}{\Delta t}\]</div>
+<p>Мы видим, что математическая конструкция, к которой мы пришли, полностью аналогична той, что возникла в задаче о касательной. Это универсальное отношение лежит в основе формального определения производной.</p>
+<hr class="docutils" />
+</section>
 </section>
 <section id="id5">
-<h2>4. Нахождение касательной к графику функции и расчет углового коэффициента<a class="headerlink" href="#id5" title="Ссылка на этот заголовок">#</a></h2>
-<p>4.1. Уравнение касательной:<br />
-Уравнение касательной к графику функции <span class="math notranslate nohighlight">\(y = f(x)\)</span> в точке <span class="math notranslate nohighlight">\(x_0\)</span> можно записать в следующем виде:</p>
-<div class="math notranslate nohighlight">
-\[
-y = f(x_0) + f'(x_0)(x - x_0)
-\]</div>
-<p>где <span class="math notranslate nohighlight">\(f(x_0)\)</span> — значение функции в точке <span class="math notranslate nohighlight">\(x_0\)</span>, а <span class="math notranslate nohighlight">\(f'(x_0)\)</span> — значение производной функции в точке <span class="math notranslate nohighlight">\(x_0\)</span>.</p>
-<p>4.2. Пример расчета:<br />
-Рассмотрим функцию <span class="math notranslate nohighlight">\(f(x) = x^2\)</span>. Найдем уравнение касательной в точке <span class="math notranslate nohighlight">\(x_0 = 1\)</span>.</p>
-<ul>
-<li><p>Находим значение функции в этой точке: <span class="math notranslate nohighlight">\(f(1) = 1^2 = 1\)</span>.</p></li>
-<li><p>Находим производную функции: <span class="math notranslate nohighlight">\(f'(x) = 2x\)</span>, следовательно, <span class="math notranslate nohighlight">\(f'(1) = 2 \cdot 1 = 2\)</span>.</p></li>
-<li><p>Подставляем значения в уравнение касательной:</p>
-<div class="math notranslate nohighlight">
-\[
-  y = 1 + 2(x - 1)
-  \]</div>
-<p>Таким образом, уравнение касательной имеет вид:</p>
-<div class="math notranslate nohighlight">
-\[
-  y = 2x - 1
-  \]</div>
-</li>
+<h1>2. Формальное определение производной<a class="headerlink" href="#id5" title="Ссылка на этот заголовок">#</a></h1>
+<p>Перейдем к строгому определению.</p>
+<p><strong>Определение.</strong> <strong>Производной</strong> функции <span class="math notranslate nohighlight">\(y = f(x)\)</span> в точке <span class="math notranslate nohighlight">\(x_0\)</span> называется предел отношения приращения функции <span class="math notranslate nohighlight">\(\Delta y\)</span> к вызвавшему его приращению аргумента <span class="math notranslate nohighlight">\(\Delta x\)</span> при условии, что приращение аргумента стремится к нулю.</p>
+<p>Для производной используются следующие стандартные обозначения:</p>
+<ul class="simple">
+<li><p><strong>Обозначение Лагранжа:</strong> <span class="math notranslate nohighlight">\(f'(x_0)\)</span></p></li>
+<li><p><strong>Обозначение Лейбница:</strong> <span class="math notranslate nohighlight">\(\frac{dy}{dx}\bigg|_{x=x_0}\)</span> или <span class="math notranslate nohighlight">\(\frac{df}{dx}(x_0)\)</span></p></li>
+<li><p><strong>Обозначение Ньютона (в основном в механике):</strong> <span class="math notranslate nohighlight">\(\dot{y}(t_0)\)</span></p></li>
 </ul>
+<p>Таким образом, по определению:</p>
+<div class="math notranslate nohighlight">
+\[f'(x_0) = \lim_{\Delta x \to 0} \frac{\Delta y}{\Delta x} = \lim_{\Delta x \to 0} \frac{f(x_0 + \Delta x) - f(x_0)}{\Delta x}\]</div>
+<p><strong>Важнейшие замечания:</strong></p>
+<ol class="arabic simple">
+<li><p>Производная существует только в том случае, если указанный предел существует и конечен.</p></li>
+<li><p>Предел должен быть одинаковым независимо от того, с какой стороны <span class="math notranslate nohighlight">\(\Delta x\)</span> стремится к нулю (справа, <span class="math notranslate nohighlight">\(\Delta x \to 0+\)</span>, или слева, <span class="math notranslate nohighlight">\(\Delta x \to 0-\)</span>). Пределы справа и слева называют, соответственно, <strong>правой и левой производными</strong>. Для существования производной необходимо и достаточно, чтобы существовали и были равны правая и левая производные.</p></li>
+<li><p>Операция нахождения производной называется <strong>дифференцированием</strong>.</p></li>
+</ol>
+<p>Эквивалентная форма записи определения, получаемая заменой <span class="math notranslate nohighlight">\(x = x_0 + \Delta x\)</span> (откуда <span class="math notranslate nohighlight">\(\Delta x = x - x_0\)</span>):</p>
+<div class="math notranslate nohighlight">
+\[f'(x_0) = \lim_{x \to x_0} \frac{f(x) - f(x_0)}{x - x_0}\]</div>
+<hr class="docutils" />
 </section>
 <section id="id6">
-<h2>5. Примеры интерпретации углового коэффициента<a class="headerlink" href="#id6" title="Ссылка на этот заголовок">#</a></h2>
-<p>5.1. Положительный угловой коэффициент:</p>
+<h1>3. Дифференцируемость и непрерывность<a class="headerlink" href="#id6" title="Ссылка на этот заголовок">#</a></h1>
+<p>Возникает естественный вопрос: как связаны между собой свойства дифференцируемости и непрерывности функции в точке? Ответ дает следующая фундаментальная теорема.</p>
+<p><strong>Теорема.</strong> Если функция <span class="math notranslate nohighlight">\(f(x)\)</span> дифференцируема в точке <span class="math notranslate nohighlight">\(x_0\)</span>, то она непрерывна в этой точке.</p>
+<p><strong>Доказательство.</strong>
+То, что функция <span class="math notranslate nohighlight">\(f(x)\)</span> дифференцируема в точке <span class="math notranslate nohighlight">\(x_0\)</span>, означает, что существует конечный предел:</p>
+<div class="math notranslate nohighlight">
+\[f'(x_0) = \lim_{\Delta x \to 0} \frac{f(x_0 + \Delta x) - f(x_0)}{\Delta x}\]</div>
+<p>Нам нужно доказать, что функция непрерывна в точке <span class="math notranslate nohighlight">\(x_0\)</span>, то есть, по определению непрерывности, что <span class="math notranslate nohighlight">\(\lim_{\Delta x \to 0} f(x_0 + \Delta x) = f(x_0)\)</span>, или, что эквивалентно, <span class="math notranslate nohighlight">\(\lim_{\Delta x \to 0} (f(x_0 + \Delta x) - f(x_0)) = 0\)</span>.</p>
+<p>Рассмотрим приращение функции <span class="math notranslate nohighlight">\(\Delta y = f(x_0 + \Delta x) - f(x_0)\)</span>. Выполним тождественное преобразование для <span class="math notranslate nohighlight">\(\Delta x \neq 0\)</span>:
+<span class="math notranslate nohighlight">\(f(x_0 + \Delta x) - f(x_0) = \frac{f(x_0 + \Delta x) - f(x_0)}{\Delta x} \cdot \Delta x\)</span></p>
+<p>Теперь перейдем к пределу при <span class="math notranslate nohighlight">\(\Delta x \to 0\)</span> в обеих частях равенства:
+<span class="math notranslate nohighlight">\(\lim_{\Delta x \to 0} (f(x_0 + \Delta x) - f(x_0)) = \lim_{\Delta x \to 0} \left( \frac{f(x_0 + \Delta x) - f(x_0)}{\Delta x} \cdot \Delta x \right)\)</span></p>
+<p>Используя теорему о пределе произведения, получаем:
+<span class="math notranslate nohighlight">\(\lim_{\Delta x \to 0} (f(x_0 + \Delta x) - f(x_0)) = \left( \lim_{\Delta x \to 0} \frac{f(x_0 + \Delta x) - f(x_0)}{\Delta x} \right) \cdot \left( \lim_{\Delta x \to 0} \Delta x \right)\)</span></p>
+<p>Первый предел в правой части по условию теоремы есть <span class="math notranslate nohighlight">\(f'(x_0)\)</span> (конечное число), а второй предел очевидно равен нулю.
+Следовательно:
+<span class="math notranslate nohighlight">\(\lim_{\Delta x \to 0} (f(x_0 + \Delta x) - f(x_0)) = f'(x_0) \cdot 0 = 0\)</span></p>
+<p>Это и доказывает непрерывность функции в точке <span class="math notranslate nohighlight">\(x_0\)</span>. <strong>Что и требовалось доказать.</strong></p>
+<p><strong>Обратное утверждение неверно!</strong> Непрерывность функции в точке не гарантирует ее дифференцируемости. Классический контрпример — функция <span class="math notranslate nohighlight">\(f(x) = |x|\)</span> в точке <span class="math notranslate nohighlight">\(x_0 = 0\)</span>. Она, очевидно, непрерывна в этой точке. Однако, найдем ее левую и правую производные:</p>
 <ul class="simple">
-<li><p>Если <span class="math notranslate nohighlight">\(f'(x_0) &gt; 0\)</span>, то функция возрастает в точке <span class="math notranslate nohighlight">\(x_0\)</span>. Чем больше значение <span class="math notranslate nohighlight">\(f'(x_0)\)</span>, тем круче поднимается график функции.</p></li>
+<li><p><strong>Правая производная:</strong>
+<span class="math notranslate nohighlight">\(f'_+(0) = \lim_{\Delta x \to 0+} \frac{|0 + \Delta x| - |0|}{\Delta x} = \lim_{\Delta x \to 0+} \frac{|\Delta x|}{\Delta x} = \lim_{\Delta x \to 0+} \frac{\Delta x}{\Delta x} = 1\)</span></p></li>
+<li><p><strong>Левая производная:</strong>
+<span class="math notranslate nohighlight">\(f'_-(0) = \lim_{\Delta x \to 0-} \frac{|0 + \Delta x| - |0|}{\Delta x} = \lim_{\Delta x \to 0-} \frac{|\Delta x|}{\Delta x} = \lim_{\Delta x \to 0-} \frac{-\Delta x}{\Delta x} = -1\)</span></p></li>
 </ul>
-<p>5.2. Отрицательный угловой коэффициент:</p>
-<ul class="simple">
-<li><p>Если <span class="math notranslate nohighlight">\(f'(x_0) &lt; 0\)</span>, то функция убывает в точке <span class="math notranslate nohighlight">\(x_0\)</span>. Чем меньше значение <span class="math notranslate nohighlight">\(f'(x_0)\)</span> (по модулю), тем круче опускается график функции.</p></li>
-</ul>
-<p>5.3. Нулевой угловой коэффициент:</p>
-<ul class="simple">
-<li><p>Если <span class="math notranslate nohighlight">\(f'(x_0) = 0\)</span>, то касательная горизонтальна, и график функции в данной точке имеет горизонтальный наклон. Это может указывать на экстремум (максимум или минимум) функции в этой точке.</p></li>
-</ul>
+<p>Поскольку <span class="math notranslate nohighlight">\(f'_+(0) \neq f'_-(0)\)</span>, производная в точке <span class="math notranslate nohighlight">\(x_0 = 0\)</span> не существует. Геометрически это соответствует тому, что график функции в этой точке имеет «излом», и провести однозначную касательную невозможно.</p>
+<hr class="docutils" />
 </section>
 <section id="id7">
-<h2>6. Пример из физики<a class="headerlink" href="#id7" title="Ссылка на этот заголовок">#</a></h2>
-<p>Рассмотрим движение автомобиля по прямой линии. Пусть координата автомобиля в момент времени <span class="math notranslate nohighlight">\(t\)</span> задаётся функцией <span class="math notranslate nohighlight">\(s(t) = 5t^2 + 2t + 1\)</span>, где <span class="math notranslate nohighlight">\(s\)</span> — путь, пройденный автомобилем в метрах, а <span class="math notranslate nohighlight">\(t\)</span> — время в секундах.</p>
-<p>6.1. Нахождение скорости:<br />
-Скорость <span class="math notranslate nohighlight">\(v(t)\)</span> — это первая производная координаты <span class="math notranslate nohighlight">\(s(t)\)</span> по времени <span class="math notranslate nohighlight">\(t\)</span>:</p>
-<div class="math notranslate nohighlight">
-\[
-v(t) = s'(t) = \frac{d}{dt}(5t^2 + 2t + 1) = 10t + 2
-\]</div>
-<p>6.2. Нахождение ускорения:<br />
-Ускорение <span class="math notranslate nohighlight">\(a(t)\)</span> — это первая производная скорости <span class="math notranslate nohighlight">\(v(t)\)</span> по времени <span class="math notranslate nohighlight">\(t\)</span>:</p>
-<div class="math notranslate nohighlight">
-\[
-a(t) = v'(t) = \frac{d}{dt}(10t + 2) = 10
-\]</div>
-<p>Таким образом, ускорение автомобиля постоянно и равно <span class="math notranslate nohighlight">\(10\)</span> м/с².</p>
+<h1>4. Дифференциал функции<a class="headerlink" href="#id7" title="Ссылка на этот заголовок">#</a></h1>
+<p>Понятие производной тесно связано с концепцией линейной аппроксимации функции и понятием дифференциала.</p>
+<p>Пусть функция <span class="math notranslate nohighlight">\(f(x)\)</span> дифференцируема в точке <span class="math notranslate nohighlight">\(x_0\)</span>. Тогда по определению производной:
+<span class="math notranslate nohighlight">\(\lim_{\Delta x \to 0} \frac{f(x_0 + \Delta x) - f(x_0)}{\Delta x} = f'(x_0)\)</span></p>
+<p>Это равенство по определению предела можно переписать в виде:
+<span class="math notranslate nohighlight">\(\frac{f(x_0 + \Delta x) - f(x_0)}{\Delta x} = f'(x_0) + \alpha(\Delta x)\)</span>, где <span class="math notranslate nohighlight">\(\alpha(\Delta x)\)</span> — бесконечно малая функция при <span class="math notranslate nohighlight">\(\Delta x \to 0\)</span>, то есть <span class="math notranslate nohighlight">\(\lim_{\Delta x \to 0} \alpha(\Delta x) = 0\)</span>.</p>
+<p>Домножим на <span class="math notranslate nohighlight">\(\Delta x\)</span>:
+<span class="math notranslate nohighlight">\(f(x_0 + \Delta x) - f(x_0) = f'(x_0)\Delta x + \alpha(\Delta x)\Delta x\)</span></p>
+<p>Обозначим приращение функции <span class="math notranslate nohighlight">\(\Delta y = f(x_0 + \Delta x) - f(x_0)\)</span>. Тогда:
+<span class="math notranslate nohighlight">\(\Delta y = f'(x_0)\Delta x + o(\Delta x)\)</span></p>
+<p>Здесь <span class="math notranslate nohighlight">\(o(\Delta x)\)</span> (читается «о малое от дельта икс») — это член <span class="math notranslate nohighlight">\(\alpha(\Delta x)\Delta x\)</span>, который является бесконечно малой более высокого порядка по сравнению с <span class="math notranslate nohighlight">\(\Delta x\)</span>, то есть <span class="math notranslate nohighlight">\(\lim_{\Delta x \to 0} \frac{o(\Delta x)}{\Delta x} = 0\)</span>.</p>
+<p>Мы представили приращение функции <span class="math notranslate nohighlight">\(\Delta y\)</span> в виде суммы двух слагаемых:</p>
+<ol class="arabic simple">
+<li><p><span class="math notranslate nohighlight">\(f'(x_0)\Delta x\)</span> — линейная относительно <span class="math notranslate nohighlight">\(\Delta x\)</span> часть приращения.</p></li>
+<li><p><span class="math notranslate nohighlight">\(o(\Delta x)\)</span> — остаточный член.</p></li>
+</ol>
+<p><strong>Определение.</strong> Функция <span class="math notranslate nohighlight">\(f(x)\)</span> называется <strong>дифференцируемой</strong> в точке <span class="math notranslate nohighlight">\(x_0\)</span>, если ее приращение в этой точке может быть представлено в виде <span class="math notranslate nohighlight">\(\Delta y = A \cdot \Delta x + o(\Delta x)\)</span>, где <span class="math notranslate nohighlight">\(A\)</span> — некоторая константа, не зависящая от <span class="math notranslate nohighlight">\(\Delta x\)</span>.</p>
+<p><strong>Определение.</strong> <strong>Дифференциалом</strong> функции <span class="math notranslate nohighlight">\(f(x)\)</span> в точке <span class="math notranslate nohighlight">\(x_0\)</span> (обозначается <span class="math notranslate nohighlight">\(dy\)</span> или <span class="math notranslate nohighlight">\(df(x_0)\)</span>) называется главная, линейная относительно <span class="math notranslate nohighlight">\(\Delta x\)</span> часть ее приращения.
+<span class="math notranslate nohighlight">\(dy = A \cdot \Delta x\)</span></p>
+<p>Сравнивая два определения, мы видим, что функция дифференцируема в точке тогда и только тогда, когда в этой точке существует производная, причем <span class="math notranslate nohighlight">\(A = f'(x_0)\)</span>.</p>
+<p>Таким образом, дифференциал функции равен произведению ее производной на приращение независимой переменной:
+<span class="math notranslate nohighlight">\(dy = f'(x_0)\Delta x\)</span></p>
+<p>Принято называть дифференциалом независимой переменной само приращение: <span class="math notranslate nohighlight">\(dx = \Delta x\)</span>. С учетом этого, формула принимает канонический вид:</p>
+<p><span class="math notranslate nohighlight">\(dy = f'(x)dx\)</span></p>
+<p>Из этой формулы следует знаменитая запись Лейбница: <span class="math notranslate nohighlight">\(f'(x) = \frac{dy}{dx}\)</span>, которая теперь может трактоваться не просто как символьное обозначение, а как отношение двух дифференциалов.</p>
+<p><strong>Геометрический смысл дифференциала.</strong> Вспомним, что <span class="math notranslate nohighlight">\(f'(x_0)\)</span> — это тангенс угла наклона касательной. Тогда <span class="math notranslate nohighlight">\(f'(x_0)\Delta x = \tan \varphi \cdot \Delta x\)</span> есть не что иное, как приращение ординаты касательной, проведенной в точке <span class="math notranslate nohighlight">\(x_0\)</span>, когда аргумент получает приращение <span class="math notranslate nohighlight">\(\Delta x\)</span>. Дифференциал <span class="math notranslate nohighlight">\(dy\)</span> — это приращение по касательной, в то время как <span class="math notranslate nohighlight">\(\Delta y\)</span> — это истинное приращение по самой кривой.</p>
+<hr class="docutils" />
 </section>
 <section id="id8">
-<h2>7. Геометрический смысл производной<a class="headerlink" href="#id8" title="Ссылка на этот заголовок">#</a></h2>
-<p>Производная функции в точке также имеет геометрический смысл: она определяет наклон касательной к графику функции в этой точке. Наклон касательной показывает, как быстро и в каком направлении изменяется функция в данной точке.</p>
-<p>7.1. Пример из физики (продолжение):<br />
-Возвращаясь к примеру с движением автомобиля, можно построить график функции <span class="math notranslate nohighlight">\(s(t) = 5t^2 + 2t + 1\)</span> и найти касательную в точке <span class="math notranslate nohighlight">\(t_0 = 1\)</span> секунда:</p>
+<h1>Заключение<a class="headerlink" href="#id8" title="Ссылка на этот заголовок">#</a></h1>
+<p>Итак, сегодня мы установили, что производная — это не просто абстрактная математическая операция. Это мощный инструмент, имеющий ясные интерпретации:</p>
 <ul class="simple">
-<li><p>Значение функции в этой точке: <span class="math notranslate nohighlight">\(s(1) = 5(1)^2 + 2(1) + 1 = 8\)</span> метра.</p></li>
-<li><p>Значение производной (скорости) в этой точке: <span class="math notranslate nohighlight">\(v(1) = 10(1) + 2 = 12\)</span> м/с.</p></li>
+<li><p><strong>Геометрически</strong> — это угловой коэффициент касательной к графику функции.</p></li>
+<li><p><strong>Физически</strong> — это мгновенная скорость изменения процесса, описываемого функцией.</p></li>
+<li><p><strong>Аналитически</strong> — это коэффициент в главной линейной части приращения функции, что делает производную основой для линейной аппроксимации и введения понятия дифференциала.</p></li>
 </ul>
-<p>Уравнение касательной:</p>
-<div class="math notranslate nohighlight">
-\[
-s = 8 + 12(t - 1)
-\]</div>
-<p>Это уравнение показывает, как изменяется пройденный путь в окрестности <span class="math notranslate nohighlight">\(t = 1\)</span> секунда. Таким образом, геометрически производная представляет собой наклон касательной к кривой, описывающей движение автомобиля.</p>
-</section>
-<section id="id9">
-<h2>8. Дополнения<a class="headerlink" href="#id9" title="Ссылка на этот заголовок">#</a></h2>
-<p>Чем меньше приращение, тем больше кривая в точке похожа на свою касательную и тем ближе её мгновенная скорость к скорости роста прямой. При бесконечно малом приращении аргумента они становятся неразличимы.</p>
-<div class="math notranslate nohighlight">
-\[
-f'(x_0) = k = \tan \alpha,
-\]</div>
-<p>где <span class="math notranslate nohighlight">\(k\)</span> — угловой коэффициент касательной в данной точке.</p>
-<p>Численное значение производной в точке <span class="math notranslate nohighlight">\(x_0\)</span> зависит от <span class="math notranslate nohighlight">\(x_0\)</span>, поэтому производная функции тоже является функцией.</p>
-<p>У кусочных функций чаще всего нет производной в точке склейки (только в ней).</p>
-<p>Взятие производной также называется дифференцированием.</p>
-</section>
-<section id="id10">
-<h2>9. Формулы дифференцирования<a class="headerlink" href="#id10" title="Ссылка на этот заголовок">#</a></h2>
-<div class="math notranslate nohighlight">
-\[
-(c \cdot f(x))' = c \cdot f'(x),
-\]</div>
-<p>где <span class="math notranslate nohighlight">\(c \in \mathbb{R}\)</span>,</p>
-<div class="math notranslate nohighlight">
-\[
-(f(x) \pm g(x))' = f'(x) \pm g'(x),
-\]</div>
-<div class="math notranslate nohighlight">
-\[
-(f(x) \cdot g(x))' = f'(x) \cdot g(x) + f(x) \cdot g'(x),
-\]</div>
-<div class="math notranslate nohighlight">
-\[
-\left( \frac{f(x)}{g(x)} \right)' = \frac{f'(x) \cdot g(x) - f(x) \cdot g'(x)}{g^2(x)},
-\]</div>
-<div class="math notranslate nohighlight">
-\[
-(f \circ g)' = (f(g(x)))' = f'(g(x)) \cdot g'(x).
-\]</div>
-<p>Чтобы численно вычислить значение производной функции <span class="math notranslate nohighlight">\(f(x)\)</span> в точке <span class="math notranslate nohighlight">\(x_0\)</span> в Python, надо:</p>
-<ol class="arabic simple">
-<li><p>выбрать маленькое значение приращения <span class="math notranslate nohighlight">\(dx\)</span>, оптимально использовать <span class="math notranslate nohighlight">\(dx = 10^{-8}\)</span>,</p></li>
-<li><p>найти <span class="math notranslate nohighlight">\(f(x_0)\)</span>,</p></li>
-<li><p>найти <span class="math notranslate nohighlight">\(f(x_0 + dx)\)</span>,</p></li>
-<li><p>вычислить значение производной в точке по определению:</p></li>
-</ol>
-<div class="math notranslate nohighlight">
-\[
-f'(x_0) \approx \frac{f(x_0 + dx) - f(x_0)}{dx}.
-\]</div>
-</section>
-<section id="id11">
-<h2>10. Связь монотонности и производной<a class="headerlink" href="#id11" title="Ссылка на этот заголовок">#</a></h2>
-<ol class="arabic simple">
-<li><p>Если <span class="math notranslate nohighlight">\(f'(x) &gt; 0\)</span> на интервале <span class="math notranslate nohighlight">\((a, b)\)</span>, то функция <span class="math notranslate nohighlight">\(f(x)\)</span> возрастает на этом интервале.</p></li>
-<li><p>Если <span class="math notranslate nohighlight">\(f'(x) &lt; 0\)</span> на интервале <span class="math notranslate nohighlight">\((a, b)\)</span>, то функция <span class="math notranslate nohighlight">\(f(x)\)</span> убывает на этом интервале.</p></li>
-<li><p>Если <span class="math notranslate nohighlight">\(f'(x) = 0\)</span> в точке <span class="math notranslate nohighlight">\(x = x_0\)</span> и производная меняет знак в этой точке, то <span class="math notranslate nohighlight">\(x_0\)</span> является точкой экстремума функции <span class="math notranslate nohighlight">\(f(x)\)</span>.</p></li>
-</ol>
-</section>
-<section id="id12">
-<h2>11. Вторая производная и выпуклость функции<a class="headerlink" href="#id12" title="Ссылка на этот заголовок">#</a></h2>
-<p>В прошлых уроках мы обсуждали, как связан тип монотонности функции со знаком её производной. Оказывается, тип выпуклости тоже связан с производной, но уже не с первой, а со второй.</p>
-<p>11.1. Вторая производная функции — это производная, взятая от производной данной функции. Обозначается как <span class="math notranslate nohighlight">\(f''(x)\)</span>.</p>
-<p>Физический смысл второй производной — это скорость изменения скорости, то есть ускорение функции. Можно вычислять производные и более высоких порядков: третьего, четвёртого и так далее. Для третьего порядка используют обозначение <span class="math notranslate nohighlight">\(f'''(x)\)</span>, а для четвёртого и далее вместо штрихов пишут число в скобках: <span class="math notranslate nohighlight">\(f^{(4)}(x)\)</span> или <span class="math notranslate nohighlight">\(f^{(IV)}(x)\)</span>. Скобки показывают, что цифра — это не степень, а порядок производной.</p>
-<p>11.2. Пример: Давайте вычислим вторую производную функции <span class="math notranslate nohighlight">\(y = 7x^3 - 13x^2 + 2\)</span>. Сначала находим первую производную: <span class="math notranslate nohighlight">\(y' = 21x^2 - 26x\)</span>. Теперь дифференцируем первую производную, чтобы получить вторую: <span class="math notranslate nohighlight">\(y'' = 42x - 26\)</span>.</p>
-<p>11.3. Связь с выпуклостью: Вторая производная связана с типом выпуклости функции:</p>
-<ul class="simple">
-<li><p>Если <span class="math notranslate nohighlight">\(f''(x_0) &gt; 0\)</span>, то точка <span class="math notranslate nohighlight">\(x_0\)</span> лежит на выпуклом вниз участке графика.</p></li>
-<li><p>Если <span class="math notranslate nohighlight">\(f''(x_0) &lt; 0\)</span>, то точка <span class="math notranslate nohighlight">\(x_0\)</span> лежит на выпуклом вверх участке графика.</p></li>
-</ul>
-<p>Это можно запомнить следующим образом: если вторая производная положительна, функция «улыбается» (выпукла вниз), если отрицательна — «грустит» (выпукла вверх).</p>
-<p>11.4. Обратные утверждения:</p>
-<ul class="simple">
-<li><p>Если функция выпукла вниз на участке графика, то на этом участке её вторая производная положительна.</p></li>
-<li><p>Если функция выпукла вверх, то её вторая производная отрицательна.</p></li>
-</ul>
-</section>
-<section id="id13">
-<h2>12. Алгоритм нахождения экстремумов функции<a class="headerlink" href="#id13" title="Ссылка на этот заголовок">#</a></h2>
-<p>12.1. Шаг 1: Нахождение производной функции</p>
-<ol class="arabic">
-<li><p>Определите производную функции <span class="math notranslate nohighlight">\( f(x) \)</span>:</p>
-<div class="math notranslate nohighlight">
-\[
-   f'(x)
-   \]</div>
-</li>
-</ol>
-<p>12.2. Шаг 2: Нахождение критических точек</p>
-<ol class="arabic">
-<li><p>Найдите значения <span class="math notranslate nohighlight">\( x \)</span>, при которых производная функции равна нулю:</p>
-<div class="math notranslate nohighlight">
-\[
-   f'(x) = 0
-   \]</div>
-</li>
-</ol>
-<p>12.3. Шаг 3: Исследование знака производной</p>
-<ol class="arabic simple">
-<li><p>Разделите числовую прямую на интервалы, используя найденные критические точки.</p></li>
-<li><p>Определите знак производной <span class="math notranslate nohighlight">\( f'(x) \)</span> на каждом из интервалов.</p></li>
-</ol>
-<p>12.4. Шаг 4: Классификация экстремумов</p>
-<ol class="arabic simple">
-<li><p>Если производная <span class="math notranslate nohighlight">\( f'(x) \)</span> меняет знак с положительного на отрицательный в критической точке, эта точка является локальным максимумом.</p></li>
-<li><p>Если производная <span class="math notranslate nohighlight">\( f'(x) \)</span> меняет знак с отрицательного на положительный в критической точке, эта точка является локальным минимумом.</p></li>
-</ol>
-<p>12.5. Пример алгоритма на практике:<br />
-Рассмотрим функцию <span class="math notranslate nohighlight">\( f(x) = x^3 - 3x^2 + 2 \)</span>.</p>
-<p>Шаг 1: Нахождение производной функции</p>
-<div class="math notranslate nohighlight">
-\[
-f'(x) = 3x^2 - 6x
-\]</div>
-<p>Шаг 2: Нахождение критических точек</p>
-<div class="math notranslate nohighlight">
-\[
-3x^2 - 6x = 0 \implies 3x(x - 2) = 0 \implies x = 0 \text{ или } x = 2
-\]</div>
-<p>Шаг 3: Исследование знака производной</p>
-<ul class="simple">
-<li><p>На интервале <span class="math notranslate nohighlight">\( (-\infty, 0) \)</span>: <span class="math notranslate nohighlight">\( f'(x) = 3x^2 - 6x &gt; 0 \)</span> (функция возрастает).</p></li>
-<li><p>На интервале <span class="math notranslate nohighlight">\( (0, 2) \)</span>: <span class="math notranslate nohighlight">\( f'(x) = 3x^2 - 6x &lt; 0 \)</span> (функция убывает).</p></li>
-<li><p>На интервале <span class="math notranslate nohighlight">\( (2, \infty) \)</span>: <span class="math notranslate nohighlight">\( f'(x) = 3x^2 - 6x &gt; 0 \)</span> (функция возрастает).</p></li>
-</ul>
-<p>Шаг 4: Классификация экстремумов</p>
-<ul class="simple">
-<li><p>В точке <span class="math notranslate nohighlight">\( x = 0 \)</span>: <span class="math notranslate nohighlight">\( f'(x) \)</span> меняет знак с положительного на отрицательный (локальный максимум).</p></li>
-<li><p>В точке <span class="math notranslate nohighlight">\( x = 2 \)</span>: <span class="math notranslate nohighlight">\( f'(x) \)</span> меняет знак с отрицательного на положительный (локальный минимум).</p></li>
-</ul>
-<p>Таким образом, функция <span class="math notranslate nohighlight">\( f(x) \)</span> имеет локальный максимум в точке <span class="math notranslate nohighlight">\( x = 0 \)</span> и локальный минимум в точке <span class="math notranslate nohighlight">\( x = 2 \)</span>.</p>
-</section>
-<section id="id14">
-<h2>13. Пример из физики<a class="headerlink" href="#id14" title="Ссылка на этот заголовок">#</a></h2>
-<p>Рассмотрим движение объекта, координата которого задана функцией <span class="math notranslate nohighlight">\(s(t) = t^3 - 6t^2 + 9t + 1\)</span>. Найдём точки максимальной и минимальной скорости.</p>
-<ol class="arabic">
-<li><p>Находим скорость <span class="math notranslate nohighlight">\(v(t)\)</span>:</p>
-<div class="math notranslate nohighlight">
-\[
-   v(t) = s'(t) = 3t^2 - 12t + 9
-   \]</div>
-</li>
-<li><p>Решаем уравнение <span class="math notranslate nohighlight">\(v'(t) = 0\)</span>:</p>
-<div class="math notranslate nohighlight">
-\[
-   3t^2 - 12t + 9 = 0 \implies t^2 - 4t + 3 = 0 \implies t = 1 \text{ или } t = 3
-   \]</div>
-</li>
-<li><p>Исследуем знак ускорения <span class="math notranslate nohighlight">\(a(t) = v'(t)\)</span> на интервалах <span class="math notranslate nohighlight">\((0, 1)\)</span>, <span class="math notranslate nohighlight">\((1, 3)\)</span> и <span class="math notranslate nohighlight">\((3, \infty)\)</span>:</p>
-<ul class="simple">
-<li><p>На интервале <span class="math notranslate nohighlight">\((0, 1)\)</span>: <span class="math notranslate nohighlight">\(a(t) = 6t - 12 &lt; 0\)</span> (скорость убывает).</p></li>
-<li><p>На интервале <span class="math notranslate nohighlight">\((1, 3)\)</span>: <span class="math notranslate nohighlight">\(a(t) = 6t - 12 &gt; 0\)</span> (скорость возрастает).</p></li>
-<li><p>На интервале <span class="math notranslate nohighlight">\((3, \infty)\)</span>: <span class="math notranslate nohighlight">\(a(t) = 6t - 12 &gt; 0\)</span> (скорость возрастает).</p></li>
-</ul>
-</li>
-</ol>
-<p>Таким образом, в точке <span class="math notranslate nohighlight">\(t = 1\)</span> объект имеет минимальную скорость, а в точке <span class="math notranslate nohighlight">\(t = 3\)</span> — максимальную.</p>
-</section>
-<section id="id15">
-<h2>14. Теорема о композиций функций<a class="headerlink" href="#id15" title="Ссылка на этот заголовок">#</a></h2>
-<ol class="arabic simple">
-<li><p>Если к функции <span class="math notranslate nohighlight">\(f\)</span> применяется возрастающая функция <span class="math notranslate nohighlight">\(g\)</span>, то композиция <span class="math notranslate nohighlight">\(g \circ f\)</span> имеет экстремумы при тех же аргументах, что и исходная функция <span class="math notranslate nohighlight">\(f\)</span>. При этом сохраняется и их тип.</p></li>
-<li><p>Если к <span class="math notranslate nohighlight">\(f\)</span> применяется убывающая функция <span class="math notranslate nohighlight">\(p\)</span>, то композиция <span class="math notranslate nohighlight">\(p \circ f\)</span> имеет экстремумы при тех же аргументах, что и исходная функция <span class="math notranslate nohighlight">\(f\)</span>, но меняется их тип.</p></li>
-<li><p>Если к <span class="math notranslate nohighlight">\(f\)</span> применяется немонотонная функция, то сделать быстрый вывод об экстремумах их композиции нельзя.</p></li>
-</ol>
-<p>То есть если функция <span class="math notranslate nohighlight">\(f\)</span> имела точку минимума в <span class="math notranslate nohighlight">\(x = 3\)</span>, то после применения к ней возрастающей функции <span class="math notranslate nohighlight">\(g\)</span> получится <span class="math notranslate nohighlight">\(g \circ f\)</span>, у которой, согласно теореме, тоже будет точка минимума при <span class="math notranslate nohighlight">\(x = 3\)</span>.</p>
-<p>А если к той же функции применить убывающую функцию <span class="math notranslate nohighlight">\(p\)</span>, то для <span class="math notranslate nohighlight">\(p \circ f\)</span> точка <span class="math notranslate nohighlight">\(x = 3\)</span> будет являться уже точкой максимума. То есть она остаётся экстремальной, но меняет тип.</p>
-<p>Важно! Сами значения функций в точках экстремума будут разные, поскольку <span class="math notranslate nohighlight">\(f(x) \neq g \circ f(x)\)</span>.</p>
-</section>
-<section id="id16">
-<h2>15. Точки перегиба<a class="headerlink" href="#id16" title="Ссылка на этот заголовок">#</a></h2>
-<p>Точка перегиба — это аргумент <span class="math notranslate nohighlight">\(x \in D(y)\)</span>, при котором меняется тип выпуклости: функция из выпуклой вверх становится выпуклой вниз или наоборот.</p>
-<p>У значения <span class="math notranslate nohighlight">\(y\)</span> в этой точке специального имени нет, если его хотят найти, то так и пишут: «найдите значение функции в точке перегиба».</p>
-<p>У некоторых функций точка перегиба видна сразу: например, для <span class="math notranslate nohighlight">\(y = -x^3\)</span> это точка <span class="math notranslate nohighlight">\(x = 0\)</span>. Здесь функция сначала была выпуклой вниз, а потом стала выпуклой вверх.</p>
-<p>Однако точки перегиба не всегда так просто определить на глаз, поэтому нужен формальный аналитический способ. И он связан со второй производной!</p>
-<p>Тут есть некоторая аналогия с точками экстремума и с их связью с первой производной. Давайте вспомним, как обстояли дела там:</p>
-<ul class="simple">
-<li><p>если точка <span class="math notranslate nohighlight">\(x_0\)</span> экстремальная, то производная в точке равна нулю или не существует;</p></li>
-<li><p>если производная в точке равна нулю или не существует, то точка будет «кандидатом» в экстремальные, но нет гарантий, что она такой окажется.</p></li>
-</ul>
-<p>Похожим образом связаны точки перегиба и вторая производная:</p>
-<ul class="simple">
-<li><p>если точка <span class="math notranslate nohighlight">\(x_0\)</span> является точкой перегиба, то <span class="math notranslate nohighlight">\(f''(x_0) = 0\)</span> или не существует в точке <span class="math notranslate nohighlight">\(x_0\)</span>;</p></li>
-<li><p>если <span class="math notranslate nohighlight">\(f''(x_0) = 0\)</span> или не существует в точке <span class="math notranslate nohighlight">\(x_0\)</span>, то точка будет «кандидатом» на звание точки перегиба, но нет гарантий, что она таковой окажется.</p></li>
-</ul>
-</section>
-<section id="id17">
-<h2>16. Анализ функции<a class="headerlink" href="#id17" title="Ссылка на этот заголовок">#</a></h2>
-<p>Анализировать функцию мы будем, добывая данные по следующему списку:</p>
-<ol class="arabic simple">
-<li><p>Область определения функции.</p></li>
-<li><p>Асимптоты: вертикальные и горизонтальные.</p></li>
-<li><p>Промежутки монотонности и экстремумы.</p></li>
-<li><p>Наибольшее и наименьшее значения.</p></li>
-<li><p>Выпуклость и точки перегиба.</p></li>
-</ol>
-<ul class="simple">
-<li><p>Иногда уже на этом этапе можно построить график. Если данных не хватает,<br />
-то можно исследовать функцию дополнительно:</p></li>
-</ul>
-<ol class="arabic simple" start="6">
-<li><p>Точки пересечения с осями координат. Если их найти сложно, то этот пункт пропускают.</p></li>
-<li><p>Множество значений функции.</p></li>
-<li><p>Если данных всё ещё недостаточно, составляют таблицу значений функции<br />
-в дополнительных точках.</p></li>
-</ol>
-</section>
+<p>Мы доказали, что дифференцируемость является более сильным свойством, чем непрерывность. Понятия, введенные сегодня, служат фундаментом для всего последующего курса математического анализа, включая правила дифференцирования, исследование функций и интегральное исчисление.</p>
+<p>Спасибо за внимание.</p>
 </section>
 
     <script type="text/x-thebe-config">
@@ -786,23 +605,18 @@ f'(x) = 3x^2 - 6x
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">1. Производная</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">2. Объяснение</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">3. Математическая формализация</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">4. Нахождение касательной к графику функции и расчет углового коэффициента</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">5. Примеры интерпретации углового коэффициента</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">6. Пример из физики</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">7. Геометрический смысл производной</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">8. Дополнения</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">9. Формулы дифференцирования</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id11">10. Связь монотонности и производной</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id12">11. Вторая производная и выпуклость функции</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id13">12. Алгоритм нахождения экстремумов функции</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id14">13. Пример из физики</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id15">14. Теорема о композиций функций</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id16">15. Точки перегиба</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id17">16. Анализ функции</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Анализ и формализация понятия производной</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">1. Предпосылки: Задачи о касательной и мгновенной скорости</a><ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">1.1. Геометрическая задача: Построение касательной к кривой</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">1.2. Физическая задача: Определение мгновенной скорости</a></li>
 </ul>
+</li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">2. Формальное определение производной</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">3. Дифференцируемость и непрерывность</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">4. Дифференциал функции</a></li>
+<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">Заключение</a></li>
+</ul>
+
   </nav></div>
 
 </div></div>
