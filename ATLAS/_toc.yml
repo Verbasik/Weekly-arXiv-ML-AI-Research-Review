@@ -21,3 +21,4 @@ parts:
   - caption: Глава 3. Производная
     chapters:
     - file: Chapter-1/03-derivative
+    - file: Chapter-1/03-math
