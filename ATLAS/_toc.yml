@@ -22,3 +22,7 @@ parts:
     chapters:
     - file: Chapter-1/03-derivative
     - file: Chapter-1/03-math
+
+  - caption: Глава 4. Градиент
+    chapters:
+    - file: Chapter-1/04-gradient
