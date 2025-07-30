@@ -76,6 +76,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'Chapter-1/03-math';</script>
     <link rel="index" title="Алфавитный указатель" href="../genindex.html" />
     <link rel="search" title="Поиск" href="../search.html" />
+    <link rel="next" title="Градиент — ваш навигатор в мире функций" href="04-gradient.html" />
     <link rel="prev" title="Производная — узнаём скорость в любой момент" href="03-derivative.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="ru"/>
@@ -203,11 +204,10 @@
 <ul class="current nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="03-derivative.html">Производная — узнаём скорость в любой момент</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Анализ и формализация понятия производной</a></li>
-
-
-
-
-
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Глава 4. Градиент</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="04-gradient.html">Градиент — ваш навигатор в мире функций</a></li>
 </ul>
 
     </div>
@@ -403,18 +403,16 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Анализ и формализация понятия производной</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">1. Предпосылки: Задачи о касательной и мгновенной скорости</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">1.1. Геометрическая задача: Построение касательной к кривой</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">1.2. Физическая задача: Определение мгновенной скорости</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">1. Предпосылки: задачи о касательной и мгновенной скорости</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">1.1. Геометрическая задача: построение касательной к кривой</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">1.2. Физическая задача: определение мгновенной скорости</a></li>
 </ul>
 </li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">2. Формальное определение производной</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">3. Дифференцируемость и непрерывность</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">4. Дифференциал функции</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">Заключение</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">2. Формальное определение производной</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">3. Дифференцируемость и непрерывность</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">4. Дифференциал функции</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">Заключение</a></li>
 </ul>
-
             </nav>
         </div>
     </div>
@@ -427,14 +425,16 @@ document.write(`
                   
   <section id="id1">
 <h1>Анализ и формализация понятия производной<a class="headerlink" href="#id1" title="Ссылка на этот заголовок">#</a></h1>
-</section>
 <section id="id2">
-<h1>1. Предпосылки: Задачи о касательной и мгновенной скорости<a class="headerlink" href="#id2" title="Ссылка на этот заголовок">#</a></h1>
+<h2>1. Предпосылки: задачи о касательной и мгновенной скорости<a class="headerlink" href="#id2" title="Ссылка на этот заголовок">#</a></h2>
 <p>Аппарат дифференциального исчисления, разработанный в трудах Исаака Ньютона и Готфрида Лейбница в XVII веке, возник не на пустом месте. Он стал ответом на давно стоявшие перед математиками и физиками вопросы. Рассмотрим два ключевых из них.</p>
 <section id="id3">
-<h2>1.1. Геометрическая задача: Построение касательной к кривой<a class="headerlink" href="#id3" title="Ссылка на этот заголовок">#</a></h2>
+<h3>1.1. Геометрическая задача: построение касательной к кривой<a class="headerlink" href="#id3" title="Ссылка на этот заголовок">#</a></h3>
 <p>Рассмотрим произвольную плоскую кривую, заданную как график функции <span class="math notranslate nohighlight">\(y = f(x)\)</span>. Что такое касательная к этой кривой в некоторой точке <span class="math notranslate nohighlight">\(M_0(x_0, y_0)\)</span>? Интуитивно мы представляем ее как прямую, которая «прикасается» к кривой в данной точке, наилучшим образом повторяя ее направление в бесконечно малой окрестности этой точки.</p>
-<p>Для формализации этого понятия воспользуемся методом секущих. Возьмем на кривой еще одну точку <span class="math notranslate nohighlight">\(M_1(x_0 + \Delta x, y_0 + \Delta y)\)</span>, где <span class="math notranslate nohighlight">\(\Delta x\)</span> — некоторое приращение аргумента, а <span class="math notranslate nohighlight">\(\Delta y = f(x_0 + \Delta x) - f(x_0)\)</span> — соответствующее приращение функции. Проведем через точки <span class="math notranslate nohighlight">\(M_0\)</span> и <span class="math notranslate nohighlight">\(M_1\)</span> прямую, называемую <strong>секущей</strong>.</p>
+<p>Для формализации этого понятия воспользуемся методом секущих. Возьмем на кривой еще одну точку:</p>
+<div class="math notranslate nohighlight">
+\[M_1(x_0 + \Delta x, y_0 + \Delta y)\]</div>
+<p>где <span class="math notranslate nohighlight">\(\Delta x\)</span> — некоторое приращение аргумента, а <span class="math notranslate nohighlight">\(\Delta y = f(x_0 + \Delta x) - f(x_0)\)</span> — соответствующее приращение функции. Проведем через точки <span class="math notranslate nohighlight">\(M_0\)</span> и <span class="math notranslate nohighlight">\(M_1\)</span> прямую, называемую <strong>секущей</strong>.</p>
 <p>Угловой коэффициент этой секущей, который определяет тангенс угла ее наклона к оси абсцисс, вычисляется тривиально:</p>
 <div class="math notranslate nohighlight">
 \[k_{\text{сек}} = \tan \varphi = \frac{\Delta y}{\Delta x} = \frac{f(x_0 + \Delta x) - f(x_0)}{\Delta x}\]</div>
@@ -444,7 +444,7 @@ document.write(`
 <p>Таким образом, <strong>геометрический смысл</strong> величины, которую мы собираемся определить, заключается в том, что она равна угловому коэффициенту касательной к графику функции в данной точке.</p>
 </section>
 <section id="id4">
-<h2>1.2. Физическая задача: Определение мгновенной скорости<a class="headerlink" href="#id4" title="Ссылка на этот заголовок">#</a></h2>
+<h3>1.2. Физическая задача: определение мгновенной скорости<a class="headerlink" href="#id4" title="Ссылка на этот заголовок">#</a></h3>
 <p>Рассмотрим материальную точку, движущуюся прямолинейно по закону <span class="math notranslate nohighlight">\(s = s(t)\)</span>, где <span class="math notranslate nohighlight">\(s\)</span> — координата точки в момент времени <span class="math notranslate nohighlight">\(t\)</span>. За промежуток времени от <span class="math notranslate nohighlight">\(t_0\)</span> до <span class="math notranslate nohighlight">\(t_0 + \Delta t\)</span> точка пройдет путь <span class="math notranslate nohighlight">\(\Delta s = s(t_0 + \Delta t) - s(t_0)\)</span>.</p>
 <p><strong>Средняя скорость</strong> движения за этот промежуток времени определяется как отношение пройденного пути ко времени, за которое он был пройден:</p>
 <div class="math notranslate nohighlight">
@@ -453,11 +453,10 @@ document.write(`
 <div class="math notranslate nohighlight">
 \[v(t_0) = \lim_{\Delta t \to 0} v_{\text{ср}} = \lim_{\Delta t \to 0} \frac{s(t_0 + \Delta t) - s(t_0)}{\Delta t}\]</div>
 <p>Мы видим, что математическая конструкция, к которой мы пришли, полностью аналогична той, что возникла в задаче о касательной. Это универсальное отношение лежит в основе формального определения производной.</p>
-<hr class="docutils" />
 </section>
 </section>
 <section id="id5">
-<h1>2. Формальное определение производной<a class="headerlink" href="#id5" title="Ссылка на этот заголовок">#</a></h1>
+<h2>2. Формальное определение производной<a class="headerlink" href="#id5" title="Ссылка на этот заголовок">#</a></h2>
 <p>Перейдем к строгому определению.</p>
 <p><strong>Определение.</strong> <strong>Производной</strong> функции <span class="math notranslate nohighlight">\(y = f(x)\)</span> в точке <span class="math notranslate nohighlight">\(x_0\)</span> называется предел отношения приращения функции <span class="math notranslate nohighlight">\(\Delta y\)</span> к вызвавшему его приращению аргумента <span class="math notranslate nohighlight">\(\Delta x\)</span> при условии, что приращение аргумента стремится к нулю.</p>
 <p>Для производной используются следующие стандартные обозначения:</p>
@@ -478,68 +477,145 @@ document.write(`
 <p>Эквивалентная форма записи определения, получаемая заменой <span class="math notranslate nohighlight">\(x = x_0 + \Delta x\)</span> (откуда <span class="math notranslate nohighlight">\(\Delta x = x - x_0\)</span>):</p>
 <div class="math notranslate nohighlight">
 \[f'(x_0) = \lim_{x \to x_0} \frac{f(x) - f(x_0)}{x - x_0}\]</div>
-<hr class="docutils" />
 </section>
 <section id="id6">
-<h1>3. Дифференцируемость и непрерывность<a class="headerlink" href="#id6" title="Ссылка на этот заголовок">#</a></h1>
+<h2>3. Дифференцируемость и непрерывность<a class="headerlink" href="#id6" title="Ссылка на этот заголовок">#</a></h2>
 <p>Возникает естественный вопрос: как связаны между собой свойства дифференцируемости и непрерывности функции в точке? Ответ дает следующая фундаментальная теорема.</p>
-<p><strong>Теорема.</strong> Если функция <span class="math notranslate nohighlight">\(f(x)\)</span> дифференцируема в точке <span class="math notranslate nohighlight">\(x_0\)</span>, то она непрерывна в этой точке.</p>
-<p><strong>Доказательство.</strong>
-То, что функция <span class="math notranslate nohighlight">\(f(x)\)</span> дифференцируема в точке <span class="math notranslate nohighlight">\(x_0\)</span>, означает, что существует конечный предел:</p>
+<p><strong>Теорема.</strong></p>
+<p>Если функция <span class="math notranslate nohighlight">\(f(x)\)</span> дифференцируема в точке <span class="math notranslate nohighlight">\(x_0\)</span>, то она непрерывна в этой точке.</p>
+<p><strong>Доказательство.</strong></p>
+<p>То, что функция <span class="math notranslate nohighlight">\(f(x)\)</span> дифференцируема в точке <span class="math notranslate nohighlight">\(x_0\)</span>, означает, что существует конечный предел:</p>
 <div class="math notranslate nohighlight">
-\[f'(x_0) = \lim_{\Delta x \to 0} \frac{f(x_0 + \Delta x) - f(x_0)}{\Delta x}\]</div>
-<p>Нам нужно доказать, что функция непрерывна в точке <span class="math notranslate nohighlight">\(x_0\)</span>, то есть, по определению непрерывности, что <span class="math notranslate nohighlight">\(\lim_{\Delta x \to 0} f(x_0 + \Delta x) = f(x_0)\)</span>, или, что эквивалентно, <span class="math notranslate nohighlight">\(\lim_{\Delta x \to 0} (f(x_0 + \Delta x) - f(x_0)) = 0\)</span>.</p>
-<p>Рассмотрим приращение функции <span class="math notranslate nohighlight">\(\Delta y = f(x_0 + \Delta x) - f(x_0)\)</span>. Выполним тождественное преобразование для <span class="math notranslate nohighlight">\(\Delta x \neq 0\)</span>:
-<span class="math notranslate nohighlight">\(f(x_0 + \Delta x) - f(x_0) = \frac{f(x_0 + \Delta x) - f(x_0)}{\Delta x} \cdot \Delta x\)</span></p>
-<p>Теперь перейдем к пределу при <span class="math notranslate nohighlight">\(\Delta x \to 0\)</span> в обеих частях равенства:
-<span class="math notranslate nohighlight">\(\lim_{\Delta x \to 0} (f(x_0 + \Delta x) - f(x_0)) = \lim_{\Delta x \to 0} \left( \frac{f(x_0 + \Delta x) - f(x_0)}{\Delta x} \cdot \Delta x \right)\)</span></p>
-<p>Используя теорему о пределе произведения, получаем:
-<span class="math notranslate nohighlight">\(\lim_{\Delta x \to 0} (f(x_0 + \Delta x) - f(x_0)) = \left( \lim_{\Delta x \to 0} \frac{f(x_0 + \Delta x) - f(x_0)}{\Delta x} \right) \cdot \left( \lim_{\Delta x \to 0} \Delta x \right)\)</span></p>
-<p>Первый предел в правой части по условию теоремы есть <span class="math notranslate nohighlight">\(f'(x_0)\)</span> (конечное число), а второй предел очевидно равен нулю.
-Следовательно:
-<span class="math notranslate nohighlight">\(\lim_{\Delta x \to 0} (f(x_0 + \Delta x) - f(x_0)) = f'(x_0) \cdot 0 = 0\)</span></p>
+\[
+f'(x_0) = \lim_{\Delta x \to 0} \frac{f(x_0 + \Delta x) - f(x_0)}{\Delta x}
+\]</div>
+<p>Нам нужно доказать, что функция непрерывна в точке <span class="math notranslate nohighlight">\(x_0\)</span>, то есть, по определению непрерывности, что:</p>
+<div class="math notranslate nohighlight">
+\[
+\lim_{\Delta x \to 0} f(x_0 + \Delta x) = f(x_0),
+\]</div>
+<p>или, что эквивалентно:</p>
+<div class="math notranslate nohighlight">
+\[
+\lim_{\Delta x \to 0} \left( f(x_0 + \Delta x) - f(x_0) \right) = 0.
+\]</div>
+<p>Рассмотрим приращение функции:</p>
+<div class="math notranslate nohighlight">
+\[
+\Delta y = f(x_0 + \Delta x) - f(x_0).
+\]</div>
+<p>Выполним тождественное преобразование для <span class="math notranslate nohighlight">\(\Delta x \neq 0\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[
+f(x_0 + \Delta x) - f(x_0) = \frac{f(x_0 + \Delta x) - f(x_0)}{\Delta x} \cdot \Delta x.
+\]</div>
+<p>Теперь перейдем к пределу при <span class="math notranslate nohighlight">\(\Delta x \to 0\)</span> в обеих частях равенства:</p>
+<div class="math notranslate nohighlight">
+\[
+\lim_{\Delta x \to 0} \left( f(x_0 + \Delta x) - f(x_0) \right) = \lim_{\Delta x \to 0} \left( \frac{f(x_0 + \Delta x) - f(x_0)}{\Delta x} \cdot \Delta x \right).
+\]</div>
+<p>Используя теорему о пределе произведения, получаем:</p>
+<div class="math notranslate nohighlight">
+\[
+\lim_{\Delta x \to 0} \left( f(x_0 + \Delta x) - f(x_0) \right) = \left( \lim_{\Delta x \to 0} \frac{f(x_0 + \Delta x) - f(x_0)}{\Delta x} \right) \cdot \left( \lim_{\Delta x \to 0} \Delta x \right).
+\]</div>
+<p>Первый предел в правой части по условию теоремы есть <span class="math notranslate nohighlight">\(f'(x_0)\)</span> (конечное число), а второй предел очевидно равен нулю.</p>
+<p>Следовательно:</p>
+<div class="math notranslate nohighlight">
+\[
+\lim_{\Delta x \to 0} \left( f(x_0 + \Delta x) - f(x_0) \right) = f'(x_0) \cdot 0 = 0.
+\]</div>
 <p>Это и доказывает непрерывность функции в точке <span class="math notranslate nohighlight">\(x_0\)</span>. <strong>Что и требовалось доказать.</strong></p>
-<p><strong>Обратное утверждение неверно!</strong> Непрерывность функции в точке не гарантирует ее дифференцируемости. Классический контрпример — функция <span class="math notranslate nohighlight">\(f(x) = |x|\)</span> в точке <span class="math notranslate nohighlight">\(x_0 = 0\)</span>. Она, очевидно, непрерывна в этой точке. Однако, найдем ее левую и правую производные:</p>
+<p><strong>Обратное утверждение неверно!</strong><br />
+Непрерывность функции в точке не гарантирует ее дифференцируемости. Классический контрпример — функция <span class="math notranslate nohighlight">\(f(x) = |x|\)</span> в точке <span class="math notranslate nohighlight">\(x_0 = 0\)</span>. Она, очевидно, непрерывна в этой точке. Однако, найдем ее левую и правую производные:</p>
 <ul class="simple">
-<li><p><strong>Правая производная:</strong>
-<span class="math notranslate nohighlight">\(f'_+(0) = \lim_{\Delta x \to 0+} \frac{|0 + \Delta x| - |0|}{\Delta x} = \lim_{\Delta x \to 0+} \frac{|\Delta x|}{\Delta x} = \lim_{\Delta x \to 0+} \frac{\Delta x}{\Delta x} = 1\)</span></p></li>
-<li><p><strong>Левая производная:</strong>
-<span class="math notranslate nohighlight">\(f'_-(0) = \lim_{\Delta x \to 0-} \frac{|0 + \Delta x| - |0|}{\Delta x} = \lim_{\Delta x \to 0-} \frac{|\Delta x|}{\Delta x} = \lim_{\Delta x \to 0-} \frac{-\Delta x}{\Delta x} = -1\)</span></p></li>
+<li><p><strong>Правая производная:</strong><br />
+$<span class="math notranslate nohighlight">\(
+f'_+(0) = \lim_{\Delta x \to 0+} \frac{|0 + \Delta x| - |0|}{\Delta x} = \lim_{\Delta x \to 0+} \frac{|\Delta x|}{\Delta x} = \lim_{\Delta x \to 0+} \frac{\Delta x}{\Delta x} = 1
+\)</span>$</p></li>
+<li><p><strong>Левая производная:</strong><br />
+$<span class="math notranslate nohighlight">\(
+f'_-(0) = \lim_{\Delta x \to 0-} \frac{|0 + \Delta x| - |0|}{\Delta x} = \lim_{\Delta x \to 0-} \frac{|\Delta x|}{\Delta x} = \lim_{\Delta x \to 0-} \frac{-\Delta x}{\Delta x} = -1
+\)</span>$</p></li>
 </ul>
-<p>Поскольку <span class="math notranslate nohighlight">\(f'_+(0) \neq f'_-(0)\)</span>, производная в точке <span class="math notranslate nohighlight">\(x_0 = 0\)</span> не существует. Геометрически это соответствует тому, что график функции в этой точке имеет «излом», и провести однозначную касательную невозможно.</p>
-<hr class="docutils" />
+<p>Поскольку <span class="math notranslate nohighlight">\(f'_+(0) \neq f'_-(0)\)</span>, производная в точке <span class="math notranslate nohighlight">\(x_0 = 0\)</span> не существует.</p>
+<p>Геометрически это соответствует тому, что график функции в этой точке имеет «излом», и провести однозначную касательную невозможно.</p>
 </section>
 <section id="id7">
-<h1>4. Дифференциал функции<a class="headerlink" href="#id7" title="Ссылка на этот заголовок">#</a></h1>
+<h2>4. Дифференциал функции<a class="headerlink" href="#id7" title="Ссылка на этот заголовок">#</a></h2>
 <p>Понятие производной тесно связано с концепцией линейной аппроксимации функции и понятием дифференциала.</p>
-<p>Пусть функция <span class="math notranslate nohighlight">\(f(x)\)</span> дифференцируема в точке <span class="math notranslate nohighlight">\(x_0\)</span>. Тогда по определению производной:
-<span class="math notranslate nohighlight">\(\lim_{\Delta x \to 0} \frac{f(x_0 + \Delta x) - f(x_0)}{\Delta x} = f'(x_0)\)</span></p>
-<p>Это равенство по определению предела можно переписать в виде:
-<span class="math notranslate nohighlight">\(\frac{f(x_0 + \Delta x) - f(x_0)}{\Delta x} = f'(x_0) + \alpha(\Delta x)\)</span>, где <span class="math notranslate nohighlight">\(\alpha(\Delta x)\)</span> — бесконечно малая функция при <span class="math notranslate nohighlight">\(\Delta x \to 0\)</span>, то есть <span class="math notranslate nohighlight">\(\lim_{\Delta x \to 0} \alpha(\Delta x) = 0\)</span>.</p>
-<p>Домножим на <span class="math notranslate nohighlight">\(\Delta x\)</span>:
-<span class="math notranslate nohighlight">\(f(x_0 + \Delta x) - f(x_0) = f'(x_0)\Delta x + \alpha(\Delta x)\Delta x\)</span></p>
-<p>Обозначим приращение функции <span class="math notranslate nohighlight">\(\Delta y = f(x_0 + \Delta x) - f(x_0)\)</span>. Тогда:
-<span class="math notranslate nohighlight">\(\Delta y = f'(x_0)\Delta x + o(\Delta x)\)</span></p>
-<p>Здесь <span class="math notranslate nohighlight">\(o(\Delta x)\)</span> (читается «о малое от дельта икс») — это член <span class="math notranslate nohighlight">\(\alpha(\Delta x)\Delta x\)</span>, который является бесконечно малой более высокого порядка по сравнению с <span class="math notranslate nohighlight">\(\Delta x\)</span>, то есть <span class="math notranslate nohighlight">\(\lim_{\Delta x \to 0} \frac{o(\Delta x)}{\Delta x} = 0\)</span>.</p>
+<p>Пусть функция <span class="math notranslate nohighlight">\(f(x)\)</span> дифференцируема в точке <span class="math notranslate nohighlight">\(x_0\)</span>. Тогда по определению производной:</p>
+<div class="math notranslate nohighlight">
+\[
+\lim_{\Delta x \to 0} \frac{f(x_0 + \Delta x) - f(x_0)}{\Delta x} = f'(x_0)
+\]</div>
+<p>Это равенство по определению предела можно переписать в виде:</p>
+<div class="math notranslate nohighlight">
+\[
+\frac{f(x_0 + \Delta x) - f(x_0)}{\Delta x} = f'(x_0) + \alpha(\Delta x),
+\]</div>
+<p>где <span class="math notranslate nohighlight">\(\alpha(\Delta x)\)</span> — бесконечно малая функция при <span class="math notranslate nohighlight">\(\Delta x \to 0\)</span>, то есть <span class="math notranslate nohighlight">\(\lim_{\Delta x \to 0} \alpha(\Delta x) = 0\)</span>.</p>
+<p>Домножим на <span class="math notranslate nohighlight">\(\Delta x\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[
+f(x_0 + \Delta x) - f(x_0) = f'(x_0)\Delta x + \alpha(\Delta x)\Delta x
+\]</div>
+<p>Обозначим приращение функции <span class="math notranslate nohighlight">\(\Delta y = f(x_0 + \Delta x) - f(x_0)\)</span>. Тогда:</p>
+<div class="math notranslate nohighlight">
+\[
+\Delta y = f'(x_0)\Delta x + o(\Delta x)
+\]</div>
+<p>Здесь <span class="math notranslate nohighlight">\(o(\Delta x)\)</span> (читается «о малое от дельта икс») — это член <span class="math notranslate nohighlight">\(\alpha(\Delta x)\Delta x\)</span>, который является бесконечно малой более высокого порядка по сравнению с <span class="math notranslate nohighlight">\(\Delta x\)</span>, то есть:</p>
+<div class="math notranslate nohighlight">
+\[
+\lim_{\Delta x \to 0} \frac{o(\Delta x)}{\Delta x} = 0
+\]</div>
 <p>Мы представили приращение функции <span class="math notranslate nohighlight">\(\Delta y\)</span> в виде суммы двух слагаемых:</p>
 <ol class="arabic simple">
 <li><p><span class="math notranslate nohighlight">\(f'(x_0)\Delta x\)</span> — линейная относительно <span class="math notranslate nohighlight">\(\Delta x\)</span> часть приращения.</p></li>
 <li><p><span class="math notranslate nohighlight">\(o(\Delta x)\)</span> — остаточный член.</p></li>
 </ol>
-<p><strong>Определение.</strong> Функция <span class="math notranslate nohighlight">\(f(x)\)</span> называется <strong>дифференцируемой</strong> в точке <span class="math notranslate nohighlight">\(x_0\)</span>, если ее приращение в этой точке может быть представлено в виде <span class="math notranslate nohighlight">\(\Delta y = A \cdot \Delta x + o(\Delta x)\)</span>, где <span class="math notranslate nohighlight">\(A\)</span> — некоторая константа, не зависящая от <span class="math notranslate nohighlight">\(\Delta x\)</span>.</p>
-<p><strong>Определение.</strong> <strong>Дифференциалом</strong> функции <span class="math notranslate nohighlight">\(f(x)\)</span> в точке <span class="math notranslate nohighlight">\(x_0\)</span> (обозначается <span class="math notranslate nohighlight">\(dy\)</span> или <span class="math notranslate nohighlight">\(df(x_0)\)</span>) называется главная, линейная относительно <span class="math notranslate nohighlight">\(\Delta x\)</span> часть ее приращения.
-<span class="math notranslate nohighlight">\(dy = A \cdot \Delta x\)</span></p>
+<p><strong>Определение.</strong></p>
+<p>Функция <span class="math notranslate nohighlight">\(f(x)\)</span> называется <strong>дифференцируемой</strong> в точке <span class="math notranslate nohighlight">\(x_0\)</span>, если ее приращение в этой точке может быть представлено в виде:</p>
+<div class="math notranslate nohighlight">
+\[
+\Delta y = A \cdot \Delta x + o(\Delta x),
+\]</div>
+<p>где <span class="math notranslate nohighlight">\(A\)</span> — некоторая константа, не зависящая от <span class="math notranslate nohighlight">\(\Delta x\)</span>.</p>
+<p><strong>Определение.</strong></p>
+<p><strong>Дифференциалом</strong> функции <span class="math notranslate nohighlight">\(f(x)\)</span> в точке <span class="math notranslate nohighlight">\(x_0\)</span> (обозначается <span class="math notranslate nohighlight">\(dy\)</span> или <span class="math notranslate nohighlight">\(df(x_0)\)</span>) называется главная, линейная относительно <span class="math notranslate nohighlight">\(\Delta x\)</span> часть ее приращения:</p>
+<div class="math notranslate nohighlight">
+\[
+dy = A \cdot \Delta x
+\]</div>
 <p>Сравнивая два определения, мы видим, что функция дифференцируема в точке тогда и только тогда, когда в этой точке существует производная, причем <span class="math notranslate nohighlight">\(A = f'(x_0)\)</span>.</p>
-<p>Таким образом, дифференциал функции равен произведению ее производной на приращение независимой переменной:
-<span class="math notranslate nohighlight">\(dy = f'(x_0)\Delta x\)</span></p>
+<p>Таким образом, дифференциал функции равен произведению ее производной на приращение независимой переменной:</p>
+<div class="math notranslate nohighlight">
+\[
+dy = f'(x_0)\Delta x
+\]</div>
 <p>Принято называть дифференциалом независимой переменной само приращение: <span class="math notranslate nohighlight">\(dx = \Delta x\)</span>. С учетом этого, формула принимает канонический вид:</p>
-<p><span class="math notranslate nohighlight">\(dy = f'(x)dx\)</span></p>
-<p>Из этой формулы следует знаменитая запись Лейбница: <span class="math notranslate nohighlight">\(f'(x) = \frac{dy}{dx}\)</span>, которая теперь может трактоваться не просто как символьное обозначение, а как отношение двух дифференциалов.</p>
-<p><strong>Геометрический смысл дифференциала.</strong> Вспомним, что <span class="math notranslate nohighlight">\(f'(x_0)\)</span> — это тангенс угла наклона касательной. Тогда <span class="math notranslate nohighlight">\(f'(x_0)\Delta x = \tan \varphi \cdot \Delta x\)</span> есть не что иное, как приращение ординаты касательной, проведенной в точке <span class="math notranslate nohighlight">\(x_0\)</span>, когда аргумент получает приращение <span class="math notranslate nohighlight">\(\Delta x\)</span>. Дифференциал <span class="math notranslate nohighlight">\(dy\)</span> — это приращение по касательной, в то время как <span class="math notranslate nohighlight">\(\Delta y\)</span> — это истинное приращение по самой кривой.</p>
-<hr class="docutils" />
+<div class="math notranslate nohighlight">
+\[
+dy = f'(x)dx
+\]</div>
+<p>Из этой формулы следует знаменитая запись Лейбница:</p>
+<div class="math notranslate nohighlight">
+\[
+f'(x) = \frac{dy}{dx},
+\]</div>
+<p>которая теперь может трактоваться не просто как символьное обозначение, а как отношение двух дифференциалов.</p>
+<p><strong>Геометрический смысл дифференциала.</strong><br />
+Вспомним, что <span class="math notranslate nohighlight">\(f'(x_0)\)</span> — это тангенс угла наклона касательной. Тогда:</p>
+<div class="math notranslate nohighlight">
+\[
+f'(x_0)\Delta x = \tan \varphi \cdot \Delta x
+\]</div>
+<p>есть не что иное, как приращение ординаты касательной, проведенной в точке <span class="math notranslate nohighlight">\(x_0\)</span>, когда аргумент получает приращение <span class="math notranslate nohighlight">\(\Delta x\)</span>.</p>
+<p>Дифференциал <span class="math notranslate nohighlight">\(dy\)</span> — это приращение по касательной, в то время как <span class="math notranslate nohighlight">\(\Delta y\)</span> — это истинное приращение по самой кривой.</p>
 </section>
 <section id="id8">
-<h1>Заключение<a class="headerlink" href="#id8" title="Ссылка на этот заголовок">#</a></h1>
+<h2>Заключение<a class="headerlink" href="#id8" title="Ссылка на этот заголовок">#</a></h2>
 <p>Итак, сегодня мы установили, что производная — это не просто абстрактная математическая операция. Это мощный инструмент, имеющий ясные интерпретации:</p>
 <ul class="simple">
 <li><p><strong>Геометрически</strong> — это угловой коэффициент касательной к графику функции.</p></li>
@@ -548,6 +624,7 @@ document.write(`
 </ul>
 <p>Мы доказали, что дифференцируемость является более сильным свойством, чем непрерывность. Понятия, введенные сегодня, служат фундаментом для всего последующего курса математического анализа, включая правила дифференцирования, исследование функций и интегральное исчисление.</p>
 <p>Спасибо за внимание.</p>
+</section>
 </section>
 
     <script type="text/x-thebe-config">
@@ -589,6 +666,15 @@ document.write(`
         <p class="prev-next-title">Производная — узнаём скорость в любой момент</p>
       </div>
     </a>
+    <a class="right-next"
+       href="04-gradient.html"
+       title="следующая страница">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">вперёд</p>
+        <p class="prev-next-title">Градиент — ваш навигатор в мире функций</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
 </div>
                 </footer>
               
@@ -605,18 +691,16 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">Анализ и формализация понятия производной</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">1. Предпосылки: Задачи о касательной и мгновенной скорости</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">1.1. Геометрическая задача: Построение касательной к кривой</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">1.2. Физическая задача: Определение мгновенной скорости</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">1. Предпосылки: задачи о касательной и мгновенной скорости</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">1.1. Геометрическая задача: построение касательной к кривой</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">1.2. Физическая задача: определение мгновенной скорости</a></li>
 </ul>
 </li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">2. Формальное определение производной</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">3. Дифференцируемость и непрерывность</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">4. Дифференциал функции</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">Заключение</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">2. Формальное определение производной</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">3. Дифференцируемость и непрерывность</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">4. Дифференциал функции</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">Заключение</a></li>
 </ul>
-
   </nav></div>
 
 </div></div>

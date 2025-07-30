@@ -32,7 +32,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
@@ -204,6 +204,10 @@
 <ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="03-derivative.html">Производная — узнаём скорость в любой момент</a></li>
 <li class="toctree-l1"><a class="reference internal" href="03-math.html">Анализ и формализация понятия производной</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Глава 4. Градиент</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="04-gradient.html">Градиент — ваш навигатор в мире функций</a></li>
 </ul>
 
     </div>
@@ -466,11 +470,6 @@ document.write(`
 </pre></div>
 </div>
 </div>
-<div class="cell_output docutils container">
-<div class="plotly-plot">
-    <iframe src="../_static/plots/speed_plot.html" width="100%" height="600px" frameborder="0"></iframe>
-</div>
-</div>
 </div>
 <p>Мы вспомнили понятие функции, и теперь давайте рассмотрим изменение скорости велосипеда в разные промежутки времени. Для этого разберём два понятия: приращение аргумента и приращение функции.</p>
 <p>Отметим на графике точки <strong>A</strong> и <strong>B</strong>, опустим из них перпендикуляры на оси <strong>X</strong> и <strong>Y</strong>. Точки пересечения этих перпендикуляров с осями будут координатами точек <strong>A</strong> и <strong>B</strong>. Пусть точка <strong>A</strong> имеет координаты <span class="math notranslate nohighlight">\((x_1, y_1)\)</span>, а точка <strong>B</strong> — <span class="math notranslate nohighlight">\((x_2, y_2)\)</span>:</p>
@@ -484,11 +483,6 @@ document.write(`
 <span class="s2">&lt;/div&gt;</span>
 <span class="s2">&quot;&quot;&quot;</span><span class="p">))</span>
 </pre></div>
-</div>
-</div>
-<div class="cell_output docutils container">
-<div class="plotly-plot">
-    <iframe src="../_static/plots/delta_speed_plot.html" width="100%" height="600px" frameborder="0"></iframe>
 </div>
 </div>
 </div>

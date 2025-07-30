@@ -1,0 +1,655 @@
+
+<!DOCTYPE html>
+
+
+<html lang="ru" data-content_root="../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Градиент — ваш навигатор в мире функций &#8212; ATLAS</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css?v=6644e6bb" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="../_static/documentation_options.js?v=576a2c22"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script src="../_static/translations.js?v=9bfe3ffa"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-9S2CQ3B60T"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-9S2CQ3B60T');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-9S2CQ3B60T');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'Chapter-1/04-gradient';</script>
+    <link rel="index" title="Алфавитный указатель" href="../genindex.html" />
+    <link rel="search" title="Поиск" href="../search.html" />
+    <link rel="prev" title="Анализ и формализация понятия производной" href="03-math.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="ru"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Перейти к основному содержанию</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">ATLAS</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Поиск" aria-label="Поиск" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Поиск</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../index.html">
+                    🚀 Что такое ATLAS?
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Введение</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="00-introduction.html">От функций к градиенту</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Глава 1. Функция — отправная точка</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="01-functions.html">Функция - начало</a></li>
+<li class="toctree-l1"><a class="reference internal" href="01-math.html">Анализ и формализация понятия функции</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Глава 2. Предел функции</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="02-limit.html">Предел функции — финишная прямая</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02-math.html">Анализ и формализация понятия предела функции</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Глава 3. Производная</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="03-derivative.html">Производная — узнаём скорость в любой момент</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03-math.html">Анализ и формализация понятия производной</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Глава 4. Градиент</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Градиент — ваш навигатор в мире функций</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Исходный репозиторий"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/issues/new?title=Issue%20on%20page%20%2FChapter-1/04-gradient.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Открыть вопрос"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Загрузите эту страницу">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/Chapter-1/04-gradient.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Скачать исходный файл"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Распечатать в PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Полноэкранный режим"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="светлая/темная" aria-label="светлая/темная" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Поиск" aria-label="Поиск" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Градиент — ваш навигатор в мире функций</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Содержание </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Фокус с «замораживанием» осей</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Собираем наш «умный компас»</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Что градиент показывает на карте?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">Градиентный спуск в машинном обучении</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">Постановка задачи</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">Функция потерь</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">Градиентный спуск в действии</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">Что происходит в анимации</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">Визуальная интерпретация</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="id1">
+<h1>Градиент — ваш навигатор в мире функций<a class="headerlink" href="#id1" title="Ссылка на этот заголовок">#</a></h1>
+<p>Мы уже знаем, как с помощью производной <span class="math notranslate nohighlight">\(f'(x)\)</span> найти «мгновенную скорость» функции одной переменной. Это наш спидометр на прямой дороге.</p>
+<p>Но мир редко бывает одномерным. Представьте, что вы стоите на склоне горы. Ваша высота зависит уже от двух координат: от того, насколько вы продвинулись на север (ось Y) и на восток (ось X). Ваша высота — это функция <span class="math notranslate nohighlight">\(f(x, y)\)</span>.</p>
+<p>Здесь возникает новый, более сложный вопрос: <strong>в каком направлении нужно сделать шаг, чтобы подъём был самым крутым, и какова эта крутизна?</strong></p>
+<section id="id2">
+<h2>Фокус с «замораживанием» осей<a class="headerlink" href="#id2" title="Ссылка на этот заголовок">#</a></h2>
+<p>Чтобы ответить на этот вопрос, нам понадобится новый инструмент. Идея проста: давайте на время «заморозим» одно из направлений и посмотрим, что происходит с другим.</p>
+<ol class="arabic">
+<li><p><strong>Движение только вдоль оси X:</strong> Представьте, что вы решили двигаться строго на восток (вдоль оси X), не меняя своей координаты по оси Y. Как будет меняться высота? Чтобы это узнать, нам нужна производная функции <span class="math notranslate nohighlight">\(f(x, y)\)</span>, но только по переменной <span class="math notranslate nohighlight">\(x\)</span>. Это называется <strong>частная производная по x</strong> и обозначается <span class="math notranslate nohighlight">\(\frac{\partial f}{\partial x}\)</span>.</p>
+<blockquote>
+<div><p><strong>Частная производная <span class="math notranslate nohighlight">\(\frac{\partial f}{\partial x}\)</span></strong> — это та же производная, но мы считаем её, делая вид, что все остальные переменные (в нашем случае <span class="math notranslate nohighlight">\(y\)</span>) — это просто числа (константы). Она показывает «скорость роста» функции строго в направлении оси X.</p>
+</div></blockquote>
+</li>
+<li><p><strong>Движение только вдоль оси Y:</strong> Теперь сделаем наоборот. Замрём на месте по оси X и сделаем шаг строго на север (вдоль оси Y). Скорость изменения высоты в этом направлении нам покажет <strong>частная производная по y</strong> — <span class="math notranslate nohighlight">\(\frac{\partial f}{\partial y}\)</span>.</p></li>
+</ol>
+<p>Итак, у нас есть две «скорости»: одна в направлении X, другая в направлении Y. Как их объединить, чтобы найти самое крутое направление?</p>
+</section>
+<section id="id3">
+<h2>Собираем наш «умный компас»<a class="headerlink" href="#id3" title="Ссылка на этот заголовок">#</a></h2>
+<p>Градиент и есть тот самый инструмент, который объединяет эти частные производные в единое целое.</p>
+<p><strong>Градиент</strong> — это вектор (то есть направленный отрезок или «стрелка»), составленный из всех частных производных функции. Для функции двух переменных <span class="math notranslate nohighlight">\(f(x, y)\)</span> он выглядит так:</p>
+<div class="math notranslate nohighlight">
+\[ \nabla f = \left( \frac{\partial f}{\partial x}, \frac{\partial f}{\partial y} \right) \]</div>
+<p>Читается это как «градиент эф» или «набла эф».</p>
+<blockquote>
+<div><p>Если функция — это ландшафт вашей горы, то градиент — это вектор-компас, который в каждой точке указывает направление <strong>самого быстрого роста</strong> функции.</p>
+</div></blockquote>
+<ul class="simple">
+<li><p><strong>Направление вектора</strong> <span class="math notranslate nohighlight">\(\nabla f\)</span> — это и есть ответ на вопрос «куда идти?». Это направление самого крутого подъёма.</p></li>
+<li><p><strong>Длина (модуль) вектора</strong> <span class="math notranslate nohighlight">\(\|\nabla f\|\)</span> — это ответ на вопрос «насколько круто?». Она показывает скорость роста в этом самом крутом направлении.</p></li>
+</ul>
+</section>
+<section id="id4">
+<h2>Что градиент показывает на карте?<a class="headerlink" href="#id4" title="Ссылка на этот заголовок">#</a></h2>
+<p>Представьте карту высот с <strong>линиями уровня</strong> — линиями, соединяющими точки с одинаковой высотой.</p>
+<p><strong>Градиент в любой точке всегда перпендикулярен (направлен под углом 90°) к линии уровня, проходящей через эту точку.</strong></p>
+<p>Это логично: если вы стоите на тропинке, идущей траверсом по склону (линия уровня), то самый быстрый способ подняться — это пойти не вдоль тропы, а прямо «в лоб», перпендикулярно ей.</p>
+<p>А если мы хотим спуститься как можно быстрее (например, как вода, стекающая с горы)? Нужно двигаться в направлении, прямо противоположном градиенту. Это направление называется <strong>антиградиентом</strong> и обозначается <strong>-∇f</strong>.</p>
+</section>
+<section id="id5">
+<h2>Градиентный спуск в машинном обучении<a class="headerlink" href="#id5" title="Ссылка на этот заголовок">#</a></h2>
+<p>Давайте разберем, как работает градиентный спуск на примере задачи предсказания оценок студентов.</p>
+<section id="id6">
+<h3>Постановка задачи<a class="headerlink" href="#id6" title="Ссылка на этот заголовок">#</a></h3>
+<p>У нас есть данные о студентах:</p>
+<ul class="simple">
+<li><p><strong>GPA</strong> (средний балл) - признак <span class="math notranslate nohighlight">\(x_1\)</span></p></li>
+<li><p><strong>Credits</strong> (количество кредитов) - признак <span class="math notranslate nohighlight">\(x_2\)</span></p></li>
+<li><p><strong>Part-time Job</strong> (подработка: 0 или 1) - признак <span class="math notranslate nohighlight">\(x_3\)</span></p></li>
+<li><p><strong>Grade</strong> (итоговая оценка) - целевая переменная <span class="math notranslate nohighlight">\(y\)</span></p></li>
+</ul>
+<p>Нужно построить модель для предсказания оценки: <span class="math notranslate nohighlight">\(\hat{y} = \beta_1 + \beta_2 x_1 + \beta_3 x_2 + \beta_4 x_3\)</span></p>
+</section>
+<section id="id7">
+<h3>Функция потерь<a class="headerlink" href="#id7" title="Ссылка на этот заголовок">#</a></h3>
+<p>Используем Mean Squared Error (MSE):
+$<span class="math notranslate nohighlight">\(\epsilon(\hat{y}, y) = \frac{1}{n} \sum_{i=1}^{n} (\hat{y}_i - y_i)^2\)</span>$</p>
+</section>
+<section id="id8">
+<h3>Градиентный спуск в действии<a class="headerlink" href="#id8" title="Ссылка на этот заголовок">#</a></h3>
+<ol class="arabic simple">
+<li><p><strong>Находим частные производные функции потерь:</strong></p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\frac{\partial \epsilon}{\partial \beta_1}\)</span>: Производная по свободному члену</p></li>
+<li><p><span class="math notranslate nohighlight">\(\frac{\partial \epsilon}{\partial \beta_2}\)</span>: Производная по весу для GPA</p></li>
+<li><p><span class="math notranslate nohighlight">\(\frac{\partial \epsilon}{\partial \beta_3}\)</span>: Производная по весу для Credits</p></li>
+<li><p><span class="math notranslate nohighlight">\(\frac{\partial \epsilon}{\partial \beta_4}\)</span>: Производная по весу для Part-time Job</p></li>
+</ul>
+</li>
+<li><p><strong>Записываем вектор градиента:</strong>
+$<span class="math notranslate nohighlight">\(\nabla \epsilon = \left(\frac{\partial \epsilon}{\partial \beta_1}, \frac{\partial \epsilon}{\partial \beta_2}, \frac{\partial \epsilon}{\partial \beta_3}, \frac{\partial \epsilon}{\partial \beta_4}\right)\)</span>$</p></li>
+<li><p><strong>Обновляем параметры:</strong>
+$<span class="math notranslate nohighlight">\(\beta_i = \beta_i - \alpha \cdot \frac{\partial \epsilon}{\partial \beta_i}\)</span><span class="math notranslate nohighlight">\(
+где \)</span>\alpha$ - скорость обучения (learning rate)</p></li>
+</ol>
+</section>
+<section id="id9">
+<h3>Что происходит в анимации<a class="headerlink" href="#id9" title="Ссылка на этот заголовок">#</a></h3>
+<ol class="arabic simple">
+<li><p><strong>Инициализация:</strong> Параметры <span class="math notranslate nohighlight">\(\beta_1, \beta_2, \beta_3, \beta_4\)</span> получают случайные значения</p></li>
+<li><p><strong>Вычисление градиента:</strong> В текущей точке вычисляется направление самого крутого подъема функции потерь</p></li>
+<li><p><strong>Шаг в противоположном направлении:</strong> Параметры обновляются так, чтобы «спуститься» по поверхности функции потерь</p></li>
+<li><p><strong>Итерации:</strong> Процесс повторяется, шаги становятся все меньше по мере приближения к минимуму</p></li>
+</ol>
+</section>
+<section id="id10">
+<h3>Визуальная интерпретация<a class="headerlink" href="#id10" title="Ссылка на этот заголовок">#</a></h3>
+<p>Представьте, что вы стоите на холмистой поверхности, где:</p>
+<ul class="simple">
+<li><p><strong>Высота</strong> - это значение функции потерь</p></li>
+<li><p><strong>Координаты</strong> - это значения параметров <span class="math notranslate nohighlight">\(\beta_1, \beta_2, \beta_3, \beta_4\)</span></p></li>
+<li><p><strong>Градиент</strong> - это направление самого крутого подъема</p></li>
+<li><p><strong>Градиентный спуск</strong> - это движение в противоположном направлении к дну долины</p></li>
+</ul>
+<p>В анимации красная кривая показывает «ландшафт» функции потерь, а зеленая точка движется по этому ландшафту, постепенно находя оптимальные значения параметров модели.</p>
+<iframe
+  width="720"
+  height="405"
+  src="https://rutube.ru/play/embed/f6a0732c094a72a9daebbb07ff3fbae9"
+  frameBorder="0"
+  allow="clipboard-write; autoplay"
+  allowFullScreen
+></iframe>
+<p><strong>Итак, главное, что нужно запомнить:</strong></p>
+<ol class="arabic simple">
+<li><p><strong>Градиент — это вектор</strong>, указывающий направление и скорость самого быстрого роста функции.</p></li>
+<li><p><strong>Он состоит из частных производных</strong> (<span class="math notranslate nohighlight">\(\frac{\partial f}{\partial x}, \frac{\partial f}{\partial y}, \dots\)</span>), которые показывают «скорость» вдоль каждой оси.</p></li>
+<li><p><strong>На карте</strong> градиент всегда перпендикулярен линиям уровня.</p></li>
+<li><p><strong>Антиградиент (-∇f)</strong> указывает направление самого быстрого спуска.</p></li>
+</ol>
+</section>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./Chapter-1"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="03-math.html"
+       title="предыдущая страница">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">назад</p>
+        <p class="prev-next-title">Анализ и формализация понятия производной</p>
+      </div>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Содержание
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Фокус с «замораживанием» осей</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Собираем наш «умный компас»</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Что градиент показывает на карте?</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">Градиентный спуск в машинном обучении</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">Постановка задачи</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">Функция потерь</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">Градиентный спуск в действии</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">Что происходит в анимации</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">Визуальная интерпретация</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+По Verbasik
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
