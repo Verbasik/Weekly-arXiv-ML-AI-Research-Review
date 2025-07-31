@@ -1,23 +1,67 @@
+# -*- coding: utf-8 -*-
+
+"""
+Модуль определяет инструменты (tools) для взаимодействия с Git и
+создает агента-помощника.
+
+Этот модуль содержит функции для выполнения основных Git-операций, таких как
+получение различий в файлах, создание коммитов и отправка изменений
+на удаленный сервер. Он также определяет и создает экземпляр
+`GitAssistantAgent`, который использует эти инструменты для своей работы.
+"""
+
+# Стандартные библиотеки
 import subprocess
-from google.adk.agents import Agent
 from typing import Tuple
+
+# Сторонние библиотеки
+from google.adk.agents import Agent
+
 
 def get_git_diff(repo_path: str) -> Tuple[bool, str]:
     """
-    Adds all changes to the staging area and returns the staged git diff.
+    Description:
+    ---------------
+        Добавляет все изменения в области подготовки (staging area) и
+        возвращает результат выполнения `git diff --staged`.
+
     Args:
-        repo_path: The absolute path to the git repository.
+    ---------------
+        repo_path (str): Абсолютный путь к локальному Git-репозиторию.
+
     Returns:
-        A tuple containing a success boolean and the diff or an error message.
+    ---------------
+        Tuple[bool, str]: Кортеж, где первый элемент — это флаг успеха
+        (True/False), а второй — либо содержимое diff, либо
+        сообщение об ошибке.
+
+    Raises:
+    ---------------
+        subprocess.CalledProcessError: Возникает, если команда Git
+        завершается с ошибкой.
+        FileNotFoundError: Возникает, если команда `git` не найдена в системе.
+
+    Examples:
+    ---------------
+        >>> success, output = get_git_diff('/path/to/my/repo')
+        >>> if success:
+        ...     print(output)
+        ... else:
+        ...     print(f"Error: {output}")
     """
     try:
+        # Шаг 1: Добавить все измененные и новые файлы в staging area.
+        # Это эквивалентно выполнению `git add .` в терминале.
         subprocess.run(
             ["git", "add", "."],
-            cwd=repo_path,
-            check=True,
-            capture_output=True,
-            text=True
+            cwd=repo_path,  # Указываем рабочий каталог для команды
+            check=True,  # Проверяем, что команда завершилась успешно
+            capture_output=True,  # Захватываем вывод команды
+            text=True  # Декодируем вывод в текстовый формат
         )
+
+        # Шаг 2: Получить diff для файлов, находящихся в staging area.
+        # Это необходимо, чтобы агент получил точную информацию об изменениях.
         diff_result = subprocess.run(
             ["git", "diff", "--staged"],
             cwd=repo_path,
@@ -25,22 +69,54 @@ def get_git_diff(repo_path: str) -> Tuple[bool, str]:
             capture_output=True,
             text=True
         )
+        # Возвращаем успешный результат и сам diff
         return True, diff_result.stdout
+
     except subprocess.CalledProcessError as e:
-        return False, f"An error occurred: {e.stderr}"
+        # Обработка ошибок, если любая из команд git завершилась неудачно.
+        error_message = f"Произошла ошибка при выполнении git: {e.stderr}"
+        return False, error_message
+
     except FileNotFoundError:
-        return False, "Error: 'git' command not found. Is Git installed and in your PATH?"
+        # Обработка случая, когда git не установлен или не найден в PATH.
+        error_message = (
+            "Ошибка: команда 'git' не найдена. "
+            "Убедитесь, что Git установлен и доступен в системном PATH."
+        )
+        return False, error_message
+
 
 def create_commit(repo_path: str, message: str) -> Tuple[bool, str]:
     """
-    Creates a git commit with the given message.
+    Description:
+    ---------------
+        Создает Git-коммит с предоставленным сообщением.
+
     Args:
-        repo_path: The absolute path to the git repository.
-        message: The commit message.
+    ---------------
+        repo_path (str): Абсолютный путь к локальному Git-репозиторию.
+        message (str): Сообщение для коммита.
+
     Returns:
-        A tuple containing a success boolean and a status message.
+    ---------------
+        Tuple[bool, str]: Кортеж с флагом успеха и статусным сообщением.
+
+    Raises:
+    ---------------
+        subprocess.CalledProcessError: Если команда `git commit` завершается
+        с ошибкой.
+
+    Examples:
+    ---------------
+        >>> success, status = create_commit(
+        ...     '/path/to/repo',
+        ...     'feat: add new feature'
+        ... )
+        >>> print(status)
+        'Коммит успешно создан.'
     """
     try:
+        # Выполняем команду `git commit` с переданным сообщением.
         subprocess.run(
             ["git", "commit", "-m", message],
             cwd=repo_path,
@@ -48,19 +124,41 @@ def create_commit(repo_path: str, message: str) -> Tuple[bool, str]:
             capture_output=True,
             text=True
         )
-        return True, "Commit created successfully."
+        return True, "Коммит успешно создан."
+
     except subprocess.CalledProcessError as e:
-        return False, f"An error occurred during commit: {e.stderr}"
+        # Обработка ошибок, возникших в процессе создания коммита.
+        error_message = f"Произошла ошибка во время коммита: {e.stderr}"
+        return False, error_message
+
 
 def push_to_remote(repo_path: str) -> Tuple[bool, str]:
     """
-    Pushes the commits to the remote repository.
+    Description:
+    ---------------
+        Отправляет коммиты на удаленный репозиторий (git push).
+
     Args:
-        repo_path: The absolute path to the git repository.
+    ---------------
+        repo_path (str): Абсолютный путь к локальному Git-репозиторию.
+
     Returns:
-        A tuple containing a success boolean and a status message.
+    ---------------
+        Tuple[bool, str]: Кортеж с флагом успеха и статусным сообщением.
+
+    Raises:
+    ---------------
+        subprocess.CalledProcessError: Если команда `git push` завершается
+        с ошибкой (например, из-за конфликтов или проблем с доступом).
+
+    Examples:
+    ---------------
+        >>> success, status = push_to_remote('/path/to/repo')
+        >>> print(status)
+        'Изменения успешно отправлены на удаленный сервер.'
     """
     try:
+        # Выполняем команду `git push` для отправки изменений.
         subprocess.run(
             ["git", "push"],
             cwd=repo_path,
@@ -68,22 +166,137 @@ def push_to_remote(repo_path: str) -> Tuple[bool, str]:
             capture_output=True,
             text=True
         )
-        return True, "Pushed to remote successfully."
+        return True, "Изменения успешно отправлены на удаленный сервер."
+
     except subprocess.CalledProcessError as e:
-        return False, f"An error occurred during push: {e.stderr}"
+        # Обработка ошибок, возникших при отправке.
+        error_message = f"Произошла ошибка во время push: {e.stderr}"
+        return False, error_message
+
 
 def create_git_assistant_agent() -> Agent:
-    """Creates the Git Assistant Agent."""
+    """
+    Description:
+    ---------------
+        Создает и настраивает экземпляр агента `GitAssistantAgent`.
+
+    Returns:
+    ---------------
+        Agent: Настроенный экземпляр агента.
+
+    Examples:
+    ---------------
+        >>> assistant = create_git_assistant_agent()
+        >>> print(assistant.name)
+        'GitAssistant'
+    """
+    # Это основная инструкция (промпт), которая определяет поведение
+    # и роль AI-агента. Она четко указывает, что агент должен делать
+    # (анализировать diff), в каком формате должен быть результат
+    # (Conventional Commits) и чего делать не следует (добавлять лишний текст).
+    instruction = (
+    """
+    <role>
+    Вы — высокоточный AI-аналитик кода, специализирующийся на написании сообщений для git-коммитов в строгом соответствии со спецификацией Conventional Commits v1.0.0.
+    </role>
+
+    <goal>
+    Ваша задача — проанализировать предоставленный `git diff` и сгенерировать одно единственное, идеально отформатированное сообщение для коммита.
+    </goal>
+
+    <context>
+    ### Спецификация Conventional Commits
+
+    Структура сообщения должна быть следующей:
+    `<type>[optional scope]: <description>`
+    `[optional body]`
+    `[optional footer]`
+
+    **Допустимые типы (`<type>`):**
+    - **feat:** Новая функциональность.
+    - **fix:** Исправление ошибки.
+    - **docs:** Изменения в документации.
+    - **style:** Изменения, не влияющие на логику кода (форматирование, пропущенные точки с запятой и т.д.).
+    - **refactor:** Рефакторинг кода без изменения его внешнего поведения.
+    - **perf:** Улучшение производительности.
+    - **test:** Добавление или исправление тестов.
+    - **chore:** Прочие изменения, не затрагивающие исходный код или тесты (обновление зависимостей, настройка сборки и т.п.).
+
+    **Критические изменения (BREAKING CHANGE):**
+    - Могут быть частью любого типа.
+    - Обозначаются добавлением `!` после типа/скоупа (например, `feat(api)!:`) и обязательным наличием футера `BREAKING CHANGE: <описание>`.
+    </context>
+
+    <thinking_process>
+    1.  **Анализ сути:** внимательно изучи `git diff`. Какова основная цель этих изменений? Это добавление нового, исправление старого, или техническая реорганизация?
+    2.  **Определение типа:** на основе анализа выбери наиболее подходящий `<type>` из списка выше.
+    3.  **Определение скоупа (scope):** постарайся определить затронутый компонент, модуль или часть системы (например, `api`, `auth`, `ui-kit`). Если изменение затрагивает множество компонентов, оставь `scope` пустым.
+    4.  **Написание описания (description):** сформулируй краткое (до 50 символов) описание в настоящем времени, отражающее суть коммита. Например, "добавляет эндпоинт для..." вместо "добавлен эндпоинт".
+    5.  **Проверка на BREAKING CHANGE:** если изменения нарушают обратную совместимость, добавь `!` и футер `BREAKING CHANGE:`.
+    6.  **Формирование тела (body):** если описание слишком короткое для объяснения контекста ("почему" и "как"), добавь развернутое описание в `body`.
+    7.  **Финальная сборка:** собери сообщение в соответствии со спецификацией.
+    </thinking_process>
+
+    <examples>
+    **Пример 1: Простое исправление**
+    *   **Diff:**
+        ```diff
+        - return x * x;
+        + return x + x;
+        ```
+    *   **Результат:**
+        ```
+        fix: исправляет ошибку в вычислении квадрата числа
+        ```
+
+    **Пример 2: Новая функция со скоупом**
+    *   **Diff:**
+        ```diff
+        + function login(user, pass) { ... }
+        ```
+    *   **Результат:**
+        ```
+        feat(auth): добавляет функцию аутентификации пользователя
+        ```
+
+    **Пример 3: Рефакторинг с телом сообщения**
+    *   **Diff:** (Большой diff с переименованием переменных и вынесением логики в отдельную функцию)
+    *   **Результат:**
+        ```
+        refactor(parser): выносит логику парсинга токенов в отдельный сервис
+
+        Логика обработки токенов была разбросана по нескольким методам,
+        что затрудняло поддержку. Теперь она инкапсулирована в TokenParsingService
+        для улучшения читаемости и тестируемости.
+        ```
+
+    **Пример 4: Критическое изменение (BREAKING CHANGE)**
+    *   **Diff:**
+        ```diff
+        - function getUser(id) { ... }
+        + function getUser(id, options) { ... }
+        ```
+    *   **Результат:**
+        ```
+        feat(api)!: изменяет сигнатуру метода getUser
+
+        BREAKING CHANGE: Метод getUser теперь требует второй аргумент `options`.
+        Старые вызовы `getUser(id)` больше не будут работать.
+        ```
+    </examples>
+
+    <instruction>
+    Проанализируй `git diff`, который предоставит пользователь.
+    Твой ответ должен содержать ИСКЛЮЧИТЕЛЬНО сгенерированное сообщение коммита в виде простого текста, без каких-либо объяснений, заголовков, комментариев или markdown-разметки типа \`\`\`.
+    </instruction>
+    """
+    )
+
     return Agent(
         name="GitAssistant",
         model="gemini-1.5-flash-latest",
-        instruction=(
-            "You are an expert AI assistant specializing in writing git commit messages."
-            "Your task is to analyze a provided 'git diff' and generate a concise, "
-            "informative commit message that follows the Conventional Commits specification."
-            "The user will provide the diff, and you must return ONLY the commit message."
-            "Do not add any extra text, explanations, or markdown formatting."
-        ),
-        description="An AI assistant for Git operations.",
+        instruction=instruction,
+        description="AI-ассистент для автоматизации Git-операций.",
+        # Передаем агенту список функций, которые он может использовать.
         tools=[get_git_diff, create_commit, push_to_remote]
     )
