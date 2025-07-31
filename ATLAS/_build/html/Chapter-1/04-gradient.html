@@ -32,7 +32,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
@@ -468,7 +468,7 @@ document.write(`
 </section>
 <section id="id5">
 <h2>Градиентный спуск в машинном обучении<a class="headerlink" href="#id5" title="Ссылка на этот заголовок">#</a></h2>
-<p>Давайте разберем, как работает градиентный спуск на примере задачи предсказания оценок студентов.</p>
+<p>Давайте разберем, как работает градиентный спуск на примере задачи предсказания оценок студентов. Если вы не знакомы с такими понятиями как: Линейная регрессия, функция потерь, оптимизация функции потерь, то ничего страшного, в следующих уроках мы подробно все это разберем, а сейчас главное увидеть и понять, что же все таки такое градиент и как он ведет себя.</p>
 <section id="id6">
 <h3>Постановка задачи<a class="headerlink" href="#id6" title="Ссылка на этот заголовок">#</a></h3>
 <p>У нас есть данные о студентах:</p>
@@ -478,16 +478,17 @@ document.write(`
 <li><p><strong>Part-time Job</strong> (подработка: 0 или 1) - признак <span class="math notranslate nohighlight">\(x_3\)</span></p></li>
 <li><p><strong>Grade</strong> (итоговая оценка) - целевая переменная <span class="math notranslate nohighlight">\(y\)</span></p></li>
 </ul>
-<p>Нужно построить модель для предсказания оценки: <span class="math notranslate nohighlight">\(\hat{y} = \beta_1 + \beta_2 x_1 + \beta_3 x_2 + \beta_4 x_3\)</span></p>
+<p>Нужно построить модель линейной регресси для предсказания оценки: <span class="math notranslate nohighlight">\(\hat{y} = \beta_1 + \beta_2 x_1 + \beta_3 x_2 + \beta_4 x_3\)</span></p>
 </section>
 <section id="id7">
 <h3>Функция потерь<a class="headerlink" href="#id7" title="Ссылка на этот заголовок">#</a></h3>
-<p>Используем Mean Squared Error (MSE):
-$<span class="math notranslate nohighlight">\(\epsilon(\hat{y}, y) = \frac{1}{n} \sum_{i=1}^{n} (\hat{y}_i - y_i)^2\)</span>$</p>
+<p>Используем Mean Squared Error (MSE):</p>
+<div class="math notranslate nohighlight">
+\[\epsilon(\hat{y}, y) = \frac{1}{n} \sum_{i=1}^{n} (\hat{y}_i - y_i)^2\]</div>
 </section>
 <section id="id8">
 <h3>Градиентный спуск в действии<a class="headerlink" href="#id8" title="Ссылка на этот заголовок">#</a></h3>
-<ol class="arabic simple">
+<ol class="arabic">
 <li><p><strong>Находим частные производные функции потерь:</strong></p>
 <ul class="simple">
 <li><p><span class="math notranslate nohighlight">\(\frac{\partial \epsilon}{\partial \beta_1}\)</span>: Производная по свободному члену</p></li>
@@ -496,20 +497,24 @@ $<span class="math notranslate nohighlight">\(\epsilon(\hat{y}, y) = \frac{1}{n}
 <li><p><span class="math notranslate nohighlight">\(\frac{\partial \epsilon}{\partial \beta_4}\)</span>: Производная по весу для Part-time Job</p></li>
 </ul>
 </li>
-<li><p><strong>Записываем вектор градиента:</strong>
-$<span class="math notranslate nohighlight">\(\nabla \epsilon = \left(\frac{\partial \epsilon}{\partial \beta_1}, \frac{\partial \epsilon}{\partial \beta_2}, \frac{\partial \epsilon}{\partial \beta_3}, \frac{\partial \epsilon}{\partial \beta_4}\right)\)</span>$</p></li>
-<li><p><strong>Обновляем параметры:</strong>
-$<span class="math notranslate nohighlight">\(\beta_i = \beta_i - \alpha \cdot \frac{\partial \epsilon}{\partial \beta_i}\)</span><span class="math notranslate nohighlight">\(
-где \)</span>\alpha$ - скорость обучения (learning rate)</p></li>
+<li><p><strong>Записываем вектор градиента:</strong></p>
+<div class="math notranslate nohighlight">
+\[\nabla \epsilon = \left(\frac{\partial \epsilon}{\partial \beta_1}, \frac{\partial \epsilon}{\partial \beta_2}, \frac{\partial \epsilon}{\partial \beta_3}, \frac{\partial \epsilon}{\partial \beta_4}\right)\]</div>
+</li>
+<li><p><strong>Обновляем параметры:</strong></p>
+<div class="math notranslate nohighlight">
+\[\beta_i = \beta_i - \alpha \cdot \frac{\partial \epsilon}{\partial \beta_i}\]</div>
+<p>где <span class="math notranslate nohighlight">\(\alpha\)</span> - скорость обучения (learning rate)</p>
+</li>
 </ol>
 </section>
 <section id="id9">
 <h3>Что происходит в анимации<a class="headerlink" href="#id9" title="Ссылка на этот заголовок">#</a></h3>
 <ol class="arabic simple">
-<li><p><strong>Инициализация:</strong> Параметры <span class="math notranslate nohighlight">\(\beta_1, \beta_2, \beta_3, \beta_4\)</span> получают случайные значения</p></li>
-<li><p><strong>Вычисление градиента:</strong> В текущей точке вычисляется направление самого крутого подъема функции потерь</p></li>
-<li><p><strong>Шаг в противоположном направлении:</strong> Параметры обновляются так, чтобы «спуститься» по поверхности функции потерь</p></li>
-<li><p><strong>Итерации:</strong> Процесс повторяется, шаги становятся все меньше по мере приближения к минимуму</p></li>
+<li><p><strong>Инициализация:</strong> параметры <span class="math notranslate nohighlight">\(\beta_1, \beta_2, \beta_3, \beta_4\)</span> получают случайные значения</p></li>
+<li><p><strong>Вычисление градиента:</strong> в текущей точке вычисляется направление самого крутого подъема функции потерь</p></li>
+<li><p><strong>Шаг в противоположном направлении:</strong> параметры обновляются так, чтобы «спуститься» по поверхности функции потерь</p></li>
+<li><p><strong>Итерации:</strong> процесс повторяется, шаги становятся все меньше по мере приближения к минимуму</p></li>
 </ol>
 </section>
 <section id="id10">
