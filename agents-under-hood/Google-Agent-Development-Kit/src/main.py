@@ -1,12 +1,28 @@
-import click
+# -*- coding: utf-8 -*-
+
+"""
+Главный модуль CLI-приложения AI Git Assistant.
+
+Этот модуль отвечает за обработку команд из командной строки,
+инициализацию AI-агента, управление потоком выполнения и взаимодействие
+с пользователем.
+"""
+
+# Стандартные библиотеки
+import asyncio
 import os
 import uuid
-import asyncio
 from functools import wraps
+from typing import Callable, Any
+
+# Сторонние библиотеки
+import click
 from dotenv import load_dotenv
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.genai.types import Content, Part
+
+# Локальные модули
 from agents.assistant_agent import (
     create_git_assistant_agent,
     get_git_diff,
@@ -14,116 +30,191 @@ from agents.assistant_agent import (
     push_to_remote
 )
 
-def coro(f):
+
+def coro(f: Callable) -> Callable:
+    """
+    Description:
+    ---------------
+        Декоратор для запуска асинхронных функций `click`
+        в синхронном контексте.
+
+    Args:
+    ---------------
+        f (Callable): Асинхронная функция для декорирования.
+
+    Returns:
+    ---------------
+        Callable: Синхронная обертка для асинхронной функции.
+    """
     @wraps(f)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
+        # Запускает асинхронную функцию и дожидается ее выполнения.
         return asyncio.run(f(*args, **kwargs))
     return wrapper
 
-# Load environment variables from .env file
+
+# Загружаем переменные окружения из файла .env.
+# Это позволяет безопасно хранить API-ключи вне кода.
 load_dotenv()
 
+
 @click.group()
-def cli():
-    """AI Git Assistant: Automates Git operations using Gemini and ADK."""
+def cli() -> None:
+    """
+    Description:
+    ---------------
+        Основная группа команд для CLI-приложения AI Git Assistant.
+        Автоматизирует Git-операции с помощью Gemini и ADK.
+    """
     pass
 
-@cli.command()
-@click.argument('path', type=click.Path(exists=True, file_okay=False, resolve_path=True))
-@click.option('--yes', '-y', is_flag=True, help='Skip interactive confirmation and execute commit and push.')
-@coro
-async def run(path, yes):
-    """
-    Run the process of analysis, commit generation, and push for the specified repository.
-    
-    PATH: The path to the local Git repository.
-    """
-    click.echo(f"Running analysis for repository: {path}")
 
+@cli.command()
+@click.argument(
+    'path',
+    type=click.Path(exists=True, file_okay=False, resolve_path=True)
+)
+@click.option(
+    '--yes', '-y',
+    is_flag=True,
+    help='Пропустить интерактивное подтверждение перед коммитом и push.'
+)
+@coro
+async def run(path: str, yes: bool) -> None:
+    """
+    Description:
+    ---------------
+        Запускает полный цикл анализа репозитория, генерации коммита
+        и отправки изменений.
+
+    Args:
+    ---------------
+        path (str): Путь к локальному Git-репозиторию.
+        yes (bool): Флаг для пропуска интерактивного подтверждения.
+
+    Returns:
+    ---------------
+        None
+    """
+    click.echo(f"Запуск анализа для репозитория: {path}")
+
+    # --- Шаг 0: Проверка наличия API-ключа ---
+    # Критически важно убедиться, что ключ API доступен.
     if not os.getenv("GEMINI_API_KEY"):
-        click.echo(click.style("Error: GEMINI_API_KEY environment variable not found.", fg='red'))
-        click.echo("Please create a .env file and add GEMINI_API_KEY=your_key")
+        click.echo(click.style(
+            "Ошибка: Переменная окружения GEMINI_API_KEY не найдена.",
+            fg='red'
+        ))
+        click.echo(
+            "Пожалуйста, создайте файл .env и добавьте в него строку "
+            "GEMINI_API_KEY=ваш_ключ"
+        )
         return
-    click.echo("API key loaded successfully.")
+    click.echo("API-ключ успешно загружен.")
 
     try:
-        # --- Step 1: Get Git Diff using the tool ---
-        click.echo("Getting git diff...")
+        # --- Шаг 1: Получение Git Diff ---
+        click.echo("Получение git diff...")
         success, diff_content = get_git_diff(repo_path=path)
 
         if not success:
+            # Если инструмент вернул ошибку, выводим ее и завершаем работу.
             click.echo(click.style(diff_content, fg='red'))
             return
-        
-        if not diff_content.strip():
-            click.echo(click.style("No staged changes to commit.", fg='yellow'))
-            return
-            
-        click.echo("Successfully retrieved git diff.")
 
-        # --- Step 2: Generate Commit Message using the ADK Agent ---
-        click.echo("Initializing Git Assistant Agent...")
+        if not diff_content.strip():
+            # Если нет изменений для коммита, сообщаем об этом.
+            click.echo(click.style(
+                "Нет подготовленных изменений для коммита.", fg='yellow'
+            ))
+            return
+
+        click.echo("Git diff успешно получен.")
+
+        # --- Шаг 2: Генерация сообщения коммита с помощью ADK Agent ---
+        click.echo("Инициализация агента Git Assistant...")
         assistant_agent = create_git_assistant_agent()
-        click.echo("Generating commit message...")
-        
+        click.echo("Генерация сообщения для коммита...")
+
+        # Runner — это ключевой компонент ADK, который управляет
+        # жизненным циклом агента и выполнением его задач.
         runner = Runner(
             agent=assistant_agent,
             app_name="AI-Git-Assistant",
             session_service=InMemorySessionService()
         )
-        
-        # Create a session to get a session_id
+
+        # Создаем уникальный ID для сессии.
         session_id = str(uuid.uuid4())
-        user_id = "local-user"
+        user_id = "local-user"  # Идентификатор пользователя
         await runner.session_service.create_session(
             app_name="AI-Git-Assistant",
             user_id=user_id,
             session_id=session_id
         )
 
-        # Wrap the diff content in a Content object
+        # Оборачиваем diff в специальный объект `Content` для передачи агенту.
         new_message = Content(role='user', parts=[Part(text=diff_content)])
 
-        # Call the runner asynchronously and process the event stream
+        # Асинхронно запускаем агента и обрабатываем поток событий.
         commit_message = ""
-        async for event in runner.run_async(user_id=user_id, session_id=session_id, new_message=new_message):
-            if event.is_final_response() and event.content and event.content.parts:
+        async for event in runner.run_async(
+            user_id=user_id, session_id=session_id, new_message=new_message
+        ):
+            # Нас интересует только финальный ответ от агента.
+            if event.is_final_response() and event.content:
                 commit_message = event.content.parts[0].text.strip()
-        
+
         if not commit_message:
-            click.echo(click.style("Error: Agent did not produce a final commit message.", fg='red'))
+            click.echo(click.style(
+                "Ошибка: Агент не сгенерировал итоговое сообщение коммита.",
+                fg='red'
+            ))
             return
 
-        click.echo(click.style("Generated Commit Message:", fg='green'))
+        click.echo(click.style("Сгенерированное сообщение:", fg='green'))
         click.echo("------------------------------------")
         click.echo(commit_message)
         click.echo("------------------------------------")
 
-        # --- Step 3: Confirmation and Execution ---
-        if not yes and not click.confirm(click.style('Execute commit and push with this message?', fg='yellow'), default=True):
-            click.echo("Operation cancelled by user.")
+        # --- Шаг 3: Подтверждение и выполнение ---
+        # Если не был передан флаг `--yes`, запрашиваем подтверждение.
+        if not yes and not click.confirm(
+            click.style('Выполнить коммит и push с этим сообщением?',
+                        fg='yellow'),
+            default=True
+        ):
+            click.echo("Операция отменена пользователем.")
             return
-        
-        # Commit using the tool
-        success, commit_result = create_commit(repo_path=path, message=commit_message)
+
+        # Выполняем коммит с помощью нашего инструмента.
+        success, commit_result = create_commit(
+            repo_path=path, message=commit_message
+        )
         if not success:
-            click.echo(click.style(f"Error: {commit_result}", fg='red'))
+            click.echo(click.style(f"Ошибка: {commit_result}", fg='red'))
             return
         click.echo(click.style(commit_result, fg='green'))
 
-        # Push using the tool
-        click.echo("Pushing to remote repository...")
+        # Отправляем изменения на удаленный сервер.
+        click.echo("Отправка на удаленный репозиторий...")
         success, push_result = push_to_remote(repo_path=path)
         if not success:
-            click.echo(click.style(f"Error: {push_result}", fg='red'))
+            click.echo(click.style(f"Ошибка: {push_result}", fg='red'))
             return
         click.echo(click.style(push_result, fg='green'))
-        
-        click.echo(click.style("\nProcess completed successfully!", fg='cyan', bold=True))
+
+        click.echo(click.style(
+            "\nПроцесс успешно завершен!", fg='cyan', bold=True
+        ))
 
     except Exception as e:
-        click.echo(click.style(f"An unexpected error occurred: {e}", fg='red'))
+        # Глобальный обработчик для непредвиденных ошибок.
+        click.echo(click.style(
+            f"Произошла непредвиденная ошибка: {e}", fg='red'
+        ))
         return
+
 
 if __name__ == '__main__':
     cli()
