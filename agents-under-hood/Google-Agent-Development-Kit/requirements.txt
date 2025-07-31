@@ -1,3 +1,4 @@
 google-generativeai
 click
 python-dotenv
+google-adk
