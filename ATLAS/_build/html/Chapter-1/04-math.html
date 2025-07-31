@@ -1,0 +1,738 @@
+
+<!DOCTYPE html>
+
+
+<html lang="ru" data-content_root="../" data-theme="light">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Анализ и формализация понятия градиента &#8212; ATLAS</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="../_static/documentation_options.js?v=576a2c22"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js?v=4a39c7ea"></script>
+    <script src="../_static/translations.js?v=9bfe3ffa"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-9S2CQ3B60T"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-9S2CQ3B60T');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-9S2CQ3B60T');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'Chapter-1/04-math';</script>
+    <link rel="index" title="Алфавитный указатель" href="../genindex.html" />
+    <link rel="search" title="Поиск" href="../search.html" />
+    <link rel="prev" title="Градиент — ваш навигатор в мире функций" href="04-gradient.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="ru"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="light">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Перейти к основному содержанию</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+  
+    <p class="title logo__title">ATLAS</p>
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Поиск" aria-label="Поиск" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Поиск</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../index.html">
+                    🚀 Что такое ATLAS?
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Введение</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="00-introduction.html">От функций к градиенту</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Глава 1. Функция — отправная точка</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="01-functions.html">Функция - начало</a></li>
+<li class="toctree-l1"><a class="reference internal" href="01-math.html">Анализ и формализация понятия функции</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Глава 2. Предел функции</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="02-limit.html">Предел функции — финишная прямая</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02-math.html">Анализ и формализация понятия предела функции</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Глава 3. Производная</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="03-derivative.html">Производная — узнаём скорость в любой момент</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03-math.html">Анализ и формализация понятия производной</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Глава 4. Градиент</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="04-gradient.html">Градиент — ваш навигатор в мире функций</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Анализ и формализация понятия градиента</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Исходный репозиторий"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/issues/new?title=Issue%20on%20page%20%2FChapter-1/04-math.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Открыть вопрос"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Загрузите эту страницу">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/Chapter-1/04-math.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Скачать исходный файл"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Распечатать в PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Полноэкранный режим"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="светлая/темная" aria-label="светлая/темная" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Поиск" aria-label="Поиск" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Анализ и формализация понятия градиента</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Содержание </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">1. Введение: От производной к градиенту</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">2. Формальное определение градиента</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">3. Производная по направлению</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">4. Фундаментальная теорема о градиенте и производной по направлению</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">5. Геометрический смысл градиента</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">6. Свойства градиента</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">7. Градиент и линии (поверхности) уровня</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">8. Приложения градиента</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">9. Заключение</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="id1">
+<h1>Анализ и формализация понятия градиента<a class="headerlink" href="#id1" title="Ссылка на этот заголовок">#</a></h1>
+<section id="id2">
+<h2>1. Введение: От производной к градиенту<a class="headerlink" href="#id2" title="Ссылка на этот заголовок">#</a></h2>
+<p>Вспомним основы анализа функций одной переменной. Производная <span class="math notranslate nohighlight">\(f'(x)\)</span> функции <span class="math notranslate nohighlight">\(y = f(x)\)</span> в точке <span class="math notranslate nohighlight">\(x₀\)</span> дает нам скорость изменения функции в этой точке. Геометрически это тангенс угла наклона касательной к графику. Ключевой момент здесь в том, что у функции одной переменной есть только два направления для движения из точки <span class="math notranslate nohighlight">\(x₀\)</span>: вправо (положительное направление) и влево (отрицательное).</p>
+<p>Переходя к функциям нескольких переменных, например, к <span class="math notranslate nohighlight">\(z = f(x, y)\)</span>, ситуация кардинально меняется. Из любой точки <span class="math notranslate nohighlight">\((x₀, y₀)\)</span> на плоскости мы можем двигаться в бесконечном множестве направлений. Возникает естественный вопрос: как охарактеризовать скорость изменения функции в каждой конкретной точке с учетом этого многообразия направлений? Существует ли одно «главное» направление?</p>
+<p>Ответом на эти вопросы и служит концепция градиента. Градиент — это вектор, который элегантно инкапсулирует в себе всю информацию о поведении функции в малой окрестности точки.</p>
+</section>
+<section id="id3">
+<h2>2. Формальное определение градиента<a class="headerlink" href="#id3" title="Ссылка на этот заголовок">#</a></h2>
+<p>Пусть дана скалярная функция <span class="math notranslate nohighlight">\(n\)</span> переменных <span class="math notranslate nohighlight">\(f(x₁, x₂, ..., xₙ)\)</span>, определенная и дифференцируемая в некоторой области <span class="math notranslate nohighlight">\(D \subset \mathbb{R}ⁿ\)</span>.</p>
+<p><strong>Определение:</strong> <strong>Градиентом</strong> функции <span class="math notranslate nohighlight">\(f\)</span> в точке <span class="math notranslate nohighlight">\(M(x₁, ..., xₙ)\)</span> называется вектор, компонентами которого являются частные производные функции <span class="math notranslate nohighlight">\(f\)</span> по соответствующим переменным в этой точке.</p>
+<p>Градиент обозначается как <span class="math notranslate nohighlight">\(\text{grad } f\)</span> или, что более распространено, с использованием <strong>оператора набла (<span class="math notranslate nohighlight">\(\nabla\)</span>)</strong>:</p>
+<div class="math notranslate nohighlight">
+\[
+\nabla f(M) = \left( \frac{\partial f}{\partial x_1}, \frac{\partial f}{\partial x_2}, \dots, \frac{\partial f}{\partial x_n} \right)
+\]</div>
+<p>Оператор <span class="math notranslate nohighlight">\(\nabla\)</span> (набла или гамильтониан) представляет собой символический вектор:</p>
+<div class="math notranslate nohighlight">
+\[
+\nabla = \left( \frac{\partial}{\partial x_1}, \frac{\partial}{\partial x_2}, \dots, \frac{\partial}{\partial x_n} \right)
+\]</div>
+<p><strong>Пример:</strong> Для функции трех переменных <span class="math notranslate nohighlight">\(f(x, y, z) = x^2y + z \sin(y)\)</span> ее градиент имеет вид:</p>
+<div class="math notranslate nohighlight">
+\[
+\nabla f = \left( \frac{\partial f}{\partial x}, \frac{\partial f}{\partial y}, \frac{\partial f}{\partial z} \right) = (2xy, x^2 + z \cos(y), \sin(y))
+\]</div>
+<p>В точке <span class="math notranslate nohighlight">\(M(1, 0, 2)\)</span> градиент будет конкретным вектором:</p>
+<div class="math notranslate nohighlight">
+\[
+\nabla f(1, 0, 2) = (2 \cdot 1 \cdot 0, 1^2 + 2 \cos(0), \sin(0)) = (0, 1 + 2, 0) = (0, 3, 0)
+\]</div>
+<p>Важно понимать, что градиент — это <strong>векторное поле</strong>. Каждой точке <span class="math notranslate nohighlight">\(M\)</span> из области определения функции <span class="math notranslate nohighlight">\(f\)</span> он сопоставляет вектор <span class="math notranslate nohighlight">\(\nabla f(M)\)</span>.</p>
+</section>
+<section id="id4">
+<h2>3. Производная по направлению<a class="headerlink" href="#id4" title="Ссылка на этот заголовок">#</a></h2>
+<p>Прежде чем раскрыть смысл самого градиента, введем еще одно ключевое понятие.</p>
+<p>Пусть <span class="math notranslate nohighlight">\(f(M)\)</span> — скалярная функция, дифференцируемая в точке <span class="math notranslate nohighlight">\(M\)</span>, и пусть <span class="math notranslate nohighlight">\(\mathbf{u}\)</span> — единичный вектор (<span class="math notranslate nohighlight">\(||\mathbf{u}|| = 1\)</span>), задающий некоторое направление в <span class="math notranslate nohighlight">\(\mathbb{R}ⁿ\)</span>.</p>
+<p><strong>Определение:</strong> <strong>Производной функции <span class="math notranslate nohighlight">\(f\)</span> в точке <span class="math notranslate nohighlight">\(M\)</span> по направлению вектора <span class="math notranslate nohighlight">\(\mathbf{u}\)</span></strong> называется предел:</p>
+<div class="math notranslate nohighlight">
+\[
+D_{\mathbf{u}} f(M) = \lim_{h \to 0^+} \frac{f(M + h\mathbf{u}) - f(M)}{h}
+\]</div>
+<p>Этот предел описывает скорость изменения функции <span class="math notranslate nohighlight">\(f\)</span> при движении из точки <span class="math notranslate nohighlight">\(M\)</span> строго в направлении <span class="math notranslate nohighlight">\(\mathbf{u}\)</span>. Если <span class="math notranslate nohighlight">\(f\)</span> описывает температуру в пространстве, то <span class="math notranslate nohighlight">\(D_{\mathbf{u}} f(M)\)</span> — это мгновенная скорость изменения температуры, которую почувствует наблюдатель, движущийся через точку <span class="math notranslate nohighlight">\(M\)</span> в направлении <span class="math notranslate nohighlight">\(\mathbf{u}\)</span>.</p>
+</section>
+<section id="id5">
+<h2>4. Фундаментальная теорема о градиенте и производной по направлению<a class="headerlink" href="#id5" title="Ссылка на этот заголовок">#</a></h2>
+<p>Теперь мы можем связать введенные понятия. Эта теорема является центральной для понимания градиента.</p>
+<p><strong>Теорема:</strong> Если функция <span class="math notranslate nohighlight">\(f(x₁, ..., xₙ)\)</span> дифференцируема в точке <span class="math notranslate nohighlight">\(M\)</span>, то ее производная по любому направлению <span class="math notranslate nohighlight">\(\mathbf{u}\)</span> существует и вычисляется как скалярное произведение вектора градиента <span class="math notranslate nohighlight">\(\nabla f(M)\)</span> на единичный вектор направления <span class="math notranslate nohighlight">\(\mathbf{u}\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[
+D_{\mathbf{u}} f(M) = \nabla f(M) \cdot \mathbf{u}
+\]</div>
+<p><strong>Доказательство (для случая n=3):</strong></p>
+<p>Пусть <span class="math notranslate nohighlight">\(M = (x, y, z)\)</span> и <span class="math notranslate nohighlight">\(\mathbf{u} = (u₁, u₂, u₃)\)</span>, где <span class="math notranslate nohighlight">\(u₁² + u₂² + u₃² = 1\)</span>.</p>
+<p>Точка <span class="math notranslate nohighlight">\(M + h\mathbf{u}\)</span> имеет координаты <span class="math notranslate nohighlight">\((x + hu₁, y + hu₂, z + hu₃)\)</span>.</p>
+<p>Рассмотрим приращение функции <span class="math notranslate nohighlight">\(f\)</span>:</p>
+<p><span class="math notranslate nohighlight">\(\Delta f = f(x + hu₁, y + hu₂, z + hu₃) - f(x, y, z)\)</span></p>
+<p>По определению дифференцируемости функции, ее полное приращение можно представить в виде:</p>
+<p><span class="math notranslate nohighlight">\(\Delta f = \frac{\partial f}{\partial x}\Delta x + \frac{\partial f}{\partial y}\Delta y + \frac{\partial f}{\partial z}\Delta z + o(||\Delta\mathbf{r}||)\)</span></p>
+<p>где <span class="math notranslate nohighlight">\(\Delta x = hu₁\)</span>, <span class="math notranslate nohighlight">\(\Delta y = hu₂\)</span>, <span class="math notranslate nohighlight">\(\Delta z = hu₃\)</span>, а <span class="math notranslate nohighlight">\(||\Delta\mathbf{r}|| = \sqrt{ (hu₁)² + (hu₂)² + (hu₃)² } = h\)</span>.</p>
+<p>Подставляя, получаем:</p>
+<p><span class="math notranslate nohighlight">\(\Delta f = \frac{\partial f}{\partial x}hu₁ + \frac{\partial f}{\partial y}hu₂ + \frac{\partial f}{\partial z}hu₃ + o(h)\)</span></p>
+<p>Теперь разделим на <span class="math notranslate nohighlight">\(h\)</span> и перейдем к пределу при <span class="math notranslate nohighlight">\(h \to 0⁺\)</span>:</p>
+<p><span class="math notranslate nohighlight">\(\lim_{h \to 0^+} \frac{\Delta f}{h} = \lim_{h \to 0^+} \left[ \frac{\partial f}{\partial x}u₁ + \frac{\partial f}{\partial y}u₂ + \frac{\partial f}{\partial z}u₃ + \frac{o(h)}{h} \right]\)</span></p>
+<div class="math notranslate nohighlight">
+\[
+D_{\mathbf{u}} f(M) = \frac{\partial f}{\partial x}u₁ + \frac{\partial f}{\partial y}u₂ + \frac{\partial f}{\partial z}u₃
+\]</div>
+<p>Правая часть этого равенства есть не что иное, как скалярное произведение векторов <span class="math notranslate nohighlight">\(\left(\frac{\partial f}{\partial x}, \frac{\partial f}{\partial y}, \frac{\partial f}{\partial z}\right)\)</span> и <span class="math notranslate nohighlight">\((u₁, u₂, u₃)\)</span>.
+Следовательно, <span class="math notranslate nohighlight">\(D_{\mathbf{u}} f(M) = \nabla f(M) \cdot \mathbf{u}\)</span>. Теорема доказана.</p>
+</section>
+<section id="id6">
+<h2>5. Геометрический смысл градиента<a class="headerlink" href="#id6" title="Ссылка на этот заголовок">#</a></h2>
+<p>Эта теорема позволяет нам сделать два ключевых вывода, которые и составляют геометрический смысл градиента.</p>
+<p>Вспомним определение скалярного произведения: <span class="math notranslate nohighlight">\(\mathbf{a} \cdot \mathbf{b} = ||\mathbf{a}|| \cdot ||\mathbf{b}|| \cos(\phi)\)</span>, где <span class="math notranslate nohighlight">\(\phi\)</span> — угол между векторами.
+Применим это к нашей формуле:</p>
+<p><span class="math notranslate nohighlight">\(D_{\mathbf{u}} f(M) = ||\nabla f(M)|| \cdot ||\mathbf{u}|| \cdot \cos(\phi) = ||\nabla f(M)|| \cdot \cos(\phi)\)</span> (поскольку <span class="math notranslate nohighlight">\(||\mathbf{u}|| = 1\)</span>).</p>
+<p>Теперь проанализируем это выражение:</p>
+<ol class="arabic simple">
+<li><p><strong>Направление градиента:</strong> Производная по направлению <span class="math notranslate nohighlight">\(D_{\mathbf{u}} f(M)\)</span> достигает своего <strong>максимального</strong> значения, когда <span class="math notranslate nohighlight">\(\cos(\phi) = 1\)</span>, то есть когда <span class="math notranslate nohighlight">\(\phi = 0\)</span>. Это означает, что вектор направления <span class="math notranslate nohighlight">\(\mathbf{u}\)</span> сонаправлен с вектором градиента <span class="math notranslate nohighlight">\(\nabla f(M)\)</span>.</p>
+<ul class="simple">
+<li><p><strong>Вывод 1:</strong> Вектор градиента <span class="math notranslate nohighlight">\(\nabla f\)</span> в точке <span class="math notranslate nohighlight">\(M\)</span> указывает направление <strong>наискорейшего роста</strong> функции <span class="math notranslate nohighlight">\(f\)</span> в этой точке.</p></li>
+</ul>
+</li>
+<li><p><strong>Величина (модуль) градиента:</strong> Максимальное значение производной по направлению, как мы выяснили, достигается при <span class="math notranslate nohighlight">\(\phi = 0\)</span> и равно:
+<span class="math notranslate nohighlight">\(\max(D_{\mathbf{u}} f(M)) = ||\nabla f(M)|| \cdot \cos(0) = ||\nabla f(M)||\)</span></p>
+<ul class="simple">
+<li><p><strong>Вывод 2:</strong> Модуль (длина) вектора градиента <span class="math notranslate nohighlight">\(||\nabla f(M)||\)</span> равен <strong>величине этой максимальной скорости</strong> роста функции.</p></li>
+</ul>
+</li>
+</ol>
+<p>Аналогично, направление, противоположное градиенту (<span class="math notranslate nohighlight">\(-\nabla f\)</span>), является направлением <strong>наискорейшего убывания</strong> функции (антиградиент).</p>
+<p><strong>Наглядная аналогия:</strong> Представьте себе карту высот местности. Функция <span class="math notranslate nohighlight">\(h(x, y)\)</span> — это высота над уровнем моря в точке с координатами <span class="math notranslate nohighlight">\((x, y)\)</span>.</p>
+<ul class="simple">
+<li><p>Вектор градиента <span class="math notranslate nohighlight">\(\nabla h\)</span> в любой точке на карте будет указывать направление самого крутого подъема на холм.</p></li>
+<li><p>Длина вектора <span class="math notranslate nohighlight">\(||\nabla h||\)</span> будет характеризовать крутизну этого подъема.</p></li>
+<li><p>Вектор антиградиента <span class="math notranslate nohighlight">\(-\nabla h\)</span> будет указывать путь, по которому покатится мяч, то есть направление самого крутого спуска.</p></li>
+</ul>
+</section>
+<section id="id7">
+<h2>6. Свойства градиента<a class="headerlink" href="#id7" title="Ссылка на этот заголовок">#</a></h2>
+<p>Оператор градиента обладает свойствами, схожими со свойствами обычной производной. Пусть <span class="math notranslate nohighlight">\(f\)</span> и <span class="math notranslate nohighlight">\(g\)</span> — дифференцируемые скалярные функции, <span class="math notranslate nohighlight">\(c\)</span> — константа.</p>
+<ol class="arabic">
+<li><p><strong>Линейность:</strong></p>
+<ul>
+<li><p><span class="math notranslate nohighlight">\(\nabla(c) = \mathbf{0}\)</span> (градиент константы равен нулевому вектору)</p></li>
+<li><p><span class="math notranslate nohighlight">\(\nabla(cf) = c\nabla f\)</span></p></li>
+<li><div class="math notranslate nohighlight">
+\[ \nabla(f + g) = \nabla f + \nabla g \]</div>
+</li>
+</ul>
+</li>
+<li><p><strong>Правило произведения:</strong></p>
+<ul>
+<li><div class="math notranslate nohighlight">
+\[ \nabla(fg) = f\nabla g + g\nabla f \]</div>
+</li>
+</ul>
+</li>
+</ol>
+<p><strong>Доказательство правила произведения (для n=2):</strong></p>
+<p><span class="math notranslate nohighlight">\(\nabla(fg) = \left(\frac{\partial(fg)}{\partial x}, \frac{\partial(fg)}{\partial y}\right)\)</span></p>
+<p>Используем правило Лейбница для частных производных:</p>
+<p><span class="math notranslate nohighlight">\(\frac{\partial(fg)}{\partial x} = \frac{\partial f}{\partial x}g + f\frac{\partial g}{\partial x}\)</span></p>
+<p><span class="math notranslate nohighlight">\(\frac{\partial(fg)}{\partial y} = \frac{\partial f}{\partial y}g + f\frac{\partial g}{\partial y}\)</span></p>
+<p>Тогда:</p>
+<p><span class="math notranslate nohighlight">\(\nabla(fg) = \left( \frac{\partial f}{\partial x}g + f\frac{\partial g}{\partial x}, \frac{\partial f}{\partial y}g + f\frac{\partial g}{\partial y} \right)\)</span></p>
+<p><span class="math notranslate nohighlight">\(= \left( \frac{\partial f}{\partial x}g, \frac{\partial f}{\partial y}g \right) + \left( f\frac{\partial g}{\partial x}, f\frac{\partial g}{\partial y} \right)\)</span></p>
+<p><span class="math notranslate nohighlight">\(= g\left(\frac{\partial f}{\partial x}, \frac{\partial f}{\partial y}\right) + f\left(\frac{\partial g}{\partial x}, \frac{\partial g}{\partial y}\right) = g\nabla f + f\nabla g\)</span></p>
+<p>Существуют также правила для частного и для композиции функций, которые строятся аналогичным образом.</p>
+</section>
+<section id="id8">
+<h2>7. Градиент и линии (поверхности) уровня<a class="headerlink" href="#id8" title="Ссылка на этот заголовок">#</a></h2>
+<p><strong>Определение:</strong> <strong>Поверхностью уровня <span class="math notranslate nohighlight">\(C\)</span></strong> функции <span class="math notranslate nohighlight">\(f(x, y, z)\)</span> называется множество точек, в которых функция принимает постоянное значение: <span class="math notranslate nohighlight">\(f(x, y, z) = C\)</span>. Для функции двух переменных это будут <strong>линии уровня</strong>.</p>
+<p>Например, для <span class="math notranslate nohighlight">\(f(x, y) = x^2 + y^2\)</span> линиями уровня <span class="math notranslate nohighlight">\(f(x, y) = C\)</span> (<span class="math notranslate nohighlight">\(C &gt; 0\)</span>) являются окружности. Для <span class="math notranslate nohighlight">\(h(x, y)\)</span> (высота) линиями уровня являются горизонтали на карте.</p>
+<p><strong>Теорема:</strong> Вектор градиента <span class="math notranslate nohighlight">\(\nabla f\)</span> в точке <span class="math notranslate nohighlight">\(M\)</span> ортогонален (перпендикулярен) касательной к линии уровня (или касательной плоскости к поверхности уровня), проходящей через эту точку <span class="math notranslate nohighlight">\(M\)</span>.</p>
+<p><strong>Доказательство:</strong>
+Рассмотрим поверхность уровня <span class="math notranslate nohighlight">\(f(x, y, z) = C\)</span>. Пусть <span class="math notranslate nohighlight">\(\mathbf{r}(t) = (x(t), y(t), z(t))\)</span> — произвольная гладкая кривая, целиком лежащая на этой поверхности и проходящая через точку <span class="math notranslate nohighlight">\(M\)</span> в момент <span class="math notranslate nohighlight">\(t=t₀\)</span>.</p>
+<p>Поскольку кривая лежит на поверхности уровня, для любого <span class="math notranslate nohighlight">\(t\)</span> выполняется тождество:
+<span class="math notranslate nohighlight">\(f(x(t), y(t), z(t)) = C\)</span></p>
+<p>Продифференцируем это тождество по параметру <span class="math notranslate nohighlight">\(t\)</span>, используя цепное правило (сложную производную):</p>
+<div class="math notranslate nohighlight">
+\[
+\frac{d}{dt} f(x(t), y(t), z(t)) = \frac{\partial f}{\partial x}\frac{dx}{dt} + \frac{\partial f}{\partial y}\frac{dy}{dt} + \frac{\partial f}{\partial z}\frac{dz}{dt} = 0
+\]</div>
+<p>Левая часть этого выражения является скалярным произведением двух векторов:</p>
+<ul class="simple">
+<li><p>Вектора градиента <span class="math notranslate nohighlight">\(\nabla f = \left(\frac{\partial f}{\partial x}, \frac{\partial f}{\partial y}, \frac{\partial f}{\partial z}\right)\)</span></p></li>
+<li><p>Вектора <span class="math notranslate nohighlight">\(\mathbf{r}'(t) = \left(\frac{dx}{dt}, \frac{dy}{dt}, \frac{dz}{dt}\right)\)</span>, который является <strong>касательным вектором</strong> к нашей кривой <span class="math notranslate nohighlight">\(\mathbf{r}(t)\)</span>.</p></li>
+</ul>
+<p>Таким образом, мы получили:</p>
+<div class="math notranslate nohighlight">
+\[
+\nabla f(M) \cdot \mathbf{r}'(t_0) = 0
+\]</div>
+<p>Это равенство означает, что вектор градиента в точке <span class="math notranslate nohighlight">\(M\)</span> ортогонален вектору касательной к <em>любой</em> кривой, лежащей на поверхности уровня и проходящей через <span class="math notranslate nohighlight">\(M\)</span>. Совокупность всех таких касательных векторов образует <strong>касательную плоскость</strong> к поверхности в точке <span class="math notranslate nohighlight">\(M\)</span>. Следовательно, градиент ортогонален этой касательной плоскости, то есть является <strong>вектором нормали</strong> к поверхности уровня.</p>
+<p>Этот результат имеет огромное геометрическое значение. Например, зная градиент, мы можем легко написать уравнение касательной плоскости и нормали к поверхности, заданной неявно <span class="math notranslate nohighlight">\(f(x, y, z) = C\)</span>.</p>
+</section>
+<section id="id9">
+<h2>8. Приложения градиента<a class="headerlink" href="#id9" title="Ссылка на этот заголовок">#</a></h2>
+<p>Концепция градиента является рабочей лошадкой во многих областях науки и инженерии.</p>
+<ul>
+<li><p><strong>Машинное обучение и оптимизация:</strong> Метод <strong>градиентного спуска</strong> — один из самых популярных алгоритмов для минимизации функции потерь. Его идея проста: чтобы найти минимум функции, нужно двигаться в направлении, противоположном ее градиенту (в направлении антиградиента), то есть по пути наискорейшего спуска.</p>
+<div class="math notranslate nohighlight">
+\[
+    \mathbf{x}_{k+1} = \mathbf{x}_k - \gamma\nabla f(\mathbf{x}_k)
+    \]</div>
+<p>где <span class="math notranslate nohighlight">\(\gamma\)</span> — скорость обучения.</p>
+</li>
+<li><p><strong>Физика:</strong> Градиент связывает потенциальные поля со связанными с ними силовыми полями.</p>
+<ul>
+<li><p><strong>Электростатика:</strong> Напряженность электрического поля <span class="math notranslate nohighlight">\(\mathbf{E}\)</span> является антиградиентом электростатического потенциала <span class="math notranslate nohighlight">\(\phi\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[ \mathbf{E} = -\nabla\phi \]</div>
+</li>
+<li><p><strong>Гравитация:</strong> Напряженность гравитационного поля <span class="math notranslate nohighlight">\(\mathbf{g}\)</span> — антиградиент гравитационного потенциала <span class="math notranslate nohighlight">\(\Phi\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[ \mathbf{g} = -\nabla\Phi \]</div>
+<p>Такие поля называются <strong>консервативными</strong> или <strong>потенциальными</strong>.</p>
+</li>
+<li><p><strong>Термодинамика:</strong> Поток тепла направлен в сторону, противоположную градиенту температуры.</p></li>
+</ul>
+</li>
+<li><p><strong>Компьютерная графика и геометрия:</strong> Градиент используется для вычисления нормалей к поверхностям, что критически важно для корректного расчета освещения и затенения 3D-моделей.</p></li>
+</ul>
+</section>
+<section id="id10">
+<h2>9. Заключение<a class="headerlink" href="#id10" title="Ссылка на этот заголовок">#</a></h2>
+<p>Итак, подведем итоги. Градиент — это не просто набор частных производных. Это вектор, который несет в себе исчерпывающую информацию о локальном поведении функции:</p>
+<ol class="arabic simple">
+<li><p>Он указывает <strong>направление наискорейшего роста</strong> функции.</p></li>
+<li><p>Его модуль равен <strong>величине этой скорости роста</strong>.</p></li>
+<li><p>Он позволяет вычислить <strong>скорость изменения функции в любом заданном направлении</strong> через скалярное произведение.</p></li>
+<li><p>Он всегда <strong>ортогонален линиям и поверхностям уровня</strong> функции.</p></li>
+</ol>
+<p>Понимание этих четырех аспектов позволяет эффективно использовать градиент как мощный инструмент для решения задач в самых разных областях математики, физики, информатики и инженерии.</p>
+<p>Благодарю за внимание. Готов ответить на ваши вопросы.</p>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./Chapter-1"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="04-gradient.html"
+       title="предыдущая страница">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">назад</p>
+        <p class="prev-next-title">Градиент — ваш навигатор в мире функций</p>
+      </div>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Содержание
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">1. Введение: От производной к градиенту</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">2. Формальное определение градиента</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">3. Производная по направлению</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">4. Фундаментальная теорема о градиенте и производной по направлению</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">5. Геометрический смысл градиента</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id7">6. Свойства градиента</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id8">7. Градиент и линии (поверхности) уровня</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id9">8. Приложения градиента</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id10">9. Заключение</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+По Verbasik
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

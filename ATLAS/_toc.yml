@@ -26,3 +26,4 @@ parts:
   - caption: Глава 4. Градиент
     chapters:
     - file: Chapter-1/04-gradient
+    - file: Chapter-1/04-math
