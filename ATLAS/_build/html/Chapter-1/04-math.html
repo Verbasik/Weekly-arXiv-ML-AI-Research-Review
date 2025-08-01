@@ -32,7 +32,7 @@
     <link rel="stylesheet" type="text/css" href="../_static/styles/sphinx-book-theme.css?v=a3416100" />
     <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css?v=13237357" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
-    <link rel="stylesheet" type="text/css" href="../_static/mystnb.8ecb98da25f57f5357bf6f572d296f466b2cfe2517ffebfabe82451661e28f02.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css?v=be8a1c11" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css?v=4fa983c6" />
     <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
   
@@ -403,7 +403,7 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">1. Введение: От производной к градиенту</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">1. Введение: от производной к градиенту</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">2. Формальное определение градиента</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">3. Производная по направлению</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">4. Фундаментальная теорема о градиенте и производной по направлению</a></li>
@@ -426,7 +426,7 @@ document.write(`
   <section id="id1">
 <h1>Анализ и формализация понятия градиента<a class="headerlink" href="#id1" title="Ссылка на этот заголовок">#</a></h1>
 <section id="id2">
-<h2>1. Введение: От производной к градиенту<a class="headerlink" href="#id2" title="Ссылка на этот заголовок">#</a></h2>
+<h2>1. Введение: от производной к градиенту<a class="headerlink" href="#id2" title="Ссылка на этот заголовок">#</a></h2>
 <p>Вспомним основы анализа функций одной переменной. Производная <span class="math notranslate nohighlight">\(f'(x)\)</span> функции <span class="math notranslate nohighlight">\(y = f(x)\)</span> в точке <span class="math notranslate nohighlight">\(x₀\)</span> дает нам скорость изменения функции в этой точке. Геометрически это тангенс угла наклона касательной к графику. Ключевой момент здесь в том, что у функции одной переменной есть только два направления для движения из точки <span class="math notranslate nohighlight">\(x₀\)</span>: вправо (положительное направление) и влево (отрицательное).</p>
 <p>Переходя к функциям нескольких переменных, например, к <span class="math notranslate nohighlight">\(z = f(x, y)\)</span>, ситуация кардинально меняется. Из любой точки <span class="math notranslate nohighlight">\((x₀, y₀)\)</span> на плоскости мы можем двигаться в бесконечном множестве направлений. Возникает естественный вопрос: как охарактеризовать скорость изменения функции в каждой конкретной точке с учетом этого многообразия направлений? Существует ли одно «главное» направление?</p>
 <p>Ответом на эти вопросы и служит концепция градиента. Градиент — это вектор, который элегантно инкапсулирует в себе всю информацию о поведении функции в малой окрестности точки.</p>
@@ -434,7 +434,7 @@ document.write(`
 <section id="id3">
 <h2>2. Формальное определение градиента<a class="headerlink" href="#id3" title="Ссылка на этот заголовок">#</a></h2>
 <p>Пусть дана скалярная функция <span class="math notranslate nohighlight">\(n\)</span> переменных <span class="math notranslate nohighlight">\(f(x₁, x₂, ..., xₙ)\)</span>, определенная и дифференцируемая в некоторой области <span class="math notranslate nohighlight">\(D \subset \mathbb{R}ⁿ\)</span>.</p>
-<p><strong>Определение:</strong> <strong>Градиентом</strong> функции <span class="math notranslate nohighlight">\(f\)</span> в точке <span class="math notranslate nohighlight">\(M(x₁, ..., xₙ)\)</span> называется вектор, компонентами которого являются частные производные функции <span class="math notranslate nohighlight">\(f\)</span> по соответствующим переменным в этой точке.</p>
+<p><strong>Определение:</strong> <strong>градиентом</strong> функции <span class="math notranslate nohighlight">\(f\)</span> в точке <span class="math notranslate nohighlight">\(M(x₁, ..., xₙ)\)</span> называется вектор, компонентами которого являются частные производные функции <span class="math notranslate nohighlight">\(f\)</span> по соответствующим переменным в этой точке.</p>
 <p>Градиент обозначается как <span class="math notranslate nohighlight">\(\text{grad } f\)</span> или, что более распространено, с использованием <strong>оператора набла (<span class="math notranslate nohighlight">\(\nabla\)</span>)</strong>:</p>
 <div class="math notranslate nohighlight">
 \[
@@ -445,7 +445,7 @@ document.write(`
 \[
 \nabla = \left( \frac{\partial}{\partial x_1}, \frac{\partial}{\partial x_2}, \dots, \frac{\partial}{\partial x_n} \right)
 \]</div>
-<p><strong>Пример:</strong> Для функции трех переменных <span class="math notranslate nohighlight">\(f(x, y, z) = x^2y + z \sin(y)\)</span> ее градиент имеет вид:</p>
+<p><strong>Пример:</strong> для функции трех переменных <span class="math notranslate nohighlight">\(f(x, y, z) = x^2y + z \sin(y)\)</span> ее градиент имеет вид:</p>
 <div class="math notranslate nohighlight">
 \[
 \nabla f = \left( \frac{\partial f}{\partial x}, \frac{\partial f}{\partial y}, \frac{\partial f}{\partial z} \right) = (2xy, x^2 + z \cos(y), \sin(y))
@@ -461,7 +461,7 @@ document.write(`
 <h2>3. Производная по направлению<a class="headerlink" href="#id4" title="Ссылка на этот заголовок">#</a></h2>
 <p>Прежде чем раскрыть смысл самого градиента, введем еще одно ключевое понятие.</p>
 <p>Пусть <span class="math notranslate nohighlight">\(f(M)\)</span> — скалярная функция, дифференцируемая в точке <span class="math notranslate nohighlight">\(M\)</span>, и пусть <span class="math notranslate nohighlight">\(\mathbf{u}\)</span> — единичный вектор (<span class="math notranslate nohighlight">\(||\mathbf{u}|| = 1\)</span>), задающий некоторое направление в <span class="math notranslate nohighlight">\(\mathbb{R}ⁿ\)</span>.</p>
-<p><strong>Определение:</strong> <strong>Производной функции <span class="math notranslate nohighlight">\(f\)</span> в точке <span class="math notranslate nohighlight">\(M\)</span> по направлению вектора <span class="math notranslate nohighlight">\(\mathbf{u}\)</span></strong> называется предел:</p>
+<p><strong>Определение:</strong> <strong>производной функции <span class="math notranslate nohighlight">\(f\)</span> в точке <span class="math notranslate nohighlight">\(M\)</span> по направлению вектора <span class="math notranslate nohighlight">\(\mathbf{u}\)</span></strong> называется предел:</p>
 <div class="math notranslate nohighlight">
 \[
 D_{\mathbf{u}} f(M) = \lim_{h \to 0^+} \frac{f(M + h\mathbf{u}) - f(M)}{h}
@@ -503,12 +503,12 @@ D_{\mathbf{u}} f(M) = \frac{\partial f}{\partial x}u₁ + \frac{\partial f}{\par
 <p><span class="math notranslate nohighlight">\(D_{\mathbf{u}} f(M) = ||\nabla f(M)|| \cdot ||\mathbf{u}|| \cdot \cos(\phi) = ||\nabla f(M)|| \cdot \cos(\phi)\)</span> (поскольку <span class="math notranslate nohighlight">\(||\mathbf{u}|| = 1\)</span>).</p>
 <p>Теперь проанализируем это выражение:</p>
 <ol class="arabic simple">
-<li><p><strong>Направление градиента:</strong> Производная по направлению <span class="math notranslate nohighlight">\(D_{\mathbf{u}} f(M)\)</span> достигает своего <strong>максимального</strong> значения, когда <span class="math notranslate nohighlight">\(\cos(\phi) = 1\)</span>, то есть когда <span class="math notranslate nohighlight">\(\phi = 0\)</span>. Это означает, что вектор направления <span class="math notranslate nohighlight">\(\mathbf{u}\)</span> сонаправлен с вектором градиента <span class="math notranslate nohighlight">\(\nabla f(M)\)</span>.</p>
+<li><p><strong>Направление градиента:</strong> производная по направлению <span class="math notranslate nohighlight">\(D_{\mathbf{u}} f(M)\)</span> достигает своего <strong>максимального</strong> значения, когда <span class="math notranslate nohighlight">\(\cos(\phi) = 1\)</span>, то есть когда <span class="math notranslate nohighlight">\(\phi = 0\)</span>. Это означает, что вектор направления <span class="math notranslate nohighlight">\(\mathbf{u}\)</span> сонаправлен с вектором градиента <span class="math notranslate nohighlight">\(\nabla f(M)\)</span>.</p>
 <ul class="simple">
 <li><p><strong>Вывод 1:</strong> Вектор градиента <span class="math notranslate nohighlight">\(\nabla f\)</span> в точке <span class="math notranslate nohighlight">\(M\)</span> указывает направление <strong>наискорейшего роста</strong> функции <span class="math notranslate nohighlight">\(f\)</span> в этой точке.</p></li>
 </ul>
 </li>
-<li><p><strong>Величина (модуль) градиента:</strong> Максимальное значение производной по направлению, как мы выяснили, достигается при <span class="math notranslate nohighlight">\(\phi = 0\)</span> и равно:
+<li><p><strong>Величина (модуль) градиента:</strong> максимальное значение производной по направлению, как мы выяснили, достигается при <span class="math notranslate nohighlight">\(\phi = 0\)</span> и равно:
 <span class="math notranslate nohighlight">\(\max(D_{\mathbf{u}} f(M)) = ||\nabla f(M)|| \cdot \cos(0) = ||\nabla f(M)||\)</span></p>
 <ul class="simple">
 <li><p><strong>Вывод 2:</strong> Модуль (длина) вектора градиента <span class="math notranslate nohighlight">\(||\nabla f(M)||\)</span> равен <strong>величине этой максимальной скорости</strong> роста функции.</p></li>
@@ -516,7 +516,7 @@ D_{\mathbf{u}} f(M) = \frac{\partial f}{\partial x}u₁ + \frac{\partial f}{\par
 </li>
 </ol>
 <p>Аналогично, направление, противоположное градиенту (<span class="math notranslate nohighlight">\(-\nabla f\)</span>), является направлением <strong>наискорейшего убывания</strong> функции (антиградиент).</p>
-<p><strong>Наглядная аналогия:</strong> Представьте себе карту высот местности. Функция <span class="math notranslate nohighlight">\(h(x, y)\)</span> — это высота над уровнем моря в точке с координатами <span class="math notranslate nohighlight">\((x, y)\)</span>.</p>
+<p><strong>Наглядная аналогия:</strong> представьте себе карту высот местности. Функция <span class="math notranslate nohighlight">\(h(x, y)\)</span> — это высота над уровнем моря в точке с координатами <span class="math notranslate nohighlight">\((x, y)\)</span>.</p>
 <ul class="simple">
 <li><p>Вектор градиента <span class="math notranslate nohighlight">\(\nabla h\)</span> в любой точке на карте будет указывать направление самого крутого подъема на холм.</p></li>
 <li><p>Длина вектора <span class="math notranslate nohighlight">\(||\nabla h||\)</span> будет характеризовать крутизну этого подъема.</p></li>
@@ -557,9 +557,9 @@ D_{\mathbf{u}} f(M) = \frac{\partial f}{\partial x}u₁ + \frac{\partial f}{\par
 </section>
 <section id="id8">
 <h2>7. Градиент и линии (поверхности) уровня<a class="headerlink" href="#id8" title="Ссылка на этот заголовок">#</a></h2>
-<p><strong>Определение:</strong> <strong>Поверхностью уровня <span class="math notranslate nohighlight">\(C\)</span></strong> функции <span class="math notranslate nohighlight">\(f(x, y, z)\)</span> называется множество точек, в которых функция принимает постоянное значение: <span class="math notranslate nohighlight">\(f(x, y, z) = C\)</span>. Для функции двух переменных это будут <strong>линии уровня</strong>.</p>
+<p><strong>Определение:</strong> <strong>поверхностью уровня <span class="math notranslate nohighlight">\(C\)</span></strong> функции <span class="math notranslate nohighlight">\(f(x, y, z)\)</span> называется множество точек, в которых функция принимает постоянное значение: <span class="math notranslate nohighlight">\(f(x, y, z) = C\)</span>. Для функции двух переменных это будут <strong>линии уровня</strong>.</p>
 <p>Например, для <span class="math notranslate nohighlight">\(f(x, y) = x^2 + y^2\)</span> линиями уровня <span class="math notranslate nohighlight">\(f(x, y) = C\)</span> (<span class="math notranslate nohighlight">\(C &gt; 0\)</span>) являются окружности. Для <span class="math notranslate nohighlight">\(h(x, y)\)</span> (высота) линиями уровня являются горизонтали на карте.</p>
-<p><strong>Теорема:</strong> Вектор градиента <span class="math notranslate nohighlight">\(\nabla f\)</span> в точке <span class="math notranslate nohighlight">\(M\)</span> ортогонален (перпендикулярен) касательной к линии уровня (или касательной плоскости к поверхности уровня), проходящей через эту точку <span class="math notranslate nohighlight">\(M\)</span>.</p>
+<p><strong>Теорема:</strong> вектор градиента <span class="math notranslate nohighlight">\(\nabla f\)</span> в точке <span class="math notranslate nohighlight">\(M\)</span> ортогонален (перпендикулярен) касательной к линии уровня (или касательной плоскости к поверхности уровня), проходящей через эту точку <span class="math notranslate nohighlight">\(M\)</span>.</p>
 <p><strong>Доказательство:</strong>
 Рассмотрим поверхность уровня <span class="math notranslate nohighlight">\(f(x, y, z) = C\)</span>. Пусть <span class="math notranslate nohighlight">\(\mathbf{r}(t) = (x(t), y(t), z(t))\)</span> — произвольная гладкая кривая, целиком лежащая на этой поверхности и проходящая через точку <span class="math notranslate nohighlight">\(M\)</span> в момент <span class="math notranslate nohighlight">\(t=t₀\)</span>.</p>
 <p>Поскольку кривая лежит на поверхности уровня, для любого <span class="math notranslate nohighlight">\(t\)</span> выполняется тождество:
@@ -586,28 +586,28 @@ D_{\mathbf{u}} f(M) = \frac{\partial f}{\partial x}u₁ + \frac{\partial f}{\par
 <h2>8. Приложения градиента<a class="headerlink" href="#id9" title="Ссылка на этот заголовок">#</a></h2>
 <p>Концепция градиента является рабочей лошадкой во многих областях науки и инженерии.</p>
 <ul>
-<li><p><strong>Машинное обучение и оптимизация:</strong> Метод <strong>градиентного спуска</strong> — один из самых популярных алгоритмов для минимизации функции потерь. Его идея проста: чтобы найти минимум функции, нужно двигаться в направлении, противоположном ее градиенту (в направлении антиградиента), то есть по пути наискорейшего спуска.</p>
+<li><p><strong>Машинное обучение и оптимизация:</strong> метод <strong>градиентного спуска</strong> — один из самых популярных алгоритмов для минимизации функции потерь. Его идея проста: чтобы найти минимум функции, нужно двигаться в направлении, противоположном ее градиенту (в направлении антиградиента), то есть по пути наискорейшего спуска.</p>
 <div class="math notranslate nohighlight">
 \[
     \mathbf{x}_{k+1} = \mathbf{x}_k - \gamma\nabla f(\mathbf{x}_k)
     \]</div>
 <p>где <span class="math notranslate nohighlight">\(\gamma\)</span> — скорость обучения.</p>
 </li>
-<li><p><strong>Физика:</strong> Градиент связывает потенциальные поля со связанными с ними силовыми полями.</p>
+<li><p><strong>Физика:</strong> градиент связывает потенциальные поля со связанными с ними силовыми полями.</p>
 <ul>
-<li><p><strong>Электростатика:</strong> Напряженность электрического поля <span class="math notranslate nohighlight">\(\mathbf{E}\)</span> является антиградиентом электростатического потенциала <span class="math notranslate nohighlight">\(\phi\)</span>:</p>
+<li><p><strong>Электростатика:</strong> напряженность электрического поля <span class="math notranslate nohighlight">\(\mathbf{E}\)</span> является антиградиентом электростатического потенциала <span class="math notranslate nohighlight">\(\phi\)</span>:</p>
 <div class="math notranslate nohighlight">
 \[ \mathbf{E} = -\nabla\phi \]</div>
 </li>
-<li><p><strong>Гравитация:</strong> Напряженность гравитационного поля <span class="math notranslate nohighlight">\(\mathbf{g}\)</span> — антиградиент гравитационного потенциала <span class="math notranslate nohighlight">\(\Phi\)</span>:</p>
+<li><p><strong>Гравитация:</strong> напряженность гравитационного поля <span class="math notranslate nohighlight">\(\mathbf{g}\)</span> — антиградиент гравитационного потенциала <span class="math notranslate nohighlight">\(\Phi\)</span>:</p>
 <div class="math notranslate nohighlight">
 \[ \mathbf{g} = -\nabla\Phi \]</div>
 <p>Такие поля называются <strong>консервативными</strong> или <strong>потенциальными</strong>.</p>
 </li>
-<li><p><strong>Термодинамика:</strong> Поток тепла направлен в сторону, противоположную градиенту температуры.</p></li>
+<li><p><strong>Термодинамика:</strong> поток тепла направлен в сторону, противоположную градиенту температуры.</p></li>
 </ul>
 </li>
-<li><p><strong>Компьютерная графика и геометрия:</strong> Градиент используется для вычисления нормалей к поверхностям, что критически важно для корректного расчета освещения и затенения 3D-моделей.</p></li>
+<li><p><strong>Компьютерная графика и геометрия:</strong> градиент используется для вычисления нормалей к поверхностям, что критически важно для корректного расчета освещения и затенения 3D-моделей.</p></li>
 </ul>
 </section>
 <section id="id10">
@@ -679,7 +679,7 @@ D_{\mathbf{u}} f(M) = \frac{\partial f}{\partial x}u₁ + \frac{\partial f}{\par
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">1. Введение: От производной к градиенту</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">1. Введение: от производной к градиенту</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">2. Формальное определение градиента</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">3. Производная по направлению</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">4. Фундаментальная теорема о градиенте и производной по направлению</a></li>
