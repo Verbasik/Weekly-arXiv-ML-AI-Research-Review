@@ -23,7 +23,7 @@ from google.adk.sessions import InMemorySessionService
 from google.genai.types import Content, Part
 
 # Локальные модули
-from agents.assistant_agent import (
+from .agents.assistant_agent import (
     create_git_assistant_agent,
     get_git_diff,
     create_commit,
@@ -58,44 +58,30 @@ def coro(f: Callable) -> Callable:
 load_dotenv()
 
 
-@click.group()
-def cli() -> None:
-    """
-    Description:
-    ---------------
-        Основная группа команд для CLI-приложения AI Git Assistant.
-        Автоматизирует Git-операции с помощью Gemini и ADK.
-    """
-    pass
-
-
-@cli.command()
-@click.argument(
-    'path',
-    type=click.Path(exists=True, file_okay=False, resolve_path=True)
-)
+@click.command()
 @click.option(
     '--yes', '-y',
     is_flag=True,
     help='Пропустить интерактивное подтверждение перед коммитом и push.'
 )
 @coro
-async def run(path: str, yes: bool) -> None:
+async def cli(yes: bool) -> None:
     """
     Description:
     ---------------
         Запускает полный цикл анализа репозитория, генерации коммита
-        и отправки изменений.
+        и отправки изменений для ТЕКУЩЕЙ директории.
 
     Args:
     ---------------
-        path (str): Путь к локальному Git-репозиторию.
         yes (bool): Флаг для пропуска интерактивного подтверждения.
 
     Returns:
     ---------------
         None
     """
+    # Автоматически определяем путь к репозиторию как текущую рабочую директорию
+    path = os.getcwd()
     click.echo(f"Запуск анализа для репозитория: {path}")
 
     # --- Шаг 0: Проверка наличия API-ключа ---
