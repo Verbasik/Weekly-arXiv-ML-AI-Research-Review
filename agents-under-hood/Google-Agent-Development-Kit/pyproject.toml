@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "ai-git-assistant"
 version = "0.1.0"
 authors = [
-  { name="Your Name", email="you@example.com" },
+  { name="Verbasik", email="verbasik2018@mail.com" },
 ]
 description = "A CLI tool that uses Google Gemini to automate Git commit messages."
 readme = "README.md"
