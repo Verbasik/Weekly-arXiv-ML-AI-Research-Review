@@ -7,8 +7,8 @@ author: Verbasik
 # Принудительное выполнение ноутбуков при каждой сборке.
 # См. https://jupyterbook.org/content/execute.html
 execute:
-  execute_notebooks: force
-  # execute_notebooks: 'off'
+  execute_notebooks: 'off'
+  # execute_notebooks: force
   # execute_notebooks: cache
 
 # Определение имени выходного файла LaTeX для сборки PDF

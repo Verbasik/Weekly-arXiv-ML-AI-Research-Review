@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Анализ и формализация понятия функции &#8212; ATLAS</title>
+    <title>Производная — узнаём скорость в любой момент &#8212; ATLAS</title>
   
   
   
@@ -73,11 +73,11 @@
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
     <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'Chapter-1/01-math';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'Chapter-1/03-derivative';</script>
     <link rel="index" title="Алфавитный указатель" href="../genindex.html" />
     <link rel="search" title="Поиск" href="../search.html" />
-    <link rel="next" title="Предел функции — финишная прямая" href="02-limit.html" />
-    <link rel="prev" title="Функция - начало" href="01-functions.html" />
+    <link rel="next" title="Анализ и формализация понятия производной" href="03-math.html" />
+    <link rel="prev" title="Анализ и формализация понятия предела функции" href="02-math.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="ru"/>
   </head>
@@ -191,9 +191,9 @@
 <li class="toctree-l1"><a class="reference internal" href="00-introduction.html">От функций к градиенту</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Глава 1. Функция — отправная точка</span></p>
-<ul class="current nav bd-sidenav">
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="01-functions.html">Функция - начало</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">Анализ и формализация понятия функции</a></li>
+<li class="toctree-l1"><a class="reference internal" href="01-math.html">Анализ и формализация понятия функции</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Глава 2. Предел функции</span></p>
 <ul class="nav bd-sidenav">
@@ -201,8 +201,8 @@
 <li class="toctree-l1"><a class="reference internal" href="02-math.html">Анализ и формализация понятия предела функции</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Глава 3. Производная</span></p>
-<ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="03-derivative.html">Производная — узнаём скорость в любой момент</a></li>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Производная — узнаём скорость в любой момент</a></li>
 <li class="toctree-l1"><a class="reference internal" href="03-math.html">Анализ и формализация понятия производной</a></li>
 </ul>
 <p aria-level="2" class="caption" role="heading"><span class="caption-text">Глава 4. Градиент</span></p>
@@ -280,7 +280,7 @@
       
       
       
-      <li><a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/issues/new?title=Issue%20on%20page%20%2FChapter-1/01-math.html&body=Your%20issue%20content%20here." target="_blank"
+      <li><a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/issues/new?title=Issue%20on%20page%20%2FChapter-1/03-derivative.html&body=Your%20issue%20content%20here." target="_blank"
    class="btn btn-sm btn-source-issues-button dropdown-item"
    title="Открыть вопрос"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -310,7 +310,7 @@
       
       
       
-      <li><a href="../_sources/Chapter-1/01-math.ipynb" target="_blank"
+      <li><a href="../_sources/Chapter-1/03-derivative.ipynb" target="_blank"
    class="btn btn-sm btn-download-source-button dropdown-item"
    title="Скачать исходный файл"
    data-bs-placement="left" data-bs-toggle="tooltip"
@@ -394,7 +394,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Анализ и формализация понятия функции</h1>
+    <h1>Производная — узнаём скорость в любой момент</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -404,10 +404,9 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">1. Формальное определение функции через теорию множеств</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">2. Терминология и нотация</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">3. График функции</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">4. Свойства отображений (классификация функций)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Фокус с приближением</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Что такое производная? Проще некуда!</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Что производная показывает на графике?</a></li>
 </ul>
             </nav>
         </div>
@@ -420,90 +419,79 @@ document.write(`
                 <article class="bd-article">
                   
   <section id="id1">
-<h1>Анализ и формализация понятия функции<a class="headerlink" href="#id1" title="Ссылка на этот заголовок">#</a></h1>
+<h1>Производная — узнаём скорость в любой момент<a class="headerlink" href="#id1" title="Ссылка на этот заголовок">#</a></h1>
+<p>Мы уже поняли, как вычислить <em>среднюю</em> скорость нашего велосипедиста за какой-то промежуток времени. Мы брали две точки на его пути и делили изменение скорости на изменение времени (<span class="math notranslate nohighlight">\(\frac{\Delta y}{\Delta x}\)</span>).</p>
+<p>Но это как сказать: «За последний час моя средняя скорость была 15 км/ч». Это не говорит вам, гнали ли вы с горы со скоростью 30 км/ч или еле тащились в гору со скоростью 5 км/ч.</p>
+<p>А что, если мы хотим узнать скорость <strong>прямо сейчас</strong>? Как на спидометре. Как математически «посмотреть на спидометр» функции?</p>
 <section id="id2">
-<h2>1. Формальное определение функции через теорию множеств<a class="headerlink" href="#id2" title="Ссылка на этот заголовок">#</a></h2>
-<p>В основе строгого определения функции лежит понятие <strong>декартова произведения</strong> множеств и <strong>бинарного отношения</strong>.</p>
-<p><strong>1.1. Декартово произведение:</strong></p>
-<p>Пусть даны два множества <span class="math notranslate nohighlight">\(X\)</span> и <span class="math notranslate nohighlight">\(Y\)</span>. Их декартовым произведением <span class="math notranslate nohighlight">\(X \times Y\)</span> называется множество всех возможных упорядоченных пар <span class="math notranslate nohighlight">\((x, y)\)</span>, где <span class="math notranslate nohighlight">\(x \in X\)</span> и <span class="math notranslate nohighlight">\(y \in Y\)</span>.</p>
-<div class="math notranslate nohighlight">
-\[
-X \times Y = \{ (x, y) \mid x \in X, y \in Y \}
-\]</div>
-<p><strong>1.2. Бинарное отношение:</strong></p>
-<p>Любое подмножество <span class="math notranslate nohighlight">\(R\)</span> декартова произведения <span class="math notranslate nohighlight">\(X \times Y\)</span> называется бинарным отношением между множествами <span class="math notranslate nohighlight">\(X\)</span> и <span class="math notranslate nohighlight">\(Y\)</span>. Если пара <span class="math notranslate nohighlight">\((x, y) \in R\)</span>, говорят, что элемент <span class="math notranslate nohighlight">\(x\)</span> находится в отношении <span class="math notranslate nohighlight">\(R\)</span> с элементом <span class="math notranslate nohighlight">\(y\)</span>.</p>
-<p><strong>1.3. Определение функции:</strong></p>
-<p><strong>Функция</strong> <span class="math notranslate nohighlight">\(f\)</span> из множества <span class="math notranslate nohighlight">\(X\)</span> в множество <span class="math notranslate nohighlight">\(Y\)</span> — это бинарное отношение <span class="math notranslate nohighlight">\(F \subseteq X \times Y\)</span> (то есть множество упорядоченных пар), которое удовлетворяет следующему свойству <strong>функциональности (или однозначности)</strong>:</p>
-<blockquote>
-<div><p>Для каждого элемента <span class="math notranslate nohighlight">\(x \in X\)</span> существует <strong>единственный</strong> элемент <span class="math notranslate nohighlight">\(y \in Y\)</span> такой, что пара <span class="math notranslate nohighlight">\((x, y)\)</span> принадлежит отношению <span class="math notranslate nohighlight">\(F\)</span>.</p>
-</div></blockquote>
-<hr class="docutils" />
-<p>Формально это записывается с помощью кванторов:</p>
-<div class="math notranslate nohighlight">
-\[
-\forall x \in X \ \exists! y \in Y : (x, y) \in F
-\]</div>
-<p>Таким образом, строго говоря, функция — это тройка <span class="math notranslate nohighlight">\((X, Y, F)\)</span>, где <span class="math notranslate nohighlight">\(X\)</span> и <span class="math notranslate nohighlight">\(Y\)</span> — множества, а <span class="math notranslate nohighlight">\(F \subseteq X \times Y\)</span> — график функции, удовлетворяющий указанному свойству.</p>
+<h2>Фокус с приближением<a class="headerlink" href="#id2" title="Ссылка на этот заголовок">#</a></h2>
+<p>Для вычисления средней скорости нам нужны были две точки. А для мгновенной скорости у нас есть только одна — «сейчас». Вот тут и начинается самое интересное.</p>
+<p>Давайте схитрим. Возьмем нашу точку «сейчас» (<strong>A</strong>) и вторую точку (<strong>B</strong>), но расположим её невероятно, <em>невообразимо</em> близко к первой.</p>
+<p>Представьте, что вы смотрите на график движения. Сначала между точками <strong>A</strong> и <strong>B</strong> есть видимое расстояние. Но мы начинаем двигать точку <strong>B</strong> по графику всё ближе к <strong>A</strong>.</p>
+<ul class="simple">
+<li><p>Когда <strong>B</strong> находится в 1 секунде от <strong>A</strong>, мы получаем очень точную среднюю скорость за эту секунду.</p></li>
+<li><p>Когда <strong>B</strong> в 0.1 секунды от <strong>A</strong> — скорость еще точнее.</p></li>
+<li><p>Когда <strong>B</strong> в 0.000001 секунды от <strong>A</strong>…</p></li>
+</ul>
+<p>Линия, которая соединяет <strong>A</strong> и <strong>B</strong> (секущая), почти перестает пересекать график, она почти просто <em>касается</em> его в одной точке.</p>
+<p>Этот процесс «бесконечного приближения» вам уже знаком — это <strong>предел</strong>! Мы заставляем промежуток времени <span class="math notranslate nohighlight">\(\Delta x\)</span> стремиться к нулю, чтобы поймать то самое значение скорости в одно-единственное мгновение.</p>
+<iframe
+  width="720"
+  height="405"
+  src="https://rutube.ru/play/embed/e137062a3f0c33bdbed6bf0ebfe75a59"
+  frameBorder="0"
+  allow="clipboard-write; autoplay"
+  allowFullScreen
+></iframe>
 </section>
 <section id="id3">
-<h2>2. Терминология и нотация<a class="headerlink" href="#id3" title="Ссылка на этот заголовок">#</a></h2>
-<p>На основе формального определения вводятся более удобные обозначения и термины.</p>
-<p><strong>2.1. Обозначение:</strong></p>
-<p>Если <span class="math notranslate nohighlight">\(f\)</span> является функцией из <span class="math notranslate nohighlight">\(X\)</span> в <span class="math notranslate nohighlight">\(Y\)</span>, это записывают как <span class="math notranslate nohighlight">\(f: X \rightarrow Y\)</span>. Вместо <span class="math notranslate nohighlight">\((x, y) \in F\)</span> принято писать <span class="math notranslate nohighlight">\(y = f(x)\)</span>.</p>
-<ul class="simple">
-<li><p><strong><span class="math notranslate nohighlight">\(f: X \rightarrow Y\)</span></strong>: Эта запись означает, что <span class="math notranslate nohighlight">\(f\)</span> является функцией, которая отображает элементы множества <span class="math notranslate nohighlight">\(X\)</span> в элементы множества <span class="math notranslate nohighlight">\(Y\)</span>.</p></li>
-<li><p><strong><span class="math notranslate nohighlight">\(y = f(x)\)</span></strong>: Эта запись утверждает, что элемент <span class="math notranslate nohighlight">\(y \in Y\)</span> является <strong>образом</strong> элемента <span class="math notranslate nohighlight">\(x \in X\)</span> при отображении <span class="math notranslate nohighlight">\(f\)</span>. Элемент <span class="math notranslate nohighlight">\(x\)</span> называется <strong>прообразом</strong> элемента <span class="math notranslate nohighlight">\(y\)</span>.</p></li>
-</ul>
-<p><strong>2.2. Ключевые множества:</strong></p>
-<p>Крайне важно различать следующие три множества:</p>
-<ul>
-<li><p><strong>Область определения (Domain)</strong>, <span class="math notranslate nohighlight">\(D(f)\)</span>: Это исходное множество <span class="math notranslate nohighlight">\(X\)</span>. Множество всех «входов» функции.</p></li>
-<li><p><strong>Область прибытия (Codomain)</strong>, или <strong>кодомен</strong>: Это целевое множество <span class="math notranslate nohighlight">\(Y\)</span>. Оно определяет, в каком множестве <em>могут</em> лежать значения функции, но не все элементы <span class="math notranslate nohighlight">\(Y\)</span> обязаны быть значениями.</p></li>
-<li><p><strong>Множество значений (Range) или Образ (Image)</strong>, <span class="math notranslate nohighlight">\(E(f)\)</span> или <span class="math notranslate nohighlight">\(\text{Im}(f)\)</span>: Это подмножество кодомена <span class="math notranslate nohighlight">\(Y\)</span>, состоящее из всех <em>фактических</em> значений, которые принимает функция.</p>
-<div class="math notranslate nohighlight">
-\[
-    \text{Im}(f) = \{ y \in Y \mid \exists x \in X, y = f(x) \}
-    \]</div>
-<p>Всегда справедливо, что <span class="math notranslate nohighlight">\(\text{Im}(f) \subseteq Y\)</span>.</p>
-</li>
-</ul>
-<p><strong>Пример для различения:</strong>
-рассмотрим функцию <span class="math notranslate nohighlight">\(f: \mathbb{R} \rightarrow \mathbb{R}\)</span>, заданную формулой <span class="math notranslate nohighlight">\(f(x) = x^2\)</span>.</p>
-<ul class="simple">
-<li><p><strong>Область определения:</strong> <span class="math notranslate nohighlight">\(D(f) = \mathbb{R}\)</span> (все действительные числа).</p></li>
-<li><p><strong>Кодомен (область прибытия):</strong> <span class="math notranslate nohighlight">\(Y = \mathbb{R}\)</span> (согласно определению <span class="math notranslate nohighlight">\(f: \mathbb{R} \rightarrow \mathbb{R}\)</span>).</p></li>
-<li><p><strong>Множество значений (образ):</strong> <span class="math notranslate nohighlight">\(\text{Im}(f) = [0, +\infty)\)</span>, так как квадрат любого действительного числа неотрицателен. Очевидно, что <span class="math notranslate nohighlight">\([0, +\infty) \subset \mathbb{R}\)</span>.</p></li>
-</ul>
+<h2>Что такое производная? Проще некуда!<a class="headerlink" href="#id3" title="Ссылка на этот заголовок">#</a></h2>
+<p><strong>Производная</strong> — это и есть та самая <strong>мгновенная скорость</strong> изменения функции.</p>
+<blockquote>
+<div><p>Если функция — это ваш путь, то производная — это ваш спидометр.</p>
+</div></blockquote>
+<p>Она показывает, насколько быстро и в каком направлении меняется ваша функция (скорость, температура, прибыль — что угодно) в конкретной точке.</p>
+<p>Обозначают производную очень просто — штрихом: <strong><span class="math notranslate nohighlight">\(f'(x)\)</span></strong>. Читается как «эф штрих от икс». Увидели штрих — знайте, речь идет о скорости изменения.</p>
 </section>
 <section id="id4">
-<h2>3. График функции<a class="headerlink" href="#id4" title="Ссылка на этот заголовок">#</a></h2>
-<p><strong>График функции</strong> <span class="math notranslate nohighlight">\(f: X \rightarrow Y\)</span> — это в точности то самое множество упорядоченных пар <span class="math notranslate nohighlight">\(F\)</span>, которое мы использовали в формальном определении.</p>
-<div class="math notranslate nohighlight">
-\[
-\Gamma_f = \{ (x, f(x)) \mid x \in X \}
-\]</div>
-<p>С точки зрения теории множеств, <strong>функция и её график — это одно и то же</strong>. Обозначение <span class="math notranslate nohighlight">\(f: X \rightarrow Y\)</span> является более удобной и информативной записью, которая сразу указывает на область определения и кодомен, в то время как <span class="math notranslate nohighlight">\(\Gamma_f\)</span> просто представляет собой множество пар.</p>
-<p>Для функций, где <span class="math notranslate nohighlight">\(X, Y \subseteq \mathbb{R}\)</span>, график имеет привычную визуализацию на декартовой координатной плоскости. <strong>Вертикальный тест</strong> (любая вертикальная прямая пересекает график не более чем в одной точке) является геометрической интерпретацией свойства функциональности.</p>
-</section>
-<section id="id5">
-<h2>4. Свойства отображений (классификация функций)<a class="headerlink" href="#id5" title="Ссылка на этот заголовок">#</a></h2>
-<p>Глубокий анализ функций включает их классификацию по свойствам отображения.</p>
-<ul>
-<li><p><strong>Инъекция (вложение, «один к одному»):</strong> функция <span class="math notranslate nohighlight">\(f: X \rightarrow Y\)</span> инъективна, если разным элементам из <span class="math notranslate nohighlight">\(X\)</span> всегда соответствуют разные элементы из <span class="math notranslate nohighlight">\(Y\)</span>.</p>
-<div class="math notranslate nohighlight">
-\[
-    \forall x_1, x_2 \in X, (f(x_1) = f(x_2) \implies x_1 = x_2)
-    \]</div>
-</li>
-<li><p><strong>Сюръекция (отображение «на»):</strong> функция <span class="math notranslate nohighlight">\(f: X \rightarrow Y\)</span> сюръективна, если каждый элемент кодомена <span class="math notranslate nohighlight">\(Y\)</span> является образом хотя бы одного элемента из <span class="math notranslate nohighlight">\(X\)</span>.</p>
-<div class="math notranslate nohighlight">
-\[
-    \forall y \in Y \ \exists x \in X : f(x) = y
-    \]</div>
-<p>Это эквивалентно тому, что образ функции совпадает с её кодоменом: <span class="math notranslate nohighlight">\(\text{Im}(f) = Y\)</span>.</p>
-</li>
-<li><p><strong>Биекция (взаимно-однозначное соответствие):</strong> функция <span class="math notranslate nohighlight">\(f: X \rightarrow Y\)</span> биективна, если она одновременно инъективна и сюръективна. Биекция устанавливает идеальное «партнерство» между элементами множеств <span class="math notranslate nohighlight">\(X\)</span> и <span class="math notranslate nohighlight">\(Y\)</span>.</p></li>
+<h2>Что производная показывает на графике?<a class="headerlink" href="#id4" title="Ссылка на этот заголовок">#</a></h2>
+<p>Самое наглядное объяснение производной — через <strong>касательную</strong>.</p>
+<p><strong>Касательная</strong> — это прямая, которая касается графика функции в одной-единственной точке, как бы «прислоняется» к нему.</p>
+<p>Так вот, <strong>производная в точке — это наклон касательной в этой точке.</strong></p>
+<ul class="simple">
+<li><p>Если касательная <strong>смотрит вверх</strong> — производная положительная. Это значит, что функция <strong>растёт</strong> (велосипедист разгоняется).</p></li>
+<li><p>Если касательная <strong>смотрит вниз</strong> — производная отрицательная. Функция <strong>убывает</strong> (велосипедист тормозит).</p></li>
+<li><p>Если касательная <strong>горизонтальна</strong> — производная равна нулю. Функция достигла пика («вершина холма») или дна («нижняя точка впадины»). Скорость в этот момент равна нулю.</p></li>
 </ul>
+<p><strong>Итак, главное, что нужно запомнить:</strong></p>
+<ol class="arabic simple">
+<li><p><strong>Производная — это мгновенная скорость функции.</strong></p></li>
+<li><p><strong>На графике она показывает наклон касательной.</strong></p></li>
+<li><p><strong>Она помогает понять, растет функция или убывает, и как быстро она это делает.</strong></p></li>
+</ol>
+<blockquote>
+<div><p>Для просмотра видео включите VPN</p>
+</div></blockquote>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTML</span>
+
+<span class="n">video_url</span> <span class="o">=</span> <span class="s2">&quot;https://www.youtube.com/watch?v=stnoEkxBxps&quot;</span>
+<span class="n">HTML</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&lt;iframe width=&quot;840&quot; height=&quot;315&quot; src=&quot;</span><span class="si">{</span><span class="n">video_url</span><span class="si">}</span><span class="s1">&quot; frameborder=&quot;0&quot; allowfullscreen&gt;&lt;/iframe&gt;&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">IPython.display</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTML</span>
+
+<span class="n">video_url</span> <span class="o">=</span> <span class="s2">&quot;https://www.youtube.com/watch?v=JVS_ge7_nd4&amp;list=PLVjLpKXnAGLVbrcJdDb0a2RS6MmRCgxJz&amp;index=3&quot;</span>
+<span class="n">HTML</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&lt;iframe width=&quot;840&quot; height=&quot;315&quot; src=&quot;</span><span class="si">{</span><span class="n">video_url</span><span class="si">}</span><span class="s1">&quot; frameborder=&quot;0&quot; allowfullscreen&gt;&lt;/iframe&gt;&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
 </section>
 </section>
 
@@ -538,20 +526,20 @@ X \times Y = \{ (x, y) \mid x \in X, y \in Y \}
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="01-functions.html"
+       href="02-math.html"
        title="предыдущая страница">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">назад</p>
-        <p class="prev-next-title">Функция - начало</p>
+        <p class="prev-next-title">Анализ и формализация понятия предела функции</p>
       </div>
     </a>
     <a class="right-next"
-       href="02-limit.html"
+       href="03-math.html"
        title="следующая страница">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">вперёд</p>
-        <p class="prev-next-title">Предел функции — финишная прямая</p>
+        <p class="prev-next-title">Анализ и формализация понятия производной</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -571,10 +559,9 @@ X \times Y = \{ (x, y) \mid x \in X, y \in Y \}
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">1. Формальное определение функции через теорию множеств</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">2. Терминология и нотация</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">3. График функции</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">4. Свойства отображений (классификация функций)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Фокус с приближением</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Что такое производная? Проще некуда!</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Что производная показывает на графике?</a></li>
 </ul>
   </nav></div>
 
