@@ -3,6 +3,8 @@
 [![Open Source](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://opensource.org/)
 [![Telegram Channel](https://img.shields.io/badge/Telegram-TheWeeklyBrief-blue)](https://t.me/TheWeeklyBrief)
 
+![](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/ATLAS/image/ATLAS.png)
+
 ## Второй выпуск ATLAS уже доступен!
 
 На этой неделе мы продолжаем наше путешествие по основам машинного обучения в проекте ATLAS.

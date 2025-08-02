@@ -3,6 +3,8 @@
 [![Open Source](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://opensource.org/)
 [![Telegram Channel](https://img.shields.io/badge/Telegram-TheWeeklyBrief-blue)](https://t.me/TheWeeklyBrief)
 
+![](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/ATLAS/image/ATLAS.png)
+
 ## Первый выпуск ATLAS уже доступен!
 
 Готовы пройти путь от математического фундамента к градиентному спуску? В пилотном выпуске:
