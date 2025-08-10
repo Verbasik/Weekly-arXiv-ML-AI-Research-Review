@@ -1,5 +1,7 @@
 # ATLAS: Algorithm Templates for Live AI Scripts
 
+![](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/ATLAS/image/ATLAS.png)
+
 ## 🚀 О проекте
 
 **ATLAS** (Algorithm Templates for Live AI Scripts) — это интерактивный практический справочник (CookBook) с динамической визуализацией классических алгоритмов машинного обучения. Проект создан в рамках дополнительного топика основного проекта ["TWRB"](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review) и представляет собой [Jupyter Book](https://jupyterbook.org/en/stable/intro.html) с интерактивными ноутбуками.
