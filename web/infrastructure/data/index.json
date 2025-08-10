@@ -278,11 +278,11 @@
           },
           {
             "week": "week-32",
-            "title": "Week 31: GSPO vs GRPO",
+            "title": "Week 32: GSPO (Qwen RL Algorithm by Alibaba Cloud)",
             "date": "Aug 04-Aug 10, 2025",
             "tags": ["RL", "GSPO", "GRPO"],
             "description": "GSPO vs GRPO: групповая оптимизация политик в обучении с подкреплением",
-            "papers": 0,
+            "papers": 1,
             "notebooks": 0,
             "code": 0,
             "notebook_path": "2025/week-32/review.md"
