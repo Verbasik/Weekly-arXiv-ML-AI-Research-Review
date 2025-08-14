@@ -286,6 +286,17 @@
             "notebooks": 0,
             "code": 0,
             "notebook_path": "2025/week-32/review.md"
+          },
+          {
+            "week": "week-33",
+            "title": "Week 33: Google Agent Development Kit (ADK)",
+            "date": "Aug 10-Aug 15, 2025",
+            "tags": ["Google", "Agent", "ADK"],
+            "description": "Разбор фреймворка для мультиагентных систем от Google",
+            "papers": 1,
+            "notebooks": 1,
+            "code": 0,
+            "notebook_path": "agents-under-hood/Google-Agent-Development-Kit/CookBook.ipynb"
           }
         ]
       },
