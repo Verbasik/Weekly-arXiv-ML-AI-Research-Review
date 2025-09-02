@@ -297,6 +297,26 @@
             "notebooks": 1,
             "code": 0,
             "notebook_path": "agents-under-hood/Google-Agent-Development-Kit/CookBook.ipynb"
+          },
+          {
+            "week": "week-34-35",
+            "title": "Week 34-35: Отпуск",
+            "date": "Aug 15-Aug 30, 2025",
+            "tags": ["Отпуск"],
+            "description": "Отпуск",
+            "papers": 0,
+            "notebooks": 0,
+            "code": 0
+          },
+          {
+            "week": "week-36",
+            "title": "Week 36: Schema Guided Reasoning",
+            "date": "Aug 31-Sep 06, 2025",
+            "tags": ["SGR", "Pydantic", "StructuredAI"],
+            "description": "SGR - новый метод когнитивной манипуляции LLM",
+            "papers": 1,
+            "notebooks": 0,
+            "code": 0
           }
         ]
       },
