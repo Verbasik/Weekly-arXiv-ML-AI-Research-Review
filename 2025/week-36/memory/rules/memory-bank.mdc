@@ -1,0 +1,245 @@
+# Memory Bank Learning Journal
+
+*Персональный журнал обучения для проекта SGR Research*  
+*Дата создания: 2025-09-05*
+
+## Обзор системы обучения
+
+Этот файл фиксирует ключевые знания, паттерны и insights, полученные в процессе работы над проектом Schema Guided Reasoning. Цель - обеспечить continuity знаний между сессиями и улучшить эффективность будущих итераций.
+
+## Выученные паттерны и insights
+
+### 1. Schema Design Patterns
+
+#### Основной принцип: Explicit over Implicit
+**Обнаружен**: При инициализации Memory Bank  
+**Паттерн**: Лучше явно указать все ограничения в схемах, чем полагаться на неявные правила
+
+```python
+# ❌ Неявное ограничение
+class Step(BaseModel):
+    actions: List[str]  # Сколько actions? Не понятно
+
+# ✅ Явное ограничение  
+class Step(BaseModel):
+    actions: Annotated[List[str], MinLen(1), MaxLen(3)] = Field(
+        description="1-3 конкретных действий"
+    )
+```
+
+**Применение**: Использовать во всех будущих схемах Annotated types с constraints
+
+#### Anti-Cycling через Schema Design
+**Обнаружен**: При анализе кода sgr-deep-research.py  
+**Паттерн**: Counters и boolean flags в схемах предотвращают зацикливание
+
+```python
+class NextStep(BaseModel):
+    searches_done: int = Field(description="MAX 3-4 searches")  
+    enough_data: bool = Field(description="Stop condition")
+    clarification_used: bool  # Context flag
+```
+
+**Insight**: LLM без explicit limits могут зацикливаться. Schema constraints - эффективное решение.
+
+### 2. Memory Bank Organization  
+
+#### Иерархическая структура знаний
+**Обнаружен**: При создании структуры memory/memory-bank/  
+**Паттерн**: Фундаментальные файлы → Специфические файлы → Активный контекст
+
+```
+projectbrief.md     # Фундамент - цели и требования
+↓
+productContext.md   # Проблемы и решения
+techContext.md      # Технологии  
+systemPatterns.md   # Архитектура
+↓  
+activeContext.md    # Текущий фокус
+progress.md         # Общий статус
+```
+
+**Применение**: Всегда начинать с projectbrief.md при восстановлении контекста
+
+#### Детализация по layers
+**Insight**: Каждый файл Memory Bank должен иметь разный уровень детализации:
+- **projectbrief.md**: High-level goals и requirements
+- **techContext.md**: Implementation details и dependencies  
+- **systemPatterns.md**: Code-level patterns и best practices
+- **activeContext.md**: Immediate next steps и current blockers
+
+### 3. Documentation Strategy
+
+#### Russian-first для внутренней документации  
+**Обнаружен**: При создании всех .md файлов  
+**Решение**: Русский язык для Memory Bank, английский для code comments
+
+**Обоснование**: 
+- Пользователь работает на русском
+- Внутренние размышления проще на родном языке
+- Code остается на английском для universal accessibility
+
+#### Structured Markdown с consistent formatting
+**Паттерн**: Использование таблиц, headers, и code blocks для structured information
+
+```markdown
+### Секция
+| Компонент | Статус | Метрики |
+|-----------|--------|---------|
+| **Item**  | ✅ Ready | Details |
+
+#### Sub-секция
+- ✅ Completed items
+- ⏳ In progress
+- 🎯 Future goals
+```
+
+### 4. Context Management Patterns
+
+#### State Preservation между sessions
+**Проблема**: AI agent теряет контекст между запусками  
+**Решение**: Memory Bank как persistent knowledge store
+
+**Критические элементы для preservation**:
+- Current project phase
+- Key architectural decisions с обоснованиями
+- Known limitations и workarounds
+- Next steps priority order
+
+#### Context Size Optimization  
+**Insight**: Memory Bank файлы должны быть comprehensive, но не overwhelming
+
+**Найденный баланс**:
+- projectbrief.md: ~60 строк (high-level overview)
+- productContext.md: ~120 строк (detailed analysis) 
+- techContext.md: ~150 строк (implementation details)
+- systemPatterns.md: ~200 строк (architectural patterns)
+
+### 5. Project-Specific Learnings
+
+#### SGR Schema Design Best Practices
+**Выученные принципы**:
+
+1. **Union routing**: Использовать Union types для routing между actions
+```python
+function: Union[Clarification, GeneratePlan, WebSearch, ...]
+```
+
+2. **Progress tracking**: Включать counters для предотвращения infinite loops
+```python
+searches_done: int = Field(description="MAX 3-4 searches")  
+```
+
+3. **Language consistency**: Preserve original user request для language detection
+```python
+user_request_language_reference: str = Field(
+    description="Copy of original request for language consistency"
+)
+```
+
+#### Citation Management Pattern
+**Обнаружен**: В коде add_citation() function  
+**Паттерн**: Centralized citation управление с deduplication
+
+```python
+def add_citation(url: str, title: str = "") -> int:
+    if url in CONTEXT["sources"]:
+        return CONTEXT["sources"][url]["number"]
+    # Auto-increment logic
+```
+
+**Insight**: Лучше centralized система цитирования, чем manual tracking
+
+#### Configuration Management
+**Best practice**: YAML + Environment Variables combo
+```python
+# Flexible configuration hierarchy
+config.yaml (defaults) → env variables (overrides) → runtime parameters
+```
+
+## Предпочтения пользователя
+
+### Communication Style  
+- **Язык**: Русский для internal communication, английский для code
+- **Детализация**: Comprehensive documentation с практическими примерами
+- **Структура**: Clear hierarchies с explicit relationships между компонентами
+
+### Technical Preferences
+- **Type safety**: Предпочтение Pydantic models с explicit validation
+- **Documentation**: Inline docstrings + separate documentation files
+- **Error handling**: Graceful degradation с clear error messages
+
+### Project Management Style
+- **Planning**: Structured approach с explicit todos и progress tracking
+- **Quality**: Code quality приоритет над speed
+- **Maintainability**: Long-term maintainability важнее short-term convenience
+
+## Повторяющиеся задачи
+
+### Memory Bank Maintenance
+**Frequency**: При каждом significant project change  
+**Actions**:
+1. Обновить activeContext.md с current focus
+2. Добавить новые patterns в systemPatterns.md  
+3. Зафиксировать learnings в этом файле
+4. Обновить progress.md статусы
+
+### Schema Evolution
+**Trigger**: При добавлении новых capabilities  
+**Process**:
+1. Проанализировать existing schemas для consistency
+2. Добавить новые Union options в NextStep.function
+3. Создать specialized Pydantic models  
+4. Обновить dispatch() function для handling новых types
+
+### Documentation Sync
+**Requirement**: Keep Memory Bank в sync с actual implementation  
+**Checklist**:
+- [ ] Code changes reflected в techContext.md
+- [ ] New patterns documented в systemPatterns.md
+- [ ] Progress updated в activeContext.md и progress.md
+
+## Избегать в будущем
+
+### Антипаттерны
+1. **Schema over-engineering**: Не создавать излишне сложные схемы
+2. **Context pollution**: Избегать loading всей истории в каждый prompt
+3. **Hardcoded limits**: Использовать configurable parameters вместо magic numbers
+
+### Known Pitfalls
+1. **Language mixing**: Не mix русский и английский в одном document section
+2. **Outdated documentation**: Regular updates Memory Bank при code changes
+3. **Missing error handling**: Always include graceful degradation paths
+
+## Metrics для Success
+
+### Documentation Quality
+- **Completeness**: Все major components задокументированы
+- **Clarity**: Понятно для future AI agents и human developers  
+- **Consistency**: Unified style across всех files
+- **Actionability**: Clear next steps и decision points
+
+### Code Quality  
+- **Type coverage**: 100% functions имеют type hints
+- **Schema coverage**: Все actions covered by Pydantic models
+- **Error handling**: Comprehensive exception handling
+- **Testing readiness**: Modular structure для easy unit testing
+
+## Будущие направления обучения
+
+### Приоритетные области
+1. **Performance optimization**: Изучить token usage patterns
+2. **Error scenario handling**: Документировать edge cases и recovery strategies
+3. **Multi-agent coordination**: Паттерны для complex agent interactions
+4. **Schema versioning**: Strategies для backward compatibility
+
+### Исследовательские вопросы
+- Как оптимизировать schema design для better LLM performance?
+- Какие patterns наиболее эффективны для preventing hallucinations?
+- Как лучше structure Memory Bank для different project types?
+
+---
+
+**Последнее обновление**: 2025-09-05  
+**Следующая ревизия**: После практического тестирования SGR агента  
+**Версия журнала**: 1.0 (Initial Memory Bank setup)
