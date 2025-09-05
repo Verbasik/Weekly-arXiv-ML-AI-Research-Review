@@ -46,8 +46,8 @@
 
 ## 🔗 Ссылки
 
-- Обзор недели: `review.md`
-- Краткое резюме: `summary.md`
+- Обзор недели: [`review.md`](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-36/review.md)
+- Краткое резюме: [`summary.md`](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-36/summary.md)
 - Публикация: [arXiv:2502.03450](https://arxiv.org/abs/2502.03450)
 - Инструменты: Instructor, OpenAI Structured Outputs, LangChain, Pydantic AI
 
