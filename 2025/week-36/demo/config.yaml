@@ -1,0 +1,39 @@
+# Конфигурация SGR Mathematical Agent
+
+sgr_math_agent:
+  # Настройки Ollama
+  ollama_base_url: "http://localhost:11434"
+  ollama_model: "gemma3n:e2b"
+  
+  # Параметры генерации
+  temperature: 0.1
+  max_tokens: 4000
+  
+  # Лимиты выполнения
+  max_execution_steps: 15
+  max_verification_attempts: 3
+  max_improvement_attempts: 5
+  
+  # Директории
+  reports_directory: "reports"
+  memory_directory: "memory"
+
+# Альтернативные модели для экспериментов
+alternative_models:
+  - "llama3.2:3b"
+  - "qwen2.5:7b"
+  - "mistral:7b"
+
+# Настройки для разных типов задач
+task_specific:
+  geometry:
+    temperature: 0.05  # Более детерминированно для геометрии
+    max_verification_attempts: 4
+  
+  algebra:
+    temperature: 0.1
+    max_verification_attempts: 3
+  
+  combinatorics:
+    temperature: 0.15  # Больше креативности для комбинаторики
+    max_verification_attempts: 5
