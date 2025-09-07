@@ -358,6 +358,12 @@ class OllamaClient:
             # Специальная обработка для сложных объектов в данных
             self._fix_complex_fields(corrected_data)
             
+            # Исправление булевых полей
+            self._fix_boolean_fields(corrected_data)
+            
+            # Исправление типов полей (число → список, и т.д.)
+            self._fix_field_types(corrected_data)
+            
             for error in validation_error.errors():
                 field_name = error['loc'][0] if error['loc'] else None
                 error_type = error['type']
@@ -496,12 +502,94 @@ class OllamaClient:
                         string_steps.append(str(step))
                 data['remaining_steps'] = string_steps[:5]  # Максимум 5 шагов
         
+        # Исправляем completed_steps - должен быть List[str] с максимум 8 элементами
+        if 'completed_steps' in data and isinstance(data['completed_steps'], list):
+            steps = data['completed_steps']
+            if len(steps) > 8:
+                data['completed_steps'] = steps[:8]  # Обрезаем до 8 элементов
+        
+        # Исправляем другие поля со ограничениями длины
+        list_limits = {
+            'key_concepts': 6,  # MaxLen(6)
+            'suggested_approaches': 4,  # MaxLen(4)
+            'solution_steps_plan': 8,  # MaxLen(8)  
+            'expected_techniques': 5,  # MaxLen(5)
+            'key_insights': 4,  # MaxLen(4)
+            'identified_issues': 10,  # Разумный лимит
+            'suggestions': 10,  # Разумный лимит
+            'issues_to_address': 5,  # MaxLen(5)
+            'expected_improvements': 4,  # MaxLen(4)
+            'reasoning_chain': 3  # MaxLen(3) для SimpleNextStep
+        }
+        
+        for field, max_len in list_limits.items():
+            if field in data and isinstance(data[field], list):
+                if len(data[field]) > max_len:
+                    data[field] = data[field][:max_len]
+        
         # Исправляем problem_domain - убираем недопустимые значения
         if 'problem_domain' in data:
             domain = data['problem_domain']
             valid_domains = ['algebra', 'geometry', 'calculus', 'number_theory', 'analysis', 'combinatorics']
             if domain not in valid_domains:
                 data['problem_domain'] = 'algebra'  # По умолчанию
+    
+    def _fix_boolean_fields(self, data: Dict[str, Any]) -> None:
+        """Исправление булевых полей, которые модель генерирует как строки"""
+        
+        # Список булевых полей, которые нужно исправлять
+        boolean_fields = ['task_completed', 'case_analysis_needed']
+        
+        for field in boolean_fields:
+            if field in data:
+                value = data[field]
+                if isinstance(value, str):
+                    # Преобразование строк в булевые значения
+                    value_lower = value.lower().strip()
+                    if value_lower in ['да', 'yes', 'true', '1', 'истина', 'завершено']:
+                        data[field] = True
+                    elif value_lower in ['нет', 'no', 'false', '0', 'ложь', 'не завершено']:
+                        data[field] = False
+                    else:
+                        # По умолчанию для неясных значений
+                        data[field] = False
+    
+    def _fix_field_types(self, data: Dict[str, Any]) -> None:
+        """Исправление типов полей, когда модель генерирует неправильный тип"""
+        
+        # Поля, которые должны быть списками
+        list_fields = [
+            'reasoning_chain', 'remaining_steps', 'key_concepts', 'suggested_approaches',
+            'solution_steps_plan', 'expected_techniques', 'key_insights', 'identified_issues',
+            'suggestions', 'issues_to_address', 'expected_improvements', 'completed_steps'
+        ]
+        
+        for field in list_fields:
+            if field in data:
+                value = data[field]
+                if not isinstance(value, list):
+                    if isinstance(value, (int, float)):
+                        # Число → создаем список из N элементов
+                        count = max(1, min(int(value), 5))  # От 1 до 5 элементов
+                        if field == 'reasoning_chain':
+                            data[field] = [f"Шаг {i+1} анализа" for i in range(count)]
+                        elif field == 'remaining_steps':
+                            data[field] = [f"Оставшийся шаг {i+1}" for i in range(count)]
+                        elif field == 'key_concepts':
+                            data[field] = ["математика", "решение"][:count]
+                        else:
+                            data[field] = [f"элемент {i+1}" for i in range(count)]
+                    elif isinstance(value, str):
+                        # Строка → список из одного элемента
+                        data[field] = [value]
+                    else:
+                        # Неизвестный тип → значение по умолчанию
+                        if field == 'reasoning_chain':
+                            data[field] = ["Анализ задачи"]
+                        elif field == 'remaining_steps':
+                            data[field] = ["Продолжить решение"]
+                        else:
+                            data[field] = ["значение"]
     
     def _detect_union_type(self, context_data: Dict[str, Any], function_data: Dict[str, Any]) -> str:
         """Определение нужного Union типа на основе контекста"""

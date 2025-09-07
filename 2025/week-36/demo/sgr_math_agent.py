@@ -25,7 +25,8 @@ from rich.table import Table
 
 # Импорт наших модулей
 from math_sgr_schemas import (
-    MathSolutionNextStep, ProblemAnalysis, SolutionStrategy, 
+    MathSolutionNextStep, SimpleNextStep, StateRouter,
+    ProblemAnalysis, SolutionStrategy, 
     MathematicalSolution, SolutionVerification, SolutionImprovement,
     TaskCompletion, get_problem_system_prompt, create_math_context
 )
@@ -387,6 +388,146 @@ def handle_task_completion(cmd: TaskCompletion, context: Dict[str, Any]) -> Dict
 # ОСНОВНОЙ ДВИЖОК SGR
 # =============================================================================
 
+def execute_sgr_with_smart_routing(problem_statement: str) -> str:
+    """Выполнение математической задачи с новой умной dispatch логикой без Union типов"""
+    
+    console.print(Panel(problem_statement, title="📐 Математическая задача (Smart Routing)", title_align="left"))
+    
+    # Проверка доступности Ollama
+    if not ollama_client.is_available():
+        console.print("[red]❌ Ollama недоступен. Запустите Docker контейнер.[/red]")
+        return "OLLAMA_UNAVAILABLE"
+    
+    # Инициализация контекста
+    CONTEXT.clear()
+    CONTEXT.update(create_math_context())
+    CONTEXT["problem_text"] = problem_statement
+    CONTEXT["start_time"] = datetime.now()
+    
+    console.print(f"[bold green]🚀 SGR SMART ROUTING АГЕНТ ЗАПУЩЕН[/bold green]")
+    console.print(f"[dim]🤖 Модель: {CONFIG['ollama_model']}[/dim]")
+    console.print(f"[dim]🧠 Режим: SimpleNextStep без Union типов[/dim]")
+    
+    # State router
+    router = StateRouter()
+    
+    # Основной цикл с умной маршрутизацией
+    for i in range(CONFIG['max_execution_steps']):
+        step_id = f"step_{i+1}"
+        console.print(f"\n🧠 [bold]{step_id}[/bold]: Анализ состояния...")
+        
+        try:
+            # 1. Сначала получаем текущее состояние через SimpleNextStep
+            status_prompt = f"""Быстрый статус анализ для математической задачи: {problem_statement}
+
+Шаг {i+1}/{CONFIG['max_execution_steps']}
+Выполнено: Анализ={'✅' if CONTEXT.get('analysis') else '❌'} | Стратегия={'✅' if CONTEXT.get('strategy') else '❌'} | Решение={'✅' if CONTEXT.get('solution') else '❌'}
+
+Определите статус в JSON формате:
+- reasoning_chain: краткие шаги рассуждения (1-2 элемента)
+- current_situation: текущее состояние (одно предложение)
+- problem_understanding: уровень понимания (unclear/partial/good/complete) 
+- solution_progress: прогресс (not_started/analysis_done/strategy_chosen/solving_in_progress/solution_complete/verified)
+- remaining_steps: оставшиеся шаги (1-2 элемента)
+- task_completed: завершена ли задача (true/false)
+"""
+            
+            # Генерация состояния
+            step_result = ollama_client.generate_structured(
+                schema=SimpleNextStep,
+                prompt=status_prompt,
+                system_prompt="Быстрый статусный анализ. ТОЛЬКО JSON без объяснений, текста, markdown. Краткие ответы.",
+                max_retries=3,
+                stream_output=True
+            )
+            
+            console.print(f"[dim]💭 Понимание: {step_result.problem_understanding}[/dim]")
+            console.print(f"[dim]📊 Прогресс: {step_result.solution_progress}[/dim]")
+            console.print(f"[dim]🎯 Завершена: {step_result.task_completed}[/dim]")
+            
+            # 2. Определяем следующее действие через роутер
+            next_action = router.determine_next_action(CONTEXT, step_result)
+            console.print(f"[blue]🎯 Следующее действие: {next_action}[/blue]")
+            
+            # 3. Проверяем завершение
+            if next_action == "complete_task" or step_result.task_completed:
+                console.print(f"[bold green]✅ Задача завершена на шаге {i+1}[/bold green]")
+                
+                # Финальное завершение
+                completion_prompt = router.create_action_prompt(next_action, CONTEXT, problem_statement)
+                completion_result = ollama_client.generate_structured(
+                    schema=TaskCompletion,
+                    prompt=completion_prompt,
+                    system_prompt=get_problem_system_prompt(),
+                    max_retries=3,
+                    stream_output=True
+                )
+                
+                dispatch(completion_result, CONTEXT)
+                break
+            
+            # 4. Создаем специализированный промпт для действия
+            action_prompt = router.create_action_prompt(next_action, CONTEXT, problem_statement)
+            
+            # 5. Выполняем конкретное действие с соответствующей схемой
+            if next_action == "analyze_problem":
+                result = ollama_client.generate_structured(
+                    schema=ProblemAnalysis,
+                    prompt=action_prompt,
+                    system_prompt=get_problem_system_prompt(),
+                    max_retries=3,
+                    stream_output=True
+                )
+                dispatch(result, CONTEXT)
+                
+            elif next_action == "choose_strategy":
+                result = ollama_client.generate_structured(
+                    schema=SolutionStrategy,
+                    prompt=action_prompt,
+                    system_prompt=get_problem_system_prompt(),
+                    max_retries=3,
+                    stream_output=True
+                )
+                dispatch(result, CONTEXT)
+                
+            elif next_action == "generate_solution":
+                result = ollama_client.generate_structured(
+                    schema=MathematicalSolution,
+                    prompt=action_prompt,
+                    system_prompt=get_problem_system_prompt(),
+                    max_retries=3,
+                    stream_output=True
+                )
+                dispatch(result, CONTEXT)
+                
+            elif next_action == "verify_solution":
+                result = ollama_client.generate_structured(
+                    schema=SolutionVerification,
+                    prompt=action_prompt,
+                    system_prompt=get_problem_system_prompt(),
+                    max_retries=3,
+                    stream_output=True
+                )
+                dispatch(result, CONTEXT)
+                
+            elif next_action == "improve_solution":
+                result = ollama_client.generate_structured(
+                    schema=SolutionImprovement,
+                    prompt=action_prompt,
+                    system_prompt=get_problem_system_prompt(),
+                    max_retries=3,
+                    stream_output=True
+                )
+                dispatch(result, CONTEXT)
+            
+            console.print(f"[green]✅ Действие '{next_action}' выполнено[/green]")
+            
+        except Exception as e:
+            console.print(f"[red]❌ Ошибка на шаге {i+1}: {e}[/red]")
+            break
+    
+    return "COMPLETED"
+
 def execute_sgr_math_task(problem_statement: str) -> str:
     """Выполнение математической задачи с использованием SGR"""
     
@@ -501,6 +642,7 @@ def main():
     parser.add_argument('--resume', '-r', action='store_true', help='Восстановить из файла памяти')
     parser.add_argument('--test-ollama', action='store_true', help='Тестировать подключение к Ollama')
     parser.add_argument('--interactive', '-i', action='store_true', help='Интерактивный режим')
+    parser.add_argument('--smart-routing', action='store_true', help='Использовать новую smart routing логику без Union типов')
     
     args = parser.parse_args()
     
@@ -538,7 +680,11 @@ def main():
                     console.print("❌ Пустая задача, попробуйте еще раз")
                     continue
                 
-                result = execute_sgr_math_task(problem)
+                # Выбор движка
+                if args.smart_routing:
+                    result = execute_sgr_with_smart_routing(problem)
+                else:
+                    result = execute_sgr_math_task(problem)
                 
                 # Сохранение памяти после каждой задачи
                 if args.memory:
@@ -564,7 +710,11 @@ def main():
             
             console.print(f"[dim]📂 Загружена задача из: {args.problem_file}[/dim]")
             
-            result = execute_sgr_math_task(problem_statement)
+            # Выбор движка
+            if args.smart_routing:
+                result = execute_sgr_with_smart_routing(problem_statement)
+            else:
+                result = execute_sgr_math_task(problem_statement)
             
             # Сохранение памяти
             if args.memory:

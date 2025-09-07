@@ -169,7 +169,53 @@ class TaskCompletion(BaseModel):
     )
 
 # =============================================================================
-# ГЛАВНАЯ SGR СХЕМА - УПРАВЛЕНИЕ ПРОЦЕССОМ РЕШЕНИЯ
+# УПРОЩЕННАЯ SGR СХЕМА БЕЗ UNION ТИПОВ
+# =============================================================================
+
+class SimpleNextStep(BaseModel):
+    """Упрощенная SGR схема без Union типов для стабильной работы с локальными моделями"""
+    
+    # Цепочка рассуждений
+    reasoning_chain: Annotated[List[str], MinLen(1), MaxLen(3)] = Field(
+        description="Краткий процесс рассуждения к решению"
+    )
+    
+    # Оценка текущей ситуации
+    current_situation: str = Field(
+        description="Анализ текущего состояния процесса решения"
+    )
+    
+    problem_understanding: Literal["unclear", "partial", "good", "complete"] = Field(
+        description="Уровень понимания задачи"
+    )
+    
+    # Прогресс решения - ключевое поле для state-машины
+    solution_progress: Literal["not_started", "analysis_done", "strategy_chosen", 
+                              "solving_in_progress", "solution_complete", "verified"] = Field(
+        description="Текущий прогресс в решении"
+    )
+    
+    # Счетчики попыток
+    verification_attempts: int = Field(default=0, ge=0, le=3)
+    improvement_attempts: int = Field(default=0, ge=0, le=5)
+    
+    # Планирование
+    remaining_steps: Annotated[List[str], MinLen(1), MaxLen(3)] = Field(
+        description="Оставшиеся шаги для завершения задачи"
+    )
+    
+    task_completed: bool = Field(
+        description="Завершена ли задача решения?"
+    )
+    
+    # Конкретные данные для текущего этапа (вместо Union)
+    step_data: Dict[str, Any] = Field(
+        description="Специфичные данные для текущего этапа решения",
+        default_factory=dict
+    )
+
+# =============================================================================
+# СОХРАНЯЕМ СТАРУЮ СХЕМУ ДЛЯ СОВМЕСТИМОСТИ
 # =============================================================================
 
 class MathSolutionNextStep(BaseModel):
@@ -335,6 +381,139 @@ def get_problem_system_prompt() -> str:
 \<completion\_criteria> <item>Доказательство строгое и полное (или корректно обозначено как частичное).</item> <item>Все утверждения обоснованы, граничные случаи проверены.</item> <item>Финальный ответ сформулирован явно.</item> <item>Верификация выполнена по рубрике 10/10 и отражена во выводе.</item>
 \</completion\_criteria> </system>
 """.strip()
+
+# =============================================================================
+# ИНТЕЛЛЕКТУАЛЬНЫЙ STATE РОУТЕР
+# =============================================================================
+
+class StateRouter:
+    """Интеллектуальный роутер для определения следующего шага без Union типов"""
+    
+    @staticmethod
+    def determine_next_action(context: Dict[str, Any], step_result: SimpleNextStep) -> str:
+        """Определяет следующее действие на основе контекста и прогресса"""
+        
+        # Если задача завершена
+        if step_result.task_completed:
+            return "complete_task"
+        
+        # Проверяем лимиты
+        if (step_result.verification_attempts >= 3 or 
+            step_result.improvement_attempts >= 5):
+            return "complete_task"
+        
+        # Логика state-машины
+        progress = step_result.solution_progress
+        understanding = step_result.problem_understanding
+        
+        # Приоритет прогрессу над пониманием
+        if progress == "not_started":
+            return "analyze_problem"
+        elif progress == "analysis_done" and not context.get("strategy", {}):
+            return "choose_strategy"  # Переходим к стратегии независимо от понимания
+        elif progress == "strategy_chosen" and not context.get("solution", {}):
+            return "generate_solution"
+        elif progress == "solution_complete" and not context.get("verification", {}):
+            return "verify_solution"
+        elif (context.get("verification", {}) and 
+              context.get("verification", {}).get("result") != "correct" and
+              step_result.improvement_attempts < 5):
+            return "improve_solution"
+        elif understanding in ["unclear", "partial"] and not context.get("analysis"):
+            return "analyze_problem"  # Только если анализ не выполнен
+        else:
+            return "complete_task"
+    
+    @staticmethod
+    def create_action_prompt(action: str, context: Dict[str, Any], problem_text: str) -> str:
+        """Создает специализированный промпт для конкретного действия"""
+        
+        base_context = f"Математическая задача: {problem_text}\n\n"
+        
+        if action == "analyze_problem":
+            return f"""{base_context}
+ЗАДАЧА: Проанализируйте математическую задачу и определите её тип.
+
+ТРЕБУЕМЫЕ ПОЛЯ:
+- problem_domain: область математики (algebra, geometry, etc.)
+- problem_type: конкретный тип задачи
+- key_concepts: список ключевых концепций (2-6 элементов)
+- difficulty_assessment: уровень сложности (low, medium, high, very_high)
+- suggested_approaches: возможные подходы (2-4 элемента)
+"""
+        
+        elif action == "choose_strategy":
+            analysis = context.get("analysis", {})
+            domain = analysis.get('domain', 'неизвестно') if analysis else 'неизвестно'
+            problem_type = analysis.get('type', 'неизвестно') if analysis else 'неизвестно'
+            return f"""{base_context}
+ПРЕДЫДУЩИЙ АНАЛИЗ: {domain} / {problem_type}
+
+ЗАДАЧА: Выберите стратегию решения на основе анализа.
+
+ТРЕБУЕМЫЕ ПОЛЯ:
+- chosen_approach: выбранный подход
+- solution_steps_plan: план шагов решения (3-8 элементов)
+- expected_techniques: ожидаемые техники (1-5 элементов)
+"""
+        
+        elif action == "generate_solution":
+            strategy = context.get("strategy", {})
+            approach = strategy.get('approach', 'неизвестно') if strategy else 'неизвестно'
+            return f"""{base_context}
+ВЫБРАННАЯ СТРАТЕГИЯ: {approach}
+
+ЗАДАЧА: Создайте подробное математическое решение.
+
+ТРЕБУЕМЫЕ ПОЛЯ:
+- solution_summary: краткое резюме решения
+- detailed_solution: подробное пошаговое решение в TeX
+- key_insights: ключевые инсайты (1-4 элемента)
+- mathematical_rigor: уровень строгости (complete, mostly_complete, partial, incomplete)
+- confidence: уверенность в решении (very_high, high, medium, low)
+"""
+        
+        elif action == "verify_solution":
+            solution = context.get("solution", {})
+            summary = solution.get('summary', 'неизвестно') if solution else 'неизвестно'
+            return f"""{base_context}
+РЕШЕНИЕ ДЛЯ ПРОВЕРКИ: {summary}
+
+ЗАДАЧА: Проверьте корректность решения.
+
+ТРЕБУЕМЫЕ ПОЛЯ:
+- verification_approach: метод проверки
+- verification_result: результат (correct, incorrect, partially_correct, unclear)
+- identified_issues: список проблем (может быть пустой)
+- suggestions: предложения по улучшению (может быть пустой)
+"""
+        
+        elif action == "improve_solution":
+            verification = context.get("verification", {})
+            issues = verification.get("issues", []) if verification else []
+            issues_str = ', '.join(issues) if issues else 'отсутствуют'
+            return f"""{base_context}
+ОБНАРУЖЕННЫЕ ПРОБЛЕМЫ: {issues_str}
+
+ЗАДАЧА: Улучшите решение на основе верификации.
+
+ТРЕБУЕМЫЕ ПОЛЯ:
+- improvement_strategy: стратегия улучшения
+- issues_to_address: проблемы для исправления (1-5 элементов)
+- expected_improvements: ожидаемые улучшения (1-4 элемента)
+"""
+        
+        elif action == "complete_task":
+            return f"""{base_context}
+ЗАДАЧА: Завершите решение задачи и дайте финальный ответ.
+
+ТРЕБУЕМЫЕ ПОЛЯ:
+- final_answer: финальный ответ на задачу
+- solution_quality: качество решения (excellent, good, satisfactory, poor)
+- completed_steps: выполненные этапы (1-8 элементов)
+"""
+        
+        return f"{base_context}Выполните действие: {action}"
 
 def create_math_context() -> Dict[str, Any]:
     """Создание контекста для математического SGR агента"""
