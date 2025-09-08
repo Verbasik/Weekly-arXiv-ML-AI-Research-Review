@@ -594,6 +594,10 @@ code, pre, .pixel-mono {
 .pixel-justify-end { justify-content: flex-end; }
 .pixel-flex-wrap { flex-wrap: wrap; }
 
+/* Vertical stack utility with consistent rhythm */
+.pixel-stack { display: flex; flex-direction: column; gap: var(--pixel-space-3); }
+@media (max-width: 768px) { .pixel-stack { gap: var(--pixel-space-2); } }
+
 .pixel-grid { display: grid; }
 .pixel-grid-2 { grid-template-columns: repeat(2, 1fr); }
 .pixel-grid-3 { grid-template-columns: repeat(3, 1fr); }
