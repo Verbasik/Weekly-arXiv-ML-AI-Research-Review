@@ -19,16 +19,38 @@
                 "Готовая архитектура для масштабирования",
                 "Подробная документация и примеры использования"
             ]
+        },
+        {
+            "id": "google-adk-ai-git-assistant",
+            "title": "Google ADK — AI Git Assistant",
+            "date": "2025",
+            "tags": ["Google ADK", "Gemini", "CLI", "Git", "Automation"],
+            "description": "CLI-инструмент на базе Google Agent Development Kit и Gemini, который анализирует изменения в репозитории, генерирует сообщения в формате Conventional Commits и выполняет полный цикл add/commit/push.",
+            "notebooks": 1,
+            "code": 1,
+            "notebook_path": "agents-under-hood/Google-Agent-Development-Kit/CookBook.ipynb",
+            "code_path": "agents-under-hood/Google-Agent-Development-Kit",
+            "technologies": ["Google ADK", "Gemini", "Python"],
+            "features": [
+                "Автоматическое индексирование изменений (git add .)",
+                "Глубокий анализ git diff",
+                "Генерация сообщений коммитов (Conventional Commits)",
+                "Единая команда для add/commit/push",
+                "Интерактивное подтверждение перед коммитом",
+                "Неинтерактивный режим для CI/CD (--yes)"
+            ]
         }
     ],
     "metadata": {
-        "total_projects": 1,
-        "last_updated": "2025-01-01",
+        "total_projects": 2,
+        "last_updated": "2025-09-08",
         "categories": [
             "Multi-Agent Systems",
             "Customer Service",
             "OpenAI SDK",
-            "Web Interfaces"
+            "Web Interfaces",
+            "Google ADK",
+            "Developer Tools"
         ]
     }
 } 
