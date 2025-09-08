@@ -796,9 +796,68 @@ nav .pixel-card {
 }
 
 /* Ensure proper content alignment inside cards */
-header .pixel-card > *,
-nav .pixel-card > * {
+header .pixel-card > *:not(.sprite),
+nav .pixel-card > *:not(.sprite) {
     width: 100%;
+}
+
+/* ==================== PIXEL ANIMATED SPRITES ==================== */
+/* Hero card setup for sprites */
+.hero-card {
+    position: relative;
+    overflow: hidden; /* чтобы спрайты не выходили за рамку */
+}
+
+/* общие правила для пиксельных спрайтов */
+.sprite {
+    position: absolute;
+    bottom: 12px; /* прижимаем к низу карточки */
+    width: 128px; 
+    height: 128px; /* зафиксируй кратный размер */
+    pointer-events: none; /* не мешают кликам по кнопкам */
+    z-index: 1; /* над фоном, под контентом */
+}
+
+.sprite img, 
+.sprite source, 
+.sprite picture { 
+    display: block; 
+}
+
+.sprite img { 
+    width: 100%; 
+    height: 100%; 
+    image-rendering: pixelated; /* резкие пиксели */
+    background-color: transparent !important; /* явно убираем любой фон */
+}
+
+/* позиционирование справа */
+.sprite-right { 
+    right: 16px; 
+}
+
+/* уважение «меньше анимаций»: спрайты скрыть */
+@media (prefers-reduced-motion: reduce) {
+    .sprite { 
+        display: none; 
+    }
+}
+
+/* адаптация под мобилки: уменьшить спрайт */
+@media (max-width: 480px) {
+    .sprite-right { 
+        width: 96px; 
+        height: 96px; 
+        right: 8px; 
+        bottom: 8px; 
+    }
+}
+
+/* Ensure content elements are above sprites */
+.hero-card .pixel-flex-center,
+.hero-card .pixel-badge {
+    position: relative;
+    z-index: 2;
 }
 
 /* Mobile responsive layout */
