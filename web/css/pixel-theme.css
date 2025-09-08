@@ -776,6 +776,31 @@ body {
     margin-top: clamp(24px, 2.4vw, 32px);
 }
 
+/* Header and Navigation full-width layout */
+header, nav {
+    width: 100%;
+}
+
+header .pixel-container,
+nav .pixel-container {
+    max-width: 1400px !important; /* Match sidebar-layout max-width */
+    margin: 0 auto;
+    padding: 0 var(--pixel-space-3);
+}
+
+header .pixel-card,
+nav .pixel-card {
+    width: 100% !important;
+    max-width: none !important;
+    display: block !important;
+}
+
+/* Ensure proper content alignment inside cards */
+header .pixel-card > *,
+nav .pixel-card > * {
+    width: 100%;
+}
+
 /* Mobile responsive layout */
 @media (max-width: 768px) {
     .sidebar-layout {
@@ -786,5 +811,10 @@ body {
     #home {
         min-height: clamp(320px, 40vh, 480px) !important;
         padding: clamp(16px, 3vh, 32px) var(--pixel-space-2) !important;
+    }
+    
+    header .pixel-container,
+    nav .pixel-container {
+        padding: 0 var(--pixel-space-2);
     }
 }
