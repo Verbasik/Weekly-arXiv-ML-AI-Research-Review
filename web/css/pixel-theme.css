@@ -588,8 +588,10 @@ code, pre, .pixel-mono {
 .pixel-text-right { text-align: right; }
 
 .pixel-flex { display: flex; }
+.pixel-flex-col { display: flex; flex-direction: column; }
 .pixel-flex-center { display: flex; align-items: center; justify-content: center; }
 .pixel-flex-between { display: flex; align-items: center; justify-content: space-between; }
+.pixel-justify-end { justify-content: flex-end; }
 .pixel-flex-wrap { flex-wrap: wrap; }
 
 .pixel-grid { display: grid; }
@@ -799,6 +801,13 @@ nav .pixel-card {
 header .pixel-card > *:not(.sprite),
 nav .pixel-card > *:not(.sprite) {
     width: 100%;
+}
+
+/* Restore flex for the navigation stack card specifically */
+nav .nav-stack {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: var(--pixel-space-2);
 }
 
 /* ==================== PIXEL ANIMATED SPRITES ==================== */
@@ -1142,6 +1151,25 @@ nav .pixel-card > *:not(.sprite) {
         padding: var(--pixel-space-3);
         font-size: 16px;
         max-width: none;
+    }
+}
+
+/* Nav adjustments on mobile */
+@media (max-width: 768px) {
+    /* уменьшенный вертикальный зазор между рядами навигации */
+    .nav-stack { gap: 12px !important; }
+
+    /* поиск на всю ширину строки */
+    .nav-search {
+        width: 100%;
+        justify-content: flex-start !important; /* перекрываем выравнивание вправо */
+    }
+    .nav-search .pixel-input {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+    .nav-search .pixel-btn {
+        flex: 0 0 auto;
     }
 }
 
