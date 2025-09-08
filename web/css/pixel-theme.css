@@ -733,3 +733,58 @@ code, pre, .pixel-mono {
         --pixel-border-ultra: 4px solid var(--pixel-ink);
     }
 }
+
+/* ==================== PIXEL LAYOUT SYSTEM ==================== */
+/* Override Scale AI layout for pixel theme */
+
+/* Hero section optimized heights */
+body {
+    min-height: auto !important; /* Remove 100vh constraint */
+}
+
+.sidebar-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: var(--pixel-space-3);
+    align-items: start;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 var(--pixel-space-3);
+}
+
+.content {
+    min-height: auto !important; /* Remove excessive height */
+}
+
+/* Hero section with proper spacing */
+#home {
+    min-height: clamp(380px, 48vh, 640px) !important; /* Instead of 100vh */
+    padding: clamp(24px, 4vh, 48px) var(--pixel-space-4) !important;
+    background: var(--pixel-bg-lavender);
+    border-radius: var(--pixel-radius-lg);
+}
+
+/* Proper vertical rhythm for sections */
+.content section + section,
+.content .pixel-card + .pixel-card {
+    margin-top: clamp(24px, 2.4vw, 32px);
+}
+
+/* First content block after hero */
+.content section:first-child + section,
+.content section .pixel-card:first-child + .pixel-card {
+    margin-top: clamp(24px, 2.4vw, 32px);
+}
+
+/* Mobile responsive layout */
+@media (max-width: 768px) {
+    .sidebar-layout {
+        grid-template-columns: 1fr;
+        gap: var(--pixel-space-2);
+    }
+    
+    #home {
+        min-height: clamp(320px, 40vh, 480px) !important;
+        padding: clamp(16px, 3vh, 32px) var(--pixel-space-2) !important;
+    }
+}
