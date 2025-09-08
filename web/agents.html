@@ -7,14 +7,13 @@
     <!-- External CSS Libraries -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.2.0/github-markdown.min.css">
-    <!-- Google Fonts for Modern Typography & Scale AI Deep-tech -->
+    <!-- Google Fonts (Inter/IBM) + Pixel Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <!-- Scale AI Theme -->
-    <link rel="stylesheet" href="css/scale-ai-theme.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;500;600;700&family=Silkscreen:wght@400;700&family=VT323&display=swap" rel="stylesheet">
+    <!-- Pixel Theme (primary) -->
+    <link rel="stylesheet" href="css/pixel-theme.css">
     <!-- Mobile Optimizations -->
     <link rel="stylesheet" href="css/mobile-optimizations.css">
-    <!-- Agents Theme -->
-    <link rel="stylesheet" href="css/agents-theme.css">
     <!-- Markdown Integration -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
     <!-- Favicon -->
@@ -43,45 +42,56 @@
 
     
     <!-- Header with brand bar (same as main page) -->
-    <header>
-        <div class="container header-content">
-            <div>
-                <div class="logo">
-                    <i class="fas fa-robot"></i>
-                    <span>The Weekly Research Brief</span>
+    <header class="pixel-p-4">
+        <div class="pixel-container">
+            <div class="pixel-card pixel-card--accent pixel-flex pixel-flex-between pixel-gap-4 hero-card">
+                <div class="pixel-flex-center pixel-gap-3">
+                    <div style="font-size: 3rem;">🤖</div>
+                    <div>
+                        <h1 style="font-family: var(--pixel-font-title); font-size: var(--pixel-font-2xl); margin-bottom: var(--px-unit-half); text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.8);">
+                            Agents Under Hood
+                        </h1>
+                        <div style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-xs); color: var(--pixel-ink-soft);">
+                            Изучаем мультиагентные системы на практике
+                        </div>
+                    </div>
                 </div>
-                <div class="tagline">Agents Under Hood - Изучаем мультиагентные системы на практике</div>
-            </div>
-            <div class="badges">
-                <span class="badge"><i class="fas fa-star"></i> Awesome</span>
-                <span class="badge"><i class="fas fa-heart"></i> Made With Love</span>
-                <span class="badge"><i class="fas fa-code"></i> Open Source</span>
+                <div class="pixel-flex pixel-flex-wrap pixel-gap-2">
+                    <span class="pixel-badge pixel-badge--star" data-icon="⭐">Awesome</span>
+                    <span class="pixel-badge pixel-badge--heart" data-icon="❤️">Made With Love</span>
+                    <span class="pixel-badge pixel-badge--diamond" data-icon="💎">Open Source</span>
+                </div>
             </div>
         </div>
     </header>
 
     <!-- Navigation (same structure as main page) -->
-    <nav>
-        <div class="nav-container">
-            <div class="nav-content">
-                <ul class="nav-links">
-                    <li><a href="../index.html"><i class="fas fa-home"></i> Home</a></li>
-                    <li><a href="#agents" class="active"><i class="fas fa-robot"></i> Agents</a></li>
-                    <li class="dropdown">
-                        <a href="../index.html#years"><i class="fas fa-calendar-alt"></i> Years <i class="fas fa-chevron-down"></i></a>
-                        <div class="dropdown-content">
-                            <a href="../index.html#2025">2025</a>
-                            <a href="../index.html#2024">2024</a>
+    <nav class="pixel-p-3">
+        <div class="pixel-container">
+            <div class="pixel-card pixel-flex-col pixel-gap-2 nav-stack" style="padding: var(--pixel-space-2);">
+                <div class="pixel-flex pixel-flex-wrap pixel-gap-2 nav-actions">
+                    <a href="../index.html#home" class="pixel-btn pixel-btn--sm">🏠 Home</a>
+                    <a href="../atlas-wrapper.html" class="pixel-btn pixel-btn--primary pixel-btn--sm" title="Algorithm Templates for Live AI Scripts">
+                        📊 ATLAS 
+                        <span class="pixel-badge pixel-badge--crown" data-icon="✨" style="margin-left: var(--px-unit-half); font-size: var(--pixel-font-xs);">New</span>
+                    </a>
+                    <a href="#agents" class="pixel-btn pixel-btn--sm">🤖 Agents</a>
+                    <div class="pixel-dropdown" style="position: relative; display: inline-block;">
+                        <button class="pixel-btn pixel-btn--sm pixel-dropdown-btn" onclick="toggleDropdown()">📅 Years ▼</button>
+                        <div class="pixel-dropdown-content" id="yearsDropdown" style="display: none; position: absolute; top: 100%; left: 0; z-index: var(--pixel-z-dropdown); margin-top: var(--px-unit-half);">
+                            <div class="pixel-card" style="min-width: 120px; padding: var(--pixel-space-1);">
+                                <a href="../index.html#2025" class="pixel-btn pixel-btn--sm" style="width: 100%; margin-bottom: var(--px-unit-half);">2025</a>
+                                <a href="../index.html#2024" class="pixel-btn pixel-btn--sm" style="width: 100%;">2024</a>
+                            </div>
                         </div>
-                    </li>
-                    <li><a href="about.html"><i class="fas fa-info-circle"></i> About</a></li>
-                    <li><a href="#contribute"><i class="fas fa-hands-helping"></i> Contribute</a></li>
-                    <li><a href="#contact"><i class="fas fa-envelope"></i> Contact</a></li>
-                </ul>
-                
-                <div class="search-bar">
-                    <input type="text" placeholder="Search agents...">
-                    <button><i class="fas fa-search"></i></button>
+                    </div>
+                    <a href="about.html" class="pixel-btn pixel-btn--sm">ℹ️ About</a>
+                    <a href="#contribute" class="pixel-btn pixel-btn--sm">🤝 Contribute</a>
+                    <a href="#contact" class="pixel-btn pixel-btn--sm">✉️ Contact</a>
+                </div>
+                <div class="pixel-flex pixel-gap-1 pixel-justify-end nav-search" style="min-width: 200px;">
+                    <input type="text" class="pixel-input" placeholder="Search agents..." style="font-size: var(--pixel-font-sm);">
+                    <button class="pixel-btn pixel-btn--primary pixel-btn--sm">🔍</button>
                 </div>
             </div>
         </div>
@@ -146,15 +156,31 @@
         <i class="fas fa-arrow-up"></i>
     </div>
     
-    <!-- Modal Window -->
-    <div id="markdown-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal">×</span>
-            <div class="loader"></div>
-            <!-- Title will be added dynamically by JS -->
-            <div class="markdown-body" id="markdown-content">
-                <!-- Markdown content will be loaded here -->
-            </div>
+    <!-- Reading Modal (Fullscreen) -->
+    <div id="markdown-modal" class="reading-modal">
+        <div class="reading-modal__overlay"></div>
+        <div class="reading-modal__container">
+            <header class="reading-modal__header">
+                <div class="reading-header__left">
+                    <h1 class="reading-title">📜 Project Details</h1>
+                    <div class="reading-subtitle">Agents Review</div>
+                </div>
+                <div class="reading-header__controls">
+                    <button class="reading-btn reading-btn--theme" title="Toggle theme">🌙</button>
+                    <button class="reading-btn reading-btn--font-smaller" title="Smaller font">A-</button>
+                    <button class="reading-btn reading-btn--font-larger" title="Larger font">A+</button>
+                    <button class="reading-btn reading-btn--close" title="Close (Esc)">×</button>
+                </div>
+            </header>
+            <main class="reading-modal__main">
+                <div class="reading-loader" style="display: none;">
+                    <div class="pixel-card pixel-text-center pixel-p-4">
+                        <h3 style="font-family: var(--pixel-font-display); margin-bottom: var(--pixel-space-2);">🎮 Loading Quest...</h3>
+                        <div class="loader"></div>
+                    </div>
+                </div>
+                <article class="reading-article" id="markdown-content"></article>
+            </main>
         </div>
     </div>
     
@@ -165,9 +191,10 @@
                 <h3>About</h3>
                 <p>Weekly collection of arXiv paper reviews in ML/AI with practical implementations and agent projects.</p>
                 <div class="social-links">
-                    <a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i></a>
-                    <a href="https://linkedin.com/in/edwardverbetsky" target="_blank" rel="noopener noreferrer"><i class="fab fa-linkedin"></i></a>
-                    <a href="mailto:edward.verbetsky@gmail.com"><i class="fas fa-envelope"></i></a>
+                    <a href="https://github.com/Verbasik" target="_blank" rel="noopener"><i class="fab fa-github"></i></a>
+                    <a href="https://t.me/Verbasik" target="_blank" rel="noopener" title="@Verbasik"><i class="fab fa-telegram"></i></a>
+                    <a href="https://www.linkedin.com/in/verbasik/" target="_blank" rel="noopener"><i class="fab fa-linkedin"></i></a>
+                    <a href="mailto:verbasik2018@gmail.com" title="verbasik2018@gmail.com"><i class="fas fa-envelope"></i></a>
                 </div>
             </div>
             <div class="footer-column">
@@ -226,12 +253,81 @@
             // Инициализируем приложение
             await app.initialize();
         });
-        
+    </script>
+    <!-- Reading Modal class (same as index) -->
+    <script>
+        // Pixel dropdown for Years
+        function toggleDropdown() {
+            const dropdown = document.getElementById('yearsDropdown');
+            if (!dropdown) return;
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        }
+        document.addEventListener('click', function(event) {
+            const dd = document.querySelector('.pixel-dropdown');
+            const content = document.getElementById('yearsDropdown');
+            if (dd && content && !dd.contains(event.target)) { content.style.display = 'none'; }
+        });
 
+        class ReadingModal {
+            constructor() {
+                this.modal = document.getElementById('markdown-modal');
+                this.overlay = this.modal?.querySelector('.reading-modal__overlay');
+                this.container = this.modal?.querySelector('.reading-modal__container');
+                this.article = this.modal?.querySelector('.reading-article');
+                this.loader = this.modal?.querySelector('.reading-loader');
+                this.title = this.modal?.querySelector('.reading-title');
+                this.closeBtn = this.modal?.querySelector('.reading-btn--close, .pixel-modal__close');
+                this.themeBtn = this.modal?.querySelector('.reading-btn--theme');
+                this.fontSmallerBtn = this.modal?.querySelector('.reading-btn--font-smaller');
+                this.fontLargerBtn = this.modal?.querySelector('.reading-btn--font-larger');
+                this.currentFontSize = 'normal';
+                this.isDarkTheme = false;
+                this.initEventListeners();
+            }
+            initEventListeners() {
+                if (!this.modal) return;
+                this.closeBtn?.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); this.close(); });
+                this.overlay?.addEventListener('click', (e) => { if (e.target === this.overlay) { this.close(); } });
+                document.addEventListener('keydown', (e) => {
+                    if (this.modal.classList.contains('active')) {
+                        if (e.key === 'Escape') this.close();
+                        if (e.key === '+' || (e.ctrlKey && e.key === '=')) { e.preventDefault(); this.increaseFontSize(); }
+                        if (e.key === '-' || (e.ctrlKey && e.key === '-')) { e.preventDefault(); this.decreaseFontSize(); }
+                        if (e.key === 't' || e.key === 'T') { e.preventDefault(); this.toggleTheme(); }
+                    }
+                });
+                this.themeBtn?.addEventListener('click', () => this.toggleTheme());
+                this.fontSmallerBtn?.addEventListener('click', () => this.decreaseFontSize());
+                this.fontLargerBtn?.addEventListener('click', () => this.increaseFontSize());
+            }
+            open(title, content) {
+                if (!this.modal) return;
+                this.title.textContent = `📜 ${title}`;
+                document.body.style.overflow = 'hidden';
+                this.modal.style.display = '';
+                this.modal.classList.add('active');
+                if (content) { this.article.innerHTML = content; this.loader.style.display = 'none'; }
+                else { this.showLoader(); }
+            }
+            close() {
+                if (!this.modal) return;
+                this.modal.classList.remove('active');
+                this.modal.style.display = 'none';
+                document.body.style.overflow = '';
+                this.article.innerHTML = '';
+            }
+            showLoader() { this.loader.style.display = 'flex'; this.article.innerHTML = ''; }
+            hideLoader() { this.loader.style.display = 'none'; }
+            setContent(content) { this.article.innerHTML = content; this.hideLoader(); }
+            toggleTheme() { this.isDarkTheme = !this.isDarkTheme; if (this.isDarkTheme) { this.container.classList.add('dark-theme'); this.themeBtn.textContent = '☀️'; } else { this.container.classList.remove('dark-theme'); this.themeBtn.textContent = '🌙'; } }
+            increaseFontSize() { this.article.classList.remove('font-small','font-large','font-xl'); if (this.currentFontSize==='small'){this.currentFontSize='normal';} else if(this.currentFontSize==='normal'){this.currentFontSize='large'; this.article.classList.add('font-large');} else if(this.currentFontSize==='large'){this.currentFontSize='xl'; this.article.classList.add('font-xl');}}
+            decreaseFontSize() { this.article.classList.remove('font-small','font-large','font-xl'); if (this.currentFontSize==='xl'){this.currentFontSize='large'; this.article.classList.add('font-large');} else if(this.currentFontSize==='large'){this.currentFontSize='normal';} else if(this.currentFontSize==='normal'){this.currentFontSize='small'; this.article.classList.add('font-small');} }
+        }
+        let readingModal;
+        document.addEventListener('DOMContentLoaded', function() { readingModal = new ReadingModal(); window.readingModal = readingModal; });
     </script>
     
-    <!-- Mobile Enhancements -->
-    <script src="presentation/mobile-enhancements.js" defer></script>
+    <!-- Mobile Enhancements (не требуется для ReadingModal) -->
 
 </body>
 </html> 
