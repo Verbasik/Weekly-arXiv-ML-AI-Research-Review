@@ -13,3 +13,6 @@
 
 # Configuration files
 **/.env.cursor/
+
+# Memory Bank (private project documentation)
+memory/

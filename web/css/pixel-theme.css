@@ -1,0 +1,735 @@
+/* ==================== PIXEL THEME - TWRB ==================== */
+/* 8-bit/16-bit Pixel Art Design System */
+/* Based on Gaming UI Aesthetics with Modern UX */
+
+/* ==================== PIXEL DESIGN TOKENS ==================== */
+:root {
+    /* === PIXEL UNIT SYSTEM === */
+    /* Base on 8px grid for pixel-perfect alignment */
+    --px-unit: 8px;
+    --px-unit-half: 4px;
+    --px-unit-double: 16px;
+    --px-unit-triple: 24px;
+    --px-unit-quad: 32px;
+    
+    /* === PIXEL COLORS === */
+    /* Pastel Gaming Palette */
+    --pixel-ink: #111111;                    /* Deep black text */
+    --pixel-ink-soft: #334455;               /* Soft dark text */
+    
+    /* Background Colors (Game Windows) */
+    --pixel-bg-sky: #EAF4FF;                 /* Sky blue background */
+    --pixel-bg-lavender: #FCEBFF;            /* Lavender background */
+    --pixel-bg-cream: #FFF4E0;               /* Cream background */
+    --pixel-bg-mint: #E0FFF4;                /* Mint background */
+    --pixel-bg-peach: #FFE8E0;               /* Peach background */
+    
+    /* Surface Colors (Cards/Panels) */
+    --pixel-surface-primary: #FFFFFF;         /* White panels */
+    --pixel-surface-secondary: #F8F9FF;       /* Slightly tinted panels */
+    --pixel-surface-accent: #FFF8F0;          /* Warm accent panels */
+    
+    /* Accent Colors (Game Elements) */
+    --pixel-accent-primary: #6ED3FF;          /* Bright cyan */
+    --pixel-accent-secondary: #FF86C8;        /* Hot pink */
+    --pixel-accent-warning: #FFE36E;          /* Golden yellow */
+    --pixel-accent-success: #86FFB7;          /* Mint green */
+    --pixel-accent-danger: #FF8A80;           /* Coral red */
+    --pixel-accent-purple: #B794F6;           /* Soft purple */
+    
+    /* === PIXEL BORDERS & SHADOWS === */
+    /* Pixel-perfect borders */
+    --pixel-border-thin: 1px solid var(--pixel-ink);
+    --pixel-border-thick: 2px solid var(--pixel-ink);
+    --pixel-border-ultra: 3px solid var(--pixel-ink);
+    --pixel-border-accent: 2px solid var(--pixel-accent-primary);
+    
+    /* Hard shadows (no blur) */
+    --pixel-shadow-sm: 2px 2px 0 rgba(17, 17, 17, 0.15);
+    --pixel-shadow-md: 4px 4px 0 rgba(17, 17, 17, 0.2);
+    --pixel-shadow-lg: 6px 6px 0 rgba(17, 17, 17, 0.25);
+    --pixel-shadow-xl: 8px 8px 0 rgba(17, 17, 17, 0.3);
+    
+    /* Colored shadows for game effects */
+    --pixel-shadow-cyan: 4px 4px 0 rgba(110, 211, 255, 0.3);
+    --pixel-shadow-pink: 4px 4px 0 rgba(255, 134, 200, 0.3);
+    --pixel-shadow-yellow: 4px 4px 0 rgba(255, 227, 110, 0.3);
+    
+    /* === PIXEL TYPOGRAPHY === */
+    /* Pixel fonts (will be loaded from Google Fonts) */
+    --pixel-font-title: "Press Start 2P", "Pixelify Sans", monospace;
+    --pixel-font-display: "Silkscreen", "VT323", monospace;
+    --pixel-font-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+    --pixel-font-mono: "IBM Plex Mono", "Courier New", monospace;
+    
+    /* Pixel font sizes (larger for readability) */
+    --pixel-font-xs: 12px;
+    --pixel-font-sm: 14px;
+    --pixel-font-base: 16px;
+    --pixel-font-lg: 18px;
+    --pixel-font-xl: 24px;
+    --pixel-font-2xl: 28px;
+    --pixel-font-3xl: 32px;
+    --pixel-font-4xl: 40px;
+    
+    /* Pixel line heights */
+    --pixel-line-tight: 1.1;
+    --pixel-line-normal: 1.4;
+    --pixel-line-relaxed: 1.6;
+    
+    /* === PIXEL SPACING === */
+    /* Based on 8px grid system */
+    --pixel-space-1: var(--px-unit);          /* 8px */
+    --pixel-space-2: var(--px-unit-double);   /* 16px */
+    --pixel-space-3: var(--px-unit-triple);   /* 24px */
+    --pixel-space-4: var(--px-unit-quad);     /* 32px */
+    --pixel-space-5: 40px;                    /* 40px */
+    --pixel-space-6: 48px;                    /* 48px */
+    --pixel-space-8: 64px;                    /* 64px */
+    
+    /* === PIXEL RADIUSES === */
+    /* Minimal rounding for pixel aesthetic */
+    --pixel-radius-none: 0px;
+    --pixel-radius-sm: 2px;
+    --pixel-radius-md: 4px;
+    --pixel-radius-lg: 8px;
+    
+    /* === PIXEL Z-INDEX === */
+    --pixel-z-dropdown: 100;
+    --pixel-z-sticky: 200;
+    --pixel-z-modal: 1000;
+    --pixel-z-tooltip: 1100;
+    
+    /* === PIXEL ANIMATIONS === */
+    /* Discrete timing for pixel feel */
+    --pixel-transition-fast: 120ms step-end;
+    --pixel-transition-normal: 160ms step-end;
+    --pixel-transition-slow: 240ms step-end;
+    
+    /* Smooth transitions for modern UX where needed */
+    --pixel-transition-smooth: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==================== PIXEL GLOBAL RESET ==================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+    /* Pixel-perfect rendering */
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}
+
+body {
+    font-family: var(--pixel-font-body);
+    font-size: var(--pixel-font-base);
+    line-height: var(--pixel-line-normal);
+    color: var(--pixel-ink);
+    background-color: var(--pixel-bg-sky);
+    
+    /* Improved font rendering for pixel fonts */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    
+    /* Pixel grid pattern overlay (subtle) */
+    background-image: 
+        linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px);
+    background-size: var(--px-unit) var(--px-unit);
+}
+
+/* ==================== PIXEL TYPOGRAPHY SYSTEM ==================== */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--pixel-font-title);
+    font-weight: 400; /* Pixel fonts usually don't have bold variants */
+    line-height: var(--pixel-line-tight);
+    color: var(--pixel-ink);
+    margin-bottom: var(--pixel-space-2);
+    
+    /* Text shadow for retro effect */
+    text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.8);
+}
+
+h1 { font-size: var(--pixel-font-4xl); }
+h2 { font-size: var(--pixel-font-3xl); }
+h3 { font-size: var(--pixel-font-2xl); }
+h4 { font-size: var(--pixel-font-xl); }
+h5 { font-size: var(--pixel-font-lg); }
+h6 { font-size: var(--pixel-font-base); }
+
+p {
+    margin-bottom: var(--pixel-space-2);
+    color: var(--pixel-ink-soft);
+    line-height: var(--pixel-line-relaxed);
+}
+
+/* Pixel code/mono elements */
+code, pre, .pixel-mono {
+    font-family: var(--pixel-font-mono);
+    font-size: var(--pixel-font-sm);
+    background: var(--pixel-surface-secondary);
+    border: var(--pixel-border-thin);
+    padding: var(--px-unit-half) var(--px-unit);
+    border-radius: var(--pixel-radius-sm);
+}
+
+/* ==================== PIXEL COMPONENTS SYSTEM ==================== */
+
+/* === PIXEL CONTAINERS === */
+.pixel-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--pixel-space-3);
+}
+
+/* === PIXEL CARDS (Game Windows) === */
+.pixel-card {
+    background: var(--pixel-surface-primary);
+    border: var(--pixel-border-thick);
+    border-radius: var(--pixel-radius-sm);
+    box-shadow: var(--pixel-shadow-md);
+    padding: var(--pixel-space-3);
+    position: relative;
+    
+    /* Pixel card decorations */
+    &::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        height: var(--px-unit);
+        background: repeating-linear-gradient(
+            90deg,
+            var(--pixel-accent-primary) 0px,
+            var(--pixel-accent-primary) 4px,
+            var(--pixel-accent-secondary) 4px,
+            var(--pixel-accent-secondary) 8px
+        );
+        border-radius: var(--pixel-radius-sm) var(--pixel-radius-sm) 0 0;
+    }
+    
+    transition: transform var(--pixel-transition-normal),
+                box-shadow var(--pixel-transition-normal);
+}
+
+.pixel-card:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--pixel-shadow-lg);
+}
+
+/* Card variants */
+.pixel-card--accent {
+    background: var(--pixel-surface-accent);
+    border-color: var(--pixel-accent-primary);
+    box-shadow: var(--pixel-shadow-cyan);
+}
+
+.pixel-card--warning {
+    background: var(--pixel-bg-cream);
+    border-color: var(--pixel-accent-warning);
+    box-shadow: var(--pixel-shadow-yellow);
+}
+
+.pixel-card--success {
+    background: var(--pixel-bg-mint);
+    border-color: var(--pixel-accent-success);
+}
+
+/* === PIXEL BUTTONS (Game UI) === */
+.pixel-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--px-unit);
+    
+    padding: var(--pixel-space-2) var(--pixel-space-3);
+    font-family: var(--pixel-font-display);
+    font-size: var(--pixel-font-sm);
+    font-weight: 400;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    
+    background: var(--pixel-surface-primary);
+    color: var(--pixel-ink);
+    border: var(--pixel-border-thick);
+    border-radius: var(--pixel-radius-sm);
+    box-shadow: var(--pixel-shadow-sm);
+    
+    cursor: pointer;
+    transition: all var(--pixel-transition-fast);
+    
+    /* Button hover state */
+    &:hover {
+        transform: translate(-1px, -1px);
+        box-shadow: var(--pixel-shadow-md);
+        background: var(--pixel-surface-secondary);
+    }
+    
+    /* Button pressed state */
+    &:active {
+        transform: translate(1px, 1px);
+        box-shadow: none;
+    }
+    
+    /* Button disabled state */
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
+        box-shadow: var(--pixel-shadow-sm);
+    }
+}
+
+/* Button variants */
+.pixel-btn--primary {
+    background: var(--pixel-accent-primary);
+    border-color: var(--pixel-accent-primary);
+    color: var(--pixel-ink);
+    box-shadow: var(--pixel-shadow-cyan);
+}
+
+.pixel-btn--secondary {
+    background: var(--pixel-accent-secondary);
+    border-color: var(--pixel-accent-secondary);
+    color: white;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+    box-shadow: var(--pixel-shadow-pink);
+}
+
+.pixel-btn--warning {
+    background: var(--pixel-accent-warning);
+    border-color: var(--pixel-accent-warning);
+    color: var(--pixel-ink);
+    box-shadow: var(--pixel-shadow-yellow);
+}
+
+.pixel-btn--success {
+    background: var(--pixel-accent-success);
+    border-color: var(--pixel-accent-success);
+    color: var(--pixel-ink);
+}
+
+.pixel-btn--danger {
+    background: var(--pixel-accent-danger);
+    border-color: var(--pixel-accent-danger);
+    color: white;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.5);
+}
+
+/* Button sizes */
+.pixel-btn--sm {
+    padding: var(--px-unit) var(--pixel-space-2);
+    font-size: var(--pixel-font-xs);
+}
+
+.pixel-btn--lg {
+    padding: var(--pixel-space-3) var(--pixel-space-4);
+    font-size: var(--pixel-font-lg);
+}
+
+/* === PIXEL BADGES (RPG Style) === */
+.pixel-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--px-unit-half);
+    padding: var(--px-unit-half) var(--px-unit);
+    
+    font-family: var(--pixel-font-display);
+    font-size: var(--pixel-font-xs);
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    
+    background: var(--pixel-surface-primary);
+    color: var(--pixel-ink);
+    border: var(--pixel-border-thin);
+    border-radius: var(--pixel-radius-sm);
+    box-shadow: var(--pixel-shadow-sm);
+    
+    /* Badge icon spacing */
+    &::before {
+        content: attr(data-icon);
+        font-size: var(--pixel-font-sm);
+    }
+}
+
+/* Badge variants */
+.pixel-badge--star {
+    background: var(--pixel-accent-warning);
+    color: var(--pixel-ink);
+}
+
+.pixel-badge--heart {
+    background: var(--pixel-accent-danger);
+    color: white;
+}
+
+.pixel-badge--diamond {
+    background: var(--pixel-accent-primary);
+    color: var(--pixel-ink);
+}
+
+.pixel-badge--crown {
+    background: var(--pixel-accent-purple);
+    color: white;
+}
+
+/* === PIXEL PROGRESS BARS (XP/Level System) === */
+.pixel-progress {
+    width: 100%;
+    height: var(--pixel-space-3);
+    background: var(--pixel-surface-secondary);
+    border: var(--pixel-border-thin);
+    border-radius: var(--pixel-radius-sm);
+    overflow: hidden;
+    position: relative;
+}
+
+.pixel-progress__bar {
+    height: 100%;
+    background: linear-gradient(90deg, 
+        var(--pixel-accent-success) 0%, 
+        var(--pixel-accent-warning) 100%);
+    transition: width var(--pixel-transition-smooth);
+    position: relative;
+    
+    /* Pixel pattern overlay */
+    &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: repeating-linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.2) 0px,
+            rgba(255, 255, 255, 0.2) 2px,
+            transparent 2px,
+            transparent 4px
+        );
+    }
+}
+
+.pixel-progress__label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--pixel-font-display);
+    font-size: var(--pixel-font-xs);
+    font-weight: 400;
+    color: var(--pixel-ink);
+    text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* === PIXEL TAGS (Inventory Items) === */
+.pixel-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--px-unit-half);
+    padding: var(--px-unit-half) var(--px-unit);
+    
+    font-family: var(--pixel-font-body);
+    font-size: var(--pixel-font-xs);
+    font-weight: 500;
+    
+    background: var(--pixel-surface-secondary);
+    color: var(--pixel-ink-soft);
+    border: var(--pixel-border-thin);
+    border-radius: var(--pixel-radius-md);
+    box-shadow: var(--pixel-shadow-sm);
+    
+    cursor: pointer;
+    transition: all var(--pixel-transition-fast);
+    
+    &:hover {
+        background: var(--pixel-accent-primary);
+        color: var(--pixel-ink);
+        transform: translate(-1px, -1px);
+        box-shadow: var(--pixel-shadow-md);
+    }
+}
+
+/* === PIXEL INPUT FIELDS === */
+.pixel-input {
+    width: 100%;
+    padding: var(--pixel-space-2);
+    
+    font-family: var(--pixel-font-body);
+    font-size: var(--pixel-font-base);
+    color: var(--pixel-ink);
+    
+    background: var(--pixel-surface-primary);
+    border: var(--pixel-border-thick);
+    border-radius: var(--pixel-radius-sm);
+    box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.1);
+    
+    transition: all var(--pixel-transition-normal);
+    
+    &:focus {
+        outline: none;
+        border-color: var(--pixel-accent-primary);
+        box-shadow: inset 2px 2px 0 rgba(0, 0, 0, 0.1),
+                    0 0 0 2px rgba(110, 211, 255, 0.3);
+    }
+    
+    &::placeholder {
+        color: var(--pixel-ink-soft);
+        font-style: italic;
+    }
+}
+
+/* === PIXEL MODALS (Game Dialogs) === */
+.pixel-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(17, 17, 17, 0.8);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--pixel-z-modal);
+    padding: var(--pixel-space-3);
+    
+    /* Pixel noise overlay */
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        opacity: 0.1;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.3'/%3E%3C/svg%3E");
+    }
+}
+
+.pixel-modal__content {
+    background: var(--pixel-surface-primary);
+    border: var(--pixel-border-ultra);
+    border-radius: var(--pixel-radius-lg);
+    box-shadow: var(--pixel-shadow-xl);
+    padding: var(--pixel-space-4);
+    max-width: 900px;
+    max-height: 90vh;
+    width: 100%;
+    overflow-y: auto;
+    position: relative;
+    
+    /* Modal title bar */
+    &::before {
+        content: '';
+        position: absolute;
+        top: -3px;
+        left: -3px;
+        right: -3px;
+        height: var(--pixel-space-3);
+        background: var(--pixel-accent-primary);
+        border-radius: var(--pixel-radius-lg) var(--pixel-radius-lg) 0 0;
+    }
+}
+
+.pixel-modal__close {
+    position: absolute;
+    top: var(--px-unit);
+    right: var(--px-unit);
+    width: var(--pixel-space-3);
+    height: var(--pixel-space-3);
+    
+    background: var(--pixel-accent-danger);
+    border: var(--pixel-border-thin);
+    border-radius: var(--pixel-radius-sm);
+    box-shadow: var(--pixel-shadow-sm);
+    
+    font-family: var(--pixel-font-display);
+    font-size: var(--pixel-font-sm);
+    color: white;
+    text-align: center;
+    line-height: 1;
+    
+    cursor: pointer;
+    transition: all var(--pixel-transition-fast);
+    z-index: 10;
+    
+    &:hover {
+        transform: translate(-1px, -1px);
+        box-shadow: var(--pixel-shadow-md);
+    }
+    
+    &:active {
+        transform: translate(0, 0);
+        box-shadow: var(--pixel-shadow-sm);
+    }
+    
+    &::before {
+        content: '×';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+}
+
+/* ==================== PIXEL UTILITIES ==================== */
+.pixel-text-center { text-align: center; }
+.pixel-text-left { text-align: left; }
+.pixel-text-right { text-align: right; }
+
+.pixel-flex { display: flex; }
+.pixel-flex-center { display: flex; align-items: center; justify-content: center; }
+.pixel-flex-between { display: flex; align-items: center; justify-content: space-between; }
+.pixel-flex-wrap { flex-wrap: wrap; }
+
+.pixel-grid { display: grid; }
+.pixel-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.pixel-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.pixel-grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+.pixel-gap-1 { gap: var(--pixel-space-1); }
+.pixel-gap-2 { gap: var(--pixel-space-2); }
+.pixel-gap-3 { gap: var(--pixel-space-3); }
+.pixel-gap-4 { gap: var(--pixel-space-4); }
+
+/* Margin utilities */
+.pixel-m-1 { margin: var(--pixel-space-1); }
+.pixel-m-2 { margin: var(--pixel-space-2); }
+.pixel-m-3 { margin: var(--pixel-space-3); }
+.pixel-m-4 { margin: var(--pixel-space-4); }
+
+.pixel-mt-1 { margin-top: var(--pixel-space-1); }
+.pixel-mt-2 { margin-top: var(--pixel-space-2); }
+.pixel-mt-3 { margin-top: var(--pixel-space-3); }
+.pixel-mt-4 { margin-top: var(--pixel-space-4); }
+
+.pixel-mb-1 { margin-bottom: var(--pixel-space-1); }
+.pixel-mb-2 { margin-bottom: var(--pixel-space-2); }
+.pixel-mb-3 { margin-bottom: var(--pixel-space-3); }
+.pixel-mb-4 { margin-bottom: var(--pixel-space-4); }
+
+.pixel-ml-1 { margin-left: var(--pixel-space-1); }
+.pixel-ml-2 { margin-left: var(--pixel-space-2); }
+.pixel-ml-3 { margin-left: var(--pixel-space-3); }
+.pixel-ml-4 { margin-left: var(--pixel-space-4); }
+
+.pixel-mr-1 { margin-right: var(--pixel-space-1); }
+.pixel-mr-2 { margin-right: var(--pixel-space-2); }
+.pixel-mr-3 { margin-right: var(--pixel-space-3); }
+.pixel-mr-4 { margin-right: var(--pixel-space-4); }
+
+/* Padding utilities */
+.pixel-p-1 { padding: var(--pixel-space-1); }
+.pixel-p-2 { padding: var(--pixel-space-2); }
+.pixel-p-3 { padding: var(--pixel-space-3); }
+.pixel-p-4 { padding: var(--pixel-space-4); }
+
+.pixel-pt-1 { padding-top: var(--pixel-space-1); }
+.pixel-pt-2 { padding-top: var(--pixel-space-2); }
+.pixel-pt-3 { padding-top: var(--pixel-space-3); }
+.pixel-pt-4 { padding-top: var(--pixel-space-4); }
+
+.pixel-pb-1 { padding-bottom: var(--pixel-space-1); }
+.pixel-pb-2 { padding-bottom: var(--pixel-space-2); }
+.pixel-pb-3 { padding-bottom: var(--pixel-space-3); }
+.pixel-pb-4 { padding-bottom: var(--pixel-space-4); }
+
+.pixel-pl-1 { padding-left: var(--pixel-space-1); }
+.pixel-pl-2 { padding-left: var(--pixel-space-2); }
+.pixel-pl-3 { padding-left: var(--pixel-space-3); }
+.pixel-pl-4 { padding-left: var(--pixel-space-4); }
+
+.pixel-pr-1 { padding-right: var(--pixel-space-1); }
+.pixel-pr-2 { padding-right: var(--pixel-space-2); }
+.pixel-pr-3 { padding-right: var(--pixel-space-3); }
+.pixel-pr-4 { padding-right: var(--pixel-space-4); }
+
+/* ==================== PIXEL ICONS SYSTEM ==================== */
+.pixel-icon {
+    display: inline-block;
+    width: var(--pixel-space-2);
+    height: var(--pixel-space-2);
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}
+
+.pixel-icon--lg {
+    width: var(--pixel-space-3);
+    height: var(--pixel-space-3);
+}
+
+.pixel-icon--xl {
+    width: var(--pixel-space-4);
+    height: var(--pixel-space-4);
+}
+
+/* ==================== PIXEL RESPONSIVE DESIGN ==================== */
+@media (max-width: 768px) {
+    :root {
+        --pixel-font-base: 14px;
+        --pixel-font-lg: 16px;
+        --pixel-font-xl: 20px;
+        --pixel-font-2xl: 24px;
+        --pixel-font-3xl: 28px;
+        --pixel-font-4xl: 32px;
+        
+        --pixel-space-3: var(--pixel-space-2);
+        --pixel-space-4: var(--pixel-space-3);
+    }
+    
+    .pixel-card {
+        padding: var(--pixel-space-2);
+    }
+    
+    .pixel-btn {
+        padding: var(--pixel-space-2);
+        font-size: var(--pixel-font-xs);
+    }
+    
+    .pixel-modal__content {
+        margin: var(--pixel-space-2);
+        padding: var(--pixel-space-3);
+    }
+}
+
+@media (max-width: 480px) {
+    .pixel-grid-2,
+    .pixel-grid-3,
+    .pixel-grid-4 {
+        grid-template-columns: 1fr;
+    }
+    
+    .pixel-flex-between {
+        flex-direction: column;
+        gap: var(--pixel-space-2);
+    }
+}
+
+/* ==================== PIXEL ACCESSIBILITY ==================== */
+@media (prefers-reduced-motion: reduce) {
+    .pixel-card,
+    .pixel-btn,
+    .pixel-tag,
+    .pixel-progress__bar {
+        transition: none;
+    }
+}
+
+@media (prefers-contrast: high) {
+    :root {
+        --pixel-border-thin: 2px solid var(--pixel-ink);
+        --pixel-border-thick: 3px solid var(--pixel-ink);
+        --pixel-border-ultra: 4px solid var(--pixel-ink);
+    }
+}

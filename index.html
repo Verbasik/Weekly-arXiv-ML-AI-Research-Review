@@ -7,10 +7,14 @@
     <!-- External CSS Libraries -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.2.0/github-markdown.min.css">
-    <!-- Google Fonts for Modern Typography & Scale AI Deep-tech -->
+    <!-- Google Fonts for Modern Typography & Pixel Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <!-- Scale AI Theme -->
-    <link rel="stylesheet" href="web/css/scale-ai-theme.css">
+    <!-- Pixel Fonts for Gaming Aesthetic -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;500;600;700&family=Silkscreen:wght@400;700&family=VT323&display=swap" rel="stylesheet">
+    <!-- Pixel Theme (New Gaming Design) -->
+    <link rel="stylesheet" href="web/css/pixel-theme.css">
+    <!-- Scale AI Theme (Legacy) -->
+    <!-- <link rel="stylesheet" href="web/css/scale-ai-theme.css"> -->
     <!-- Mobile Optimizations -->
     <link rel="stylesheet" href="web/css/mobile-optimizations.css">
     
@@ -63,45 +67,61 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
-    <header>
-        <div class="container header-content">
-            <div>
-                <div class="logo">
-                    <i class="fas fa-brain"></i>
-                    <span>The Weekly Research Brief</span>
+    <header class="pixel-p-4">
+        <div class="pixel-container">
+            <div class="pixel-card pixel-card--accent pixel-flex pixel-flex-between pixel-gap-4">
+                <div class="pixel-flex-center pixel-gap-3">
+                    <div style="font-size: 3rem;">🧠</div>
+                    <div>
+                        <h1 style="font-family: var(--pixel-font-title); font-size: var(--pixel-font-2xl); margin-bottom: var(--px-unit-half); text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.8);">
+                            TWRB
+                        </h1>
+                        <div style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-xs); color: var(--pixel-ink-soft);">
+                            The Weekly Research Brief
+                        </div>
+                    </div>
                 </div>
-                <div class="tagline">"Чем больше я знаю, тем больше я понимаю, что ничего не знаю"</div>
+                <div class="pixel-flex pixel-flex-wrap pixel-gap-2">
+                    <span class="pixel-badge pixel-badge--star" data-icon="⭐">Awesome</span>
+                    <span class="pixel-badge pixel-badge--heart" data-icon="❤️">Made With Love</span>
+                    <span class="pixel-badge pixel-badge--diamond" data-icon="💎">Open Source</span>
+                </div>
             </div>
-            <div class="badges">
-                <span class="badge"><i class="fas fa-star"></i> Awesome</span>
-                <span class="badge"><i class="fas fa-heart"></i> Made With Love</span>
-                <span class="badge"><i class="fas fa-code"></i> Open Source</span>
+            <div class="pixel-text-center pixel-mt-2" style="font-family: var(--pixel-font-body); font-style: italic; color: var(--pixel-ink-soft);">
+                "Чем больше я знаю, тем больше я понимаю, что ничего не знаю"
             </div>
         </div>
     </header>
 
-    <nav>
-        <div class="nav-container">
-            <div class="nav-content">
-                <ul class="nav-links">
-                    <li><a href="#home"><i class="fas fa-home"></i> Home</a></li>
-                    <li><a href="atlas-wrapper.html" title="Algorithm Templates for Live AI Scripts - Интерактивная визуализация алгоритмов ML"><i class="fas fa-chart-line"></i> ATLAS <span class="new-badge">New</span></a></li>
-                    <li><a href="web/agents.html"><i class="fas fa-robot"></i> Agents</a></li>
-                    <li class="dropdown">
-                        <a href="#years"><i class="fas fa-calendar-alt"></i> Years <i class="fas fa-chevron-down"></i></a>
-                        <div class="dropdown-content">
-                            <a href="#2025">2025</a>
-                            <a href="#2024">2024</a>
+    <nav class="pixel-p-3">
+        <div class="pixel-container">
+            <div class="pixel-card pixel-flex pixel-flex-between pixel-gap-4" style="padding: var(--pixel-space-2);">
+                <div class="pixel-flex pixel-flex-wrap pixel-gap-2">
+                    <a href="#home" class="pixel-btn pixel-btn--sm">🏠 Home</a>
+                    <a href="atlas-wrapper.html" class="pixel-btn pixel-btn--primary pixel-btn--sm" title="Algorithm Templates for Live AI Scripts">
+                        📊 ATLAS 
+                        <span class="pixel-badge pixel-badge--crown" data-icon="✨" style="margin-left: var(--px-unit-half); font-size: var(--pixel-font-xs);">New</span>
+                    </a>
+                    <a href="web/agents.html" class="pixel-btn pixel-btn--sm">🤖 Agents</a>
+                    
+                    <div class="pixel-dropdown" style="position: relative; display: inline-block;">
+                        <button class="pixel-btn pixel-btn--sm pixel-dropdown-btn" onclick="toggleDropdown()">📅 Years ▼</button>
+                        <div class="pixel-dropdown-content" id="yearsDropdown" style="display: none; position: absolute; top: 100%; left: 0; z-index: var(--pixel-z-dropdown); margin-top: var(--px-unit-half);">
+                            <div class="pixel-card" style="min-width: 120px; padding: var(--pixel-space-1);">
+                                <a href="#2025" class="pixel-btn pixel-btn--sm" style="width: 100%; margin-bottom: var(--px-unit-half);">2025</a>
+                                <a href="#2024" class="pixel-btn pixel-btn--sm" style="width: 100%;">2024</a>
+                            </div>
                         </div>
-                    </li>
-                    <li><a href="web/about.html"><i class="fas fa-info-circle"></i> About</a></li>
-                    <li><a href="#contribute"><i class="fas fa-hands-helping"></i> Contribute</a></li>
-                    <li><a href="#contact"><i class="fas fa-envelope"></i> Contact</a></li>
-                </ul>
+                    </div>
+                    
+                    <a href="web/about.html" class="pixel-btn pixel-btn--sm">ℹ️ About</a>
+                    <a href="#contribute" class="pixel-btn pixel-btn--sm">🤝 Contribute</a>
+                    <a href="#contact" class="pixel-btn pixel-btn--sm">✉️ Contact</a>
+                </div>
                 
-                <div class="search-bar">
-                    <input type="text" placeholder="Search papers...">
-                    <button><i class="fas fa-search"></i></button>
+                <div class="pixel-flex pixel-gap-1" style="min-width: 200px;">
+                    <input type="text" class="pixel-input" placeholder="Search papers..." style="font-size: var(--pixel-font-sm);">
+                    <button class="pixel-btn pixel-btn--primary pixel-btn--sm">🔍</button>
                 </div>
             </div>
         </div>
@@ -109,54 +129,186 @@
 
     <main>
         <div class="sidebar-layout">
-            <aside class="sidebar">
-                <div class="sidebar-section">
-                    <h3><i class="fas fa-filter"></i> Filter by Year</h3>
-                    <ul>
-                        <li><a href="#2025" class="active">2025</a></li>
-                        <li><a href="#2024">2024</a></li>
-                    </ul>
-                </div>
-
-                <div class="sidebar-section">
-                    <h3><i class="fas fa-tags"></i> Popular Tags</h3>
-                    <div class="tags-container">
-                        <span class="tag">LLMs</span>
-                        <span class="tag">Deep Learning</span>
-                        <span class="tag">NLP</span>
-                        <span class="tag">Computer Vision</span>
-                        <span class="tag">Reinforcement Learning</span>
-                        <span class="tag">Transformers</span>
-                        <span class="tag">Genomics</span>
-                        <span class="tag">Efficient Training</span>
+            <aside class="pixel-p-3" style="width: 280px;">
+                <!-- Game Menu Header -->
+                <div class="pixel-card pixel-card--accent pixel-text-center pixel-mb-3">
+                    <h3 style="font-family: var(--pixel-font-title); font-size: var(--pixel-font-sm); margin-bottom: var(--pixel-space-1);">
+                        🎮 GAME MENU
+                    </h3>
+                    <div class="pixel-flex pixel-flex-center pixel-gap-2">
+                        <span class="pixel-badge pixel-badge--star" data-icon="⭐">ACTIVE</span>
+                        <span class="pixel-badge pixel-badge--heart" data-icon="❤️">ONLINE</span>
                     </div>
                 </div>
 
-                <div class="sidebar-section">
-                    <h3><i class="fas fa-fire"></i> Trending Papers</h3>
-                    <ul>
-                        <li><a href="#paper1">Distillation Scaling Laws</a></li>
-                        <li><a href="#paper2">rStar-Math</a></li>
-                        <li><a href="#paper3">DeepSpeed-MoE</a></li>
-                        <li><a href="#paper4">CRISPR-CAS9 технология</a></li>
-                    </ul>
+                <!-- Year Selection (Game Levels) -->
+                <div class="pixel-card pixel-mb-3">
+                    <h4 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-base); margin-bottom: var(--pixel-space-2);">
+                        🏰 SELECT LEVEL
+                    </h4>
+                    <div class="pixel-flex pixel-flex-wrap pixel-gap-2">
+                        <a href="#2025" class="pixel-btn pixel-btn--primary pixel-btn--sm" style="flex: 1;">
+                            🗡️ 2025
+                            <span class="pixel-badge" data-icon="🔥" style="margin-left: var(--px-unit-half);">Active</span>
+                        </a>
+                        <a href="#2024" class="pixel-btn pixel-btn--sm" style="flex: 1;">
+                            🛡️ 2024
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Skills/Tags (Inventory) -->
+                <div class="pixel-card pixel-mb-3">
+                    <h4 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-base); margin-bottom: var(--pixel-space-2);">
+                        🎒 SKILL INVENTORY
+                    </h4>
+                    <div class="pixel-flex pixel-flex-wrap pixel-gap-1">
+                        <span class="pixel-tag">🤖 LLMs</span>
+                        <span class="pixel-tag">🧠 Deep Learning</span>
+                        <span class="pixel-tag">💬 NLP</span>
+                        <span class="pixel-tag">👁️ Computer Vision</span>
+                        <span class="pixel-tag">🎯 Reinforcement Learning</span>
+                        <span class="pixel-tag">🔄 Transformers</span>
+                        <span class="pixel-tag">🧬 Genomics</span>
+                        <span class="pixel-tag">⚡ Efficient Training</span>
+                    </div>
+                </div>
+
+                <!-- Hot Papers (Quest Log) -->
+                <div class="pixel-card">
+                    <h4 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-base); margin-bottom: var(--pixel-space-2);">
+                        🔥 ACTIVE QUESTS
+                    </h4>
+                    <div style="display: flex; flex-direction: column; gap: var(--px-unit);">
+                        <a href="#paper1" class="pixel-btn pixel-btn--warning pixel-btn--sm" style="text-align: left; font-size: var(--pixel-font-xs);">
+                            📊 Distillation Scaling Laws
+                        </a>
+                        <a href="#paper2" class="pixel-btn pixel-btn--success pixel-btn--sm" style="text-align: left; font-size: var(--pixel-font-xs);">
+                            🧮 rStar-Math
+                        </a>
+                        <a href="#paper3" class="pixel-btn pixel-btn--secondary pixel-btn--sm" style="text-align: left; font-size: var(--pixel-font-xs);">
+                            🚀 DeepSpeed-MoE
+                        </a>
+                        <a href="#paper4" class="pixel-btn pixel-btn--sm" style="text-align: left; font-size: var(--pixel-font-xs);">
+                            🧬 CRISPR-CAS9 технология
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Player Stats -->
+                <div class="pixel-card pixel-card--success pixel-mt-3 pixel-text-center">
+                    <h5 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-sm); margin-bottom: var(--pixel-space-1);">
+                        👤 PLAYER STATS
+                    </h5>
+                    <div class="pixel-progress pixel-mb-2">
+                        <div class="pixel-progress__bar" style="width: 92%;"></div>
+                        <div class="pixel-progress__label" style="font-size: var(--pixel-font-xs);">Research XP</div>
+                    </div>
+                    <div class="pixel-flex pixel-flex-between" style="font-size: var(--pixel-font-xs);">
+                        <span>🏆 Level: Master</span>
+                        <span>⚡ 920/1000 XP</span>
+                    </div>
                 </div>
             </aside>
 
             <div class="content">
-                <section id="home" class="hero">
-                    <h1 class="section-heading">Welcome to<br/>"The Weekly Research Brief"</h1>
-                    <p>Этот репозиторий представляет собой еженедельную коллекцию обзоров статей с arXiv и Daily Papers Hugging Face в области машинного обучения и искусственного интеллекта. Каждую неделю я буду выбирать одну значимую публикацию для детального анализа и практической реализации.</p>
+                <section id="home" class="pixel-p-4">
+                    <!-- Game Title Screen -->
+                    <div class="pixel-card pixel-card--accent pixel-text-center pixel-mb-4">
+                        <h1 style="font-family: var(--pixel-font-title); font-size: var(--pixel-font-3xl); margin-bottom: var(--pixel-space-2); text-shadow: 3px 3px 0 rgba(255, 255, 255, 0.8);">
+                            🎮 WELCOME TO 🎮
+                        </h1>
+                        <h2 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-xl); color: var(--pixel-accent-primary); margin-bottom: var(--pixel-space-3);">
+                            THE WEEKLY RESEARCH BRIEF
+                        </h2>
+                        
+                        <!-- Player Stats -->
+                        <div class="pixel-flex pixel-flex-center pixel-gap-4 pixel-mb-3">
+                            <div class="pixel-card pixel-card--success" style="padding: var(--pixel-space-2); min-width: 120px;">
+                                <div style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-xs); color: var(--pixel-ink-soft); margin-bottom: var(--px-unit-half);">LEVEL</div>
+                                <div style="font-family: var(--pixel-font-title); font-size: var(--pixel-font-lg); color: var(--pixel-accent-success);">∞</div>
+                            </div>
+                            <div class="pixel-card pixel-card--warning" style="padding: var(--pixel-space-2); min-width: 120px;">
+                                <div style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-xs); color: var(--pixel-ink-soft); margin-bottom: var(--px-unit-half);">PAPERS</div>
+                                <div style="font-family: var(--pixel-font-title); font-size: var(--pixel-font-lg); color: var(--pixel-accent-warning);">500+</div>
+                            </div>
+                            <div class="pixel-card" style="padding: var(--pixel-space-2); min-width: 120px;">
+                                <div style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-xs); color: var(--pixel-ink-soft); margin-bottom: var(--px-unit-half);">YEARS</div>
+                                <div style="font-family: var(--pixel-font-title); font-size: var(--pixel-font-lg); color: var(--pixel-accent-primary);">2024-25</div>
+                            </div>
+                        </div>
 
-                    <hr class="glow-divider">
+                        <!-- Action Buttons -->
+                        <div class="pixel-flex pixel-flex-center pixel-gap-3 pixel-mb-3">
+                            <button class="pixel-btn pixel-btn--primary pixel-btn--lg" onclick="scrollToSection('2025')">
+                                🚀 START QUEST
+                            </button>
+                            <button class="pixel-btn pixel-btn--secondary pixel-btn--lg" onclick="scrollToSection('about')">
+                                📖 LORE
+                            </button>
+                        </div>
+                    </div>
 
-                    <h3 class="section-heading">🎯 Цели проекта:</h3>
-                    <ul>
-                        <li>Систематическое изучение передовых исследований в области AI</li>
-                        <li>Создание доступных и понятных обзоров сложных научных работ</li>
-                        <li>Практическая реализация описанных методов и алгоритмов</li>
-                        <li>Формирование базы знаний для исследователей и энтузиастов</li>
-                    </ul>
+                    <!-- Game Description -->
+                    <div class="pixel-card pixel-mb-4">
+                        <h3 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-lg); margin-bottom: var(--pixel-space-2);">
+                            🎯 QUEST OBJECTIVES
+                        </h3>
+                        <p style="margin-bottom: var(--pixel-space-2);">
+                            Добро пожаловать в мир научных исследований! Этот репозиторий представляет собой еженедельную коллекцию обзоров статей с arXiv и Hugging Face в области машинного обучения и искусственного интеллекта.
+                        </p>
+                        
+                        <!-- Mission List -->
+                        <div class="pixel-grid pixel-grid-2 pixel-gap-3">
+                            <div class="pixel-card pixel-card--success">
+                                <div class="pixel-flex pixel-gap-2 pixel-mb-2">
+                                    <span style="font-size: 1.5rem;">🔬</span>
+                                    <h4 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-base);">Research Quest</h4>
+                                </div>
+                                <p style="font-size: var(--pixel-font-sm);">Систематическое изучение передовых исследований в области AI</p>
+                            </div>
+                            
+                            <div class="pixel-card pixel-card--warning">
+                                <div class="pixel-flex pixel-gap-2 pixel-mb-2">
+                                    <span style="font-size: 1.5rem;">📝</span>
+                                    <h4 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-base);">Translation Mission</h4>
+                                </div>
+                                <p style="font-size: var(--pixel-font-sm);">Создание доступных и понятных обзоров сложных научных работ</p>
+                            </div>
+                            
+                            <div class="pixel-card pixel-card--accent">
+                                <div class="pixel-flex pixel-gap-2 pixel-mb-2">
+                                    <span style="font-size: 1.5rem;">⚡</span>
+                                    <h4 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-base);">Implementation Challenge</h4>
+                                </div>
+                                <p style="font-size: var(--pixel-font-sm);">Практическая реализация описанных методов и алгоритмов</p>
+                            </div>
+                            
+                            <div class="pixel-card">
+                                <div class="pixel-flex pixel-gap-2 pixel-mb-2">
+                                    <span style="font-size: 1.5rem;">🏆</span>
+                                    <h4 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-base);">Knowledge Base</h4>
+                                </div>
+                                <p style="font-size: var(--pixel-font-sm);">Формирование базы знаний для исследователей и энтузиастов</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- XP Progress Bar -->
+                    <div class="pixel-card pixel-card--accent">
+                        <h4 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-base); margin-bottom: var(--pixel-space-2);">
+                            🌟 PROJECT PROGRESS
+                        </h4>
+                        <div style="margin-bottom: var(--pixel-space-1);">
+                            <span style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-sm); color: var(--pixel-ink-soft);">
+                                Research Mastery Level
+                            </span>
+                        </div>
+                        <div class="pixel-progress">
+                            <div class="pixel-progress__bar" style="width: 85%;"></div>
+                            <div class="pixel-progress__label">Master Researcher</div>
+                        </div>
+                    </div>
                 </section>
 
                 <!-- Year sections will be dynamically added here by script.js -->
@@ -173,11 +325,11 @@
         </div>
     </main>
 
-    <!-- Modal for displaying markdown content -->
-    <div id="markdown-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal">×</span>
-            <div class="loader"></div>
+    <!-- Pixel Modal for displaying markdown content -->
+    <div id="markdown-modal" class="pixel-modal">
+        <div class="pixel-modal__content">
+            <button class="pixel-modal__close">×</button>
+            <div class="loader" style="display: none;"></div>
             <!-- Title will be added dynamically by JS -->
             <div class="markdown-body" id="markdown-content">
                 <!-- Markdown content will be loaded here -->
@@ -185,53 +337,174 @@
         </div>
     </div>
 
-    <footer>
-        <div class="container footer-content">
-            <div class="footer-column">
-                <h3>About</h3>
-                <p>Weekly collection of arXiv paper reviews in ML/AI with practical implementations.</p>
-                <div class="social-links">
-                    <a href="#"><i class="fab fa-github"></i></a>
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                    <a href="#"><i class="fab fa-linkedin"></i></a>
-                    <a href="#"><i class="fas fa-envelope"></i></a>
+    <footer class="pixel-p-4" style="margin-top: var(--pixel-space-8); background: var(--pixel-bg-lavender);">
+        <div class="pixel-container">
+            <!-- Game Over Screen Style -->
+            <div class="pixel-card pixel-card--accent pixel-text-center pixel-mb-4">
+                <h2 style="font-family: var(--pixel-font-title); font-size: var(--pixel-font-2xl); margin-bottom: var(--pixel-space-2);">
+                    🎮 GAME INFO 🎮
+                </h2>
+                <div class="pixel-flex pixel-flex-center pixel-gap-3">
+                    <span class="pixel-badge pixel-badge--star" data-icon="⭐">Level Complete</span>
+                    <span class="pixel-badge pixel-badge--heart" data-icon="❤️">Thanks for Playing</span>
+                    <span class="pixel-badge pixel-badge--diamond" data-icon="💎">Come Back Soon</span>
                 </div>
             </div>
-            <div class="footer-column">
-                <h3>Quick Links</h3>
-                <ul>
-                    <li><a href="#home">Home</a></li>
-                    <li><a href="atlas-wrapper.html">ATLAS Project</a></li>
-                    <li><a href="#2025">2025 Papers</a></li>
-                    <li><a href="#2024">2024 Papers</a></li>
-                    <li><a href="#about">About Project</a></li>
-                </ul>
+
+            <!-- Footer Content in Game Style -->
+            <div class="pixel-grid pixel-grid-4 pixel-gap-4">
+                <!-- About Section -->
+                <div class="pixel-card">
+                    <h4 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-base); margin-bottom: var(--pixel-space-2);">
+                        📖 About Quest
+                    </h4>
+                    <p style="font-size: var(--pixel-font-sm); margin-bottom: var(--pixel-space-3);">
+                        Weekly collection of arXiv paper reviews in ML/AI with practical implementations.
+                    </p>
+                    <div class="pixel-flex pixel-gap-2">
+                        <a href="#" class="pixel-btn pixel-btn--sm">🐙 GitHub</a>
+                        <a href="#" class="pixel-btn pixel-btn--sm">🐦 Twitter</a>
+                        <a href="#" class="pixel-btn pixel-btn--sm">💼 LinkedIn</a>
+                        <a href="#" class="pixel-btn pixel-btn--sm">✉️ Email</a>
+                    </div>
+                </div>
+
+                <!-- Quick Links Section -->
+                <div class="pixel-card">
+                    <h4 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-base); margin-bottom: var(--pixel-space-2);">
+                        🚀 Quick Links
+                    </h4>
+                    <div style="display: flex; flex-direction: column; gap: var(--px-unit);">
+                        <a href="#home" class="pixel-btn pixel-btn--sm" style="text-align: left;">🏠 Home Base</a>
+                        <a href="atlas-wrapper.html" class="pixel-btn pixel-btn--sm" style="text-align: left;">📊 ATLAS Project</a>
+                        <a href="#2025" class="pixel-btn pixel-btn--sm" style="text-align: left;">🗡️ 2025 Papers</a>
+                        <a href="#2024" class="pixel-btn pixel-btn--sm" style="text-align: left;">🛡️ 2024 Papers</a>
+                    </div>
+                </div>
+
+                <!-- Resources Section -->
+                <div class="pixel-card">
+                    <h4 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-base); margin-bottom: var(--pixel-space-2);">
+                        🎒 Resources
+                    </h4>
+                    <div style="display: flex; flex-direction: column; gap: var(--px-unit);">
+                        <a href="https://arxiv.org/" class="pixel-btn pixel-btn--sm" style="text-align: left;" target="_blank">📄 arXiv</a>
+                        <a href="https://paperswithcode.com/" class="pixel-btn pixel-btn--sm" style="text-align: left;" target="_blank">💻 Papers With Code</a>
+                        <a href="https://github.com/" class="pixel-btn pixel-btn--sm" style="text-align: left;" target="_blank">🐙 GitHub</a>
+                        <a href="https://colab.research.google.com/" class="pixel-btn pixel-btn--sm" style="text-align: left;" target="_blank">🔬 Google Colab</a>
+                    </div>
+                </div>
+
+                <!-- Contribute Section -->
+                <div class="pixel-card">
+                    <h4 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-base); margin-bottom: var(--pixel-space-2);">
+                        🤝 Join Guild
+                    </h4>
+                    <p style="font-size: var(--pixel-font-sm); margin-bottom: var(--pixel-space-2);">
+                        Found an error or want to contribute? Submit a pull request!
+                    </p>
+                    <a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review" class="pixel-btn pixel-btn--primary pixel-btn--sm" target="_blank">
+                        🚀 Join on GitHub
+                    </a>
+                </div>
             </div>
-            <div class="footer-column">
-                <h3>Resources</h3>
-                <ul>
-                    <li><a href="https://arxiv.org/">arXiv</a></li>
-                    <li><a href="https://paperswithcode.com/">Papers With Code</a></li>
-                    <li><a href="https://github.com/">GitHub</a></li>
-                    <li><a href="https://colab.research.google.com/">Google Colab</a></li>
-                </ul>
+
+            <!-- Copyright in Pixel Style -->
+            <div class="pixel-card pixel-text-center pixel-mt-4" style="padding: var(--pixel-space-2);">
+                <div style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-sm); color: var(--pixel-ink-soft);">
+                    🎮 © 2025 TWRB - Made with ❤️ for the AI research community 🎮
+                </div>
+                <div style="font-family: var(--pixel-font-body); font-size: var(--pixel-font-xs); color: var(--pixel-ink-soft); margin-top: var(--px-unit);">
+                    Pixel theme powered by 8-bit nostalgia and modern web tech
+                </div>
             </div>
-            <div class="footer-column">
-                <h3>Contribute</h3>
-                <p>Found an error or want to contribute? Submit a pull request on GitHub!</p>
-                <a href="#" style="color: white; border-color: white; text-decoration: none; padding: 8px 16px; border: 1px solid; border-radius: 8px; display: inline-block; margin-top: 8px;">
-                    <i class="fab fa-github"></i> GitHub Repo
-                </a>
-            </div>
-        </div>
-        <div class="copyright">
-            © 2025 TWRB. All rights reserved.
         </div>
     </footer>
 
-    <div class="back-to-top" id="back-to-top">
-        <i class="fas fa-arrow-up"></i>
+    <!-- Pixel Back to Top Button -->
+    <div class="pixel-btn pixel-btn--primary" id="back-to-top" style="position: fixed; bottom: var(--pixel-space-3); right: var(--pixel-space-3); z-index: var(--pixel-z-sticky); opacity: 0; visibility: hidden; transition: all var(--pixel-transition-smooth); border-radius: var(--pixel-radius-lg);">
+        ⬆️ TOP
     </div>
+    <!-- Pixel Theme JavaScript -->
+    <script>
+        // Pixel Theme Game Functions
+        function toggleDropdown() {
+            const dropdown = document.getElementById('yearsDropdown');
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                // If section doesn't exist, scroll to main content
+                document.querySelector('main').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.querySelector('.pixel-dropdown');
+            const dropdownContent = document.getElementById('yearsDropdown');
+            
+            if (dropdown && !dropdown.contains(event.target)) {
+                dropdownContent.style.display = 'none';
+            }
+        });
+        
+        // Pixel Theme initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎮 Pixel Theme Loaded!');
+            console.log('🎨 Welcome to the retro gaming experience!');
+            
+            // Add pixel sparkle effect to badges (optional enhancement)
+            const badges = document.querySelectorAll('.pixel-badge');
+            badges.forEach(badge => {
+                badge.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.05) rotate(-1deg)';
+                    this.style.transition = 'all 0.2s ease';
+                });
+                
+                badge.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1) rotate(0deg)';
+                });
+            });
+            
+            // Add click effects to pixel buttons
+            const pixelButtons = document.querySelectorAll('.pixel-btn');
+            pixelButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    // Create pixel "explosion" effect
+                    const rect = this.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const spark = document.createElement('div');
+                    spark.style.position = 'absolute';
+                    spark.style.left = x + 'px';
+                    spark.style.top = y + 'px';
+                    spark.style.width = '4px';
+                    spark.style.height = '4px';
+                    spark.style.backgroundColor = 'var(--pixel-accent-warning)';
+                    spark.style.pointerEvents = 'none';
+                    spark.style.zIndex = '9999';
+                    spark.style.borderRadius = '1px';
+                    
+                    this.style.position = 'relative';
+                    this.appendChild(spark);
+                    
+                    // Animate and remove
+                    setTimeout(() => {
+                        if (spark.parentNode) {
+                            spark.parentNode.removeChild(spark);
+                        }
+                    }, 300);
+                });
+            });
+        });
+    </script>
+    
     <!-- New DDD Architecture -->
     <script type="module" src="web/main.js"></script>
     <script src="web/presentation/mobile-enhancements.js" defer></script>
