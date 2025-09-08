@@ -331,15 +331,38 @@
         </div>
     </main>
 
-    <!-- Pixel Modal for displaying markdown content -->
-    <div id="markdown-modal" class="pixel-modal">
-        <div class="pixel-modal__content">
-            <button class="pixel-modal__close">×</button>
-            <div class="loader" style="display: none;"></div>
-            <!-- Title will be added dynamically by JS -->
-            <div class="markdown-body" id="markdown-content">
-                <!-- Markdown content will be loaded here -->
-            </div>
+    <!-- Full-Screen Reading Modal -->
+    <div id="markdown-modal" class="reading-modal">
+        <div class="reading-modal__overlay"></div>
+        <div class="reading-modal__container">
+            <!-- Sticky Header -->
+            <header class="reading-modal__header">
+                <div class="reading-header__left">
+                    <h1 class="reading-title">📜 Quest Details</h1>
+                    <div class="reading-subtitle">Technical Review</div>
+                </div>
+                <div class="reading-header__controls">
+                    <button class="reading-btn reading-btn--theme" title="Toggle theme">🌙</button>
+                    <button class="reading-btn reading-btn--font-smaller" title="Smaller font">A-</button>
+                    <button class="reading-btn reading-btn--font-larger" title="Larger font">A+</button>
+                    <button class="reading-btn reading-btn--close" title="Close (Esc)">×</button>
+                </div>
+            </header>
+            
+            <!-- Content Area -->
+            <main class="reading-modal__main">
+                <div class="reading-loader" style="display: none;">
+                    <div class="pixel-card pixel-text-center pixel-p-4">
+                        <h3 style="font-family: var(--pixel-font-display); margin-bottom: var(--pixel-space-2);">
+                            🎮 Loading Quest...
+                        </h3>
+                        <div class="loader"></div>
+                    </div>
+                </div>
+                <article class="reading-article" id="markdown-content">
+                    <!-- Markdown content will be loaded here -->
+                </article>
+            </main>
         </div>
     </div>
 
@@ -459,10 +482,143 @@
             }
         });
         
+        // Reading Modal functionality
+        class ReadingModal {
+            constructor() {
+                this.modal = document.getElementById('markdown-modal');
+                this.overlay = this.modal?.querySelector('.reading-modal__overlay');
+                this.container = this.modal?.querySelector('.reading-modal__container');
+                this.article = this.modal?.querySelector('.reading-article');
+                this.loader = this.modal?.querySelector('.reading-loader');
+                this.title = this.modal?.querySelector('.reading-title');
+                this.closeBtn = this.modal?.querySelector('.reading-btn--close');
+                this.themeBtn = this.modal?.querySelector('.reading-btn--theme');
+                this.fontSmallerBtn = this.modal?.querySelector('.reading-btn--font-smaller');
+                this.fontLargerBtn = this.modal?.querySelector('.reading-btn--font-larger');
+                
+                this.currentFontSize = 'normal';
+                this.isDarkTheme = false;
+                
+                this.initEventListeners();
+            }
+            
+            initEventListeners() {
+                if (!this.modal) return;
+                
+                // Close buttons
+                this.closeBtn?.addEventListener('click', () => this.close());
+                this.overlay?.addEventListener('click', () => this.close());
+                
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if (this.modal.classList.contains('active')) {
+                        if (e.key === 'Escape') this.close();
+                        if (e.key === '+' || (e.ctrlKey && e.key === '=')) {
+                            e.preventDefault();
+                            this.increaseFontSize();
+                        }
+                        if (e.key === '-' || (e.ctrlKey && e.key === '-')) {
+                            e.preventDefault();
+                            this.decreaseFontSize();
+                        }
+                        if (e.key === 't' || e.key === 'T') {
+                            e.preventDefault();
+                            this.toggleTheme();
+                        }
+                    }
+                });
+                
+                // Control buttons
+                this.themeBtn?.addEventListener('click', () => this.toggleTheme());
+                this.fontSmallerBtn?.addEventListener('click', () => this.decreaseFontSize());
+                this.fontLargerBtn?.addEventListener('click', () => this.increaseFontSize());
+            }
+            
+            open(title, content) {
+                if (!this.modal) return;
+                
+                this.title.textContent = `📜 ${title}`;
+                document.body.style.overflow = 'hidden';
+                this.modal.classList.add('active');
+                
+                if (content) {
+                    this.article.innerHTML = content;
+                    this.loader.style.display = 'none';
+                } else {
+                    this.showLoader();
+                }
+            }
+            
+            close() {
+                if (!this.modal) return;
+                
+                this.modal.classList.remove('active');
+                document.body.style.overflow = '';
+                this.article.innerHTML = '';
+            }
+            
+            showLoader() {
+                this.loader.style.display = 'flex';
+                this.article.innerHTML = '';
+            }
+            
+            hideLoader() {
+                this.loader.style.display = 'none';
+            }
+            
+            setContent(content) {
+                this.article.innerHTML = content;
+                this.hideLoader();
+            }
+            
+            toggleTheme() {
+                this.isDarkTheme = !this.isDarkTheme;
+                if (this.isDarkTheme) {
+                    this.container.classList.add('dark-theme');
+                    this.themeBtn.textContent = '☀️';
+                } else {
+                    this.container.classList.remove('dark-theme');
+                    this.themeBtn.textContent = '🌙';
+                }
+            }
+            
+            increaseFontSize() {
+                this.article.classList.remove('font-small', 'font-large', 'font-xl');
+                if (this.currentFontSize === 'small') {
+                    this.currentFontSize = 'normal';
+                } else if (this.currentFontSize === 'normal') {
+                    this.currentFontSize = 'large';
+                    this.article.classList.add('font-large');
+                } else if (this.currentFontSize === 'large') {
+                    this.currentFontSize = 'xl';
+                    this.article.classList.add('font-xl');
+                }
+            }
+            
+            decreaseFontSize() {
+                this.article.classList.remove('font-small', 'font-large', 'font-xl');
+                if (this.currentFontSize === 'xl') {
+                    this.currentFontSize = 'large';
+                    this.article.classList.add('font-large');
+                } else if (this.currentFontSize === 'large') {
+                    this.currentFontSize = 'normal';
+                } else if (this.currentFontSize === 'normal') {
+                    this.currentFontSize = 'small';
+                    this.article.classList.add('font-small');
+                }
+            }
+        }
+        
+        // Initialize reading modal
+        let readingModal;
+        
         // Pixel Theme initialization
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🎮 Pixel Theme Loaded!');
             console.log('🎨 Welcome to the retro gaming experience!');
+            
+            // Initialize reading modal
+            readingModal = new ReadingModal();
             
             // Add pixel sparkle effect to badges (optional enhancement)
             const badges = document.querySelectorAll('.pixel-badge');
@@ -508,6 +664,46 @@
                     }, 300);
                 });
             });
+            
+            // Test reading modal with START QUEST button
+            const startQuestBtn = document.querySelector('[onclick*="scrollToSection"]');
+            if (startQuestBtn && startQuestBtn.textContent.includes('START QUEST')) {
+                startQuestBtn.onclick = null; // Remove existing onclick
+                startQuestBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const sampleContent = `
+                        <h1>Пример технического обзора</h1>
+                        <h2>Введение</h2>
+                        <p>Это демонстрация полноэкранного окна чтения с оптимальной типографикой. Ширина текста ограничена 72 символами для комфортного чтения, использованы правильные отступы и контраст.</p>
+                        
+                        <h2>Особенности</h2>
+                        <ul>
+                            <li>Полноэкранный режим (100dvh × 100vw)</li>
+                            <li>Оптимальная ширина строки (72ch)</li>
+                            <li>Размер шрифта 18px с межстрочным интервалом 1.7</li>
+                            <li>Переключение темной/светлой темы (🌙/☀️)</li>
+                            <li>Контроль размера шрифта (A-/A+)</li>
+                            <li>Горячие клавиши: Esc, +/-, T</li>
+                        </ul>
+                        
+                        <h3>Код примера</h3>
+                        <pre><code>function optimizeReading() {
+    const maxWidth = '72ch';
+    const fontSize = '18px';
+    const lineHeight = 1.7;
+    return { maxWidth, fontSize, lineHeight };
+}</code></pre>
+                        
+                        <blockquote>
+                            <p>Хорошая типографика — это невидимое искусство. Она не привлекает к себе внимание, но делает чтение приятным и эффективным.</p>
+                        </blockquote>
+                        
+                        <h2>Заключение</h2>
+                        <p>Теперь технические обзоры открываются в удобном полноэкранном режиме с профессиональной типографикой, сохраняя при этом пиксельную эстетику в элементах интерфейса.</p>
+                    `;
+                    readingModal.open('Пример технического обзора', sampleContent);
+                });
+            }
         });
     </script>
     
