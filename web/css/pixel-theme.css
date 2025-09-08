@@ -788,7 +788,9 @@ header, nav {
 }
 
 header .pixel-container,
-nav .pixel-container {
+nav .pixel-container,
+main .pixel-container,
+footer .pixel-container {
     max-width: 1400px !important; /* Match sidebar-layout max-width */
     margin: 0 auto;
     padding: 0 var(--pixel-space-3);
