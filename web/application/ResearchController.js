@@ -374,8 +374,8 @@ export class ResearchController {
 
         // Обработчик кастомного события открытия из WeekCard
         document.addEventListener('openReview', (event) => {
-            const { year, weekId, title } = event.detail;
-            this.modal.open(year, weekId, title);
+            const { year, weekId, title, useFullscreenModal } = event.detail;
+            this.modal.open(year, weekId, title, useFullscreenModal);
         });
     }
 

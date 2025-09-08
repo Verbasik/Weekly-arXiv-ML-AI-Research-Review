@@ -150,51 +150,17 @@ export class WeekCard {
      * Обработчик открытия обзора
      */
     _onReadReview() {
-        // Проверяем, есть ли глобальный readingModal
-        if (window.readingModal) {
-            const title = `${this.year} Week ${this.week.getId()}: ${this.week.title}`;
-            
-            // Открываем полноэкранное модальное окно
-            window.readingModal.open(title);
-            
-            // Симулируем загрузку контента (здесь будет реальная загрузка)
-            setTimeout(() => {
-                const content = `
-                    <h1>${this.week.title}</h1>
-                    <h2>Техническое описание</h2>
-                    <p>Это детальный технический обзор статьи "${this.week.title}" за ${this.year} год, неделя ${this.week.getId()}.</p>
-                    
-                    <h3>Основные концепции</h3>
-                    <ul>
-                        <li>Инновационный подход к решению задач</li>
-                        <li>Применение современных алгоритмов</li>
-                        <li>Практические результаты исследования</li>
-                    </ul>
-                    
-                    <h3>Методология</h3>
-                    <p>В данной работе используются передовые методы анализа данных и машинного обучения.</p>
-                    
-                    <blockquote>
-                        <p>Этот обзор демонстрирует возможности полноэкранного режима чтения с оптимальной типографикой и удобным управлением.</p>
-                    </blockquote>
-                    
-                    <h3>Заключение</h3>
-                    <p>Представленное исследование открывает новые горизонты в области ИИ и машинного обучения.</p>
-                `;
-                window.readingModal.setContent(content);
-            }, 1500);
-        } else {
-            // Fallback - создаем кастомное событие для старого модального окна
-            const event = new CustomEvent('openReview', {
-                detail: {
-                    year: this.year,
-                    weekId: this.week.getId(),
-                    title: this.week.title
-                }
-            });
-            
-            document.dispatchEvent(event);
-        }
+        // Всегда используем старый механизм загрузки, но открываем в новом полноэкранном окне
+        const event = new CustomEvent('openReview', {
+            detail: {
+                year: this.year,
+                weekId: this.week.getId(),
+                title: this.week.title,
+                useFullscreenModal: true // Флаг для использования нового модального окна
+            }
+        });
+        
+        document.dispatchEvent(event);
     }
 
     /**
