@@ -25,8 +25,9 @@ export class AgentsController {
         // DOM элементы
         this.contentElement = document.querySelector('.content');
         this.modalElement = document.getElementById('markdown-modal');
-        this.searchInput = document.querySelector('.nav-content .search-bar input');
-        this.searchButton = document.querySelector('.nav-content .search-bar button');
+        // Поиск в пиксельной навигации
+        this.searchInput = document.querySelector('.nav-search input') || document.querySelector('.search-bar input');
+        this.searchButton = document.querySelector('.nav-search button') || document.querySelector('.search-bar button');
         this.backToTopButton = document.getElementById('back-to-top');
         
         // Компоненты презентации
@@ -261,8 +262,8 @@ export class AgentsController {
      * Открывает проект в модальном окне
      */
     _openProject(projectId, title) {
-        // Используем метод модального окна напрямую
-        this.modal.open(projectId, projectId, title);
+        // Открываем в полноэкранном режиме (ReadingModal)
+        this.modal.open(projectId, projectId, title, true);
     }
 
     /**
