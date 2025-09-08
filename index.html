@@ -547,6 +547,8 @@
                 
                 this.title.textContent = `📜 ${title}`;
                 document.body.style.overflow = 'hidden';
+                // Сбрасываем инлайновые стили показа (могли быть установлены стандартным ModalWindow)
+                this.modal.style.display = '';
                 this.modal.classList.add('active');
                 
                 if (content) {
@@ -561,6 +563,8 @@
                 if (!this.modal) return;
                 
                 this.modal.classList.remove('active');
+                // Полностью скрываем элемент, перекрывая возможный инлайновый display из других модалок
+                this.modal.style.display = 'none';
                 document.body.style.overflow = '';
                 this.article.innerHTML = '';
             }
