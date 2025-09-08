@@ -106,23 +106,23 @@
             <aside class="sidebar">
                 <div class="sidebar-section">
                     <h3><i class="fas fa-filter"></i> Filter by Type</h3>
-                    <ul>
-                        <li><a href="#all" class="active">All Projects</a></li>
-                        <li><a href="#demos">Demos</a></li>
-                        <li><a href="#tutorials">Tutorials</a></li>
-                    </ul>
+                    <div class="pixel-flex pixel-flex-col pixel-gap-1">
+                        <a href="#all" class="pixel-btn pixel-btn--sm" style="text-align: left;">📦 All Projects</a>
+                        <a href="#demos" class="pixel-btn pixel-btn--sm" style="text-align: left;">🎮 Demos</a>
+                        <a href="#tutorials" class="pixel-btn pixel-btn--sm" style="text-align: left;">📘 Tutorials</a>
+                    </div>
                 </div>
 
                 <div class="sidebar-section">
                     <h3><i class="fas fa-tags"></i> Popular Tags</h3>
-                    <div class="tags-container">
+                    <div class="tags-container pixel-flex pixel-flex-wrap pixel-gap-1">
                         <!-- Теги будут добавлены динамически -->
                     </div>
                 </div>
 
                 <div class="sidebar-section">
                     <h3><i class="fas fa-fire"></i> Featured Projects</h3>
-                    <ul>
+                    <ul class="featured-list" style="list-style: none; padding-left: 0; margin: 0; display: flex; flex-direction: column; gap: var(--px-unit);">
                         <!-- Рекомендации будут добавлены динамически -->
                     </ul>
                 </div>

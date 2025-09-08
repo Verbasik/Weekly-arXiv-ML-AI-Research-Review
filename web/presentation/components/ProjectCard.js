@@ -15,7 +15,7 @@ export class ProjectCard {
      */
     createElement() {
         const card = document.createElement('div');
-        card.className = 'week-card project-card';
+        card.className = 'pixel-card project-card';
         card.setAttribute('data-project', this.project.getId());
         
         card.innerHTML = this._getCardHTML();
@@ -30,25 +30,101 @@ export class ProjectCard {
      */
     _getCardHTML() {
         const meta = this.project.getFormattedMeta();
-        // НЕ ИСПОЛЬЗУЕМ СЛОЖНУЮ КОНФИГУРАЦИЮ - передаем null для fallback
-        const resources = this.project.getFormattedResources(this.githubConfig.githubRepo, this.githubConfig.githubBranch, null);
-        
+        const resources = this.project.getFormattedResources(
+            this.githubConfig.githubRepo,
+            this.githubConfig.githubBranch,
+            null
+        );
+
+        // Конвертируем FA-иконки в эмодзи для пиксельной темы
+        const iconMap = {
+            'fas fa-calendar-alt': '📅',
+            'fas fa-clock': '⏰',
+            'fas fa-tag': '🏷️',
+            'fas fa-fire': '🔥',
+            'fas fa-star': '⭐',
+            'fas fa-brain': '🧠',
+            'fas fa-robot': '🤖',
+            'fas fa-chart-line': '📊',
+            'fas fa-file-pdf': '📄',
+            'fas fa-code': '💻',
+            'fas fa-play': '▶️',
+            'fas fa-download': '⬇️',
+            'fas fa-external-link-alt': '🔗'
+        };
+
+        const metaHTML = meta.map(item => {
+            const emoji = iconMap[item.icon] || '📌';
+            if (item.type === 'tag') {
+                return `<span class="pixel-tag">${emoji} ${item.text}</span>`;
+            }
+            return `<span style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-xs); color: var(--pixel-ink-soft);">${emoji} ${item.text}</span>`;
+        }).join('');
+
+        const resourcesHTML = resources.map(resource => {
+            const emoji = iconMap[resource.icon] || '🔗';
+            if (resource.url) {
+                return `<a href="${resource.url}" target="_blank" rel="noopener" class="pixel-btn pixel-btn--sm" style="font-size: var(--pixel-font-xs);">${emoji} ${resource.text}</a>`;
+            }
+            return `<span class="pixel-badge" data-icon="${emoji}">${resource.text}</span>`;
+        }).join('');
+
+        // Случайная “сложность” как бейдж (для игрового ощущения)
+        const difficulties = [
+            { level: 'Beginner', emoji: '🟢', color: 'success' },
+            { level: 'Intermediate', emoji: '🟡', color: 'warning' },
+            { level: 'Advanced', emoji: '🟠', color: 'danger' },
+            { level: 'Expert', emoji: '🔴', color: 'secondary' }
+        ];
+        const difficulty = difficulties[Math.floor(Math.random() * difficulties.length)];
+
         return `
-            <div class="week-card-header">
-                <h3 class="week-card-title">${this.project.title}</h3>
-                <div class="week-card-meta">
-                    ${meta.map(item => this._getMetaItemHTML(item)).join('')}
+            <!-- Game Cartridge Header -->
+            <div class="pixel-flex pixel-flex-between pixel-mb-2" style="align-items: flex-start;">
+                <div class="pixel-flex pixel-gap-2">
+                    <div style="font-size: 2rem;">🤖</div>
+                    <div>
+                        <h3 class="project-card-title" style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-base); margin-bottom: var(--px-unit-half); color: var(--pixel-ink);">
+                            ${this.project.title}
+                        </h3>
+                        <div class="pixel-badge pixel-badge--${difficulty.color}" data-icon="${difficulty.emoji}">
+                            ${difficulty.level} Quest
+                        </div>
+                    </div>
+                </div>
+                <div style="font-size: 1.5rem;">🧩</div>
+            </div>
+
+            <!-- Meta and Description -->
+            <div class="pixel-mb-3">
+                <div class="pixel-flex pixel-flex-wrap pixel-gap-1 pixel-mb-2">
+                    ${metaHTML}
+                </div>
+                <p class="project-card-desc" style="font-size: var(--pixel-font-sm); line-height: var(--pixel-line-relaxed); margin-bottom: var(--pixel-space-2); color: var(--pixel-ink-soft);">
+                    ${this.project.description}
+                </p>
+
+                <!-- XP Reward -->
+                <div class="pixel-progress pixel-mb-2">
+                    <div class="pixel-progress__bar" style="width: ${Math.floor(Math.random() * 40 + 60)}%;"></div>
+                    <div class="pixel-progress__label" style="font-size: var(--pixel-font-xs);">+${Math.floor(Math.random() * 50 + 50)} XP</div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="pixel-flex pixel-gap-2">
+                    <button class="pixel-btn pixel-btn--primary pixel-btn--sm read-review" style="flex: 1;">
+                        🎮 Start Quest
+                    </button>
+                    <button class="pixel-btn pixel-btn--secondary pixel-btn--sm" style="min-width: auto;" title="Add to wishlist">
+                        💾
+                    </button>
                 </div>
             </div>
-            <div class="week-card-body">
-                <p class="week-card-desc">${this.project.description}</p>
-                <button type="button" class="gradient-button read-review">Read Review</button>
+
+            <!-- Resources -->
+            <div class="pixel-flex pixel-flex-wrap pixel-gap-1" style="padding-top: var(--pixel-space-2); border-top: var(--pixel-border-thin);">
+                ${resourcesHTML}
             </div>
-            <div class="week-card-footer">
-                ${resources.map(resource => this._getResourceHTML(resource)).join('')}
-            </div>
-            <!-- Невидимый оверлей-ссылка для клика по всей карточке -->
-            <a href="#agents/${this.project.getId()}" class="card-overlay-link" aria-label="Open ${this.project.title}"></a>
         `;
     }
 
@@ -97,7 +173,6 @@ export class ProjectCard {
             });
         });
 
-        // УПРОЩЕННАЯ ЛОГИКА - НЕ БЛОКИРУЕМ КЛИКИ ПО ССЫЛКАМ КАК НА ГЛАВНОЙ СТРАНИЦЕ
         // Обработчик для клика по карточке (открытие по клику на карточку)
         card.addEventListener('click', (e) => {
             // Проверяем, что клик не по ссылке или кнопке - КАК В WEEKCARD
@@ -105,9 +180,7 @@ export class ProjectCard {
                 this._onReadReview();
             }
         });
-
-        // Добавляем курсор pointer для интерактивности
-        card.style.cursor = 'pointer';
+        card.style.cursor = 'default';
     }
 
     /**
@@ -206,7 +279,7 @@ export class ProjectCard {
     highlight(searchTerm) {
         if (!this.element || !searchTerm) return;
 
-        const elements = this.element.querySelectorAll('.week-card-title, .week-card-desc');
+        const elements = this.element.querySelectorAll('.project-card-title, .project-card-desc');
         elements.forEach(element => {
             const originalText = element.textContent;
             const highlightedText = this._highlightText(originalText, searchTerm);

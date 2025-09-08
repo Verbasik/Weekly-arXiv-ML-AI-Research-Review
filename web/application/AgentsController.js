@@ -158,7 +158,7 @@ export class AgentsController {
                 tagsContainer.innerHTML = '';
                 popularTags.forEach(({ tag, count }) => {
                     const tagElement = document.createElement('span');
-                    tagElement.className = 'tag';
+                    tagElement.className = 'pixel-tag';
                     tagElement.textContent = tag;
                     tagElement.title = `${count} проектов`;
                     
@@ -180,7 +180,7 @@ export class AgentsController {
     async _updateFeaturedProjects() {
         try {
             const featuredProjects = await this.service.getFeaturedProjects(3);
-            const featuredList = document.querySelector('.sidebar-section:last-child ul');
+            const featuredList = document.querySelector('.sidebar-section:last-child ul.featured-list');
             
             if (featuredList) {
                 featuredList.innerHTML = '';
@@ -189,6 +189,8 @@ export class AgentsController {
                     const a = document.createElement('a');
                     a.href = `#${project.getId()}`;
                     a.textContent = project.title;
+                    a.className = 'pixel-btn pixel-btn--sm';
+                    a.style.textAlign = 'left';
                     
                     a.addEventListener('click', (e) => {
                         e.preventDefault();
