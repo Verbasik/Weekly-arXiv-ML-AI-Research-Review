@@ -491,7 +491,7 @@
                 this.article = this.modal?.querySelector('.reading-article');
                 this.loader = this.modal?.querySelector('.reading-loader');
                 this.title = this.modal?.querySelector('.reading-title');
-                this.closeBtn = this.modal?.querySelector('.reading-btn--close');
+                this.closeBtn = this.modal?.querySelector('.reading-btn--close, .pixel-modal__close');
                 this.themeBtn = this.modal?.querySelector('.reading-btn--theme');
                 this.fontSmallerBtn = this.modal?.querySelector('.reading-btn--font-smaller');
                 this.fontLargerBtn = this.modal?.querySelector('.reading-btn--font-larger');
@@ -505,9 +505,17 @@
             initEventListeners() {
                 if (!this.modal) return;
                 
-                // Close buttons
-                this.closeBtn?.addEventListener('click', () => this.close());
-                this.overlay?.addEventListener('click', () => this.close());
+                // Close buttons - исправляем селекторы
+                this.closeBtn?.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.close();
+                });
+                this.overlay?.addEventListener('click', (e) => {
+                    if (e.target === this.overlay) {
+                        this.close();
+                    }
+                });
                 
                 // Keyboard shortcuts
                 document.addEventListener('keydown', (e) => {
@@ -617,8 +625,9 @@
             console.log('🎮 Pixel Theme Loaded!');
             console.log('🎨 Welcome to the retro gaming experience!');
             
-            // Initialize reading modal
+            // Initialize reading modal and make it globally accessible
             readingModal = new ReadingModal();
+            window.readingModal = readingModal;
             
             // Add pixel sparkle effect to badges (optional enhancement)
             const badges = document.querySelectorAll('.pixel-badge');
@@ -665,45 +674,8 @@
                 });
             });
             
-            // Test reading modal with START QUEST button
-            const startQuestBtn = document.querySelector('[onclick*="scrollToSection"]');
-            if (startQuestBtn && startQuestBtn.textContent.includes('START QUEST')) {
-                startQuestBtn.onclick = null; // Remove existing onclick
-                startQuestBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const sampleContent = `
-                        <h1>Пример технического обзора</h1>
-                        <h2>Введение</h2>
-                        <p>Это демонстрация полноэкранного окна чтения с оптимальной типографикой. Ширина текста ограничена 72 символами для комфортного чтения, использованы правильные отступы и контраст.</p>
-                        
-                        <h2>Особенности</h2>
-                        <ul>
-                            <li>Полноэкранный режим (100dvh × 100vw)</li>
-                            <li>Оптимальная ширина строки (72ch)</li>
-                            <li>Размер шрифта 18px с межстрочным интервалом 1.7</li>
-                            <li>Переключение темной/светлой темы (🌙/☀️)</li>
-                            <li>Контроль размера шрифта (A-/A+)</li>
-                            <li>Горячие клавиши: Esc, +/-, T</li>
-                        </ul>
-                        
-                        <h3>Код примера</h3>
-                        <pre><code>function optimizeReading() {
-    const maxWidth = '72ch';
-    const fontSize = '18px';
-    const lineHeight = 1.7;
-    return { maxWidth, fontSize, lineHeight };
-}</code></pre>
-                        
-                        <blockquote>
-                            <p>Хорошая типографика — это невидимое искусство. Она не привлекает к себе внимание, но делает чтение приятным и эффективным.</p>
-                        </blockquote>
-                        
-                        <h2>Заключение</h2>
-                        <p>Теперь технические обзоры открываются в удобном полноэкранном режиме с профессиональной типографикой, сохраняя при этом пиксельную эстетику в элементах интерфейса.</p>
-                    `;
-                    readingModal.open('Пример технического обзора', sampleContent);
-                });
-            }
+            // START QUEST button сохраняет свое изначальное поведение (scrollToSection)
+            // Полноэкранное окно чтения теперь открывается только через кнопки "Start Quest" в карточках недель
         });
     </script>
     
