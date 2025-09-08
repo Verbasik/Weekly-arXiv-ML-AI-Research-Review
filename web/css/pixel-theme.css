@@ -598,6 +598,48 @@ code, pre, .pixel-mono {
 .pixel-stack { display: flex; flex-direction: column; gap: var(--pixel-space-3); }
 @media (max-width: 768px) { .pixel-stack { gap: var(--pixel-space-2); } }
 
+/* Experience grid/cards */
+.exp-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--pixel-space-3); }
+@media (max-width: 992px) { .exp-grid { grid-template-columns: 1fr; } }
+
+.exp-card h3 { font-family: var(--pixel-font-display); font-size: var(--pixel-font-base); margin-bottom: var(--px-unit); }
+.exp-meta { display: flex; gap: var(--pixel-space-2); align-items: center; color: var(--pixel-ink-soft); font-size: var(--pixel-font-sm); margin-bottom: var(--px-unit); }
+.exp-meta .dot { width: 6px; height: 6px; background: var(--pixel-ink-soft); display: inline-block; border-radius: 1px; }
+.exp-summary { color: var(--pixel-ink-soft); font-size: var(--pixel-font-sm); margin-bottom: var(--pixel-space-2); }
+.exp-bullets { list-style: none; padding-left: 0; margin: 0; display: grid; gap: var(--px-unit); }
+.exp-bullets li { position: relative; padding-left: 14px; font-size: var(--pixel-font-sm); line-height: var(--pixel-line-relaxed); }
+.exp-bullets li::before { content: '\25B8'; position: absolute; left: 0; top: 2px; color: var(--pixel-accent-primary); }
+
+/* Education / Courses / Interests / Philosophy grids */
+.edu-grid, .course-grid, .interest-grid, .philo-grid { display: grid; gap: var(--pixel-space-3); }
+.edu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.course-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.interest-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.philo-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+@media (max-width: 1200px) { .interest-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 992px) {
+  .edu-grid, .course-grid { grid-template-columns: 1fr; }
+  .philo-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .interest-grid, .philo-grid { grid-template-columns: 1fr; }
+}
+
+.edu-card h3, .course-card h3 { font-family: var(--pixel-font-display); font-size: var(--pixel-font-base); margin-bottom: var(--px-unit); }
+.edu-meta, .course-meta { color: var(--pixel-ink-soft); font-size: var(--pixel-font-sm); margin-bottom: var(--px-unit); }
+.edu-highlights, .course-points { list-style: none; padding-left: 0; margin: 0; display: grid; gap: var(--px-unit); }
+.edu-highlights li, .course-points li { position: relative; padding-left: 14px; font-size: var(--pixel-font-sm); }
+.edu-highlights li::before, .course-points li::before { content: '\25B8'; position: absolute; left: 0; top: 2px; color: var(--pixel-accent-primary); }
+
+.interest-card { padding: var(--pixel-space-3); }
+.interest-card h3 { font-family: var(--pixel-font-display); font-size: var(--pixel-font-base); margin: 0 0 var(--px-unit) 0; }
+.interest-card p { color: var(--pixel-ink-soft); font-size: var(--pixel-font-sm); }
+
+.principle-card { padding: var(--pixel-space-3); }
+.principle-card h3 { font-family: var(--pixel-font-display); font-size: var(--pixel-font-base); margin: 0 0 var(--px-unit) 0; }
+.principle-card p { color: var(--pixel-ink-soft); font-size: var(--pixel-font-sm); }
+
 .pixel-grid { display: grid; }
 .pixel-grid-2 { grid-template-columns: repeat(2, 1fr); }
 .pixel-grid-3 { grid-template-columns: repeat(3, 1fr); }

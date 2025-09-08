@@ -154,11 +154,6 @@
         </div>
     </main>
     
-    <!-- Back to Top Button (same as main page) -->
-    <div class="back-to-top" id="back-to-top">
-        <i class="fas fa-arrow-up"></i>
-    </div>
-    
     <!-- Reading Modal (Fullscreen) -->
     <div id="markdown-modal" class="reading-modal">
         <div class="reading-modal__overlay"></div>
@@ -187,49 +182,67 @@
         </div>
     </div>
     
-    <!-- Footer (same structure as main page) -->
-    <footer>
-        <div class="pixel-container footer-content">
-            <div class="footer-column">
-                <h3>About</h3>
-                <p>Weekly collection of arXiv paper reviews in ML/AI with practical implementations and agent projects.</p>
-                <div class="social-links">
-                    <a href="https://github.com/Verbasik" target="_blank" rel="noopener"><i class="fab fa-github"></i></a>
-                    <a href="https://t.me/Verbasik" target="_blank" rel="noopener" title="@Verbasik"><i class="fab fa-telegram"></i></a>
-                    <a href="https://www.linkedin.com/in/verbasik/" target="_blank" rel="noopener"><i class="fab fa-linkedin"></i></a>
-                    <a href="mailto:verbasik2018@gmail.com" title="verbasik2018@gmail.com"><i class="fas fa-envelope"></i></a>
+    <!-- Footer in Pixel Game Style (like home) -->
+    <footer class="pixel-p-4" style="margin-top: var(--pixel-space-8); background: var(--pixel-bg-lavender);">
+        <div class="pixel-container">
+            <div class="pixel-card pixel-card--accent pixel-text-center pixel-mb-4">
+                <h2 style="font-family: var(--pixel-font-title); font-size: var(--pixel-font-2xl); margin-bottom: var(--pixel-space-2);">
+                    🎮 GAME INFO 🎮
+                </h2>
+                <div class="pixel-flex pixel-flex-center pixel-gap-3">
+                    <span class="pixel-badge pixel-badge--star" data-icon="⭐">Level Complete</span>
+                    <span class="pixel-badge pixel-badge--heart" data-icon="❤️">Thanks for Playing</span>
+                    <span class="pixel-badge pixel-badge--diamond" data-icon="💎">Come Back Soon</span>
                 </div>
             </div>
-            <div class="footer-column">
-                <h3>Quick Links</h3>
-                <ul>
-                    <li><a href="../index.html">Home</a></li>
-                    <li><a href="#agents">Agents</a></li>
-                    <li><a href="../index.html#2025">2025 Papers</a></li>
-                    <li><a href="about.html">About Project</a></li>
-                </ul>
+
+            <div class="pixel-grid pixel-grid-4 pixel-gap-4">
+                <div class="pixel-card">
+                    <h4 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-base); margin-bottom: var(--pixel-space-2);">📖 About Quest</h4>
+                    <p style="font-size: var(--pixel-font-sm); margin-bottom: var(--pixel-space-3);">Weekly collection of arXiv paper reviews in ML/AI with practical implementations and agent projects.</p>
+                    <div class="pixel-flex pixel-gap-2">
+                        <a href="https://github.com/Verbasik" class="pixel-btn pixel-btn--sm" target="_blank" rel="noopener">🐙 GitHub</a>
+                        <a href="https://t.me/Verbasik" class="pixel-btn pixel-btn--sm" target="_blank" rel="noopener" title="@Verbasik">📨 Telegram</a>
+                        <a href="https://www.linkedin.com/in/verbasik/" class="pixel-btn pixel-btn--sm" target="_blank" rel="noopener">💼 LinkedIn</a>
+                        <a href="mailto:verbasik2018@gmail.com" class="pixel-btn pixel-btn--sm" title="verbasik2018@gmail.com">✉️ Email</a>
+                    </div>
+                </div>
+                <div class="pixel-card">
+                    <h4 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-base); margin-bottom: var(--pixel-space-2);">🚀 Quick Links</h4>
+                    <div style="display: flex; flex-direction: column; gap: var(--px-unit);">
+                        <a href="../index.html#home" class="pixel-btn pixel-btn--sm" style="text-align: left;">🏠 Home Base</a>
+                        <a href="../atlas-wrapper.html" class="pixel-btn pixel-btn--sm" style="text-align: left;">📊 ATLAS Project</a>
+                        <a href="../index.html#2025" class="pixel-btn pixel-btn--sm" style="text-align: left;">🗡️ 2025 Papers</a>
+                        <a href="../index.html#2024" class="pixel-btn pixel-btn--sm" style="text-align: left;">🛡️ 2024 Papers</a>
+                    </div>
+                </div>
+                <div class="pixel-card">
+                    <h4 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-base); margin-bottom: var(--pixel-space-2);">🎒 Resources</h4>
+                    <div style="display: flex; flex-direction: column; gap: var(--px-unit);">
+                        <a href="https://arxiv.org/" class="pixel-btn pixel-btn--sm" style="text-align: left;" target="_blank">📄 arXiv</a>
+                        <a href="https://paperswithcode.com/" class="pixel-btn pixel-btn--sm" style="text-align: left;" target="_blank">💻 Papers With Code</a>
+                        <a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/tree/develop/agents-under-hood" class="pixel-btn pixel-btn--sm" style="text-align: left;" target="_blank">🤖 Agents GitHub</a>
+                        <a href="https://colab.research.google.com/" class="pixel-btn pixel-btn--sm" style="text-align: left;" target="_blank">🔬 Google Colab</a>
+                    </div>
+                </div>
+                <div class="pixel-card">
+                    <h4 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-base); margin-bottom: var(--pixel-space-2);">🤝 Join Guild</h4>
+                    <p style="font-size: var(--pixel-font-sm); margin-bottom: var(--pixel-space-2);">Found an error or want to contribute? Submit a pull request!</p>
+                    <a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review" class="pixel-btn pixel-btn--primary pixel-btn--sm" target="_blank">🚀 Join on GitHub</a>
+                </div>
             </div>
-            <div class="footer-column">
-                <h3>Resources</h3>
-                <ul>
-                    <li><a href="https://arxiv.org/">arXiv</a></li>
-                    <li><a href="https://paperswithcode.com/">Papers With Code</a></li>
-                    <li><a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/tree/develop/agents-under-hood" target="_blank">Agents GitHub</a></li>
-                    <li><a href="https://colab.research.google.com/">Google Colab</a></li>
-                </ul>
+
+            <div class="pixel-card pixel-text-center pixel-mt-4" style="padding: var(--pixel-space-2);">
+                <div style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-sm); color: var(--pixel-ink-soft);">🎮 © 2025 TWRB - Made with ❤️ for the AI research community 🎮</div>
+                <div style="font-family: var(--pixel-font-body); font-size: var(--pixel-font-xs); color: var(--pixel-ink-soft); margin-top: var(--px-unit);">Pixel theme powered by 8-bit nostalgia and modern web tech</div>
             </div>
-            <div class="footer-column">
-                <h3>Contribute</h3>
-                <p>Found an error or want to contribute? Submit a pull request on GitHub!</p>
-                <a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review" target="_blank" rel="noopener noreferrer" style="color: white; border-color: white; text-decoration: none; padding: 8px 16px; border: 1px solid; border-radius: 8px; display: inline-block; margin-top: 8px;">
-                    <i class="fab fa-github"></i> GitHub Repo
-                </a>
-            </div>
-        </div>
-        <div class="copyright">
-            © 2025 TWRB. All rights reserved.
         </div>
     </footer>
+
+    <!-- Pixel Back to Top Button -->
+    <div class="pixel-btn pixel-btn--primary" id="back-to-top" style="position: fixed; bottom: var(--pixel-space-3); right: var(--pixel-space-3); z-index: var(--pixel-z-sticky); opacity: 0; visibility: hidden; transition: all var(--pixel-transition-smooth); border-radius: var(--pixel-radius-lg);">
+        ⬆️ TOP
+    </div>
     
     <!-- JavaScript Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
