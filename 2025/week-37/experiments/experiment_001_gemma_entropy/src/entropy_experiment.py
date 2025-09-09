@@ -10,7 +10,8 @@ from typing import List, Dict, Any
 # Добавляем путь к модулю
 sys.path.append(str(Path(__file__).parent))
 
-from model_loader import GemmaEntropyAnalyzer
+from infrastructure.gemma_model_manager import GemmaModelManager
+from application.entropy_analyzer import GemmaEntropyAnalyzer
 
 class EntropyExperimentRunner:
     """Класс для красивого запуска и отображения экспериментов с энтропией"""
@@ -154,24 +155,27 @@ class EntropyExperimentRunner:
         
         # Инициализация
         self.print_section("ИНИЦИАЛИЗАЦИЯ", "🚀")
-        print("⏳ Загружаем анализатор энтропии...")
+        print("⏳ Создаем менеджер модели и анализатор...")
         
         try:
-            self.analyzer = GemmaEntropyAnalyzer()
-            print("✅ Анализатор создан")
+            manager = GemmaModelManager()
+            print("✅ Менеджер модели создан")
             
             print("⏳ Загружаем модель Gemma-3n-E2B-it...")
             print("   (Это может занять несколько минут при первой загрузке)")
             
             start_time = time.time()
-            self.analyzer.load_model()
+            manager.load_model()
             load_time = time.time() - start_time
             
             print(f"✅ Модель загружена за {load_time:.1f} секунд")
             
             # Информация о модели
-            model_info = self.analyzer.get_model_info()
+            model_info = manager.get_model_info()
             self.print_model_info(model_info)
+            
+            # Создаем анализатор
+            self.analyzer = GemmaEntropyAnalyzer(manager)
             
             # Генеративный анализ энтропии
             self.print_section("ГЕНЕРАТИВНЫЙ АНАЛИЗ ЭНТРОПИИ", "🎲")
