@@ -113,7 +113,8 @@ class GemmaModelManager(ModelPort):
 
         config_path = Path(config_path)
         if not config_path.exists():
-            config_path = Path(__file__).parent.parent / config_path
+            # Файл находится глубже (src/infrastructure), поднимаемся до корня эксперимента
+            config_path = Path(__file__).parent.parent.parent / config_path
         with open(config_path, "r") as f:
             config = yaml.safe_load(f)
         return config
