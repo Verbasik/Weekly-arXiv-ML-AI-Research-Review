@@ -16,7 +16,7 @@ import torch
 import yaml
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from domain.ports import ModelPort
+from .ports import ModelPort
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -38,41 +38,29 @@ class GemmaModelManager(ModelPort):
         True
     """
 
-    def __init__(self, config_path: str = "config/experiment.yaml") -> None:
+    def __init__(self, config: Dict[str, Any]) -> None:
         """
         Description:
         ---------------
-            Инициализирует менеджер модели: загружает конфигурацию,
+            Инициализирует менеджер модели: принимает готовую конфигурацию,
             подготавливает атрибуты модели, токенизатора и устройства.
 
         Args:
         ---------------
-            config_path: путь к конфигурационному файлу.
+            config: словарь конфигурации (уже загруженный)
 
         Returns:
         ---------------
             None
 
-        Raises:
-        ---------------
-            FileNotFoundError: если файл конфигурации не найден
-
         Examples:
         ---------------
-            >>> manager = GemmaModelManager("config/experiment.yaml")
+            >>> config = {"model": {"name": "google/gemma-2b-it"}}
+            >>> manager = GemmaModelManager(config)
             >>> manager.model is None
             True
         """
-        # TODO: инициализируйте следующие атрибуты:
-        # - self.config (загрузите конфигурацию через _load_config)
-        # - self.model = None
-        # - self.tokenizer = None
-        # - self._device (определите CUDA или CPU)
-        # Выведите информацию об устройстве через logger.info
-
-        # pass
-
-        self.config = self._load_config(config_path)
+        self.config = config
         self.model = None
         self.tokenizer = None
         self._device = torch.device("cpu")

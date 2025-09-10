@@ -16,21 +16,17 @@ model:
   device_map: "auto"
 
 computation:
-  batch_size: 1  # Для детального анализа
+  batch_size: 1      # Для детального анализа
   max_new_tokens: 50
-  temperature: 1.0  # Важно для энтропийного анализа
-  top_p: 1.0       # Не обрезаем распределение
-  top_k: 0         # Учитываем все токены
-  do_sample: false # Детерминированный режим
+  temperature: 1.0   # Важно для энтропийного анализа
+  top_p: 1.0         # Не обрезаем распределение
+  top_k: 0           # Учитываем все токены
+  do_sample: false   # Детерминированный режим
   
 entropy:
   log_base: 2      # Биты информации
   epsilon: 1e-10   # Для численной стабильности
-  
-data:
-  test_prompts_path: "data/test_prompts.txt"
-  results_path: "results/entropy_analysis.json"
-  plots_path: "results/plots/"
+
 
 logging:
   level: "INFO"
