@@ -8,6 +8,7 @@ import { Year } from '../entities/Year.js';
 export class ResearchRepository {
     constructor(dataSource) {
         this.dataSource = dataSource;
+        this._yearsCache = null;
     }
 
     /**
@@ -15,8 +16,12 @@ export class ResearchRepository {
      */
     async getAllYears() {
         try {
+            if (this._yearsCache) {
+                return this._yearsCache;
+            }
             const data = await this.dataSource.fetchData();
-            return this._mapToYearEntities(data.years);
+            this._yearsCache = this._mapToYearEntities(data.years);
+            return this._yearsCache;
         } catch (error) {
             throw new Error(`Failed to fetch research data: ${error.message}`);
         }

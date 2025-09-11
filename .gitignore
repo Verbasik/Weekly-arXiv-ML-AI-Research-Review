@@ -7,6 +7,7 @@
 
 # Virtual environment
 **/venv/
+**/.venv/
 
 # Cache files
 **/__pycache__/
