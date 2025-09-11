@@ -95,7 +95,7 @@
     --pixel-radius-lg: 8px;
     
     /* === PIXEL Z-INDEX === */
-    --pixel-z-dropdown: 100;
+    --pixel-z-dropdown: 600; /* поднято, чтобы подсказки поиска были поверх контента */
     --pixel-z-sticky: 200;
     --pixel-z-modal: 1000;
     --pixel-z-tooltip: 1100;
@@ -856,6 +856,14 @@ nav .nav-stack {
     display: flex !important;
     flex-direction: column !important;
     gap: var(--pixel-space-2);
+    position: relative;            /* формируем свой стек */
+    z-index: var(--pixel-z-sticky);/* поднимаем над основным контентом */
+}
+
+/* Поднимаем сам блок поиска, чтобы внутри absolute-элементы были выше */
+.nav-search {
+    position: relative;
+    z-index: var(--pixel-z-dropdown);
 }
 
 /* ==================== PIXEL ANIMATED SPRITES ==================== */
