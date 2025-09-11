@@ -144,7 +144,8 @@ class GroupConfidenceCalculator:
         # TODO(human): Вернуть torch.Tensor с групповыми уверенностями
         # pass
 
-        
+        # 1. Вычисляем уверенность для каждого токена
+        token_confidences = self.conf_calc.calculate_confidence(probabilities)
 
         
 

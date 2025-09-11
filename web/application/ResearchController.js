@@ -98,6 +98,14 @@ export class ResearchController {
             // Инициализируем контейнер подсказок под строкой поиска
             this._ensureSearchSuggestionsContainer();
 
+            // Вставляем служебные карточки (Contribute/Contact) после последнего года (например, 2024)
+            try {
+                const yearIds = years.map(y => y.year);
+                const minYear = yearIds.reduce((a, b) => (a < b ? a : b), yearIds[0]);
+                this._appendUtilityCardsToYear(minYear);
+                this._scrollToUtilityAnchor();
+            } catch (e) { /* non-fatal */ }
+
         } catch (error) {
             console.error('Error loading research data:', error);
             
@@ -432,6 +440,78 @@ export class ResearchController {
     _clearOldSections() {
         this.contentElement.querySelectorAll('.year-section:not(#home)').forEach(section => section.remove());
         this.weekCards.clear();
+    }
+
+    /**
+     * Добавляет карточки Contribute/Contact в конец указанного года
+     */
+    _appendUtilityCardsToYear(year) {
+        const section = document.getElementById(String(year));
+        if (!section) return;
+        const grid = section.querySelector('.weeks-grid');
+        if (!grid) return;
+
+        const contribute = document.createElement('div');
+        contribute.className = 'pixel-card week-card';
+        contribute.id = 'contribute';
+        contribute.innerHTML = `
+            <div class="pixel-flex pixel-flex-between pixel-mb-2" style="align-items: flex-start;">
+                <div class="pixel-flex pixel-gap-2">
+                    <div style="font-size: 2rem;">🤝</div>
+                    <div>
+                        <h3 class="week-card-title" style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-base); margin-bottom: var(--px-unit-half); color: var(--pixel-ink);">Contribute</h3>
+                        <div class="pixel-badge pixel-badge--success" data-icon="⭐">Community Quest</div>
+                    </div>
+                </div>
+            </div>
+            <p class="week-card-desc" style="font-size: var(--pixel-font-sm); color: var(--pixel-ink-soft);">
+                Help improve TWRB: ideas, issues, pull requests — everything matters!
+            </p>
+            <div class="pixel-flex pixel-gap-2 pixel-mt-2">
+                <a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review" target="_blank" class="pixel-btn pixel-btn--sm">🐙 Repo</a>
+                <a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/issues/new/choose" target="_blank" class="pixel-btn pixel-btn--sm">📝 Issue</a>
+                <a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/fork" target="_blank" class="pixel-btn pixel-btn--sm">🍴 Fork & PR</a>
+                <a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review#readme" target="_blank" class="pixel-btn pixel-btn--sm">📖 Readme</a>
+            </div>
+        `;
+
+        const contact = document.createElement('div');
+        contact.className = 'pixel-card week-card';
+        contact.id = 'contact';
+        contact.innerHTML = `
+            <div class="pixel-flex pixel-flex-between pixel-mb-2" style="align-items: flex-start;">
+                <div class="pixel-flex pixel-gap-2">
+                    <div style="font-size: 2rem;">✉️</div>
+                    <div>
+                        <h3 class="week-card-title" style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-base); margin-bottom: var(--px-unit-half); color: var(--pixel-ink);">Contact</h3>
+                        <div class="pixel-badge" data-icon="💬">Say Hello</div>
+                    </div>
+                </div>
+            </div>
+            <p class="week-card-desc" style="font-size: var(--pixel-font-sm); color: var(--pixel-ink-soft);">
+                Questions or collaboration ideas? Reach out on your favorite channel.
+            </p>
+            <div class="pixel-flex pixel-gap-2 pixel-mt-2">
+                <a href="mailto:verbasik2018@gmail.com" class="pixel-btn pixel-btn--sm">📬 Email</a>
+                <a href="https://t.me/Verbasik" target="_blank" rel="noopener" class="pixel-btn pixel-btn--sm">📨 Telegram</a>
+                <a href="https://www.linkedin.com/in/verbasik/" target="_blank" rel="noopener" class="pixel-btn pixel-btn--sm">💼 LinkedIn</a>
+            </div>
+        `;
+
+        grid.appendChild(contribute);
+        grid.appendChild(contact);
+    }
+
+    /**
+     * Прокручивает к #contribute/#contact, если они в hash
+     */
+    _scrollToUtilityAnchor() {
+        const id = (location.hash || '').replace('#','');
+        if (!id) return;
+        if (id === 'contribute' || id === 'contact') {
+            const el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     }
 
     /**

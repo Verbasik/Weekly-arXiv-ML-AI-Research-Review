@@ -644,6 +644,7 @@ code, pre, .pixel-mono {
 .pixel-grid-2 { grid-template-columns: repeat(2, 1fr); }
 .pixel-grid-3 { grid-template-columns: repeat(3, 1fr); }
 .pixel-grid-4 { grid-template-columns: repeat(4, 1fr); }
+.pixel-grid-6 { grid-template-columns: repeat(6, 1fr); }
 
 .pixel-gap-1 { gap: var(--pixel-space-1); }
 .pixel-gap-2 { gap: var(--pixel-space-2); }
@@ -754,7 +755,8 @@ code, pre, .pixel-mono {
 @media (max-width: 480px) {
     .pixel-grid-2,
     .pixel-grid-3,
-    .pixel-grid-4 {
+    .pixel-grid-4,
+    .pixel-grid-6 {
         grid-template-columns: 1fr;
     }
     
