@@ -856,7 +856,8 @@ nav .nav-stack {
     display: flex !important;
     flex-direction: column !important;
     gap: var(--pixel-space-2);
-    /* не поднимаем весь блок навигации над контентом, чтобы рамка не перекрывала низ */
+    position: relative;            /* формируем свой стек */
+    z-index: var(--pixel-z-sticky);/* поднимаем над основным контентом */
 }
 
 /* Поднимаем сам блок поиска, чтобы внутри absolute-элементы были выше */
