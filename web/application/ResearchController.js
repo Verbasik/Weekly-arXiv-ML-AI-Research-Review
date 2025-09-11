@@ -25,8 +25,10 @@ export class ResearchController {
         // DOM элементы
         this.contentElement = document.querySelector('.content');
         this.modalElement = document.getElementById('markdown-modal');
-        this.searchInput = document.querySelector('.search-bar input');
-        this.searchButton = document.querySelector('.search-bar button');
+        // Поддержка новой пиксельной навигации (.nav-search) и старой разметки (.search-bar)
+        this.searchInput = document.querySelector('.nav-search input') || document.querySelector('.search-bar input');
+        this.searchButton = document.querySelector('.nav-search button') || document.querySelector('.search-bar button');
+        this.searchSuggestions = null; // контейнер выпадающих подсказок
         this.backToTopButton = document.getElementById('back-to-top');
         
         // Компоненты презентации
@@ -92,6 +94,9 @@ export class ResearchController {
 
             // Обновляем фильтры в боковой панели
             this._updateSidebarFilters(years);
+
+            // Инициализируем контейнер подсказок под строкой поиска
+            this._ensureSearchSuggestionsContainer();
 
         } catch (error) {
             console.error('Error loading research data:', error);
@@ -297,12 +302,21 @@ export class ResearchController {
      * Выполняет поиск
      */
     async _performSearch(query) {
-        if (!query || query.trim().length < 2) {
-            this._showSearchModal('Запрос должен содержать минимум 2 символа.');
+        const q = (query || '').trim();
+        if (q.length < 2) {
+            this._clearSearchSuggestions();
+            this.currentSearchQuery = '';
+            this._applyCurrentFilter();
             return;
         }
 
-        // Здесь будет реализована логика поиска
+        try {
+            const results = await this.service.searchResearch(q);
+            this._renderSearchSuggestions(results, q);
+        } catch (error) {
+            console.error('Search error:', error);
+            this._showSearchModal('Не удалось выполнить поиск. Попробуйте позже.');
+        }
     }
 
     /**
@@ -342,9 +356,13 @@ export class ResearchController {
             
             // Сброс поиска при очистке поля
             this.searchInput.addEventListener('input', (e) => {
-                if (!e.target.value.trim()) {
+                const value = e.target.value || '';
+                if (!value.trim()) {
                     this.currentSearchQuery = '';
                     this._applyCurrentFilter();
+                    this._clearSearchSuggestions();
+                } else {
+                    this._debouncedSuggest(value);
                 }
             });
         }
@@ -363,6 +381,22 @@ export class ResearchController {
         // URL hash изменения
         window.addEventListener('hashchange', () => {
             this.modal.checkUrlHash();
+        });
+
+        // Закрытие подсказок по клику вне поля
+        document.addEventListener('click', (e) => {
+            const host = this.searchInput?.closest('.nav-search') || this.searchInput?.closest('.search-bar');
+            if (!host) return;
+            if (!host.contains(e.target)) {
+                this._clearSearchSuggestions();
+            }
+        });
+
+        // Закрытие подсказок по Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this._clearSearchSuggestions();
+            }
         });
 
         // Обработка unhandled promise rejections
@@ -398,6 +432,77 @@ export class ResearchController {
     _clearOldSections() {
         this.contentElement.querySelectorAll('.year-section:not(#home)').forEach(section => section.remove());
         this.weekCards.clear();
+    }
+
+    /**
+     * Создает контейнер подсказок под полем поиска
+     */
+    _ensureSearchSuggestionsContainer() {
+        if (!this.searchInput) return;
+        const host = this.searchInput.closest('.nav-search') || this.searchInput.closest('.search-bar');
+        if (!host) return;
+        if (!this.searchSuggestions) {
+            const container = document.createElement('div');
+            container.className = 'search-suggestions pixel-card';
+            container.setAttribute('role', 'listbox');
+            container.style.display = 'none';
+            // визуально под инпутом
+            host.style.position = 'relative';
+            host.appendChild(container);
+            this.searchSuggestions = container;
+        }
+    }
+
+    /**
+     * Рендерит подсказки
+     */
+    _renderSearchSuggestions(results, query) {
+        this._ensureSearchSuggestionsContainer();
+        if (!this.searchSuggestions) return;
+
+        if (!results || results.length === 0) {
+            this.searchSuggestions.innerHTML = `<div class="search-suggestion empty">Ничего не найдено</div>`;
+            this.searchSuggestions.style.display = 'block';
+            return;
+        }
+
+        const max = 8;
+        const html = results.slice(0, max).map(({ year, week }) => {
+            const id = week.getId();
+            const title = week.title;
+            return `<button class="search-suggestion" role="option" data-year="${year}" data-id="${id}">${title}</button>`;
+        }).join('');
+
+        this.searchSuggestions.innerHTML = html;
+        this.searchSuggestions.style.display = 'block';
+
+        this.searchSuggestions.querySelectorAll('.search-suggestion').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const year = btn.getAttribute('data-year');
+                const id = btn.getAttribute('data-id');
+                const title = btn.textContent;
+                this.modal.open(year, id, title, true);
+                this._clearSearchSuggestions();
+            });
+        });
+    }
+
+    _clearSearchSuggestions() {
+        if (!this.searchSuggestions) return;
+        this.searchSuggestions.innerHTML = '';
+        this.searchSuggestions.style.display = 'none';
+    }
+
+    _debouncedSuggest(value) {
+        clearTimeout(this._suggestTimer);
+        this._suggestTimer = setTimeout(() => {
+            const q = (value || '').trim();
+            if (q.length >= 2) {
+                this._performSearch(q);
+            } else {
+                this._clearSearchSuggestions();
+            }
+        }, 180);
     }
 
     /**

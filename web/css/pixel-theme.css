@@ -1221,6 +1221,35 @@ nav .nav-stack {
     }
 }
 
+/* Search suggestions dropdown (pixel style) */
+.nav-search .search-suggestions {
+    position: absolute;
+    top: calc(100% + var(--px-unit-half));
+    left: 0;
+    right: 48px; /* оставляем место под кнопку лупы */
+    z-index: var(--pixel-z-dropdown);
+    padding: var(--pixel-space-1);
+    background: var(--pixel-surface-primary);
+    border: var(--pixel-border-thick);
+    box-shadow: var(--pixel-shadow-md);
+}
+
+.search-suggestion {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: var(--px-unit);
+    margin: 0 0 var(--px-unit-half) 0;
+    background: var(--pixel-surface-primary); 
+    border: var(--pixel-border-thin);
+    font-family: var(--pixel-font-display);
+    font-size: var(--pixel-font-sm);
+}
+
+.search-suggestion:last-child { margin-bottom: 0; }
+.search-suggestion:hover { background: var(--pixel-surface-secondary); }
+.search-suggestion.empty { color: var(--pixel-ink-soft); border-style: dashed; }
+
 /* Loading state */
 .reading-loader {
     display: flex;
