@@ -29,7 +29,7 @@ import torch
 
 # Shared infrastructure
 from shared.framework.experiment_runner import run_experiment
-from shared.infrastructure.base_analyzer import MetricCalculator
+from shared.infrastructure.base_analyzer import MetricCalculator, BaseAnalyzer
 
 # Локальные файлы
 from experiment_002_gemma_confidence.confidence_algorithm import ConfidenceCalculator
@@ -87,7 +87,6 @@ class GroupConfidenceCalculator:
         self.conf_calc = ConfidenceCalculator(k = base_confidence_params.get('k', 10), 
                                               eps = base_confidence_params.get('eps', 1e-8))
 
-        
 
     def _create_sliding_windows(self, sequence_length: int) -> List[Tuple[int, int]]:
         """
@@ -146,8 +145,28 @@ class GroupConfidenceCalculator:
 
         # 1. Вычисляем уверенность для каждого токена
         token_confidences = self.conf_calc.calculate_confidence(probabilities)
-
+        # Используем shape[0] что бы получить количество токенов (T), для shape (T, V)
+        # Это нужно так как мы будем создавать окна по токенам
+        sequence_length = token_confidences.shape[0]
         
+        # Специальный случай: один токен (пошаговая генерация)
+        if sequence_length == 1:
+            # Для одного токена просто возвращаем его уверенность как скалярный tensor
+            return token_confidences
+        
+        # 2. Создаем скользящие окна для последовательностей
+        windows = self._create_sliding_windows(sequence_length)
+        group_confidences = []
+        # 3. Вычисляем среднюю уверенность для каждого окна
+        for (start, end) in windows:
+            window_confidences = token_confidences[start:end]
+            if len(window_confidences) > 0:
+                group_confidence = window_confidences.mean().item()
+            else:
+                group_confidence = 0.0  # На случай пустого окна
+            group_confidences.append(group_confidence)
+
+        return torch.tensor(group_confidences)
 
 
 class GroupConfidenceAnalyzer:
@@ -170,8 +189,13 @@ class GroupConfidenceAnalyzer:
         """
         # TODO(human): Создать экземпляр BaseAnalyzer с model_port и calculator
         # TODO(human): Установить metric_name = "group_confidence"
-        pass
-    
+        # pass
+
+        self.analyzer = BaseAnalyzer(model_port  = model_port,
+                                     calculator  = calculator,
+                                     metric_name = 'group_confidence')
+        
+
     def analyze_text(self, text: str, **kwargs) -> Dict[str, Any]:
         """
         Description:
@@ -188,7 +212,10 @@ class GroupConfidenceAnalyzer:
         # TODO(human): Делегировать вызов базовому анализатору
         # TODO(human): Добавить специфичные для групповой уверенности метрики
         # TODO(human): Форматировать результаты для красивого вывода
-        pass
+        # pass
+
+        return self.analyzer.analyze_text(text, **kwargs)
+
     
     def generate_with_analysis(self, prompt: str, max_tokens: int = 10, **kwargs) -> Dict[str, Any]:
         """
@@ -206,7 +233,54 @@ class GroupConfidenceAnalyzer:
         """
         # TODO(human): Делегировать вызов базовому анализатору
         # TODO(human): Добавить вывод динамики групповой уверенности по шагам
-        pass
+        # pass
+
+        return self.analyzer.generate_with_analysis(prompt, max_tokens = max_tokens, **kwargs)
+
+
+class GroupConfidenceAlgorithm:
+    """
+    Description:
+    ---------------
+        Алгоритм эксперимента, предоставляющий калькулятор групповой уверенности
+        и конфигурацию по умолчанию для общего раннера.
+    """
+    
+    def __init__(self, window_size: int = 32, stride: int = 16):
+        """
+        Description:
+        ---------------
+            Инициализация алгоритма групповой уверенности.
+            
+        Args:
+            window_size: размер скользящего окна токенов
+            stride: шаг между окнами (для перекрытия)
+        """
+        self.window_size = window_size
+        self.stride = stride
+        self.calculator = GroupConfidenceCalculator(
+            window_size=window_size,
+            stride=stride
+        )
+    
+    def get_calculator(self) -> GroupConfidenceCalculator:
+        """Возвращает калькулятор групповой уверенности"""
+        return self.calculator
+    
+    def get_metric_name(self) -> str:
+        """Возвращает название метрики"""
+        return "group_confidence"
+    
+    def get_default_config(self) -> Dict[str, Any]:
+        """Возвращает конфигурацию по умолчанию"""
+        # Базовая конфигурация загружается из ../shared/config/experiment.yaml
+        # Здесь только переопределяем специфичные для групповой уверенности параметры
+        return {
+            "group_confidence": {
+                "window_size": self.window_size,
+                "stride": self.stride
+            }
+        }
 
 
 def create_analyzer_factory():
@@ -221,11 +295,19 @@ def create_analyzer_factory():
     """
     # TODO(human): Определить параметры GroupConfidenceCalculator по умолчанию
     # TODO(human): Вернуть lambda функцию для создания анализатора
-    pass
+    # pass
+
+    return lambda model_port: GroupConfidenceAnalyzer(model_port = model_port,
+                                                      calculator = GroupConfidenceCalculator())
+
+
 
 
 # CLI точка входа
 if __name__ == "__main__":
     # TODO(human): Использовать run_experiment с GroupConfidenceAnalyzer
     # TODO(human): Передать создатель анализатора и калькулятора в run_experiment
-    pass
+    # pass
+
+    algorithm = GroupConfidenceAlgorithm()
+    run_experiment(algorithm, "Group Confidence Analysis")
