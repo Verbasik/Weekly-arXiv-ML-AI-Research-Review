@@ -139,34 +139,44 @@ export class AgentsDataSource {
      * Получает markdown контент для проекта
      */
     async fetchMarkdown(projectId) {
-        try {
-            // Сначала пробуем удаленно
-            const response = await fetch(`https://raw.githubusercontent.com/${this.githubRepo}/${this.githubBranch}/agents-under-hood/${projectId}/review.md`);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const isEn = (typeof document !== 'undefined') && document.documentElement?.getAttribute('lang') === 'en';
+        const tryFiles = isEn ? ['review.en.md', 'review.md'] : ['review.md'];
+        for (const file of tryFiles) {
+            try {
+                const response = await fetch(`https://raw.githubusercontent.com/${this.githubRepo}/${this.githubBranch}/agents-under-hood/${projectId}/${file}`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                const markdown = await response.text();
+                if (isEn && file === 'review.md') {
+                    const notice = `\n<div class=\"pixel-card pixel-card--warning\" style=\"margin-bottom: var(--pixel-space-2);\"><strong>EN unavailable:</strong> showing Russian version. Want to help translate? <a href=\"https://github.com/${this.githubRepo}\" target=\"_blank\">Contribute</a>.</div>\n`;
+                    return notice + markdown;
+                }
+                return markdown;
+            } catch (error) {
+                if (file === tryFiles[tryFiles.length - 1]) {
+                    console.warn('Failed to fetch remote markdown, trying local:', error.message);
+                    const local = await this._fetchLocalMarkdown(projectId, tryFiles);
+                    if (isEn && local && tryFiles.includes('review.md')) {
+                        // naive detection whether local came from RU path is omitted; always show notice on EN fallback
+                        const notice = `\n<div class=\"pixel-card pixel-card--warning\" style=\"margin-bottom: var(--pixel-space-2);\"><strong>EN unavailable:</strong> showing Russian version. Want to help translate? <a href=\"https://github.com/${this.githubRepo}\" target=\"_blank\">Contribute</a>.</div>\n`;
+                        return notice + local;
+                    }
+                    return local;
+                }
             }
-            
-            return await response.text();
-        } catch (error) {
-            console.warn('Failed to fetch remote markdown, trying local:', error.message);
-            return await this._fetchLocalMarkdown(projectId);
         }
     }
 
     /**
      * Резервная загрузка локального markdown
      */
-    async _fetchLocalMarkdown(projectId) {
+    async _fetchLocalMarkdown(projectId, tryFiles = ['review.md']) {
         try {
-            // Пробуем найти локальный файл
-            const response = await fetch(`../agents-under-hood/${projectId}/review.md`);
-            
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: Local markdown not found`);
+            // Пробуем найти локальный файл (en -> ru fallback)
+            for (const file of tryFiles) {
+                const response = await fetch(`../agents-under-hood/${projectId}/${file}`);
+                if (response.ok) return await response.text();
             }
-            
-            return await response.text();
+            throw new Error('Local markdown not found for any locale');
         } catch (error) {
             console.error(`Failed to load markdown for ${projectId}:`, error);
             

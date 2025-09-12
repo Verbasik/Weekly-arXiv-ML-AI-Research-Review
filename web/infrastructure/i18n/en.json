@@ -1,0 +1,106 @@
+{
+  "meta": {
+    "title": "The Weekly Research Brief"
+  },
+  "nav": {
+    "home": "🏠 Home",
+    "atlas": "📊 ATLAS",
+    "atlasTitle": "Algorithm Templates for Live AI Scripts",
+    "agents": "🤖 Agents",
+    "years": "📅 Years ▼",
+    "new": "New",
+    "about": "ℹ️ About",
+    "contribute": "🤝 Contribute",
+    "contact": "✉️ Contact"
+  },
+  "search": {
+    "placeholder": "Search papers...",
+    "button": "🔍",
+    "empty": "No results",
+    "error": "Search error"
+  },
+  "header": {
+    "tagline": "The Weekly Research Brief",
+    "quote": "\"The more I know, the more I realize I know nothing\""
+  },
+  "switch": {
+    "title": "Switch language",
+    "ru": "RU",
+    "en": "EN"
+  },
+  "home": {
+    "welcome": "🎮 WELCOME TO 🎮",
+    "title": "THE WEEKLY RESEARCH BRIEF",
+    "start": "🚀 START QUEST",
+    "lore": "📖 LORE",
+    "objectives": "🎯 QUEST OBJECTIVES",
+    "intro": "Welcome to the world of research! This site is a weekly collection of reviews of arXiv and Hugging Face papers in machine learning and AI.",
+    "missions": {
+      "research": { "title": "Research Quest", "desc": "Systematic exploration of cutting-edge AI research" },
+      "translation": { "title": "Translation Mission", "desc": "Making complex research accessible and clear" },
+      "implementation": { "title": "Implementation Challenge", "desc": "Practical implementation of described methods and algorithms" },
+      "knowledge": { "title": "Knowledge Base", "desc": "Building a knowledge base for researchers and enthusiasts" }
+    }
+  },
+  "stats": {
+    "level": "LEVEL",
+    "papers": "PAPERS",
+    "years": "YEARS"
+  },
+  "about": {
+    "quickLinks": "🧭 Quick Links",
+    "experience": "🚀 Experience",
+    "education": "🎓 Education",
+    "development": "📜 Development",
+    "interests": "🔬 Interests",
+    "philosophy": "💡 Philosophy",
+    "skills": "🏷️ Skills & Tags",
+    "profExp": "🚀 Professional Experience",
+    "highlights": "⭐ Highlights",
+    "projects": "🧩 Projects"
+  },
+  "agents": {
+    "filterByType": "Filter by Type",
+    "allProjects": "📦 All Projects",
+    "demos": "🎮 Demos",
+    "tutorials": "📘 Tutorials",
+    "popularTags": "Popular Tags",
+    "heroTitle": "🤖 Agents Under Hood",
+    "whatStudy": "🎯 What we study:"
+  },
+  "sidebar": {
+    "gameMenu": "🎮 GAME MENU",
+    "active": "ACTIVE",
+    "online": "ONLINE",
+    "selectLevel": "🏰 SELECT LEVEL",
+    "activeBadge": "Active",
+    "skillInventory": "🎒 SKILL INVENTORY",
+    "activeQuests": "🔥 ACTIVE QUESTS",
+    "playerStats": "👤 PLAYER STATS",
+    "researchXp": "Research XP",
+    "levelMaster": "🏆 Level: Master"
+  },
+  "footer": {
+    "gameInfo": "🎮 GAME INFO 🎮",
+    "levelComplete": "Level Complete",
+    "thanks": "Thanks for Playing",
+    "comeBack": "Come Back Soon",
+    "aboutTitle": "📖 About Quest",
+    "aboutDesc": "Weekly collection of arXiv paper reviews in ML/AI with practical implementations.",
+    "quickLinks": "🚀 Quick Links",
+    "homeBase": "🏠 Home Base",
+    "atlasProject": "📊 ATLAS Project",
+    "papers2025": "🗡️ 2025 Papers",
+    "papers2024": "🛡️ 2024 Papers",
+    "resources": "🎒 Resources",
+    "joinGuild": "🤝 Join Guild",
+    "joinGuildDesc": "Found an error or want to contribute? Submit a pull request!",
+    "joinOnGitHub": "🚀 Join on GitHub",
+    "copyright1": "🎮 © 2025 TWRB - Made with ❤️ for the AI research community 🎮",
+    "copyright2": "Pixel theme powered by 8-bit nostalgia and modern web tech"
+  },
+  "ui": {
+    "backToTop": "⬆️ TOP",
+    "loadingQuest": "🎮 Loading Quest..."
+  }
+}

@@ -22,6 +22,9 @@ python experiment_001_gemma_entropy/entropy_algorithm.py -m analyze -t "Hello wo
 # Уверенность (DeepConf) на сгенерированных токенах
 python experiment_002_gemma_confidence/confidence_algorithm.py -m analyze -t "The capital of France is" --max-tokens 100
 
+# Групповая уверенность (скользящие окна) на сгенерированных токенах
+python experiment_003_group_confidence/group_confidence_algorithm.py -m analyze -t "The capital of France is" --max-tokens 100
+
 # Генерация с пошаговым анализом (эквивалент analyze --on generated)
 python experiment_001_gemma_entropy/entropy_algorithm.py -m generate -p "Once upon a time" --max-tokens 100
 ```
@@ -44,6 +47,7 @@ python experiment_001_gemma_entropy/entropy_algorithm.py -m analyze -t "Hello" -
 
 - `experiment_001_gemma_entropy`: энтропия Шеннона, `H = -∑ p_i log_b p_i` (base=2 по умолчанию)
 - `experiment_002_gemma_confidence`: уверенность DeepConf по топ‑k, `C = -(1/k) ∑ log2 P_j`
+- `experiment_003_group_confidence`: групповая уверенность по скользящим окнам, `C_{G_i} = (1/|G_i|) ∑ C_t`
 
 ## 🎓 Учебный режим
 Программный код создаётся в режиме совместной работы с Claude Code (Learning mode) с личным кастомным промптом. Это объясняет наличие учебных TODO, скелетов и постепенных реализаций.

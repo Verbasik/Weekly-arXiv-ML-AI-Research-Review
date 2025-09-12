@@ -253,7 +253,7 @@ class ExperimentRunner:
         parser.add_argument(
             '--config', '-c',
             type=str,
-            default='shared/config/experiment.yaml',
+            default='../shared/config/experiment.yaml',
             help='Путь к файлу конфигурации (default: config/experiment.yaml)'
         )
         

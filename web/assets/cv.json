@@ -1,0 +1,96 @@
+{
+  "profile": {
+    "name": {"ru": "Edward Verbetsky", "en": "Edward Verbetsky"},
+    "headline": {
+      "ru": "Исследователь/инженер ML/AI, автор TWRB",
+      "en": "ML/AI researcher & engineer, TWRB author"
+    }
+  },
+  "skills": ["AI", "LLMs", "Math", "ML", "NLP", "CV", "Neuroscience", "Systems"],
+  "experience": [
+    {
+      "role": {"ru": "Head of AI‑Powered Process Automation", "en": "Head of AI‑Powered Process Automation"},
+      "company": {"ru": "СберБанк", "en": "SberBank"},
+      "period": {"ru": "2024 — Настоящее", "en": "2024 — Present"},
+      "summary": {
+        "ru": "Лидерство в стратегии и внедрении AI‑решений для автоматизации бизнес‑процессов.",
+        "en": "Leading strategy and implementation of AI solutions for business process automation."
+      },
+      "bullets": {
+        "ru": [
+          "Построил платформенный подход и пайплайны данных/ML.",
+          "Запустил 10+ пилотов с экономическим эффектом.",
+          "Выстроил практики качества, MLOps и мониторинг."
+        ],
+        "en": [
+          "Built platform approach and data/ML pipelines.",
+          "Launched 10+ pilots with tangible business impact.",
+          "Established quality practices, MLOps and monitoring."
+        ]
+      },
+      "tags": ["MLOps", "Automation", "LLMs"]
+    },
+    {
+      "role": {"ru": "Tech Lead AI Agents", "en": "Tech Lead AI Agents"},
+      "company": {"ru": "Альфа‑Банк", "en": "Alfa‑Bank"},
+      "period": {"ru": "2023 — 2024", "en": "2023 — 2024"},
+      "summary": {"ru": "Лидировал разработку AI‑агентов для банковских сценариев.", "en": "Led AI‑agent development for banking scenarios."},
+      "bullets": {
+        "ru": ["Спроектировал архитектуру агентов и интеграции API.", "Оптимизировал стоимость и латентность inference."],
+        "en": ["Designed agent architecture and API integrations.", "Optimized inference cost and latency."]
+      },
+      "tags": ["Agents", "Retrieval", "Eval"]
+    },
+    {
+      "role": {"ru": "Team Lead Data Science", "en": "Team Lead Data Science"},
+      "company": {"ru": "ДИТ Москвы", "en": "Moscow DIT"},
+      "period": {"ru": "2021 — 2023", "en": "2021 — 2023"},
+      "summary": {"ru": "Руководил DS‑командой для задач городского управления.", "en": "Led a DS team for urban management tasks."},
+      "bullets": {
+        "ru": ["Управление 10+ специалистами, roadmap и KPI.", "Внедрил модели прогнозирования и оптимизации."],
+        "en": ["Managed 10+ specialists, roadmap and KPIs.", "Deployed forecasting and optimization models to production."]
+      },
+      "tags": ["Time‑Series", "Forecasting", "Optimization"]
+    }
+  ],
+  "education": [
+    {
+      "degree": {"ru": "Магистр — ИВТ", "en": "MSc — Information Technologies"},
+      "meta": {"ru": "МАИ (НИУ), Москва • 2026", "en": "MAI (NRU), Moscow • 2026"},
+      "highlights": {"ru": ["ML и анализ данных", "Распределённые системы"], "en": ["ML & data analysis", "Distributed systems"]},
+      "tags": ["AI", "Networks"]
+    },
+    {
+      "degree": {"ru": "Бакалавр — ВМК", "en": "BSc — Mathematics & CS"},
+      "meta": {"ru": "МГУ, Москва • 2020", "en": "MSU, Moscow • 2020"},
+      "highlights": {"ru": ["Вычислительная математика", "Прикладная информатика"], "en": ["Computational mathematics", "Applied CS"]},
+      "tags": ["Math", "CS"]
+    },
+    {
+      "degree": {"ru": "Доп. образование — Менеджмент", "en": "Additional — Management"},
+      "meta": {"ru": "МИА • 2016", "en": "MIA • 2016"},
+      "highlights": {"ru": ["Управление бизнесом", "Проектный и продуктовый менеджмент"], "en": ["Business management", "Project & product management"]},
+      "tags": ["Management"]
+    }
+  ],
+  "courses": [
+    {
+      "title": {"ru": "Проф. переподготовка \"Data Science\"", "en": "Professional retraining \"Data Science\""},
+      "meta": {"ru": "Yandex Practicum", "en": "Yandex Practicum"},
+      "points": {"ru": ["ML, Python, статистика, продакшн‑практики", "Проектный трек и code review"], "en": ["ML, Python, statistics, production practices", "Project track and code review"]},
+      "tags": ["ML", "Python", "Stats"]
+    },
+    {
+      "title": {"ru": "Математика для анализа данных и ML", "en": "Mathematics for data analysis and ML"},
+      "meta": {"ru": "Yandex Practicum", "en": "Yandex Practicum"},
+      "points": {"ru": ["Линал, матстат, матан", "Практика выводов и доказательств"], "en": ["Linear algebra, probability, calculus", "Proofs and derivations practice"]},
+      "tags": ["LA", "Stats", "Calculus"]
+    }
+  ],
+  "interests": [
+    {"title": {"ru": "Нейробиология", "en": "Neurobiology"}, "desc": {"ru": "Физические принципы биопроцессов и их моделирование.", "en": "Physical principles of bioprocesses and their modeling."}},
+    {"title": {"ru": "Искусственный интеллект", "en": "Artificial Intelligence"}, "desc": {"ru": "Прикладные решения и интеграции на базе AI.", "en": "Applied solutions and integrations powered by AI."}},
+    {"title": {"ru": "Научная литература", "en": "Scientific literature"}, "desc": {"ru": "Любимая книга: \"Что такое жизнь\" Э. Шредингера.", "en": "Favorite book: Schrödinger's \"What is Life?\""}}
+  ]
+}
+

@@ -39,9 +39,16 @@
   async function fetchIndex() {
     if (DATA) return DATA;
     const { repo, branch } = getConfig();
-    const url = `https://raw.githubusercontent.com/${repo}/${branch}/web/infrastructure/data/index.json`;
-    const resp = await fetch(url, { cache: 'no-store' });
-    if (!resp.ok) throw new Error(`Index fetch failed: ${resp.status}`);
+    const lang = (document.documentElement.getAttribute('lang') || 'ru').toLowerCase();
+    const file = lang === 'en' ? 'index.en.json' : 'index.json';
+    const url = `https://raw.githubusercontent.com/${repo}/${branch}/web/infrastructure/data/${file}`;
+    let resp = await fetch(url, { cache: 'no-store' });
+    if (!resp.ok) {
+      // Fallback to RU index if EN missing
+      const fallback = `https://raw.githubusercontent.com/${repo}/${branch}/web/infrastructure/data/index.json`;
+      resp = await fetch(fallback, { cache: 'no-store' });
+      if (!resp.ok) throw new Error(`Index fetch failed: ${resp.status}`);
+    }
     DATA = await resp.json();
     FLAT = flatten(DATA);
     return DATA;
@@ -89,7 +96,8 @@
 
   function renderSuggestions(list) {
     if (!list || list.length === 0) {
-      box.innerHTML = '<div class="search-suggestion empty">Ничего не найдено</div>';
+      const msg = (window.i18n && typeof window.i18n.t === 'function') ? (window.i18n.t('search.empty') || 'Ничего не найдено') : 'Ничего не найдено';
+      box.innerHTML = `<div class="search-suggestion empty">${msg}</div>`;
       box.style.display = 'block';
       return;
     }
@@ -113,11 +121,11 @@
   function openOnMain(year, id) {
     // If already on main page
     const isIndex = /\/index\.html?$/.test(location.pathname) || location.pathname === '/' || location.pathname === '';
+    const isEn = /(^|\/)en(\/|$)/.test(location.pathname) || (document.documentElement.getAttribute('lang') || '').toLowerCase() === 'en';
     if (isIndex) {
       location.hash = `#${year}/${id}`;
     } else {
-      // From nested pages like web/about.html → go to ../index.html
-      const target = `../index.html#${year}/${id}`;
+      const target = isEn ? `../en/index.html#${year}/${id}` : `../index.html#${year}/${id}`;
       location.href = target;
     }
     box.style.display = 'none';
@@ -135,7 +143,8 @@
       renderSuggestions(searchLocal(q));
     } catch (e) {
       console.error(e);
-      box.innerHTML = '<div class="search-suggestion empty">Ошибка поиска</div>';
+      const msg = (window.i18n && typeof window.i18n.t === 'function') ? (window.i18n.t('search.error') || 'Ошибка поиска') : 'Ошибка поиска';
+      box.innerHTML = `<div class=\"search-suggestion empty\">${msg}</div>`;
       box.style.display = 'block';
     }
   }
@@ -174,4 +183,3 @@
     }
   });
 })();
-

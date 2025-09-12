@@ -15,7 +15,9 @@ export class GitHubDataSource {
      * Получает данные из index.json
      */
     async fetchData() {
-        const jsonUrl = `${this.baseUrl}/web/infrastructure/data/index.json`;
+        const isEn = (typeof document !== 'undefined') && document.documentElement?.getAttribute('lang') === 'en';
+        const file = isEn ? 'index.en.json' : 'index.json';
+        const jsonUrl = `${this.baseUrl}/web/infrastructure/data/${file}`;
         
         try {
             const response = await fetchWithRetry(jsonUrl, {}, 'данные статей');
@@ -27,6 +29,20 @@ export class GitHubDataSource {
             
             return data;
         } catch (error) {
+            // Fallback to RU index if EN missing/unavailable
+            if (isEn) {
+                try {
+                    const fallbackUrl = `${this.baseUrl}/web/infrastructure/data/index.json`;
+                    const resp = await fetchWithRetry(fallbackUrl, {}, 'данные статей (fallback)');
+                    const data = await resp.json();
+                    if (!data.years || !Array.isArray(data.years)) {
+                        throw new Error('Invalid data format (fallback): years array is missing');
+                    }
+                    return data;
+                } catch (err) {
+                    throw new Error(`Failed to fetch research data (en and fallback): ${err.message}`);
+                }
+            }
             throw new Error(`Failed to fetch research data: ${error.message}`);
         }
     }
@@ -35,20 +51,28 @@ export class GitHubDataSource {
      * Получает markdown контент для недели
      */
     async fetchMarkdown(yearNumber, weekId) {
-        const reviewUrl = `${this.baseUrl}/${yearNumber}/${weekId}/review.md`;
-        
-        try {
-            const response = await fetchWithRetry(reviewUrl, {}, `статья "${yearNumber}/${weekId}"`);
-            let markdown = await response.text();
-            
-            if (!markdown.trim()) {
-                throw new Error('Статья пуста или не содержит контента');
+        const basePath = `${this.baseUrl}/${yearNumber}/${weekId}`;
+        const isEn = (typeof document !== 'undefined') && document.documentElement?.getAttribute('lang') === 'en';
+        const tryOrder = isEn ? ['review.en.md', 'review.md'] : ['review.md'];
+        let lastError;
+        for (const file of tryOrder) {
+            const url = `${basePath}/${file}`;
+            try {
+                const response = await fetchWithRetry(url, {}, `статья "${yearNumber}/${weekId}"`);
+                const markdown = await response.text();
+                if (!markdown.trim()) throw new Error('Статья пуста или не содержит контента');
+                // If EN requested but RU used, prepend fallback notice block
+                if (isEn && file === 'review.md') {
+                    const notice = `\n<div class=\"pixel-card pixel-card--warning\" style=\"margin-bottom: var(--pixel-space-2);\"><strong>EN unavailable:</strong> showing Russian version. Want to help translate? <a href=\"https://github.com/${this.githubRepo}\" target=\"_blank\">Contribute</a>.</div>\n`;
+                    return notice + markdown;
+                }
+                return markdown;
+            } catch (err) {
+                lastError = err;
+                // try next
             }
-            
-            return markdown;
-        } catch (error) {
-            throw new Error(`Failed to fetch markdown for ${yearNumber}/${weekId}: ${error.message}`);
         }
+        throw new Error(`Failed to fetch markdown for ${yearNumber}/${weekId}: ${lastError?.message || 'unknown error'}`);
     }
 
     /**

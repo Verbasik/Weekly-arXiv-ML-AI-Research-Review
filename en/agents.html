@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,31 +14,31 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;500;600;700&family=Silkscreen:wght@400;700&family=VT323&display=swap" rel="stylesheet">
     <!-- Pixel Theme (primary) -->
-    <link rel="stylesheet" href="css/pixel-theme.css">
+    <link rel="stylesheet" href="../web/css/pixel-theme.css">
     <!-- Mobile Optimizations -->
-    <link rel="stylesheet" href="css/mobile-optimizations.css">
+    <link rel="stylesheet" href="../web/css/mobile-optimizations.css">
     <!-- Markdown Integration -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="../images/main.png">
     
     <!-- SEO Meta Tags -->
-    <meta name="description" content="Agents Under Hood - Практические проекты и обзоры мультиагентных систем, инструментов ИИ и современных технологий машинного обучения.">
-    <meta name="keywords" content="AI agents, мультиагентные системы, OpenAI, машинное обучение, искусственный интеллект, обзоры, проекты">
+    <meta name="description" content="Agents Under Hood - Practical projects and reviews of multi-agent systems, AI tooling and modern ML technologies.">
+    <meta name="keywords" content="AI agents, multi-agent systems, OpenAI, machine learning, artificial intelligence, reviews, projects">
     <meta name="author" content="Edward Verbetsky">
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://cyberrunner.github.io/Weekly-arXiv-ML-AI-Research-Review/web/agents.html">
     <meta property="og:title" content="Agents Under Hood - AI Agents Research & Projects">
-    <meta property="og:description" content="Изучаем и разбираем современные мультиагентные системы на практике">
+    <meta property="og:description" content="Exploring modern multi-agent systems in practice">
     <meta property="og:image" content="https://cyberrunner.github.io/Weekly-arXiv-ML-AI-Research-Review/images/main.png">
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://cyberrunner.github.io/Weekly-arXiv-ML-AI-Research-Review/web/agents.html">
     <meta property="twitter:title" content="Agents Under Hood - AI Agents Research & Projects">
-    <meta property="twitter:description" content="Изучаем и разбираем современные мультиагентные системы на практике">
+    <meta property="twitter:description" content="Exploring modern multi-agent systems in practice">
     <meta property="twitter:image" content="https://cyberrunner.github.io/Weekly-arXiv-ML-AI-Research-Review/images/main.png">
 </head>
 <body>
@@ -54,9 +54,7 @@
                         <h1 style="font-family: var(--pixel-font-title); font-size: var(--pixel-font-2xl); margin-bottom: var(--px-unit-half); text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.8);">
                             Agents Under Hood
                         </h1>
-                        <div style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-xs); color: var(--pixel-ink-soft);">
-                            Изучаем мультиагентные системы на практике
-                        </div>
+                        <div style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-xs); color: var(--pixel-ink-soft);">Learning multi-agent systems in practice</div>
                     </div>
                 </div>
                 <div class="pixel-flex pixel-flex-wrap pixel-gap-2">
@@ -73,7 +71,7 @@
         <div class="pixel-container">
             <div class="pixel-card pixel-flex-col pixel-gap-2 nav-stack" style="padding: var(--pixel-space-2);">
                 <div class="pixel-flex pixel-flex-wrap pixel-gap-2 nav-actions">
-                    <a href="../index.html#home" class="pixel-btn pixel-btn--sm" data-i18n="nav.home">🏠 Home</a>
+                    <a href="../en/index.html#home" class="pixel-btn pixel-btn--sm" data-i18n="nav.home">🏠 Home</a>
                     <a href="../atlas-wrapper.html" class="pixel-btn pixel-btn--primary pixel-btn--sm" data-i18n-attr="title" data-i18n-title="nav.atlasTitle" title="Algorithm Templates for Live AI Scripts">
                         <span data-i18n="nav.atlas">📊 ATLAS</span>
                         <span class="pixel-badge pixel-badge--crown" data-icon="✨" style="margin-left: var(--px-unit-half); font-size: var(--pixel-font-xs);" data-i18n="nav.new">New</span>
@@ -83,18 +81,18 @@
                         <button class="pixel-btn pixel-btn--sm pixel-dropdown-btn" onclick="toggleDropdown()" data-i18n="nav.years">📅 Years ▼</button>
                         <div class="pixel-dropdown-content" id="yearsDropdown" style="display: none; position: absolute; top: 100%; left: 0; z-index: var(--pixel-z-dropdown); margin-top: var(--px-unit-half);">
                             <div class="pixel-card" style="min-width: 120px; padding: var(--pixel-space-1);">
-                                <a href="../index.html#2025" class="pixel-btn pixel-btn--sm" style="width: 100%; margin-bottom: var(--px-unit-half);">2025</a>
-                                <a href="../index.html#2024" class="pixel-btn pixel-btn--sm" style="width: 100%;">2024</a>
+                                <a href="../en/index.html#2025" class="pixel-btn pixel-btn--sm" style="width: 100%; margin-bottom: var(--px-unit-half);">2025</a>
+                                <a href="../en/index.html#2024" class="pixel-btn pixel-btn--sm" style="width: 100%;">2024</a>
                             </div>
                         </div>
                     </div>
                     <a href="about.html" class="pixel-btn pixel-btn--sm" data-i18n="nav.about">ℹ️ About</a>
-                    <a href="../index.html#contribute" class="pixel-btn pixel-btn--sm" data-i18n="nav.contribute">🤝 Contribute</a>
-                    <a href="../index.html#contact" class="pixel-btn pixel-btn--sm" data-i18n="nav.contact">✉️ Contact</a>
-                    <button id="lang-switch" class="pixel-btn pixel-btn--secondary pixel-btn--sm" role="switch" aria-checked="false" data-i18n-attr="title,aria-label" data-i18n-title="switch.title" data-i18n-aria-label="switch.title">🌐</button>
+                    <a href="../en/index.html#contribute" class="pixel-btn pixel-btn--sm" data-i18n="nav.contribute">🤝 Contribute</a>
+                    <a href="../en/index.html#contact" class="pixel-btn pixel-btn--sm" data-i18n="nav.contact">✉️ Contact</a>
+                    <button id="lang-switch" class="pixel-btn pixel-btn--secondary pixel-btn--sm" role="switch" aria-checked="true" data-i18n-attr="title,aria-label" data-i18n-title="switch.title" data-i18n-aria-label="switch.title">🌐</button>
                 </div>
                 <div class="pixel-flex pixel-gap-1 pixel-justify-end nav-search" style="min-width: 200px;">
-                    <input type="text" class="pixel-input" style="font-size: var(--pixel-font-sm);" data-i18n-attr="placeholder" data-i18n-placeholder="search.placeholder" placeholder="Поиск обзоров...">
+                    <input type="text" class="pixel-input" style="font-size: var(--pixel-font-sm);" data-i18n-attr="placeholder" data-i18n-placeholder="search.placeholder" placeholder="Search agents...">
                     <button class="pixel-btn pixel-btn--primary pixel-btn--sm" data-i18n="search.button">🔍</button>
                 </div>
             </div>
@@ -120,14 +118,14 @@
                 <div class="sidebar-section pixel-card pixel-mb-3">
                     <h3><i class="fas fa-tags"></i> <span data-i18n="agents.popularTags">Popular Tags</span></h3>
                     <div class="tags-container pixel-flex pixel-flex-wrap pixel-gap-1">
-                        <!-- Теги будут добавлены динамически -->
+                        <!-- Tags rendered dynamically -->
                     </div>
                 </div>
 
                 <div class="sidebar-section pixel-card pixel-mb-3">
                     <h3><i class="fas fa-fire"></i> Featured Projects</h3>
                     <ul class="featured-list" style="list-style: none; padding-left: 0; margin: 0; display: flex; flex-direction: column; gap: var(--px-unit);">
-                        <!-- Рекомендации будут добавлены динамически -->
+                        <!-- Recommendations rendered dynamically -->
                     </ul>
                 </div>
             </aside>
@@ -137,19 +135,19 @@
                 <!-- Hero Section (inside content like main page) -->
                 <section id="home" class="pixel-card">
                     <h1 class="section-heading" style="font-family: var(--pixel-font-display);" data-i18n="agents.heroTitle">🤖 Agents Under Hood</h1>
-                    <p>Практические проекты мультиагентных систем для изучения современных подходов к искусственному интеллекту. Каждый проект включает полный код, документацию и живые демонстрации.</p>
+                    <p>Practical multi-agent projects to study modern approaches to AI. Each project includes full code, documentation, and live demos.</p>
                     <div class="pixel-flex pixel-gap-1 pixel-mb-2">
                         <span class="pixel-badge" data-icon="🧩">Projects</span>
                         <span class="pixel-badge pixel-badge--star" data-icon="⭐">Demos</span>
                     </div>
                     <hr class="glow-divider">
 
-                    <h3 class="section-heading" data-i18n="agents.whatStudy">🎯 Что мы изучаем:</h3>
+                    <h3 class="section-heading" data-i18n="agents.whatStudy">🎯 What we study:</h3>
                     <ul>
-                        <li>Мультиагентные системы и их архитектуры</li>
-                        <li>Практическое применение OpenAI API и инструментов</li>
-                        <li>Современные фреймворки для разработки AI-агентов</li>
-                        <li>Интеграция различных AI-сервисов в единые решения</li>
+                        <li>Multi-agent systems and their architectures</li>
+                        <li>Practical use of OpenAI API and tooling</li>
+                        <li>Modern frameworks for AI agents</li>
+                        <li>Integrating various AI services into cohesive solutions</li>
                     </ul>
                 </section>
 
@@ -259,18 +257,18 @@
     <script type="module">
         import { AgentsController } from './application/AgentsController.js';
         
-        // Конфигурация приложения
+        // App configuration
         const config = {
             githubRepo: 'Verbasik/Weekly-arXiv-ML-AI-Research-Review',
             githubBranch: 'develop'
         };
         
-        // Инициализация приложения
+        // Initialize application
         const app = new AgentsController(config);
         
-        // Запуск после загрузки DOM
+        // Boot after DOM ready
         document.addEventListener('DOMContentLoaded', async () => {
-            // Инициализируем приложение
+            // Initialize app
             await app.initialize();
         });
     </script>
@@ -356,6 +354,18 @@
       });
     </script>
     <!-- Global search suggestions (uses index.json) -->
-    <script src="presentation/search/search.js" defer></script>
+    <script src="../web/presentation/search/search.js" defer></script>
+    <script src="../web/infrastructure/i18n/i18n.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', async () => {
+        if (window.i18n) { try { await window.i18n.init(); } catch(e){ console.warn('i18n init failed:', e); } }
+        const btn = document.getElementById('lang-switch');
+        if (btn) {
+          btn.setAttribute('aria-checked','true');
+          try { btn.textContent = '🌐 ' + (i18n?.t('switch.en') || 'EN'); } catch(_) { btn.textContent = '🌐 EN'; }
+          btn.addEventListener('click', () => { location.href = '../web/agents.html'; });
+        }
+      });
+    </script>
 </body>
 </html>
