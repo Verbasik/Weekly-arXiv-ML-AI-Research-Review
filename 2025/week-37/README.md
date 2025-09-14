@@ -1,7 +1,6 @@
 # Deep Think with Confidence (DeepConf): уверенные рассуждения с ранней остановкой 🚀
 
 [![arXiv](https://img.shields.io/badge/arXiv-2508.15260-b31b1b.svg)](https://arxiv.org/abs/2508.15260)
-[![PDF](https://img.shields.io/badge/PDF-DeepConf-red)](./Deep-Think-with-Confidence.pdf)
 [![Telegram Channel](https://img.shields.io/badge/Telegram-TheWeeklyBrief-blue)](https://t.me/TheWeeklyBrief)
 
 ## 📝 Описание
