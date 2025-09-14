@@ -25,8 +25,9 @@ export class AgentsController {
         // DOM элементы
         this.contentElement = document.querySelector('.content');
         this.modalElement = document.getElementById('markdown-modal');
-        this.searchInput = document.querySelector('.nav-content .search-bar input');
-        this.searchButton = document.querySelector('.nav-content .search-bar button');
+        // Поиск в пиксельной навигации
+        this.searchInput = document.querySelector('.nav-search input') || document.querySelector('.search-bar input');
+        this.searchButton = document.querySelector('.nav-search button') || document.querySelector('.search-bar button');
         this.backToTopButton = document.getElementById('back-to-top');
         
         // Компоненты презентации
@@ -157,7 +158,7 @@ export class AgentsController {
                 tagsContainer.innerHTML = '';
                 popularTags.forEach(({ tag, count }) => {
                     const tagElement = document.createElement('span');
-                    tagElement.className = 'tag';
+                    tagElement.className = 'pixel-tag';
                     tagElement.textContent = tag;
                     tagElement.title = `${count} проектов`;
                     
@@ -179,7 +180,7 @@ export class AgentsController {
     async _updateFeaturedProjects() {
         try {
             const featuredProjects = await this.service.getFeaturedProjects(3);
-            const featuredList = document.querySelector('.sidebar-section:last-child ul');
+            const featuredList = document.querySelector('.sidebar-section:last-child ul.featured-list');
             
             if (featuredList) {
                 featuredList.innerHTML = '';
@@ -188,6 +189,8 @@ export class AgentsController {
                     const a = document.createElement('a');
                     a.href = `#${project.getId()}`;
                     a.textContent = project.title;
+                    a.className = 'pixel-btn pixel-btn--sm';
+                    a.style.textAlign = 'left';
                     
                     a.addEventListener('click', (e) => {
                         e.preventDefault();
@@ -261,8 +264,8 @@ export class AgentsController {
      * Открывает проект в модальном окне
      */
     _openProject(projectId, title) {
-        // Используем метод модального окна напрямую
-        this.modal.open(projectId, projectId, title);
+        // Открываем в полноэкранном режиме (ReadingModal)
+        this.modal.open(projectId, projectId, title, true);
     }
 
     /**

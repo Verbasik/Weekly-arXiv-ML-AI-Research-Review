@@ -7,9 +7,13 @@
 
 # Virtual environment
 **/venv/
+**/.venv/
 
 # Cache files
 **/__pycache__/
 
 # Configuration files
 **/.env.cursor/
+
+# Memory Bank (private project documentation)
+memory/

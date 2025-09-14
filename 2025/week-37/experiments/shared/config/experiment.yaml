@@ -1,0 +1,40 @@
+# Конфигурация эксперимента: Анализ энтропии токенов Gemma-3n-E2B-it
+
+experiment:
+  name: "gemma_entropy_analysis"
+  description: "Анализ энтропии токенов модели Google Gemma-3n-E2B-it"
+  version: "1.0"
+  author: "AI-Lab"
+  date: "2025-09-09"
+
+model:
+  name: "google/gemma-3n-E2B-it"
+  type: "multimodal_llm"
+  parameters: "6B"
+  context_length: 32768
+  precision: "bfloat16"
+  device_map: "auto"
+
+computation:
+  batch_size: 1      # Для детального анализа
+  max_new_tokens: 50
+  temperature: 1.0   # Важно для энтропийного анализа
+  top_p: 1.0         # Не обрезаем распределение
+  top_k: 0           # Учитываем все токены
+  do_sample: false   # Детерминированный режим
+  
+entropy:
+  log_base: 2      # Биты информации
+  epsilon: 1e-10   # Для численной стабильности
+
+
+logging:
+  level: "INFO"
+  save_predictions: true
+  save_probabilities: true
+  save_intermediate: true
+
+reproducibility:
+  seed: 42
+  deterministic: true
+  benchmark: false

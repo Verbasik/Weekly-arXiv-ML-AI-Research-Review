@@ -36,7 +36,7 @@ export class ModalWindow {
         if (!this.modal) return;
 
         // Закрытие по клику на X
-        const closeButton = this.modal.querySelector('.close-modal');
+        const closeButton = this.modal.querySelector('.close-modal, .pixel-modal__close');
         if (closeButton) {
             closeButton.addEventListener('click', () => {
                 this.close();
@@ -62,22 +62,64 @@ export class ModalWindow {
      * Открывает модальное окно
      * Универсальный метод для research и agents
      */
-    async open(year, weekId, title) {
+    async open(year, weekId, title, useFullscreen = false) {
         if (!this.modal || !this.markdownContent) return;
 
-        // Устанавливаем заголовок
-        this._setTitle(title);
+        // Если запрошено полноэкранное окно и оно доступно
+        if (useFullscreen && window.readingModal) {
+            const fullTitle = `${year} Week ${weekId}: ${title}`;
+            window.readingModal.open(fullTitle);
+            
+            // Загружаем контент для полноэкранного окна
+            try {
+                let markdown;
+                
+                // Получаем markdown в зависимости от типа сервиса
+                if (this.serviceType === 'agents') {
+                    markdown = await this.service.getProjectMarkdown(year);
+                } else {
+                    markdown = await this.service.getWeekMarkdown(year, weekId);
+                }
+                
+                // Обрабатываем markdown
+                const html = await this._processMarkdown(markdown);
+                
+                // Отображаем в полноэкранном окне
+                window.readingModal.setContent(html);
+                
+                // Обновляем URL
+                this._updateUrl(year, weekId);
+                
+                return true;
+            } catch (error) {
+                console.error('Error loading markdown for fullscreen:', error);
+                window.readingModal.setContent(`
+                    <div class="pixel-card pixel-text-center pixel-p-4">
+                        <h3>❌ Ошибка загрузки</h3>
+                        <p>Не удалось загрузить технический обзор.</p>
+                        <p style="font-size: var(--pixel-font-sm); color: var(--pixel-ink-soft);">
+                            ${error.message}
+                        </p>
+                    </div>
+                `);
+                return false;
+            }
+        } else {
+            // Стандартное модальное окно
+            // Устанавливаем заголовок
+            this._setTitle(title);
 
-        // Показываем модальное окно
-        this.modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
+            // Показываем модальное окно
+            this.modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
 
-        // Загружаем контент в зависимости от типа сервиса
-        const success = await this._loadMarkdown(year, weekId);
+            // Загружаем контент в зависимости от типа сервиса
+            const success = await this._loadMarkdown(year, weekId);
 
-        if (success) {
-            // Обновляем URL только при успехе
-            this._updateUrl(year, weekId);
+            if (success) {
+                // Обновляем URL только при успехе
+                this._updateUrl(year, weekId);
+            }
         }
     }
 
@@ -123,10 +165,29 @@ export class ModalWindow {
             : `Загрузка статьи "${year}/${weekId}"...`;
             
         this.markdownContent.innerHTML = `
-            <div class="loading-content">
-                <div class="loader"></div>
-                <p>${loadingMessage}</p>
-                <p class="loading-tip">💡 Обычно это занимает несколько секунд</p>
+            <div class="pixel-card pixel-text-center pixel-p-4">
+                <h3 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-lg); margin-bottom: var(--pixel-space-2);">
+                    🎮 Loading Quest...
+                </h3>
+                <div class="loader" style="margin: var(--pixel-space-3) auto;"></div>
+                <p style="font-family: var(--pixel-font-body); margin-bottom: var(--pixel-space-2);">${loadingMessage}</p>
+                <p style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-sm); color: var(--pixel-ink-soft);">
+                    ⏳ Usually takes a few seconds...
+                </p>
+                
+                <!-- Pixel Progress Animation -->
+                <div class="pixel-progress pixel-mt-3">
+                    <div class="pixel-progress__bar" style="width: 0%; animation: loadingProgress 2s ease-in-out infinite;"></div>
+                    <div class="pixel-progress__label" style="font-size: var(--pixel-font-xs);">Downloading...</div>
+                </div>
+                
+                <style>
+                    @keyframes loadingProgress {
+                        0% { width: 0%; }
+                        50% { width: 70%; }
+                        100% { width: 0%; }
+                    }
+                </style>
             </div>
         `;
 
@@ -260,18 +321,34 @@ export class ModalWindow {
      * Устанавливает заголовок модального окна
      */
     _setTitle(title) {
-        const modalContentDiv = this.modal.querySelector('.modal-content');
-        let titleElement = modalContentDiv?.querySelector('h2.modal-title');
+        const modalContentDiv = this.modal.querySelector('.modal-content, .pixel-modal__content');
+        let titleElement = modalContentDiv?.querySelector('h2.modal-title, h2.pixel-modal-title');
         
         if (!titleElement) {
             titleElement = document.createElement('h2');
-            titleElement.className = 'modal-title';
-            titleElement.style.marginTop = '0';
-            titleElement.style.marginBottom = '1rem';
+            titleElement.className = 'pixel-modal-title';
+            titleElement.style.fontFamily = 'var(--pixel-font-display)';
+            titleElement.style.fontSize = 'var(--pixel-font-xl)';
+            titleElement.style.marginTop = 'var(--pixel-space-3)';
+            titleElement.style.marginBottom = 'var(--pixel-space-3)';
+            titleElement.style.color = 'var(--pixel-ink)';
+            titleElement.style.textAlign = 'center';
+            
+            // Add quest icon
+            const icon = document.createElement('span');
+            icon.textContent = '📜 ';
+            icon.style.fontSize = '1.5em';
+            titleElement.appendChild(icon);
+            
             modalContentDiv?.insertBefore(titleElement, this.markdownContent);
         }
         
-        titleElement.textContent = title;
+        // Keep the icon, update only the text
+        if (titleElement.childNodes.length > 1) {
+            titleElement.childNodes[1].textContent = title;
+        } else {
+            titleElement.innerHTML = `📜 ${title}`;
+        }
     }
 
     /**
