@@ -452,6 +452,20 @@
           "notebooks": 0,
           "code": 1,
           "code_path": "2025/week-37/experiments"
+        },
+        {
+          "week": "week-38",
+          "title": "Week 38: EEG → Текст",
+          "date": "Sep 15-Sep 21, 2025",
+          "tags": [
+            "BCI",
+            "EEG",
+            "ML"
+          ],
+          "description": "Воспроизводимый конвейер восстановления семантики внутренней речи из сигналов ЭЭГ",
+          "papers": 1,
+          "notebooks": 0,
+          "code": 0
         }
       ]
     },
