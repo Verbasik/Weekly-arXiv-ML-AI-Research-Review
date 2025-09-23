@@ -22,7 +22,7 @@
 
 Прежде чем подробно обсуждать архитектуру, начнём с обзора двух моделей — `gpt-oss-20b` и `gpt-oss-120b`, показанных на Рисунке 1 ниже.
 
-[Рисунок 1: Две модели gpt-oss рядом.](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-01.png)
+![Рисунок 1: Две модели gpt-oss рядом.](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-01.png)
 
 Если вы раньше видели схемы современных LLM или читали мою предыдущую статью «Большое сравнение архитектур», вы можете заметить, что на первый взгляд здесь нет ничего принципиально нового или необычного.
 

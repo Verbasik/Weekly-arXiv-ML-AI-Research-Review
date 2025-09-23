@@ -7,7 +7,12 @@ import torch
 import torch.nn as nn
 
 # Локальные импорты
-from ..rmsnorm import RMSNorm
+import sys
+import os
+# Получаем путь к директории с rmsnorm.py
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, parent_dir)
+from rmsnorm import RMSNorm
 
 
 class TestRMSNorm:
@@ -31,7 +36,7 @@ class TestRMSNorm:
         # TODO: Создайте RMSNorm с elementwise_affine=False
         # TODO: Проверьте, что weight равен None
 
-        pass
+        # pass
         
         # Создаем RMSNorm с normalized_shape=512 и проверяем параметры
         norm = RMSNorm(normalized_shape=512)
@@ -65,7 +70,7 @@ class TestRMSNorm:
         # TODO: Тест 4D тензора формы (2, 8, 15, 32) с RMSNorm(32)
         # TODO: Проверьте, что выход имеет ту же форму
 
-        pass
+        # pass
         
         # Тест 2D тензора формы (10, 256)
         x_2d = torch.randn(10, 256)
@@ -109,7 +114,7 @@ class TestRMSNorm:
         #       output_rms = sqrt(mean(output²))
         #       assert abs(output_rms - 1.0) < 1e-5
 
-        pass
+        # pass
         
         # Применяем rmsnorm к x
         output = rmsnorm(x)
@@ -148,7 +153,7 @@ class TestRMSNorm:
         # TODO: Проверьте, что среднее RMSNorm выхода может быть ≠ 0
         # TODO: Проверьте, что дисперсии обоих выходов близки к 1
 
-        pass
+        # pass
         
         # Применяем обе нормализации к x
         rms_output = rmsnorm(x)
@@ -197,7 +202,7 @@ class TestRMSNorm:
         # TODO: Проверьте, что rmsnorm.weight.grad не None и не содержит NaN
         # TODO: Проверьте, что градиенты имеют правильные формы
 
-        pass
+        # pass
         
         # Выполняем forward pass
         output = rmsnorm(x)
@@ -309,7 +314,7 @@ class TestRMSNorm:
         # TODO: Проверьте, что RMS выхода близок к 1
         # TODO: Убедитесь, что нет обучаемых параметров
 
-        pass
+        # pass
         
         # Проверяем, что weight равен None
         assert rmsnorm.weight is None, "weight должен быть None при elementwise_affine=False"
@@ -342,7 +347,7 @@ class TestRMSNorm:
         # TODO: Проверьте корректность forward pass
         # TODO: Проверьте, что RMS выхода близок к 1
 
-        pass
+        # pass
         
         # Создаем RMSNorm с заданным normalized_shape
         rmsnorm = RMSNorm(normalized_shape)
