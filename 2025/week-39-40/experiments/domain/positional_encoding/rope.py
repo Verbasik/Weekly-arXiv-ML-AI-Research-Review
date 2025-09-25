@@ -77,31 +77,31 @@ class RoPE(nn.Module):
 
         # Создаем тензор позиций [0, 1, 2, ..., max_position-1]
         position = torch.arange(start = 0, end = max_position, step =1).float()
-        print(f"Тензор позиций: {position}")
 
         # Создаем тензор с четными индексами [0, 2, 4, ...] для адресации пар измерений
         # Каждая пара (2i, 2i+1) будет обрабатываться как комплексное число
         idx = torch.arange(start=0, end=dim, step=2).float()
-        print(f"Индексы четных измерений (2i): {idx}")
 
         # Вычисляем частоты для каждой пары измерений по формуле: ω_d = base^(-2d/D)
         # - Низкие частоты (начало тензора) меняются медленно с изменением позиции
         # - Высокие частоты (конец тензора) меняются быстрее
         # - scale < 1.0 замедляет вращение для лучшей экстраполяции на длинные контексты
         freqs = base ** (-idx / dim)
-        print(f"Частоты для каждой пары измерений: {freqs}")
-
-        print(f"Тензор позиций (unsqueeze(1)): {position.unsqueeze(1)}")
-        print(f"Частоты (unsqueeze(0)): {freqs.unsqueeze(0)}")
 
         # Вычисляем углы для каждой комбинации позиции и частоты
         # Применяем scale для поддержки длинных контекстов
         # Форма: (max_position, dim/2)
         angles = position.unsqueeze(1) * freqs.unsqueeze(0) / scale
-        print(f"Углы для каждой комбинации позиции и частоты: {angles}")
 
-        
-        
+        # Вычисляем sin и cos для каждого угла
+        cos = torch.cos(angles)  # (max_position, dim/2)
+        sin = torch.sin(angles)  # (max_position, dim/2)
+
+        # Сохраняем sin и cos как буферы (не параметры)
+        # Используем register_buffer для правильной работы с CUDA и сохранения/загрузки модели
+        self.register_buffer('sin_cached', sin)
+        self.register_buffer('cos_cached', cos)
+
         
     def _compute_rope_embeddings(
         self,
@@ -110,14 +110,18 @@ class RoPE(nn.Module):
         is_query: bool = True
     ) -> torch.Tensor:
         """
-        Применяет ротационное позиционное кодирование к входному тензору.
+        Description:
+        ---------------
+            Применяет ротационное позиционное кодирование к входному тензору.
         
         Args:
+        ---------------
             x: Входной тензор формы (..., seq_len, dim)
             positions: Тензор позиций формы (..., seq_len)
             is_query: Флаг, указывающий, является ли вход query (True) или key (False)
             
         Returns:
+        ---------------
             Тензор с примененным позиционным кодированием той же формы, что и x
         """
         # TODO: Получите форму входного тензора x
@@ -133,7 +137,37 @@ class RoPE(nn.Module):
         # - Почему для query и key используются разные направления вращения?
         # - Как RoPE обеспечивает относительное позиционное кодирование?
         # - Как работает экстраполяция на позиции за пределами max_position?
-        pass
+        # pass
+
+        # Получаем форму входного тензора
+        x_shape = x.shape
+
+        if positions.max() < self.max_position:
+            sin = self.sin_cached[positions]
+            cos = self.cos_cached[positions]
+        else:
+            # Так же как в __init__
+            idx = torch.arange(start=0, end=self.dim, step=2).float()
+            freqs = self.base ** (-idx / self.dim)
+            angles = positions.unsqueeze(1) * freqs.unsqueeze(0) / self.scale
+
+            cos = torch.cos(angles)
+            sin = torch.sin(angles)
+
+        # Создаем выходной тензор той же формы, что и входной
+        x_out = torch.zeros_like(x)
+
+        # Применяем вращение в зависимости от типа входа (query или key)
+        if is_query:
+            # Для query - положительное направление вращения
+            x_out[..., 0::2] = x[..., 0::2] * cos - x[..., 1::2] * sin
+            x_out[..., 1::2] = x[..., 1::2] * cos + x[..., 0::2] * sin
+        else:
+            # Для key - отрицательное направление вращения
+            x_out[..., 0::2] = x[..., 0::2] * cos + x[..., 1::2] * sin
+            x_out[..., 1::2] = x[..., 1::2] * cos - x[..., 0::2] * sin
+
+        return x_out
 
     def forward(
         self,
@@ -142,9 +176,12 @@ class RoPE(nn.Module):
         positions: Optional[torch.Tensor] = None
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
-        Применяет RoPE к query и key тензорам.
+        Description:
+        ---------------
+            Применяет RoPE к query и key тензорам.
         
         Args:
+        ---------------
             query: Query тензор формы (..., seq_len, dim)
             key: Key тензор формы (..., seq_len, dim)
             positions: Опциональный тензор позиций. Если None, используется torch.arange(seq_len)
@@ -163,12 +200,33 @@ class RoPE(nn.Module):
         # - Как RoPE влияет на взаимодействие между query и key в attention?
         # - Почему важно применять RoPE к обоим тензорам - query и key?
         # - Как можно оптимизировать вычисления RoPE для больших моделей?
-        pass
-    
+        # pass
+
+        if query.shape[-1] != self.dim or key.shape[-1] != self.dim:
+            raise ValueError(f'Размерность query и key должна быть равна {self.dim}')
+        
+        # Проверяем, что формы query и key совпадают по seq_len
+        if query.shape[-2] != key.shape[-2]:
+            raise ValueError(f'Длины последовательностей query и key должны совпадать')
+        
+        seq_len = query.shape[-2]
+
+        if positions is not None:
+            query_rope = self._compute_rope_embeddings(query, positions, is_query=True)
+            key_rope   = self._compute_rope_embeddings(key,   positions, is_query=False)
+
+            return query_rope, key_rope
+
+        else:
+            # Создаем позиции от 0 до seq_len-1 на том же устройстве, что и query
+            positions = torch.arange(seq_len, device=query.device)
+            # Применяем RoPE к query и key
+            query_rope = self._compute_rope_embeddings(query, positions, is_query=True)
+            key_rope = self._compute_rope_embeddings(key, positions, is_query=False)
+            
+            return query_rope, key_rope
+
+
     def extra_repr(self) -> str:
         """Строковое представление модуля для отладки."""
         return f'dim={self.dim}, base={self.base}, max_position={self.max_position}, scale={self.scale}'
-
-if __name__ == '__main__':
-    rope = RoPE(dim=8)
-    print(rope)
