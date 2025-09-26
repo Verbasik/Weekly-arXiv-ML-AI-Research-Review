@@ -45,7 +45,9 @@ class Swish(nn.Module):
     def __init__(self, beta: float = 1.0):
         super().__init__()
         # TODO: Сохраните beta параметр
-        pass
+        # pass
+
+        self.beta = beta
         
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -62,7 +64,11 @@ class Swish(nn.Module):
             Тензор той же формы с примененной Swish активацией
         """
         # TODO: Реализуйте Swish активацию: x * sigmoid(beta * x)
-        pass
+        # pass
+
+        # Сигмоида масштабирует значения тензора от 0 до 1, 
+        # затем умножаем на исходный тензор, тем самым сглаживая значения
+        return x * torch.sigmoid(self.beta * x)
 
 
 class SwiGLU(nn.Module):
@@ -91,7 +97,7 @@ class SwiGLU(nn.Module):
     ---------------
         input_dim: Размерность входного вектора
         output_dim: Размерность выходного вектора
-        intermediate_dim: Размерность промежуточного представления (по умолчанию 4*output_dim)
+        intermediate_dim: Размерность промежуточных матриц W1 и W2 (как правило 4*input_dim)
         bias: Использовать ли смещение в линейных преобразованиях (по умолчанию True)
         
     Returns:
