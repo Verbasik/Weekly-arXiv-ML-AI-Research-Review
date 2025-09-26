@@ -11,6 +11,7 @@
 """
 
 # Стандартные библиотеки
+import os
 import subprocess
 from typing import Tuple
 
@@ -297,9 +298,13 @@ def create_git_assistant_agent() -> Agent:
     """
     )
 
+    # Модель можно переопределить через переменную окружения GEMINI_MODEL.
+    # Значение по умолчанию использует стабильный общедоступный идентификатор модели.
+    model_id = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite")
+
     return Agent(
         name="GitAssistant",
-        model="gemini-1.5-flash-latest",
+        model=model_id,
         instruction=instruction,
         description="AI-ассистент для автоматизации Git-операций.",
         # Передаем агенту список функций, которые он может использовать.
