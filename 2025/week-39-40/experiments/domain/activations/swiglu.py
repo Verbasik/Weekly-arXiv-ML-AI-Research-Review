@@ -132,8 +132,28 @@ class SwiGLU(nn.Module):
         # - Почему используется коэффициент 4 для промежуточной размерности?
         # - Какое преимущество дает механизм гейтинга по сравнению с простой активацией?
         # - Почему SwiGLU лучше работает в глубоких моделях по сравнению с ReLU/GELU?
-        pass
+        # pass
+
+        self.input_dim  = input_dim
+        self.output_dim = output_dim
+        self.bias = bias
+
+        self.swish = Swish()
         
+        # Если intermediate_dim не указан, устанавливаем его как 4*input_dim
+        if intermediate_dim is None:
+            self.intermediate_dim = 4 * input_dim
+        else:
+            self.intermediate_dim = intermediate_dim
+
+        # nn.Linear создает матрицу весов размера [intermediate_dim, input_dim] и вектор смещения [intermediate_dim]
+        # Это соответствует проекции W1*x + b1 в формуле SwiGLU (расширяем)
+        self.gate_proj = nn.Linear(self.input_dim, self.intermediate_dim, bias=self.bias)
+        # Это соответствует проекции W2*x + b2 в формуле SwiGLU (расширяем)
+        self.value_proj = nn.Linear(self.input_dim, self.intermediate_dim, bias=self.bias)
+        # Проекция результата в выходную размерность (сжимаем)
+        self.output_proj = nn.Linear(self.intermediate_dim, self.output_dim, bias=self.bias)
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Description:
@@ -158,4 +178,19 @@ class SwiGLU(nn.Module):
         # - Как механизм гейтинга влияет на градиенты при обратном распространении?
         # - Почему важно использовать разные проекции для gate и value?
         # - Как SwiGLU способствует обучению более глубоких моделей?
-        pass
+        # pass
+
+        # Создаем линейный слой, W1*x + b1
+        gate_proj = self.gate_proj(x)
+        # Создаем линейный слой, W2*x + b2
+        value_proj = self.value_proj(x)
+        # Применяем Swish активацию к результату gate_proj
+        swish = self.swish.forward(gate_proj)
+
+        # Поэлементное умножение результатов (механизм гейтинга)
+        swiglu_intermediate = swish * value_proj
+        
+        # Проекция в выходную размерность (сжимаем: input == output)
+        output = self.output_proj(swiglu_intermediate)
+        
+        return output
