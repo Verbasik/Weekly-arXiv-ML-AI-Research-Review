@@ -35,7 +35,42 @@ export class GitHubDataSource {
      * Получает markdown контент для недели
      */
     async fetchMarkdown(yearNumber, weekId) {
-        const reviewUrl = `${this.baseUrl}/${yearNumber}/${weekId}/review.md`;
+        // Determine language mode based on current page path
+        let isEnglish = false;
+        try {
+            const path = (typeof window !== 'undefined' && window.location && window.location.pathname) ? window.location.pathname : '';
+            // If current page filename ends with _en.html, treat as English mode
+            isEnglish = /_en\.html$/i.test(path);
+        } catch (e) { /* no-op: default to RU */ }
+
+        const fileName = isEnglish ? 'review_en.md' : 'review.md';
+        const reviewUrl = `${this.baseUrl}/${yearNumber}/${weekId}/${fileName}`;
+
+        // Helper to fetch with descriptive context
+        const load = async (url, label) => {
+            const response = await fetchWithRetry(url, {}, label);
+            const text = await response.text();
+            if (!text.trim()) {
+                throw new Error('Статья пуста или не содержит контента');
+            }
+            return text;
+        };
+
+        // Try preferred language first; on failure, fallback to RU version
+        try {
+            return await load(reviewUrl, `статья "${yearNumber}/${weekId}"`);
+        } catch (firstError) {
+            if (isEnglish) {
+                // Fallback to RU if EN not available
+                const fallbackUrl = `${this.baseUrl}/${yearNumber}/${weekId}/review.md`;
+                try {
+                    return await load(fallbackUrl, `статья "${yearNumber}/${weekId}"`);
+                } catch (fallbackError) {
+                    throw fallbackError;
+                }
+            }
+            throw firstError;
+        }
         
         try {
             const response = await fetchWithRetry(reviewUrl, {}, `статья "${yearNumber}/${weekId}"`);
