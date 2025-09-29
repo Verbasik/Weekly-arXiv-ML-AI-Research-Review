@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TWRB i18n Test</title>
+    <link rel="stylesheet" href="web/css/pixel-theme.css">
+    <style>
+        body {
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🌐 TWRB Internationalization Test</h1>
+
+        <!-- Language Switcher Test -->
+        <div class="test-section">
+            <h2>Language Switcher</h2>
+            <div id="language-switcher-container"></div>
+        </div>
+
+        <!-- Translation Test -->
+        <div class="test-section">
+            <h2>Translation Test</h2>
+            <p>Current Language: <span id="current-language">-</span></p>
+            <p>Site Title: <span id="site-title">-</span></p>
+            <p>Navigation Home: <span id="nav-home">-</span></p>
+            <p>Search Placeholder: <span id="search-placeholder">-</span></p>
+        </div>
+
+        <!-- Service Status -->
+        <div class="test-section">
+            <h2>Service Status</h2>
+            <p>I18nService Status: <span id="i18n-status">Loading...</span></p>
+            <p>Loaded Languages: <span id="loaded-languages">-</span></p>
+            <p>Translation Count: <span id="translation-count">-</span></p>
+        </div>
+
+        <!-- Console Output -->
+        <div class="test-section">
+            <h2>Console Output</h2>
+            <div id="console-output" style="background: #f0f0f0; padding: 10px; height: 200px; overflow-y: auto; font-family: monospace; font-size: 12px;"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { I18nService } from './web/infrastructure/i18n/I18nService.js';
+        import { LanguageSwitcher } from './web/presentation/components/LanguageSwitcher.js';
+
+        // Console capture
+        const consoleOutput = document.getElementById('console-output');
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+
+        function addToConsole(type, message) {
+            const div = document.createElement('div');
+            div.style.color = type === 'error' ? 'red' : type === 'warn' ? 'orange' : 'black';
+            div.textContent = `[${type.toUpperCase()}] ${message}`;
+            consoleOutput.appendChild(div);
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+
+        console.log = (...args) => {
+            originalLog(...args);
+            addToConsole('log', args.join(' '));
+        };
+
+        console.error = (...args) => {
+            originalError(...args);
+            addToConsole('error', args.join(' '));
+        };
+
+        console.warn = (...args) => {
+            originalWarn(...args);
+            addToConsole('warn', args.join(' '));
+        };
+
+        // Test initialization
+        async function testI18n() {
+            console.log('🚀 Starting i18n test...');
+
+            try {
+                // Initialize I18nService
+                const i18nService = new I18nService();
+                await i18nService.initialize();
+
+                // Update status
+                document.getElementById('i18n-status').textContent = '✅ Initialized';
+                document.getElementById('current-language').textContent = i18nService.getCurrentLanguage();
+                document.getElementById('loaded-languages').textContent = Array.from(i18nService.translations.keys()).join(', ');
+
+                // Create language switcher
+                const languageSwitcher = new LanguageSwitcher(i18nService);
+                const switcherElement = languageSwitcher.createElement();
+                document.getElementById('language-switcher-container').appendChild(switcherElement);
+
+                // Update translations
+                function updateTranslations() {
+                    document.getElementById('current-language').textContent = i18nService.getCurrentLanguage();
+                    document.getElementById('site-title').textContent = i18nService.t('site.title');
+                    document.getElementById('nav-home').textContent = i18nService.t('navigation.home');
+                    document.getElementById('search-placeholder').textContent = i18nService.t('search.placeholder');
+
+                    const stats = i18nService.getStats();
+                    document.getElementById('translation-count').textContent =
+                        Object.entries(stats.translationCounts).map(([lang, count]) => `${lang}: ${count}`).join(', ');
+                }
+
+                // Initial update
+                updateTranslations();
+
+                // Listen for language changes
+                document.addEventListener('languageChanged', (event) => {
+                    console.log('🌐 Language changed:', event.detail.currentLanguage);
+                    updateTranslations();
+                });
+
+                console.log('✅ Test completed successfully');
+
+            } catch (error) {
+                console.error('❌ Test failed:', error);
+                document.getElementById('i18n-status').textContent = '❌ Failed: ' + error.message;
+            }
+        }
+
+        // Start test when DOM is ready
+        document.addEventListener('DOMContentLoaded', testI18n);
+    </script>
+</body>
+</html>

@@ -103,15 +103,15 @@
         <div class="pixel-container">
             <div class="pixel-card pixel-flex-col pixel-gap-2 nav-stack" style="padding: var(--pixel-space-2);">
                 <div class="pixel-flex pixel-flex-wrap pixel-gap-2 nav-actions">
-                    <a href="#home" class="pixel-btn pixel-btn--sm">🏠 Home</a>
-                    <a href="atlas-wrapper.html" class="pixel-btn pixel-btn--primary pixel-btn--sm" title="Algorithm Templates for Live AI Scripts">
-                        📊 ATLAS 
-                        <span class="pixel-badge pixel-badge--crown" data-icon="✨" style="margin-left: var(--px-unit-half); font-size: var(--pixel-font-xs);">New</span>
+                    <a href="#home" class="pixel-btn pixel-btn--sm" data-i18n="navigation.home">🏠 Home</a>
+                    <a href="atlas-wrapper.html" class="pixel-btn pixel-btn--primary pixel-btn--sm" title="Algorithm Templates for Live AI Scripts" data-i18n="navigation.atlas">
+                        📊 ATLAS
+                        <span class="pixel-badge pixel-badge--crown" data-icon="✨" data-i18n="badges.new" style="margin-left: var(--px-unit-half); font-size: var(--pixel-font-xs);">New</span>
                     </a>
-                    <a href="web/agents.html" class="pixel-btn pixel-btn--sm">🤖 Agents</a>
+                    <a href="web/agents.html" class="pixel-btn pixel-btn--sm" data-i18n="navigation.agents">🤖 Agents</a>
                     
                     <div class="pixel-dropdown" style="position: relative; display: inline-block;">
-                        <button class="pixel-btn pixel-btn--sm pixel-dropdown-btn" onclick="toggleDropdown()">📅 Years ▼</button>
+                        <button class="pixel-btn pixel-btn--sm pixel-dropdown-btn" onclick="toggleDropdown()" data-i18n="navigation.years">📅 Years ▼</button>
                         <div class="pixel-dropdown-content" id="yearsDropdown" style="display: none; position: absolute; top: 100%; left: 0; z-index: var(--pixel-z-dropdown); margin-top: var(--px-unit-half);">
                             <div class="pixel-card" style="min-width: 120px; padding: var(--pixel-space-1);">
                                 <a href="#2025" class="pixel-btn pixel-btn--sm" style="width: 100%; margin-bottom: var(--px-unit-half);">2025</a>
@@ -120,14 +120,17 @@
                         </div>
                     </div>
                     
-                    <a href="web/about.html" class="pixel-btn pixel-btn--sm">ℹ️ About</a>
-                    <a href="#contribute" class="pixel-btn pixel-btn--sm">🤝 Contribute</a>
-                    <a href="#contact" class="pixel-btn pixel-btn--sm">✉️ Contact</a>
+                    <a href="web/about.html" class="pixel-btn pixel-btn--sm" data-i18n="navigation.about">ℹ️ About</a>
+                    <a href="#contribute" class="pixel-btn pixel-btn--sm" data-i18n="navigation.contribute">🤝 Contribute</a>
+                    <a href="#contact" class="pixel-btn pixel-btn--sm" data-i18n="navigation.contact">✉️ Contact</a>
                 </div>
                 
                 <div class="pixel-flex pixel-gap-1 pixel-justify-end nav-search" style="min-width: 200px;">
-                    <input type="text" class="pixel-input" placeholder="Search papers..." style="font-size: var(--pixel-font-sm);">
-                    <button class="pixel-btn pixel-btn--primary pixel-btn--sm">🔍</button>
+                    <input type="text" class="pixel-input" placeholder="Search papers..." data-i18n-placeholder="search.placeholder" style="font-size: var(--pixel-font-sm);">
+                    <button class="pixel-btn pixel-btn--primary pixel-btn--sm" data-i18n-title="search.button">🔍</button>
+
+                    <!-- Language Switcher -->
+                    <div id="language-switcher-container" style="margin-left: var(--pixel-space-1);"></div>
                 </div>
             </div>
         </div>
@@ -682,7 +685,81 @@
             // Полноэкранное окно чтения теперь открывается только через кнопки "Start Quest" в карточках недель
         });
     </script>
-    
+
+    <!-- Initialize I18n System -->
+    <script type="module">
+        import { I18nService } from './web/infrastructure/i18n/I18nService.js';
+        import { LanguageSwitcher } from './web/presentation/components/LanguageSwitcher.js';
+
+        // Initialize i18n system
+        async function initializeI18n() {
+            try {
+                console.log('🌐 Initializing i18n system...');
+
+                // Create and initialize I18n service
+                const i18nService = new I18nService();
+                await i18nService.initialize();
+
+                // Create language switcher and add to navigation
+                const languageSwitcher = new LanguageSwitcher(i18nService);
+                const switcherElement = languageSwitcher.createElement();
+
+                const container = document.getElementById('language-switcher-container');
+                if (container) {
+                    container.appendChild(switcherElement);
+                }
+
+                // Function to update all translations on the page
+                function updatePageTranslations() {
+                    // Update elements with data-i18n attribute
+                    document.querySelectorAll('[data-i18n]').forEach(element => {
+                        const key = element.getAttribute('data-i18n');
+                        element.textContent = i18nService.t(key);
+                    });
+
+                    // Update placeholders with data-i18n-placeholder attribute
+                    document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
+                        const key = element.getAttribute('data-i18n-placeholder');
+                        element.placeholder = i18nService.t(key);
+                    });
+
+                    // Update titles with data-i18n-title attribute
+                    document.querySelectorAll('[data-i18n-title]').forEach(element => {
+                        const key = element.getAttribute('data-i18n-title');
+                        element.title = i18nService.t(key);
+                    });
+
+                    // Update lang attribute
+                    document.documentElement.lang = i18nService.getCurrentLanguage();
+                }
+
+                // Initial translation update
+                updatePageTranslations();
+
+                // Listen for language changes
+                document.addEventListener('languageChanged', (event) => {
+                    console.log('🌐 Language changed to:', event.detail.currentLanguage);
+                    updatePageTranslations();
+                });
+
+                // Make i18nService globally available
+                window.i18nService = i18nService;
+
+                console.log('✅ I18n system initialized successfully');
+
+            } catch (error) {
+                console.error('❌ Failed to initialize i18n system:', error);
+            }
+        }
+
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeI18n);
+        } else {
+            initializeI18n();
+        }
+    </script>
+
     <!-- New DDD Architecture -->
     <script type="module" src="web/main.js"></script>
     <script src="web/presentation/mobile-enhancements.js" defer></script>

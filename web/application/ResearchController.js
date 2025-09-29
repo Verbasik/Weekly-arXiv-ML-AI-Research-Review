@@ -3,6 +3,8 @@ import { ResearchRepository } from '../domain/research/repositories/ResearchRepo
 import { ResearchService } from '../domain/research/services/ResearchService.js';
 import { WeekCard } from '../presentation/components/WeekCard.js';
 import { ModalWindow } from '../presentation/components/ModalWindow.js';
+import { LanguageSwitcher } from '../presentation/components/LanguageSwitcher.js';
+import { I18nService } from '../infrastructure/i18n/I18nService.js';
 import { ErrorHandler, createErrorUI } from '../infrastructure/error/ErrorHandler.js';
 
 /**
@@ -16,7 +18,10 @@ export class ResearchController {
             githubRepo: config.githubRepo,
             githubBranch: config.githubBranch
         };
-        
+
+        // Инициализируем i18n сервис
+        this.i18nService = new I18nService();
+
         // Инициализируем слои архитектуры
         this.dataSource = new GitHubDataSource(this.githubConfig);
         this.repository = new ResearchRepository(this.dataSource);
@@ -33,13 +38,15 @@ export class ResearchController {
         
         // Компоненты презентации
         this.modal = new ModalWindow(this.modalElement, this.service);
+        this.languageSwitcher = null; // Будет создан после инициализации i18n
         this.weekCards = new Map(); // Хранилище карточек недель
         
         // Состояние приложения
         this.currentFilter = null;
         this.currentSearchQuery = '';
-        
+
         this._initializeEventListeners();
+        this._initializeLanguageChangeHandler();
     }
 
     /**
@@ -47,15 +54,26 @@ export class ResearchController {
      */
     async initialize() {
         try {
+            // Инициализируем i18n сервис
+            await this.i18nService.initialize();
+            console.log('🌐 I18n service initialized');
+
+            // Создаем переключатель языков
+            this.languageSwitcher = new LanguageSwitcher(this.i18nService);
+            this._addLanguageSwitcherToNavigation();
+
             // Инициализируем мониторинг сети
             this._initNetworkMonitoring();
-            
+
             // Загружаем данные и рендерим интерфейс
             await this._loadAndRenderData();
-            
+
             // Проверяем URL hash
             this.modal.checkUrlHash();
-            
+
+            // Обновляем переводы UI
+            this._updateUITranslations();
+
         } catch (error) {
             console.error('Failed to initialize research application:', error);
             this._showCriticalError(error);
@@ -738,5 +756,172 @@ export class ResearchController {
         indicator.innerHTML = '🌐 Онлайн';
         document.body.appendChild(indicator);
         return indicator;
+    }
+
+    /**
+     * Добавляет переключатель языков в навигацию
+     */
+    _addLanguageSwitcherToNavigation() {
+        if (!this.languageSwitcher) return;
+
+        // Ищем место для размещения переключателя
+        const navSearch = document.querySelector('.nav-search');
+        const navActions = document.querySelector('.nav-actions');
+
+        if (navSearch) {
+            // Добавляем в блок поиска
+            const switcherElement = this.languageSwitcher.createElement();
+            navSearch.appendChild(switcherElement);
+            console.log('🌐 Language switcher added to nav-search');
+        } else if (navActions) {
+            // Добавляем в блок действий
+            const switcherElement = this.languageSwitcher.createElement();
+            navActions.appendChild(switcherElement);
+            console.log('🌐 Language switcher added to nav-actions');
+        } else {
+            console.warn('⚠️ Navigation container not found for language switcher');
+        }
+    }
+
+    /**
+     * Обновляет переводы UI элементов
+     */
+    _updateUITranslations() {
+        // Обновляем статические тексты
+        this._updateStaticTexts();
+
+        // Обновляем плейсхолдеры
+        this._updatePlaceholders();
+
+        // Обновляем заголовки и атрибуты
+        this._updateAttributes();
+
+        // Обновляем динамический контент
+        this._updateDynamicContent();
+
+        console.log('🌐 UI translations updated');
+    }
+
+    /**
+     * Обновляет статические тексты
+     */
+    _updateStaticTexts() {
+        // Обновляем навигацию
+        const homeLink = document.querySelector('a[href="#home"]');
+        if (homeLink) homeLink.textContent = this.i18nService.t('navigation.home');
+
+        const atlasLink = document.querySelector('a[href="atlas-wrapper.html"]');
+        if (atlasLink) {
+            const text = atlasLink.querySelector('text') || atlasLink.firstChild;
+            if (text) text.textContent = `📊 ${this.i18nService.t('navigation.atlas')}`;
+        }
+
+        const agentsLink = document.querySelector('a[href="web/agents.html"]');
+        if (agentsLink) agentsLink.textContent = `🤖 ${this.i18nService.t('navigation.agents')}`;
+
+        const aboutLink = document.querySelector('a[href="web/about.html"]');
+        if (aboutLink) aboutLink.textContent = `ℹ️ ${this.i18nService.t('navigation.about')}`;
+
+        // Обновляем кнопки навигации
+        const yearsButton = document.querySelector('.pixel-dropdown-btn');
+        if (yearsButton) yearsButton.textContent = `📅 ${this.i18nService.t('navigation.years')} ▼`;
+    }
+
+    /**
+     * Обновляет плейсхолдеры
+     */
+    _updatePlaceholders() {
+        if (this.searchInput) {
+            this.searchInput.placeholder = this.i18nService.t('search.placeholder');
+        }
+    }
+
+    /**
+     * Обновляет атрибуты и заголовки
+     */
+    _updateAttributes() {
+        // Обновляем кнопку поиска
+        if (this.searchButton) {
+            this.searchButton.title = this.i18nService.t('search.button');
+        }
+
+        // Обновляем кнопку "наверх"
+        if (this.backToTopButton) {
+            this.backToTopButton.textContent = `⬆️ ${this.i18nService.t('backToTop')}`;
+        }
+    }
+
+    /**
+     * Обновляет динамический контент
+     */
+    _updateDynamicContent() {
+        // Обновляем заголовки года
+        document.querySelectorAll('.year-title').forEach(title => {
+            const year = title.textContent.match(/\d{4}/)?.[0];
+            if (year) {
+                title.textContent = this.i18nService.t('yearSections.papers', { year });
+            }
+        });
+
+        // Обновляем карточки недель
+        this.weekCards.forEach(weekCard => {
+            if (weekCard.updateTranslations) {
+                weekCard.updateTranslations(this.i18nService);
+            }
+        });
+    }
+
+    /**
+     * Инициализирует обработку событий смены языка
+     */
+    _initializeLanguageChangeHandler() {
+        document.addEventListener('languageChanged', (event) => {
+            const { currentLanguage } = event.detail;
+            console.log(`🌐 Language changed to: ${currentLanguage}`);
+
+            // Обновляем все переводы
+            this._updateUITranslations();
+
+            // Обновляем сетевые индикаторы
+            this._updateNetworkStatusTexts(currentLanguage);
+
+            // Сохраняем язык в localStorage (делает I18nService)
+            // Уведомляем другие компоненты через событие (уже отправлено)
+        });
+    }
+
+    /**
+     * Обновляет тексты сетевых статусов
+     */
+    _updateNetworkStatusTexts(language) {
+        const indicator = document.querySelector('.network-status');
+        if (!indicator) return;
+
+        if (indicator.classList.contains('online')) {
+            indicator.innerHTML = this.i18nService.t('network.online');
+        } else if (indicator.classList.contains('offline')) {
+            indicator.innerHTML = this.i18nService.t('network.offline');
+        }
+    }
+
+    /**
+     * Получить текущий язык
+     */
+    getCurrentLanguage() {
+        return this.i18nService.getCurrentLanguage();
+    }
+
+    /**
+     * Получить i18n сервис для других компонентов
+     */
+    getI18nService() {
+        return this.i18nService;
+    }
+
+    /**
+     * Перевести текст (helper метод)
+     */
+    t(key, params = {}) {
+        return this.i18nService.t(key, params);
     }
 } 

@@ -1,0 +1,197 @@
+{
+  "site": {
+    "title": "The Weekly Research Brief",
+    "subtitle": "Weekly collection of scientific paper reviews",
+    "quote": "The more I know, the more I realize I know nothing"
+  },
+  "navigation": {
+    "home": "Home",
+    "atlas": "ATLAS",
+    "agents": "Agents",
+    "years": "Years",
+    "about": "About",
+    "contribute": "Contribute",
+    "contact": "Contact",
+    "search": "Search papers..."
+  },
+  "gameMenu": {
+    "title": "GAME MENU",
+    "status": {
+      "active": "ACTIVE",
+      "online": "ONLINE"
+    },
+    "levels": {
+      "title": "SELECT LEVEL",
+      "active": "Active"
+    },
+    "inventory": {
+      "title": "SKILL INVENTORY"
+    },
+    "quests": {
+      "title": "ACTIVE QUESTS"
+    },
+    "stats": {
+      "title": "PLAYER STATS",
+      "researchXp": "Research XP",
+      "level": "Level: Master"
+    }
+  },
+  "home": {
+    "welcome": "WELCOME TO",
+    "weeklyBrief": "THE WEEKLY RESEARCH BRIEF",
+    "stats": {
+      "level": "LEVEL",
+      "papers": "PAPERS",
+      "years": "YEARS"
+    },
+    "buttons": {
+      "startQuest": "START QUEST",
+      "lore": "LORE"
+    },
+    "objectives": {
+      "title": "QUEST OBJECTIVES",
+      "description": "Welcome to the world of scientific research! This repository is a weekly collection of arXiv and Hugging Face paper reviews in machine learning and artificial intelligence.",
+      "research": {
+        "title": "Research Quest",
+        "description": "Systematic study of cutting-edge AI research"
+      },
+      "translation": {
+        "title": "Translation Mission",
+        "description": "Creating accessible and understandable reviews of complex scientific works"
+      },
+      "implementation": {
+        "title": "Implementation Challenge",
+        "description": "Practical implementation of described methods and algorithms"
+      },
+      "knowledge": {
+        "title": "Knowledge Base",
+        "description": "Building knowledge base for researchers and enthusiasts"
+      }
+    },
+    "progress": {
+      "title": "PROJECT PROGRESS",
+      "label": "Research Mastery Level",
+      "level": "Master Researcher"
+    }
+  },
+  "yearSections": {
+    "papers": "{{year}} Papers"
+  },
+  "weekCard": {
+    "week": "Week",
+    "startQuest": "Start Quest"
+  },
+  "modal": {
+    "title": "Quest Details",
+    "subtitle": "Technical Review",
+    "loading": "Loading Quest...",
+    "controls": {
+      "theme": "Toggle theme",
+      "fontSmaller": "Smaller font",
+      "fontLarger": "Larger font",
+      "close": "Close"
+    }
+  },
+  "search": {
+    "placeholder": "Search papers...",
+    "button": "Search",
+    "noResults": "Nothing found",
+    "suggestions": "Search suggestions"
+  },
+  "tags": {
+    "llms": "LLMs",
+    "deepLearning": "Deep Learning",
+    "nlp": "NLP",
+    "computerVision": "Computer Vision",
+    "reinforcementLearning": "Reinforcement Learning",
+    "transformers": "Transformers",
+    "genomics": "Genomics",
+    "efficientTraining": "Efficient Training"
+  },
+  "badges": {
+    "awesome": "Awesome",
+    "madeWithLove": "Made With Love",
+    "openSource": "Open Source",
+    "new": "New",
+    "community": "Community Quest",
+    "sayHello": "Say Hello"
+  },
+  "footer": {
+    "gameInfo": "GAME INFO",
+    "status": {
+      "levelComplete": "Level Complete",
+      "thanksForPlaying": "Thanks for Playing",
+      "comeBackSoon": "Come Back Soon"
+    },
+    "about": {
+      "title": "About Quest",
+      "description": "Weekly collection of arXiv paper reviews in ML/AI with practical implementations."
+    },
+    "quickLinks": {
+      "title": "Quick Links",
+      "homeBase": "Home Base",
+      "atlasProject": "ATLAS Project",
+      "papers2025": "2025 Papers",
+      "papers2024": "2024 Papers"
+    },
+    "resources": {
+      "title": "Resources"
+    },
+    "joinGuild": {
+      "title": "Join Guild",
+      "description": "Found an error or want to contribute? Submit a pull request!",
+      "button": "Join on GitHub"
+    },
+    "copyright": "© 2025 TWRB - Made with ❤️ for the AI research community",
+    "pixelTheme": "Pixel theme powered by 8-bit nostalgia and modern web tech"
+  },
+  "utility": {
+    "contribute": {
+      "title": "Contribute",
+      "badge": "Community Quest",
+      "description": "Help improve TWRB: ideas, issues, pull requests — everything matters!",
+      "buttons": {
+        "repo": "Repo",
+        "issue": "Issue",
+        "fork": "Fork & PR",
+        "readme": "Readme"
+      }
+    },
+    "contact": {
+      "title": "Contact",
+      "badge": "Say Hello",
+      "description": "Questions or collaboration ideas? Reach out on your favorite channel.",
+      "buttons": {
+        "email": "Email",
+        "telegram": "Telegram",
+        "linkedin": "LinkedIn"
+      }
+    }
+  },
+  "backToTop": "TOP",
+  "loading": {
+    "articles": "Loading articles...",
+    "content": "Loading content...",
+    "translations": "Loading translations..."
+  },
+  "errors": {
+    "critical": "Critical application error",
+    "dataLoad": "Failed to load article data",
+    "network": "Network issues",
+    "tryAgain": "Try again",
+    "reload": "Reload page",
+    "offline": "No internet connection",
+    "unknown": "An unexpected error occurred"
+  },
+  "network": {
+    "online": "Connection restored",
+    "offline": "No connection",
+    "reconnecting": "Reconnecting..."
+  },
+  "language": {
+    "switch": "Switch language",
+    "current": "Current language",
+    "russian": "Русский",
+    "english": "English"
+  }
+}

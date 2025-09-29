@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TWRB Main Page I18n Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: white;
+        }
+        .status.success { background: #4CAF50; }
+        .status.error { background: #f44336; }
+        .status.loading { background: #ff9800; }
+        .console-log {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+        iframe {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🌐 TWRB Main Page i18n Integration Test</h1>
+
+    <div class="test-section">
+        <h2>Test Status</h2>
+        <p>Local Server: <span id="server-status" class="status loading">Testing...</span></p>
+        <p>I18n Integration: <span id="i18n-status" class="status loading">Testing...</span></p>
+        <p>Language Switcher: <span id="switcher-status" class="status loading">Testing...</span></p>
+    </div>
+
+    <div class="test-section">
+        <h2>Instructions</h2>
+        <ol>
+            <li>Check that the language switcher appears in the top navigation</li>
+            <li>Try switching between 🇷🇺 RU and 🇺🇸 EN</li>
+            <li>Verify that navigation text changes language</li>
+            <li>Check browser console for any errors</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>Main Page Preview</h2>
+        <iframe src="http://localhost:8000/index.html" id="main-iframe"></iframe>
+    </div>
+
+    <div class="test-section">
+        <h2>Console Output</h2>
+        <div id="console-output" class="console-log">Loading...</div>
+    </div>
+
+    <script>
+        const serverStatus = document.getElementById('server-status');
+        const i18nStatus = document.getElementById('i18n-status');
+        const switcherStatus = document.getElementById('switcher-status');
+        const consoleOutput = document.getElementById('console-output');
+        const iframe = document.getElementById('main-iframe');
+
+        // Test server availability
+        async function testServer() {
+            try {
+                const response = await fetch('http://localhost:8000/index.html');
+                if (response.ok) {
+                    serverStatus.textContent = 'Running ✓';
+                    serverStatus.className = 'status success';
+                    return true;
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                serverStatus.textContent = 'Failed ✗';
+                serverStatus.className = 'status error';
+                consoleOutput.textContent = `Server test failed: ${error.message}`;
+                return false;
+            }
+        }
+
+        // Test i18n files
+        async function testI18nFiles() {
+            try {
+                const ruResponse = await fetch('http://localhost:8000/web/infrastructure/i18n/locales/ru.json');
+                const enResponse = await fetch('http://localhost:8000/web/infrastructure/i18n/locales/en.json');
+
+                if (ruResponse.ok && enResponse.ok) {
+                    const ruData = await ruResponse.json();
+                    const enData = await enResponse.json();
+
+                    if (ruData.navigation && enData.navigation) {
+                        i18nStatus.textContent = 'Available ✓';
+                        i18nStatus.className = 'status success';
+                        return true;
+                    } else {
+                        throw new Error('Translation structure invalid');
+                    }
+                } else {
+                    throw new Error('Translation files not found');
+                }
+            } catch (error) {
+                i18nStatus.textContent = 'Failed ✗';
+                i18nStatus.className = 'status error';
+                return false;
+            }
+        }
+
+        // Monitor iframe for language switcher
+        function monitorLanguageSwitcher() {
+            iframe.onload = () => {
+                try {
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    const switcher = iframeDoc.getElementById('language-switcher-container');
+
+                    if (switcher && switcher.children.length > 0) {
+                        switcherStatus.textContent = 'Found ✓';
+                        switcherStatus.className = 'status success';
+
+                        // Monitor console messages from iframe
+                        const originalLog = iframe.contentWindow.console.log;
+                        iframe.contentWindow.console.log = (...args) => {
+                            originalLog.apply(iframe.contentWindow.console, args);
+                            consoleOutput.innerHTML += `[LOG] ${args.join(' ')}<br>`;
+                            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+                        };
+
+                        const originalError = iframe.contentWindow.console.error;
+                        iframe.contentWindow.console.error = (...args) => {
+                            originalError.apply(iframe.contentWindow.console, args);
+                            consoleOutput.innerHTML += `<span style="color: #ff6666;">[ERROR] ${args.join(' ')}</span><br>`;
+                            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+                        };
+                    } else {
+                        switcherStatus.textContent = 'Not Found ✗';
+                        switcherStatus.className = 'status error';
+                    }
+                } catch (error) {
+                    switcherStatus.textContent = 'Access Error ✗';
+                    switcherStatus.className = 'status error';
+                }
+            };
+        }
+
+        // Run tests
+        async function runTests() {
+            const serverOk = await testServer();
+            if (serverOk) {
+                await testI18nFiles();
+                monitorLanguageSwitcher();
+            }
+        }
+
+        runTests();
+    </script>
+</body>
+</html>
