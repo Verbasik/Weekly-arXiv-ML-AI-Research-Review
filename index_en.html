@@ -69,8 +69,8 @@
 <body>
     <!-- Language Switch (fixed, top-right) -->
     <div style="position: fixed; top: var(--pixel-space-3); right: var(--pixel-space-3); z-index: var(--pixel-z-sticky); display: flex; gap: var(--px-unit);">
-        <span class="pixel-badge pixel-badge--star" data-icon="⭐" aria-label="Текущий язык: Русский">RU</span>
-        <a href="index_en.html" class="pixel-btn pixel-btn--sm" aria-label="Switch to English">EN</a>
+        <a href="index.html" class="pixel-btn pixel-btn--sm" aria-label="Switch to Russian">RU</a>
+        <span class="pixel-badge pixel-badge--star" data-icon="⭐" aria-label="Current language English">EN</span>
     </div>
     <header class="pixel-p-4">
         <div class="pixel-container">
@@ -92,14 +92,14 @@
                     <span class="pixel-badge pixel-badge--diamond" data-icon="💎">Open Source</span>
                 </div>
                 
-                <!-- Анимированный персонаж справа -->
+                <!-- Animated character on the right -->
                 <picture class="sprite sprite-right">
                     <source srcset="web/assets/R&M.webp" type="image/webp">
                     <img src="web/assets/R&M.gif" alt="" aria-hidden="true" width="128" height="128">
                 </picture>
             </div>
             <div class="pixel-text-center pixel-mt-2" style="font-family: var(--pixel-font-body); font-style: italic; color: var(--pixel-ink-soft);">
-                "Чем больше я знаю, тем больше я понимаю, что ничего не знаю"
+                "The more I know, the more I realize I know nothing."
             </div>
         </div>
     </header>
@@ -201,7 +201,7 @@
                             🚀 DeepSpeed-MoE
                         </a>
                         <a href="#paper4" class="pixel-btn pixel-btn--sm" style="text-align: left; font-size: var(--pixel-font-xs);">
-                            🧬 CRISPR-CAS9 технология
+                            🧬 CRISPR-CAS9 technology
                         </a>
                     </div>
                 </div>
@@ -266,7 +266,7 @@
                             🎯 QUEST OBJECTIVES
                         </h3>
                         <p style="margin-bottom: var(--pixel-space-2);">
-                            Добро пожаловать в мир научных исследований! Этот репозиторий представляет собой еженедельную коллекцию обзоров статей с arXiv и Hugging Face в области машинного обучения и искусственного интеллекта.
+                            Welcome to the world of scientific research! This repository is a weekly collection of paper reviews from arXiv and Hugging Face in the field of Machine Learning and Artificial Intelligence.
                         </p>
                         
                         <!-- Mission List -->
@@ -276,7 +276,7 @@
                                     <span style="font-size: 1.5rem;">🔬</span>
                                     <h4 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-base);">Research Quest</h4>
                                 </div>
-                                <p style="font-size: var(--pixel-font-sm);">Систематическое изучение передовых исследований в области AI</p>
+                                <p style="font-size: var(--pixel-font-sm);">Systematic exploration of cutting-edge AI research</p>
                             </div>
                             
                             <div class="pixel-card pixel-card--warning">
@@ -284,7 +284,7 @@
                                     <span style="font-size: 1.5rem;">📝</span>
                                     <h4 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-base);">Translation Mission</h4>
                                 </div>
-                                <p style="font-size: var(--pixel-font-sm);">Создание доступных и понятных обзоров сложных научных работ</p>
+                                <p style="font-size: var(--pixel-font-sm);">Clear and accessible summaries of complex research</p>
                             </div>
                             
                             <div class="pixel-card pixel-card--accent">
@@ -292,7 +292,7 @@
                                     <span style="font-size: 1.5rem;">⚡</span>
                                     <h4 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-base);">Implementation Challenge</h4>
                                 </div>
-                                <p style="font-size: var(--pixel-font-sm);">Практическая реализация описанных методов и алгоритмов</p>
+                                <p style="font-size: var(--pixel-font-sm);">Practical implementation of described methods and algorithms</p>
                             </div>
                             
                             <div class="pixel-card">
@@ -300,7 +300,7 @@
                                     <span style="font-size: 1.5rem;">🏆</span>
                                     <h4 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-base);">Knowledge Base</h4>
                                 </div>
-                                <p style="font-size: var(--pixel-font-sm);">Формирование базы знаний для исследователей и энтузиастов</p>
+                                <p style="font-size: var(--pixel-font-sm);">Building a knowledge base for researchers and enthusiasts</p>
                             </div>
                         </div>
                     </div>
@@ -510,7 +510,7 @@
             initEventListeners() {
                 if (!this.modal) return;
                 
-                // Close buttons - исправляем селекторы
+                // Close buttons - fix selectors
                 this.closeBtn?.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -552,7 +552,7 @@
                 
                 this.title.textContent = `📜 ${title}`;
                 document.body.style.overflow = 'hidden';
-                // Сбрасываем инлайновые стили показа (могли быть установлены стандартным ModalWindow)
+                // Reset inline display styles (may be set by standard ModalWindow)
                 this.modal.style.display = '';
                 this.modal.classList.add('active');
                 
@@ -568,7 +568,7 @@
                 if (!this.modal) return;
                 
                 this.modal.classList.remove('active');
-                // Полностью скрываем элемент, перекрывая возможный инлайновый display из других модалок
+                // Fully hide the element, overriding any inline display from other modals
                 this.modal.style.display = 'none';
                 document.body.style.overflow = '';
                 this.article.innerHTML = '';
@@ -683,8 +683,8 @@
                 });
             });
             
-            // START QUEST button сохраняет свое изначальное поведение (scrollToSection)
-            // Полноэкранное окно чтения теперь открывается только через кнопки "Start Quest" в карточках недель
+            // START QUEST button keeps its original behavior (scrollToSection)
+            // Full-screen reading modal now opens only via "Start Quest" buttons in week cards
         });
     </script>
     

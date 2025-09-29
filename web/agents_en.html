@@ -20,29 +20,29 @@
     <link rel="icon" type="image/x-icon" href="../images/main.png">
     
     <!-- SEO Meta Tags -->
-    <meta name="description" content="Agents Under Hood - Практические проекты и обзоры мультиагентных систем, инструментов ИИ и современных технологий машинного обучения.">
-    <meta name="keywords" content="AI agents, мультиагентные системы, OpenAI, машинное обучение, искусственный интеллект, обзоры, проекты">
+    <meta name="description" content="Agents Under Hood - Practical projects and reviews of multi-agent systems, AI tools, and modern machine learning technologies.">
+    <meta name="keywords" content="AI agents, multi-agent systems, OpenAI, machine learning, artificial intelligence, reviews, projects">
     <meta name="author" content="Edward Verbetsky">
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://cyberrunner.github.io/Weekly-arXiv-ML-AI-Research-Review/web/agents.html">
     <meta property="og:title" content="Agents Under Hood - AI Agents Research & Projects">
-    <meta property="og:description" content="Изучаем и разбираем современные мультиагентные системы на практике">
+    <meta property="og:description" content="Exploring and dissecting modern multi-agent systems in practice">
     <meta property="og:image" content="https://cyberrunner.github.io/Weekly-arXiv-ML-AI-Research-Review/images/main.png">
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://cyberrunner.github.io/Weekly-arXiv-ML-AI-Research-Review/web/agents.html">
     <meta property="twitter:title" content="Agents Under Hood - AI Agents Research & Projects">
-    <meta property="twitter:description" content="Изучаем и разбираем современные мультиагентные системы на практике">
+    <meta property="twitter:description" content="Exploring and dissecting modern multi-agent systems in practice">
     <meta property="twitter:image" content="https://cyberrunner.github.io/Weekly-arXiv-ML-AI-Research-Review/images/main.png">
 </head>
 <body>
     <!-- Language Switch (fixed, top-right) -->
     <div style="position: fixed; top: var(--pixel-space-3); right: var(--pixel-space-3); z-index: var(--pixel-z-sticky); display: flex; gap: var(--px-unit);">
-        <span class="pixel-badge pixel-badge--star" data-icon="⭐" aria-label="Текущий язык: Русский">RU</span>
-        <a href="agents_en.html" class="pixel-btn pixel-btn--sm" aria-label="Switch to English">EN</a>
+        <a href="agents.html" class="pixel-btn pixel-btn--sm" aria-label="Switch to Russian">RU</a>
+        <span class="pixel-badge pixel-badge--star" data-icon="⭐" aria-label="Current language: English">EN</span>
     </div>
 
     
@@ -57,7 +57,7 @@
                             Agents Under Hood
                         </h1>
                         <div style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-xs); color: var(--pixel-ink-soft);">
-                            Изучаем мультиагентные системы на практике
+                            Exploring multi-agent systems in practice
                         </div>
                     </div>
                 </div>
@@ -121,14 +121,14 @@
                 <div class="sidebar-section pixel-card pixel-mb-3">
                     <h3><i class="fas fa-tags"></i> Popular Tags</h3>
                     <div class="tags-container pixel-flex pixel-flex-wrap pixel-gap-1">
-                        <!-- Теги будут добавлены динамически -->
+                        <!-- Tags will be added dynamically -->
                     </div>
                 </div>
 
                 <div class="sidebar-section pixel-card pixel-mb-3">
                     <h3><i class="fas fa-fire"></i> Featured Projects</h3>
                     <ul class="featured-list" style="list-style: none; padding-left: 0; margin: 0; display: flex; flex-direction: column; gap: var(--px-unit);">
-                        <!-- Рекомендации будут добавлены динамически -->
+                        <!-- Recommendations will be added dynamically -->
                     </ul>
                 </div>
             </aside>
@@ -138,19 +138,19 @@
                 <!-- Hero Section (inside content like main page) -->
                 <section id="home" class="pixel-card">
                     <h1 class="section-heading" style="font-family: var(--pixel-font-display);">🤖 Agents Under Hood</h1>
-                    <p>Практические проекты мультиагентных систем для изучения современных подходов к искусственному интеллекту. Каждый проект включает полный код, документацию и живые демонстрации.</p>
+                    <p>Practical multi-agent system projects to explore modern approaches to AI. Each project includes full code, documentation, and live demos.</p>
                     <div class="pixel-flex pixel-gap-1 pixel-mb-2">
                         <span class="pixel-badge" data-icon="🧩">Projects</span>
                         <span class="pixel-badge pixel-badge--star" data-icon="⭐">Demos</span>
                     </div>
                     <hr class="glow-divider">
 
-                    <h3 class="section-heading">🎯 Что мы изучаем:</h3>
+                    <h3 class="section-heading">🎯 What we study:</h3>
                     <ul>
-                        <li>Мультиагентные системы и их архитектуры</li>
-                        <li>Практическое применение OpenAI API и инструментов</li>
-                        <li>Современные фреймворки для разработки AI-агентов</li>
-                        <li>Интеграция различных AI-сервисов в единые решения</li>
+                        <li>Multi-agent systems and their architectures</li>
+                        <li>Practical use of OpenAI API and tooling</li>
+                        <li>Modern frameworks for building AI agents</li>
+                        <li>Integrations of various AI services into cohesive solutions</li>
                     </ul>
                 </section>
 
@@ -260,18 +260,18 @@
     <script type="module">
         import { AgentsController } from './application/AgentsController.js';
         
-        // Конфигурация приложения
+        // App configuration
         const config = {
             githubRepo: 'Verbasik/Weekly-arXiv-ML-AI-Research-Review',
             githubBranch: 'develop'
         };
         
-        // Инициализация приложения
+        // App initialization
         const app = new AgentsController(config);
         
-        // Запуск после загрузки DOM
+        // Run after DOM loaded
         document.addEventListener('DOMContentLoaded', async () => {
-            // Инициализируем приложение
+            // Initialize app
             await app.initialize();
         });
     </script>
@@ -348,7 +348,7 @@
         document.addEventListener('DOMContentLoaded', function() { readingModal = new ReadingModal(); window.readingModal = readingModal; });
     </script>
     
-    <!-- Mobile Enhancements (не требуется для ReadingModal) -->
+    <!-- Mobile Enhancements (not required for ReadingModal) -->
     
     <!-- Global search suggestions (uses index.json) -->
     <script src="presentation/search/search.js" defer></script>
