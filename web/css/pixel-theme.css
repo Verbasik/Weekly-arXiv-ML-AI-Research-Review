@@ -99,7 +99,6 @@
     --pixel-z-sticky: 200;
     --pixel-z-modal: 1000;
     --pixel-z-tooltip: 1100;
-    --pixel-z-lang-switch: 1200; /* всегда поверх модалок/подсказок */
     
     /* === PIXEL ANIMATIONS === */
     /* Discrete timing for pixel feel */
@@ -183,24 +182,7 @@ code, pre, .pixel-mono {
 
 /* ==================== PIXEL COMPONENTS SYSTEM ==================== */
 
-/* === Language Switch (fixed position) === */
-.lang-switch {
-    position: fixed !important;
-    top: var(--pixel-space-3);
-    right: var(--pixel-space-3);
-    z-index: var(--pixel-z-lang-switch) !important;
-    display: flex;
-    gap: var(--px-unit);
-    pointer-events: auto;
-}
-
-@media (max-width: 640px) {
-    .lang-switch {
-        top: auto;
-        bottom: var(--pixel-space-3);
-        right: var(--pixel-space-3);
-    }
-}
+/* (Removed .lang-switch: now RU/EN lives inside nav as .nav-lang-inline) */
 
 /* === PIXEL CONTAINERS === */
 .pixel-container {
