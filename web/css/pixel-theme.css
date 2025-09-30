@@ -99,7 +99,6 @@
     --pixel-z-sticky: 200;
     --pixel-z-modal: 1000;
     --pixel-z-tooltip: 1100;
-    --pixel-z-lang-switch: 1200; /* всегда поверх модалок/подсказок */
     
     /* === PIXEL ANIMATIONS === */
     /* Discrete timing for pixel feel */
@@ -183,23 +182,7 @@ code, pre, .pixel-mono {
 
 /* ==================== PIXEL COMPONENTS SYSTEM ==================== */
 
-/* === Language Switch (fixed position) === */
-.lang-switch {
-    position: fixed;
-    top: var(--pixel-space-3);
-    right: var(--pixel-space-3);
-    z-index: var(--pixel-z-lang-switch);
-    display: flex;
-    gap: var(--px-unit);
-}
-
-@media (max-width: 640px) {
-    .lang-switch {
-        top: auto;
-        bottom: var(--pixel-space-3);
-        right: var(--pixel-space-3);
-    }
-}
+/* (Removed .lang-switch: now RU/EN lives inside nav as .nav-lang-inline) */
 
 /* === PIXEL CONTAINERS === */
 .pixel-container {
@@ -850,6 +833,14 @@ header, nav {
     width: 100%;
 }
 
+/* Make navigation bar sticky so language switch pinned to panel follows viewport */
+nav {
+    position: sticky;
+    top: 0;
+    z-index: calc(var(--pixel-z-sticky) + 10);
+    backdrop-filter: saturate(120%) blur(2px);
+}
+
 header .pixel-container,
 nav .pixel-container,
 main .pixel-container,
@@ -881,10 +872,25 @@ nav .nav-stack {
     z-index: var(--pixel-z-sticky);/* поднимаем над основным контентом */
 }
 
-/* Поднимаем сам блок поиска, чтобы внутри absolute-элементы были выше */
+/* Top row utility: search and language switch to the right */
 .nav-search {
     position: relative;
     z-index: var(--pixel-z-dropdown);
+    display: flex;
+    align-items: center;
+    gap: var(--px-unit);
+}
+
+.nav-lang-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--px-unit);
+    white-space: nowrap;
+}
+
+/* Push language switch to the far right within the nav row */
+.nav-actions .nav-lang-inline {
+    margin-left: auto;
 }
 
 /* ==================== PIXEL ANIMATED SPRITES ==================== */

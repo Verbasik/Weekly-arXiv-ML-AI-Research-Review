@@ -245,6 +245,13 @@ class GroupedQueryAttention(nn.Module):
         key   = self._split_heads(key,   self.num_attention_heads)
         value = self._split_heads(value, self.num_attention_heads)
         # Применяем RoPE, если необходимо
+        if self.use_rope:
+            if position_ids is None:
+                position_ids = torch.arange(seq_len, dtype=torch.long, device=hidden_states.device)
+                position_ids = position_ids.unsqueeze(0).expand(batch_size, -1)
+            query = self.rope(query, position_ids, seq_len, self.rope_theta, self.rope_scaling)
+            key   = self.rope(key,   position_ids, seq_len, self.rope_theta, self.rope_scaling)
+        # Объединяем с past_key_value, если предоставлено
 
 
 

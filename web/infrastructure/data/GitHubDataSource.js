@@ -97,19 +97,6 @@ export class GitHubDataSource {
             }
             throw firstError;
         }
-        
-        try {
-            const response = await fetchWithRetry(reviewUrl, {}, `статья "${yearNumber}/${weekId}"`);
-            let markdown = await response.text();
-            
-            if (!markdown.trim()) {
-                throw new Error('Статья пуста или не содержит контента');
-            }
-            
-            return markdown;
-        } catch (error) {
-            throw new Error(`Failed to fetch markdown for ${yearNumber}/${weekId}: ${error.message}`);
-        }
     }
 
     /**
