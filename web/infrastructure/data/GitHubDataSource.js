@@ -15,10 +15,29 @@ export class GitHubDataSource {
      * Получает данные из index.json
      */
     async fetchData() {
-        const jsonUrl = `${this.baseUrl}/web/infrastructure/data/index.json`;
+        // Determine language mode based on current page path
+        let isEnglish = false;
+        try {
+            const path = (typeof window !== 'undefined' && window.location && window.location.pathname) ? window.location.pathname : '';
+            // Treat pages ending with -en.html or _en.html as English mode
+            isEnglish = /(?:-|_)en\.html$/i.test(path);
+        } catch (e) { /* no-op: default to RU */ }
+
+        // Prefer EN data on EN pages; fallback to alternative EN name, then RU index.json if EN not available
+        const primaryUrl = `${this.baseUrl}/web/infrastructure/data/${isEnglish ? 'index-en.json' : 'index.json'}`;
+        const altEnUrl = `${this.baseUrl}/web/infrastructure/data/index_en.json`;
+        const fallbackUrl = `${this.baseUrl}/web/infrastructure/data/index.json`;
         
         try {
-            const response = await fetchWithRetry(jsonUrl, {}, 'данные статей');
+            let response = await fetchWithRetry(primaryUrl, {}, 'данные статей');
+            if (!response.ok && isEnglish) {
+                // Try alternative EN filename
+                response = await fetchWithRetry(altEnUrl, {}, 'данные статей');
+                if (!response.ok) {
+                    // Fallback to RU if EN missing
+                    response = await fetchWithRetry(fallbackUrl, {}, 'данные статей');
+                }
+            }
             const data = await response.json();
             
             if (!data.years || !Array.isArray(data.years)) {
@@ -39,12 +58,13 @@ export class GitHubDataSource {
         let isEnglish = false;
         try {
             const path = (typeof window !== 'undefined' && window.location && window.location.pathname) ? window.location.pathname : '';
-            // If current page filename ends with _en.html, treat as English mode
-            isEnglish = /_en\.html$/i.test(path);
+            // Treat pages ending with -en.html or _en.html as English mode
+            isEnglish = /(?:-|_)en\.html$/i.test(path);
         } catch (e) { /* no-op: default to RU */ }
 
-        const fileName = isEnglish ? 'review_en.md' : 'review.md';
-        const reviewUrl = `${this.baseUrl}/${yearNumber}/${weekId}/${fileName}`;
+        const preferred = isEnglish ? 'review-en.md' : 'review.md';
+        const altEn = 'review_en.md';
+        const reviewUrl = `${this.baseUrl}/${yearNumber}/${weekId}/${preferred}`;
 
         // Helper to fetch with descriptive context
         const load = async (url, label) => {
@@ -56,17 +76,23 @@ export class GitHubDataSource {
             return text;
         };
 
-        // Try preferred language first; on failure, fallback to RU version
+        // Try preferred language first; on failure, try alternate EN name then fallback to RU version
         try {
             return await load(reviewUrl, `статья "${yearNumber}/${weekId}"`);
         } catch (firstError) {
             if (isEnglish) {
-                // Fallback to RU if EN not available
-                const fallbackUrl = `${this.baseUrl}/${yearNumber}/${weekId}/review.md`;
+                // Try alternative EN filename
+                const altEnUrl = `${this.baseUrl}/${yearNumber}/${weekId}/${altEn}`;
                 try {
-                    return await load(fallbackUrl, `статья "${yearNumber}/${weekId}"`);
-                } catch (fallbackError) {
-                    throw fallbackError;
+                    return await load(altEnUrl, `статья "${yearNumber}/${weekId}"`);
+                } catch (secondError) {
+                    // Fallback to RU if both EN variants not available
+                    const fallbackUrl = `${this.baseUrl}/${yearNumber}/${weekId}/review.md`;
+                    try {
+                        return await load(fallbackUrl, `статья "${yearNumber}/${weekId}"`);
+                    } catch (fallbackError) {
+                        throw fallbackError;
+                    }
                 }
             }
             throw firstError;
