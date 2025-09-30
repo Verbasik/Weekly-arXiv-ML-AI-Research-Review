@@ -65,13 +65,10 @@
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <!-- Marked.js for markdown rendering -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Ensure language switch stays pinned -->
+    <script defer src="web/presentation/fix-lang-switch.js"></script>
 </head>
 <body>
-    <!-- Language Switch (fixed, top-right) -->
-    <div class="lang-switch">
-        <span class="pixel-badge pixel-badge--star" data-icon="⭐" aria-label="Текущий язык: Русский">RU</span>
-        <a href="index-en.html" class="pixel-btn pixel-btn--sm" aria-label="Switch to English">EN</a>
-    </div>
     <header class="pixel-p-4">
         <div class="pixel-container">
             <div class="pixel-card pixel-card--accent pixel-flex pixel-flex-between pixel-gap-4 hero-card">
@@ -128,6 +125,10 @@
                     <a href="web/about.html" class="pixel-btn pixel-btn--sm">ℹ️ About</a>
                     <a href="#contribute" class="pixel-btn pixel-btn--sm">🤝 Contribute</a>
                     <a href="#contact" class="pixel-btn pixel-btn--sm">✉️ Contact</a>
+                    <div class="nav-lang-inline" aria-label="Language switch">
+                        <span class="pixel-badge pixel-badge--star" data-icon="⭐" aria-label="Текущий язык: Русский">RU</span>
+                        <a href="index-en.html" class="pixel-btn pixel-btn--sm" aria-label="Switch to English">EN</a>
+                    </div>
                 </div>
                 
                 <div class="pixel-flex pixel-gap-1 pixel-justify-end nav-search" style="min-width: 200px;">

@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="css/pixel-theme.css">
     <!-- Mobile Optimizations -->
     <link rel="stylesheet" href="css/mobile-optimizations.css">
+    <script defer src="presentation/fix-lang-switch.js"></script>
     <!-- Markdown Integration -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
     <!-- Favicon -->
@@ -39,11 +40,6 @@
     <meta property="twitter:image" content="https://cyberrunner.github.io/Weekly-arXiv-ML-AI-Research-Review/images/main.png">
 </head>
 <body>
-    <!-- Language Switch (fixed, top-right) -->
-    <div class="lang-switch">
-        <span class="pixel-badge pixel-badge--star" data-icon="⭐" aria-label="Текущий язык: Русский">RU</span>
-        <a href="agents-en.html" class="pixel-btn pixel-btn--sm" aria-label="Switch to English">EN</a>
-    </div>
 
     
     <!-- Header with brand bar (same as main page) -->
@@ -93,6 +89,10 @@
                     <a href="about.html" class="pixel-btn pixel-btn--sm">ℹ️ About</a>
                     <a href="../index.html#contribute" class="pixel-btn pixel-btn--sm">🤝 Contribute</a>
                     <a href="../index.html#contact" class="pixel-btn pixel-btn--sm">✉️ Contact</a>
+                    <div class="nav-lang-inline" aria-label="Language switch">
+                        <span class="pixel-badge pixel-badge--star" data-icon="⭐" aria-label="Текущий язык: Русский">RU</span>
+                        <a href="agents-en.html" class="pixel-btn pixel-btn--sm" aria-label="Switch to English">EN</a>
+                    </div>
                 </div>
                 <div class="pixel-flex pixel-gap-1 pixel-justify-end nav-search" style="min-width: 200px;">
                     <input type="text" class="pixel-input" placeholder="Search agents..." style="font-size: var(--pixel-font-sm);">

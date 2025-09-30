@@ -185,12 +185,13 @@ code, pre, .pixel-mono {
 
 /* === Language Switch (fixed position) === */
 .lang-switch {
-    position: fixed;
+    position: fixed !important;
     top: var(--pixel-space-3);
     right: var(--pixel-space-3);
-    z-index: var(--pixel-z-lang-switch);
+    z-index: var(--pixel-z-lang-switch) !important;
     display: flex;
     gap: var(--px-unit);
+    pointer-events: auto;
 }
 
 @media (max-width: 640px) {
@@ -850,6 +851,14 @@ header, nav {
     width: 100%;
 }
 
+/* Make navigation bar sticky so language switch pinned to panel follows viewport */
+nav {
+    position: sticky;
+    top: 0;
+    z-index: calc(var(--pixel-z-sticky) + 10);
+    backdrop-filter: saturate(120%) blur(2px);
+}
+
 header .pixel-container,
 nav .pixel-container,
 main .pixel-container,
@@ -881,10 +890,25 @@ nav .nav-stack {
     z-index: var(--pixel-z-sticky);/* поднимаем над основным контентом */
 }
 
-/* Поднимаем сам блок поиска, чтобы внутри absolute-элементы были выше */
+/* Top row utility: search and language switch to the right */
 .nav-search {
     position: relative;
     z-index: var(--pixel-z-dropdown);
+    display: flex;
+    align-items: center;
+    gap: var(--px-unit);
+}
+
+.nav-lang-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--px-unit);
+    white-space: nowrap;
+}
+
+/* Push language switch to the far right within the nav row */
+.nav-actions .nav-lang-inline {
+    margin-left: auto;
 }
 
 /* ==================== PIXEL ANIMATED SPRITES ==================== */
