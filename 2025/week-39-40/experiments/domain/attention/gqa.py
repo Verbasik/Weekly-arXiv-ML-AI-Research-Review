@@ -124,19 +124,20 @@ class GroupedQueryAttention(nn.Module):
         self.max_position = max_position
 
         # Проекции для query, key и value
-        self.query_proj = nn.Linear(in_features = hidden_size, 
-                                    out_features = num_attention_heads * head_dim, 
+        # В GQA: query использует группы, а key/value используют все головы
+        self.query_proj = nn.Linear(in_features = hidden_size,
+                                    out_features = num_query_groups * head_dim,
+                                    bias=bias)
+
+        self.key_proj   = nn.Linear(in_features = hidden_size,
+                                    out_features = num_attention_heads * head_dim,
+                                    bias=bias)
+
+        self.value_proj = nn.Linear(in_features = hidden_size,
+                                    out_features = num_attention_heads * head_dim,
                                     bias=bias)
         
-        self.key_proj   = nn.Linear(in_features = hidden_size, 
-                                    out_features = num_attention_heads * head_dim, 
-                                    bias=bias)
-        
-        self.value_proj = nn.Linear(in_features = hidden_size, 
-                                    out_features = num_attention_heads * head_dim, 
-                                    bias=bias)
-        
-        self.output_proj = nn.Linear(in_features = num_attention_heads * head_dim, 
+        self.output_proj = nn.Linear(in_features = num_query_groups * head_dim,
                                     out_features = hidden_size,
                                     bias=bias)
         
@@ -172,13 +173,60 @@ class GroupedQueryAttention(nn.Module):
 
         # batch_size - количество последовательностей, обрабатываемых одновременно
         # seq_len - количество токенов в последовательности
-        # hidden_size - размерность скрытого состояния (эмбеддинги токенов)
-        batch_size, seq_len, hidden_size = x.shape
+        # total_dim - общая размерность (num_heads * head_dim)
+        batch_size, seq_len, total_dim = x.shape
+
+        # Вычисляем head_dim на основе total_dim и количества голов
+        head_dim = total_dim // num_heads
 
         # .view() перестраивает тензор в новую форму, не изменяя данные.
+        # Меняем форму с (batch, seq, total_dim) на (batch, seq, num_heads, head_dim)
         x = x.view(batch_size, seq_len, num_heads, head_dim)
 
         return x
+
+    def _repeat_kv_heads(self, kv: torch.Tensor) -> torch.Tensor:
+        """
+        Description:
+        ---------------
+            Повторяет key/value головы для соответствия количеству групп query.
+            Это ключевая особенность GQA - каждая группа query использует
+            несколько key/value голов.
+
+        Args:
+        ---------------
+            kv: Тензор key или value формы (batch_size, seq_len, num_attention_heads, head_dim)
+
+        Returns:
+        ---------------
+            Тензор формы (batch_size, seq_len, num_query_groups, head_dim)
+            где key/value головы сгруппированы для каждой группы query
+        """
+        # TODO: Получите размерности входного тензора
+        # TODO: Вычислите количество key/value голов на одну группу query
+        # TODO: Измените форму тензора для группировки голов
+        # TODO: Усредните головы внутри каждой группы
+        # TODO: Верните результат
+
+        # Вопросы для размышления:
+        # - Почему мы группируем key/value головы, а не дублируем их?
+        # - Как группировка влияет на выразительную способность модели?
+        # - Какие альтернативы усреднению можно использовать (concatenation, max pooling)?
+        # - Как соотношение num_attention_heads к num_query_groups влияет на эффективность?
+        # pass
+
+        batch_size, seq_len, num_kv_heads, head_dim = kv.shape
+
+        # Вычисляем, сколько key/value голов приходится на одну группу query
+        heads_per_group = num_kv_heads // self.num_query_groups
+
+        # Изменяем форму для группировки голов: (batch, seq, heads, dim) -> (batch, seq, groups, heads_per_group, dim)
+        kv = kv.view(batch_size, seq_len, self.num_query_groups, heads_per_group, head_dim)
+
+        # Усредняем головы внутри каждой группы
+        kv = kv.mean(dim=3)  # Размерность: (batch_size, seq_len, num_query_groups, head_dim)
+
+        return kv
 
     def forward(
         self,
@@ -234,47 +282,90 @@ class GroupedQueryAttention(nn.Module):
         # pass
 
         # Тензор скрытого состояния
-        batch_size, seq_len, hidden_size = hidden_states.shape()
+        batch_size, seq_len, hidden_size = hidden_states.shape
+
         # Проекции для query, key и value
         # Используем фабрику линейных слоев для создания проекций
         query = self.query_proj(hidden_states)
         key   = self.key_proj(hidden_states)
         value = self.value_proj(hidden_states)
+
         # Разделяем query на группы, а key и value на головы
         query = self._split_heads(query, self.num_query_groups)
         key   = self._split_heads(key,   self.num_attention_heads)
         value = self._split_heads(value, self.num_attention_heads)
-        # Применяем RoPE, если необходимо
+
+        # Применяем RoPE до группировки, когда тензоры в правильном формате
         if self.use_rope:
             if position_ids is None:
+                # Создаем позиционные индексы для RoPE: [0, 1, 2, ..., seq_len-1]
                 position_ids = torch.arange(seq_len, dtype=torch.long, device=hidden_states.device)
+
+                # Трансформация 1D → 2D → Batch-compatible:
+                # 1. unsqueeze(0): [0,1,2,3] → [[0,1,2,3]] (добавляем batch размерность)
+                # 2. expand(batch_size, -1): [[0,1,2,3]] → [[0,1,2,3], [0,1,2,3], ...]
+                # Результат: каждый элемент в batch получает одинаковые позиции
+                # expand() эффективен - создает view без копирования данных
                 position_ids = position_ids.unsqueeze(0).expand(batch_size, -1)
-            query = self.rope(query, position_ids, seq_len, self.rope_theta, self.rope_scaling)
-            key   = self.rope(key,   position_ids, seq_len, self.rope_theta, self.rope_scaling)
+
+            # RoPE применяется к каждой голове отдельно
+            # Сначала изменяем формат для применения RoPE
+            query_for_rope = query.view(batch_size * self.num_query_groups, seq_len, self.head_dim)
+            key_for_rope   = key.view(batch_size * self.num_attention_heads, seq_len, self.head_dim)
+
+            # Расширяем position_ids для всех голов
+            pos_query = position_ids.unsqueeze(1).expand(-1, self.num_query_groups, -1).contiguous().view(-1, seq_len)
+            pos_key = position_ids.unsqueeze(1).expand(-1, self.num_attention_heads, -1).contiguous().view(-1, seq_len)
+
+            # Применяем RoPE
+            query_rope, _ = self.rope(query_for_rope, query_for_rope, pos_query)
+            _, key_rope = self.rope(key_for_rope, key_for_rope, pos_key)
+
+            # Возвращаем к исходному формату
+            query = query_rope.view(batch_size, self.num_query_groups, seq_len, self.head_dim)
+            key = key_rope.view(batch_size, self.num_attention_heads, seq_len, self.head_dim)
+
+        # Применяем группировку key/value для соответствия query группам
+        key   = self._repeat_kv_heads(key)
+        value = self._repeat_kv_heads(value)
+
+        # Транспонируем для attention computation: (batch, seq, heads, dim) -> (batch, heads, seq, dim)
+        query = query.transpose(1, 2)  # (batch_size, num_query_groups, seq_len, head_dim)
+        key   = key.transpose(1, 2)    # (batch_size, num_query_groups, seq_len, head_dim)
+        value = value.transpose(1, 2)  # (batch_size, num_query_groups, seq_len, head_dim)
+
         # Объединяем с past_key_value, если предоставлено
+        if past_key_value is not None:
+            key = torch.cat([past_key_value[0], key], dim=1)
+            value = torch.cat([past_key_value[1], value], dim=1)
 
+        # Подготавливаем новый past_key_value
+        if use_cache:
+            past_key_value = (key, value)
 
-
-if __name__ == "__main__":
-    # Создаем GQA с параметрами
-    hidden_size = 512
-    num_query_groups = 8
-    num_attention_heads = 16
-    head_dim = 64
-    
-    gqa = GroupedQueryAttention(
-        hidden_size=hidden_size,
-        num_query_groups=num_query_groups,
-        num_attention_heads=num_attention_heads,
-        head_dim=head_dim
-    )
-    
-    # Создаем тестовый тензор
-    batch_size = 2
-    seq_len = 10
-    x = torch.randn(batch_size, seq_len, hidden_size)
-    
-    # Проверяем, что форма выхода соответствует ожидаемой
-    print(f"Входной тензор: {x.shape}")
-    # output = gqa(x)
-    # print(f"Выходной тензор: {output.shape}")
+        # Вычисляем скалярное произведение query и key и масштабируем один раз
+        scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(self.head_dim)
+        # Применяем маску внимания
+        if attention_mask is not None:
+            scores = scores + attention_mask
+        # Применяем softmax к весам внимания
+        weights = F.softmax(scores, dim=-1)
+        # Применяем dropout к весам внимания
+        weights = self.dropout(weights)
+        # Вычисляем взвешенную сумму значений
+        context = torch.matmul(weights, value)
+        # Объединяем головы внимания: (batch, heads, seq, dim) -> (batch, seq, heads, dim)
+        context = context.transpose(1, 2).contiguous()
+        # Объединяем головы: (batch, seq, heads, dim) -> (batch, seq, heads*dim)
+        context = context.view(batch_size, seq_len, self.num_query_groups * self.head_dim)
+        # Применяем выходную проекцию
+        output = self.output_proj(context)
+        # Возвращаем результат в зависимости от флагов
+        if use_cache and output_attentions:
+            return output, past_key_value, weights
+        elif use_cache:
+            return output, past_key_value, None
+        elif output_attentions:
+            return output, None, weights
+        else:
+            return output
