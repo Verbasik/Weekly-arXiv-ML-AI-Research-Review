@@ -36,11 +36,29 @@
     return { repo, branch };
   }
 
+  function isEnglishPage() {
+    try {
+      const path = (typeof window !== 'undefined' && window.location && window.location.pathname) ? window.location.pathname : '';
+      return /(?:-|_)en\.html$/i.test(path);
+    } catch (e) { return false; }
+  }
+
   async function fetchIndex() {
     if (DATA) return DATA;
     const { repo, branch } = getConfig();
-    const url = `https://raw.githubusercontent.com/${repo}/${branch}/web/infrastructure/data/index.json`;
-    const resp = await fetch(url, { cache: 'no-store' });
+    const en = isEnglishPage();
+    const primary = `https://raw.githubusercontent.com/${repo}/${branch}/web/infrastructure/data/${en ? 'index-en.json' : 'index.json'}`;
+    const altEn = `https://raw.githubusercontent.com/${repo}/${branch}/web/infrastructure/data/index_en.json`;
+    const fallback = `https://raw.githubusercontent.com/${repo}/${branch}/web/infrastructure/data/index.json`;
+
+    let resp = await fetch(primary, { cache: 'no-store' });
+    if (!resp.ok && en) {
+      // Try alternative EN name, then fallback to RU
+      resp = await fetch(altEn, { cache: 'no-store' });
+      if (!resp.ok) {
+        resp = await fetch(fallback, { cache: 'no-store' });
+      }
+    }
     if (!resp.ok) throw new Error(`Index fetch failed: ${resp.status}`);
     DATA = await resp.json();
     FLAT = flatten(DATA);
@@ -112,12 +130,13 @@
 
   function openOnMain(year, id) {
     // If already on main page
-    const isIndex = /\/index\.html?$/.test(location.pathname) || location.pathname === '/' || location.pathname === '';
+    const isIndex = (/\/index(?:-en|_en)?\.html?$/.test(location.pathname)) || location.pathname === '/' || location.pathname === '';
+    const en = isEnglishPage();
     if (isIndex) {
       location.hash = `#${year}/${id}`;
     } else {
       // From nested pages like web/about.html → go to ../index.html
-      const target = `../index.html#${year}/${id}`;
+      const target = `../index${en ? '-en' : ''}.html#${year}/${id}`;
       location.href = target;
     }
     box.style.display = 'none';
@@ -174,4 +193,3 @@
     }
   });
 })();
-

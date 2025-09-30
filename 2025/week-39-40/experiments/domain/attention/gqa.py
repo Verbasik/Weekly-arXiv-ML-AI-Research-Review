@@ -231,7 +231,21 @@ class GroupedQueryAttention(nn.Module):
         # - Как attention_mask влияет на веса внимания?
         # - Как кэширование ключей и значений ускоряет генерацию?
         # - Какие преимущества дает использование RoPE в GQA?
-        pass
+        # pass
+
+        # Тензор скрытого состояния
+        batch_size, seq_len, hidden_size = hidden_states.shape()
+        # Проекции для query, key и value
+        # Используем фабрику линейных слоев для создания проекций
+        query = self.query_proj(hidden_states)
+        key   = self.key_proj(hidden_states)
+        value = self.value_proj(hidden_states)
+        # Разделяем query на группы, а key и value на головы
+        query = self._split_heads(query, self.num_query_groups)
+        key   = self._split_heads(key,   self.num_attention_heads)
+        value = self._split_heads(value, self.num_attention_heads)
+        # Применяем RoPE, если необходимо
+
 
 
 if __name__ == "__main__":
