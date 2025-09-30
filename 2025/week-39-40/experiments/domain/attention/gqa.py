@@ -241,8 +241,10 @@ class GroupedQueryAttention(nn.Module):
         key   = self.key_proj(hidden_states)
         value = self.value_proj(hidden_states)
         # Разделяем query на группы, а key и value на головы
-        # Получаем тензоры формы: (batch_size, num_query_groups, seq_len, head_dim)
         query = self._split_heads(query, self.num_query_groups)
+        key   = self._split_heads(key,   self.num_attention_heads)
+        value = self._split_heads(value, self.num_attention_heads)
+        # Применяем RoPE, если необходимо
 
 
 
