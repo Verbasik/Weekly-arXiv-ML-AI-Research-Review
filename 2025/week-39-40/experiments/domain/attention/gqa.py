@@ -183,6 +183,9 @@ class GroupedQueryAttention(nn.Module):
         # Меняем форму с (batch, seq, total_dim) на (batch, seq, num_heads, head_dim)
         x = x.view(batch_size, seq_len, num_heads, head_dim)
 
+        # Транспонируем для формата (batch, num_heads, seq, head_dim) согласно документации
+        x = x.transpose(1, 2)
+
         return x
 
     def _repeat_kv_heads(self, kv: torch.Tensor) -> torch.Tensor:
@@ -195,11 +198,11 @@ class GroupedQueryAttention(nn.Module):
 
         Args:
         ---------------
-            kv: Тензор key или value формы (batch_size, seq_len, num_attention_heads, head_dim)
+            kv: Тензор key или value формы (batch_size, num_attention_heads, seq_len, head_dim)
 
         Returns:
         ---------------
-            Тензор формы (batch_size, seq_len, num_query_groups, head_dim)
+            Тензор формы (batch_size, num_query_groups, seq_len, head_dim)
             где key/value головы сгруппированы для каждой группы query
         """
         # TODO: Получите размерности входного тензора
@@ -213,18 +216,17 @@ class GroupedQueryAttention(nn.Module):
         # - Как группировка влияет на выразительную способность модели?
         # - Какие альтернативы усреднению можно использовать (concatenation, max pooling)?
         # - Как соотношение num_attention_heads к num_query_groups влияет на эффективность?
-        # pass
 
-        batch_size, seq_len, num_kv_heads, head_dim = kv.shape
+        batch_size, num_kv_heads, seq_len, head_dim = kv.shape
 
         # Вычисляем, сколько key/value голов приходится на одну группу query
         heads_per_group = num_kv_heads // self.num_query_groups
 
-        # Изменяем форму для группировки голов: (batch, seq, heads, dim) -> (batch, seq, groups, heads_per_group, dim)
-        kv = kv.view(batch_size, seq_len, self.num_query_groups, heads_per_group, head_dim)
+        # Изменяем форму для группировки голов: (batch, heads, seq, dim) -> (batch, groups, heads_per_group, seq, dim)
+        kv = kv.view(batch_size, self.num_query_groups, heads_per_group, seq_len, head_dim)
 
-        # Усредняем головы внутри каждой группы
-        kv = kv.mean(dim=3)  # Размерность: (batch_size, seq_len, num_query_groups, head_dim)
+        # Усредняем головы внутри каждой группы по оси heads_per_group (индекс 2)
+        kv = kv.mean(dim=2)  # Размерность: (batch_size, num_query_groups, seq_len, head_dim)
 
         return kv
 
@@ -310,8 +312,9 @@ class GroupedQueryAttention(nn.Module):
 
             # RoPE применяется к каждой голове отдельно
             # Сначала изменяем формат для применения RoPE
-            query_for_rope = query.view(batch_size * self.num_query_groups, seq_len, self.head_dim)
-            key_for_rope   = key.view(batch_size * self.num_attention_heads, seq_len, self.head_dim)
+            # Используем reshape() вместо view() так как после transpose() тензор может быть не-contiguous
+            query_for_rope = query.reshape(batch_size * self.num_query_groups, seq_len, self.head_dim)
+            key_for_rope   = key.reshape(batch_size * self.num_attention_heads, seq_len, self.head_dim)
 
             # Расширяем position_ids для всех голов
             pos_query = position_ids.unsqueeze(1).expand(-1, self.num_query_groups, -1).contiguous().view(-1, seq_len)
@@ -329,15 +332,16 @@ class GroupedQueryAttention(nn.Module):
         key   = self._repeat_kv_heads(key)
         value = self._repeat_kv_heads(value)
 
-        # Транспонируем для attention computation: (batch, seq, heads, dim) -> (batch, heads, seq, dim)
-        query = query.transpose(1, 2)  # (batch_size, num_query_groups, seq_len, head_dim)
-        key   = key.transpose(1, 2)    # (batch_size, num_query_groups, seq_len, head_dim)
-        value = value.transpose(1, 2)  # (batch_size, num_query_groups, seq_len, head_dim)
+        # Все тензоры уже в формате (batch, heads, seq, dim) после _split_heads и _repeat_kv_heads
+        # query: (batch_size, num_query_groups, seq_len, head_dim)
+        # key:   (batch_size, num_query_groups, seq_len, head_dim)
+        # value: (batch_size, num_query_groups, seq_len, head_dim)
 
         # Объединяем с past_key_value, если предоставлено
+        # Формат: (batch, heads, seq, dim), конкатенируем по seq_len (dim=2)
         if past_key_value is not None:
-            key = torch.cat([past_key_value[0], key], dim=1)
-            value = torch.cat([past_key_value[1], value], dim=1)
+            key = torch.cat([past_key_value[0], key], dim=2)
+            value = torch.cat([past_key_value[1], value], dim=2)
 
         # Подготавливаем новый past_key_value
         if use_cache:

@@ -115,6 +115,7 @@ class TransformerBlock(nn.Module):
         Description:
         ---------------
             Применяет Transformer блок к входному тензору.
+            Input → RMSNorm → GQA → Residual → RMSNorm → SwiGLU → Residual → Output
 
         Args:
         ---------------
@@ -137,4 +138,58 @@ class TransformerBlock(nn.Module):
         # Вопросы для размышления:
         # - Почему нормализация применяется ДО attention/ffn, а не после?
         # - Как residual connections помогают при обучении глубоких сетей?
-        pass
+
+        # ──────────────────────────────────────────────────────────────────────────
+        # ПЕРВЫЙ RESIDUAL BLOCK: Self-Attention (GQA)
+        # ──────────────────────────────────────────────────────────────────────────
+
+        # Сохраняем вход для остаточной связи (residual).
+        residual_1 = hidden_states
+
+        # Преднормализация улучшает устойчивость и качество внимания.
+        normed = self.attention_norm(hidden_states)
+
+        # Вызываем модуль внимания. Он может вернуть:
+        # - только выход (Tensor), либо
+        # - кортеж (att_output, present_key_value, attn_weights).
+        att_output = self.attention(
+            hidden_states=normed,
+            attention_mask=attention_mask,
+            position_ids=position_ids,
+            past_key_value=past_key_value,
+            output_attentions=output_attentions,
+            use_cache=use_cache,
+        )
+
+        if isinstance(att_output, tuple):
+            att_output, present_key_value, attn_weights = att_output
+        else:
+            present_key_value = None
+            attn_weights = None
+
+        # Первая residual-связь: складываем вход и выход подблока.
+        hidden_states = att_output + residual_1
+
+        # ──────────────────────────────────────────────────────────────────────────
+        # ВТОРОЙ RESIDUAL BLOCK: Feed-Forward (SwiGLU)
+        # ──────────────────────────────────────────────────────────────────────────
+
+        residual_2 = hidden_states
+
+        # Преднормализация перед FFN по тем же причинам, что и перед вниманием.
+        normed = self.ffn_norm(hidden_states)
+
+        # Применяем нелинейную проекцию SwiGLU с расширением размерности
+        # до intermediate_size и обратной проекцией к hidden_size.
+        ffn_output = self.feed_forward(normed)
+
+        # Вторая residual-связь.
+        hidden_states = ffn_output + residual_2
+
+        if use_cache or output_attentions:
+            return hidden_states, present_key_value, attn_weights
+
+        return hidden_states
+
+
+
