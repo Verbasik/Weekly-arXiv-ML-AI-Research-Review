@@ -1,4 +1,5 @@
 # Стандартная библиотека
+import math
 from typing import Tuple, Optional
 
 # Сторонние библиотеки
@@ -21,7 +22,8 @@ class MoERouter(nn.Module):
         Архитектура:
         Input Token → Linear Projection → Softmax → Top-K Selection → Gating Weights
 
-        Для Qwen3-30B: N=128 экспертов, K=8 активных per token
+        Для этой модели (0.6B): N=8 экспертов, K=2 активных per token
+        Для справки, Qwen3-30B использует: N=128 экспертов, K=8 активных per token
 
     Mathematical Formulation:
     ---------------
@@ -55,11 +57,12 @@ class MoERouter(nn.Module):
 
     Example:
     ---------------
-        >>> router = MoERouter(hidden_size=2048, num_experts=128, top_k=8)
-        >>> x = torch.randn(2, 10, 2048)  # (batch=2, seq=10, hidden=2048)
+        >>> # Для модели 0.6B
+        >>> router = MoERouter(hidden_size=512, num_experts=8, top_k=2)
+        >>> x = torch.randn(2, 10, 512)  # (batch=2, seq=10, hidden=512)
         >>> weights, experts, loss = router(x)
-        >>> weights.shape  # torch.Size([2, 10, 8])
-        >>> experts.shape  # torch.Size([2, 10, 8])
+        >>> weights.shape  # torch.Size([2, 10, 2])
+        >>> experts.shape  # torch.Size([2, 10, 2])
         >>> loss.item()    # Скаляр loss
     """
 
@@ -67,7 +70,7 @@ class MoERouter(nn.Module):
         self,
         hidden_size: int,
         num_experts: int,
-        top_k: int = 8,
+        top_k: int = 2,
         capacity_factor: float = 1.25,
         balance_loss_coef: float = 0.01
     ):
@@ -181,9 +184,9 @@ class MoERouter(nn.Module):
 
         batch_size, seq_len, hidden_size = hidden_states.shape
 
-        # Linear projection (W·x + b) 
-        # Проекция токенов в пространство экспертов: (B, S, H) → (B, S, N) 
-        # Логиты для всех 128 экспертов
+        # Linear projection (W·x + b)
+        # Проекция токенов в пространство экспертов: (B, S, H) → (B, S, N)
+        # Логиты для всех N экспертов (например, 8 для модели 0.6B)
         logits = self.gate(hidden_states)
 
         # Softmax по оси num_experts для получения gating_scores
@@ -208,7 +211,15 @@ class MoERouter(nn.Module):
             dim = -1
         )
 
-        # Сначало реализуем _compute_balance_loss
+        if training:
+            load_balance_loss = self._compute_balance_loss(
+                gating_scores = gating_scores,
+                selected_experts = selected_experts
+            )
+        else:
+            load_balance_loss = torch.tensor(0.0, device=gating_scores.device)
+
+        return routing_weights, selected_experts, load_balance_loss
 
 
     def _compute_balance_loss(
@@ -254,7 +265,42 @@ class MoERouter(nn.Module):
         # - Какие альтернативные метрики балансировки существуют?
         # pass
 
-        
+        if gating_scores.dim() != 3:
+            raise ValueError("gating_scores должен иметь форму (B, S, N).")
+        if selected_experts.dim() != 3:
+            raise ValueError("selected_experts должен иметь форму (B, S, K).")
+        if gating_scores.size(-1) != self.num_experts:
+            raise ValueError("Последняя размерность gating_scores должна быть N.")
+
+        # # .view() перестраивает тензор уже выбранных экспертов в новую форму, не изменяя данные.
+        # Было: (batch_size, seq_len, top_k) = (2, 10, 8)
+        # Стало: (160,) — все индексы в одном массиве, мы получаем один длинный одномерный вектор
+        flattened_experts = selected_experts.view(-1)
+
+        # expert_counts[i] = сколько раз эксперт i был выбран
+        expert_counts = torch.bincount(
+            flattened_experts,
+            minlength=self.num_experts  # Гарантируем вектор длины num_experts (например, 8)
+        )
+
+        # Общее количество выборов = batch_size * seq_len * top_k
+        batch_size, seq_len, top_k = selected_experts.shape
+        total_selections = batch_size * seq_len * top_k
+
+        # f_i = (количество раз, когда эксперт i был выбран) / (общее количество выборов)
+        f_i = expert_counts.float() / total_selections
+
+        # Зачем вычисляем среднее для gating_scores, когда это уже тензор вероятностей экспертов после softmax?
+        # Потому что нам нужно знать среднюю уверенность модели в каждом эксперте по всем токенам. Это отличается от частоты выбора:
+        #   - f_i = как часто эксперт попадает в Top-K (0 или 1 для каждого токена)
+        #   - P_i = какую среднюю вероятность модель назначает эксперту (до Top-K)
+        # Произведение f_i * P_i максимально, когда эксперт и часто выбирается, и модель в нём уверена → это дисбаланс → высокий loss → градиент штрафует.
+        P_i = gating_scores.mean(dim=(0, 1))
+
+        balance_loss = self.balance_loss_coef * self.num_experts * (f_i * P_i).sum()
+
+        return balance_loss
+
 
     def expert_capacity(self, num_tokens: int) -> int:
         """
@@ -285,4 +331,8 @@ class MoERouter(nn.Module):
         # - Зачем нужен capacity_factor > 1.0?
         # - Что делать с токенами, превышающими capacity?
         # - Как capacity влияет на memory footprint?
-        pass
+        # pass
+
+        capacity = math.ceil((num_tokens / self.num_experts) * self.capacity_factor * self.top_k)
+
+        return capacity
