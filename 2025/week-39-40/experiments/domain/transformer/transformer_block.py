@@ -49,22 +49,59 @@ class TransformerBlock(nn.Module):
         # TODO: Создайте self.ffn_norm = RMSNorm(hidden_size)
         # TODO: Создайте self.feed_forward = SwiGLU(...)
 
-        # Проверка валидности параметров
-        assert isinstance(hidden_size, int) and hidden_size > 0, "hidden_size должен быть положительным целым числом"
-        assert isinstance(num_query_groups, int) and num_query_groups > 0, "num_query_groups должен быть положительным целым числом"
-        assert isinstance(num_attention_heads, int) and num_attention_heads > 0, "num_attention_heads должен быть положительным целым числом"
+        # --- Валидация параметров -------------------------------------------------
+        assert (
+            isinstance(hidden_size, int) and hidden_size > 0
+        ), "hidden_size должен быть положительным целым числом"
+        assert (
+            isinstance(num_query_groups, int) and num_query_groups > 0
+        ), "num_query_groups должен быть положительным целым числом"
+        assert (
+            isinstance(num_attention_heads, int) and num_attention_heads > 0
+        ), "num_attention_heads должен быть положительным целым числом"
 
-        # Ключевая проверка для GQA архитектуры
-        assert num_attention_heads % num_query_groups == 0, "num_attention_heads должен делиться на num_query_groups для корректной работы GQA"
+        # Ключевая проверка для GQA архитектуры:
+        assert (
+            num_attention_heads % num_query_groups == 0
+        ), (
+            "num_attention_heads должен делиться на num_query_groups для "
+            "корректной работы GQA"
+        )
 
-        # Проверка для корректной работы attention механизма
-        assert hidden_size % num_attention_heads == 0, "hidden_size должен делиться на num_attention_heads"
+        # Проверка делимости hidden_size на число голов:
+        assert (
+            hidden_size % num_attention_heads == 0
+        ), "hidden_size должен делиться на num_attention_heads"
 
         # Проверка intermediate_size если указан
         if intermediate_size is not None:
-            assert isinstance(intermediate_size, int) and intermediate_size > 0, "intermediate_size должен быть положительным целым числом"
-                
+            assert (
+                isinstance(intermediate_size, int) and intermediate_size > 0
+            ), "intermediate_size должен быть положительным целым числом"
 
+        # --- Инициализация атрибутов ----------------------------------------------
+        self.hidden_size = hidden_size
+        self.num_query_groups = num_query_groups
+        self.num_attention_heads = num_attention_heads
+        self.intermediate_size = (
+            intermediate_size if intermediate_size is not None else 4 * hidden_size
+        )
+
+        # --- Компоненты нормализации и подблоков ----------------------------------
+        self.attention_norm = RMSNorm(hidden_size)
+        self.attention = GroupedQueryAttention(
+            hidden_size=hidden_size,
+            num_query_groups=num_query_groups,
+            num_attention_heads=num_attention_heads,
+        )
+        self.ffn_norm = RMSNorm(hidden_size)
+        self.feed_forward = SwiGLU(
+            input_dim=self.hidden_size,
+            output_dim=self.hidden_size,
+            intermediate_dim=self.intermediate_size,
+        )
+        
+        
     def forward(
         self,
         hidden_states: torch.Tensor,
@@ -78,6 +115,7 @@ class TransformerBlock(nn.Module):
         Description:
         ---------------
             Применяет Transformer блок к входному тензору.
+            Input → RMSNorm → GQA → Residual → RMSNorm → SwiGLU → Residual → Output
 
         Args:
         ---------------
@@ -100,4 +138,58 @@ class TransformerBlock(nn.Module):
         # Вопросы для размышления:
         # - Почему нормализация применяется ДО attention/ffn, а не после?
         # - Как residual connections помогают при обучении глубоких сетей?
-        pass
+
+        # ──────────────────────────────────────────────────────────────────────────
+        # ПЕРВЫЙ RESIDUAL BLOCK: Self-Attention (GQA)
+        # ──────────────────────────────────────────────────────────────────────────
+
+        # Сохраняем вход для остаточной связи (residual).
+        residual_1 = hidden_states
+
+        # Преднормализация улучшает устойчивость и качество внимания.
+        normed = self.attention_norm(hidden_states)
+
+        # Вызываем модуль внимания. Он может вернуть:
+        # - только выход (Tensor), либо
+        # - кортеж (att_output, present_key_value, attn_weights).
+        att_output = self.attention(
+            hidden_states=normed,
+            attention_mask=attention_mask,
+            position_ids=position_ids,
+            past_key_value=past_key_value,
+            output_attentions=output_attentions,
+            use_cache=use_cache,
+        )
+
+        if isinstance(att_output, tuple):
+            att_output, present_key_value, attn_weights = att_output
+        else:
+            present_key_value = None
+            attn_weights = None
+
+        # Первая residual-связь: складываем вход и выход подблока.
+        hidden_states = att_output + residual_1
+
+        # ──────────────────────────────────────────────────────────────────────────
+        # ВТОРОЙ RESIDUAL BLOCK: Feed-Forward (SwiGLU)
+        # ──────────────────────────────────────────────────────────────────────────
+
+        residual_2 = hidden_states
+
+        # Преднормализация перед FFN по тем же причинам, что и перед вниманием.
+        normed = self.ffn_norm(hidden_states)
+
+        # Применяем нелинейную проекцию SwiGLU с расширением размерности
+        # до intermediate_size и обратной проекцией к hidden_size.
+        ffn_output = self.feed_forward(normed)
+
+        # Вторая residual-связь.
+        hidden_states = ffn_output + residual_2
+
+        if use_cache or output_attentions:
+            return hidden_states, present_key_value, attn_weights
+
+        return hidden_states
+
+
+

@@ -466,6 +466,23 @@
           "papers": 1,
           "notebooks": 0,
           "code": 0
+        },
+        {
+          "week": "week-39-40",
+          "title": "Week 39-40: GPT-OSS & Qwen3 MoE",
+          "date": "Sep 22-Oct 05, 2025",
+          "tags": [
+            "GPT-OSS",
+            "Qwen3",
+            "MoE",
+            "OpenAI",
+            "Architecture"
+          ],
+          "description": "From GPT-2 to gpt-oss: architecture evolution analysis and Qwen3 MoE implementation",
+          "papers": 1,
+          "notebooks": 0,
+          "code": 1,
+          "code_path": "2025/week-39-40/experiments"
         }
       ]
     },
