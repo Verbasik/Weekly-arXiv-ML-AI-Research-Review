@@ -1,3 +1,9 @@
+"""
+SimpleMoELayer - это учебная версия MoE, которая фокусируется на правильности логики, а не на производительности. Используя простой цикл по токенам, мы избегаем сложных
+тензорных операций индексации, делая код понятным и легко отлаживаемым. Это идеальный first step перед оптимизированной версией.
+"""
+
+
 # Стандартная библиотека
 from typing import Tuple, Optional
 
@@ -115,8 +121,33 @@ class SimpleMoELayer(nn.Module):
         # - Зачем нужен residual connection в MoE Layer?
         # - Как top_k влияет на вычислительную сложность?
         # - Что произойдет, если эксперт получит 0 токенов?
-        pass
+        # pass
 
+        assert hidden_size > 0, "hidden_size должен быть > 0"
+        assert num_experts > 0, "num_experts должен быть > 0"
+        assert top_k > 0 and top_k <= num_experts, "top_k должен быть > 0 и <= num_experts"
+        assert intermediate_size > 0, "intermediate_size должен быть > 0"
+
+        self.hidden_size = hidden_size
+        self.num_experts = num_experts
+        self.top_k = top_k
+        self.intermediate_size = intermediate_size
+        self.expert_dropout = expert_dropout
+        self.capacity_factor = capacity_factor
+        self.balance_loss_coef = balance_loss_coef
+
+        self.router = MoERouter(
+            hidden_size=hidden_size,
+            num_experts=num_experts,
+            top_k=top_k,
+            capacity_factor=capacity_factor,
+            balance_loss_coef=balance_loss_coef
+        )
+
+        self.experts = nn.ModuleList([
+            Expert(hidden_size, intermediate_size, expert_dropout)
+            for _ in range(num_experts)
+        ])
 
     def forward(
         self,
@@ -147,43 +178,50 @@ class SimpleMoELayer(nn.Module):
                    Выходные скрытые состояния
             balance_loss: Скаляр - load balancing loss
         """
-        # TODO: Шаг 1 - Router
-        #       Вызовите self.router(hidden_states, training)
-        #       Получите: routing_weights, selected_experts, balance_loss
-
-        # TODO: Шаг 2 - Получите размерности
-        #       batch_size, seq_len, hidden_size = hidden_states.shape
-
+        # TODO: Шаг 1 - Вызовите self.router
+        # TODO: Шаг 2 - Получите размерности hidden_states.shape=
         # TODO: Шаг 3 - Создайте output тензор
-        #       Инициализируйте нулями: torch.zeros_like(hidden_states)
-
         # TODO: Шаг 4 - Dispatch + Process + Combine (наивный подход)
-        #       Для каждого batch b в range(batch_size):
-        #           Для каждого sequence s в range(seq_len):
-        #               Извлеките токен: token = hidden_states[b, s:s+1, :]  # (1, 1, H)
-        #               Создайте token_output = torch.zeros(1, 1, hidden_size)
-        #
-        #               Для каждого k в range(self.top_k):
-        #                   Получите индекс эксперта: expert_idx = selected_experts[b, s, k].item()
-        #                   Получите вес: weight = routing_weights[b, s, k].item()
-        #
-        #                   Обработайте токен экспертом:
-        #                       expert_output = self.experts[expert_idx](token)
-        #
-        #                   Добавьте взвешенный результат:
-        #                       token_output += weight * expert_output
-        #
-        #               Сохраните результат: output[b, s, :] = token_output.squeeze()
-
-        # TODO: Шаг 5 - Residual connection
-        #       output = output + hidden_states
-
-        # TODO: Шаг 6 - Return
-        #       Верните (output, balance_loss)
+        # TODO: Шаг 5 - output = output + hidden_states
+        # TODO: Шаг 6 - Верните (output, balance_loss)
 
         # Вопросы для размышления:
         # - Почему используем token = hidden_states[b, s:s+1, :] с s:s+1, а не s?
         # - Зачем нужен .item() при извлечении expert_idx и weight?
         # - Что произойдет, если убрать residual connection?
         # - Как можно оптимизировать эти циклы?
-        pass
+        # pass
+
+        # Шаг 1 - Router
+        # nn.Module.__call__ обёртка: router(...) автоматически вызывает router.forward(...)
+        routing_weights, selected_experts, balance_loss = self.router(hidden_states, training)
+
+        # Шаг 2 - Размерности
+        batch_size, seq_len, hidden_size = hidden_states.shape
+
+        # Шаг 3 - Output тензор
+        output = torch.zeros(batch_size, seq_len, hidden_size, device=hidden_states.device)
+
+        # Шаг 4 - Dispatch + Process + Combine (наивный подход)
+        for b in range(batch_size):
+            for s in range(seq_len):
+                token = hidden_states[b, s:s+1, :]  # (1, 1, H)
+                token_output = torch.zeros(1, 1, hidden_size, device=hidden_states.device)
+
+                for k in range(self.top_k):
+                    expert_idx = selected_experts[b, s, k].item()
+                    weight = routing_weights[b, s, k].item()
+
+                    expert_output = self.experts[expert_idx](token)  # (1, 1, H)
+
+                    token_output += weight * expert_output  # Взвешенное суммирование
+
+                output[b, s, :] = token_output.squeeze()    # Сохранение результата
+
+        # Шаг 5 - Residual connection
+        output = output + hidden_states
+
+        # Шаг 6 - Return
+        return output, balance_loss
+
+
