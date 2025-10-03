@@ -90,7 +90,36 @@ class Expert(nn.Module):
         # - Зачем нужен dropout в экспертах?
         # - Как SwiGLU отличается от обычного ReLU FFN?
         # - Почему каждый эксперт должен иметь одинаковую архитектуру?
-        pass
+        # pass
+
+        # --- Валидация параметров -------------------------------------------------
+        # Используем assert для раннего обнаружения ошибок конфигурации.
+        assert isinstance(hidden_size, int) and hidden_size > 0, (
+            "hidden_size должен быть положительным целым числом"
+        )
+        assert isinstance(intermediate_size, int) and intermediate_size > 0, (
+            "intermediate_size должен быть положительным целым числом"
+        )
+        assert isinstance(dropout, float) and 0.0 <= dropout < 1.0, (
+            "dropout должен быть в диапазоне [0.0, 1.0)"
+        )
+
+        # --- Сохранение параметров ------------------------------------------------
+        # Храним параметры как атрибуты экземпляра
+        self.hidden_size = hidden_size
+        self.intermediate_size = intermediate_size
+        self.dropout_prob = dropout
+
+        # --- Создание слоев ------------------------------------------------------
+        # SwiGLU feed-forward сеть
+        self.ffn = SwiGLU(
+            input_dim=self.hidden_size,
+            output_dim=self.hidden_size,
+            intermediate_dim=self.intermediate_size
+        )
+
+        # Dropout слой для регуляризации
+        self.dropout = nn.Dropout(p=self.dropout_prob)
 
 
     def forward(self, hidden_states: torch.Tensor) -> torch.Tensor:
@@ -121,4 +150,11 @@ class Expert(nn.Module):
         # - Нужен ли residual connection внутри эксперта?
         # - Когда применяется dropout - только при training или всегда?
         # - Как размерности входа и выхода связаны?
-        pass
+        # pass
+
+        # Прямое распространение через SwiGLU FFN
+        x = self.ffn(hidden_states)
+        # Применение dropout для регуляризации
+        x = self.dropout(x)
+        
+        return x
