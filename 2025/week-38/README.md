@@ -42,7 +42,7 @@
 
 ## 🔗 Ссылки
 
-- Обзор недели: [review](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-38/review.md)
+- Обзор недели: [review](https://verbasik.github.io/Weekly-arXiv-ML-AI-Research-Review/#2025/week-38)
 
 ## 📜 Цитирование
 
