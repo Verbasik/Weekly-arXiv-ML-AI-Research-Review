@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - The Weekly Research Brief</title>
+    <!-- External CSS Libraries -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.2.0/github-markdown.min.css">
+    <!-- Google Fonts (Inter/IBM) + Pixel Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;500;600;700&family=Silkscreen:wght@400;700&family=VT323&display=swap" rel="stylesheet">
+    <!-- Pixel Theme (primary) -->
+    <link rel="stylesheet" href="css/pixel-theme.css">
+    <!-- Mobile Optimizations -->
+    <link rel="stylesheet" href="css/mobile-optimizations.css">
+</head>
+<body>
+    <header class="pixel-p-4">
+        <div class="pixel-container">
+            <div class="pixel-card pixel-card--accent pixel-flex pixel-flex-between pixel-gap-4 hero-card">
+                <div class="pixel-flex-center pixel-gap-3">
+                    <div style="font-size: 3rem;">🧠</div>
+                    <div>
+                        <h1 style="font-family: var(--pixel-font-title); font-size: var(--pixel-font-2xl); margin-bottom: var(--px-unit-half); text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.8);">
+                            TWRB
+                        </h1>
+                        <div style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-xs); color: var(--pixel-ink-soft);">
+                            The Weekly Research Brief
+                        </div>
+                    </div>
+                </div>
+                <div class="pixel-flex pixel-flex-wrap pixel-gap-2">
+                    <span class="pixel-badge pixel-badge--star" data-icon="⭐">Awesome</span>
+                    <span class="pixel-badge pixel-badge--heart" data-icon="❤️">Made With Love</span>
+                    <span class="pixel-badge pixel-badge--diamond" data-icon="💎">Open Source</span>
+                </div>
+            </div>
+            <div class="pixel-text-center pixel-mt-2" style="font-family: var(--pixel-font-body); font-style: italic; color: var(--pixel-ink-soft);">
+                "The more I know, the more I realize I know nothing."
+            </div>
+        </div>
+    </header>
+
+    <nav class="pixel-p-3">
+        <div class="pixel-container">
+            <div class="pixel-card pixel-flex-col pixel-gap-2 nav-stack" style="padding: var(--pixel-space-2);">
+                <div class="pixel-flex pixel-flex-wrap pixel-gap-2 nav-actions">
+                    <a href="../index.html#home" class="pixel-btn pixel-btn--sm">🏠 Home</a>
+                    <a href="../atlas-wrapper.html" class="pixel-btn pixel-btn--primary pixel-btn--sm" title="Algorithm Templates for Live AI Scripts">
+                        📊 ATLAS 
+                        <span class="pixel-badge pixel-badge--crown" data-icon="✨" style="margin-left: var(--px-unit-half); font-size: var(--pixel-font-xs);">New</span>
+                    </a>
+                    <a href="agents.html" class="pixel-btn pixel-btn--sm">🤖 Agents</a>
+                    
+                    <div class="pixel-dropdown" style="position: relative; display: inline-block;">
+                        <button class="pixel-btn pixel-btn--sm pixel-dropdown-btn" onclick="toggleDropdown()">📅 Years ▼</button>
+                        <div class="pixel-dropdown-content" id="yearsDropdown" style="display: none; position: absolute; top: 100%; left: 0; z-index: var(--pixel-z-dropdown); margin-top: var(--px-unit-half);">
+                            <div class="pixel-card" style="min-width: 120px; padding: var(--pixel-space-1);">
+                                <a href="../index.html#2025" class="pixel-btn pixel-btn--sm" style="width: 100%; margin-bottom: var(--px-unit-half);">2025</a>
+                                <a href="../index.html#2024" class="pixel-btn pixel-btn--sm" style="width: 100%;">2024</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <a href="about.html" class="pixel-btn pixel-btn--sm">ℹ️ About</a>
+                    <a href="../index.html#contribute" class="pixel-btn pixel-btn--sm">🤝 Contribute</a>
+                    <a href="../index.html#contact" class="pixel-btn pixel-btn--sm">✉️ Contact</a>
+                    <div class="nav-lang-inline" aria-label="Language switch">
+                        <a href="about.html" class="pixel-btn pixel-btn--sm" aria-label="Switch to Russian">RU</a>
+                        <span class="pixel-badge pixel-badge--star" data-icon="⭐" aria-label="Current language: English">EN</span>
+                    </div>
+                </div>
+                
+                <div class="pixel-flex pixel-gap-1 pixel-justify-end nav-search" style="min-width: 200px;">
+                    <input type="text" class="pixel-input" placeholder="Search papers..." style="font-size: var(--pixel-font-sm);">
+                    <button class="pixel-btn pixel-btn--primary pixel-btn--sm">🔍</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <div class="pixel-container">
+            <div class="about-content pixel-stack">
+                <!-- Profile layout (reference-like: left hero + right experience) -->
+                <section id="about" class="profile-layout" style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--pixel-space-4);">
+                    <!-- Left: Hero/Profile card -->
+                    <div class="pixel-card pixel-card--accent" style="display: grid; grid-template-columns: 180px 1fr; gap: var(--pixel-space-3); align-items: start;">
+                        <div class="pixel-card" style="width: 180px; height: 180px; display: flex; align-items: center; justify-content: center; background: var(--pixel-bg-cream);">
+                            <div style="font-size: 4rem;">🧑‍💻</div>
+                        </div>
+                        <div>
+                            <div class="pixel-flex pixel-flex-between pixel-gap-2" style="align-items: flex-start;">
+                                <div>
+                                    <h2 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-xl); margin-bottom: var(--px-unit-half);">Edward Verbetsky</h2>
+                                    <div style="font-family: var(--pixel-font-body); color: var(--pixel-ink-soft);">Head of AI‑Powered Process Automation • Sberbank</div>
+                                </div>
+                                <div class="pixel-flex pixel-gap-1">
+                                    <a href="https://t.me/Verbasik" class="pixel-btn pixel-btn--sm" target="_blank" title="@Verbasik">📨</a>
+                                    <a href="https://github.com/Verbasik" class="pixel-btn pixel-btn--sm" target="_blank">🐙</a>
+                                    <a href="https://www.linkedin.com/in/verbasik/" class="pixel-btn pixel-btn--sm" target="_blank">💼</a>
+                                    <a href="mailto:verbasik2018@gmail.com" class="pixel-btn pixel-btn--sm" title="Email">✉️</a>
+                                </div>
+                            </div>
+
+                            <!-- Stats row -->
+                            <div class="pixel-flex pixel-flex-wrap pixel-gap-2 pixel-mt-2">
+                                <div class="pixel-card" style="padding: var(--pixel-space-2); min-width: 110px; text-align: center;">
+                                    <div style="font-family: var(--pixel-font-title); font-size: var(--pixel-font-lg);">500+</div>
+                                    <div style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-xs); color: var(--pixel-ink-soft);">papers</div>
+                                </div>
+                                <div class="pixel-card" style="padding: var(--pixel-space-2); min-width: 110px; text-align: center;">
+                                    <div style="font-family: var(--pixel-font-title); font-size: var(--pixel-font-lg);">33+</div>
+                                    <div style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-xs); color: var(--pixel-ink-soft);">issues</div>
+                                </div>
+                                <div class="pixel-card" style="padding: var(--pixel-space-2); min-width: 110px; text-align: center;">
+                                    <div style="font-family: var(--pixel-font-title); font-size: var(--pixel-font-lg);">2y</div>
+                                    <div style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-xs); color: var(--pixel-ink-soft);">running</div>
+                                </div>
+                                <div class="pixel-card" style="padding: var(--pixel-space-2); min-width: 110px; text-align: center;">
+                                    <div style="font-family: var(--pixel-font-title); font-size: var(--pixel-font-lg);">10+</div>
+                                    <div style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-xs); color: var(--pixel-ink-soft);">demos</div>
+                                </div>
+                            </div>
+
+                            <p style="margin-top: var(--pixel-space-2); color: var(--pixel-ink-soft);">
+                                Engineer AI, Researcher and Scientist. Passionate about making complex research accessible with clear reviews and practical implementations.
+                            </p>
+
+                            <div class="pixel-flex pixel-gap-2 pixel-mt-2">
+                                <a href="mailto:verbasik2018@gmail.com" class="pixel-btn pixel-btn--primary">✉️ Contact</a>
+                                <a href="https://github.com/Verbasik" target="_blank" class="pixel-btn">📁 Portfolio</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Work Experience list -->
+                    <aside class="pixel-card">
+                        <h3 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-lg); margin-bottom: var(--pixel-space-2);">🧰 Work experience</h3>
+                        <div class="pixel-stack">
+                            <div class="pixel-card" style="padding: var(--pixel-space-2);">
+                                <div style="font-weight: 700;">Head of AI‑Powered Process Automation</div>
+                                <div style="color: var(--pixel-ink-soft);">Sberbank • 2024 — present</div>
+                            </div>
+                            <div class="pixel-card" style="padding: var(--pixel-space-2);">
+                                <div style="font-weight: 700;">Tech Lead AI Agents</div>
+                                <div style="color: var(--pixel-ink-soft);">Alfa‑Bank • 2023 — 2024</div>
+                            </div>
+                            <div class="pixel-card" style="padding: var(--pixel-space-2);">
+                                <div style="font-weight: 700;">Senior ML Engineer</div>
+                                <div style="color: var(--pixel-ink-soft);">R&D • 2020 — 2023</div>
+                            </div>
+                        </div>
+                    </aside>
+                </section>
+
+                <!-- Quick Links / Filters in Pixel Style -->
+                <!-- Quick Links / Filters in Pixel Style -->
+                <section class="pixel-card">
+                    <h2 class="section-heading" style="font-family: var(--pixel-font-display);">🧭 Quick Links</h2>
+                    <div class="pixel-flex pixel-flex-wrap pixel-gap-2 pixel-mt-2">
+                        <a href="#experience" class="pixel-btn pixel-btn--sm" style="text-align: left;">🚀 Experience</a>
+                        <a href="#education" class="pixel-btn pixel-btn--sm" style="text-align: left;">🎓 Education</a>
+                        <a href="#development" class="pixel-btn pixel-btn--sm" style="text-align: left;">📜 Development</a>
+                        <a href="#interests" class="pixel-btn pixel-btn--sm" style="text-align: left;">🔬 Interests</a>
+                        <a href="#philosophy" class="pixel-btn pixel-btn--sm" style="text-align: left;">💡 Philosophy</a>
+                    </div>
+                </section>
+
+                <!-- Skills / Tags Display -->
+                <section class="pixel-card">
+                    <h2 class="section-heading" style="font-family: var(--pixel-font-display);">🏷️ Skills & Tags</h2>
+                    <div class="pixel-flex pixel-flex-wrap pixel-gap-1 pixel-mt-2">
+                        <span class="pixel-tag">🧠 AI</span>
+                        <span class="pixel-tag">🤖 LLMs</span>
+                        <span class="pixel-tag">🧮 Math</span>
+                        <span class="pixel-tag">📈 ML</span>
+                        <span class="pixel-tag">💬 NLP</span>
+                        <span class="pixel-tag">👁️ CV</span>
+                        <span class="pixel-tag">🧬 Neuroscience</span>
+                        <span class="pixel-tag">⚙️ Systems</span>
+                    </div>
+                </section>
+
+                <section id="experience" class="experience-section pixel-card">
+                    <h2 class="section-heading" style="font-family: var(--pixel-font-display);">🚀 Professional Experience</h2>
+                    <div class="pixel-flex pixel-gap-1 pixel-mb-2">
+                        <span class="pixel-badge pixel-badge--star" data-icon="⭐">Highlights</span>
+                        <span class="pixel-badge" data-icon="🧩">Projects</span>
+                    </div>
+                    <div class="exp-grid">
+                        <div class="pixel-card exp-card">
+                            <h3>Head of AI‑Powered Process Automation</h3>
+                            <div class="exp-meta"><span>Sberbank</span><span class="dot"></span><span>2024 — Present</span></div>
+                            <p class="exp-summary">Leadership in strategy and implementation of AI-driven business process automation.</p>
+                            <ul class="exp-bullets">
+                                <li>Built a platform approach and data/ML pipelines.</li>
+                                <li>Launched 10+ pilots with measurable business impact.</li>
+                                <li>Established quality practices, MLOps, and monitoring.</li>
+                            </ul>
+                            <div class="pixel-flex pixel-flex-wrap pixel-gap-1 pixel-mt-2"><span class="pixel-tag">MLOps</span><span class="pixel-tag">Automation</span><span class="pixel-tag">LLMs</span></div>
+                        </div>
+                        <div class="pixel-card exp-card">
+                            <h3>Tech Lead AI Agents</h3>
+                            <div class="exp-meta"><span>Alfa‑Bank</span><span class="dot"></span><span>2023 — 2024</span></div>
+                            <p class="exp-summary">Led development of AI agents for banking use cases.</p>
+                            <ul class="exp-bullets">
+                                <li>Designed agent architecture and API integrations.</li>
+                                <li>Optimized inference cost and latency.</li>
+                            </ul>
+                            <div class="pixel-flex pixel-flex-wrap pixel-gap-1 pixel-mt-2"><span class="pixel-tag">Agents</span><span class="pixel-tag">Retrieval</span><span class="pixel-tag">Eval</span></div>
+                        </div>
+                        <div class="pixel-card exp-card">
+                            <h3>Team Lead Data Science</h3>
+                            <div class="exp-meta"><span>Moscow DIT</span><span class="dot"></span><span>2021 — 2023</span></div>
+                            <p class="exp-summary">Led a data science team for city management tasks.</p>
+                            <ul class="exp-bullets">
+                                <li>Managed a 10+ specialists team, roadmap, and KPIs.</li>
+                                <li>Deployed production forecasting and optimization models.</li>
+                            </ul>
+                            <div class="pixel-flex pixel-flex-wrap pixel-gap-1 pixel-mt-2"><span class="pixel-tag">Time‑Series</span><span class="pixel-tag">Forecasting</span><span class="pixel-tag">Optimization</span></div>
+                        </div>
+                        <div class="pixel-card exp-card">
+                            <h3>Data Analytics</h3>
+                            <div class="exp-meta"><span>N.A. Semashko Research Institute of Public Health</span><span class="dot"></span><span>2019 — 2021</span></div>
+                            <p class="exp-summary">Data analytics in public health and medical research.</p>
+                            <ul class="exp-bullets">
+                                <li>Cohort studies, reporting, and visualization.</li>
+                                <li>ETL automation and data quality checks.</li>
+                            </ul>
+                            <div class="pixel-flex pixel-flex-wrap pixel-gap-1 pixel-mt-2"><span class="pixel-tag">ETL</span><span class="pixel-tag">Health</span><span class="pixel-tag">BI</span></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Education Section -->
+                <section id="education" class="education-section pixel-card">
+                    <h2 class="section-heading" style="font-family: var(--pixel-font-display);">🎓 Education</h2>
+                    <div class="pixel-flex pixel-gap-1 pixel-mb-2">
+                        <span class="pixel-badge" data-icon="📚">Courses</span>
+                        <span class="pixel-badge" data-icon="🏛️">Universities</span>
+                    </div>
+                    <div class="edu-grid">
+                        <div class="pixel-card edu-card">
+                            <h3>MSc — Computer Science</h3>
+                            <div class="edu-meta">MAI (National Research University), Moscow • 2026</div>
+                            <ul class="edu-highlights">
+                                <li>Machine Learning and Data Analysis</li>
+                                <li>Distributed systems, network protocols</li>
+                            </ul>
+                            <div class="pixel-flex pixel-gap-1 pixel-mt-2"><span class="pixel-tag">AI</span><span class="pixel-tag">Networks</span></div>
+                        </div>
+
+                        <div class="pixel-card edu-card">
+                            <h3>BSc — Computational Mathematics</h3>
+                            <div class="edu-meta">Lomonosov Moscow State University • 2020</div>
+                            <ul class="edu-highlights">
+                                <li>Computational mathematics and cybernetics</li>
+                                <li>Applied mathematics and computer science</li>
+                            </ul>
+                            <div class="pixel-flex pixel-gap-1 pixel-mt-2"><span class="pixel-tag">Math</span><span class="pixel-tag">CS</span></div>
+                        </div>
+
+                        <div class="pixel-card edu-card">
+                            <h3>Additional Education — Management</h3>
+                            <div class="edu-meta">Moscow International Academy • 2016</div>
+                            <ul class="edu-highlights">
+                                <li>Business administration</li>
+                                <li>Project and product management</li>
+                            </ul>
+                            <div class="pixel-flex pixel-gap-1 pixel-mt-2"><span class="pixel-tag">Management</span></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Courses Section -->
+                <section id="development" class="courses-section pixel-card">
+                    <h2 class="section-heading" style="font-family: var(--pixel-font-display);">📜 Professional Development</h2>
+                    <div class="pixel-flex pixel-gap-1 pixel-mb-2">
+                        <span class="pixel-badge" data-icon="🧠">ML</span>
+                        <span class="pixel-badge" data-icon="🧮">Math</span>
+                    </div>
+                    <div class="course-grid">
+                        <div class="pixel-card course-card">
+                            <h3>Professional retraining “Data Science”</h3>
+                            <div class="course-meta">Yandex Practicum</div>
+                            <ul class="course-points">
+                                <li>ML, Python, statistics, production practices</li>
+                                <li>Project track and code review</li>
+                            </ul>
+                            <div class="pixel-flex pixel-gap-1 pixel-mt-2"><span class="pixel-tag">ML</span><span class="pixel-tag">Python</span><span class="pixel-tag">Stats</span></div>
+                        </div>
+                        <div class="pixel-card course-card">
+                            <h3>Mathematics for Data Analysis and ML</h3>
+                            <div class="course-meta">Yandex Practicum</div>
+                            <ul class="course-points">
+                                <li>Linear algebra, probability/statistics, calculus</li>
+                                <li>Practice in derivations and proofs</li>
+                            </ul>
+                            <div class="pixel-flex pixel-gap-1 pixel-mt-2"><span class="pixel-tag">LA</span><span class="pixel-tag">Stats</span><span class="pixel-tag">Calculus</span></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Research & Interests (split grid) -->
+                <section id="interests" class="interests-section pixel-card">
+                    <h2 class="section-heading" style="font-family: var(--pixel-font-display);">🔬 Research & Interests</h2>
+                    <div class="pixel-flex pixel-gap-1 pixel-mb-2">
+                        <span class="pixel-badge" data-icon="🧠">AI</span>
+                        <span class="pixel-badge" data-icon="🧬">Neuro</span>
+                    </div>
+                    <div class="pixel-grid" style="grid-template-columns: 1.2fr 1fr; gap: var(--pixel-space-3);">
+                        <div class="pixel-card">
+                            <h3 style="font-family: var(--pixel-font-display);">🧠 Current research</h3>
+                            <div class="pixel-stack">
+                                <div>
+                                    <div style="font-weight:700;">EEG ➝ Text</div>
+                                    <p class="exp-summary">A model to convert EEG signals into text.</p>
+                                    <ul class="exp-bullets">
+                                        <li>66% of cases — top‑5 semantically close phrases (cos≈0.61)</li>
+                                        <li>Pipeline: EEG preprocessing → encoding → recognition</li>
+                                    </ul>
+                                    <div class="pixel-flex pixel-gap-1 pixel-mt-2"><span class="pixel-tag">BCI</span><span class="pixel-tag">Deep Learning</span><span class="pixel-tag">Signal</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="interest-grid">
+                            <div class="pixel-card interest-card"><h3>Neurobiology</h3><p>Physical principles of bioprocesses and their modeling.</p></div>
+                            <div class="pixel-card interest-card"><h3>Artificial Intelligence</h3><p>Applied solutions and integrations powered by AI.</p></div>
+                            <div class="pixel-card interest-card"><h3>Scientific Literature</h3><p>Favorite book: “What Is Life?” by E. Schrödinger.</p></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Professional Philosophy (principles grid) -->
+                <section id="philosophy" class="philosophy-section pixel-card">
+                    <h2 class="section-heading" style="font-family: var(--pixel-font-display);">💡 Professional Philosophy</h2>
+                    <div class="pixel-flex pixel-gap-1 pixel-mb-2">
+                        <span class="pixel-badge" data-icon="⚙️">Systems</span>
+                        <span class="pixel-badge" data-icon="📈">Math</span>
+                        <span class="pixel-badge" data-icon="🚀">Innovation</span>
+                    </div>
+                    <blockquote style="margin-bottom: var(--pixel-space-3);">"A true scientist follows new information that transforms into knowledge."</blockquote>
+                    <div class="philo-grid">
+                        <div class="pixel-card principle-card"><h3>Systems Thinking</h3><p>Structured methods and architectural thinking for complex problems.</p></div>
+                        <div class="pixel-card principle-card"><h3>Mathematical Methods</h3><p>The formal apparatus — a language of precision and verifiability.</p></div>
+                        <div class="pixel-card principle-card"><h3>Innovation</h3><p>Continuous learning, rapid experimentation, and deployment.</p></div>
+                    </div>
+                </section>
+
+                <!-- Reviews / Feedback (reference-like bottom row) -->
+                <section class="pixel-card">
+                    <h2 class="section-heading" style="font-family: var(--pixel-font-display);">⭐ Community feedback</h2>
+                    <div class="pixel-grid pixel-gap-3" style="grid-template-columns: repeat(4, 1fr); display: grid;">
+                        <div class="pixel-card" style="padding: var(--pixel-space-3);">
+                            <div style="font-family: var(--pixel-font-title); font-size: var(--pixel-font-xl);">4.9 / 5.0</div>
+                            <div style="color: var(--pixel-ink-soft); margin: var(--px-unit) 0;">127 ratings</div>
+                            <a class="pixel-btn pixel-btn--sm" href="#">See stats</a>
+                        </div>
+                        <div class="pixel-card" style="padding: var(--pixel-space-3);">
+                            <div style="height: 80px; background: var(--pixel-surface-secondary); border: var(--pixel-border-thin);
+                                        background-image: linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px); background-size: 8px 8px;"></div>
+                            <div style="color: var(--pixel-ink-soft); font-size: var(--pixel-font-xs); margin-top: var(--px-unit);">Activity trend</div>
+                        </div>
+                        <div class="pixel-card" style="padding: var(--pixel-space-3);">
+                            <div style="font-weight: 700;">“Reading every week”</div>
+                            <p style="color: var(--pixel-ink-soft); font-size: var(--pixel-font-sm);">Great reviews and clear explanations; easy to revisit materials.</p>
+                        </div>
+                        <div class="pixel-card" style="padding: var(--pixel-space-3);">
+                            <div style="font-weight: 700;">“Useful demos and code”</div>
+                            <p style="color: var(--pixel-ink-soft); font-size: var(--pixel-font-sm);">Demos and code links help to dive in and try things quickly.</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <footer class="pixel-p-4" style="margin-top: var(--pixel-space-8); background: var(--pixel-bg-lavender);">
+        <div class="pixel-container">
+            <div class="pixel-card pixel-card--accent pixel-text-center pixel-mb-4">
+                <h2 style="font-family: var(--pixel-font-title); font-size: var(--pixel-font-2xl); margin-bottom: var(--pixel-space-2);">🎮 GAME INFO 🎮</h2>
+                <div class="pixel-flex pixel-flex-center pixel-gap-3">
+                    <span class="pixel-badge pixel-badge--star" data-icon="⭐">Level Complete</span>
+                    <span class="pixel-badge pixel-badge--heart" data-icon="❤️">Thanks for Playing</span>
+                    <span class="pixel-badge pixel-badge--diamond" data-icon="💎">Come Back Soon</span>
+                </div>
+            </div>
+
+            <div class="pixel-grid pixel-grid-4 pixel-gap-4">
+                <div class="pixel-card">
+                    <h4 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-base); margin-bottom: var(--pixel-space-2);">📖 About Quest</h4>
+                    <p style="font-size: var(--pixel-font-sm); margin-bottom: var(--pixel-space-3);">Weekly collection of arXiv paper reviews in ML/AI with practical implementations.</p>
+                    <div class="pixel-flex pixel-gap-2">
+                        <a href="https://github.com/Verbasik" class="pixel-btn pixel-btn--sm" target="_blank" rel="noopener">🐙 GitHub</a>
+                        <a href="https://t.me/Verbasik" class="pixel-btn pixel-btn--sm" target="_blank" rel="noopener" title="@Verbasik">📨 Telegram</a>
+                        <a href="https://www.linkedin.com/in/verbasik/" class="pixel-btn pixel-btn--sm" target="_blank" rel="noopener">💼 LinkedIn</a>
+                        <a href="mailto:verbasik2018@gmail.com" class="pixel-btn pixel-btn--sm" title="verbasik2018@gmail.com">✉️ Email</a>
+                    </div>
+                </div>
+                <div class="pixel-card">
+                    <h4 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-base); margin-bottom: var(--pixel-space-2);">🚀 Quick Links</h4>
+                    <div style="display: flex; flex-direction: column; gap: var(--px-unit);">
+                        <a href="../index.html#home" class="pixel-btn pixel-btn--sm" style="text-align: left;">🏠 Home Base</a>
+                        <a href="../atlas-wrapper.html" class="pixel-btn pixel-btn--sm" style="text-align: left;">📊 ATLAS Project</a>
+                        <a href="../index.html#2025" class="pixel-btn pixel-btn--sm" style="text-align: left;">🗡️ 2025 Papers</a>
+                        <a href="../index.html#2024" class="pixel-btn pixel-btn--sm" style="text-align: left;">🛡️ 2024 Papers</a>
+                    </div>
+                </div>
+                <div class="pixel-card">
+                    <h4 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-base); margin-bottom: var(--pixel-space-2);">🎒 Resources</h4>
+                    <div style="display: flex; flex-direction: column; gap: var(--px-unit);">
+                        <a href="https://arxiv.org/" class="pixel-btn pixel-btn--sm" style="text-align: left;" target="_blank">📄 arXiv</a>
+                        <a href="https://paperswithcode.com/" class="pixel-btn pixel-btn--sm" style="text-align: left;" target="_blank">💻 Papers With Code</a>
+                        <a href="https://github.com/" class="pixel-btn pixel-btn--sm" style="text-align: left;" target="_blank">🐙 GitHub</a>
+                        <a href="https://colab.research.google.com/" class="pixel-btn pixel-btn--sm" style="text-align: left;" target="_blank">🔬 Google Colab</a>
+                    </div>
+                </div>
+                <div class="pixel-card">
+                    <h4 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-base); margin-bottom: var(--pixel-space-2);">🤝 Join Guild</h4>
+                    <p style="font-size: var(--pixel-font-sm); margin-bottom: var(--pixel-space-2);">Found an error or want to contribute? Submit a pull request!</p>
+                    <a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review" class="pixel-btn pixel-btn--primary pixel-btn--sm" target="_blank">🚀 Join on GitHub</a>
+                </div>
+            </div>
+
+            <div class="pixel-card pixel-text-center pixel-mt-4" style="padding: var(--pixel-space-2);">
+                <div style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-sm); color: var(--pixel-ink-soft);">🎮 © 2025 TWRB - Made with ❤️ for the AI research community 🎮</div>
+                <div style="font-family: var(--pixel-font-body); font-size: var(--pixel-font-xs); color: var(--pixel-ink-soft); margin-top: var(--px-unit);">Pixel theme powered by 8-bit nostalgia and modern web tech</div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Pixel Back to Top Button -->
+    <div class="pixel-btn pixel-btn--primary" id="back-to-top" style="position: fixed; bottom: var(--pixel-space-3); right: var(--pixel-space-3); z-index: var(--pixel-z-sticky); opacity: 0; visibility: hidden; transition: all var(--pixel-transition-smooth); border-radius: var(--pixel-radius-lg);">
+        ⬆️ TOP
+    </div>
+
+    <!-- Reading Modal (Fullscreen) matching index.html -->
+    <div id="markdown-modal" class="reading-modal">
+        <div class="reading-modal__overlay"></div>
+        <div class="reading-modal__container">
+            <header class="reading-modal__header">
+                <div class="reading-header__left">
+                    <h1 class="reading-title">📜 Quest Details</h1>
+                    <div class="reading-subtitle">Technical Review</div>
+                </div>
+                <div class="reading-header__controls">
+                    <button class="reading-btn reading-btn--theme" title="Toggle theme">🌙</button>
+                    <button class="reading-btn reading-btn--font-smaller" title="Smaller font">A-</button>
+                    <button class="reading-btn reading-btn--font-larger" title="Larger font">A+</button>
+                    <button class="reading-btn reading-btn--close" title="Close (Esc)">×</button>
+                </div>
+            </header>
+            <main class="reading-modal__main">
+                <div class="reading-loader" style="display: none;">
+                    <div class="pixel-card pixel-text-center pixel-p-4">
+                        <h3 style="font-family: var(--pixel-font-display); margin-bottom: var(--pixel-space-2);">🎮 Loading Quest...</h3>
+                        <div class="loader"></div>
+                    </div>
+                </div>
+                <article class="reading-article" id="markdown-content"></article>
+            </main>
+        </div>
+    </div>
+
+    <!-- ReadingModal + Back to Top Script -->
+    <script>
+        // Pixel dropdown for Years
+        function toggleDropdown() {
+            const dropdown = document.getElementById('yearsDropdown');
+            if (!dropdown) return;
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        }
+        document.addEventListener('click', function(event) {
+            const dd = document.querySelector('.pixel-dropdown');
+            const content = document.getElementById('yearsDropdown');
+            if (dd && content && !dd.contains(event.target)) { content.style.display = 'none'; }
+        });
+
+        // Reading Modal functionality (copied from index.html)
+        class ReadingModal {
+            constructor() {
+                this.modal = document.getElementById('markdown-modal');
+                this.overlay = this.modal?.querySelector('.reading-modal__overlay');
+                this.container = this.modal?.querySelector('.reading-modal__container');
+                this.article = this.modal?.querySelector('.reading-article');
+                this.loader = this.modal?.querySelector('.reading-loader');
+                this.title = this.modal?.querySelector('.reading-title');
+                this.closeBtn = this.modal?.querySelector('.reading-btn--close, .pixel-modal__close');
+                this.themeBtn = this.modal?.querySelector('.reading-btn--theme');
+                this.fontSmallerBtn = this.modal?.querySelector('.reading-btn--font-smaller');
+                this.fontLargerBtn = this.modal?.querySelector('.reading-btn--font-larger');
+                this.currentFontSize = 'normal';
+                this.isDarkTheme = false;
+                this.initEventListeners();
+            }
+            initEventListeners() {
+                if (!this.modal) return;
+                this.closeBtn?.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); this.close(); });
+                this.overlay?.addEventListener('click', (e) => { if (e.target === this.overlay) { this.close(); } });
+                document.addEventListener('keydown', (e) => {
+                    if (this.modal.classList.contains('active')) {
+                        if (e.key === 'Escape') this.close();
+                        if (e.key === '+' || (e.ctrlKey && e.key === '=')) { e.preventDefault(); this.increaseFontSize(); }
+                        if (e.key === '-' || (e.ctrlKey && e.key === '-')) { e.preventDefault(); this.decreaseFontSize(); }
+                        if (e.key === 't' || e.key === 'T') { e.preventDefault(); this.toggleTheme(); }
+                    }
+                });
+                this.themeBtn?.addEventListener('click', () => this.toggleTheme());
+                this.fontSmallerBtn?.addEventListener('click', () => this.decreaseFontSize());
+                this.fontLargerBtn?.addEventListener('click', () => this.increaseFontSize());
+            }
+            open(title, content) {
+                if (!this.modal) return;
+                this.title.textContent = `📜 ${title}`;
+                document.body.style.overflow = 'hidden';
+                this.modal.style.display = '';
+                this.modal.classList.add('active');
+                if (content) { this.article.innerHTML = content; this.loader.style.display = 'none'; }
+                else { this.showLoader(); }
+            }
+            close() {
+                if (!this.modal) return;
+                this.modal.classList.remove('active');
+                this.modal.style.display = 'none';
+                document.body.style.overflow = '';
+                this.article.innerHTML = '';
+            }
+            showLoader() { this.loader.style.display = 'flex'; this.article.innerHTML = ''; }
+            hideLoader() { this.loader.style.display = 'none'; }
+            setContent(content) { this.article.innerHTML = content; this.hideLoader(); }
+            toggleTheme() { this.isDarkTheme = !this.isDarkTheme; if (this.isDarkTheme) { this.container.classList.add('dark-theme'); this.themeBtn.textContent = '☀️'; } else { this.container.classList.remove('dark-theme'); this.themeBtn.textContent = '🌙'; } }
+            increaseFontSize() { this.article.classList.remove('font-small','font-large','font-xl'); if (this.currentFontSize==='small'){this.currentFontSize='normal';} else if(this.currentFontSize==='normal'){this.currentFontSize='large'; this.article.classList.add('font-large');} else if(this.currentFontSize==='large'){this.currentFontSize='xl'; this.article.classList.add('font-xl');}}
+            decreaseFontSize() { this.article.classList.remove('font-small','font-large','font-xl'); if (this.currentFontSize==='xl'){this.currentFontSize='large'; this.article.classList.add('font-large');} else if(this.currentFontSize==='large'){this.currentFontSize='normal';} else if(this.currentFontSize==='normal'){this.currentFontSize='small'; this.article.classList.add('font-small');} }
+        }
+        let readingModal;
+        document.addEventListener('DOMContentLoaded', function() {
+            readingModal = new ReadingModal();
+            window.readingModal = readingModal;
+        });
+
+        // Back to top functionality
+        const backToTopButton = document.getElementById('back-to-top');
+        
+        window.addEventListener('scroll', () => {
+            backToTopButton.classList.toggle('visible', window.pageYOffset > 300);
+        });
+        
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+    
+    <!-- Global search suggestions (uses index.json) -->
+    <script src="presentation/search/search.js" defer></script>
+</body>
+</html>

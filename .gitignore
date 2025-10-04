@@ -4,6 +4,7 @@
 # IDE-specific files
 **/.vscode/
 **/.cursor/
+**/.claude/
 
 # Virtual environment
 **/venv/

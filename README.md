@@ -7,6 +7,8 @@
 [![Open Source](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://opensource.org/)
 [![Telegram Channel](https://img.shields.io/badge/Telegram-TheWeeklyBrief-blue)](https://t.me/TheWeeklyBrief)
 
+[![RU](https://img.shields.io/badge/lang-RU-blue)](README.md) [![EN](https://img.shields.io/badge/lang-EN-black)](docs/README-en.md)
+
 ## 📚 О проекте
 
 Этот репозиторий представляет собой еженедельную коллекцию обзоров статей с arXiv 📰 и Hugging Face 🤗 в таких областях как: 🤖 Машинное обучение, 🧬 Биоинженерия, ⚛️ Физика. Каждую неделю я выбираю значимые публикации для детального анализа и практической реализации.

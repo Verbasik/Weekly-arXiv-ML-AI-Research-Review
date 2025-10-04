@@ -1,0 +1,39 @@
+# Основные зависимости для Qwen3 MoE
+torch>=2.0.0
+torch-audio>=2.0.0
+torchaudio>=2.0.0
+
+# Transformers и связанные библиотеки
+transformers>=4.35.0
+tokenizers>=0.14.0
+accelerate>=0.24.0
+
+# Оптимизация
+flash-attn>=2.3.0
+triton>=2.1.0
+
+# Distributed training
+deepspeed>=0.10.0
+
+# Данные и утилиты
+datasets>=2.14.0
+numpy>=1.24.0
+scipy>=1.10.0
+
+# Мониторинг и логирование
+wandb>=0.15.0
+tensorboard>=2.13.0
+
+# Тестирование
+pytest>=7.0.0
+pytest-cov>=4.0.0
+
+# Код качество
+black>=23.0.0
+isort>=5.12.0
+flake8>=6.0.0
+
+# Развитие
+jupyter>=1.0.0
+matplotlib>=3.7.0
+seaborn>=0.12.0

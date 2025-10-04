@@ -1,0 +1,510 @@
+{
+  "years": [
+    {
+      "year": "2025",
+      "weeks": [
+        {
+          "week": "week-01_&_02",
+          "title": "Week 01 & 02: LLM vs Bio",
+          "date": "Dec 30, 2024-Jan 12, 2025",
+          "tags": [
+            "LLMs",
+            "Bio"
+          ],
+          "description": "Comparative analysis of biological and artificial neural networks.",
+          "papers": 1,
+          "notebooks": 0,
+          "code": 0
+        },
+        {
+          "week": "week-03",
+          "title": "Week 03: rStar-Math",
+          "date": "Jan 13-Jan 19, 2025",
+          "tags": [
+            "Math Reasoning",
+            "Small LLMs"
+          ],
+          "description": "rStar-Math: A mathematical revolution for small language models.",
+          "papers": 1,
+          "notebooks": 0,
+          "code": 0
+        },
+        {
+          "week": "week-04",
+          "title": "Week 04: ModernBERT",
+          "date": "Jan 20-Jan 26, 2025",
+          "tags": [
+            "Encoders",
+            "Efficiency"
+          ],
+          "description": "The successor to BERT: ModernBERT.",
+          "papers": 1,
+          "notebooks": 2,
+          "code": 0
+        },
+        {
+          "week": "week-05",
+          "title": "Week 05: Bio vs LLM",
+          "date": "Jan 27-Feb 2, 2025",
+          "tags": [
+            "Deep Learning",
+            "NLP",
+            "Bio"
+          ],
+          "description": "Learning processes in biological and artificial neural networks.",
+          "papers": 1,
+          "notebooks": 0,
+          "code": 0
+        },
+        {
+          "week": "week-06",
+          "title": "Week 06: MoE",
+          "date": "Feb 3-Feb 9, 2025",
+          "tags": [
+            "DeepSpeed",
+            "MoE",
+            "Efficient Training"
+          ],
+          "description": "MoE: Mixture of Experts — a revolution in AI architecture.",
+          "papers": 1,
+          "notebooks": 0,
+          "code": 0
+        },
+        {
+          "week": "week-07_&_08",
+          "title": "Week 07 & 08: DeepSeek R1",
+          "date": "Feb 10-Feb 23, 2025",
+          "tags": [
+            "Transformers",
+            "Architecture",
+            "DeepSeek-V3",
+            "DeepSeek R1"
+          ],
+          "description": "From generation to reasoning: the evolution from GPT-style transformers to reasoning systems.",
+          "papers": 1,
+          "notebooks": 0,
+          "code": 0
+        },
+        {
+          "week": "week-09",
+          "title": "Week 09: Native Sparse Attention",
+          "date": "Feb 24-Mar 2, 2025",
+          "tags": [
+            "Attention Mechanisms",
+            "DeepSeek"
+          ],
+          "description": "Native Sparse Attention: a new type of sparse attention from DeepSeek.",
+          "papers": 1,
+          "notebooks": 0,
+          "code": 0
+        },
+        {
+          "week": "week-10",
+          "title": "Week 10: Evo-2",
+          "date": "Mar 3-Mar 9, 2025",
+          "tags": [
+            "Transformers",
+            "Bio"
+          ],
+          "description": "Evo-2 — AI that designs life.",
+          "papers": 1,
+          "notebooks": 0,
+          "code": 0
+        },
+        {
+          "week": "week-11",
+          "title": "Week 11: Scaling Laws",
+          "date": "Mar 10-Mar 16, 2025",
+          "tags": [
+            "Distillation",
+            "Scaling Laws"
+          ],
+          "description": "Distillation scaling laws.",
+          "papers": 1,
+          "notebooks": 0,
+          "code": 0
+        },
+        {
+          "week": "week-12",
+          "title": "Week 12: MCP",
+          "date": "Mar 17-Mar 23, 2025",
+          "tags": [
+            "Protocol",
+            "Ai Agents"
+          ],
+          "description": "Model Context Protocol (MCP).",
+          "papers": 1,
+          "notebooks": 0,
+          "code": 1,
+          "code_path": "2025/week-12/MCP"
+        },
+        {
+          "week": "week-13",
+          "title": "Week 13: DAPO",
+          "date": "Mar 24-Mar 30, 2025",
+          "tags": [
+            "Reinforcement Learning",
+            "LLMs"
+          ],
+          "description": "DAPO: a breakthrough RL algorithm from ByteDance.",
+          "papers": 1,
+          "notebooks": 2,
+          "code": 0,
+          "notebook_path": "2025/week-13/experiments"
+        },
+        {
+          "week": "week-14",
+          "title": "Week 14: Qwen2.5-Omni",
+          "date": "Mar 31-Apr 6, 2025",
+          "tags": [
+            "Qwen",
+            "Multimodal",
+            "LLMs"
+          ],
+          "description": "Qwen2.5-Omni: a next-generation multimodal model.",
+          "papers": 1,
+          "notebooks": 0,
+          "code": 0
+        },
+        {
+          "week": "week-15",
+          "title": "Week 15: Google DeepMind",
+          "date": "Apr 7-Apr 13, 2025",
+          "tags": [
+            "LLMs",
+            "KnowledgeAcquisition",
+            "HallucinationsInAI"
+          ],
+          "description": "How LLMs acquire facts — and why they hallucinate.",
+          "papers": 1,
+          "notebooks": 0,
+          "code": 0
+        },
+        {
+          "week": "week-16",
+          "title": "Week 16: Agent2Agent",
+          "date": "Apr 14-Apr 20, 2025",
+          "tags": [
+            "Google",
+            "Protocol",
+            "A2A",
+            "Ai Agents"
+          ],
+          "description": "The era of multi-agents? Google introduces A2A.",
+          "papers": 1,
+          "notebooks": 0,
+          "code": 1,
+          "code_path": "2025/week-16/A2A"
+        },
+        {
+          "week": "week-17_&_18",
+          "title": "Week 17 & 18: Nemotron-H",
+          "date": "Apr 21-May 4, 2025",
+          "tags": [
+            "Nvidia",
+            "Mamba",
+            "Transformers",
+            "Hybrid"
+          ],
+          "description": "Mamba 2 + Transformer = Nemotron H",
+          "papers": 1,
+          "notebooks": 0,
+          "code": 0
+        },
+        {
+          "week": "week-19",
+          "title": "Week 19: I-Con",
+          "date": "May 05-May 11, 2025",
+          "tags": [
+            "ML",
+            "ICon",
+            "Framework",
+            "Algorithms"
+          ],
+          "description": "I-Con: a periodic table of machine learning.",
+          "papers": 1,
+          "notebooks": 2,
+          "code": 0,
+          "notebook_path": "2025/week-19"
+        },
+        {
+          "week": "week-20",
+          "title": "Week 20: Continuous Thought Machines",
+          "date": "May 12-May 18, 2025",
+          "tags": [
+            "ML",
+            "SakanaAI",
+            "Architecture",
+            "CTM"
+          ],
+          "description": "Continuous Thought Machine — an architecture inspired by biological neural processes.",
+          "papers": 1,
+          "notebooks": 1,
+          "code": 0,
+          "notebook_path": "2025/week-20/example.ipynb"
+        },
+        {
+          "week": "week-21",
+          "title": "Week 21: RNN, LSTM & Transformers",
+          "date": "May 19-May 25, 2025",
+          "tags": [
+            "Practical",
+            "ML",
+            "Architecture"
+          ],
+          "description": "A repository of interactive Jupyter tutorials for machine learning.",
+          "papers": 0,
+          "notebooks": 5,
+          "code": 0,
+          "notebook_path": "2025/week-21"
+        },
+        {
+          "week": "week-22",
+          "title": "Week 22: Inference-Time Scaling for Generalist Reward Modeling",
+          "date": "May 26-Jun 01, 2025",
+          "tags": [
+            "DeepSeek",
+            "ReinforcementLearning",
+            "RewardModel"
+          ],
+          "description": "Generative Reward Modeling (GRM) with Inference-Time Scaling (ITS).",
+          "papers": 1,
+          "notebooks": 0,
+          "code": 0
+        },
+        {
+          "week": "week-23-25",
+          "title": "Week 23-25: Сессия",
+          "date": "Jun 02-Jun 22, 2025",
+          "tags": [
+            "Study"
+          ],
+          "description": "No technical reviews during this period due to exam session.",
+          "papers": 0,
+          "notebooks": 0,
+          "code": 0
+        },
+        {
+          "week": "week-26",
+          "title": "Week 26: Large Language Diffusion Models",
+          "date": "Jun 23-Jun 29, 2025",
+          "tags": [
+            "LLDM",
+            "Gemini Diffusion",
+            "Mercury Coder",
+            "LLaDA",
+            "Eso-LM"
+          ],
+          "description": "Diffusion Language Models — an alternative to classic transformers?",
+          "papers": 1,
+          "notebooks": 0,
+          "code": 0
+        },
+        {
+          "week": "week-27",
+          "title": "Week 27: Text-to-LoRA",
+          "date": "Jun 30-July 06, 2025",
+          "tags": [
+            "Sakana AI",
+            "TextToLoRA",
+            "Hypernetwork",
+            "Finetuning"
+          ],
+          "description": "Text-to-LoRA from Sakana AI: generate adapters straight from text!",
+          "papers": 1,
+          "notebooks": 0,
+          "code": 0
+        },
+        {
+          "week": "week-28",
+          "title": "Week 28: OpenAI Agents SDK",
+          "date": "July 07-July 13, 2025",
+          "tags": [
+            "OpenAI",
+            "AIAgents",
+            "AgentsSDK",
+            "MAS"
+          ],
+          "description": "OpenAI Agents SDK: quick start or an expensive black box?",
+          "papers": 0,
+          "notebooks": 1,
+          "notebook_path": "agents-under-hood/openai-cs-agents-demo/CookBook.ipynb",
+          "code": 1,
+          "code_path": "agents-under-hood/openai-cs-agents-demo"
+        },
+        {
+          "week": "week-29",
+          "title": "Week 29: Kimi-K2 - MoE-Монстр с триллионом параметров",
+          "date": "July 14-July 20, 2025",
+          "tags": [
+            "Moonshot AI",
+            "Kimi-K2",
+            "LLMs",
+            "MoE",
+            "Agentic AI"
+          ],
+          "description": "🔥 Kimi-K2, the MoE monster! A new open-source star from China with 1 trillion parameters.",
+          "papers": 1,
+          "notebooks": 0,
+          "code": 0
+        },
+        {
+          "week": "week-30",
+          "title": "Week 30: ATLAS",
+          "date": "July 21-July 27, 2025",
+          "tags": [
+            "ATLAS",
+            "Math",
+            "ML",
+            "AI"
+          ],
+          "description": "ATLAS: ready to go from mathematical foundations to gradient descent?",
+          "papers": 0,
+          "notebooks": 1,
+          "code": 0,
+          "notebook_path": "2025/week-30/review.md"
+        },
+        {
+          "week": "week-31",
+          "title": "Week 31: ATLAS",
+          "date": "July 28-Aug 03, 2025",
+          "tags": [
+            "ATLAS",
+            "Math",
+            "ML",
+            "AI"
+          ],
+          "description": "ATLAS: continuing the mathematical foundations of ML.",
+          "papers": 0,
+          "notebooks": 1,
+          "code": 0,
+          "notebook_path": "2025/week-31/review.md"
+        },
+        {
+          "week": "week-32",
+          "title": "Week 32: GSPO (Qwen RL Algorithm by Alibaba Cloud)",
+          "date": "Aug 04-Aug 10, 2025",
+          "tags": [
+            "RL",
+            "Qwen",
+            "Alibaba",
+            "GSPO",
+            "GRPO"
+          ],
+          "description": "GSPO vs GRPO: group policy optimization for reinforcement learning.",
+          "papers": 1,
+          "notebooks": 0,
+          "code": 0,
+          "notebook_path": "2025/week-32/review.md"
+        },
+        {
+          "week": "week-33",
+          "title": "Week 33: Google Agent Development Kit (ADK)",
+          "date": "Aug 11-Aug 17, 2025",
+          "tags": [
+            "Google",
+            "Agent",
+            "ADK"
+          ],
+          "description": "A deep dive into Google's multi-agent systems framework.",
+          "papers": 1,
+          "notebooks": 1,
+          "code": 0,
+          "notebook_path": "agents-under-hood/Google-Agent-Development-Kit/CookBook.ipynb"
+        },
+        {
+          "week": "week-34-35",
+          "title": "Week 34-35: Vacation",
+          "date": "Aug 18-Aug 31, 2025",
+          "tags": [
+            "Vacation"
+          ],
+          "description": "Vacation",
+          "papers": 0,
+          "notebooks": 0,
+          "code": 0
+        },
+        {
+          "week": "week-36",
+          "title": "Week 36: Schema Guided Reasoning",
+          "date": "Sep 01-Sep 07, 2025",
+          "tags": [
+            "SGR",
+            "Pydantic",
+            "StructuredAI"
+          ],
+          "description": "Schema-Guided Reasoning — a new method for cognitively steering LLMs.",
+          "papers": 1,
+          "notebooks": 0,
+          "code": 0
+        },
+        {
+          "week": "week-37",
+          "title": "Week 37: Deep Think with Confidence",
+          "date": "Sep 08-Sep 14, 2025",
+          "tags": [
+            "DeepConf",
+            "Confidence",
+            "Reasoning"
+          ],
+          "description": "DeepConf: confident reasoning, early stopping, and weighted aggregation.",
+          "papers": 1,
+          "notebooks": 0,
+          "code": 1,
+          "code_path": "2025/week-37/experiments"
+        },
+        {
+          "week": "week-38",
+          "title": "Week 38: EEG → Текст",
+          "date": "Sep 15-Sep 21, 2025",
+          "tags": [
+            "BCI",
+            "EEG",
+            "ML"
+          ],
+          "description": "A reproducible pipeline for recovering inner-speech semantics from EEG signals.",
+          "papers": 1,
+          "notebooks": 0,
+          "code": 0
+        },
+        {
+          "week": "week-39-40",
+          "title": "Week 39-40: GPT-OSS & Qwen3 MoE",
+          "date": "Sep 22-Oct 05, 2025",
+          "tags": [
+            "GPT-OSS",
+            "Qwen3",
+            "MoE",
+            "OpenAI",
+            "Architecture"
+          ],
+          "description": "From GPT-2 to gpt-oss: architecture evolution analysis and Qwen3 MoE implementation",
+          "papers": 1,
+          "notebooks": 0,
+          "code": 1,
+          "code_path": "2025/week-39-40/experiments"
+        }
+      ]
+    },
+    {
+      "year": "2024",
+      "weeks": [
+        {
+          "week": "week-52",
+          "title": "Week 52: Superweights",
+          "date": "Dec 23-31, 2024",
+          "tags": [
+            "LLMs",
+            "Weight Analysis"
+          ],
+          "description": "Exploring 'superweights' in large language models.",
+          "papers": 1,
+          "notebooks": 1,
+          "code": 0,
+          "notebook_path": "2024/week-52/experiments.ipynb"
+        }
+      ]
+    }
+  ]
+}
+

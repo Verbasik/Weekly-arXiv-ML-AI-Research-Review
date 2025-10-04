@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agents Under Hood - The Weekly Research Brief</title>
+    <!-- External CSS Libraries -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.2.0/github-markdown.min.css">
+    <!-- Google Fonts (Inter/IBM) + Pixel Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;500;600;700&family=Silkscreen:wght@400;700&family=VT323&display=swap" rel="stylesheet">
+    <!-- Pixel Theme (primary) -->
+    <link rel="stylesheet" href="css/pixel-theme.css">
+    <!-- Mobile Optimizations -->
+    <link rel="stylesheet" href="css/mobile-optimizations.css">
+    <!-- Markdown Integration -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="../images/main.png">
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Agents Under Hood - Practical projects and reviews of multi-agent systems, AI tools, and modern machine learning technologies.">
+    <meta name="keywords" content="AI agents, multi-agent systems, OpenAI, machine learning, artificial intelligence, reviews, projects">
+    <meta name="author" content="Edward Verbetsky">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://cyberrunner.github.io/Weekly-arXiv-ML-AI-Research-Review/web/agents.html">
+    <meta property="og:title" content="Agents Under Hood - AI Agents Research & Projects">
+    <meta property="og:description" content="Exploring and dissecting modern multi-agent systems in practice">
+    <meta property="og:image" content="https://cyberrunner.github.io/Weekly-arXiv-ML-AI-Research-Review/images/main.png">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://cyberrunner.github.io/Weekly-arXiv-ML-AI-Research-Review/web/agents.html">
+    <meta property="twitter:title" content="Agents Under Hood - AI Agents Research & Projects">
+    <meta property="twitter:description" content="Exploring and dissecting modern multi-agent systems in practice">
+    <meta property="twitter:image" content="https://cyberrunner.github.io/Weekly-arXiv-ML-AI-Research-Review/images/main.png">
+</head>
+<body>
+
+    
+    <!-- Header with brand bar (same as main page) -->
+    <header class="pixel-p-4">
+        <div class="pixel-container">
+            <div class="pixel-card pixel-card--accent pixel-flex pixel-flex-between pixel-gap-4 hero-card">
+                <div class="pixel-flex-center pixel-gap-3">
+                    <div style="font-size: 3rem;">🤖</div>
+                    <div>
+                        <h1 style="font-family: var(--pixel-font-title); font-size: var(--pixel-font-2xl); margin-bottom: var(--px-unit-half); text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.8);">
+                            Agents Under Hood
+                        </h1>
+                        <div style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-xs); color: var(--pixel-ink-soft);">
+                            Exploring multi-agent systems in practice
+                        </div>
+                    </div>
+                </div>
+                <div class="pixel-flex pixel-flex-wrap pixel-gap-2">
+                    <span class="pixel-badge pixel-badge--star" data-icon="⭐">Awesome</span>
+                    <span class="pixel-badge pixel-badge--heart" data-icon="❤️">Made With Love</span>
+                    <span class="pixel-badge pixel-badge--diamond" data-icon="💎">Open Source</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation (same structure as main page) -->
+    <nav class="pixel-p-3">
+        <div class="pixel-container">
+            <div class="pixel-card pixel-flex-col pixel-gap-2 nav-stack" style="padding: var(--pixel-space-2);">
+                <div class="pixel-flex pixel-flex-wrap pixel-gap-2 nav-actions">
+                    <a href="../index.html#home" class="pixel-btn pixel-btn--sm">🏠 Home</a>
+                    <a href="../atlas-wrapper.html" class="pixel-btn pixel-btn--primary pixel-btn--sm" title="Algorithm Templates for Live AI Scripts">
+                        📊 ATLAS 
+                        <span class="pixel-badge pixel-badge--crown" data-icon="✨" style="margin-left: var(--px-unit-half); font-size: var(--pixel-font-xs);">New</span>
+                    </a>
+                    <a href="#agents" class="pixel-btn pixel-btn--sm">🤖 Agents</a>
+                    <div class="pixel-dropdown" style="position: relative; display: inline-block;">
+                        <button class="pixel-btn pixel-btn--sm pixel-dropdown-btn" onclick="toggleDropdown()">📅 Years ▼</button>
+                        <div class="pixel-dropdown-content" id="yearsDropdown" style="display: none; position: absolute; top: 100%; left: 0; z-index: var(--pixel-z-dropdown); margin-top: var(--px-unit-half);">
+                            <div class="pixel-card" style="min-width: 120px; padding: var(--pixel-space-1);">
+                                <a href="../index.html#2025" class="pixel-btn pixel-btn--sm" style="width: 100%; margin-bottom: var(--px-unit-half);">2025</a>
+                                <a href="../index.html#2024" class="pixel-btn pixel-btn--sm" style="width: 100%;">2024</a>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="about.html" class="pixel-btn pixel-btn--sm">ℹ️ About</a>
+                    <a href="../index.html#contribute" class="pixel-btn pixel-btn--sm">🤝 Contribute</a>
+                    <a href="../index.html#contact" class="pixel-btn pixel-btn--sm">✉️ Contact</a>
+                    <div class="nav-lang-inline" aria-label="Language switch">
+                        <a href="agents.html" class="pixel-btn pixel-btn--sm" aria-label="Switch to Russian">RU</a>
+                        <span class="pixel-badge pixel-badge--star" data-icon="⭐" aria-label="Current language: English">EN</span>
+                    </div>
+                </div>
+                <div class="pixel-flex pixel-gap-1 pixel-justify-end nav-search" style="min-width: 200px;">
+                    <input type="text" class="pixel-input" placeholder="Search agents..." style="font-size: var(--pixel-font-sm);">
+                    <button class="pixel-btn pixel-btn--primary pixel-btn--sm">🔍</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+
+    
+    <!-- Main Container (same structure as main page) -->
+    <main>
+        <div class="sidebar-layout">
+            <!-- Sidebar (same structure as main page) -->
+            <aside class="sidebar">
+                <div class="sidebar-section pixel-card pixel-mb-3">
+                    <h3><i class="fas fa-filter"></i> Filter by Type</h3>
+                    <div class="pixel-flex pixel-flex-col pixel-gap-1">
+                        <a href="#all" class="pixel-btn pixel-btn--sm" style="text-align: left;">📦 All Projects</a>
+                        <a href="#demos" class="pixel-btn pixel-btn--sm" style="text-align: left;">🎮 Demos</a>
+                        <a href="#tutorials" class="pixel-btn pixel-btn--sm" style="text-align: left;">📘 Tutorials</a>
+                    </div>
+                </div>
+
+                <div class="sidebar-section pixel-card pixel-mb-3">
+                    <h3><i class="fas fa-tags"></i> Popular Tags</h3>
+                    <div class="tags-container pixel-flex pixel-flex-wrap pixel-gap-1">
+                        <!-- Tags will be added dynamically -->
+                    </div>
+                </div>
+
+                <div class="sidebar-section pixel-card pixel-mb-3">
+                    <h3><i class="fas fa-fire"></i> Featured Projects</h3>
+                    <ul class="featured-list" style="list-style: none; padding-left: 0; margin: 0; display: flex; flex-direction: column; gap: var(--px-unit);">
+                        <!-- Recommendations will be added dynamically -->
+                    </ul>
+                </div>
+            </aside>
+            
+            <!-- Main Content -->
+            <div class="content pixel-stack">
+                <!-- Hero Section (inside content like main page) -->
+                <section id="home" class="pixel-card">
+                    <h1 class="section-heading" style="font-family: var(--pixel-font-display);">🤖 Agents Under Hood</h1>
+                    <p>Practical multi-agent system projects to explore modern approaches to AI. Each project includes full code, documentation, and live demos.</p>
+                    <div class="pixel-flex pixel-gap-1 pixel-mb-2">
+                        <span class="pixel-badge" data-icon="🧩">Projects</span>
+                        <span class="pixel-badge pixel-badge--star" data-icon="⭐">Demos</span>
+                    </div>
+                    <hr class="glow-divider">
+
+                    <h3 class="section-heading">🎯 What we study:</h3>
+                    <ul>
+                        <li>Multi-agent systems and their architectures</li>
+                        <li>Practical use of OpenAI API and tooling</li>
+                        <li>Modern frameworks for building AI agents</li>
+                        <li>Integrations of various AI services into cohesive solutions</li>
+                    </ul>
+                </section>
+
+                <!-- Projects sections will be dynamically added here -->
+            </div>
+        </div>
+    </main>
+    
+    <!-- Reading Modal (Fullscreen) -->
+    <div id="markdown-modal" class="reading-modal">
+        <div class="reading-modal__overlay"></div>
+        <div class="reading-modal__container">
+            <header class="reading-modal__header">
+                <div class="reading-header__left">
+                    <h1 class="reading-title">📜 Project Details</h1>
+                    <div class="reading-subtitle">Agents Review</div>
+                </div>
+                <div class="reading-header__controls">
+                    <button class="reading-btn reading-btn--theme" title="Toggle theme">🌙</button>
+                    <button class="reading-btn reading-btn--font-smaller" title="Smaller font">A-</button>
+                    <button class="reading-btn reading-btn--font-larger" title="Larger font">A+</button>
+                    <button class="reading-btn reading-btn--close" title="Close (Esc)">×</button>
+                </div>
+            </header>
+            <main class="reading-modal__main">
+                <div class="reading-loader" style="display: none;">
+                    <div class="pixel-card pixel-text-center pixel-p-4">
+                        <h3 style="font-family: var(--pixel-font-display); margin-bottom: var(--pixel-space-2);">🎮 Loading Quest...</h3>
+                        <div class="loader"></div>
+                    </div>
+                </div>
+                <article class="reading-article" id="markdown-content"></article>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Footer in Pixel Game Style (like home) -->
+    <footer class="pixel-p-4" style="margin-top: var(--pixel-space-8); background: var(--pixel-bg-lavender);">
+        <div class="pixel-container">
+            <div class="pixel-card pixel-card--accent pixel-text-center pixel-mb-4">
+                <h2 style="font-family: var(--pixel-font-title); font-size: var(--pixel-font-2xl); margin-bottom: var(--pixel-space-2);">
+                    🎮 GAME INFO 🎮
+                </h2>
+                <div class="pixel-flex pixel-flex-center pixel-gap-3">
+                    <span class="pixel-badge pixel-badge--star" data-icon="⭐">Level Complete</span>
+                    <span class="pixel-badge pixel-badge--heart" data-icon="❤️">Thanks for Playing</span>
+                    <span class="pixel-badge pixel-badge--diamond" data-icon="💎">Come Back Soon</span>
+                </div>
+            </div>
+
+            <div class="pixel-grid pixel-grid-4 pixel-gap-4">
+                <div class="pixel-card">
+                    <h4 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-base); margin-bottom: var(--pixel-space-2);">📖 About Quest</h4>
+                    <p style="font-size: var(--pixel-font-sm); margin-bottom: var(--pixel-space-3);">Weekly collection of arXiv paper reviews in ML/AI with practical implementations and agent projects.</p>
+                    <div class="pixel-flex pixel-gap-2">
+                        <a href="https://github.com/Verbasik" class="pixel-btn pixel-btn--sm" target="_blank" rel="noopener">🐙 GitHub</a>
+                        <a href="https://t.me/Verbasik" class="pixel-btn pixel-btn--sm" target="_blank" rel="noopener" title="@Verbasik">📨 Telegram</a>
+                        <a href="https://www.linkedin.com/in/verbasik/" class="pixel-btn pixel-btn--sm" target="_blank" rel="noopener">💼 LinkedIn</a>
+                        <a href="mailto:verbasik2018@gmail.com" class="pixel-btn pixel-btn--sm" title="verbasik2018@gmail.com">✉️ Email</a>
+                    </div>
+                </div>
+                <div class="pixel-card">
+                    <h4 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-base); margin-bottom: var(--pixel-space-2);">🚀 Quick Links</h4>
+                    <div style="display: flex; flex-direction: column; gap: var(--px-unit);">
+                        <a href="../index.html#home" class="pixel-btn pixel-btn--sm" style="text-align: left;">🏠 Home Base</a>
+                        <a href="../atlas-wrapper.html" class="pixel-btn pixel-btn--sm" style="text-align: left;">📊 ATLAS Project</a>
+                        <a href="../index.html#2025" class="pixel-btn pixel-btn--sm" style="text-align: left;">🗡️ 2025 Papers</a>
+                        <a href="../index.html#2024" class="pixel-btn pixel-btn--sm" style="text-align: left;">🛡️ 2024 Papers</a>
+                    </div>
+                </div>
+                <div class="pixel-card">
+                    <h4 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-base); margin-bottom: var(--pixel-space-2);">🎒 Resources</h4>
+                    <div style="display: flex; flex-direction: column; gap: var(--px-unit);">
+                        <a href="https://arxiv.org/" class="pixel-btn pixel-btn--sm" style="text-align: left;" target="_blank">📄 arXiv</a>
+                        <a href="https://paperswithcode.com/" class="pixel-btn pixel-btn--sm" style="text-align: left;" target="_blank">💻 Papers With Code</a>
+                        <a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/tree/develop/agents-under-hood" class="pixel-btn pixel-btn--sm" style="text-align: left;" target="_blank">🤖 Agents GitHub</a>
+                        <a href="https://colab.research.google.com/" class="pixel-btn pixel-btn--sm" style="text-align: left;" target="_blank">🔬 Google Colab</a>
+                    </div>
+                </div>
+                <div class="pixel-card">
+                    <h4 style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-base); margin-bottom: var(--pixel-space-2);">🤝 Join Guild</h4>
+                    <p style="font-size: var(--pixel-font-sm); margin-bottom: var(--pixel-space-2);">Found an error or want to contribute? Submit a pull request!</p>
+                    <a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review" class="pixel-btn pixel-btn--primary pixel-btn--sm" target="_blank">🚀 Join on GitHub</a>
+                </div>
+            </div>
+
+            <div class="pixel-card pixel-text-center pixel-mt-4" style="padding: var(--pixel-space-2);">
+                <div style="font-family: var(--pixel-font-display); font-size: var(--pixel-font-sm); color: var(--pixel-ink-soft);">🎮 © 2025 TWRB - Made with ❤️ for the AI research community 🎮</div>
+                <div style="font-family: var(--pixel-font-body); font-size: var(--pixel-font-xs); color: var(--pixel-ink-soft); margin-top: var(--px-unit);">Pixel theme powered by 8-bit nostalgia and modern web tech</div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Pixel Back to Top Button -->
+    <div class="pixel-btn pixel-btn--primary" id="back-to-top" style="position: fixed; bottom: var(--pixel-space-3); right: var(--pixel-space-3); z-index: var(--pixel-z-sticky); opacity: 0; visibility: hidden; transition: all var(--pixel-transition-smooth); border-radius: var(--pixel-radius-lg);">
+        ⬆️ TOP
+    </div>
+    
+    <!-- JavaScript Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/typescript.min.js"></script>
+    
+    <!-- Application Scripts -->
+    <script type="module">
+        import { AgentsController } from './application/AgentsController.js';
+        
+        // App configuration
+        const config = {
+            githubRepo: 'Verbasik/Weekly-arXiv-ML-AI-Research-Review',
+            githubBranch: 'develop'
+        };
+        
+        // App initialization
+        const app = new AgentsController(config);
+        
+        // Run after DOM loaded
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Initialize app
+            await app.initialize();
+        });
+    </script>
+    <!-- Reading Modal class (same as index) -->
+    <script>
+        // Pixel dropdown for Years
+        function toggleDropdown() {
+            const dropdown = document.getElementById('yearsDropdown');
+            if (!dropdown) return;
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        }
+        document.addEventListener('click', function(event) {
+            const dd = document.querySelector('.pixel-dropdown');
+            const content = document.getElementById('yearsDropdown');
+            if (dd && content && !dd.contains(event.target)) { content.style.display = 'none'; }
+        });
+
+        class ReadingModal {
+            constructor() {
+                this.modal = document.getElementById('markdown-modal');
+                this.overlay = this.modal?.querySelector('.reading-modal__overlay');
+                this.container = this.modal?.querySelector('.reading-modal__container');
+                this.article = this.modal?.querySelector('.reading-article');
+                this.loader = this.modal?.querySelector('.reading-loader');
+                this.title = this.modal?.querySelector('.reading-title');
+                this.closeBtn = this.modal?.querySelector('.reading-btn--close, .pixel-modal__close');
+                this.themeBtn = this.modal?.querySelector('.reading-btn--theme');
+                this.fontSmallerBtn = this.modal?.querySelector('.reading-btn--font-smaller');
+                this.fontLargerBtn = this.modal?.querySelector('.reading-btn--font-larger');
+                this.currentFontSize = 'normal';
+                this.isDarkTheme = false;
+                this.initEventListeners();
+            }
+            initEventListeners() {
+                if (!this.modal) return;
+                this.closeBtn?.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); this.close(); });
+                this.overlay?.addEventListener('click', (e) => { if (e.target === this.overlay) { this.close(); } });
+                document.addEventListener('keydown', (e) => {
+                    if (this.modal.classList.contains('active')) {
+                        if (e.key === 'Escape') this.close();
+                        if (e.key === '+' || (e.ctrlKey && e.key === '=')) { e.preventDefault(); this.increaseFontSize(); }
+                        if (e.key === '-' || (e.ctrlKey && e.key === '-')) { e.preventDefault(); this.decreaseFontSize(); }
+                        if (e.key === 't' || e.key === 'T') { e.preventDefault(); this.toggleTheme(); }
+                    }
+                });
+                this.themeBtn?.addEventListener('click', () => this.toggleTheme());
+                this.fontSmallerBtn?.addEventListener('click', () => this.decreaseFontSize());
+                this.fontLargerBtn?.addEventListener('click', () => this.increaseFontSize());
+            }
+            open(title, content) {
+                if (!this.modal) return;
+                this.title.textContent = `📜 ${title}`;
+                document.body.style.overflow = 'hidden';
+                this.modal.style.display = '';
+                this.modal.classList.add('active');
+                if (content) { this.article.innerHTML = content; this.loader.style.display = 'none'; }
+                else { this.showLoader(); }
+            }
+            close() {
+                if (!this.modal) return;
+                this.modal.classList.remove('active');
+                this.modal.style.display = 'none';
+                document.body.style.overflow = '';
+                this.article.innerHTML = '';
+            }
+            showLoader() { this.loader.style.display = 'flex'; this.article.innerHTML = ''; }
+            hideLoader() { this.loader.style.display = 'none'; }
+            setContent(content) { this.article.innerHTML = content; this.hideLoader(); }
+            toggleTheme() { this.isDarkTheme = !this.isDarkTheme; if (this.isDarkTheme) { this.container.classList.add('dark-theme'); this.themeBtn.textContent = '☀️'; } else { this.container.classList.remove('dark-theme'); this.themeBtn.textContent = '🌙'; } }
+            increaseFontSize() { this.article.classList.remove('font-small','font-large','font-xl'); if (this.currentFontSize==='small'){this.currentFontSize='normal';} else if(this.currentFontSize==='normal'){this.currentFontSize='large'; this.article.classList.add('font-large');} else if(this.currentFontSize==='large'){this.currentFontSize='xl'; this.article.classList.add('font-xl');}}
+            decreaseFontSize() { this.article.classList.remove('font-small','font-large','font-xl'); if (this.currentFontSize==='xl'){this.currentFontSize='large'; this.article.classList.add('font-large');} else if(this.currentFontSize==='large'){this.currentFontSize='normal';} else if(this.currentFontSize==='normal'){this.currentFontSize='small'; this.article.classList.add('font-small');} }
+        }
+        let readingModal;
+        document.addEventListener('DOMContentLoaded', function() { readingModal = new ReadingModal(); window.readingModal = readingModal; });
+    </script>
+    
+    <!-- Mobile Enhancements (not required for ReadingModal) -->
+    
+    <!-- Global search suggestions (uses index.json) -->
+    <script src="presentation/search/search.js" defer></script>
+</body>
+</html>
