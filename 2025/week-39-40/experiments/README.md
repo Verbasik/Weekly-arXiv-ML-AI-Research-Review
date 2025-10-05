@@ -179,16 +179,6 @@ experiments/
 │       ├── MoE_Router_Load_Balancing_Loss.md     # Документация (1067 строк)
 │       ├── test_integration.py    # Интерактивное тестирование
 │       └── test/
-│
-└── memory/
-    ├── memory-bank/               # Банк памяти проекта
-    │   ├── projectbrief.md
-    │   ├── activeContext.md
-    │   ├── progress.md
-    │   ├── techContext.md
-    │   └── systemPatterns.md
-    └── rules/
-        └── memory-bank.mdc        # Выученные паттерны
 ```
 
 ---
