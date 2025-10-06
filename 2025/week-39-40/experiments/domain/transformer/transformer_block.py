@@ -67,12 +67,12 @@ class TransformerBlock(nn.Module):
             "num_attention_heads должен делиться на num_query_groups для "
             "корректной работы GQA"
         )
-
-        # Проверка делимости hidden_size на число голов:
+        # Проверка делимости hidden_size на число голов
+        # Тензор скрытого состояния должен равномерно делиться на число голов
         assert (
             hidden_size % num_attention_heads == 0
         ), "hidden_size должен делиться на num_attention_heads"
-
+        
         # Проверка intermediate_size если указан
         if intermediate_size is not None:
             assert (
