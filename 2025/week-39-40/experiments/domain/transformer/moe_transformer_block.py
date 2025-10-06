@@ -234,4 +234,54 @@ class MoETransformerBlock(nn.Module):
         # - Почему balance_loss возвращается вместе с hidden_states?
         # - Как будет собираться balance_loss от всех слоёв модели?
         # - Чем отличается forward от обычного TransformerBlock?
-        pass
+        # pass
+
+        # ──────────────────────────────────────────────────────────────────────────
+        # ПЕРВЫЙ RESIDUAL BLOCK: Self-Attention (GQA)
+        # ──────────────────────────────────────────────────────────────────────────
+
+        # Сохраняем вход для остаточной связи, что бы потом прибавить к выходу блока
+        # p.s. Помогает сохранить информацию о входном тензоре (векторах), чтобы не терять её.
+        residual_1 = hidden_states
+
+        # Нормализуем входной тензор
+        normed = self.attention_norm(hidden_states)
+
+        # Вызываем модуль группового внимания. Он может вернуть:
+        # - только выход (Tensor), либо
+        # - кортеж (att_output, present_key_value, attn_weights).
+        att_output = self.attention(
+            hidden_states=normed,
+            attention_mask=attention_mask,
+            position_ids=position_ids,
+            past_key_value=past_key_value,
+            output_attentions=output_attentions,
+            use_cache=use_cache,
+        )
+
+        if isinstance(att_output, tuple):
+            att_output, present_key_value, attn_weights = att_output
+        else:
+            present_key_value = None
+            attn_weights = None
+
+        # Первая residual-связь: складываем вход и выход подблока.
+        hidden_states = att_output + residual_1
+
+        # ──────────────────────────────────────────────────────────────────────────
+        # ВТОРОЙ RESIDUAL BLOCK: MoE Feed-Forward
+        # ──────────────────────────────────────────────────────────────────────────
+
+        residual_2 = hidden_states
+
+        # Нормализуем перед MoE по тем же причинам, что и перед вниманием.
+        normed = self.ffn_norm(hidden_states)
+        # Применяем MoE слой вместо обычного FFN.
+        ffn_output, balance_loss = self.moe_layer(hidden_states=normed, training=training)
+        # Вторая residual-связь.
+        hidden_states = ffn_output + residual_2
+
+        if use_cache or output_attentions:
+            return hidden_states, balance_loss, present_key_value, attn_weights
+
+        return hidden_states, balance_loss
