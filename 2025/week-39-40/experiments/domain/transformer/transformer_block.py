@@ -67,8 +67,8 @@ class TransformerBlock(nn.Module):
             "num_attention_heads должен делиться на num_query_groups для "
             "корректной работы GQA"
         )
-
-        # Проверка делимости hidden_size на число голов:
+        # Проверка делимости hidden_size на число голов
+        # Тензор скрытого состояния должен равномерно делиться на число голов
         assert (
             hidden_size % num_attention_heads == 0
         ), "hidden_size должен делиться на num_attention_heads"
@@ -149,7 +149,7 @@ class TransformerBlock(nn.Module):
         # Преднормализация улучшает устойчивость и качество внимания.
         normed = self.attention_norm(hidden_states)
 
-        # Вызываем модуль внимания. Он может вернуть:
+        # Вызываем модуль группового внимания. Он может вернуть:
         # - только выход (Tensor), либо
         # - кортеж (att_output, present_key_value, attn_weights).
         att_output = self.attention(
