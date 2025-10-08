@@ -14,7 +14,9 @@ from ..transformer.moe_transformer_block import MoETransformerBlock
 
 class Qwen3MoEModel(nn.Module):
     """
-    Полная генеративная языковая модель Qwen3 с MoE архитектурой.
+    Description:
+    ---------------
+        Полная генеративная языковая модель Qwen3 с MoE архитектурой.
 
     Архитектура:
     ------------
@@ -64,29 +66,40 @@ class Qwen3MoEModel(nn.Module):
         super().__init__()
         self.config = config
 
-        # TODO(human): Шаг 1/4 - Token Embedding
-        # Создайте self.embed_tokens: nn.Embedding(vocab_size, hidden_size)
-        # Это преобразует дискретные token IDs в continuous векторы
-        # Вопрос: Почему embedding_dim = hidden_size?
+        # TODO: Преобразование token IDs → continuous vectors
+        # Вопрос: Какой PyTorch слой создаёт lookup table размера (vocab_size, hidden_size)?
+        # Подсказка: В SimpleMoELayer вы использовали nn.ModuleList. А для embeddings?
 
-        # TODO(human): Шаг 2/4 - Transformer Layers
-        # Создайте self.layers: nn.ModuleList из config.num_layers MoE блоков
-        # Каждый блок — это MoETransformerBlock(config)
-        # Используйте list comprehension: [MoETransformerBlock(config) for _ in range(N)]
-        # Вопрос: Почему nn.ModuleList, а не Python list?
+        # TODO: Стек из N transformer блоков
+        # Вопрос: Как создать список из config.num_layers одинаковых блоков MoETransformerBlock(config)?
+        # Подсказка: Вспомните, как в SimpleMoELayer создавались эксперты
 
-        # TODO(human): Шаг 3/4 - Final Normalization
-        # Создайте self.norm: RMSNorm(hidden_size)
-        # Это финальная нормализация перед LM head
-        # Вопрос: Зачем нормализация перед проекцией в vocab space?
+        # TODO: Финальная нормализация скрытых состояний
+        # Вопрос: Какой компонент нормализации вы реализовали на первых этапах?
+        # Подсказка: Принимает один аргумент — размерность для нормализации
 
-        # TODO(human): Шаг 4/4 - Language Modeling Head
-        # Создайте self.lm_head: nn.Linear(hidden_size, vocab_size, bias=False)
-        # Это проецирует скрытые состояния в вероятности над словарём
-        # Вопрос: Почему bias=False в LM head?
+        # TODO: Проекция hidden_size → vocab_size для предсказания токенов
+        # Вопрос: Какой слой проецирует векторы из одного пространства в другое?
+        # Подсказка: В LM обычно используют bias=False в финальной проекции
+
+        # Вопросы для размышления:
+        # - Почему все четыре компонента должны быть атрибутами класса (self.*)?
+        # - Что произойдёт, если использовать Python list вместо nn.ModuleList?
+        # - Почему размерность embedding должна совпадать с hidden_size блоков?
 
         # Инициализация весов
         self._init_weights()
+
+        # Token Embedding Layer: преобразование token IDs → continuous vectors
+        # Создаёт lookup table размера (vocab_size, hidden_size)
+        self.embed_tokens = nn.Embedding(config.vocab_size, config.hidden_size)
+
+        # Стек из N transformer блоков
+        # Каждый блок содержит: RMSNorm → GQA → RMSNorm → SimpleMoELayer
+        self.layers = nn.ModuleList([
+            MoETransformerBlock(config) for _ in range(config.num_layers)
+        ])
+
 
     def _init_weights(self):
         """
@@ -148,38 +161,17 @@ class Qwen3MoEModel(nn.Module):
             >>> print(f"Logits: {logits.shape}, Loss: {loss.item():.4f}")
             Logits: torch.Size([4, 32, 50257]), Loss: 0.0234
         """
-        # TODO(human): Шаг 1/4 - Embedding Lookup
-        # Преобразуйте input_ids в embeddings используя self.embed_tokens
-        # hidden_states = self.embed_tokens(input_ids)
-        # Размерность: (batch_size, seq_len) → (batch_size, seq_len, hidden_size)
-
-        # TODO(human): Шаг 2/4 - Transformer Blocks
-        # Пропустите hidden_states через все слои self.layers
-        # Накапливайте balance_loss из каждого блока
-        #
-        # Псевдокод:
-        # total_balance_loss = torch.tensor(0.0, device=hidden_states.device)
-        # for layer in self.layers:
-        #     hidden_states, balance_loss = layer(hidden_states, attention_mask)
-        #     total_balance_loss = total_balance_loss + balance_loss
-        #
-        # Вопрос: Почему важно указать device для total_balance_loss?
-
-        # TODO(human): Шаг 3/4 - Final Normalization
-        # Примените финальную нормализацию: hidden_states = self.norm(hidden_states)
-        # Размерность остаётся: (batch_size, seq_len, hidden_size)
-
-        # TODO(human): Шаг 4/4 - LM Head Projection
-        # Спроецируйте в vocab space: logits = self.lm_head(hidden_states)
-        # Размерность: (batch_size, seq_len, hidden_size) → (batch_size, seq_len, vocab_size)
-        # Верните (logits, total_balance_loss)
+        # TODO: Преобразуйте input_ids → embeddings через self.embed_tokens
+        # TODO: Инициализируйте total_balance_loss нулевым тензором на device embeddings
+        # TODO: Пройдите циклом по self.layers, накапливая balance_loss
+        # TODO: Примените финальную нормализацию self.norm
+        # TODO: Спроецируйте через self.lm_head в vocab space
+        # TODO: Верните (logits, total_balance_loss)
 
         # Вопросы для размышления:
-        # 1. Что представляют собой logits? (сырые оценки, ещё НЕ вероятности)
-        # 2. Как преобразовать logits → вероятности? (softmax по dim=-1)
-        # 3. Зачем accumulate balance_loss? (для обучения load balancing)
-        # 4. Что делает attention_mask? (маскирует padding токены)
-
+        # - Почему важно указать device при создании total_balance_loss?
+        # - Что возвращает каждый MoE блок?
+        # - Чем logits отличаются от вероятностей?
         pass
 
     def generate(
