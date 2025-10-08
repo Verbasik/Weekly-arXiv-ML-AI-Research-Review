@@ -1,25 +1,30 @@
-# Законы масштабирования дистилляции 🤖
+# Distillation Scaling Laws 🤖
 
-[![arXiv](https://img.shields.io/badge/arXiv-2501.12948-b31b1b.svg)](https://arxiv.org/abs/2502.08606)
-[![Telegram Channel](https://img.shields.io/badge/Telegram-TheWeeklyBrief-blue)](https://t.me/TheWeeklyBrief)
+[![arXiv](https://img.shields.io/badge/arXiv-2501.12948-b31b1b.svg  )](https://arxiv.org/abs/2502.08606  )
 
-📌 Что будет в выпуске:
+📌 What's in this issue:
 
-1️⃣ Гайд: Что такое дистилляция?
-- Разберём, как работает дистилляция — метод, который позволяет "перекачивать" знания из большой модели-учителя в маленькую модель-ученика. Почему это так популярно и как это помогает запускать модели локально?  
+1️⃣ Guide: What is Distillation?
+- We'll break down how distillation works—the method that enables "transferring" knowledge from a large teacher model to a compact student model. Why is it so popular, and how does it help deploy models locally?
 
-2️⃣ Сравнительный анализ: Дистилляция vs Квантование
-- Что эффективнее: сжать модель через дистилляцию или через квантование? Плюсы, минусы и подводные камни каждого подхода.  
+2️⃣ Comparative Analysis: Distillation vs Quantization
+- Which is more effective: compressing a model via distillation or via quantization? Pros, cons, and pitfalls of each approach.
 
-3️⃣ Обзор папиры от Apple: ресерчеры исследовали законы масштабирования дистилляции и сделали интересные выводы:  
-- Почему слишком мощный учитель может ухудшить результаты ученика?  
-- Как дистилляция подчиняется законам масштабирования?  
-- Какое уравнение оптимизирует процесс дистилляции?  
-- Почему дистилляция эффективнее обучения с нуля, но только в определённых условиях?  
+3️⃣ Review of Apple's Paper: Researchers investigated distillation scaling laws and made intriguing discoveries:
+- Why can an overly powerful teacher degrade student performance?
+- How does distillation obey scaling laws?
+- What equation optimizes the distillation process?
+- Why is distillation more effective than training from scratch—but only under specific conditions?
 
-🔍 Почему это важно?  
-- Дистилляция — мощный инструмент, но её применение требует понимания нюансов. В этом выпуске мы разберём, как избежать ошибок и добиться максимальной эффективности.  
+🔍 Why is this important?
+- Distillation is a powerful tool, but its effective use requires understanding its nuances. In this issue, we'll explore how to avoid pitfalls and achieve maximum efficiency.
 
 ---
 
-<p align="center">Исследуйте вместе с нами 🚀</p>
+<div align="center">
+
+**Explore with us 🚀**
+
+⭐ Star this repository if you found it helpful
+
+</div>

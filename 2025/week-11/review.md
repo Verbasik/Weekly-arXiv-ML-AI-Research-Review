@@ -1,278 +1,288 @@
-# Законы масштабирования дистилляции 
+# Scaling Laws of Distillation
 
-**Рекомендация для читателей:**  
-Прежде чем погрузиться в детали, советую ознакомиться с двумя отличными статьями инженера из Яндекса ([статья 1](https://habr.com/ru/companies/yandex/articles/801119/), [статья 2](https://habr.com/ru/companies/yandex/articles/878230/)). В них отлично объясняются принципы дистилляции, её применение в промышленных задачах и ключевые практические аспекты. Это идеальный старт для тех, кто только начинает знакомиться с темой.  
+**Recommendation for Readers:**
 
-**Однако**, если вы, как и я, стремитесь к *глубокому пониманию* — этого может оказаться недостаточно. В данном обзоре мы пойдём дальше:  
-1. **Математическая формализация**: Разберём более глубако уравнения, лежащие в основе дистилляции, включая функцию потерь с температурным параметром, оптимизацию распределений и законы масштабирования из работы Apple.  
-2. **Примеры кода**: Покажем, как реализовать дистилляцию на практике — от простых моделей на PyTorch до тонкой настройки гиперпараметров.  
-3. **Нюансы исследований**: Ответим на вопросы, оставшиеся за рамками вводных материалов. Например, почему «слишком умный учитель» вредит ученику и как математически обосновать оптимальное соотношение их размеров.  
+Before diving into the details, I highly recommend reading two excellent articles by a Yandex engineer ([Article 1](https://habr.com/ru/companies/yandex/articles/801119/), [Article 2](https://habr.com/ru/companies/yandex/articles/878230/)). They provide an excellent explanation of the principles of distillation, its application in industrial tasks, and key practical aspects. This is the ideal starting point for those new to the topic.
 
-**Для кого это?**  
-Если вы хотите не просто использовать дистилляцию «из коробки», а *понимать, как и почему она работает* — этот разбор для вас. Мы заглянем «под капот» методов, чтобы вы могли осознанно применять их в своих проектах. 
+**However**, if, like me, you seek *deep understanding*—this may not be sufficient. In this review, we go further:
 
-<details> 
-    <summary><em><strong>Краткий обзор 🎓</strong></em></summary>
+1.  **Mathematical Formalization**: We delve deeper into the equations underpinning distillation, including the temperature-scaled loss function, distribution optimization, and scaling laws from Apple's work.
+2.  **Code Examples**: We show how to implement distillation in practice—from simple PyTorch models to fine-tuning hyperparameters.
+3.  **Research Nuances**: We answer questions left out of introductory materials. For instance, why is an "overly smart teacher" detrimental to the student, and how can we mathematically justify the optimal size ratio between them?
 
-## Введение
+**Who is this for?**
 
-**Цель обзора:** Предоставить читателю всестороннее понимание принципов работы дистилляции знаний, ее математической формализации, практической реализации (с примерами кода) и, что наиболее важно, новейших исследований в области законов масштабирования, определяющих эффективность этого метода в зависимости от размеров моделей учителя и ученика, а также объемов данных.
+If you want to not just use distillation "out of the box," but *understand how and why it works*—this breakdown is for you. We'll look "under the hood" of the methods so you can apply them consciously in your own projects.
 
-**Для кого этот обзор:** Для тех, кто стремится не просто применять дистилляцию как готовый инструмент, а глубоко понимать ее механизмы и осознанно использовать в своих проектах.
+<details>
+    <summary><em><strong>Quick Overview 🎓</strong></em></summary>
 
-## Часть 1: Knowledge Distillation (Дистилляция знаний)
+## Introduction
 
-### Основная концепция
+**Goal of this review:** To provide the reader with a comprehensive understanding of the principles of Knowledge Distillation, its mathematical formalization, practical implementation (with code examples), and, most importantly, the latest research on scaling laws that determine the method's effectiveness depending on the sizes of the teacher and student models and the volume of data.
 
-Дистилляция знаний определяется как метод обучения моделей-студентов (обычно меньшего размера и менее сложных) путем передачи "знаний" от предварительно обученной модели-учителя (обычно большей и более сложной).
+**Who is this review for?** For those who aim not merely to apply distillation as a ready-made tool, but to deeply understand its mechanisms and use them consciously in their projects.
 
-> "Knowledge Distillation (Дистилляция знаний) — это метод обучения моделей-студентов (обычно меньшего размера и менее сложных) путем передачи "знаний" от предварительно обученной модели-учителя (обычно большей и более сложной)."
+## Part 1: Knowledge Distillation
 
-Основная идея заключается в том, что учитель, обладая большей емкостью и обученный на большом объеме данных, может передать не только "жесткие" предсказания (например, класс объекта), но и более богатую информацию о распределении вероятностей классов.
+### Core Concept
 
-### Модели Teacher и Student
+Knowledge Distillation is defined as a method for training student models (typically smaller and less complex) by transferring "knowledge" from a pre-trained teacher model (typically larger and more complex).
 
-В процессе дистилляции участвуют две основные модели:
+> "Knowledge Distillation is a method for training student models (typically smaller and less complex) by transferring 'knowledge' from a pre-trained teacher model (typically larger and more complex)."
 
-- **Teacher (Учитель):** Большая, предварительно обученная модель, "эксперт" в решении задачи. Математически представляется как функция $p(y|x)$, выдающая распределение вероятностей $p$ по классам $y$ для входных данных $x$.
-- **Student (Студент):** Меньшая, более простая модель, которую необходимо обучить имитировать поведение учителя. Математически представляется как функция $q_{\theta}(y|x)$, где $\theta$ - оптимизируемые параметры.
+The core idea is that the teacher, possessing greater capacity and trained on a large volume of data, can transfer not only "hard" predictions (e.g., the object class) but also richer information about the class probability distribution.
 
-### Функция потерь (Loss Function)
+### Teacher and Student Models
 
-Цель дистилляции - минимизировать разницу между предсказаниями учителя и студента, что формализуется функцией потерь $L(p(y|x), q_{\theta}(y|x))$. Процесс обучения заключается в поиске оптимальных параметров $\theta$ студента, минимизирующих эту функцию потерь:
+In the distillation process, two primary models participate:
 
-$$L(p(y|x), q_{\theta}(y|x)) \rightarrow \min_{\theta}$$
+-   **Teacher:** A large, pre-trained model, an "expert" at solving the task. Mathematically represented as a function $p(y|x)$, outputting a probability distribution $p$ over classes $y$ for input data $x$.
+-   **Student:** A smaller, simpler model to be trained to mimic the teacher's behavior. Mathematically represented as a function $q_{\theta}(y|x)$, where $\theta$ are the parameters to be optimized.
 
-Рассматриваются два основных подхода: дистилляция с использованием "жестких" меток (hard-label distillation) и "мягких" меток (soft-label distillation).
+### Loss Function
 
-#### I. Hard-label Distillation: Дистилляция с использованием "жестких" меток
+The goal of distillation is to minimize the difference between the teacher's and student's predictions, formalized by a loss function $L(p(y|x), q_{\theta}(y|x))$. Training involves finding the optimal student parameters $\theta$ that minimize this loss:
 
-**Концепция:** Учитель генерирует "жесткие" метки (класс с наивысшей вероятностью) для обучающей выборки, и студент обучается на этих синтетических метках стандартным образом.
+$L(p(y|x), q_{\theta}(y|x)) \rightarrow \min_{\theta}$
 
-**Пример для GPT моделей:** Описывается процесс, где большая GPT модель (учитель) генерирует последовательности токенов в качестве "жестких" меток для заданных входных текстов, а маленькая GPT модель (студент) обучается предсказывать эти последовательности, минимизируя кросс-энтропию.
+Two main approaches are considered: hard-label distillation and soft-label distillation.
 
-**Математическая формализация:**
+#### I. Hard-label Distillation
 
-- Генерация "жестких" меток учителем: $y^{(n)} = \arg\max_{y} p(y|x^{(n)})$ (для классификации) или генерация последовательности наиболее вероятных токенов (для языковых моделей).
-- Обучение студента на "жестких" метках: минимизация кросс-энтропии между предсказаниями студента и "жесткими" метками учителя.
+**Concept:** The teacher generates "hard" labels (the class with the highest probability) for the training set, and the student is trained on these synthetic labels using standard methods.
 
-$$\frac{1}{N} \sum_{n=1}^{N} \sum_{t=1}^{T_n} \log q_{\theta}(y_t^{(n)}|y_{<t}^{(n)})$$
+**Example for GPT models:** Describes the process where a large GPT model (teacher) generates token sequences as "hard" labels for given input texts, and a small GPT model (student) is trained to predict these sequences by minimizing cross-entropy.
 
-**Преимущества:** Простота реализации и понимания, использование стандартных методов обучения.
+**Mathematical Formalization:**
 
-**Недостатки:** Потеря информации, содержащейся в распределении вероятностей учителя (вероятности других классов и "мягкие" отношения между классами).
+-   Generation of "hard" labels by the teacher: $y^{(n)} = \arg\max_{y} p(y|x^{(n)})$ (for classification) or generation of the sequence of most probable tokens (for language models).
+-   Training the student on "hard" labels: Minimization of cross-entropy between the student's predictions and the teacher's "hard" labels.
 
-#### II. Soft-label Distillation: Дистилляция с использованием "мягких" меток
+$\frac{1}{N} \sum_{n=1}^{N} \sum_{t=1}^{T_n} \log q_{\theta}(y_t^{(n)}|y_{<t}^{(n)})$
 
-**Концепция:** Использование полного распределения вероятностей, предсказанного учителем (после применения "temperature scaling"), в качестве "мягких" меток для обучения студента.
+**Advantages:** Simplicity of implementation and understanding, use of standard training methods.
 
-> "Soft-label distillation, предложенная Хинтоном и соавторами в их знаменитой статье "Distilling the Knowledge in a Neural Network" (2015), является более совершенным методом дистилляции знаний. В отличие от Hard-label distillation, этот подход использует не только "жесткие" метки, но и полное распределение вероятностей, предсказанное учителем, в качестве "мягких" меток (soft labels)."
+**Disadvantages:** Loss of information contained in the teacher's probability distribution (probabilities of other classes and "soft" relationships between classes).
 
-**Temperature Scaling:** Описывается, как деление логитов модели на параметр температуры $T > 1$ делает распределение вероятностей более "мягким" и информативным.
+#### II. Soft-label Distillation
 
-**Пример для GPT моделей:** Большая GPT модель генерирует вероятности для всех возможных следующих токенов, которые затем "смягчаются" с помощью температуры. Маленький студент обучается воспроизводить это распределение вероятностей, используя КЛ-дивергенцию (или кросс-энтропию) между распределениями учителя и студента (также "смягченными" с той же температурой).
+**Concept:** Use of the full probability distribution predicted by the teacher (after applying "temperature scaling") as "soft" labels for training the student.
 
-**Математическая формализация:**
+> "Soft-label distillation, proposed by Hinton et al. in their seminal paper 'Distilling the Knowledge in a Neural Network' (2015), is a more sophisticated knowledge distillation method. Unlike hard-label distillation, this approach uses not only the 'hard' labels but the full probability distribution predicted by the teacher as 'soft' labels."
 
-- "Мягкие" метки учителя с температурой $T$: $p_i^T = \frac{\exp(z_i/T)}{\sum_j \exp(z_j/T)}$
-- Аналогично для студента: $q_i^T = \frac{\exp(z_i^q/T)}{\sum_j \exp(z_j^q/T)}$
-- Функция потерь для Soft-label Distillation: $L_{soft} = T^2 \cdot \text{KL}(p^T || q^T) = T^2 \cdot \sum_i p_i^T \log\frac{p_i^T}{q_i^T}$
-- Комбинированная функция потерь (часто используется): $L = \alpha \cdot L_{soft} + (1-\alpha) \cdot L_{hard}$
+**Temperature Scaling:** Describes how dividing the model's logits by a temperature parameter $T > 1$ makes the probability distribution more "soft" and informative.
 
-**Практическая реализация:** Приводятся фрагменты кода (заимствованные из репозитория DistillKit) для конфигурации дистилляции, подготовки моделей, реализации функции потерь с мягкими метками, обработки различных размеров словарей и создания кастомного тренера.
+**Example for GPT models:** A large GPT model generates probabilities for all possible next tokens, which are then "softened" using temperature. The small student is trained to reproduce this probability distribution using KL divergence (or cross-entropy) between the teacher's and student's distributions (both also "softened" with the same temperature).
 
-**Преимущества:** Более полная передача знаний ("темные знания"), лучшие результаты, улучшенная генерализация, контроль через температуру.
+**Mathematical Formalization:**
 
-**Недостатки:** Более высокие вычислительные затраты (особенно для больших словарей), сложность реализации (требуется доступ к логитам учителя), необходимость настройки гиперпараметров, зависимость от качества учителя.
+-   Teacher's "soft" labels with temperature $T$: $p_i^T = \frac{\exp(z_i/T)}{\sum_j \exp(z_j/T)}$
+-   Similarly for the student: $q_i^T = \frac{\exp(z_i^q/T)}{\sum_j \exp(z_j^q/T)}$
+-   Loss function for Soft-label Distillation: $L_{soft} = T^2 \cdot \text{KL}(p^T || q^T) = T^2 \cdot \sum_i p_i^T \log\frac{p_i^T}{q_i^T}$
+-   Combined loss function (often used): $L = \alpha \cdot L_{soft} + (1-\alpha) \cdot L_{hard}$
 
-**Сравнение Hard-label и Soft-label Distillation:** Приводится таблица сравнения по различным аспектам.
+**Practical Implementation:** Code snippets (borrowed from the DistillKit repository) are provided for configuring distillation, preparing models, implementing the soft-label loss function, handling different vocabulary sizes, and creating a custom trainer.
 
-## Часть 2: Законы масштабирования дистилляции
+**Advantages:** More complete transfer of knowledge ("dark knowledge"), better results, improved generalization, control via temperature.
 
-**Мотивация исследования:**
+**Disadvantages:** Higher computational cost (especially for large vocabularies), implementation complexity (requires access to teacher's logits), need for hyperparameter tuning, dependence on teacher quality.
 
-- Отсутствие систематических исследований законов масштабирования в контексте дистилляции.
-- Проблема стоимости вывода больших моделей.
-- Неопределенность в отношении оптимальных методов дистилляции и распределения вычислительных ресурсов.
+**Comparison of Hard-label and Soft-label Distillation:** A comparison table is provided across various aspects.
 
-**Закон масштабирования дистилляции:**
+## Part 2: Scaling Laws of Distillation
 
-Подчеркивается, что традиционные законы масштабирования ориентированы на обучение больших моделей с нуля, а исследование посвящено поиску закономерностей в эффективности дистилляции. Эксперименты проводились с моделями размером от 143 млн до 12.6 млрд параметров и объемом данных до 512 млрд токенов.
+**Motivation for Research:**
 
-Приводится таблица с обозначениями переменных, используемых в статье, включая количество параметров ($N_S, N_T$), количество токенов ($D_S, D_T$), соотношение токенов на параметр ($M$), кросс-энтропию ($L, L_T, L_S, \tilde{L}_S$). Дается подробное пояснение метрики кросс-энтропии и правила Чинчиллы об оптимальном соотношении токенов на параметр ($M^* \approx 20$).
+-   Lack of systematic studies on scaling laws in the context of distillation.
+-   Problem of inference cost for large models.
+-   Uncertainty regarding optimal distillation methods and allocation of computational resources.
 
-**Формализация закона масштабирования дистилляции:**
+**Scaling Law of Distillation:**
 
-Приводится центральная формула закона:
+It is emphasized that traditional scaling laws focus on training large models from scratch, while this research seeks patterns in distillation efficiency. Experiments were conducted with models ranging from 143 million to 12.6 billion parameters and data volumes up to 512 billion tokens.
 
-$$L_S(N_S, D_S, L_T) = L_T + \frac{1}{L_{c_0}^T} \left( 1 + \left( \frac{L_T}{\tilde{L}_S^{d_1}} \right)^{1/f_1} \right)^{-c_1f_1} \left( \frac{A}{N_S^{\alpha'}} + \frac{B}{D_S^{\beta'}} \right)^{\gamma'}$$
+A table is provided with notation for variables used in the paper, including number of parameters ($N_S, N_T$), number of tokens ($D_S, D_T$), token-to-parameter ratio ($M$), and cross-entropy ($L, L_T, L_S, \tilde{L}_S$). A detailed explanation of the cross-entropy metric and Chinchilla's rule for the optimal token-to-parameter ratio ($M^* \approx 20$) is given.
 
-и объясняются входящие в нее переменные ($L_S, L_T, N_S, D_S, \tilde{L}_S$) и эмпирические коэффициенты.
+**Formalization of the Distillation Scaling Law:**
 
-**Физический смысл формулы:**
+The central formula of the law is presented:
 
-- Студент не может быть лучше учителя ($L_S \geq L_T$).
-- Эффективность дистилляции тем выше, чем ближе потенциальная производительность студента ($\tilde{L}_S$) к производительности учителя ($L_T$).
-- При фиксированном учителе закон масштабирования дистилляции не превосходит обычный закон масштабирования.
+$L_S(N_S, D_S, L_T) = L_T + \frac{1}{L_{c_0}^T} \left( 1 + \left( \frac{L_T}{\tilde{L}_S^{d_1}} \right)^{1/f_1} \right)^{-c_1f_1} \left( \frac{A}{N_S^{\alpha'}} + \frac{B}{D_S^{\beta'}} \right)^{\gamma'}$
 
-**Практическое применение:** Оптимальное распределение вычислительных ресурсов и прогнозирование эффективности дистилляции.
+and the variables ($L_S, L_T, N_S, D_S, \tilde{L}_S$) and empirical coefficients are explained.
 
-### Коэффициенты смешивания в процессе дистилляции знаний
+**Physical Meaning of the Formula:**
 
-Обсуждается практическая реализация дистилляции и важность управления балансом между имитацией учителя и самостоятельным обучением студента через коэффициенты смешивания в функции потерь. Приводятся формулы для KL-дивергенции ($\mathcal{L}{\text{KD}}$) и комбинированной функции потерь ($\mathcal{L}S$), включающей потери на предсказание следующего токена ($\mathcal{L}{\textrm{NTP}}$), потери дистилляции ($\mathcal{L}{\textrm{KD}}$) и регуляризационную Z-потерю ($\mathcal{L}_Z$), а также коэффициенты смешивания $\lambda$ и $\lambda_Z$.
+-   The student cannot be better than the teacher ($L_S \geq L_T$).
+-   Distillation efficiency is higher when the student's potential performance ($\tilde{L}_S$) is closer to the teacher's performance ($L_T$).
+-   With a fixed teacher, the distillation scaling law does not surpass the standard scaling law.
 
-### Экспериментальное определение оптимальных параметров дистилляции
+**Practical Application:** Optimal allocation of computational resources and prediction of distillation effectiveness.
 
-Описываются эксперименты по определению влияния параметров дистилляции ($\lambda$ и $\tau$) на эффективность закона масштабирования. Отмечается, что в режиме "чистой дистилляции" ($\lambda = 1$) при $\tau = 1$ часто достигаются результаты, сопоставимые с оптимальными значениями. Подчеркивается зависимость оптимальных параметров от размеров моделей учителя и ученика.
+### Mixing Coefficients in Knowledge Distillation
 
-### Эксперимент с фиксированным учителем и разными учениками
+The practical implementation of distillation and the importance of managing the balance between imitating the teacher and the student's independent learning through mixing coefficients in the loss function are discussed. Formulas are provided for KL divergence ($\mathcal{L}_{\text{KD}}$) and the combined loss function ($\mathcal{L}_S$), including next-token prediction loss ($\mathcal{L}_{\textrm{NTP}}$), distillation loss ($\mathcal{L}_{\textrm{KD}}$), and regularization Z-loss ($\mathcal{L}_Z$), along with mixing coefficients $\lambda$ and $\lambda_Z$.
 
-Исследуется влияние размера модели ученика и объема дистилляционных данных при фиксированном учителе. Отмечается, что при высокой вычислительной мощности больший размер ученика приводит к меньшей функции потерь, особенно при большем размере учителя. При низкой вычислительной мощности наблюдается U-образная зависимость. Также упоминается возможность превосходства ученика над учителем в особых случаях (предположительно, при недообученном учителе).
+### Experimental Determination of Optimal Distillation Parameters
 
-### Эксперимент с фиксированным учеником и разными учителями
+Experiments are described to determine the impact of distillation parameters ($\lambda$ and $\tau$) on the effectiveness of the scaling law. It is noted that in "pure distillation" mode ($\lambda = 1$) with $\tau = 1$, results are often comparable to optimal values. The dependence of optimal parameters on the sizes of the teacher and student models is emphasized.
 
-Исследуется влияние размера модели учителя при фиксированном ученике и объеме данных дистилляции. Результаты показывают, что чем больше параметры учителя, тем ниже кросс-энтропия ученика, что указывает на необходимость соответствия производительности учителя возможностям ученика для наилучшего эффекта дистилляции.
+### Experiment with Fixed Teacher and Different Students
 
-### Дистилляция против контролируемого обучения
+The effect of student model size and distillation data volume is studied with a fixed teacher. It is observed that, with high computational power, a larger student size leads to lower loss, especially with a larger teacher. With low computational power, a U-shaped dependency is observed. The possibility of a student outperforming the teacher in special cases (presumably with an undertrained teacher) is mentioned.
 
-Сравнивается эффективность дистилляции и контролируемого обучения при фиксированных вычислительных ресурсах. Контролируемое обучение превосходит дистилляцию при достаточном количестве вычислений или данных у учащихся. Дистилляция имеет преимущества при умеренном бюджете данных, но при больших объемах данных контролируемое обучение оказывается лучше. В целом, дистилляция более эффективна при ограниченных вычислительных ресурсах.
+### Experiment with Fixed Student and Different Teachers
 
-### Выбор модели учителя
+The effect of teacher model size is studied with a fixed student and distillation data volume. Results show that the larger the teacher parameters, the lower the student's cross-entropy, indicating the need for the teacher's performance to match the student's capabilities for optimal distillation.
 
-Обсуждаются факторы, влияющие на выбор модели учителя, такие как сила обучающего сигнала (кросс-энтропия учителя) и увеличение затрат на вычисления при использовании более крупного учителя. Оптимальная потеря учителя уменьшается по степенному закону с увеличением вычислительных ресурсов ученика, и оптимальный размер учителя почти всегда линейно пропорционален размеру ученика. При ограниченных ресурсах выбор меньшего учителя может снизить затраты на вывод, обеспечивая при этом эффективные сигналы обучения.
+### Distillation vs. Supervised Learning
 
-### Рассчитайте оптимальную дистилляцию
+The effectiveness of distillation and supervised learning is compared under fixed computational resources. Supervised learning outperforms distillation with sufficient computation or data for the student. Distillation has advantages with moderate data budgets but is outperformed by supervised learning with large data volumes. Overall, distillation is more efficient under limited computational resources.
 
-Рассматривается задача определения оптимального способа создания модели студента желаемого размера с наименьшей кросс-энтропией при заданном вычислительном бюджете, включая выбор оптимального объема данных для обучения учащихся, размера модели учителя и данных для его обучения. Отмечается, что контролируемое обучение соответствует наилучшему варианту дистилляции при достаточном вычислительном бюджете. Если целью является создание наилучшей модели заданного размера без существующего учителя, контролируемое обучение предпочтительнее. Меньшие модели с большей вероятностью выиграют от контролируемого предварительного обучения, а более крупные - от дистилляции при больших вычислительных бюджетах. Оптимальный размер учителя сначала увеличивается, пока не станет немного больше ученика, а затем стабилизируется, так как переобучение учителя становится более эффективным при увеличении количества токенов учеников.
+### Choosing the Teacher Model
 
-### Ключевые результаты исследования
+Factors influencing teacher model selection are discussed, such as signal strength (teacher's cross-entropy) and increased computational costs from using a larger teacher. The optimal teacher loss decreases as a power law with increasing student computational resources, and the optimal teacher size is almost always linearly proportional to the student size. With limited resources, choosing a smaller teacher can reduce inference costs while providing effective training signals.
 
-- Возможность предсказания производительности студента с помощью разработанного закона масштабирования.
-- Влияние размера учителя ($N_T$) и данных обучения ($D_T$) на кросс-энтропию учителя ($L_T$), которая влияет на студента.
-- Обнаружение феномена "разрыва в способностях" (capacity gap), когда слишком сильный учитель может привести к худшему студенту. Важен именно разрыв в способности к обучению, а не только относительный размер.
-- Эмпирическое подтверждение U-образной зависимости ошибки студента от размера учителя при фиксированном размере студента.
+### Calculate Optimal Distillation
 
-### Практические рекомендации
+The task of determining the optimal way to create a student model of a desired size with minimal cross-entropy under a given computational budget is considered, including choosing the optimal data volume for student training, teacher model size, and data for teacher training. It is noted that supervised learning corresponds to the best distillation option with sufficient computational budget. If the goal is to create the best model of a given size without an existing teacher, supervised learning is preferable. Smaller models are more likely to benefit from supervised pre-training, while larger models benefit from distillation under large computational budgets. The optimal teacher size first increases until it is slightly larger than the student, then stabilizes, as overtraining the teacher becomes more efficient with increasing student tokens.
 
-Дистилляция эффективнее контролируемого обучения, если:
+### Key Research Findings
 
-- Общее количество вычислений/токенов для студента не превышает пороговое значение, связанное с его размером согласно новому закону масштабирования.
-- Модель-учитель уже существует или ее обучение имеет применение за пределами одной дистилляции.
-- Если оба процесса (обучение учителя и студента) имеют достаточно ресурсов, контролируемое обучение может достичь более низкой кросс-энтропии.
+-   Ability to predict student performance using the developed scaling law.
+-   Influence of teacher size ($N_T$) and training data ($D_T$) on teacher cross-entropy ($L_T$), which affects the student.
+-   Discovery of the "capacity gap" phenomenon, where an overly strong teacher can lead to a worse student. The critical factor is the gap in learning capacity, not just relative size.
+-   Empirical confirmation of the U-shaped dependency of student error on teacher size with a fixed student size.
 
-### Итоги:
+### Practical Recommendations
 
-- Представлен закон масштабирования дистилляции (формула приведена), описывающий зависимость качества студента ($L_S$) от его размера ($N_S$), данных обучения ($D_S$) и качества учителя ($L_T$, зависящего от $N_T$ и $D_T$). Фундаментальный принцип: $L_S \geq L_T$.
-- Ключевое открытие - "разрыв в способности к обучению" между учителем и учеником, включающий различия в гипотезном пространстве и оптимизационной способности. Это объясняет U-образную зависимость качества студента от размера учителя. Закон масштабирования (Уравнение 8) позволяет оценить, как характеристики учителя и студента влияют на конечную производительность. Эксперименты статистически подтверждают U-образную зависимость и помогают выявить оптимальный баланс между размерами учителя и ученика.
-- Дистилляция эффективнее стандартного обучения при ограниченных вычислительных ресурсах для студента (ниже определенного порогового значения) и при наличии уже обученной модели-учителя. Если учитель способен формировать представления, использующие сложные многомерные зависимости, ученик меньшей размерности может быть физически не способен их воспроизвести. Закон масштабирования помогает оптимально выбирать размер учителя, экономя вычислительные ресурсы.
+Distillation is more effective than supervised learning if:
 
-</details> 
+-   The total number of computations/tokens for the student does not exceed a threshold related to its size according to the new scaling law.
+-   The teacher model already exists or its training has applications beyond a single distillation.
+-   If both processes (teacher and student training) have sufficient resources, supervised learning can achieve lower cross-entropy.
+
+### Summary:
+
+-   The distillation scaling law (formula provided) is presented, describing the dependence of student quality ($L_S$) on its size ($N_S$), training data ($D_S$), and teacher quality ($L_T$, dependent on $N_T$ and $D_T$). The fundamental principle: $L_S \geq L_T$.
+-   The key discovery is the "capacity gap" between teacher and student, encompassing differences in hypothesis space and optimization capability. This explains the U-shaped dependency of student quality on teacher size. The scaling law (Equation 8) allows estimation of how teacher and student characteristics affect final performance. Experiments statistically confirm the U-shaped dependency and help identify the optimal balance between teacher and student sizes.
+-   Distillation is more effective than standard learning under limited computational resources for the student (below a certain threshold) and when a pre-trained teacher model is available. If the teacher can form representations utilizing complex multidimensional dependencies, a smaller student may be physically unable to reproduce them. The scaling law helps optimally choose teacher size, saving computational resources.
+
+</details>
 
 ## Part 1: Knowledge Distillation:
 
-**Knowledge Distillation (Дистилляция знаний)** — это метод обучения моделей-студентов (обычно меньшего размера и менее сложных) путем передачи "знаний" от предварительно обученной модели-учителя (обычно большей и более сложной).  Основная идея заключается в том, что модель-учитель, обладающая большей емкостью и обученная на большом объеме данных, может передать не только свои "жесткие" предсказания (например, класс объекта), но и более богатую информацию о распределении вероятностей классов, которую модель-студент может использовать для более эффективного обучения.
+**Knowledge Distillation** is a method for training student models (typically smaller and less complex) by transferring "knowledge" from a pre-trained teacher model (typically larger and more complex).
 
-### **Teacher и Student модели:**
+The core idea is that the teacher model, possessing greater capacity and trained on a large volume of data, can transfer not only its "hard" predictions (e.g., the object class) but also richer information about the class probability distribution, which the student model can use for more efficient learning.
 
-В парадигме Knowledge Distillation участвуют две основные модели:
+### **Teacher and Student Models:**
 
-*   **Teacher (Учитель):**  Это большая, предварительно обученная модель, которая считается "экспертом" в решении определенной задачи. Учитель уже достиг высокой точности и обладает "знаниями", которые мы хотим передать студенту. Математически учитель представляется как функция $p(y|x)$, которая для входных данных $x$ выдает распределение вероятностей $p$ по классам $y$.
+In the Knowledge Distillation paradigm, two primary models participate:
 
-*   **Student (Студент):** Это меньшая, более простая модель, которую мы хотим обучить. Цель студента — научиться имитировать поведение учителя, чтобы достичь сравнимой производительности, но при этом быть более эффективной с точки зрения вычислительных ресурсов, памяти или времени инференса. Студент представляется как функция $q_{\theta}(y|x)$, где $\theta$ — параметры модели, которые мы оптимизируем в процессе обучения.
+*   **Teacher:** This is a large, pre-trained model considered an "expert" at solving a specific task. The teacher has already achieved high accuracy and possesses "knowledge" we wish to transfer to the student. Mathematically, the teacher is represented as a function $p(y|x)$, which for input data $x$ outputs a probability distribution $p$ over classes $y$.
+*   **Student:** This is a smaller, simpler model we aim to train. The student's goal is to learn to mimic the teacher's behavior to achieve comparable performance while being more efficient in terms of computational resources, memory, or inference time. The student is represented as a function $q_{\theta}(y|x)$, where $\theta$ are the model parameters we optimize during training.
 
-**Функция потерь (Loss Function) в Knowledge Distillation:**
+**Loss Function in Knowledge Distillation:**
 
-Общая цель Knowledge Distillation — минимизировать разницу между предсказаниями учителя и студента. Это формализуется через функцию потерь $L$, которая зависит от предсказаний учителя $p(y|x)$ и студента $q_{\theta}(y|x)$.  Процесс обучения заключается в поиске оптимальных параметров $\theta$ для студента, которые минимизируют эту функцию потерь:
+The overall goal of Knowledge Distillation is to minimize the difference between the teacher's and student's predictions. This is formalized through a loss function $L$, which depends on the teacher's predictions $p(y|x)$ and the student's predictions $q_{\theta}(y|x)$.
 
-$$L(p(y|x), q_{\theta}(y|x)) \rightarrow \min_{\theta}$$
+The training process involves finding the optimal student parameters $\theta$ that minimize this loss function:
 
-Это общее выражение, и конкретный вид функции потерь и способ дистилляции определяют различные подходы. Рассмотрим два основных подхода: hard-label и soft-label дистилляцию.
+$L(p(y|x), q_{\theta}(y|x)) \rightarrow \min_{\theta}$
 
-## I. Hard-label Distillation: Дистилляция с использованием "жестких" меток
+This is a general expression, and the specific form of the loss function and distillation approach define the different methods. We consider two main approaches: hard-label and soft-label distillation.
 
-**Концепция:**
+## I. Hard-label Distillation
 
-Hard-label distillation — это наиболее простой и интуитивно понятный подход. В этом методе учитель используется для генерации "жестких" меток (hard labels) для обучающей выборки.  "Жесткая" метка — это просто класс с наивысшей вероятностью, предсказанный учителем для каждого входного примера.  Затем студент обучается на этих сгенерированных метках, как если бы это были истинные метки из размеченного датасета.  По сути, мы используем учителя для создания синтетического датасета, на котором обучаем студента стандартным образом.
+**Concept:**
 
-**Hard-label Distillation для GPT моделей: объяснение на пальцах**
+Hard-label distillation is the simplest and most intuitive approach. In this method, the teacher is used to generate "hard" labels (hard labels) for the training set.
 
-Представьте, что у нас есть две модели:
+A "hard" label is simply the class with the highest probability predicted by the teacher for each input example.
 
-*   **Учитель (Teacher):** Большая, мощная GPT модель, например, GPT-3 или что-то подобное. Она обладает огромным количеством знаний о языке и мире, и способна генерировать очень качественный и связный текст.
-*   **Студент (Student):** Маленькая, более компактная GPT модель, например, уменьшенная версия GPT или Transformer меньшего размера. Она менее ресурсоемкая, но изначально уступает учителю в качестве генерации текста.
+The student is then trained on these generated labels, as if they were true labels from a labeled dataset.
 
-Наша цель - "научить" маленькую модель-студента генерировать текст так же хорошо, как и большая модель-учитель, используя метод Hard-label Distillation.
+Essentially, we use the teacher to create a synthetic dataset on which we train the student using standard methods.
 
-**Шаги Hard-label Distillation в этом контексте:**
+**Hard-label Distillation for GPT models: An intuitive explanation**
 
-1.  **Генерация "жестких" меток учителем (Большой GPT):**
+Imagine we have two models:
 
-    *   Мы берем большой набор текстовых данных (например, обучающую выборку, на которой изначально обучался учитель, или просто большой корпус текстов).
-    *   Для каждого фрагмента текста (или запроса) из этого набора, мы просим большую модель-учителя сгенерировать текст.  В контексте GPT, это означает, что мы подаем учителю входной текст (например, начало предложения или запрос) и просим его сгенерировать продолжение.
-    *   Учитель генерирует последовательность токенов, которые он считает наиболее вероятными для продолжения данного текста.  Эти сгенерированные последовательности токенов и являются нашими "жесткими" метками.
+*   **Teacher:** A large, powerful GPT model, e.g., GPT-3 or similar. It possesses vast knowledge about language and the world and can generate very high-quality, coherent text.
+*   **Student:** A small, compact GPT model, e.g., a reduced version of GPT or a smaller Transformer. It is less resource-intensive but initially inferior to the teacher in text generation quality.
 
-    **Пример:**
+Our goal is to "teach" the small student model to generate text as well as the large teacher model, using the Hard-label Distillation method.
 
-    *   **Входной текст (запрос):** "Столица Франции - это"
-    *   **Учитель (Большая GPT) генерирует:** "Париж." (токены: "Па", "ри", "ж", ".")
-    *   **"Жесткая" метка:** Последовательность токенов: ("Па", "ри", "ж", ".")
+**Steps of Hard-label Distillation in this context:**
 
-    Мы повторяем этот процесс для большого количества различных входных текстов, получая набор пар: (исходный входной текст, "жесткая" метка - последовательность токенов, сгенерированная учителем).
+1.  **Generation of "hard" labels by the teacher (Large GPT):**
+    *   We take a large set of text data (e.g., the training set on which the teacher was originally trained, or simply a large text corpus).
+    *   For each text fragment (or prompt) from this set, we ask the large teacher model to generate text. In the context of GPT, this means we feed the teacher an input text (e.g., the beginning of a sentence or a prompt) and ask it to generate a continuation.
+    *   The teacher generates a sequence of tokens it considers most probable to continue the given text. These generated token sequences are our "hard" labels.
 
-2.  **Обучение студента (Маленький GPT) на "жестких" метках:**
+    **Example:**
+    *   **Input text (prompt):** "The capital of France is"
+    *   **Teacher (Large GPT) generates:** "Paris." (tokens: "Pa", "ri", "j", ".")
+    *   **"Hard" label:** Token sequence: ("Pa", "ri", "j", ".")
 
-    *   Теперь у нас есть синтетический датасет, состоящий из пар (исходный входной текст, "жесткая" метка).  Мы будем использовать этот датасет для обучения маленькой модели-студента.
-    *   Мы обучаем студента предсказывать "жесткие" метки, сгенерированные учителем, используя стандартную задачу языкового моделирования.  Это означает, что для каждого входного текста мы хотим, чтобы студент генерировал последовательность токенов, максимально похожую на "жесткую" метку, сгенерированную учителем.
-    *   В процессе обучения мы используем функцию потерь кросс-энтропии.  Мы сравниваем распределение вероятностей токенов, предсказанное студентом, с "жесткой" меткой (которая по сути является распределением, где вероятность "правильного" токена равна 1, а всех остальных - 0).  Мы стремимся минимизировать эту кросс-энтропию, заставляя студента "подражать" учителю в предсказании токенов.
+    We repeat this process for a large number of different input texts, obtaining a set of pairs: (original input text, "hard" label—the token sequence generated by the teacher).
 
-    В нашем примере, если студент на вход "Столица Франции - это" предсказывает, например, "Лондон", то функция потерь будет высокой, так как "жесткая" метка учителя была "Париж".  В процессе обучения студент будет корректировать свои параметры, чтобы в будущем для аналогичных запросов предсказывать "Париж" или что-то очень похожее на предсказание учителя.
+2.  **Training the student (Small GPT) on "hard" labels:**
+    *   Now we have a synthetic dataset consisting of pairs (original input text, "hard" label). We use this dataset to train the small student model.
+    *   We train the student to predict the "hard" labels generated by the teacher, using the standard language modeling task. This means that for each input text, we want the student to generate a token sequence as similar as possible to the "hard" label generated by the teacher.
+    *   During training, we use the cross-entropy loss function. We compare the probability distribution of tokens predicted by the student with the "hard" label (which is essentially a distribution where the probability of the "correct" token is 1 and all others are 0). We strive to minimize this cross-entropy, forcing the student to "imitate" the teacher in token prediction.
 
-**Почему маленькая модель может предсказывать те же токены, что и большая?**
+    In our example, if the student predicts, for the input "The capital of France is", for example, "London", the loss function will be high because the teacher's "hard" label was "Paris". During training, the student will adjust its parameters to predict "Paris" or something very similar to the teacher's prediction for similar queries in the future.
 
-*   **Передача знаний через "жесткие" метки:**  Хотя Hard-label Distillation и теряет часть информации из распределения вероятностей учителя, она все равно эффективно передает **ключевые знания** о том, какие токены являются наиболее вероятными в определенных контекстах.  Большая модель, будучи хорошо обученной, "знает", какие продолжения текста являются грамматически правильными, семантически уместными и стилистически подходящими.  Генерируя "жесткие" метки, она как бы "подсказывает" маленькой модели, какие именно токены нужно предсказывать.
-*   **Фокус на наиболее важной информации:**  "Жесткие" метки концентрируются на наиболее вероятных токенах.  В языковом моделировании часто бывает так, что для многих контекстов есть один или несколько доминирующих "правильных" продолжений.  Hard-label Distillation помогает маленькой модели быстро освоить эти наиболее важные закономерности, игнорируя менее значимые детали, которые могут быть избыточными для достижения хорошего качества генерации.
-*   **Упрощение задачи обучения:**  Обучение на "жестких" метках превращает дистилляцию в стандартную задачу обучения с учителем.  Это упрощает процесс обучения и позволяет использовать хорошо известные методы и оптимизаторы.  Маленькой модели не нужно пытаться воспроизвести все тонкости распределения вероятностей учителя, ей достаточно научиться предсказывать наиболее вероятные токены, что является более простой задачей.
+**Why can the small model predict the same tokens as the large model?**
 
-**Важно отметить ограничения Hard-label Distillation:**
+*   **Knowledge transfer via "hard" labels:** Although Hard-label Distillation loses some information from the teacher's probability distribution, it still effectively transfers **key knowledge** about which tokens are most probable in certain contexts. The large model, being well-trained, "knows" what continuations are grammatically correct, semantically appropriate, and stylistically suitable. By generating "hard" labels, it essentially "hints" to the small model which specific tokens to predict.
+*   **Focus on the most important information:** "Hard" labels concentrate on the most probable tokens. In language modeling, it is often the case that for many contexts, there is one or several dominant "correct" continuations. Hard-label Distillation helps the small model quickly master these most important patterns, ignoring less significant details that may be redundant for achieving good generation quality.
+*   **Simplification of the learning task:** Training on "hard" labels transforms distillation into a standard supervised learning task. This simplifies the training process and allows the use of well-known methods and optimizers. The small model does not need to try to reproduce all the nuances of the teacher's probability distribution; it only needs to learn to predict the most probable tokens, which is a simpler task.
 
-*   **Потеря "мягкой" информации:** Как и указано в тексте, Hard-label Distillation теряет информацию о вероятностях других классов и "мягких" отношениях между классами.  В контексте языковых моделей это означает, что студент может не улавливать все нюансы стиля, семантики и разнообразия, которые присутствуют в распределении вероятностей учителя.  Например, учитель может знать, что "Париж" является самым вероятным ответом на "Столица Франции - это", но также понимать, что "Рим" или "Берлин" являются менее вероятными, но все же допустимыми ответами в определенных контекстах.  Hard-label Distillation фокусируется только на "Париже", игнорируя эту "мягкую" информацию.
-*   **Потенциальное ухудшение разнообразия:**  Из-за фокусировки на "жестких" метках, студент может стать менее разнообразным в своих генерациях, чем учитель.  Он может слишком точно копировать наиболее вероятные ответы учителя, упуская возможность генерировать альтернативные, но все еще качественные варианты.
+**Important to note the limitations of Hard-label Distillation:**
 
-**Математическая формализация:**
+*   **Loss of "soft" information:** As stated in the text, Hard-label Distillation loses information about the probabilities of other classes and "soft" relationships between classes. In the context of language models, this means the student may not capture all the nuances of style, semantics, and diversity present in the teacher's probability distribution. For example, the teacher may know that "Paris" is the most probable answer to "The capital of France is", but also understands that "Rome" or "Berlin" are less probable but still acceptable answers in certain contexts. Hard-label Distillation focuses only on "Paris", ignoring this "soft" information.
+*   **Potential reduction in diversity:** Due to the focus on "hard" labels, the student may become less diverse in its generations than the teacher. It may copy the teacher's most probable answers too closely, missing the opportunity to generate alternative yet still high-quality variants.
 
-1.  **Генерация "жестких" меток учителем:**  Для каждого примера $x^{(n)}$ из обучающей выборки, учитель $p(y|x)$ предсказывает распределение вероятностей классов. "Жесткая" метка $y^{(n)}$ выбирается как класс с максимальной вероятностью, предсказанной учителем.  В контексте языков моделей, где $y$ представляет собой последовательность токенов, учитель генерирует последовательность "жестких" меток $y^{(1)}, \ldots y^{(N)}$ для $N$ примеров.  Здесь $y^{(n)} = (y_1^{(n)}, \ldots, y_{T_n}^{(n)})$ представляет собой последовательность токенов длиной $T_n$.
+**Mathematical Formalization:**
 
-    $$y^{(1)}, \ldots y^{(N)} \sim p(y|x)$$
-    В более простом варианте, для классификации,  $y^{(n)} = \arg\max_{y} p(y|x^{(n)})$. В случае последовательностей, учитель может генерировать целые последовательности наиболее вероятных токенов.
+1.  **Generation of "hard" labels by the teacher:** For each example $x^{(n)}$ from the training set, the teacher $p(y|x)$ predicts a probability distribution over classes. The "hard" label $y^{(n)}$ is chosen as the class with the maximum probability predicted by the teacher. In the context of language models, where $y$ represents a sequence of tokens, the teacher generates a sequence of "hard" labels $y^{(1)}, \ldots y^{(N)}$ for $N$ examples. Here, $y^{(n)} = (y_1^{(n)}, \ldots, y_{T_n}^{(n)})$ represents a token sequence of length $T_n$.
 
-2.  **Обучение студента на "жестких" метках:** Студент $q_{\theta}(y|x)$ обучается максимизировать логарифмическую вероятность "жестких" меток, сгенерированных учителем. Это стандартная задача обучения с учителем, где целевыми метками являются $y^{(1)}, \ldots y^{(N)}$.  Функция потерь, которую мы минимизируем (или эквивалентно, максимизируем отрицательную потерю), представляет собой ожидание логарифмической вероятности "жестких" меток под распределением $p(y|x)$ учителя.
+    $y^{(1)}, \ldots y^{(N)} \sim p(y|x)$
 
-    $$\mathbb{E}_{p(y|x)} [\log q_{\theta}(y|x)] \rightarrow \max_{\theta}$$
+    In a simpler variant for classification:
+    $y^{(n)} = \arg\max_{y} p(y|x^{(n)})$. For sequences, the teacher may generate entire sequences of the most probable tokens.
 
-    В практической реализации, это ожидание аппроксимируется эмпирическим средним по обучающей выборке. Для последовательностей текста, функция потерь выглядит следующим образом:
+2.  **Training the student on "hard" labels:** The student $q_{\theta}(y|x)$ is trained to maximize the log-probability of the "hard" labels generated by the teacher. This is a standard supervised learning task where the target labels are $y^{(1)}, \ldots y^{(N)}$. The loss function we minimize (or equivalently, maximize the negative loss) represents the expectation of the log-probability of the "hard" labels under the teacher's distribution $p(y|x)$.
 
-    $$\frac{1}{N} \sum_{n=1}^{N} \sum_{t=1}^{T_n} \log q_{\theta}(y_t^{(n)}|y_{<t}^{(n)})$$
+    $\mathbb{E}_{p(y|x)} [\log q_{\theta}(y|x)] \rightarrow \max_{\theta}$
 
-    Здесь:
-    *   $N$ — количество примеров в обучающей выборке.
-    *   $T_n$ — длина последовательности для $n$-го примера.
-    *   $y_t^{(n)}$ — $t$-й токен в последовательности "жестких" меток для $n$-го примера, сгенерированных учителем.
-    *   $y_{<t}^{(n)} = (y_1^{(n)}, \ldots, y_{t-1}^{(n)})$ — префикс последовательности до $t$-го токена.
-    *   $q_{\theta}(y_t^{(n)}|y_{<t}^{(n)})$ — вероятность предсказания студентом $t$-го токена $y_t^{(n)}$ при условии предыдущих токенов $y_{<t}^{(n)}$, параметризованная $\theta$.
+    In practical implementation, this expectation is approximated by the empirical average over the training set. For text sequences, the loss function is:
 
-    Эта функция потерь представляет собой **кросс-энтропию** между распределением "жестких" меток, сгенерированных учителем, и предсказаниями студента.  Мы стремимся максимизировать эту величину, что эквивалентно минимизации отрицательной логарифмической правдоподобности или кросс-энтропии.
+    $\frac{1}{N} \sum_{n=1}^{N} \sum_{t=1}^{T_n} \log q_{\theta}(y_t^{(n)}|y_{<t}^{(n)})$
 
-**Преимущества и недостатки Hard-label Distillation:**
+    Here:
+    *   $N$ — number of examples in the training set.
+    *   $T_n$ — length of the sequence for the $n$-th example.
+    *   $y_t^{(n)}$ — the $t$-th token in the "hard" label sequence for the $n$-th example, generated by the teacher.
+    *   $y_{<t}^{(n)} = (y_1^{(n)}, \ldots, y_{t-1}^{(n)})$ — the prefix of the sequence up to the $t$-th token.
+    *   $q_{\theta}(y_t^{(n)}|y_{<t}^{(n)})$ — the probability of the student predicting the $t$-th token $y_t^{(n)}$ given the previous tokens $y_{<t}^{(n)}$, parameterized by $\theta$.
 
-*   **Преимущества:** Простота реализации и понимания. Можно использовать стандартные методы обучения с учителем.
-*   **Недостатки:**  Потеря информации, содержащейся в распределении вероятностей учителя. "Жесткие" метки содержат только информацию о наиболее вероятном классе, игнорируя вероятности других классов и "мягкие" отношения между классами, которые учитель "знает".  Это может ограничить эффективность передачи знаний.
+    This loss function represents the **cross-entropy** between the distribution of "hard" labels generated by the teacher and the student's predictions. We strive to maximize this quantity, which is equivalent to minimizing the negative log-likelihood or cross-entropy.
 
-## **Реализация Hard-label Distillation на основе Open R1**
+**Advantages and Disadvantages of Hard-label Distillation:**
 
-Ниже представлена реализация Hard-label Distillation с использованием подхода, применяемого в проекте Open R1. Процесс разделен на два этапа: генерация данных учителем и обучение ученика.
+*   **Advantages:** Simplicity of implementation and understanding. Can use standard supervised learning methods.
+*   **Disadvantages:** Loss of information contained in the teacher's probability distribution. "Hard" labels contain only information about the most probable class, ignoring the probabilities of other classes and "soft" relationships between classes that the teacher "knows". This can limit the effectiveness of knowledge transfer.
 
-```
-@misc{openr1,
+## **Implementation of Hard-label Distillation based on Open R1**
+
+Below is an implementation of Hard-label Distillation using the approach applied in the Open R1 project. The process is divided into two stages: teacher data generation and student training.
+
+``` @misc{openr1,
     title = {Open R1: A fully open reproduction of DeepSeek-R1},
     url = {https://github.com/huggingface/open-r1},
     author = {Hugging Face},
@@ -281,7 +291,7 @@ Hard-label distillation — это наиболее простой и интуи
 }
 ```
 
-### **Этап 1: Генерация "жестких" меток большой моделью (учителем)**
+### **Stage 1: Generating "Hard" Labels with a Large Teacher Model**
 
 ```python
 import argparse
@@ -304,59 +314,59 @@ def build_hard_label_pipeline(
     """
     Description:
     ---------------
-        Создает конвейер для генерации "жестких" меток с использованием модели-учителя.
+        Creates a pipeline for generating "hard" labels using a teacher model.
 
     Args:
     ---------------
-        teacher_model: Идентификатор модели-учителя
-        base_url: URL сервера vLLM
-        prompt_column: Имя колонки в датасете, содержащей входные тексты
-        prompt_template: Шаблон для форматирования промптов
-        temperature: Температура для генерации (0.0 для "жестких" меток)
-        max_new_tokens: Максимальное количество генерируемых токенов
-        input_batch_size: Размер батча для входных данных
+        teacher_model: Identifier of the teacher model
+        base_url: URL of the vLLM server
+        prompt_column: Name of the dataset column containing input texts
+        prompt_template: Template for formatting prompts
+        temperature: Temperature for generation (0.0 for "hard" labels)
+        max_new_tokens: Maximum number of tokens to generate
+        input_batch_size: Batch size for input data
 
     Returns:
     ---------------
-        Настроенный конвейер Distilabel
+        Configured Distilabel pipeline
 
     Raises:
     ---------------
-        Exception: В случае ошибки настройки конвейера
+        Exception: If pipeline configuration fails
 
     Examples:
     ---------------
         >>> pipeline = build_hard_label_pipeline("deepseek-ai/DeepSeek-R1")
         >>> pipeline.run(dataset)
     """
-    # Настраиваем параметры генерации с temperature=0 для получения детерминированных ответов
+    # Configure generation parameters with temperature=0 to obtain deterministic outputs
     generation_kwargs: Dict[str, Any] = {
         "max_new_tokens": max_new_tokens,
         "temperature": temperature,
         "top_p": 1.0,
-        "do_sample": False,          # Отключаем семплирование для получения "жестких" меток
+        "do_sample": False,          # Disable sampling to obtain "hard" labels
     }
 
     with Pipeline(
         name="hard-label-distillation",
-        description="Конвейер для генерации 'жестких' меток с использованием модели-учителя",
+        description="Pipeline for generating 'hard' labels using a teacher model",
     ) as pipeline:
-        # Настраиваем модель-учителя через vLLM
+        # Configure the teacher model via vLLM
         teacher = vLLM(
             model=teacher_model,
             tokenizer=teacher_model,
             extra_kwargs={
-                "tensor_parallel_size": 1,               # Можно увеличить для больших моделей
-                "max_model_len": max_new_tokens + 2048,  # Добавляем запас для контекста
+                "tensor_parallel_size": 1,               # Can be increased for larger models
+                "max_model_len": max_new_tokens + 2048,  # Add buffer for context
             },
             generation_kwargs=generation_kwargs,
         )
 
-        # Настраиваем шаг генерации текста
+        # Configure the text generation step
         text_generation = TextGeneration(
             llm=teacher,
             template=prompt_template,
-            num_generations=1,           # Для "жестких" меток нам нужна только одна генерация
+            num_generations=1,           # For "hard" labels, only one generation is needed
             input_mappings={"instruction": prompt_column} if prompt_column is not None else {},
             input_batch_size=input_batch_size,
         )
@@ -376,71 +386,71 @@ def generate_hard_labels(
     """
     Description:
     ---------------
-        Генерирует "жесткие" метки с использованием модели-учителя и сохраняет результаты как набор данных на HuggingFace Hub.
+        Generates "hard" labels using a teacher model and saves the results as a dataset on HuggingFace Hub.
 
     Args:
     ---------------
-        dataset_name: Имя исходного датасета
-        dataset_split: Имя сплита датасета
-        teacher_model: Модель-учитель для генерации "жестких" меток
-        output_dataset: Имя выходного датасета на HuggingFace Hub
-        prompt_column: Имя колонки, содержащей входные данные
-        prompt_template: Шаблон для форматирования промптов
-        max_examples: Максимальное количество примеров для обработки
-        private: Приватный ли выходной датасет
+        dataset_name: Name of the source dataset
+        dataset_split: Name of the dataset split
+        teacher_model: Teacher model for generating "hard" labels
+        output_dataset: Name of the output dataset on HuggingFace Hub
+        prompt_column: Name of the column containing input data
+        prompt_template: Template for formatting prompts
+        max_examples: Maximum number of examples to process
+        private: Whether the output dataset should be private
 
     Returns:
     ---------------
-        Датасет с "жесткими" метками
+        Dataset with "hard" labels
 
     Raises:
     ---------------
-        Exception: В случае ошибки генерации меток
+        Exception: If label generation fails
 
     Examples:
     ---------------
         >>> hard_label_dataset = generate_hard_labels("my-dataset", "train")
         >>> hard_label_dataset.push_to_hub("my-username/hard-label-dataset")
     """
-    # Загружаем исходный датасет
-    print(f"Загрузка датасета '{dataset_name}' (сплит: {dataset_split})...")
+    # Load the source dataset
+    print(f"Loading dataset '{dataset_name}' (split: {dataset_split})...")
     dataset = load_dataset(dataset_name, split=dataset_split)
 
-    # Ограничиваем количество примеров, если указано
+    # Limit the number of examples if specified
     if max_examples is not None and max_examples < len(dataset):
         dataset = dataset.select(range(max_examples))
 
-    print(f"Создание конвейера для генерации 'жестких' меток с использованием {teacher_model}...")
+    print(f"Creating pipeline for generating 'hard' labels using {teacher_model}...")
     pipeline = build_hard_label_pipeline(
         teacher_model=teacher_model,
         prompt_column=prompt_column,
         prompt_template=prompt_template,
     )
 
-    print(f"Запуск конвейера для генерации 'жестких' меток на {len(dataset)} примерах...")
-    # Генерируем "жесткие" метки
+    print(f"Running pipeline to generate 'hard' labels on {len(dataset)} examples...")
+    # Generate "hard" labels
     hard_label_dataset = pipeline.run(dataset=dataset)
 
-    # Сохраняем результаты на HuggingFace Hub
+    # Save results to HuggingFace Hub
     if output_dataset:
-        print(f"Сохранение результатов в '{output_dataset}'...")
+        print(f"Saving results to '{output_dataset}'...")
         hard_label_dataset.push_to_hub(output_dataset, private=private)
-        print(f"Датасет с 'жесткими' метками успешно сохранен в '{output_dataset}'.")
+        print(f"Dataset with 'hard' labels successfully saved to '{output_dataset}'.")
 
     return hard_label_dataset
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Генерация 'жестких' меток с использованием модели-учителя")
-    parser.add_argument("--dataset", type=str, required=True, help="Имя исходного датасета")
-    parser.add_argument("--split", type=str, default="train", help="Сплит датасета")
-    parser.add_argument("--teacher-model", type=str, default="deepseek-ai/DeepSeek-R1", help="Модель-учитель")
-    parser.add_argument("--output-dataset", type=str, required=True, help="Имя выходного датасета")
-    parser.add_argument("--prompt-column", type=str, default="problem", help="Колонка с входными данными")
+    parser = argparse.ArgumentParser(description="Generating 'hard' labels using a teacher model")
+    parser.add_argument("--dataset", type=str, required=True, help="Name of the source dataset")
+    parser.add_argument("--split", type=str, default="train", help="Dataset split")
+    parser.add_argument("--teacher-model", type=str, default="deepseek-ai/DeepSeek-R1", help="Teacher model")
+    parser.add_argument("--output-dataset", type=str, required=True, help="Name of the output dataset")
+    parser.add_argument("--prompt-column", type=str, default="problem", help="Column containing input data")
     parser.add_argument("--prompt-template", type=str,
                        default="You will be given a problem. Please reason step by step, and put your final answer within \\boxed{}: {{ instruction }}",
-                       help="Шаблон для форматирования промптов")
-    parser.add_argument("--max-examples", type=int, default=None, help="Максимальное количество примеров")
-    parser.add_argument("--private", action="store_true", help="Сделать выходной датасет приватным")
+                       help="Template for formatting prompts")
+    parser.add_argument("--max-examples", type=int, default=None, help="Maximum number of examples")
+    parser.add_argument("--private", action="store_true", help="Make the output dataset private")
 
     args = parser.parse_args()
 
@@ -456,7 +466,7 @@ if __name__ == "__main__":
     )
 ```
 
-### **Этап 2: Обучение модели-ученика на "жестких" метках**
+### **Stage 2: Training the Student Model on "Hard" Labels**
 
 ```python
 import logging
@@ -480,31 +490,31 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class HardLabelDistillConfig(SFTConfig):
-    """Конфигурация для обучения ученика с использованием Hard-label Distillation."""
+    """Configuration for training a student model using Hard-label Distillation."""
 
     dataset_name: str = field(
-        default=None, metadata={"help": "Датасет с 'жесткими' метками, сгенерированными учителем"}
+        default=None, metadata={"help": "Dataset with 'hard' labels generated by the teacher"}
     )
     input_column: str = field(
-        default="problem", metadata={"help": "Колонка с входными данными"}
+        default="problem", metadata={"help": "Column containing input data"}
     )
     target_column: str = field(
-        default="generation_0", metadata={"help": "Колонка с выходными данными (жесткими метками) учителя"}
+        default="generation_0", metadata={"help": "Column containing teacher's outputs ('hard' labels)"}
     )
     max_seq_length: int = field(
-        default=2048, metadata={"help": "Максимальная длина последовательности"}
+        default=2048, metadata={"help": "Maximum sequence length"}
     )
 
 def train_student_model(config: HardLabelDistillConfig, model_args: ModelConfig) -> None:
     """
     Description:
     ---------------
-    Обучает модель-ученика на 'жестких' метках, сгенерированных учителем.
+    Trains a student model on 'hard' labels generated by the teacher.
 
     Args:
     ---------------
-        config: Конфигурация обучения
-        model_args: Конфигурация модели
+        config: Training configuration
+        model_args: Model configuration
 
     Returns:
     ---------------
@@ -512,13 +522,13 @@ def train_student_model(config: HardLabelDistillConfig, model_args: ModelConfig)
 
     Raises:
     ---------------
-        Exception: В случае ошибки обучения модели
+        Exception: If model training fails
 
     Examples:
     ---------------
         >>> train_student_model(config, model_args)
     """
-    # Настраиваем логирование
+    # Configure logging
     logging.basicConfig(
         format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
@@ -529,47 +539,47 @@ def train_student_model(config: HardLabelDistillConfig, model_args: ModelConfig)
     datasets.utils.logging.set_verbosity(log_level)
     transformers.utils.logging.set_verbosity(log_level)
 
-    # Устанавливаем сид для воспроизводимости
+    # Set seed for reproducibility
     set_seed(config.seed)
 
-    # Проверяем наличие последнего чекпоинта
+    # Check for last checkpoint
     last_checkpoint: Optional[str] = None
     if os.path.isdir(config.output_dir):
         last_checkpoint = get_last_checkpoint(config.output_dir)
         if last_checkpoint is not None:
-            logger.info(f"Найден чекпоинт, продолжаем обучение с {last_checkpoint}")
+            logger.info(f"Checkpoint found, resuming training from {last_checkpoint}")
 
-    # Инициализируем Weights & Biases, если нужно
+    # Initialize Weights & Biases if needed
     if "wandb" in config.report_to:
         init_wandb_training(config)
 
-    # Загружаем датасет с 'жесткими' метками
-    logger.info(f"Загрузка датасета с 'жесткими' метками: {config.dataset_name}")
+    # Load dataset with 'hard' labels
+    logger.info(f"Loading dataset with 'hard' labels: {config.dataset_name}")
     dataset = load_dataset(config.dataset_name)
 
-    # Подготавливаем входные данные и метки для обучения
+    # Prepare input data and labels for training
     def prepare_dataset(examples: Dict[str, Any]) -> Dict[str, Any]:
-        """Форматирует данные для обучения с учителем."""
+        """Formats data for supervised training."""
         return {
             "input_ids": examples[config.input_column],
             "labels": examples[config.target_column],
         }
 
-    # Трансформируем датасет
+    # Transform the dataset
     dataset = dataset.map(prepare_dataset, batched=True)
 
-    # Загружаем токенизатор
+    # Load tokenizer
     tokenizer = AutoTokenizer.from_pretrained(
         model_args.model_name_or_path,
         revision=model_args.model_revision,
         trust_remote_code=model_args.trust_remote_code,
     )
 
-    # Настраиваем chat_template, если указан
+    # Configure chat_template if specified
     if config.chat_template is not None:
         tokenizer.chat_template = config.chat_template
 
-    # Настраиваем параметры модели
+    # Configure model parameters
     torch_dtype = (
         model_args.torch_dtype if model_args.torch_dtype in ["auto", None] else getattr(torch, model_args.torch_dtype)
     )
@@ -581,7 +591,7 @@ def train_student_model(config: HardLabelDistillConfig, model_args: ModelConfig)
     )
     config.model_init_kwargs = model_kwargs
 
-    # Создаем SFT тренер
+    # Create SFT trainer
     trainer = SFTTrainer(
         model=model_args.model_name_or_path,
         args=config,
@@ -591,8 +601,8 @@ def train_student_model(config: HardLabelDistillConfig, model_args: ModelConfig)
         peft_config=get_peft_config(model_args),
     )
 
-    # Запускаем обучение
-    logger.info("Начало обучения модели-ученика...")
+    # Start training
+    logger.info("Starting student model training...")
     checkpoint: Optional[str] = None
     if config.resume_from_checkpoint is not None:
         checkpoint = config.resume_from_checkpoint
@@ -605,11 +615,11 @@ def train_student_model(config: HardLabelDistillConfig, model_args: ModelConfig)
     trainer.save_metrics("train", metrics)
     trainer.save_state()
 
-    # Сохраняем модель
-    logger.info(f"Сохранение модели в {config.output_dir}")
+    # Save model
+    logger.info(f"Saving model to {config.output_dir}")
     trainer.save_model(config.output_dir)
 
-    # Создаем карточку модели и загружаем на HuggingFace Hub, если нужно
+    # Create model card and push to HuggingFace Hub if needed
     kwargs: Dict[str, Any] = {
         "dataset_name": config.dataset_name,
         "tags": ["hard-label-distillation", "open-r1"],
@@ -617,42 +627,42 @@ def train_student_model(config: HardLabelDistillConfig, model_args: ModelConfig)
 
     if trainer.accelerator.is_main_process:
         trainer.create_model_card(**kwargs)
-        # Восстанавливаем кэш для быстрого инференса
+        # Re-enable cache for fast inference
         trainer.model.config.use_cache = True
         trainer.model.config.save_pretrained(config.output_dir)
 
-    # Оцениваем модель, если нужно
+    # Evaluate model if needed
     if config.do_eval and "validation" in dataset:
-        logger.info("Оценка модели...")
+        logger.info("Evaluating model...")
         metrics = trainer.evaluate()
         trainer.log_metrics("eval", metrics)
         trainer.save_metrics("eval", metrics)
 
-    # Загружаем модель на HuggingFace Hub, если нужно
+    # Push model to HuggingFace Hub if needed
     if config.push_to_hub:
-        logger.info("Загрузка модели на HuggingFace Hub...")
+        logger.info("Pushing model to HuggingFace Hub...")
         trainer.push_to_hub(**kwargs)
 
 if __name__ == "__main__":
-    # Создаем парсер аргументов
+    # Create argument parser
     parser = TrlParser((HardLabelDistillConfig, ModelConfig))
     config, model_args = parser.parse_args_and_config()
 
-    # Запускаем обучение
+    # Start training
     train_student_model(config, model_args)
 ```
 
-### **Пример использования**
+### **Usage Example**
 
 ```python
-# Этап 1: Генерация "жестких" меток с использованием модели-учителя
+# Stage 1: Generate "hard" labels using a teacher model
 python hard_label_distill.py \
   --dataset AI-MO/NuminaMath-TIR \
   --teacher-model deepseek-ai/DeepSeek-R1 \
   --output-dataset username/hard-label-math-dataset \
   --prompt-column problem
 
-# Этап 2: Обучение модели-ученика на сгенерированных "жестких" метках
+# Stage 2: Train the student model on the generated "hard" labels
 accelerate launch --config_file=recipes/accelerate_configs/zero3.yaml train_student.py \
   --model_name_or_path Qwen/Qwen2.5-1.5B-Instruct \
   --dataset_name username/hard-label-math-dataset \
@@ -669,218 +679,217 @@ accelerate launch --config_file=recipes/accelerate_configs/zero3.yaml train_stud
   --output_dir models/Qwen2.5-1.5B-Hard-Label-Distill
 ```
 
+## II. Soft-label Distillation: Knowledge Distillation Using Soft Labels
 
-## II. Soft-label Distillation: Дистилляция с использованием "мягких" меток
+**Concept:**
 
-**Концепция:**
+Soft-label distillation, introduced by Hinton and colleagues in their seminal paper "Distilling the Knowledge in a Neural Network" (2015), is a more sophisticated approach to knowledge distillation. Unlike hard-label distillation, this method leverages not only "hard" labels but also the full **probability distribution** predicted by the teacher as "soft labels."
 
-Soft-label distillation, предложенная Хинтоном и соавторами в их знаменитой статье "Distilling the Knowledge in a Neural Network" (2015), является более совершенным методом дистилляции знаний. В отличие от Hard-label distillation, этот подход использует не только "жесткие" метки, но и полное **распределение вероятностей**, предсказанное учителем, в качестве "мягких" меток (soft labels).
+Soft labels contain significantly more information than hard labels, as they reflect the teacher's confidence across different classes and the relationships between them. For example, a teacher might predict for an image of a dog the probabilities [0.8 for "dog", 0.15 for "wolf", 0.03 for "fox", 0.02 for other classes]. This information is far richer than simply the label "dog."
 
-"Мягкие" метки содержат значительно больше информации, чем "жесткие", поскольку они отражают уверенность учителя в различных классах и отношения между ними. Например, учитель может предсказать для изображения собаки вероятности [0.8 для "собака", 0.15 для "волк", 0.03 для "лиса", 0.02 для других классов]. Эта информация гораздо богаче, чем просто метка "собака".
+A key component of this method is "temperature scaling," which makes the probability distribution more "soft" and informative by dividing the model's logits by a temperature parameter T > 1.
 
-Ключевым компонентом метода является "temperature scaling" (масштабирование температуры), который делает распределение вероятностей более "мягким" и информативным путем деления логитов модели на параметр температуры T > 1.
+**Soft-label Distillation for GPT Models: A Simple Explanation**
 
-**Soft-label Distillation для GPT моделей: объяснение на пальцах**
+Imagine we have two models:
 
-Представьте, что у нас есть две модели:
+* **Teacher:** A large, powerful GPT model with 175 billion parameters. It possesses deep understanding of language and the world.
+* **Student:** A compact GPT model with 1.5 billion parameters. Much faster and more economical, but initially inferior in quality to the teacher.
 
-* **Учитель (Teacher):** Большая, мощная GPT модель с 175 миллиардами параметров. Она обладает глубоким пониманием языка и мира.
-* **Студент (Student):** Компактная GPT модель с 1.5 миллиардами параметров. Намного быстрее и экономичнее, но изначально уступает учителю в качестве.
+Our goal is to teach the student to generate text as well as the teacher, using soft-label distillation.
 
-Наша цель - научить студента генерировать текст так же хорошо, как учитель, используя Soft-label Distillation.
+**Steps of Soft-label Distillation:**
 
-**Шаги Soft-label Distillation:**
+1. **Teacher Generates Soft Labels:**
 
-1. **Генерация "мягких" меток учителем:**
+   * For the prompt "The capital of France is," the large teacher model does not simply output "Paris," but computes probabilities for all possible next tokens:
+     * "Paris": 0.92
+     * "city": 0.03
+     * "Rome": 0.01
+     * ... (and thousands of other tokens with small probabilities)
 
-   * Для запроса "Столица Франции - это" большая модель-учитель не просто выдает "Париж", но вычисляет вероятности для всех возможных следующих токенов:
-     * "Париж": 0.92
-     * "город": 0.03
-     * "Рим": 0.01
-     * ... (и тысячи других токенов с малыми вероятностями)
-
-   * Проблема: это распределение слишком "острое" - один токен имеет почти всю вероятность. Чтобы извлечь больше полезных знаний, применяем **temperature scaling**:
+   * Problem: This distribution is too "sharp"—one token holds almost all the probability. To extract more useful knowledge, we apply **temperature scaling**:
    
-   * Делим логиты на температуру T (например, T = 2.0) перед применением softmax:
-     * "Париж": 0.70 (уменьшилось с 0.92)
-     * "город": 0.08 (увеличилось с 0.03)
-     * "Рим": 0.05 (увеличилось с 0.01)
-     * ... (другие токены тоже получают больше вероятности)
+   * Divide the logits by temperature T (e.g., T = 2.0) before applying softmax:
+     * "Paris": 0.70 (decreased from 0.92)
+     * "city": 0.08 (increased from 0.03)
+     * "Rome": 0.05 (increased from 0.01)
+     * ... (other tokens also receive higher probabilities)
 
-   * Эти "смягченные" распределения сохраняют намного больше информации о том, что модель-учитель "знает".
+   * These "softened" distributions preserve much more information about what the teacher model "knows."
 
-2. **Обучение модели-студента:**
+2. **Training the Student Model:**
 
-   * Студент обучается не только предсказывать правильный токен, но и воспроизводить всё распределение вероятностей учителя.
-   * Для этого используется КЛ-дивергенция (или кросс-энтропия) между распределениями учителя и студента.
-   * Важно: распределение студента также "смягчается" с той же температурой T для сопоставимости.
-   * Функция потерь умножается на T² для компенсации уменьшения градиентов.
+   * The student is trained not only to predict the correct token but also to reproduce the teacher's full probability distribution.
+   * This is achieved using KL divergence (or cross-entropy) between the teacher's and student's distributions.
+   * Crucially, the student's distribution is also "softened" using the same temperature T for comparability.
+   * The loss function is multiplied by T² to compensate for reduced gradients.
 
-3. **Комбинированное обучение:**
+3. **Combined Training:**
 
-   * Обычно используется комбинация двух функций потерь:
-     * α · (Потери от "мягких" меток) + (1-α) · (Стандартные потери от "жестких" меток)
-   * Где α - коэффициент, обычно от 0.5 до 0.9
+   * Typically, a combination of two loss functions is used:
+     * α · (Loss from soft labels) + (1-α) · (Standard loss from hard labels)
+   * Where α is a coefficient, usually between 0.5 and 0.9
 
-**Почему это работает лучше Hard-label Distillation?**
+**Why Does This Work Better Than Hard-label Distillation?**
 
-* **"Темные знания" (Dark Knowledge):** Как назвал Хинтон, относительные вероятности "неправильных" ответов содержат ценную информацию. Например, если модель путает "собаку" с "волком", но не с "самолетом", это важная информация.
+* **"Dark Knowledge":** As Hinton called it, the relative probabilities of "incorrect" answers contain valuable information. For example, if a model confuses "dog" with "wolf" but not with "airplane," this is important information.
 
-* **Передача неопределенности:** Студент учится не только правильным ответам, но и тому, в каких случаях стоит сомневаться.
+* **Transferring Uncertainty:** The student learns not only correct answers but also when to be uncertain.
 
-* **Более богатый сигнал:** Вместо одного бита информации на каждый пример (правильный/неправильный класс), студент получает информацию о всем распределении вероятностей.
+* **Richer Signal:** Instead of receiving just one bit of information per example (correct/incorrect class), the student receives information about the entire probability distribution.
 
-**Математическая формализация:**
+**Mathematical Formalization:**
 
-1. **"Мягкие" метки учителя с температурой T:**
+1. **Teacher's Soft Labels with Temperature T:**
 
-   Если $z_i$ - логит для класса (токена) $i$ от учителя, то "мягкая" метка с температурой T:
+   If $z_i$ is the logits for class (token) $i$ from the teacher, then the soft label with temperature T is:
 
    $$p_i^T = \frac{\exp(z_i/T)}{\sum_j \exp(z_j/T)}$$
 
-*   **Разберем каждый элемент формулы:**
-    *   $p_i^T$: Это "мягкая" вероятность для $i$-го токена, с учетом температуры $T$.  Именно это распределение вероятностей, сгенерированное учителем, мы будем использовать как "мягкую метку".
-    *   $z_i$: Это логит (logit) для $i$-го токена, выданный моделью-учителем. Логиты - это значения, которые модель выдает перед применением функции softmax. Они представляют собой "сырые" оценки того, насколько модель уверена в каждом токене. Чем больше логит, тем больше уверенность модели в этом токене.
-    *   $T$: Это параметр температуры (temperature).  Как мы разбирали уже выше, температура используется для "смягчения" распределения вероятностей.
-    *   $\exp(x)$: Это экспоненциальная функция ($e^x$).
-    *   $\sum_j \exp(z_j/T)$: Это сумма экспоненциальных значений логитов, деленных на температуру, для всех возможных токенов $j$. Эта сумма используется для нормализации, чтобы вероятности в итоге суммировались к 1.
+*   **Breakdown of each element in the formula:**
+    *   $p_i^T$: This is the "soft" probability for token $i$, adjusted by temperature $T$. This is the probability distribution generated by the teacher that we use as the soft label.
+    *   $z_i$: This is the logit for token $i$, output by the teacher model. Logits are the raw scores the model produces before applying the softmax function—they represent the model's confidence level for each token. Higher logits indicate higher confidence.
+    *   $T$: This is the temperature parameter. As discussed above, temperature is used to "soften" the probability distribution.
+    *   $\exp(x)$: This is the exponential function ($e^x$).
+    *   $\sum_j \exp(z_j/T)$: This is the sum of the exponential values of the logits divided by temperature, across all possible tokens $j$. This sum normalizes the values so that the resulting probabilities sum to 1.
 
-*   **Пошаговое объяснение:**
-    1.  **Деление логитов на температуру ($z_i/T$):**  Когда мы делим логиты на температуру $T > 1$, мы уменьшаем абсолютные значения логитов.
-    2.  **Экспоненцирование ($\exp(z_i/T)$):**  Экспоненциальная функция преобразует логиты в положительные значения.
-    3.  **Нормализация ($\frac{\exp(z_i/T)}{\sum_j \exp(z_j/T)}$):**  Деление на сумму экспоненциальных значений всех логитов гарантирует, что полученные значения $p_i^T$ будут представлять собой вероятностное распределение, то есть будут неотрицательными и в сумме дадут 1. Это стандартная операция softmax, но с применением температуры.
+*   **Step-by-step explanation:**
+    1.  **Divide logits by temperature ($z_i/T$):** When we divide logits by temperature $T > 1$, we reduce their absolute magnitudes.
+    2.  **Exponentiation ($\exp(z_i/T)$):** The exponential function transforms logits into positive values.
+    3.  **Normalization ($\frac{\exp(z_i/T)}{\sum_j \exp(z_j/T)}$):** Dividing by the sum of all exponential logits ensures that the resulting values $p_i^T$ form a valid probability distribution—non-negative and summing to 1. This is the standard softmax operation, but with temperature applied.
 
-*   **Интуиция и эффект температуры:**
-    *   При высокой температуре (например, $T = 2.0$), распределение вероятностей становится более "мягким" или "ровным". Вероятности для менее вероятных токенов увеличиваются, а вероятность наиболее вероятного токена уменьшается. Это позволяет "вытащить" больше информации из распределения, включая "темные знания" о менее вероятных, но все же релевантных вариантах.
-    *   При низкой температуре (приближающейся к $T = 1.0$, или даже меньше), распределение становится более "острым". Вероятность наиболее вероятного токена приближается к 1, а вероятности остальных токенов стремятся к 0. При $T=1$ это стандартный softmax. При $T \rightarrow 0$ распределение становится дельта-функцией, выбирая только токен с наибольшим логитом.
+*   **Intuition and effect of temperature:**
+    *   At high temperature (e.g., $T = 2.0$), the probability distribution becomes more "soft" or "smooth." Probabilities for less likely tokens increase, while the probability of the most likely token decreases. This allows us to "extract" more information from the distribution, including "dark knowledge" about less probable but still relevant alternatives.
+    *   At low temperature (approaching $T = 1.0$, or even lower), the distribution becomes more "sharp." The probability of the most likely token approaches 1, while others approach 0. At $T=1$, this is standard softmax. As $T \rightarrow 0$, the distribution becomes a delta function, selecting only the token with the highest logit.
 
-![Figure_1.jpg](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-11/assets/Figure_1.png)
+![Figure_1.jpg](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-11/assets/Figure_1.png  )
 
-2. **Аналогично для студента:**
+2. **Similarly for the Student:**
 
    $$q_i^T = \frac{\exp(z_i^q/T)}{\sum_j \exp(z_j^q/T)}$$
 
-   где $z_i^q$ - логит студента для класса $i$.
+   where $z_i^q$ is the student's logits for class $i$.
 
-*   **Аналогия с формулой учителя:** Эта формула абсолютно идентична формуле для учителя, за исключением того, что здесь используются логиты, выданные моделью-студентом.
-    *   $q_i^T$: "Мягкая" вероятность для $i$-го токена, сгенерированная студентом с температурой $T$.
-    *   $z_i^q$: Логит для $i$-го токена, выданный моделью-студентом.
+*   **Analogy with teacher's formula:** This formula is identical to the teacher's, except that it uses logits output by the student model.
+    *   $q_i^T$: The "soft" probability for token $i$, generated by the student with temperature $T$.
+    *   $z_i^q$: The logits for token $i$, output by the student model.
 
-*   **Цель:** Мы применяем ту же температуру $T$ к распределению студента, чтобы сделать его сопоставимым с "мягкими" метками учителя. Это необходимо для корректного расчета функции потерь дистилляции.
+*   **Goal:** We apply the same temperature $T$ to the student's distribution to make it comparable to the teacher's soft labels. This is necessary for correctly computing the distillation loss function.
 
-3. **Функция потерь для Soft-label Distillation:**
+3. **Loss Function for Soft-label Distillation:**
 
    $$L_{soft} = T^2 \cdot \text{KL}(p^T || q^T) = T^2 \cdot \sum_i p_i^T \log\frac{p_i^T}{q_i^T}$$
 
-   Множитель $T^2$ компенсирует уменьшение градиентов из-за temperature scaling.
+   The multiplier $T^2$ compensates for the reduction in gradients due to temperature scaling.
 
-*   **Разберем компоненты:**
-    *   $L_{soft}$: Функция потерь Soft-label Distillation. Это значение, которое мы хотим минимизировать в процессе обучения студента.
-    *   $T^2$: Квадрат температуры. Этот множитель используется для масштабирования функции потерь и компенсации уменьшения градиентов, вызванного температурой.
-    *   $\text{KL}(p^T || q^T)$:  KL-дивергенция ( Kullback-Leibler divergence) между распределением учителя $p^T$ и распределением студента $q^T$.
-    *   $\sum_i p_i^T \log\frac{p_i^T}{q_i^T}$:  Это развернутая формула KL-дивергенции для дискретных распределений.
+*   **Breakdown of components:**
+    *   $L_{soft}$: The soft-label distillation loss function. This is the value we aim to minimize during student training.
+    *   $T^2$: The square of the temperature. This multiplier scales the loss function to compensate for gradient reduction caused by temperature.
+    *   $\text{KL}(p^T || q^T)$: The Kullback-Leibler (KL) divergence between the teacher's distribution $p^T$ and the student's distribution $q^T$.
+    *   $\sum_i p_i^T \log\frac{p_i^T}{q_i^T}$: The expanded formula for KL divergence over discrete distributions.
 
-*   **Пошаговое объяснение KL-дивергенции:**
-    1.  **$\frac{p_i^T}{q_i^T}$:**  Отношение вероятности учителя к вероятности студента для каждого токена $i$. Если студент предсказывает вероятность $q_i^T$ близкую к вероятности учителя $p_i^T$, это отношение будет близко к 1.
-    2.  **$\log\frac{p_i^T}{q_i^T}$:** Логарифм этого отношения. Если отношение близко к 1, логарифм будет близок к 0. Если $q_i^T$ сильно отличается от $p_i^T$, логарифм будет иметь большее абсолютное значение (отрицательное, если $q_i^T > p_i^T$, и положительное, если $q_i^T < p_i^T$).
-    3.  **$p_i^T \log\frac{p_i^T}{q_i^T}$:**  Умножение на $p_i^T$ взвешивает вклад каждого токена в общую дивергенцию. Токены, которые учитель считает более вероятными (высокое $p_i^T$), вносят больший вклад в функцию потерь.
-    4.  **$\sum_i p_i^T \log\frac{p_i^T}{q_i^T}$:** Суммирование по всем токенам $i$ дает общую KL-дивергенцию. KL-дивергенция измеряет "расстояние" между двумя распределениями вероятностей. В контексте дистилляции, она измеряет, насколько распределение студента $q^T$ отличается от распределения учителя $p^T$.
+*   **Step-by-step explanation of KL divergence:**
+    1.  **$\frac{p_i^T}{q_i^T}$:** The ratio of the teacher's probability to the student's probability for each token $i$. If the student predicts $q_i^T$ close to the teacher's $p_i^T$, this ratio will be close to 1.
+    2.  **$\log\frac{p_i^T}{q_i^T}$:** The logarithm of this ratio. If the ratio is close to 1, the logarithm is near 0. If $q_i^T$ deviates significantly from $p_i^T$, the logarithm becomes large in absolute value (negative if $q_i^T > p_i^T$, positive if $q_i^T < p_i^T$).
+    3.  **$p_i^T \log\frac{p_i^T}{q_i^T}$:** Multiplying by $p_i^T$ weights each token's contribution to the total divergence. Tokens the teacher considers more probable (high $p_i^T$) contribute more to the loss.
+    4.  **$\sum_i p_i^T \log\frac{p_i^T}{q_i^T}$:** Summing over all tokens $i$ gives the total KL divergence. KL divergence measures the "distance" between two probability distributions. In distillation, it quantifies how much the student's distribution $q^T$ differs from the teacher's distribution $p^T$.
 
-*   **Роль $T^2$:**
-    *   Применение температуры $T$ "смягчает" распределения, что может привести к уменьшению величины градиентов при обучении. Умножение на $T^2$ масштабирует функцию потерь, чтобы компенсировать это уменьшение и сделать градиенты более значимыми, особенно на ранних этапах обучения.  Это эмпирическая коррекция, которая помогает стабилизировать и ускорить обучение.
+*   **Role of $T^2$:**
+    *   Applying temperature $T$ "softens" the distributions, which may reduce the magnitude of gradients during training. Multiplying by $T^2$ scales the loss function to compensate for this reduction and make gradients more significant, especially early in training. This is an empirical correction that helps stabilize and accelerate learning.
 
-*   **Цель $L_{soft}$:** Минимизируя $L_{soft}$, мы заставляем распределение вероятностей студента $q^T$ максимально приблизиться к распределению вероятностей учителя $p^T$. Студент учится не только предсказывать "правильный" токен, но и имитировать всю "манеру мышления" учителя, выраженную в распределении вероятностей.
+*   **Goal of $L_{soft}$:** By minimizing $L_{soft}$, we force the student's probability distribution $q^T$ to closely match the teacher's distribution $p^T$. The student learns not only to predict the "correct" token but also to imitate the teacher's entire "thinking style," expressed in the probability distribution.
 
-4. **Комбинированная функция потерь:**
+4. **Combined Loss Function:**
 
    $$L = \alpha \cdot L_{soft} + (1-\alpha) \cdot L_{hard}$$
 
-   где $L_{hard}$ - стандартная кросс-энтропия с истинными метками, $\alpha$ - коэффициент баланса.
+   where $L_{hard}$ is the standard cross-entropy with ground-truth labels, and $\alpha$ is the balancing coefficient.
 
-*   **Разберем компоненты:**
-    *   $L$: Общая функция потерь, используемая для обучения студента.
-    *   $\alpha$: Коэффициент баланса (обычно от 0.5 до 0.9). Он определяет, насколько сильно мы полагаемся на "мягкие" метки учителя по сравнению со стандартными "жесткими" метками.
-    *   $L_{soft}$: Функция потерь Soft-label Distillation, которую мы разобрали выше.
-    *   $L_{hard}$: Стандартная функция потерь "жестких" меток, обычно кросс-энтропия между предсказаниями студента и истинными (one-hot) метками.
+*   **Breakdown of components:**
+    *   $L$: The total loss function used to train the student.
+    *   $\alpha$: The balancing coefficient (typically between 0.5 and 0.9). It determines how strongly we rely on the teacher's soft labels versus standard hard labels.
+    *   $L_{soft}$: The soft-label distillation loss function, explained above.
+    *   $L_{hard}$: The standard hard-label loss function, usually cross-entropy between the student's predictions and the true (one-hot) labels.
 
-*   **$L_{hard}$ (Стандартные потери "жестких" меток):**
-    *   В обычной задаче обучения языковой модели, мы имеем "жесткие" метки - это истинные следующие токены в обучающих данных. Например, для фразы "Столица Франции - это Париж", "Париж" является "жесткой" меткой.
-    *   $L_{hard}$ вычисляется как кросс-энтропия между распределением вероятностей, предсказанным студентом (обычно с $T=1$, то есть стандартный softmax), и one-hot вектором, представляющим истинный токен.  Эта функция потерь заставляет студента предсказывать именно "правильный" токен.
+*   **$L_{hard}$ (Standard Hard-label Loss):**
+    *   In a standard language model training task, we have "hard" labels—the ground-truth next tokens in the training data. For example, for the phrase "The capital of France is Paris," "Paris" is the hard label.
+    *   $L_{hard}$ is computed as cross-entropy between the student's predicted probability distribution (usually with $T=1$, i.e., standard softmax) and a one-hot vector representing the true token. This loss forces the student to predict the exact "correct" token.
 
-*   **Комбинирование $L_{soft}$ и $L_{hard}$:**
-    *   Комбинирование "мягких" и "жестких" потерь позволяет студенту учиться как у учителя (через $L_{soft}$), так и из исходных данных (через $L_{hard}$).
-    *   Коэффициент $\alpha$ позволяет настроить баланс.
-        *   Высокое $\alpha$ (например, 0.9) означает, что мы больше полагаемся на знания учителя, переданные через "мягкие" метки. Это может быть полезно, когда учитель обладает значительно лучшими знаниями, чем можно извлечь только из "жестких" меток.
-        *   Низкое $\alpha$ (например, 0.5) означает, что мы в равной степени учитываем как знания учителя, так и "жесткие" метки. Это может быть полезно, когда мы хотим, чтобы студент сохранил способность хорошо работать и на исходных данных, а не только имитировал учителя.
+*   **Combining $L_{soft}$ and $L_{hard}$:**
+    *   Combining soft and hard losses allows the student to learn both from the teacher (via $L_{soft}$) and from the original data (via $L_{hard}$).
+    *   The coefficient $\alpha$ allows tuning the balance.
+        *   High $\alpha$ (e.g., 0.9) means we rely more on the teacher's knowledge transmitted through soft labels. This is useful when the teacher has significantly better knowledge than can be extracted from hard labels alone.
+        *   Low $\alpha$ (e.g., 0.5) means we equally consider both the teacher's knowledge and hard labels. This is useful when we want the student to retain its ability to perform well on original data, not just mimic the teacher.
 
-**Практическая реализация Soft-label Distillation для GPT моделей**
+**Practical Implementation of Soft-label Distillation for GPT Models**
 
-> Программный код был заимствован из репозитория: https://github.com/arcee-ai/DistillKit
+> Code was adapted from: https://github.com/arcee-ai/DistillKit  
 
-**1. Конфигурация дистилляции**
+**1. Distillation Configuration**
 
-Первым шагом необходимо настроить параметры дистилляции, включая температуру и коэффициент баланса между мягкими и жесткими метками:
+The first step is to configure distillation parameters, including temperature and the balance coefficient between soft and hard labels:
 
 ```python
 """
-Здесь temperature: 2.0 соответствует параметру T в формулах, который "смягчает" распределение вероятностей, а alpha: 0.5 - это коэффициент α, который определяет соотношение между потерями от мягких и жестких меток.
+Here temperature: 2.0 corresponds to parameter T in the formulas, which "softens" the probability distribution, and alpha: 0.5 is the coefficient α, determining the ratio between soft and hard label losses.
 """
 
 config = {
-    "project_name": "distil-multilayer",    # Название проекта
+    "project_name": "distil-multilayer",    # Project name
     "dataset": {
-        "name": "mlabonne/FineTome-100k",   # Название датасета
-        "split": "train",                   # Раздел датасета для тренировки
-        "num_samples": 1000,                # Количество образцов для тренировки (можно ограничить)
-        "seed": 42                          # Значение для инициализации генератора случайных чисел
+        "name": "mlabonne/FineTome-100k",   # Dataset name
+        "split": "train",                   # Dataset split for training
+        "num_samples": 1000,                # Number of training samples (can be limited)
+        "seed": 42                          # Random seed
     },
     "models": {
-        "teacher": "arcee-ai/Arcee-Spark",  # Модель учителя
-        "student": "Qwen/Qwen2-1.5B"        # Модель студента
+        "teacher": "arcee-ai/Arcee-Spark",  # Teacher model
+        "student": "Qwen/Qwen2-1.5B"        # Student model
     },
     "tokenizer": {
         "max_length": 4096,
         "chat_template": "{% for message in messages %}\
     {% if loop.first and messages[0]['role'] != 'system' %}\
-    {{ '<|im_start|>system\\nYou are a helpful assistant.<|im_end|>\\n' }}\
+    {{ ' <|im_start|>system\\nYou are a helpful assistant.<|im_end|>\\n' }}\
     {% endif %}\
-    {{ '<|im_start|>' + message['role'] + '\\n' + message['content'] + '<|im_end|>' + '\\n' }}\
+    {{ ' <|im_start|>' + message['role'] + '\\n' + message['content'] + '<|im_end|>' + '\\n' }}\
     {% endfor %}\
     {% if add_generation_prompt %}\
-    {{ '<|im_start|>assistant\\n' }}\
+    {{ ' <|im_start|>assistant\\n' }}\
     {% endif %}"
     },
     "training": {
-        "output_dir": "./results",           # Директория для сохранения результатов
-        "num_train_epochs": 3,               # Количество эпох для тренировки
-        "per_device_train_batch_size": 1,    # Размер батча для тренировки на одном устройстве
-        "gradient_accumulation_steps": 8,    # Количество шагов для накопления градиентов
-        "save_steps": 1000,                  # Шаги для сохранения модели
-        "logging_steps": 2,                  # Шаги для логирования
-        "save_total_limit": 2,               # Лимит на количество сохраняемых моделей
-        "learning_rate": 2e-5,               # Скорость обучения
-        "weight_decay": 0.01,                # Коэффициент регуляризации
-        "warmup_ratio": 0.2,                 # Доля шагов для разгона скорости обучения
-        "lr_scheduler_type": "linear",       # Тип планировщика скорости обучения
-        "resume_from_checkpoint": None,      # Путь к чекпоинту для возобновления тренировки (если есть)
-        "fp16": False,                       # Использовать ли 16-битное число с плавающей точкой
-        "bf16": True,                        # Использовать ли BFloat16
-        "max_grad_norm": 1.0,                # Максимальная норма градиента
-        "group_by_length": False             # Группировать ли батчи по длине
+        "output_dir": "./results",           # Directory to save results
+        "num_train_epochs": 3,               # Number of training epochs
+        "per_device_train_batch_size": 1,    # Batch size per device
+        "gradient_accumulation_steps": 8,    # Number of steps for gradient accumulation
+        "save_steps": 1000,                  # Steps between model saves
+        "logging_steps": 2,                  # Steps between logging
+        "save_total_limit": 2,               # Maximum number of saved models
+        "learning_rate": 2e-5,               # Learning rate
+        "weight_decay": 0.01,                # Regularization coefficient
+        "warmup_ratio": 0.2,                 # Fraction of steps for learning rate warmup
+        "lr_scheduler_type": "linear",       # Learning rate scheduler type
+        "resume_from_checkpoint": None,      # Path to checkpoint for resuming training (if any)
+        "fp16": False,                       # Use 16-bit floating point
+        "bf16": True,                        # Use BFloat16
+        "max_grad_norm": 1.0,                # Maximum gradient norm
+        "group_by_length": False             # Group batches by length
     },
     "distillation": {
-        "temperature": 2.0,                  # Температура для дистилляции
-        "alpha": 0.5                         # Коэффициент альфа для дистилляции
+        "temperature": 2.0,                  # Temperature for distillation
+        "alpha": 0.5                         # Alpha coefficient for distillation
     },
     "model_config": {
-        "use_flash_attention": True          # Использовать ли Flash Attention
+        "use_flash_attention": True          # Use Flash Attention
     }
 }
 ```
 
-**2. Подготовка моделей учителя и студента**
+**2. Preparing Teacher and Student Models**
 
-Для дистилляции необходимо загрузить как модель-учитель (более крупную), так и модель-студент (более компактную):
+For distillation, both the teacher model (larger) and the student model (more compact) must be loaded:
 
 ```python
 import torch
@@ -891,19 +900,19 @@ def load_models_with_flash_attention(config: Dict[str, Any]) -> Dict[str, AutoMo
     """
     Description:
     ---------------
-        Загружает модели с настройкой флеш-внимания для ускорения.
+        Loads models with flash attention enabled for acceleration.
 
     Args:
     ---------------
-        config: Конфигурация моделей и параметров
+        config: Model and parameter configuration
 
     Returns:
     ---------------
-        Словарь с загруженными моделями
+        Dictionary containing loaded models
 
     Raises:
     ---------------
-        KeyError: Если в конфигурации отсутствуют необходимые ключи
+        KeyError: If required keys are missing from the configuration
 
     Examples:
     ---------------
@@ -915,38 +924,38 @@ def load_models_with_flash_attention(config: Dict[str, Any]) -> Dict[str, AutoMo
         {'teacher_model': <transformers.models.model_name.model.ModelName object>,
          'student_model': <transformers.models.model_name.model.ModelName object>}
     """
-    # Настройки для загрузки моделей
+    # Model loading settings
     model_kwargs: Dict[str, Any] = {"torch_dtype": torch.bfloat16}
 
-    # Проверка на использование flash attention
+    # Check for flash attention usage
     if config["model_config"]["use_flash_attention"]:
         model_kwargs["attn_implementation"] = "flash_attention_2"
 
-    # Загрузка моделей
+    # Load models
     teacher_model = AutoModelForCausalLM.from_pretrained(config["models"]["teacher"], **model_kwargs)
     student_model = AutoModelForCausalLM.from_pretrained(config["models"]["student"], **model_kwargs)
 
     return {"teacher_model": teacher_model, "student_model": student_model}
 
-# Вызов функции
+# Function call
 models = load_models_with_flash_attention(config)
 
-# Теперь models содержит загруженные модели
+# Now models contains the loaded models
 teacher_model = models["teacher_model"]
 student_model = models["student_model"]
 ```
 
-**3. Реализация функции потерь с мягкими метками**
+**3. Implementation of Soft-label Loss Function**
 
-Ключевым компонентом является функция потерь Soft-label Distillation. Рассмотрим её реализацию из файла distil_logits.py:
+The key component is the soft-label distillation loss function. Below is its implementation from `distil_logits.py`:
 
 ```python
 """
-Это прямая реализация формулы KL-дивергенции. Обратите внимание на следующие ключевые моменты:
+This is a direct implementation of the KL divergence formula. Note the following key points:
 
-1. Логиты масштабируются температурой T перед применением функций softmax/log_softmax.
-2. Потери умножаются на T² для компенсации уменьшения градиентов, как описано в теории.
-3. Финальная функция потерь комбинирует мягкие метки (KL-дивергенция) и жесткие метки (original_loss) с коэффициентом α.
+1. Logits are scaled by temperature T before applying softmax/log_softmax.
+2. Losses are multiplied by T² to compensate for gradient reduction, as described in the theory.
+3. The final loss combines soft labels (KL divergence) and hard labels (original_loss) with coefficient α.
 """
 
 from typing import Any
@@ -964,23 +973,23 @@ def distillation_loss(
     """
     Description:
     ---------------
-        Вычисляет потери дистилляции между логитами студента и учителя.
+        Computes distillation loss between student and teacher logits.
 
     Args:
     ---------------
-        student_logits: Логиты студента.
-        teacher_logits: Логиты учителя.
-        inputs: Входные данные.
-        original_loss: Исходные потери.
-        config: Конфигурация моделей и параметров.
+        student_logits: Student logits.
+        teacher_logits: Teacher logits.
+        inputs: Input data.
+        original_loss: Original loss.
+        config: Model and parameter configuration.
 
     Returns:
     ---------------
-        Общие потери, включающие дистилляционные потери и исходные потери.
+        Total loss combining distillation loss and original loss.
 
     Raises:
     ---------------
-        KeyError: Если в конфигурации отсутствуют необходимые ключи.
+        KeyError: If required keys are missing from the configuration.
 
     Examples:
     ---------------
@@ -995,38 +1004,38 @@ def distillation_loss(
         >>> distillation_loss(self, student_logits, teacher_logits, inputs, original_loss, config)
         tensor(0.25)
     """
-    # Приведение размерностей логитов учителя и студента к одинаковому размеру
+    # Align dimensions of teacher and student logits
     student_logits, teacher_logits = pad_logits(
         student_logits.to(self.model.device),
         teacher_logits.to(self.model.device)
     )
 
-    # Масштабирование логитов с помощью температуры T
+    # Scale logits with temperature T
     temperature = config["distillation"]["temperature"]
     student_logits_scaled = student_logits / temperature
     teacher_logits_scaled = teacher_logits / temperature
 
-    # Расчёт KL-дивергенции между распределениями учителя и студента
+    # Compute KL divergence between teacher and student distributions
     loss_kd = F.kl_div(
         F.log_softmax(student_logits_scaled, dim=-1),  # log(q_i^T)
         F.softmax(teacher_logits_scaled, dim=-1),      # p_i^T
         reduction='batchmean'
     ) * (temperature ** 2) / config["tokenizer"]["max_length"]
 
-    # Комбинирование потерь от мягких и жестких меток
+    # Combine soft and hard label losses
     alpha = config["distillation"]["alpha"]
     total_loss = alpha * loss_kd + (1 - alpha) * original_loss
 
     return total_loss
 ```
 
-**4. Обработка различных размеров словарей**
+**4. Handling Different Vocabulary Sizes**
 
-Поскольку модели учителя и студента могут иметь разный размер словаря токенов, необходима дополнительная функция для согласования размерности их логитов:
+Since teacher and student models may have different token vocabulary sizes, an additional function is required to align the dimensions of their logits:
 
 ```python
 """
-Эта функция добавляет нулевые логиты к меньшему распределению, чтобы обеспечить одинаковую размерность для сравнения распределений.
+This function adds zero logits to the smaller distribution to ensure equal dimensions for comparison.
 """
 
 from typing import Tuple
@@ -1039,20 +1048,20 @@ def pad_logits(
     """
     Description:
     ---------------
-        Приводит размерности логитов студента и учителя к одинаковому размеру.
+        Aligns the dimensions of student and teacher logits to be identical.
 
     Args:
     ---------------
-        student_logits: Логиты студента.
-        teacher_logits: Логиты учителя.
+        student_logits: Student logits.
+        teacher_logits: Teacher logits.
 
     Returns:
     ---------------
-        Кортеж из логитов студента и учителя с одинаковыми размерностями.
+        Tuple of student and teacher logits with matching dimensions.
 
     Raises:
     ---------------
-        ValueError: Если размерности логитов не совпадают и не могут быть приведены к одинаковому размеру.
+        ValueError: If logits dimensions do not match and cannot be aligned.
 
     Examples:
     ---------------
@@ -1061,10 +1070,10 @@ def pad_logits(
         >>> pad_logits(student_logits, teacher_logits)
         (tensor([...]), tensor([...]))
     """
-    # Определение размеров логитов
+    # Determine logits sizes
     student_size, teacher_size = student_logits.size(-1), teacher_logits.size(-1)
 
-    # Если размеры не совпадают, добавляем паддинг
+    # If sizes differ, apply padding
     if student_size != teacher_size:
         pad_size = abs(student_size - teacher_size)
         pad_tensor = torch.zeros(
@@ -1073,26 +1082,26 @@ def pad_logits(
             device=teacher_logits.device
         )
 
-        # Возвращаем логиты с добавленным паддингом
+        # Return logits with added padding
         if student_size < teacher_size:
             return torch.cat([student_logits, pad_tensor], dim=-1), teacher_logits
         else:
             return student_logits, torch.cat([teacher_logits, pad_tensor], dim=-1)
 
-    # Возвращаем логиты без изменений, если размеры совпадают
+    # Return logits unchanged if sizes match
     return student_logits, teacher_logits
 ```
 
-**5. Кастомный тренер для дистилляции**
+**5. Custom Trainer for Distillation**
 
-Для интеграции процесса дистилляции в процесс обучения создаётся специальный класс тренера, который переопределяет функцию вычисления потерь:
+To integrate distillation into the training process, a custom trainer class is created that overrides the loss computation function:
 
 ```python
 """
-Этот класс:
-1. Получает выходы (логиты) как от студента, так и от учителя
-2. Замораживает веса учителя с помощью `torch.no_grad()`
-3. Вычисляет комбинированную функцию потерь с использованием потерь от мягких и жестких меток
+This class:
+1. Obtains outputs (logits) from both student and teacher models
+2. Freezes teacher weights using `torch.no_grad()`
+3. Computes combined loss using soft and hard label losses
 """
 
 from typing import Dict, Any, Union, Tuple
@@ -1104,7 +1113,7 @@ class LogitsTrainer(SFTTrainer):
     """
     Description:
     ---------------
-        Класс для обучения модели с использованием дистилляции логитов.
+        Class for training a model using logits distillation.
     """
 
     def compute_loss(
@@ -1116,21 +1125,21 @@ class LogitsTrainer(SFTTrainer):
         """
         Description:
         ---------------
-            Вычисляет комбинированную функцию потерь для модели студента и учителя.
+            Computes combined loss for student and teacher models.
 
         Args:
         ---------------
-            model: Модель студента.
-            inputs: Входные данные.
-            return_outputs: Флаг для возврата выходов модели.
+            model: Student model.
+            inputs: Input data.
+            return_outputs: Flag to return model outputs.
 
         Returns:
         ---------------
-            Комбинированная функция потерь и, если указано, выходы модели.
+            Combined loss and, if specified, model outputs.
 
         Raises:
         ---------------
-            ValueError: Если входные данные не соответствуют ожидаемым.
+            ValueError: If input data does not meet expectations.
 
         Examples:
         ---------------
@@ -1140,22 +1149,22 @@ class LogitsTrainer(SFTTrainer):
             >>> trainer.compute_loss(model, inputs, return_outputs=True)
             (tensor(0.5), ...)
         """
-        # Перемещение входных данных на устройство модели
+        # Move inputs to model device
         inputs = {k: v.to(model.device) if hasattr(v, 'to') else v for k, v in inputs.items()}
 
-        # Перемещение модели учителя на устройство модели
+        # Move teacher model to device
         self.teacher_model = self.teacher_model.to(model.device)
 
-        # Получение модулей моделей, если они существуют
+        # Get model modules if they exist
         student_model = model.module if hasattr(model, 'module') else model
         teacher_model = self.teacher_model.module if hasattr(self.teacher_model, 'module') else self.teacher_model
 
-        # Получение выходов моделей
+        # Obtain model outputs
         student_outputs = student_model(**inputs)
-        with torch.no_grad():  # Учитель не обучается
+        with torch.no_grad():  # Teacher is not trained
             teacher_outputs = teacher_model(**inputs)
 
-        # Вычисление комбинированной функции потерь
+        # Compute combined loss
         custom_loss = self.distillation_loss(
             student_outputs.logits,
             teacher_outputs.logits,
@@ -1163,7 +1172,7 @@ class LogitsTrainer(SFTTrainer):
             student_outputs.loss
         )
 
-        # Возврат потерь и выходов модели, если указано
+        # Return loss and outputs if requested
         if return_outputs:
             return custom_loss, student_outputs
         return custom_loss
@@ -1176,20 +1185,20 @@ class LogitsTrainer(SFTTrainer):
         """
         Description:
         ---------------
-            Приводит размерности логитов студента и учителя к одинаковому размеру.
+            Aligns the dimensions of student and teacher logits to be identical.
 
         Args:
         ---------------
-            student_logits: Логиты студента.
-            teacher_logits: Логиты учителя.
+            student_logits: Student logits.
+            teacher_logits: Teacher logits.
 
         Returns:
         ---------------
-            Кортеж из логитов студента и учителя с одинаковыми размерностями.
+            Tuple of student and teacher logits with matching dimensions.
 
         Raises:
         ---------------
-            ValueError: Если размерности логитов не совпадают и не могут быть приведены к одинаковому размеру.
+            ValueError: If logits dimensions do not match and cannot be aligned.
 
         Examples:
         ---------------
@@ -1199,10 +1208,10 @@ class LogitsTrainer(SFTTrainer):
             >>> trainer.pad_logits(student_logits, teacher_logits)
             (tensor([...]), tensor([...]))
         """
-        # Определение размеров логитов
+        # Determine logits sizes
         student_size, teacher_size = student_logits.size(-1), teacher_logits.size(-1)
 
-        # Если размеры не совпадают, добавляем паддинг
+        # If sizes differ, apply padding
         if student_size != teacher_size:
             pad_size = abs(student_size - teacher_size)
             pad_tensor = torch.zeros(
@@ -1211,13 +1220,13 @@ class LogitsTrainer(SFTTrainer):
                 device=teacher_logits.device
             )
 
-            # Возвращаем логиты с добавленным паддингом
+            # Return logits with added padding
             if student_size < teacher_size:
                 return torch.cat([student_logits, pad_tensor], dim=-1), teacher_logits
             else:
                 return student_logits, torch.cat([teacher_logits, pad_tensor], dim=-1)
 
-        # Возвращаем логиты без изменений, если размеры совпадают
+        # Return logits unchanged if sizes match
         return student_logits, teacher_logits
 
     def distillation_loss(
@@ -1230,22 +1239,22 @@ class LogitsTrainer(SFTTrainer):
         """
         Description:
         ---------------
-            Вычисляет потери дистилляции между логитами студента и учителя.
+            Computes distillation loss between student and teacher logits.
 
         Args:
         ---------------
-            student_logits: Логиты студента.
-            teacher_logits: Логиты учителя.
-            inputs: Входные данные.
-            original_loss: Исходные потери.
+            student_logits: Student logits.
+            teacher_logits: Teacher logits.
+            inputs: Input data.
+            original_loss: Original loss.
 
         Returns:
         ---------------
-            Общие потери, включающие дистилляционные потери и исходные потери.
+            Total loss combining distillation loss and original loss.
 
         Raises:
         ---------------
-            KeyError: Если в конфигурации отсутствуют необходимые ключи.
+            KeyError: If required keys are missing from the configuration.
 
         Examples:
         ---------------
@@ -1261,57 +1270,57 @@ class LogitsTrainer(SFTTrainer):
             >>> trainer.distillation_loss(student_logits, teacher_logits, inputs, original_loss)
             tensor(0.25)
         """
-        # Приведение размерностей логитов учителя и студента к одинаковому размеру
+        # Align dimensions of teacher and student logits
         student_logits, teacher_logits = self.pad_logits(
             student_logits.to(self.model.device),
             teacher_logits.to(self.model.device)
         )
 
-        # Масштабирование логитов с помощью температуры T
+        # Scale logits with temperature T
         temperature = config["distillation"]["temperature"]
         student_logits_scaled = student_logits / temperature
         teacher_logits_scaled = teacher_logits / temperature
 
-        # Расчёт KL-дивергенции между распределениями учителя и студента
+        # Compute KL divergence between teacher and student distributions
         loss_kd = F.kl_div(
             F.log_softmax(student_logits_scaled, dim=-1),  # log(q_i^T)
             F.softmax(teacher_logits_scaled, dim=-1),      # p_i^T
             reduction='batchmean'
         ) * (temperature ** 2) / config["tokenizer"]["max_length"]
 
-        # Комбинирование потерь от мягких и жестких меток
+        # Combine soft and hard label losses
         alpha = config["distillation"]["alpha"]
         total_loss = alpha * loss_kd + (1 - alpha) * original_loss
 
         return total_loss
 ```
 
-**6. Подготовка тренера и запуск обучения**
+**6. Initializing the Trainer and Starting Training**
 
-После определения всех компонентов можно инициализировать тренер и запустить процесс дистилляции:
+After defining all components, initialize the trainer and launch the distillation process:
 
 ```python
 """
-Обратите внимание, что модель-учитель добавляется к тренеру как атрибут, чтобы она была доступна внутри функции `compute_loss`.
+Note: The teacher model is added to the trainer as an attribute so it is accessible within the `compute_loss` function.
 """
 
-# Импорт необходимых библиотек
+# Import required libraries
 from transformers import TrainingArguments
 from accelerate import Accelerator
 
-# Инициализация accelerator
+# Initialize accelerator
 accelerator = Accelerator()
 
-# Аргументы обучения
+# Training arguments
 training_arguments = TrainingArguments(**config["training"])
 
-# Проверка наличия предобработанного датасета
+# Check for preprocessed dataset
 if 'tokenized_dataset' not in locals():
-    # Если датасет не предобработан, выполняем необходимую предобработку
-    # Код предобработки датасета должен быть здесь...
-    print("Необходимо сначала выполнить предобработку датасета!")
+    # If dataset is not preprocessed, perform necessary preprocessing
+    # Dataset preprocessing code should be here...
+    print("Dataset preprocessing must be performed first!")
 
-# Создание кастомного SFT тренера
+# Create custom SFT trainer
 trainer = LogitsTrainer(
     model=student_model,
     train_dataset=tokenized_dataset["train"],
@@ -1322,362 +1331,360 @@ trainer = LogitsTrainer(
     dataset_text_field="text",
 )
 
-# Добавление модели-учителя к тренеру
+# Add teacher model to trainer
 trainer.teacher_model = teacher_model
 
-# Подготовка к распределенному обучению
+# Prepare for distributed training
 trainer = accelerator.prepare(trainer)
 
-# Запуск обучения
+# Start training
 trainer.train(resume_from_checkpoint=config["training"]["resume_from_checkpoint"])
 
-# Сохранение финальной модели
+# Save final model
 trainer.save_model(config["training"]["output_dir"])
 
-print(f"Обучение завершено. Модель сохранена в {config['training']['output_dir']}")
+print(f"Training completed. Model saved to {config['training']['output_dir']}")
 ```
 
-**Преимущества Soft-label Distillation:**
+**Advantages of Soft-label Distillation:**
 
-* **Более полная передача знаний:** Студент получает доступ к "темным знаниям" учителя — информации о сложных случаях, тонких различиях между классами и степени неопределенности.
-* **Лучшие результаты:** Студенты, обученные этим методом, обычно демонстрируют производительность ближе к учителю по сравнению с Hard-label Distillation.
-* **Улучшенная генерализация:** Модели лучше работают на новых данных, так как учатся не только "что" предсказывать, но и "с какой уверенностью".
-* **Контроль через температуру:** Параметр T позволяет настраивать степень "мягкости" дистилляции. Более высокие значения T делают распределение более равномерным, помогая передать больше информации о маловероятных классах.
-* **Совместимость с другими методами:** Легко комбинируется с другими техниками улучшения моделей.
+* **More Complete Knowledge Transfer:** The student gains access to the teacher’s "dark knowledge"—information about complex cases, subtle distinctions between classes, and degrees of uncertainty.
+* **Better Performance:** Students trained with this method typically achieve performance closer to the teacher compared to hard-label distillation.
+* **Improved Generalization:** Models perform better on unseen data because they learn not only "what" to predict but also "with what confidence."
+* **Control via Temperature:** The parameter T allows tuning the degree of "softness" in distillation. Higher T values produce more uniform distributions, helping convey more information about low-probability classes.
+* **Compatibility with Other Methods:** Easily combined with other model enhancement techniques.
 
-**Недостатки Soft-label Distillation:**
+**Disadvantages of Soft-label Distillation:**
 
-* **Вычислительные затраты:** Для языковых моделей с большими словарями (50,000+ токенов) хранение и передача полных распределений вероятностей требует значительных ресурсов.
-* **Сложность реализации:** Требует доступа к логитам/вероятностям учителя, а не только к финальным предсказаниям.
-* **Настройка гиперпараметров:** Необходимо тщательно подбирать температуру T и коэффициент α для оптимальных результатов.
-* **Зависимость от качества учителя:** Если учитель имеет систематические ошибки, они могут передаться студенту.
+* **Computational Cost:** For language models with large vocabularies (50,000+ tokens), storing and transmitting full probability distributions requires significant resources.
+* **Implementation Complexity:** Requires access to the teacher’s logits/probabilities, not just final predictions.
+* **Hyperparameter Tuning:** Temperature T and coefficient α must be carefully tuned for optimal results.
+* **Dependence on Teacher Quality:** If the teacher has systematic errors, they may be transferred to the student.
 
-**Сравнение Hard-label и Soft-label Distillation:**
+**Comparison of Hard-label and Soft-label Distillation:**
 
-| Аспект | Hard-label Distillation | Soft-label Distillation |
+| Aspect | Hard-label Distillation | Soft-label Distillation |
 |--------|-------------------------|-------------------------|
-| Передаваемая информация | Только итоговые классы/токены | Полные распределения вероятностей |
-| Температура | Не используется | Используется для "смягчения" распределений |
-| Сложность реализации | Простая | Средняя |
-| Вычислительные требования | Низкие | Средние-высокие |
-| Объем хранимых данных | Малый | Большой (особенно для языковых моделей) |
-| Качество получаемой модели | Хорошее | Лучшее |
-| Способность передавать неопределенность | Низкая | Высокая |
-| Эффективность для языковых моделей | Средняя | Высокая |
+| Information Transferred | Only final classes/tokens | Full probability distributions |
+| Temperature | Not used | Used to "soften" distributions |
+| Implementation Complexity | Simple | Moderate |
+| Computational Requirements | Low | Medium–High |
+| Data Storage Volume | Small | Large (especially for language models) |
+| Model Quality Achieved | Good | Better |
+| Ability to Transfer Uncertainty | Low | High |
+| Effectiveness for Language Models | Moderate | High |
 
-В заключение, Soft-label Distillation предлагает более мощный метод передачи знаний от учителя к ученику, особенно для сложных задач, где важны тонкие различия между классами и понимание неопределенности. Ключевое отличие от Hard-label Distillation заключается в использовании полных распределений вероятностей и temperature scaling, что позволяет извлечь "темные знания" и научить студента не только выдавать правильные ответы, но и воспроизводить тонкие нюансы рассуждений учителя.
+In conclusion, Soft-label Distillation offers a more powerful method for transferring knowledge from teacher to student, particularly for complex tasks where fine distinctions between classes and understanding uncertainty matter. The key distinction from Hard-label Distillation lies in the use of full probability distributions and temperature scaling, enabling the extraction of "dark knowledge" and teaching the student not only to produce correct answers but also to replicate the teacher’s nuanced reasoning.
 
-## **Part 2: Законы масштабирования дистилляции**
+## **Part 2: Scaling Laws of Distillation**
 
-После того, как DeepSeek представил в open source свой метод дистилляции знаний для R1, исследователи из Apple и Оксфордского университета быстро предложили закон масштабирования дистилляции и уже 28 февраля завершили все эксперименты и загрузили 67-страничную статью на arXiv.
+After DeepSeek open-sourced its knowledge distillation method for R1, researchers from Apple and the University of Oxford quickly proposed a scaling law for distillation and completed all experiments by February 28, uploading a 67-page paper to arXiv.
 
-Рассмотрим мотивацию исследования, которая сводится к следующим пунктам:
+The motivation behind this research can be summarized as follows:
 
-1. **Текущее состояние исследований законов масштабирования моделей**: В последние годы исследования выявили взаимосвязь между производительностью языковых моделей, их размером и объемом данных для обучения. Однако систематических исследований законов масштабирования в контексте дистилляции пока не проводилось.
+1. **Current State of Scaling Laws for Models**: In recent years, research has revealed relationships between language model performance, model size, and training data volume. However, systematic studies of scaling laws in the context of distillation have not yet been conducted.
 
-2. **Проблема стоимости вывода модели**: С увеличением размера языковых моделей значительно возрастает стоимость вывода. Исследование того, как снизить стоимость вывода без потери производительности, становится важной задачей.
+2. **Inference Cost Problem**: As language model sizes grow, inference cost increases significantly. Understanding how to reduce inference cost without sacrificing performance has become a critical challenge.
 
-3. **Эффективность и производительность дистилляции**: Теоретически, дистилляция может снизить стоимость вывода, однако в академических кругах нет единого мнения относительно методов дистилляции, особенно в том, как рационально распределить вычислительные ресурсы для создания наиболее мощных моделей, что остается большой неопределенностью.
+3. **Efficiency and Performance of Distillation**: Theoretically, distillation can reduce inference cost; however, there is no consensus in academia on optimal distillation methods—particularly regarding how to rationally allocate computational resources to build the most powerful models—leaving significant uncertainty.
 
-![Экстраполяция закона масштабирования дистилляции](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-11/assets/Figure_2.webp)
+![Extrapolation of Distillation Scaling Law](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-11/assets/Figure_2.webp  )
 
-Figure 1. Экстраполяции закона масштабирования дистилляции. Закон масштабирования дистилляции (Уравнение 8) аппроксимирован на слабых учениках $( L_S > 2.3 )$ для ряда учителей с потерями $( L_T )$. Сплошные линии представляют прогнозируемое поведение модели для невидимых учителей при заданной конфигурации ученика (интерполяция), а пунктирные линии представляют прогнозируемое поведение модели за пределами видимых учителей и для области сильных учеников $( L_S \leq 2.3 )$.
+Figure 1. Extrapolations of the distillation scaling law. The distillation scaling law (Equation 8) is approximated on weak students $( L_S > 2.3 )$ for a range of teachers with losses $( L_T )$. Solid lines represent the model’s predicted behavior for unseen teachers under a fixed student configuration (interpolation), while dashed lines represent predicted behavior beyond observed teachers and for strong students $( L_S \leq 2.3 )$.
 
-### **Закон масштабирования дистилляции**
+### **Distillation Scaling Law**
 
-Традиционный закон масштабирования (Scaling Laws) для больших моделей демонстрирует, что производительность языковой модели (LM) может улучшаться с увеличением вычислительных ресурсов, если модель следует оптимальной вычислительной парадигме обучения. Однако постоянный рост затрат на инференс делает этот подход все менее практичным, что заставляет исследователей искать альтернативные методы, включая переобучение и дистилляцию, для создания небольших, но мощных моделей.
+The traditional scaling law for large models demonstrates that a language model’s (LM) performance can improve with increased computational resources, provided the model follows an optimal training computational paradigm. However, the continuous rise in inference cost makes this approach increasingly impractical, prompting researchers to seek alternatives such as retraining and distillation to create small yet powerful models.
 
-Исследователи провели обширные эксперименты, используя модели-студенты и модели-учителя с параметрами от 143 миллионов до 12,6 миллиардов и объемом данных до 512 миллиардов токенов. Целью было изучить взаимосвязь между производительностью модели и вычислительными ресурсами в процессе дистилляции, а также найти способы оптимизации распределения этих ресурсов.
+Researchers conducted extensive experiments using student and teacher models ranging from 143 million to 12.6 billion parameters and training data up to 512 billion tokens. The goal was to study the relationship between model performance and computational resources during distillation, and to find ways to optimize the allocation of these resources.
 
-В следующей таблице показано значение символов, используемых в этой статье:
+The following table shows the symbols used in this paper:
 
-Таблица 1. Выражения, связанные с законами масштабирования, используемые в данной работе. В каждом случае $S$ всегда относится к ученику, а не к обучению с учителем.
+Table 1. Expressions related to scaling laws used in this work. In every case, $S$ refers to the student, not to teacher training.
 
-| Выражение | Значение |
+| Expression | Meaning |
 |---|---|
-| $N / N_S / N_T$ | Количество параметров модели/ученика/учителя, не связанных с эмбеддингом. В тексте, когда мы упоминаем параметры, мы всегда имеем в виду параметры, не связанные с эмбеддингом, если не указано иное. Подробности см. в Приложении H.2. |
-| $D / D_T$ | Количество токенов, на которых предобучена модель/учитель. |
-| $D_S$ | Количество токенов, на которых дистиллирован ученик. |
-| $M \equiv D / N$ | Соотношение токенов на параметр, или $M$-соотношение. В работе Hoffmann et al. (2022), $M$ принимает оптимальное значение $M^* \approx 20$, что является эмпирическим правилом Chinchilla. |
-| $L \approx L(N, D)$ | Кросс-энтропия модели, которая представляет собой валидационную кросс-энтропию модели на данных, оцениваемую по закону масштабирования с учителем для модели с $N$ параметрами, обученной на $D$ токенах. (Уравнение 1). |
-| $L_T \approx L(N_T, D_T)$ | Кросс-энтропия учителя, которая представляет собой валидационную кросс-энтропию учителя на данных, оцениваемую по закону масштабирования с учителем для учителя с $N_T$ параметрами, обученного на $D_T$ токенах. |
-| $L_S \approx L_S(N_S, D_S, L_T)$ | Кросс-энтропия ученика, которая представляет собой валидационную кросс-энтропию ученика на данных, оцениваемую по нашему закону масштабирования дистилляции для ученика с $N_S$ параметрами, дистиллированного на $D_S$ токенах с использованием учителя с потерей предобучения $L_T$ (Уравнение 8). |
-| $\tilde{L}_S \approx L(N_S, D_S)$ | Кросс-энтропия ученика с учителем, которая представляет собой валидационную кросс-энтропию ученика на данных, если бы ученик был обучен с учителем, оцениваемую по закону масштабирования с учителем для ученика с $N_S$ параметрами, обученного на $D_S$ токенах. |
+| $N / N_S / N_T$ | Number of model/student/teacher parameters excluding embeddings. In the text, when we refer to parameters, we always mean non-embedding parameters unless otherwise specified. See Appendix H.2 for details. |
+| $D / D_T$ | Number of tokens on which the model/teacher was pre-trained. |
+| $D_S$ | Number of tokens on which the student was distilled. |
+| $M \equiv D / N$ | Tokens-per-parameter ratio, or $M$-ratio. In Hoffmann et al. (2022), $M$ achieves an optimal value $M^* \approx 20$, which is the empirical Chinchilla rule. |
+| $L \approx L(N, D)$ | Model cross-entropy, representing the validation cross-entropy of a model with $N$ parameters trained on $D$ tokens, evaluated according to the teacher scaling law. (Equation 1). |
+| $L_T \approx L(N_T, D_T)$ | Teacher cross-entropy, representing the validation cross-entropy of a teacher with $N_T$ parameters trained on $D_T$ tokens, evaluated according to the teacher scaling law. |
+| $L_S \approx L_S(N_S, D_S, L_T)$ | Student cross-entropy, representing the validation cross-entropy of a student with $N_S$ parameters distilled on $D_S$ tokens using a teacher with pre-training loss $L_T$, evaluated according to our distillation scaling law (Equation 8). |
+| $\tilde{L}_S \approx L(N_S, D_S)$ | Teacher-trained student cross-entropy, representing the validation cross-entropy of a student with $N_S$ parameters trained on $D_S$ tokens *without* distillation, evaluated according to the teacher scaling law. |
 
-> **Пояснение**: Кросс-энтропия — это метрика, измеряющая расхождение между предсказанным распределением вероятностей модели и истинным распределением. Чем ниже кросс-энтропия, тем лучше модель предсказывает правильные токены. Это основной показатель качества языковой модели.
+> **Explanation**: Cross-entropy is a metric measuring the divergence between the model’s predicted probability distribution and the true distribution. Lower cross-entropy indicates better prediction of correct tokens—it is the primary metric for language model quality.
 
 <details> 
-    <summary><em><strong>Математическая формализация кросс-энтропии</strong></em></summary>
+    <summary><em><strong>Mathematical Formalization of Cross-Entropy</strong></em></summary>
 
-Кросс-энтропия $H(p, q)$ между двумя распределениями вероятностей $p$ (истинное распределение) и $q$ (предсказанное распределение) определяется как:
+Cross-entropy $H(p, q)$ between two probability distributions $p$ (true distribution) and $q$ (predicted distribution) is defined as:
 
 $$H(p, q) = - \sum_{x} p(x) \log_2(q(x))$$  
 
-(Обычно используется логарифм по основанию 2 или натуральный логарифм, здесь для примера используется $\log_2$)
+(Usually, base-2 or natural logarithm is used; here base-2 is shown for illustration.)
 
-В контексте языковых моделей, для оценки качества предсказания следующего токена в последовательности, формула кросс-энтропии адаптируется следующим образом:
+In the context of language models, for evaluating the quality of predicting the next token in a sequence, the cross-entropy formula is adapted as follows:
 
 $$H(p, q) = - \frac{1}{N} \sum_{i=1}^{N} \log_2(q(w_i | w_{<i}))$$
 
-где:
-*   $p$ - **истинное распределение вероятностей**. В идеале, это распределение реального языка. В практическом контексте обучения, для каждого токена $w_i$ в обучающей последовательности, истинное распределение $p(w)$ является **one-hot вектором**: $p(w_i) = 1$ для истинного токена $w_i$, и $p(w) = 0$ для всех остальных токенов $w \neq w_i$ в словаре.
-*   $q$ - **предсказанное распределение вероятностей моделью**. Модель предсказывает вероятность для *каждого* токена из словаря быть следующим, учитывая контекст.
-*   $w_i$ - $i$-й токен в последовательности.
-*   $w_{<i}$ - последовательность токенов, предшествующих $i$-му токену (контекст).
-*   $q(w_i | w_{<i})$ - вероятность, предсказанная моделью для токена $w_i$ при условии предыдущих токенов $w_{<i}$. Это вероятность того, что следующим токеном будет $w_i$, согласно модели.
-*   $N$ - общее количество токенов в наборе данных, по которому рассчитывается кросс-энтропия.
+where:
+*   $p$ is the **true probability distribution**. Ideally, this is the distribution of the real language. In practice, for each token $w_i$ in the training sequence, the true distribution $p(w)$ is a **one-hot vector**: $p(w_i) = 1$ for the true token $w_i$, and $p(w) = 0$ for all other tokens $w \neq w_i$ in the vocabulary.
+*   $q$ is the **predicted probability distribution** by the model. The model predicts the probability for *every* token in the vocabulary to be the next one, given the context.
+*   $w_i$ is the $i$-th token in the sequence.
+*   $w_{<i}$ is the sequence of tokens preceding the $i$-th token (the context).
+*   $q(w_i | w_{<i})$ is the probability predicted by the model for token $w_i$ given preceding tokens $w_{<i}$. This is the probability that the next token will be $w_i$, according to the model.
+*   $N$ is the total number of tokens in the dataset over which cross-entropy is computed.
 
-![Figure_3.png](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-11/assets/Figure_3.png)
+![Figure_3.png](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-11/assets/Figure_3.png  )
 
-**Детальное пояснение:**
+**Detailed Explanation:**
 
-Цель языковой модели - предсказывать следующий токен в последовательности слов. Для каждого токена в обучающем наборе данных, мы хотим, чтобы модель присваивала высокую вероятность именно *фактически следующему* токену.  "Истинное" распределение вероятностей в этом случае можно представить как распределение, где вероятность истинного следующего токена равна 1, а вероятности всех остальных токенов равны 0.
+The goal of a language model is to predict the next token in a word sequence. For each token in the training dataset, we want the model to assign high probability to the *actual next* token. The "true" probability distribution in this case can be represented as a distribution where the probability of the true next token is 1, and the probability of all other tokens is 0.
 
-Модель, в свою очередь, предсказывает распределение вероятностей $q(w | w_{<i})$ для *всех* возможных токенов $w$ в словаре, учитывая контекст $w_{<i}$. Кросс-энтропия измеряет, насколько "далеко" предсказанное распределение $q$ от "истинного" распределения $p$.
+The model, in turn, predicts a probability distribution $q(w | w_{<i})$ for *all* possible tokens $w$ in the vocabulary, given the context $w_{<i}$. Cross-entropy measures how "far" the predicted distribution $q$ is from the "true" distribution $p$.
 
-Формула кросс-энтропии в контексте языковых моделей вычисляет **средний отрицательный логарифм предсказанной вероятности для каждого истинного токена**.
+The cross-entropy formula in the context of language models computes the **average negative log-probability assigned to each true token**.
 
-*   **Логарифм ($\log_2$ или натуральный $\ln$)**:  Используется для преобразования вероятностей (значения от 0 до 1) в значения, которые удобно суммировать. Логарифм от вероятности всегда отрицателен (или равен нулю, если вероятность равна 1).  Использование логарифма также связано с теорией информации и измерением количества информации (битов или натов).
-*   **Отрицательный знак (-)**:  Добавляется, чтобы превратить минимизацию кросс-энтропии в задачу максимизации вероятности.  Минимизация отрицательного логарифма вероятности эквивалентна максимизации самой вероятности.
+*   **Logarithm ($\log_2$ or natural $\ln$)**: Used to transform probabilities (values between 0 and 1) into values that are convenient to sum. The logarithm of a probability is always negative (or zero if the probability is 1). The use of logarithms is also tied to information theory and measuring information quantity (bits or nats).
+*   **Negative Sign (-)**: Added to convert minimization of cross-entropy into maximization of probability. Minimizing the negative log-probability is equivalent to maximizing the probability itself.
 
-**Интерпретация значения кросс-энтропии:**
+**Interpretation of Cross-Entropy Value:**
 
-*   **Чем ниже значение кросс-энтропии, тем лучше модель**. Низкая кросс-энтропия означает, что модель в среднем присваивает высокие вероятности истинным следующим токенам, что свидетельствует о хорошем качестве предсказаний.
-*   Кросс-энтропия измеряется в битах (если используется $\log_2$) или натах (если используется натуральный логарифм $\ln$).  В контексте языковых моделей, часто говорят о **перплексии**, которая экспоненциально связана с кросс-энтропией (Perplexity = $2^{H(p,q)}$ для $\log_2$). Перплексия также является популярной метрикой качества языковых моделей, и чем она ниже, тем лучше.
+*   **Lower cross-entropy means better model performance**. Low cross-entropy indicates that, on average, the model assigns high probabilities to the correct next tokens, indicating good prediction quality.
+*   Cross-entropy is measured in bits (if using $\log_2$) or nats (if using natural logarithm $\ln$). In language modeling, **perplexity** is often discussed, which is exponentially related to cross-entropy (Perplexity = $2^{H(p,q)}$ for $\log_2$). Perplexity is also a popular quality metric, and lower perplexity indicates better performance.
 
 </details>   
 
 ---
 
-> **Пояснение к правилу Чинчиллы**: Исследование Hoffmann et al. (2022) установило эмпирическое правило оптимального соотношения между количеством параметров модели и количеством токенов для обучения — примерно 20 токенов на каждый параметр. Это правило позволяет эффективно распределять вычислительные ресурсы при обучении крупных языковых моделей.
+> **Explanation of the Chinchilla Rule**: The study by Hoffmann et al. (2022) established an empirical rule for the optimal ratio between model parameters and training tokens—approximately 20 tokens per parameter. This rule enables efficient allocation of computational resources during training of large language models.
 
 <details> 
-    <summary><em><strong>Пояснение к правилу Чинчиллы</strong></em></summary>
+    <summary><em><strong>Explanation of the Chinchilla Rule</strong></em></summary>
 
-Правило Чинчиллы можно выразить следующим **эмпирическим** соотношением:
+The Chinchilla Rule can be expressed as the following **empirical** relationship:
 
 $T_{optimal} \approx 20 \times P$
 
-где:
-*   $T_{optimal}$ - **оптимальное** количество токенов для обучения модели, позволяющее достичь наилучшей производительности при заданном количестве параметров и вычислительных ресурсах.
-*   $P$ - количество параметров в модели.
+where:
+*   $T_{optimal}$ is the **optimal** number of training tokens required to achieve the best performance given a fixed number of parameters and computational resources.
+*   $P$ is the number of parameters in the model.
 
-**Пояснение:**
+**Explanation:**
 
-Правило Чинчиллы, предложенное в исследовании Hoffmann et al. (2022), является **эмпирическим наблюдением**, полученным в результате масштабных экспериментов с большими языковыми моделями.  Исследователи стремились найти оптимальный баланс между размером модели (количеством параметров) и объемом обучающих данных (количеством токенов) для **максимально эффективного использования вычислительных ресурсов**.
+The Chinchilla Rule, proposed in Hoffmann et al. (2022), is an **empirical observation** derived from extensive experiments with large language models. Researchers sought to find the optimal balance between model size (number of parameters) and training data volume (number of tokens) to **maximize computational efficiency**.
 
-Соотношение $T_{optimal} \approx 20 \times P$ указывает на то, что для достижения наилучшей производительности при обучении модели с заданным количеством параметров, **оптимально использовать примерно 20 токенов обучающих данных на каждый параметр**.
+The ratio $T_{optimal} \approx 20 \times P$ suggests that to achieve optimal performance when training a model with a given number of parameters, it is **optimal to use approximately 20 training tokens per parameter**.
 
-**Интуитивное объяснение:**
+**Intuitive Explanation:**
 
-*   **Недостаток токенов (T << 20P):** Если модель обучается на значительно меньшем количестве токенов, чем рекомендует правило Чинчиллы, она может **недообучиться**.  Даже при большом количестве параметров, модель не сможет в полной мере извлечь знания из ограниченного объема данных, и ее производительность будет неоптимальной.  В этом случае, увеличение количества обучающих токенов принесет больше пользы, чем увеличение размера модели.
-*   **Избыток токенов (T >> 20P):** Если модель обучается на чрезмерно большом количестве токенов при относительно небольшом количестве параметров, вычислительные ресурсы могут быть потрачены **неэффективно**.  Модель может насытиться знаниями из данных, и дальнейшее увеличение объема данных не приведет к существенному улучшению производительности.  В этом случае, увеличение размера модели (количества параметров) будет более эффективным способом улучшения производительности.
+*   **Insufficient Tokens (T << 20P):** If a model is trained on significantly fewer tokens than recommended by the Chinchilla Rule, it may **underfit**. Even with many parameters, the model cannot fully extract knowledge from limited data, resulting in suboptimal performance. In this case, increasing training tokens yields greater benefit than increasing model size.
+*   **Excessive Tokens (T >> 20P):** If a model is trained on excessively large data with relatively few parameters, computational resources may be **wasted inefficiently**. The model saturates on the data, and further increases in data volume yield negligible performance gains. In this case, increasing model size (number of parameters) is a more efficient way to improve performance.
 
-**Практическое применение и ограничения правила Чинчиллы:**
+**Practical Application and Limitations of the Chinchilla Rule:**
 
-Правило Чинчиллы является ценным **ориентиром** при планировании обучения больших языковых моделей, особенно в условиях ограниченных вычислительных ресурсов.  Оно помогает определить разумное соотношение между размером модели и объемом обучающих данных, чтобы **оптимизировать процесс обучения и достичь наилучшей возможной производительности**.
+The Chinchilla Rule is a valuable **guideline** for planning training of large language models, especially under limited computational resources. It helps determine a reasonable balance between model size and training data volume to **optimize training and achieve the best possible performance**.
 
-Например, если вы располагаете определенным бюджетом вычислительных ресурсов, правило Чинчиллы может помочь вам решить, стоит ли обучать меньшую модель на большем количестве данных, или большую модель на меньшем количестве данных.
+For example, if you have a fixed computational budget, the Chinchilla Rule can help decide whether to train a smaller model on more data or a larger model on less data.
 
-**Важно отметить:**
+**Important Notes:**
 
-*   Правило Чинчиллы является **эмпирическим** и не является строгим математическим законом.  Оптимальное соотношение может незначительно варьироваться в зависимости от конкретной архитектуры модели, качества обучающих данных, используемых методов обучения и других факторов.
-*   Правило Чинчиллы является **ориентировочным**.  Оно дает хорошее начальное приближение, но для конкретной задачи может потребоваться дополнительная настройка и эксперименты для нахождения истинно оптимального соотношения.
-*   Правило Чинчиллы в первую очередь ориентировано на **оптимизацию вычислительных ресурсов** и достижение **максимальной производительности** при заданных ограничениях.
+*   The Chinchilla Rule is **empirical**, not a strict mathematical law. The optimal ratio may vary slightly depending on model architecture, data quality, training methods, and other factors.
+*   The Chinchilla Rule is **approximate**. It provides a good initial estimate but may require additional tuning and experimentation to find the true optimum for a specific task.
+*   The Chinchilla Rule primarily targets **computational resource optimization** and achieving **maximum performance** under constraints.
 
 </details> 
 
 ---
 
-## Формализация закона масштабирования дистилляции
+## Formalization of the Distillation Scaling Law
 
-Центральным вкладом исследования является формулировка закона масштабирования дистилляции:
+The central contribution of the study is the formulation of the distillation scaling law:
 
 $$L_S(N_S, D_S, L_T) = L_T + \frac{1}{L_{c_0}^T} \left( 1 + \left( \frac{L_T}{\tilde{L}_S^{d_1}} \right)^{1/f_1} \right)^{-c_1f_1} \left( \frac{A}{N_S^{\alpha'}} + \frac{B}{D_S^{\beta'}} \right)^{\gamma'}$$
 
-### Объяснение переменных:
+### Explanation of Variables:
 
-*   $L_S(N_S, D_S, L_T)$ — **кросс-энтропия студента** (мера ошибки предсказания; чем ниже, тем лучше модель).
-*   $L_T$ — **кросс-энтропия учителя** (мера ошибки предсказания большой модели).
-*   $N_S$ — **количество неэмбеддинговых параметров студента** (основные обучаемые параметры модели).
-*   $D_S$ — **количество токенов**, использованных для обучения студента при дистилляции.
-*   $\tilde{L}_S = L(N_S, D_S)$ — **потенциальная кросс-энтропия студента при обычном обучении** без дистилляции, определяемая классическим законом масштабирования:
+*   $L_S(N_S, D_S, L_T)$ — **Student cross-entropy** (prediction error metric; lower is better).
+*   $L_T$ — **Teacher cross-entropy** (prediction error metric of the large model).
+*   $N_S$ — **Number of non-embedding parameters of the student** (core trainable model parameters).
+*   $D_S$ — **Number of tokens** used to train the student during distillation.
+*   $\tilde{L}_S = L(N_S, D_S)$ — **Potential student cross-entropy under standard training without distillation**, determined by the classical scaling law:
 
 $$L(N, D) = E - \frac{A}{N^\alpha} - \frac{B}{D^\beta}$$
 
-*   $\{c_0, c_1, d_1, f_1, \alpha', \beta', \gamma'\}$ — **коэффициенты**, определяемые эмпирически.
-*   $A$ и $B$ — **положительные коэффициенты**, зависящие от архитектуры модели и характеристик набора данных.
+*   $\{c_0, c_1, d_1, f_1, \alpha', \beta', \gamma'\}$ — **Coefficients** determined empirically.
+*   $A$ and $B$ — **Positive coefficients** dependent on model architecture and dataset characteristics.
 
-### Физический смысл формулы:
+### Physical Meaning of the Formula:
 
-1. **Базовая часть**: $L_T$ — студент не может быть лучше учителя.
-2. **Модифицирующая часть**: Остальная часть формулы описывает, насколько эффективно студент может приблизиться к учителю в зависимости от своего размера, количества данных и качества учителя.
+1. **Base Term**: $L_T$ — The student cannot outperform the teacher.
+2. **Modifying Term**: The remaining part of the formula describes how effectively the student can approach the teacher, depending on its size, data volume, and teacher quality.
 
-### Ключевые выводы:
+### Key Conclusions:
 
-1. Студент не может превзойти учителя (всегда $L_S \geq L_T$). **Кросс-энтропия (L) - это мера ошибки модели**. Чем **ниже** значение L, тем **лучше** модель предсказывает данные.
-2. Чем ближе потенциальная производительность студента к производительности учителя, тем эффективнее дистилляция.
-3. При фиксированном учителе закон масштабирования дистилляции не превосходит обычный закон масштабирования.
+1. The student cannot surpass the teacher (always $L_S \geq L_T$). **Cross-entropy (L) is a measure of model error**. The **lower** the value of L, the **better** the model predicts data.
+2. The closer the student’s potential performance is to the teacher’s, the more effective distillation becomes.
+3. With a fixed teacher, the distillation scaling law does not exceed the standard scaling law.
 
-### Практическое применение:
+### Practical Application:
 
-Этот закон позволяет оптимально распределить вычислительные ресурсы между учителем и студентом и прогнозировать эффективность дистилляции.
+This law enables optimal allocation of computational resources between teacher and student and predicts distillation effectiveness.
 
-> **То есть**: Этот закон описывает, как качество маленькой модели зависит от трех факторов: размера самой модели, количества данных для обучения и качества большой модели-учителя. Ключевой вывод: студент никогда не может быть лучше учителя, но насколько близко он подойдет к учителю, зависит от его собственных возможностей и объема тренировки.
+> **In other words**: This law describes how a small model’s quality depends on three factors: its own size, amount of training data, and the quality of the large teacher model. The key insight: a student can never be better than its teacher, but how closely it approaches the teacher depends on its own capacity and training volume.
 
+## Mixing Coefficients in Knowledge Distillation
 
-## Коэффициенты смешивания в процессе дистилляции знаний
+Having examined the general distillation scaling law, it is essential to understand practical implementation aspects, particularly how to balance imitation of the teacher against independent learning by the student model.
 
-Рассмотрев общий закон масштабирования дистилляции, важно также понять практические аспекты реализации этого процесса, в частности, как управлять балансом между имитацией учителя и самостоятельным обучением модели-ученика.
-
-Основная идея дистилляции знаний заключается в переносе информации от большой модели-учителя к компактной модели-ученику. В этом процессе прогнозируемое распределение вероятностей модели-учителя используется в качестве целевого распределения для модели-ученика. Обучение происходит путем минимизации расхождения Кульбака-Лейблера (KL-дивергенции) между распределениями ученика и учителя:
+The core idea of knowledge distillation is transferring information from a large teacher model to a compact student model. In this process, the teacher’s predicted probability distribution serves as the target for the student. Training minimizes the Kullback-Leibler (KL) divergence between the student’s and teacher’s distributions:
 
 $$
 \mathcal{L}_{\text{KD}} \left( z_T^{(i)}, z_S^{(i)} \right) = -\tau^2 \sum_{a=1}^V \sigma_a \left( \frac{z_T^{(i)}}{\tau} \right) \log \sigma_a \left( \frac{z_S^{(i)}}{\tau} \right)
 $$
 
-где:
-- $z_T^{(i)}$ и $z_S^{(i)}$ — выходные логиты моделей учителя и ученика соответственно
-- $\tau$ — температура дистилляции, контролирующая "сглаженность" распределения вероятностей учителя
-- $\sigma_a$ — функция softmax, преобразующая логиты в вероятности
-- $V$ — размер словаря
+where:
+- $z_T^{(i)}$ and $z_S^{(i)}$ are the output logits of the teacher and student models, respectively
+- $\tau$ is the distillation temperature, controlling the "smoothness" of the teacher’s probability distribution
+- $\sigma_a$ is the softmax function converting logits to probabilities
+- $V$ is the vocabulary size
 
-Комбинированная функция потерь для модели-ученика объединяет несколько компонентов:
+The combined loss function for the student model integrates multiple components:
 
 $$
 \mathcal{L}_S\big(x^{(i)}, \boldsymbol{z}_T^{(i)},\boldsymbol{z}_S^{(i)}\big) = (1-\lambda)\,\mathcal{L}_{\textrm{NTP}}(x^{(i)},\boldsymbol{z}_S^{(i)}) + \lambda\,\mathcal{L}_{\textrm{KD}}(\boldsymbol{z}_T^{(i)},\boldsymbol{z}_S^{(i)}) + \lambda_Z\,\mathcal{L}_Z(\boldsymbol{z}_S^{(i)}).
 $$
 
-где:
-- $\mathcal{L}_{\textrm{NTP}}$ — потеря при предсказании следующего токена (стандартная кросс-энтропия)
-- $\mathcal{L}_{\textrm{KD}}$ — потеря при дистилляции знаний (KL-дивергенция)
-- $\mathcal{L}_Z$ — регуляризационная Z-потеря, стабилизирующая обучение путем нормализации логитов
-- $\lambda$ — коэффициент смешивания, определяющий баланс между обучением на "чистых" данных и имитацией учителя
-- $\lambda_Z$ — весовой коэффициент для Z-потери
+where:
+- $\mathcal{L}_{\textrm{NTP}}$ — Next-token prediction loss (standard cross-entropy)
+- $\mathcal{L}_{\textrm{KD}}$ — Knowledge distillation loss (KL divergence)
+- $\mathcal{L}_Z$ — Regularization Z-loss, stabilizing training by normalizing logits
+- $\lambda$ — Mixing coefficient, determining the balance between learning from "clean" data and imitating the teacher
+- $\lambda_Z$ — Weight coefficient for Z-loss
 
-## Экспериментальное определение оптимальных параметров дистилляции
+## Experimental Determination of Optimal Distillation Parameters
 
-Для определения влияния параметров дистилляции на эффективность закона масштабирования, исследователи провели серию экспериментов. Чтобы исключить влияние данных и сосредоточиться именно на роли модели-учителя, эксперименты проводились в режиме "чистой дистилляции" с $\lambda = 1$. Результаты показали, что такой выбор $\lambda$ даёт результаты, статистически сопоставимые с использованием оптимальных значений $\lambda^*$.
+To assess the impact of distillation parameters on scaling law effectiveness, researchers conducted a series of experiments. To isolate the role of the teacher model and exclude data effects, experiments were performed in "pure distillation" mode with $\lambda = 1$. Results showed this choice of $\lambda$ yields performance statistically comparable to using optimal $\lambda^*$ values.
 
-Во всех экспериментах использовалась **фиксированная температура дистилляции $\tau = 1$, которая эмпирически показала наилучшую эффективность для обучения модели-ученика.**
+In all experiments, a **fixed distillation temperature $\tau = 1$** was used, which empirically demonstrated the highest efficiency for training the student model.
 
-![Коэффициенты смешивания λ](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-11/assets/Figure_4.webp)
+![Mixing Coefficients λ](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-11/assets/Figure_4.webp  )
 
-> **Коэффициенты смешивания $\lambda$.** (a) Модели-ученики шести размеров $N_S \in \{198M, 266M, \ldots, 2.72B\}$, обученные с соотношением $M = D_S/N_S = \text{Количество токенов, на которых дистиллирован ученик} / \text{Количество параметров модели ученика} = 20$, дистиллируются от моделей-учителей размеров $N_T \in \{546M, 975M, \ldots, 7.75B\}$, обученных с соотношением $M = D_T/N_T = \text{Количество токенов, на которых предобучена модель учитель} / \text{Количество параметров модели учителя} = 20$, с различными значениями коэффициента смешивания $\lambda \in [0, 1]$. Значения $\lambda = 0$ и $\lambda = 1$ соответствуют стандартному обучению и чистой дистилляции соответственно.  
-(b) Оптимальные коэффициенты смешивания $\lambda^* = \arg \min_{\lambda} \mathcal{L}(\lambda)$, дающие наименьшую потерю на валидационном наборе для каждой пары учитель-ученик.
+> **Mixing coefficients $\lambda$.** (a) Six student models of sizes $N_S \in \{198M, 266M, \ldots, 2.72B\}$, trained with ratio $M = D_S/N_S = \text{Number of tokens used to distill the student} / \text{Number of student model parameters} = 20$, distilled from teacher models of sizes $N_T \in \{546M, 975M, \ldots, 7.75B\}$, trained with ratio $M = D_T/N_T = \text{Number of tokens used to pre-train the teacher} / \text{Number of teacher model parameters} = 20$, using various mixing coefficients $\lambda \in [0, 1]$. Values $\lambda = 0$ and $\lambda = 1$ correspond to standard training and pure distillation, respectively.  
+(b) Optimal mixing coefficients $\lambda^* = \arg \min_{\lambda} \mathcal{L}(\lambda)$ yielding the lowest validation loss for each teacher-student pair.
 
-Эти эксперименты подтверждают, что параметры дистилляции оказывают существенное влияние на итоговую производительность модели-ученика, и их оптимальный выбор напрямую связан с размерами моделей учителя и ученика, что согласуется с общим законом масштабирования дистилляции.
+These experiments confirm that distillation parameters significantly affect the final student model performance, and their optimal selection directly correlates with the sizes of the teacher and student models, consistent with the general distillation scaling law.
 
-### Вывод
+### Conclusion
 
-Дистилляция знаний — это метод, позволяющий передать способности большой нейронной модели (учителя) меньшей и вычислительно эффективной модели (ученику). Процесс основан на обучении модели-ученика имитировать распределение вероятностей модели-учителя путём минимизации расхождения Кульбака-Лейблера между их предсказаниями.
+Knowledge distillation is a method for transferring the capabilities of a large neural model (teacher) to a smaller, computationally efficient model (student). The process is based on training the student to mimic the teacher’s probability distribution by minimizing the Kullback-Leibler divergence between their predictions.
 
-Эффективность дистилляции определяется балансом нескольких компонентов в функции потерь:
-- Стандартной кросс-энтропии при предсказании следующего токена
-- KL-дивергенции при имитации учителя
-- Регуляризационной Z-потери для стабилизации обучения
+Distillation effectiveness is determined by the balance among several components in the loss function:
+- Standard cross-entropy for next-token prediction
+- KL divergence for teacher imitation
+- Regularization Z-loss for training stabilization
 
-Два ключевых параметра контролируют этот процесс:
-- Коэффициент смешивания λ, регулирующий баланс между самостоятельным обучением и имитацией учителя
-- Температура дистилляции τ, влияющая на "сглаженность" распределения вероятностей
+Two key parameters control this process:
+- Mixing coefficient $\lambda$, regulating the balance between independent learning and teacher imitation
+- Distillation temperature $\tau$, influencing the "smoothness" of the probability distribution
 
-<u>Экспериментальные исследования демонстрируют, что режим "чистой дистилляции" (λ = 1) при температуре τ = 1 часто даёт результаты, сопоставимые с оптимально подобранными параметрами. Однако наиболее важным открытием является то, что идеальные значения этих параметров системно зависят от соотношения размеров конкретной пары моделей учитель-ученик.</u>
+<u>Experimental studies demonstrate that "pure distillation" mode ($\lambda = 1$) with temperature $\tau = 1$ often yields results comparable to optimally tuned parameters. However, the most important discovery is that ideal values of these parameters systematically depend on the size ratio of the specific teacher-student model pair.</u>
 
-Это открытие соответствует общему закону масштабирования дистилляции и имеет прямое практическое применение: для достижения максимальной эффективности при практической реализации дистилляции необходим индивидуальный подбор параметров с учётом размеров используемых моделей, что позволяет существенно улучшить итоговую производительность компактной модели при сохранении её вычислительной эффективности.
+This discovery aligns with the general distillation scaling law and has direct practical implications: to achieve maximum efficiency in practical distillation, parameters must be individually tuned based on the sizes of the models used, significantly improving the final performance of the compact model while preserving its computational efficiency.
 
-## Эксперимент с фиксированным учитилем и разными учениками
+## Experiment with Fixed Teacher and Varying Students
 
-Размер модели учителя и объем обучающих данных на которых обучался учитель, фиксированы, а размер модели ученика и объем дистилляционных данных варьируются. Цель состоит в том, чтобы изучить, как производительность модели ученика меняется в зависимости от ее размера и объема обработанных дистилляционных данных в условиях фиксированной модели учителя. Таким образом, можно определить оптимальную производительность модели студента при различных масштабах и объемах данных.
+The teacher model size and the volume of data on which the teacher was trained are fixed, while the student model size and distillation data volume vary. The goal is to study how the student model’s performance changes with its size and the volume of distillation data under a fixed teacher. Thus, optimal student performance under varying scales and data volumes can be determined.
 
-![Figure_5](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-11/assets/Figure_5.webp)
+![Figure_5](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-11/assets/Figure_5.webp  )
 
-![Figure_6](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-11/assets/Figure_6.webp)
+![Figure_6](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-11/assets/Figure_6.webp  )
 
-**Из результатов эксперимента можно заметить, что:**
+**From the experimental results, it can be observed that:**
 
-- При высокой вычислительной мощности, чем больше масштаб параметров модели ученика, тем меньше его функция потерь, и чем больше масштаб модели учителя, тем очевиднее эта тенденция.
-- Когда размер моделей ученика и учителя определен, становится понятно, что чем больше вычислительная мощность, тем лучше будет работать модель ученика.
-- При низкой вычислительной мощности производительность модели сначала улучшится, а затем ослабнет с размером модели. Здесь легко понять, что более крупные модели не полностью обучаются при меньшей вычислительной мощности.
-- В особых случаях модель ученика может превзойти модель учителя и показать способность к обобщению. Я лично предполагаю, что модель учителя может быть недообучена в таких сценариях.
+- At high computational power, the larger the student model’s parameter scale, the lower its loss, and the more evident this trend becomes with larger teacher models.
+- When student and teacher model sizes are fixed, it becomes clear that higher computational power leads to better student model performance.
+- At low computational power, model performance first improves then deteriorates with increasing model size. Here, it is evident that larger models do not fully train under limited computational power.
+- In special cases, the student model may surpass the teacher model and demonstrate superior generalization. I personally hypothesize that the teacher model may be undertrained in such scenarios.
 
-## Эксперимент с фиксированным учеником и разными учителями
+## Experiment with Fixed Student and Varying Teachers
 
-Размер модели ученика и объем данных дистилляции фиксированы, а размер модели учителя и объем обучающих данных варьируются. Цель состоит в том, чтобы изучить, как эффективность модели учителя влияет на конечную эффективность модели ученика. Таким образом, можно определить оптимальный размер модели учителя и объем обучающих данных для максимизации производительности модели ученика.
+The student model size and distillation data volume are fixed, while the teacher model size and training data volume vary. The goal is to study how the teacher model’s effectiveness influences the final student model performance. Thus, the optimal teacher model size and training data volume for maximizing student performance can be determined.
 
-![Figure_7](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-11/assets/Figure_7.webp)
+![Figure_7](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-11/assets/Figure_7.webp  )
 
-Как видно из результатов, чем больше параметры у модели учителя, тем ниже перекрестная энтропия модели ученика. Это показывает, что для достижения наилучшего эффекта дистилляции производительность модели учителя должна соответствовать возможностям модели ученика.
+As shown in the results, the larger the teacher model’s parameters, the lower the student’s cross-entropy. This indicates that for optimal distillation, the teacher model’s performance must match the student model’s capabilities.
 
-## Дистилляция против контролируемого обучения
+## Distillation vs. Supervised Learning
 
-Чтобы понять, когда дистилляция приносит пользу, на следующем рисунке сравнивается производительность дистилляции и контролируемого обучения при фиксированных вычислительных ресурсах. Результаты показывают, что контролируемое обучение всегда превосходит дистилляцию при наличии достаточного количества вычислений или данных у учащихся. При умеренном бюджете данных дистилляция имеет преимущества, однако при наличии больших объемов данных контролируемое обучение превосходит дистилляцию.
+To understand when distillation provides benefits, the following figure compares distillation and supervised learning performance under fixed computational resources. Results show that supervised learning always outperforms distillation when sufficient computation or data is available to the student. With moderate data budgets, distillation has advantages; however, with large data volumes, supervised learning surpasses distillation.
 
-Подводя итог, можно сказать, что при ограниченных вычислительных ресурсах дистилляция обычно более эффективна, чем контролируемое обучение. Это связано с тем, что дистилляция может быстрее усваивать эффективные представления признаков под руководством модели учителя, тем самым достигая более высокой производительности при меньших вычислительных ресурсах.
+In summary, under limited computational resources, distillation is typically more efficient than supervised learning. This is because distillation can rapidly absorb efficient feature representations under the teacher’s guidance, achieving higher performance with fewer computational resources.
 
-![Figure_8](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-11/assets/Figure_8.webp)
+![Figure_8](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-11/assets/Figure_8.webp  )
 
-## Выбор модели учителя
+## Teacher Model Selection
 
-- Сила обучающего сигнала: Модели учителей разных размеров могут обеспечивать разную силу обучающего сигнала, которая обычно измеряется с помощью потери перекрестной энтропии. Более крупная модель учителя может обеспечить более сильный сигнал обучения (более низкая перекрестная энтропия), тем самым помогая модели ученика лучше учиться.
+- **Strength of Training Signal**: Teacher models of different sizes may provide different strengths of training signals, typically measured by cross-entropy loss. Larger teacher models can provide stronger training signals (lower cross-entropy), helping the student learn better.
+- **Increased Cost**: Using a larger teacher model incurs higher costs due to the need to compute the teacher’s logits. This means larger teacher models are not only more expensive to train but also consume more computational resources during distillation.
 
-- Увеличение затрат: использование более крупной модели учителя повлечет за собой более высокие затраты из-за необходимости вычисления логитов модели учителя. Это означает, что более крупная модель учителя не только более затратна в обучении, но и потребляет больше вычислительных ресурсов при использовании для дистилляции.
+The figure below shows the change in student cross-entropy loss under varying distillation data budgets. Results show that the optimal teacher loss (red line) decreases following a power law as student size increases until the student’s loss matches the optimal teacher loss.
 
-На рисунке ниже показано изменение потери перекрестной энтропии модели студента при различных бюджетах данных дистилляции. Результаты показывают, что оптимальная потеря учителя (представленная красной линией) уменьшается по степенному закону с увеличением численности учащихся до тех пор, пока потеря ученика не сравняется с оптимальной потерей учителя.
+![Figure_9](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-11/assets/Figure_9.webp  )
 
-![Figure_9](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-11/assets/Figure_9.webp)
+As shown in the figure below, as the distillation data volume increases, the cross-entropy of the optimal teacher model gradually decreases. Thus, we conclude: when computational resources are limited, selecting a smaller teacher model can reduce inference cost while still providing effective training signals to the student model.
 
-Как видно на другом рисунке ниже, по мере увеличения объема данных дистилляции, перекрестная энтропия оптимальной модели учителя постепенно уменьшается. Таким образом, можно сделать вывод, что: когда вычислительные ресурсы ограничены, выбор меньшей модели учителя может снизить затраты на вывод, при этом обеспечивая эффективные сигналы обучения для модели ученика.
+![Figure_10](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-11/assets/Figure_10.webp  )
 
-![Figure_10](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-11/assets/Figure_10.webp)
+## Compute Optimal Distillation
 
-## Рассчитайте оптимальную дистилляцию
+The goal of computationally optimal distillation is to determine how to create a student model of desired size with the lowest possible cross-entropy under a given computational budget. Specifically, we must find the optimal distillation data volume, teacher model size, and teacher training data to minimize student cross-entropy while satisfying computational budget constraints.
 
-Целью вычислительно оптимальной дистилляции является определение способа создания модели студента желаемого размера с наименьшей перекрестной энтропией при заданном вычислительном бюджете. В частности, необходимо найти оптимальный объем данных для обучения учащихся, размер модели учителя, данные для обучения, чтобы минимизировать перекрестную энтропию студента и при этом удовлетворить ограничениям вычислительного бюджета.
+In the figure below we see:
 
-На рисунке ниже мы видим:
+- Supervised learning always corresponds to the best distillation configuration when computational budget is sufficient: Supervised learning always matches the best distillation configuration under a fixed total computational budget. This means supervised learning can achieve the same performance as distillation if the computational budget is large enough.
 
-- Контролируемое обучение всегда соответствует наилучшему варианту настройки дистилляции при достаточном вычислительном бюджете: Контролируемое обучение всегда соответствует наилучшему варианту настройки дистилляции при определенном общем вычислительном бюджете. Это означает, что контролируемое обучение может достичь той же производительности, что и дистилляция, если вычислительный бюджет достаточно велик.
+- If teacher training is included in computations, student cross-entropy is always higher than in supervised settings: This means if your sole goal is to create the best possible model with a target size and you have no access to a teacher, you should choose supervised learning instead of training a teacher followed by distillation. Conversely, if the goal is to produce a family of models or use the teacher as a serving model, distillation may be more computationally advantageous than supervised learning.
 
-- Если в вычисления включено обучение учителя, перекрестная энтропия учащихся всегда выше, чем в контролируемой обстановке: это означает, что если вашей единственной целью является создание наилучшей модели с целевым размером и у вас нет доступа к учителю, вам следует выбрать контролируемое обучение вместо обучения учителя и последующей дистилляции. Напротив, если цель состоит в том, чтобы выделить семейство моделей или использовать учителя в качестве обслуживающей модели, то выделение может оказаться более выгодным с вычислительной точки зрения, чем контролируемое обучение.
+- Smaller models are more likely to benefit from supervised pre-training, while larger models are more likely to benefit from distillation: Smaller models are more likely to benefit from supervised learning under large computational budgets, while larger models are more likely to benefit from distillation under large computational budgets.
 
-- Меньшие модели с большей вероятностью получат выгоду от контролируемого предварительного обучения, в то время как более крупные модели с большей вероятностью получат выгоду от дистилляции: Меньшие модели с большей вероятностью получат выгоду от контролируемого обучения при больших вычислительных бюджетах, в то время как более крупные модели с большей вероятностью получат выгоду от дистилляции при больших вычислительных бюджетах.
+![Figure_11](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-11/assets/Figure_11.webp  )
 
-![Figure_11](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-11/assets/Figure_11.webp)
+The figure below shows trends in optimal teacher size and training data volume as computational budget changes. Student and teacher model tokens scale according to power laws, with student tokens growing faster. The optimal teacher model size first increases until it becomes slightly larger than the student, then stabilizes. This occurs because **using a large teacher model for inference is expensive, and as student token count increases, retraining the teacher becomes more efficient**.
 
-На рисунке ниже показаны тенденции изменения оптимального размера учителя и объема обучающих данных по мере изменения вычислительного бюджета. Токены моделей студентов и преподавателей масштабируются по степенному закону, причем токены студентов растут быстрее. Размер лучшей модели учителя сначала увеличивается, пока не станет немного больше ученика, а затем стабилизируется. Это связано с тем, **что использование большой модели учителя для вывода обходится дорого, и по мере увеличения количества токенов учеников более эффективным становится переобучение модели учителя.**
+![Figure_12](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-11/assets/Figure_12.webp  )
 
-![Figure_12](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-11/assets/Figure_12.webp)
+### **Key Research Findings**
 
-### **Ключевые результаты исследования**
+Based on their research, the authors reached the following conclusions:
 
-В результате исследований авторы пришли к следующим выводам:
+1. **Predictability of Performance via Scaling Law**: The performance of a student model of size $N_S$, obtained by distillation from a teacher model of size $N_T$ using $D_S$ tokens, can be predicted using the developed distillation scaling law.
 
-1. **Предсказуемость производительности через закон масштабирования**: Производительность модели-студента размером $N_S$, полученной путем дистилляции из модели-учителя размером $N_T$ с использованием $D_S$ токенов, может быть предсказана с помощью разработанного закона масштабирования дистилляции.
+   > **Practical Value**: This allows early estimation of distillation outcomes without costly experiments. Companies can plan resources and decide whether to invest in distillation or choose an alternative approach to building an efficient model.
 
-   > **Практическое значение**: Это позволяет заранее оценить, какой результат можно получить от процесса дистилляции, не проводя дорогостоящих экспериментов. Компания может спланировать свои ресурсы и решить, стоит ли вкладываться в дистилляцию, или лучше выбрать другой подход к созданию эффективной модели.
+2. **Impact of Teacher Parameters on Student**: The teacher model size $N_T$ and its training token count $D_T$ determine the teacher’s cross-entropy $L_T = L_T(N_T, D_T)$, which in turn affects the student’s cross-entropy.
 
-2. **Влияние параметров учителя на студента**: Размер модели-учителя $N_T$ и количество токенов для её обучения $D_T$ определяют кросс-энтропию модели-учителя $L_T = L_T(N_T, D_T)$, которая, в свою очередь, влияет на кросс-энтропию модели-студента.
+   > **Illustrative Example**: Imagine the teacher as a source of knowledge for the student. If the teacher itself is inadequately trained (high cross-entropy), it cannot effectively teach the student, regardless of the student’s capabilities.
 
-   > **Наглядный пример**: Представьте учителя как источник знаний для студента. Если учитель сам недостаточно образован (высокая кросс-энтропия), он не сможет хорошо обучить студента, какими бы способностями студент ни обладал.
+3. **The "Capacity Gap" Phenomenon**: The study revealed an interesting effect—stronger teachers can lead to worse students, explained by a "capacity gap." The effect of teacher cross-entropy on student loss follows a power law that switches between two regimes depending on the relative learning capacity of student and teacher. The study showed that the critical factor is the *gap in learning capacity* (hypothesis space and optimization capability) between teacher and student, not merely their relative size.
 
-3. **Феномен "разрыва в способностях"**: Исследование выявило интересный эффект - более сильный учитель может привести к худшему студенту, что объясняется "разрывом в способностях" (capacity gap). Влияние кросс-энтропии модели-учителя на потери модели-студента следует степенному закону, который переключается между двумя режимами в зависимости от относительной способности к обучению студента и учителя. Исследование показало, что важен именно разрыв в способности к обучению (гипотезное пространство и оптимизационная способность) между учителем и студентом, а не просто их относительный размер.
+   > **Analogy for Understanding**: Imagine a quantum physics professor trying to teach a first-grader. Despite the professor’s expertise, the child cannot absorb complex material due to the gap in learning capacity. Similarly, if the teacher model is too complex and "thinks" at a level inaccessible to the student model, training efficiency decreases.
 
-   > **Аналогия для понимания**: Представьте, что профессор квантовой физики пытается обучить первоклассника. Несмотря на высокую квалификацию профессора, первоклассник не сможет усвоить сложный материал из-за разрыва в способностях к обучению. Аналогично, если модель-учитель слишком сложна и "мыслит" на уровне, недоступном модели-студенту, эффективность обучения снижается.
+4. **U-shaped Student Error Dependency**: Empirically confirmed is a U-shaped dependence of student error on teacher size for a fixed student size, theoretically justified by the capacity gap between them.
 
-4. **U-образная зависимость ошибки студента**: Эмпирически подтверждается U-образная зависимость ошибки студента от размера учителя при фиксированном размере студента, что теоретически обосновывается разрывом в емкости между ними.
+   > **Visual Representation**: If student error is plotted against teacher size on a graph, a U-shaped curve emerges. This means there exists an optimal teacher size for a given student—neither too small (insufficient knowledge) nor too large (overly complex knowledge representation).
 
-   > **Визуальное представление**: Если изобразить ошибку студента на графике, где по горизонтальной оси отложен размер учителя, мы увидим U-образную кривую. Это означает, что существует оптимальный размер учителя для данного студента — не слишком маленький (недостаточно знаний) и не слишком большой (слишком сложное представление знаний).
+### **Practical Recommendations**
 
-### **Практические рекомендации**
+The study results show that distillation becomes more effective than teacher training under the following conditions:
 
-Результаты исследования показывают, что дистилляция становится более эффективной, чем обучение с учителем, при соблюдении следующих условий:
+1. The total number of computations or tokens for the student does not exceed a threshold tied to the student’s size, according to the new scaling law.
 
-1. Общее количество вычислений или токенов для студента не превышает пороговое значение, связанное с размером студента, согласно новому закону масштабирования.
+   > **Practical Scenario**: For a company with limited computational budget seeking to build a 1-billion-parameter model, distillation may be optimal if fewer than 20 billion training tokens are available (per the Chinchilla Rule).
 
-   > **Практический сценарий**: Для компании с ограниченным бюджетом на вычисления, которая хочет создать модель размером 1 миллиард параметров, дистилляция может быть оптимальным выбором, если доступно менее 20 миллиардов токенов для обучения (согласно правилу Чинчиллы).
+2. The teacher model already exists, or training the teacher model has applications beyond a single distillation.
 
-2. Модель-учитель уже существует, или обучение модели-учителя имеет применение за пределами одной дистилляции.
+   > **Business Case**: If a company has already trained a large model for its core tasks, it makes sense to use it for distilling smaller, specialized models for deployment on mobile devices or resource-constrained environments.
 
-   > **Бизнес-кейс**: Если компания уже обучила крупную модель для своих основных задач, имеет смысл использовать её для дистилляции меньших, специализированных моделей для развертывания на мобильных устройствах или в средах с ограниченными ресурсами.
-
-Если оба процесса обучения (учителя и студента) имеют достаточно данных или вычислений, дистилляция не может привести к более низкой кросс-энтропии модели по сравнению с обучением с учителем.
+If both training processes (teacher and student) have sufficient data or computation, distillation cannot achieve lower cross-entropy than supervised training.

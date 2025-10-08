@@ -1,32 +1,32 @@
-# 🧠 Сравнительный анализ биологических и искусственных нейронных сетей 🤖
+# 🧠 Comparative Analysis of Biological and Artificial Neural Networks 🤖
 
-### 📊 Общие сведения
+### 📊 Overview
 
-Эта директория содержит авторскую статью, посвященную сравнительному анализу биологических и искусственных нейронных сетей. В связи с подготовкой к защите магистерской диссертации, текущий фокус смещен с еженедельных обзоров статей на публикацию данной работы. Статья рассматривает ключевые различия и сходства между биологическими нейронными сетями, функционирующими в мозге, и искусственными нейронными сетями, используемыми в машинном обучении. Анализируются структурные особенности, механизмы обучения, принципы обработки информации и области применения обоих типов сетей.
+This directory contains an original article dedicated to the comparative analysis of biological and artificial neural networks. In connection with the preparation for the defense of a master’s thesis, the current focus has shifted from weekly paper reviews to the publication of this work. The article examines key differences and similarities between biological neural networks operating in the brain and artificial neural networks used in machine learning. Structural features, learning mechanisms, information processing principles, and application domains of both network types are analyzed.
 
-🔗 Основное внимание уделяется:
-- Ключевым различиям в архитектуре: от отдельных нейронов до макроструктур 🧠 vs. слои и связи 💻
-- Механизмам обучения: биологическая пластичность и обучение с подкреплением vs. backpropagation и ее вариации 🔄
-- Принципам обработки информации: параллельная распределенная обработка в мозге vs. последовательные вычисления на GPU/CPU ⚡
-- Энергоэффективности: невероятная эффективность биологических систем vs. вычислительные затраты искусственных сетей 🔋
-- Потенциалу для вдохновения: как понимание биологических нейронных сетей может улучшить искусственный интеллект ✨
+🔗 Key focus areas include:
+- Core architectural differences: from individual neurons to macrostructures 🧠 vs. layers and connections 💻  
+- Learning mechanisms: biological plasticity and reinforcement learning vs. backpropagation and its variants 🔄  
+- Information processing principles: parallel distributed processing in the brain vs. sequential computations on GPUs/CPUs ⚡  
+- Energy efficiency: the remarkable efficiency of biological systems vs. the computational costs of artificial networks 🔋  
+- Inspirational potential: how insights from biological neural networks can advance artificial intelligence ✨
 
-## 📌 Цели исследования
+## 📌 Research Objectives
 
-- Провести всесторонний сравнительный анализ биологических и искусственных нейронных сетей.
-- Выявить ключевые структурные и функциональные различия между ними.
-- Исследовать, как принципы работы биологических нейронных сетей могут быть использованы для разработки более совершенных моделей искусственного интеллекта.
-- Представить результаты анализа в рамках подготовки к магистерской диссертации.
+- Conduct a comprehensive comparative analysis of biological and artificial neural networks.  
+- Identify key structural and functional differences between them.  
+- Investigate how principles underlying biological neural networks can inform the development of more advanced artificial intelligence models.  
+- Present the analysis findings as part of the master’s thesis preparation.
 
-## 💡 Ключевые аспекты статьи
+## 💡 Key Aspects of the Article
 
-- Рассмотрение биологических нейронных сетей как высокоорганизованных, самообучающихся систем с уникальными механизмами пластичности.
-- Анализ искусственных нейронных сетей, их эволюции и современных достижений, включая глубокое обучение.
-- Сравнение методов обучения, таких как обучение с подкреплением в биологических системах и обратное распространение ошибки в искусственных.
-- Обсуждение перспектив нейроморфных вычислений и их потенциала для создания энергоэффективных и биологически правдоподобных ИИ-систем.
+- Examination of biological neural networks as highly organized, self-learning systems with unique plasticity mechanisms.  
+- Analysis of artificial neural networks, their evolution, and modern achievements, including deep learning.  
+- Comparison of learning methods, such as reinforcement learning in biological systems and backpropagation in artificial ones.  
+- Discussion of the prospects of neuromorphic computing and its potential for creating energy-efficient and biologically plausible AI systems.
 
-## 🔗 Полезные ссылки
+## 🔗 Useful Links
 
-- **Авторская статья (будет размещена здесь):**  После завершения работа будет доступна в этом же каталоге в формате `review.md`.
+- **Author’s article (to be posted here):** Once completed, the work will be available in this same directory in `review.md` format.
 
-<p align="center">Исследуйте вместе с нами 🚀</p>
+<p align="center">Explore with us 🚀</p>

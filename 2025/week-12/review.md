@@ -1,108 +1,106 @@
 # MCP (Model Context Protocol)
 
-В последнее время аббревиатура MCP стала все более часто появляться в некоторых статьях и разделах комментариев на arXiv или Daily Papers Hugging Face, которые я просматриваю. Внезапно осознав, что мое представление об этом лишь приблизительное, я решил изучить его более подробно и поделиться с вами.
+Recently, the acronym MCP has appeared increasingly frequently in some articles and comment sections on arXiv or Daily Papers Hugging Face that I browse. Realizing my understanding of it was only approximate, I decided to investigate it in detail and share my findings with you.
 
 ## Single Agent
 
-Давайте сначала рассмотрим архитектуру с одним агентом.
+Let's first examine the single-agent architecture.
 
-![Figure](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-12/assets/Figure.png)
+![Figure](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-12/assets/Figure.png  )
 
-1. Инструменты — это функции, которые определены и вызываются в текущей программе. Определение функции инструментов будет включено в системную подсказку, чтобы позволить LLM понять доступные в настоящее время инструменты.
+1. **Tools** are functions defined and invoked within the current program. The function definitions of tools are included in the system prompt to enable the LLM to understand available tools.
 
-2. Память делится на две части: текущий поток данных сеанса, включая то, что выполняется на каждом шаге, и каков результат, сохраняется в памяти текущего сеанса и может быть полностью введен в LLM в любое время, чтобы позволить LLM определить, что делать дальше. Долгосрочные данные и база знаний пользователя, такие как данные о предпочтениях пользователя на платформе, контент домена, многораундовый контекст разговора и т. д., будут извлечены из векторной базы данных.
+2. **Memory** is divided into two parts: the current session data stream, including actions performed at each step and their results, is stored in session memory and can be fully fed into the LLM at any time to help the LLM determine its next action. Long-term data and user knowledge bases—such as user preferences on a platform, domain content, multi-round conversation context, etc.—are retrieved from a vector database.
 
-3. Маршрутизатор централизует планирование программы всего процесса, передавая вводимые пользователем подсказки/системные подсказки/память в LLM, а LLM проводит углубленное мышление и выдает конкретные задачи по выполнению, а маршрутизатор вызывает соответствующую функцию действия (function calling).
+3. The **Router** centralizes the planning of the entire process by passing user prompts/system prompts/memory to the LLM; the LLM performs deep reasoning and outputs specific execution tasks, and the router invokes the corresponding action function (function calling).
 
-Это простая и общая архитектура с одним агентом, которая реализует цикл Мысль – План – Действие – Размышление (Мысль) в Агенте, при этом за все отвечает одна модель.
+This is a simple, general single-agent architecture implementing the Thought–Plan–Action–Reflect (Thought) cycle within an Agent, with one model responsible for everything.
 
 ## MCP
 
-В приведенной выше архитектуре модуль Tools (Инструменты) имеет некоторые незначительные проблемы: не очень хорошая поддерживаемость и масштабируемость функций инструмента. Сложно управлять, когда их слишком много. Чтобы добавить функции, нужно обновить основную программу. Кроме того, нужно самостоятельно определить спецификацию вызова функции. Некоторые внешние сервисы инструментов, которые будут использоваться, нужно инкапсулировать самостоятельно.
+The above architecture has minor issues with the Tools module: limited support and scalability for tool functions. Management becomes difficult when there are too many. Adding functions requires updating the main program. Additionally, the function call specification must be defined manually. External tool services to be used must be encapsulated independently.
 
-Для решения этих незначительных проблем данную архитектуру можно оптимизировать: модуль инструмента отделен от агента и управляется и реализуется единообразно с использованием протокола MCP.
+To resolve these minor issues, this architecture can be optimized: the tools module is separated from the agent and uniformly managed and implemented using the MCP protocol.
 
-## Протокол контекста модели (MCP): новый стандарт интеграции в экосистеме ИИ
+## Model Context Protocol (MCP): A New Standard for AI Ecosystem Integration
 
-Протокол контекста модели (Model Context Protocol, MCP) — это открытый стандарт, разработанный и представленный компанией Anthropic 25 ноября 2024 года. Основная цель MCP — создание унифицированного протокола связи между большими языковыми моделями (LLM) и внешними источниками данных и инструментами. Как по мне, MCP появился как естественная эволюция подхода Function Calling, преодолевая его ограничения и расширяя возможности взаимодействия моделей ИИ с внешним миром. Если Function Calling можно рассматривать как точечное решение конкретных задач взаимодействия, то MCP представляет собой комплексный подход к проблеме интеграции, обеспечивая более гибкую, масштабируемую и стандартизированную экосистему.
+The Model Context Protocol (MCP) is an open standard developed and introduced by Anthropic on November 25, 2024. The primary goal of MCP is to create a unified communication protocol between large language models (LLMs) and external data sources and tools. In my view, MCP emerged as a natural evolution of the Function Calling approach, overcoming its limitations and expanding the capabilities of AI models to interact with the external world. If Function Calling can be seen as a point solution for specific interaction tasks, MCP represents a comprehensive approach to integration, providing a more flexible, scalable, and standardized ecosystem.
 
-### Сущность MCP
+### Essence of MCP
 
-MCP — это не фреймворк или инструмент, а именно протокол, аналогичный:
-- HTTP для интернета
-- SMTP для обмена сообщениями
-- LSP (Language Server Protocol) для поддержки языков программирования
+MCP is not a framework or tool, but a protocol—similar to:
+- HTTP for the internet
+- SMTP for messaging
+- LSP (Language Server Protocol) for programming language support
 
-Anthropic точно характеризует MCP как "эквивалент порта USB-C для агентских систем" — универсальный интерфейс, позволяющий стандартизировать взаимодействие между различными компонентами экосистемы ИИ независимо от их производителя.
+Anthropic accurately characterizes MCP as the "USB-C port equivalent for agent systems"—a universal interface enabling standardized interaction between different components of the AI ecosystem, regardless of vendor.
 
-> Как говорится, картинка стоит тысячи слов. 
+> As the saying goes, a picture is worth a thousand words.
 
-![Figure_1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-12/assets/Figure_1.jpeg)
+![Figure_1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-12/assets/Figure_1.jpeg  )
 
-MCP унифицирует определения вызовов интерфейса для доступа к возможностям различных инструментов. Раньше служба (например, Slack) должна была подключаться к форматам вызовов функций, определенным несколькими пользовательскими продуктами (например, курсором). Теперь службе и клиенту нужно подключаться только к одному и тому же формату, и обеим сторонам нужно реализовать его только один раз.
+MCP unifies interface call definitions for accessing capabilities of various tools. Previously, a service (e.g., Slack) had to connect to function call formats defined by multiple user products (e.g., Cursor). Now, both the service and client need to connect only to a single format, and each side needs to implement it only once.
 
-![Figure_2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-12/assets/Figure_2.png)
+![Figure_2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-12/assets/Figure_2.png  )
 
-MCP Server работает независимо на любом сервере и может иметь собственную независимую базу данных информации/ресурсов. Он не привязан к серверу Agent и может использоваться повторно, а также его легко подключать и отключать.
+The MCP Server operates independently on any server and can have its own independent database of information/resources. It is not bound to the Agent server and can be reused and easily connected or disconnected.
 
-![Figure_3](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-12/assets/Figure_3.png)
+![Figure_3](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-12/assets/Figure_3.png  )
 
-Исходные вызовы функций инструмента инкапсулируются с помощью MCP Server, и архитектура становится такой:
+Original tool function calls are encapsulated via the MCP Server, and the architecture becomes:
 
-![Figure_4](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-12/assets/Figure_4.png)
+![Figure_4](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-12/assets/Figure_4.png  )
 
-Отличие от исходного чистого вызова функции заключается в том, что архитектура более гибкая, включая:
+The difference from the original pure function call lies in a more flexible architecture, including:
 
-1. Кластеризация : разрозненные функции можно объединить в одну службу для удобства управления.
-2. Развязка : вызов фактически происходит на соответствующей стороне сервера MCP, а не напрямую вызывается службой Agent. Инструмент расширения развертывания развязывается от проекта Agent.
-3. Сплоченность: сам сервер MCP может выполнять некоторые действия слаженно, включая независимое управление ресурсами, независимый контекст и т. д.
-4. Повторное использование: универсальные протоколы и возможности инструментов облегчают повторное использование между несколькими агентами. Во внешней экосистеме существует множество существующих серверов MCP, к которым можно получить прямой доступ.
-5. Унификация: вызовы как клиентских, так и облачных инструментов могут быть реализованы с использованием унифицированного протокола MCP.
+1. **Clustering**: Dispersed functions can be grouped into a single service for easier management.
+2. **Decoupling**: The actual call occurs on the corresponding MCP server side, not directly invoked by the Agent service. Tool extension deployment is decoupled from the Agent project.
+3. **Cohesion**: The MCP server itself can perform coordinated actions, including independent resource management, independent context, etc.
+4. **Reusability**: Universal protocols and tool capabilities facilitate reuse across multiple agents. Many existing MCP servers exist in the external ecosystem that can be accessed directly.
+5. **Unification**: Calls to both client-side and cloud-based tools can be implemented using the unified MCP protocol.
 
-### Архитектура и принцип работы
+### Architecture and Operation Principle
 
-MCP определяет:
-1. Способы взаимодействия клиентов с серверами
-2. Методы обработки серверами инструментов (API, функции)
-3. Правила доступа к ресурсам (файлы, базы данных)
+MCP defines:
+1. Ways clients interact with servers
+2. Methods servers use to handle tools (APIs, functions)
+3. Rules for accessing resources (files, databases)
 
-В этой архитектуре:
-- Модели ИИ выступают в роли клиентов
-- Внешние сервисы и источники данных — периферийные устройства (инструменты)
-- MCP — стандартизированный интерфейс (порт) между ними
+In this architecture:
+- AI models act as clients
+- External services and data sources are peripheral devices (tools)
+- MCP is the standardized interface (port) between them
 
+### Example
 
-### Пример
+Let's consider an example implementation of an MCP server and MCP client below. I will attempt to answer two key questions:
 
-Давайте рассмотрим пример реализации MCP-сервера и MCP-клиента, ниже я попробую ответить на два ключевых вопроса:
+1. How does an LLM model interact with an MCP server?
+2. How does an LLM model invoke tools on the MCP server side?
 
-1. Как LLM модель взаимодействует с MCP сервером?
+### Implementing a Custom MCP Server
 
-2. Как LLM модель вызывает инструменты на стороне MCP сервера?
+Creating a basic MCP server is straightforward. Here is an example server for working with local Git repositories using FastMCP: [GitHub 🐙](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-12/MCP/MCP_Server.py  )
 
-### Реализация собственного MCP-сервера
+### Implementing a Client to Work with the MCP Server
 
-Создать базовый MCP-сервер достаточно просто. Вот пример сервера для работы с локальными Git репозиториями с использованием FastMCP: [GitHub 🐙](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-12/MCP/MCP_Server.py)
+An example of a minimal client capable of interacting with the MCP server: [GitHub 🐙](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-12/MCP/MCP_Client.py  )
 
-### Реализация клиента для работы с MCP-сервером
+### Client Configuration File
 
-Пример минимального клиента, который может взаимодействовать с MCP-сервером: [GitHub 🐙](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-12/MCP/MCP_Client.py)
+Example implementation of the config file: [GitHub 🐙](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-12/MCP/config.json  )
 
-### Конфиг файл доя клиента
+## Interaction Between LLM Models and MCP Servers
 
-Пример реализации конфига: [GitHub 🐙](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-12/MCP/config.json)
+### Technical Implementation of LLM-MCP Server Interaction
 
-## Взаимодействие LLM моделей с MCP серверами
+In this analysis, I will examine the technical implementation of interactions between large language models (LLMs) and Model Context Protocol (MCP) servers at the FastMCP library level, focusing on specific mechanisms and the programming interface.
 
-### Техническая реализация взаимодействия LLM моделей с MCP серверами
+### How the LLM Model Interacts with the MCP Server
 
-В этом анализе я рассмотрю техническую реализацию взаимодействия языковых моделей (LLM) с серверами Model Context Protocol (MCP) на уровне библиотеки FastMCP, фокусируясь на конкретных механизмах и программном интерфейсе.
+### Declaration and Registration of Tools
 
-### Как LLM модель взаимодействует с MCP сервером
-
-### Декларация и регистрация инструментов
-
-На стороне сервера инструменты объявляются с использованием декоратора `@mcp.tool()`, который регистрирует функцию в менеджере инструментов:
+On the server side, tools are declared using the `@mcp.tool()` decorator, which registers the function in the tool manager:
 
 ```python
 @mcp.tool()
@@ -110,13 +108,13 @@ async def list_repositories() -> str:
     """
     Description:
     ---------------
-        Возвращает список зарегистрированных локальных Git репозиториев.
+        Returns a list of registered local Git repositories.
     """
-    # Реализация функции
+    # Function implementation
     return result
 ```
 
-Внутри FastMCP, декоратор `tool()` добавляет функцию в менеджер инструментов:
+Internally, the FastMCP `tool()` decorator adds the function to the tool manager:
 
 ```python
 def tool(self, name: str | None = None, description: str | None = None) -> Callable:
@@ -129,19 +127,19 @@ def add_tool(self, fn: AnyFunction, name: str | None = None, description: str | 
     self._tool_manager.add_tool(fn, name=name, description=description)
 ```
 
-При инициализации сервера MCP, он настраивает обработчики для основных запросов протокола:
+Upon initializing the MCP server, it configures handlers for the protocol's core requests:
 
 ```python
 def _setup_handlers(self) -> None:
     """Set up core MCP protocol handlers."""
     self._mcp_server.list_tools()(self.list_tools)
     self._mcp_server.call_tool()(self.call_tool)
-    # ... другие обработчики ...
+    # ... other handlers ...
 ```
 
-### Установка соединения и обнаружение инструментов
+### Connection Establishment and Tool Discovery
 
-Когда MCP-сервер запускается, он ожидает соединения:
+When the MCP server starts, it waits for a connection:
 
 ```python
 def run(self, transport: Literal["stdio", "sse"] = "stdio") -> None:
@@ -151,7 +149,7 @@ def run(self, transport: Literal["stdio", "sse"] = "stdio") -> None:
         anyio.run(self.run_sse_async)
 ```
 
-При подключении клиента (содержащего LLM) к серверу, первым шагом клиент запрашивает список доступных инструментов через метод `list_tools`:
+When a client (containing the LLM) connects to the server, the first step is for the client to request the list of available tools via the `list_tools` method:
 
 ```python
 async def list_tools(self) -> list[MCPTool]:
@@ -167,21 +165,21 @@ async def list_tools(self) -> list[MCPTool]:
     ]
 ```
 
-Этот метод преобразует все зарегистрированные инструменты в формат `MCPTool`, содержащий:
-- Имя инструмента
-- Описание (получаемое из docstring)
-- Схему входных параметров (получаемую из аннотаций типов)
+This method converts all registered tools into the `MCPTool` format, containing:
+- Tool name
+- Description (obtained from docstring)
+- Input parameter schema (obtained from type annotations)
 
-### Протокол взаимодействия
+### Interaction Protocol
 
-Протокол MCP поддерживает два основных механизма связи: локальную связь на основе стандартного ввода и вывода и удаленную связь на основе SSE ( Server-Sent Events ).
+The MCP protocol supports two primary communication mechanisms: local communication via standard input/output and remote communication via SSE (Server-Sent Events).
 
-Оба механизма используют формат JSON-RPC 2.0 для передачи сообщений, обеспечивая стандартизированную и масштабируемую связь.
+Both mechanisms use JSON-RPC 2.0 for message transmission, ensuring standardized and scalable communication.
 
-- Локальная связь : данные передаются через stdio, подходящий для связи между клиентами и серверами, работающими на одной машине.
-- Удаленная связь : SSE объединяется с HTTP для обеспечения передачи данных в реальном времени по сетям, что подходит для сценариев, требующих доступа к удаленным ресурсам или распределенного развертывания.
+- **Local communication**: Data is transmitted via stdio, suitable for communication between clients and servers running on the same machine.
+- **Remote communication**: SSE is combined with HTTP to enable real-time data transfer over networks, suitable for scenarios requiring access to remote resources or distributed deployment.
 
-1. **stdio** - общение через стандартный ввод/вывод:
+1. **stdio** - Communication via standard input/output:
 ```python
 async def run_stdio_async(self) -> None:
     """Run the server using stdio transport."""
@@ -193,30 +191,30 @@ async def run_stdio_async(self) -> None:
         )
 ```
 
-2. **SSE** (Server-Sent Events) - общение через HTTP:
+2. **SSE** (Server-Sent Events) - Communication via HTTP:
 ```python
 async def run_sse_async(self) -> None:
     """Run the server using SSE transport."""
-    # ... настройка HTTP сервера ...
+    # ... HTTP server setup ...
     server = uvicorn.Server(config)
     await server.serve()
 ```
 
-JSON-RPC 2.0 — это легкий протокол для удаленного вызова процедур (RPC), использующий JSON (JavaScript Object Notation) для кодирования данных. Он позволяет клиенту вызывать методы на сервере, передавая параметры в формате JSON, и получать ответы также в формате JSON.
+JSON-RPC 2.0 is a lightweight protocol for remote procedure calls (RPC) using JSON (JavaScript Object Notation) to encode data. It allows a client to invoke methods on a server by passing parameters in JSON format and receiving responses also in JSON format.
 
-Основные характеристики JSON-RPC 2.0:
+Key characteristics of JSON-RPC 2.0:
 
-1. **Простота**: Протокол минималистичен и легко реализуем.
-2. **Транспортная независимость**: Может работать поверх различных транспортных протоколов, таких как HTTP, WebSocket и других.
-3. **Уведомления**: Поддерживает уведомления (notifications), которые не требуют ответа от сервера.
-4. **Пакетные запросы**: Позволяет отправлять несколько запросов в одном пакете.
-5. **Обработка ошибок**: Определяет стандартный формат для сообщений об ошибках.
+1. **Simplicity**: The protocol is minimalist and easy to implement.
+2. **Transport independence**: Can operate over various transport protocols such as HTTP, WebSocket, and others.
+3. **Notifications**: Supports notifications, which do not require a server response.
+4. **Batch requests**: Allows sending multiple requests in a single batch.
+5. **Error handling**: Defines a standard format for error messages.
 
-## Как LLM модель вызывает инструменты на стороне MCP сервера
+## How the LLM Model Invokes Tools on the MCP Server Side
 
-### Механизм вызова инструментов
+### Tool Invocation Mechanism
 
-Когда LLM решает вызвать инструмент, она формирует специальную структуру в ответе:
+When the LLM decides to invoke a tool, it forms a specific structure in its response:
 
 ```json
 {
@@ -233,7 +231,7 @@ JSON-RPC 2.0 — это легкий протокол для удаленног�
 }
 ```
 
-Этот вызов преобразуется клиентом в JSON-RPC запрос к серверу:
+This call is converted by the client into a JSON-RPC request to the server:
 
 ```json
 {
@@ -247,7 +245,7 @@ JSON-RPC 2.0 — это легкий протокол для удаленног�
 }
 ```
 
-На стороне сервера, этот запрос обрабатывается методом `call_tool`:
+On the server side, this request is handled by the `call_tool` method:
 
 ```python
 async def call_tool(
@@ -260,33 +258,33 @@ async def call_tool(
     return converted_result
 ```
 
-### Процесс выполнения инструмента
+### Tool Execution Process
 
-Вот детальный процесс, происходящий на стороне сервера:
+Here is the detailed process occurring on the server side:
 
-1. **Получение контекста выполнения**:
+1. **Obtaining execution context**:
 ```python
 context = self.get_context()
 ```
-Контекст содержит информацию о текущем запросе и сессии, что позволяет инструментам взаимодействовать с клиентом (например, отправлять промежуточные результаты).
+The context contains information about the current request and session, allowing tools to interact with the client (e.g., sending intermediate results).
 
-2. **Вызов инструмента через менеджер инструментов**:
+2. **Invoking the tool via the tool manager**:
 ```python
 result = await self._tool_manager.call_tool(name, arguments, context=context)
 ```
 
-Внутри `ToolManager`, происходит:
-- Поиск инструмента по имени
-- Проверка аргументов на соответствие схеме
-- Вызов функции инструмента с переданными аргументами
-- Обработка исключений
+Inside `ToolManager`, the following occurs:
+- Tool lookup by name
+- Argument validation against schema
+- Function invocation with passed arguments
+- Exception handling
 
-3. **Преобразование результата в стандартный формат**:
+3. **Converting the result into a standard format**:
 ```python
 converted_result = _convert_to_content(result)
 ```
 
-Функция `_convert_to_content` преобразует результат (который может быть строкой, объектом или другим типом данных) в стандартное представление:
+The `_convert_to_content` function converts the result (which may be a string, object, or other data type) into a standard representation:
 
 ```python
 def _convert_to_content(
@@ -299,9 +297,9 @@ def _convert_to_content(
     if isinstance(result, (TextContent, ImageContent, EmbeddedResource)):
         return [result]
 
-    # ... обработка других типов ...
+    # ... handle other types ...
 
-    # Преобразование в текст, если это не строка
+    # Convert to text if not a string
     if not isinstance(result, str):
         try:
             result = json.dumps(pydantic_core.to_jsonable_python(result))
@@ -311,11 +309,11 @@ def _convert_to_content(
     return [TextContent(type="text", text=result)]
 ```
 
-### Пример полного потока выполнения
+### Example of Full Execution Flow
 
-Рассмотрим полный поток выполнения для вызова инструмента `list_repositories`:
+Consider the full execution flow for invoking the `list_repositories` tool:
 
-1. **LLM в ответе формирует вызов инструмента**:
+1. **LLM forms a tool call in its response**:
 ```json
 {
   "role": "assistant",
@@ -333,12 +331,12 @@ def _convert_to_content(
 }
 ```
 
-2. **Клиент преобразует вызов в JSON-RPC и отправляет на сервер**:
+2. **Client converts the call to JSON-RPC and sends it to the server**:
 ```
 2025-03-19 13:25:06,244 - mcp.server.lowlevel.server - INFO - Processing request of type CallToolRequest
 ```
 
-3. **Сервер обрабатывает запрос через метод `call_tool`**:
+3. **Server processes the request via the `call_tool` method**:
 ```python
 async def call_tool(self, name: str, arguments: dict[str, Any]) -> Sequence[...]:
     context = self.get_context()
@@ -347,29 +345,29 @@ async def call_tool(self, name: str, arguments: dict[str, Any]) -> Sequence[...]
     return converted_result
 ```
 
-4. **ToolManager находит функцию и вызывает её**:
+4. **ToolManager finds the function and invokes it**:
 ```python
-# Внутри ToolManager
+# Inside ToolManager
 tool_info = self._find_tool(name)
 result = await self._invoke_tool(tool_info, arguments, context)
 ```
 
-5. **Выполняется функция, декорированная `@mcp.tool()`**:
+5. **The function decorated with `@mcp.tool()` executes**:
 ```python
 @mcp.tool()
 async def list_repositories() -> str:
-    logger.info("Запрос списка репозиториев")
+    logger.info("Requesting repository list")
     repos = repo_manager.list_repositories()
-    # ... формирование результата ...
+    # ... form result ...
     return result
 ```
 
-6. **Результат преобразуется в стандартный формат и возвращается клиенту**:
+6. **Result is converted to standard format and returned to the client**:
 ```
-2025-03-19 13:25:35,227 - __main__ - INFO - Репозиторий зарегистрирован: /path/to/repo
+2025-03-19 13:25:35,227 - __main__ - INFO - Repository registered: /path/to/repo
 ```
 
-7. **Клиент преобразует ответ и передаёт LLM**:
+7. **Client converts the response and passes it to the LLM**:
 ```python
 messages.append({
     "role": "tool",
@@ -378,68 +376,67 @@ messages.append({
 })
 ```
 
-8. **LLM формирует итоговый ответ пользователю**:
+8. **LLM generates the final response to the user**:
 ```
-⭐ Итерация 2/5 ⭐
-2025-03-19 13:29:39,274 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
-✅ Получен ответ от модели: {'role': 'assistant', 'content': '...интерпретация результатов...'}
+⭐ Iteration 2/5 ⭐
+2025-03-19 13:29:39,274 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions   "HTTP/1.1 200 OK"
+✅ Received response from model: {'role': 'assistant', 'content': '...interpretation of results...'}
 ```
 
-### Контекст выполнения и дополнительные возможности
+### Execution Context and Additional Capabilities
 
-FastMCP предоставляет инструментам контекст выполнения через класс `Context`, который позволяет:
+FastMCP provides tools with an execution context via the `Context` class, enabling:
 
 ```python
 @server.tool()
 def tool_with_context(x: int, ctx: Context) -> str:
-    # Логирование
+    # Logging
     ctx.info(f"Processing {x}")
     
-    # Отчёт о прогрессе
+    # Progress reporting
     ctx.report_progress(50, 100)
     
-    # Доступ к ресурсам
+    # Resource access
     data = ctx.read_resource("resource://data")
     
-    # Получение информации о запросе
+    # Request information retrieval
     request_id = ctx.request_id
     
     return str(x)
 ```
 
-Это расширяет возможности инструментов, позволяя им взаимодействовать с клиентом во время выполнения.
+This extends tool capabilities, allowing them to interact with the client during execution.
 
-## Заключение
+## Conclusion
 
-Библиотека FastMCP предоставляет элегантный интерфейс для создания серверов MCP, абстрагируя сложности протокола и обеспечивая простой путь для регистрации инструментов через декораторы.
+The FastMCP library provides an elegant interface for creating MCP servers, abstracting protocol complexities and offering a simple path for tool registration via decorators.
 
-LLM взаимодействует с MCP-сервером через стандартизированный протокол JSON-RPC, используя специальную структуру в своих ответах для вызова инструментов. Сервер преобразует эти вызовы в выполнение соответствующих функций и возвращает результаты в формате, который LLM может интерпретировать.
+LLMs interact with MCP servers through the standardized JSON-RPC protocol, using a specific response structure to invoke tools. The server converts these calls into executions of corresponding functions and returns results in a format interpretable by the LLM.
 
-Ключевые компоненты этого взаимодействия:
-1. Декораторы `@mcp.tool()` для регистрации инструментов
-2. Механизм обнаружения инструментов через `list_tools`
-3. Вызов инструментов через метод `call_tool`
-4. Преобразование результатов в стандартный формат контента
+Key components of this interaction:
+1. Decorators `@mcp.tool()` for tool registration
+2. Tool discovery mechanism via `list_tools`
+3. Tool invocation via `call_tool` method
+4. Conversion of results into standard content format
 
-Такой подход обеспечивает модульность, расширяемость и стандартизацию взаимодействия между языковыми моделями и внешними инструментами, что делает MCP мощным протоколом для создания интегрированных систем ИИ.
+This approach ensures modularity, extensibility, and standardization of interactions between language models and external tools, making MCP a powerful protocol for building integrated AI systems.
 
+### Problems Solved
 
-### Решаемые проблемы
+MCP solves a key problem of modern AI models—their potential being limited by data isolation. Before MCP:
+- Data transfer occurred via manual copy/paste or upload/download
+- Each new data source required individual configuration and implementation
+- "Information islands" formed, limiting the capabilities of even the most powerful models
 
-MCP решает ключевую проблему современных моделей ИИ — ограничения их потенциала из-за изоляции данных. До появления MCP:
-- Передача данных осуществлялась через ручное копирование/вставку или загрузку/скачивание
-- Каждый новый источник данных требовал индивидуальной настройки и реализации
-- Формировались "информационные острова", ограничивающие возможности даже самых мощных моделей
+### Capabilities and Prospects
 
-### Возможности и перспективы
+MCP enables building a direct "bridge" between AI and various data sources and tools, including:
+- Local file systems
+- Internet resources
+- Development tools
+- Web and browser automation tools
+- Productivity and communication systems
 
-MCP позволяет построить прямой "мост" между ИИ и различными источниками данных и инструментами, включая:
-- Локальные файловые системы
-- Интернет-ресурсы
-- Инструменты разработки
-- Средства автоматизации веб-сайтов и браузеров
-- Системы для повышения производительности и коммуникации
+With widespread adoption of the MCP standard, the possibility arises to realize the concept of an "Internet of Everything" in AI, enabling powerful collaborative capabilities across diverse systems and components.
 
-При широком внедрении стандарта MCP создается возможность для реализации концепции "Интернета всего" в сфере искусственного интеллекта, обеспечивая мощные возможности для совместной работы различных систем и компонентов.
-
-MCP призван стать промежуточным уровнем протокола, который упростит и стандартизирует разработку и интеграцию приложений ИИ, делая экосистему более открытой, гибкой и функциональной.
+MCP is designed to become an intermediary protocol layer that simplifies and standardizes the development and integration of AI applications, making the ecosystem more open, flexible, and functional.

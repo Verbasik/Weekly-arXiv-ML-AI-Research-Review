@@ -1,37 +1,37 @@
-# Сравнительный анализ биологических и искусственных нейронных сетей
+# Comparative Analysis of Biological and Artificial Neural Networks
 
-# **Биологический нейрон и его состав**
+# **The Biological Neuron and Its Components**
 
-## Введение
-Нейронные сети – это фундаментальные структуры, лежащие в основе когнитивных процессов в биологических организмах и вдохновившие учёных на создание математических моделей, известных как искусственные нейронные сети. Сравнение этих двух подходов даёт представление о природе мышления, обучающихся систем и возможности воспроизведения интеллектуального поведения. В данном тексте подробно рассматриваются базовые принципы организации биологических нейронных сетей и архитектур искусственных систем, подчеркиваются их сходства и различия с точки зрения структуры, динамики, обучения и вычислительных возможностей.
+## Introduction
+Neural networks are fundamental structures underlying cognitive processes in biological organisms and have inspired scientists to develop mathematical models known as artificial neural networks. Comparing these two approaches provides insight into the nature of thought, learning systems, and the possibility of replicating intelligent behavior. This text examines the basic principles of biological neural network organization and artificial system architectures, highlighting their similarities and differences in terms of structure, dynamics, learning, and computational capabilities.
 
-### Структура биологического нейрона
+### Structure of the Biological Neuron
 
-Биологические нейронные сети представляют собой фундаментальную основу нервной системы живых организмов, обеспечивая обработку, передачу и хранение информации. Их структурной и функциональной единицей является нейрон – высокоспециализированная клетка, предназначенная для генерации и распространения электрохимических сигналов. Понимание структуры нейрона критически важно для осознания принципов работы биологических нейронных сетей и их моделирования в искусственных системах.
+Biological neural networks form the foundational basis of the nervous system in living organisms, enabling information processing, transmission, and storage. Their structural and functional unit is the neuron—a highly specialized cell designed to generate and propagate electrochemical signals. Understanding neuronal structure is critical for grasping the operating principles of biological neural networks and their modeling in artificial systems.
 
-1. **Сома (клеточное тело)**: Содержит ядро и основные органеллы, обеспечивает метаболические и регуляторные процессы.
-2. **Дендриты**: Ветвящиеся структуры, через которые нейрон получает входные сигналы от других клеток. Синаптические контакты преимущественно образуются именно на дендритах.
-3. **Аксон**: Единственный крупный отросток, по которому потенциал действия (спайк) передаётся на большие расстояния к синапсам.
-4. **Синапсы**: Место химической или электрической передачи сигнала. Синаптические пузырьки высвобождают нейромедиаторы (глутамат, ГАМК, ацетилхолин и др.), которые связываются с рецепторами на постсинаптической мембране.
+1. **Soma (cell body)**: Contains the nucleus and major organelles, supporting metabolic and regulatory processes.  
+2. **Dendrites**: Branching structures through which the neuron receives input signals from other cells. Synaptic contacts primarily form on dendrites.  
+3. **Axon**: A single large process along which the action potential (spike) propagates over long distances to synapses.  
+4. **Synapses**: Sites of chemical or electrical signal transmission. Synaptic vesicles release neurotransmitters (e.g., glutamate, GABA, acetylcholine), which bind to receptors on the postsynaptic membrane.
 
-![Структура_биологического_нейрона](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-01_%26_02/assets/Page_1.png)
+![Structure_of_biological_neuron](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-01_%26_02/assets/Page_1.png)
 
-**Общая математическая модель нейрона:**
+**General Mathematical Neuron Model:**
 
-Фундаментальной и широко используемой математической моделью, описывающей динамику потенциала действия в живых нейронах, включая человеческие, является **модель Ходжкина-Хаксли**. Эта модель, разработанная на основе экспериментов с гигантским аксоном кальмара, описывает изменение мембранного потенциала нейрона во времени, учитывая потоки ионов натрия ($Na^+$) и калия ($K^+$) через потенциал-зависимые ионные каналы, а также ток утечки. [1](https://www.nature.com/articles/nn1100_1165)
+The fundamental and widely used mathematical model describing action potential dynamics in living neurons—including human neurons—is the **Hodgkin-Huxley model**. Developed based on experiments with the squid giant axon, this model describes how the neuronal membrane potential changes over time, accounting for sodium ($Na^+$) and potassium ($K^+$) ion flows through voltage-gated ion channels, as well as leak current. [1](https://www.nature.com/articles/nn1100_1165)
 
-Основное уравнение модели представляет собой баланс токов через мембрану:
+The core equation of the model expresses the balance of transmembrane currents:
 
 $$C_m \frac{dV_m}{dt} = -I_{Na} - I_K - I_L + I_{ext}$$
 
-где:
-- $C_m$ — удельная емкость мембраны (Ф/м²).
-- $\frac{dV_m}{dt}$ — скорость изменения мембранного потенциала $V_m$ (В).
-- $I_{Na}$, $I_K$ — токи ионов натрия и калия соответственно (А/м²).
-- $I_L$ — ток утечки (leak current) (А/м²).
-- $I_{ext}$ — внешний приложенный ток (А/м²).
+where:  
+- $C_m$ — specific membrane capacitance (F/m²).  
+- $\frac{dV_m}{dt}$ — rate of change of membrane potential $V_m$ (V).  
+- $I_{Na}$, $I_K$ — sodium and potassium ionic currents, respectively (A/m²).  
+- $I_L$ — leak current (A/m²).  
+- $I_{ext}$ — externally applied current (A/m²).
 
-Ионные токи описываются следующими уравнениями:
+Ionic currents are described by the following equations:
 
 $$I_{Na} = g_{Na} m^3 h (V_m - E_{Na})$$
 
@@ -39,14 +39,14 @@ $$I_K = g_K n^4 (V_m - E_K)$$
 
 $$I_L = g_L (V_m - E_L)$$
 
-где:
-- $g_{Na}$, $g_K$, $g_L$ — максимальные проводимости для ионов натрия, калия и тока утечки соответственно (См/м²). Эти параметры отражают плотность соответствующих ионных каналов на мембране.
-- $E_{Na}$, $E_K$, $E_L$ — равновесные потенциалы (потенциалы Нернста) для ионов натрия, калия и тока утечки соответственно (В). Они определяются концентрацией ионов внутри и снаружи клетки.
-- $m$ — переменная активации натриевых каналов (безразмерная, от 0 до 1). Описывает вероятность открытия натриевых каналов.
-- $h$ — переменная инактивации натриевых каналов (безразмерная, от 0 до 1). Описывает вероятность того, что натриевые каналы не будут заблокированы.
-- $n$ — переменная активации калиевых каналов (безразмерная, от 0 до 1). Описывает вероятность открытия калиевых каналов.
+where:  
+- $g_{Na}$, $g_K$, $g_L$ — maximum conductances for sodium, potassium, and leak currents, respectively (S/m²). These parameters reflect the density of corresponding ion channels in the membrane.  
+- $E_{Na}$, $E_K$, $E_L$ — equilibrium (Nernst) potentials for sodium, potassium, and leak currents, respectively (V). These are determined by intra- and extracellular ion concentrations.  
+- $m$ — sodium channel activation variable (dimensionless, 0–1), representing the probability of sodium channel opening.  
+- $h$ — sodium channel inactivation variable (dimensionless, 0–1), representing the probability that sodium channels are not blocked.  
+- $n$ — potassium channel activation variable (dimensionless, 0–1), representing the probability of potassium channel opening.
 
-Переменные активации и инактивации $m$, $h$, и $n$ являются функциями мембранного потенциала и времени и описываются дифференциальными уравнениями первого порядка:
+The activation and inactivation variables $m$, $h$, and $n$ are functions of membrane potential and time, governed by first-order differential equations:
 
 $$\frac{dm}{dt} = \alpha_m(V_m) (1-m) - \beta_m(V_m) m$$
 
@@ -54,816 +54,798 @@ $$\frac{dh}{dt} = \alpha_h(V_m) (1-h) - \beta_h(V_m) h$$
 
 $$\frac{dn}{dt} = \alpha_n(V_m) (1-n) - \beta_n(V_m) n$$
 
-где $\alpha(V_m)$ и $\beta(V_m)$ — потенциал-зависимые скорости открытия и закрытия ионных каналов, которые определяются экспериментально.
+where $\alpha(V_m)$ and $\beta(V_m)$ are voltage-dependent opening and closing rates of ion channels, determined experimentally.
 
-**Биологическое описание модели Ходжкина-Хаксли:**
+**Biological Description of the Hodgkin-Huxley Model:**
 
-В состоянии покоя нейрон поддерживает определенные ионные градиенты (высокая концентрация калия внутри и натрия снаружи), что создает отрицательный мембранный потенциал (примерно -70 мВ) внутри клетки относительно внешней среды. Когда мембранный потенциал становится менее отрицательным и достигает определенного порога, обычно около -55 мВ, это вызывает лавинообразное открытие потенциал-зависимых натриевых каналов, и положительные ионы натрия устремляются внутрь сомы (точнее, в аксон). Движение ионов обусловлено электрохимическим градиентом, включающим разницу концентраций и электрический заряд. Это вызывает резкую деполяризацию, и электрический заряд внутри аксона нейрона становится положительным. Вскоре после этого натриевые каналы инактивируются, предотвращая дальнейший вход натрия. В этот момент медленнее открываются потенциал-зависимые калиевые каналы, и положительные ионы калия начинают выходить наружу. Этот отток положительного заряда приводит к реполяризации, возвращая мембранный потенциал к отрицательным значениям. Иногда может наблюдаться кратковременная гиперполяризация. Это происходит потому, что некоторые потенциал-зависимые калиевые каналы остаются открытыми дольше, чем необходимо для возвращения к потенциалу покоя, временно делая мембранный потенциал более отрицательным, чем обычно. В конечном итоге, работа натрий-калиевого насоса (активно выкачивающего натрий из клетки и закачивающего калий) помогает восстановить и поддерживать ионные градиенты, возвращая аксон нейрона к стабильному отрицательному потенциалу покоя. Описанные процессы происходят в основном в аксонном холмике и аксоне нейрона, где генерируется и распространяется потенциал действия.
+At rest, the neuron maintains specific ion gradients (high intracellular potassium and extracellular sodium), resulting in a negative resting membrane potential (approximately –70 mV) inside the cell relative to the outside. When the membrane potential becomes less negative and reaches a threshold—typically around –55 mV—it triggers an avalanche-like opening of voltage-gated sodium channels, causing positive sodium ions to rush into the soma (more precisely, into the axon). This ion movement is driven by the electrochemical gradient, which includes both concentration differences and electrical charge. This leads to rapid depolarization, making the intracellular axonal potential positive. Shortly thereafter, sodium channels inactivate, halting further sodium influx. At this point, voltage-gated potassium channels open more slowly, allowing positive potassium ions to exit the cell. This efflux of positive charge causes repolarization, returning the membrane potential to negative values. Brief hyperpolarization may sometimes occur because certain voltage-gated potassium channels remain open longer than needed to restore the resting potential, temporarily making the membrane potential more negative than usual. Ultimately, the sodium-potassium pump (which actively extrudes sodium and imports potassium) helps restore and maintain ion gradients, returning the axon to a stable negative resting potential. These processes occur primarily in the axon hillock and axon, where the action potential is generated and propagated.
 
-**Передача сигналов в нейронах:**
+**Neuronal Signal Transmission:**
 
-Передача сигналов внутри нейрона (на большие расстояния): 
+*Intraneuronal signal transmission (over long distances):*  
+- The action potential is an active signaling mechanism. Once initiated at the axon initial segment (axon hillock), it regenerates itself along the entire axon length to the nerve terminals. This occurs through the sequential opening and closing of voltage-gated ion channels along the axon. Each axonal "point" generates a new action potential, effectively "pushing" the signal forward.
 
-* Потенциал действия – это активный способ передачи сигнала.  Как только потенциал действия запускается в начале аксона (в аксонном холмике), он самовоспроизводится по всей длине аксона до самых нервных окончаний. Это происходит благодаря последовательному открытию и закрытию потенциал-зависимых ионных каналов вдоль аксона. Каждая "точка" аксона генерирует новый потенциал действия, как будто "подталкивая" сигнал дальше.
+*Interneuronal signal transmission (synaptic transmission):*  
+- When the action potential reaches the axon terminals (presynaptic terminals), it triggers synaptic transmission.  
+- Depolarization of the presynaptic terminal (caused by the arriving action potential) opens voltage-gated calcium channels.  
+- Calcium ions ($Ca^{2+}$) enter the presynaptic terminal.  
+- Calcium influx causes neurotransmitter-containing vesicles to fuse with the presynaptic membrane.  
+- Neurotransmitters are released into the synaptic cleft (the space between two neurons).  
+- Neurotransmitters bind to receptors on the postsynaptic neuron’s membrane.  
+- Neurotransmitter-receptor binding can alter the postsynaptic membrane’s ion permeability, leading to depolarization (excitatory postsynaptic potential, EPSP) or hyperpolarization (inhibitory postsynaptic potential, IPSP).  
+- If the summed depolarization in the postsynaptic neuron reaches threshold, it too will generate an action potential, propagating the signal further.
 
-Передача сигналов между нейронами (синаптическая передача):
+Thus, the action potential serves two key signaling functions:  
+- It ensures reliable long-distance signal transmission within a single neuron (without it, signals would simply decay).  
+- It initiates synaptic transmission, enabling neurons to "communicate" with each other. The action potential acts as the "trigger" for neurotransmitter release.
 
-*   Когда потенциал действия достигает нервных окончаний (пресинаптических терминалей) аксона, он запускает процесс синаптической передачи.
-*   Деполяризация пресинаптического терминала (вызванная пришедшим потенциалом действия) приводит к открытию потенциал-зависимых кальциевых каналов.
-*   Ионы кальция ($Ca^{2+}$) входят в пресинаптический терминал.
-*   Вход кальция вызывает слияние везикул, содержащих нейротрансмиттеры, с пресинаптической мембраной.
-*   Нейротрансмиттеры высвобождаются в синаптическую щель (пространство между двумя нейронами).
-*   Нейротрансмиттеры связываются с рецепторами на мембране следующего нейрона (постсинаптического нейрона).
-*   Связывание нейротрансмиттера с рецептором может вызвать изменение ионной проницаемости постсинаптической мембраны, что, в свою очередь, может привести к деполяризации (возбуждающий постсинаптический потенциал - ВПСП) или гиперполяризации (тормозной постсинаптический потенциал - ТПСП) этого нейрона.
-*   Если суммарная деполяризация постсинаптического нейрона достигнет порога, в нем также сгенерируется потенциал действия, и сигнал будет передан дальше.
+**Relevance to Human Neurons:**
 
-Таким образом, потенциал действия выполняет две ключевые функции в передаче сигналов:
+Although the original model was developed for the squid axon, its principles underlie our understanding of action potential generation in most excitable cells, including human neurons. Model parameters ($g_{Na}$, $g_K$, $g_L$, kinetics of $m$, $h$, $n$) may vary depending on neuron type and functional characteristics. Current research actively adapts and parameterizes the Hodgkin-Huxley model for various human neuron types using experimental data from patch-clamp techniques.
 
-*   Обеспечивает надежную передачу сигнала на большие расстояния внутри одного нейрона. Без этого сигнала бы просто затухали.
-*   Запускает процесс синаптической передачи, позволяя нейронам "общаться" друг с другом.  Именно потенциал действия является "спусковым крючком" для высвобождения нейротрансмиттеров.
+**Significance and Limitations:**
 
-**Актуальность для человеческих нейронов:**
+The Hodgkin-Huxley model is foundational because it:  
+- **Is grounded in biophysical processes**: It describes ion channel behavior, which is central to action potential generation.  
+- **Quantitatively reproduces action potential shape**: It accurately models membrane potential dynamics.  
+- **Serves as a basis for more complex models**: Many modern neuron models build upon Hodgkin-Huxley principles.
 
-Хотя оригинальная модель была разработана для аксона кальмара, ее принципы лежат в основе понимания генерации потенциала действия в большинстве возбудимых клеток, включая нейроны человека. Параметры модели ($g_{Na}$, $g_K$, $g_L$, кинетика переменных $m$, $h$, $n$) могут варьироваться в зависимости от типа нейрона и его функциональных особенностей. Современные исследования активно занимаются адаптацией и параметризацией модели Ходжкина-Хаксли для различных типов нейронов человека, используя экспериментальные данные, полученные с помощью методов patch-clamp.
+However, its limitations must be acknowledged:  
+- **Describes a point neuron**: It ignores the neuron’s spatial structure (dendrites, axon) and signal propagation along it. Multi-compartment models are used to simulate these aspects.  
+- **Simplifies ion channel behavior**: It treats ion channels as homogeneous populations, neglecting subunit structure and stochastic opening/closing.  
+- **Does not include all ion channel types**: Real neurons express many ion channel types that influence excitability and firing patterns.  
+- **Parameters can be difficult to determine**: Precise parameterization for a specific human neuron requires complex experimental studies.
 
-**Значение и ограничения:**
+**Modern Extensions:**
 
-Модель Ходжкина-Хаксли является фундаментальной, поскольку она:
+Numerous extensions of the Hodgkin-Huxley model now exist, aiming to overcome its limitations and better capture neuronal behavior:  
+- **Multi-compartment models**: Divide the neuron into compartments (soma, dendrites, axon) and simulate electrical signal propagation between them.  
+- **Models incorporating diverse ion channel types**: Add equations for other ion channels (e.g., calcium, chloride, various potassium subtypes).  
+- **Models integrating synaptic transmission**: Include synaptic mechanisms to simulate neuron-neuron interactions.  
+- **Models incorporating intracellular processes**: Include biochemical processes affecting ion channel function and neuronal excitability.
 
-* **Основана на биофизических процессах:**  Описывает поведение ионных каналов, являющихся ключевыми элементами генерации потенциала действия.
-* **Количественно воспроизводит форму потенциала действия:**  Может точно моделировать динамику мембранного потенциала.
-* **Служит основой для более сложных моделей:**  Многие современные модели нейронов строятся на принципах, заложенных в модели Ходжкина-Хаксли.
+In conclusion, despite its age, the Hodgkin-Huxley model remains a cornerstone of neuronal mathematical modeling, including for human neurons. Understanding its principles and limitations is essential for interpreting simulation results and developing more sophisticated, realistic models.
 
-Однако, важно учитывать ее ограничения:
+## Soma (Cell Body): Center of Metabolism and Signal Integration
 
-* **Описывает поведение точечного нейрона:**  Не учитывает пространственную структуру нейрона (дендриты, аксон) и распространение сигнала вдоль них. Для моделирования этих аспектов используются многокамерные модели.
-* **Упрощает работу ионных каналов:**  Представляет ионные каналы как однородные популяции, не учитывая их субъединичную структуру и стохастичность открытия/закрытия.
-* **Не включает все типы ионных каналов:**  Реальные нейроны экспрессируют множество различных типов ионных каналов, которые могут влиять на их возбудимость и паттерны активности.
-* **Параметры могут быть сложными для определения:**  Точное определение параметров модели для конкретного человеческого нейрона требует сложных экспериментальных исследований.
+The soma, or cell body, is the central part of the neuron, containing the nucleus and essential organelles required to sustain cellular life.
 
-**Современные расширения:**
+**Internal Neuron Structure:**  
+- **Nucleus**: Contains the neuron’s genetic material (DNA), organized into chromosomes. The nucleus controls protein synthesis necessary for neuronal structure and function—including enzymes, structural proteins, and receptors. DNA transcription into mRNA and subsequent ribosomal translation ensure continuous renewal and maintenance of cellular components. Nuclear gene expression regulation plays a key role in neuronal adaptation to changing conditions and in learning and memory processes.  
+- **Organelles**: The soma contains a typical set of eukaryotic organelles, each performing specialized functions:  
+  - **Mitochondria**: Produce energy in the form of ATP via cellular respiration. Neurons exhibit high metabolic activity and require substantial energy to maintain ion gradients and support signaling processes.  
+  - **Endoplasmic reticulum (ER)**: Participates in protein and lipid synthesis and transport. Rough ER, studded with ribosomes, synthesizes proteins destined for membranes and secretion. Smooth ER is involved in lipid synthesis and detoxification.  
+  - **Golgi apparatus**: Modifies, sorts, and packages proteins and lipids for transport to other cellular regions or for secretion. It contributes to lysosome and synaptic vesicle formation.  
+  - **Lysosomes**: Contain hydrolytic enzymes needed to break down cellular waste and damaged organelles (autophagy).  
+  - **Cytoskeleton**: Composed of a network of protein filaments (microtubules, actin filaments, neurofilaments) that provide structural support, maintain neuronal shape, and facilitate intracellular transport (axonal transport).  
+- **Cytoplasm**: A gel-like substance filling the soma, housing organelles and containing dissolved molecules such as ions, enzymes, and nutrients.
 
-В настоящее время существует множество расширений модели Ходжкина-Хаксли, которые стремятся преодолеть ее ограничения и более точно моделировать поведение нейронов:
+The soma also plays a crucial role in integrating incoming signals. Potentials generated in dendrites propagate toward the soma, where they are summed. If the total potential reaches threshold at the axon hillock, an action potential is generated.
 
-* **Многокамерные модели:**  Разбивают нейрон на несколько компартментов (сома, дендриты, аксон) и моделируют распространение электрического сигнала между ними.
-* **Модели с включением различных типов ионных каналов:**  Добавляют уравнения для описания динамики других типов ионных каналов (например, кальциевых, хлорных, различных типов калиевых каналов).
-* **Модели, учитывающие синаптическую передачу:**  Интегрируют механизмы синаптической передачи, позволяя моделировать взаимодействие между нейронами.
-* **Модели, учитывающие внутриклеточные процессы:**  Включают биохимические процессы, влияющие на работу ионных каналов и возбудимость нейрона.
+**Soma (Cell Body) – Mathematical Model:**
 
-В заключение, модель Ходжкина-Хаксли, несмотря на свою "возраст", остается краеугольным камнем в математическом моделировании нейронов, включая человеческие. Понимание ее принципов и ограничений необходимо для интерпретации результатов моделирования и разработки более сложных и реалистичных моделей.
-
-
-## Сома (клеточное тело): Центр метаболизма и интеграции сигналов
-
-Сома, или клеточное тело, является центральной частью нейрона, содержащей ядро и основные органеллы, необходимые для поддержания жизнедеятельности клетки.
-
-**Внутреннее строение нейрона:**
-*   **Ядро:**  Содержит генетический материал нейрона (ДНК), организованный в хромосомы. Ядро контролирует синтез белков, необходимых для структуры и функционирования нейрона, включая ферменты, структурные белки и рецепторы. Транскрипция ДНК в мРНК и последующая трансляция на рибосомах обеспечивают постоянное обновление и поддержание клеточных компонентов. Регуляция экспрессии генов в ядре играет ключевую роль в адаптации нейрона к изменяющимся условиям и в процессах обучения и памяти.
-*   **Органеллы:** Сома содержит типичный набор эукариотических органелл, каждая из которых выполняет специализированные функции:
-    *   **Митохондрии:**  Отвечают за производство энергии в форме АТФ посредством клеточного дыхания. Нейроны обладают высокой метаболической активностью и требуют значительного количества энергии для поддержания ионных градиентов и процессов передачи сигналов.
-    *   **Эндоплазматическая сеть (ЭР):**  Участвует в синтезе и транспорте белков и липидов. Шероховатая ЭР, покрытая рибосомами, синтезирует белки, предназначенные для мембран и секреции. Гладкая ЭР участвует в синтезе липидов и детоксикации.
-    *   **Аппарат Гольджи:**  Модифицирует, сортирует и упаковывает белки и липиды для транспортировки к другим частям клетки или для секреции. Участвует в формировании лизосом и синаптических везикул.
-    *   **Лизосомы:**  Содержат гидролитические ферменты, необходимые для расщепления клеточных отходов и поврежденных органелл (аутофагия).
-    *   **Цитоскелет:**  Представлен сетью белковых филаментов (микротрубочки, актиновые филаменты, нейрофиламенты), обеспечивающих структурную поддержку нейрона, поддержание его формы и участвующих в транспорте веществ внутри клетки (аксонный транспорт).
-*   **Цитоплазма:**  Гелеобразное вещество, заполняющее сому, в котором расположены органеллы и растворены различные молекулы, включая ионы, ферменты и питательные вещества.
-
-Сома также играет важную роль в интеграции входящих сигналов. Потенциалы, генерируемые на дендритах, распространяются к соме, где происходит их суммирование. Если суммарный потенциал достигает порогового значения в области аксонного холмика, генерируется потенциал действия.
-
-**Сома (клеточное тело) - математическая модель:**
-
-Для точного и реалистичного описания интегративной функции сомы необходимо учитывать, что мембрана нейрона не является пассивным элементом. **Активные свойства мембраны**, обусловленные наличием разнообразных потенциал-зависимых ионных каналов, играют ключевую роль в обработке входящих сигналов. В рамках **однокамерного подхода**, который предполагает, что потенциал внутри сомы распределен равномерно, математическая формализация динамики мембранного потенциала сомы опирается на следующие принципы:
+To accurately and realistically describe the soma’s integrative function, one must account for the fact that the neuronal membrane is not a passive element. **Active membrane properties**, arising from diverse voltage-gated ion channels, are critical for processing incoming signals. Within the **single-compartment approach**—which assumes uniform potential distribution inside the soma—the mathematical formalization of somatic membrane potential dynamics is based on the following principles:
 
 $$C_m \frac{dV_{soma}}{dt} = -I_{ion} + I_{syn}$$
 
-где:
+where:  
+- $C_m$ — soma membrane capacitance (F).  
+- $\frac{dV_{soma}}{dt}$ — rate of change of somatic membrane potential (V/s).  
+- $I_{ion}$ — total ionic current across the soma membrane (A). This current includes flows of various ions—such as sodium, potassium, calcium, and others—depending on neuron type.  
+- $I_{syn}$ — total synaptic current entering the soma from dendrites (A).
 
-*   $C_m$ — емкость мембраны сомы (Ф).
-*   $\frac{dV_{soma}}{dt}$ — скорость изменения мембранного потенциала сомы (В/с).
-*   $I_{ion}$ — общий ионный ток через мембрану сомы (А). Этот ток включает в себя токи различных ионов, таких как натрий, калий, кальций и другие, в зависимости от типа нейрона.
-*   $I_{syn}$ — общий синаптический ток, поступающий в сому от дендритов (А).
+**Ionic Current ($I_{ion}$) Detailing:**
 
-**Детализация ионного тока ($I_{ion}$):**
-
-Ионный ток представляет собой сумму токов отдельных ионов, проходящих через различные типы ионных каналов, присутствующих в мембране сомы. Для примера, рассмотрим основные токи, присутствующие в большинстве нейронов:
+The ionic current is the sum of individual ion flows through various ion channel types present in the soma membrane. As an example, consider the main currents found in most neurons:
 
 $$I_{ion} = I_{Na} + I_K + I_L + I_{Ca} + ...$$
 
-где:
+where:  
+- $I_{Na}$ — sodium current through voltage-gated sodium channels.  
+- $I_K$ — potassium current through various voltage-gated potassium channels (e.g., delayed rectifier, A-type, etc.).  
+- $I_L$ — leak current, representing passive ion flow across the membrane.  
+- $I_{Ca}$ — calcium current through voltage-gated calcium channels (various types, such as L-type, N-type, T-type, P/Q-type).  
+- `...` — indicates the possible presence of other ionic currents, such as chloride currents, hyperpolarization-activated currents (Ih), etc., depending on neuron type.
 
-*   $I_{Na}$ — ток ионов натрия через потенциал-зависимые натриевые каналы.
-*   $I_K$ — ток ионов калия через различные типы потенциал-зависимых калиевых каналов (например, задержанного выпрямления, A-типа и др.).
-*   $I_L$ — ток утечки, представляющий собой пассивный ток ионов через мембрану.
-*   $I_{Ca}$ — ток ионов кальция через потенциал-зависимые кальциевые каналы (различных типов, таких как L-тип, N-тип, T-тип, P/Q-тип).
-*   `...` —  обозначает возможность наличия других ионных токов, таких как токи хлора, токи, активируемые гиперполяризацией (Ih), и др., в зависимости от типа нейрона.
-
-Каждый ионный ток описывается уравнением вида:
+Each ionic current is described by an equation of the form:
 
 $$I_{ion\_type} = g_{ion\_type} \cdot m^p \cdot h^q \cdot (V_{soma} - E_{ion\_type})$$
 
-где:
+where:  
+- $g_{ion\_type}$ — maximum conductance for this ion channel type (S), reflecting channel density in the membrane.  
+- $m$ — channel activation variable (dimensionless, 0–1), representing the probability of channel opening.  
+- $h$ — channel inactivation variable (dimensionless, 0–1), representing the probability the channel is not blocked. Not all channel types have an inactivation variable.  
+- $p$ and $q$ — stoichiometric coefficients indicating the number of activation and inactivation molecules required for channel opening.  
+- $V_{soma}$ — somatic membrane potential (V).  
+- $E_{ion\_type}$ — equilibrium (Nernst) potential for this ion (V).
 
-*   $g_{ion\_type}$ — максимальная проводимость для данного типа ионных каналов (См). Этот параметр отражает плотность каналов на мембране.
-*   $m$ — переменная активации канала (безразмерная, от 0 до 1), описывающая вероятность открытия канала.
-*   $h$ — переменная инактивации канала (безразмерная, от 0 до 1), описывающая вероятность того, что канал не будет заблокирован. Не все типы каналов имеют переменную инактивации.
-*   $p$ и $q$ — стехиометрические коэффициенты, определяющие количество молекул активации и инактивации, необходимых для открытия канала.
-*   $V_{soma}$ — мембранный потенциал сомы (В).
-*   $E_{ion\_type}$ — равновесный потенциал (потенциал Нернста) для данного иона (В).
-
-Переменные активации ($m$) и инактивации ($h$) являются функциями мембранного потенциала и времени и описываются дифференциальными уравнениями первого порядка:
+Activation ($m$) and inactivation ($h$) variables are functions of membrane potential and time, governed by first-order differential equations:
 
 $$\frac{dm}{dt} = \alpha_m(V_{soma}) (1-m) - \beta_m(V_{soma}) m$$
 $$\frac{dh}{dt} = \alpha_h(V_{soma}) (1-h) - \beta_h(V_{soma}) h$$
 
-где $\alpha(V_{soma})$ и $\beta(V_{soma})$ — потенциал-зависимые скорости открытия и закрытия ионных каналов, которые определяются экспериментально и могут иметь различные функциональные формы.
+where $\alpha(V_{soma})$ and $\beta(V_{soma})$ are voltage-dependent channel opening and closing rates, determined experimentally and often represented by various functional forms.
 
-**Детализация синаптического тока ($I_{syn}$):**
+**Synaptic Current ($I_{syn}$) Detailing:**
 
-Синаптический ток представляет собой сумму токов, поступающих от всех синапсов, расположенных на соме (и, в более общих моделях, на дендритах, влияющих на потенциал сомы):
+The synaptic current is the sum of currents from all synapses located on the soma (and, in more general models, from dendrites influencing somatic potential):
 
 $$I_{syn} = \sum_{i} I_{syn\_i}$$
 
-Каждый синаптический ток может быть смоделирован как:
+Each synaptic current can be modeled as:
 
 $$I_{syn\_i} = g_{syn\_i}(t) \cdot (V_{soma} - E_{syn\_i})$$
 
-где:
+where:  
+- $g_{syn\_i}(t)$ — conductance of the $i$-th synapse, time-dependent and determined by neurotransmitter release and binding to postsynaptic receptors. This conductance is typically modeled as a function with rapid rise and slow decay.  
+- $V_{soma}$ — somatic membrane potential (V).  
+- $E_{syn\_i}$ — equilibrium potential for this synapse type (V). For excitatory synapses (e.g., glutamatergic), $E_{syn}$ is usually near 0 mV; for inhibitory synapses (e.g., GABAergic), $E_{syn}$ is close to the chloride or resting potential.
 
-*   $g_{syn\_i}(t)$ — проводимость $i$-го синапса, которая зависит от времени и определяется высвобождением нейротрансмиттера и связыванием его с рецепторами на постсинаптической мембране. Эта проводимость обычно моделируется как функция, имеющая быстрое нарастание и медленное затухание.
-*   $V_{soma}$ — мембранный потенциал сомы (В).
-*   $E_{syn\_i}$ — равновесный потенциал для данного типа синапса (В). Для возбуждающих синапсов (например, глутаматергических) $E_{syn}$ обычно близок к 0 мВ, а для тормозных синапсов (например, ГАМКергических) $E_{syn}$ близок к потенциалу хлора или потенциалу покоя.
+Synaptic conductance $g_{syn\_i}(t)$ is often modeled using kinetic schemes describing neurotransmitter-receptor binding and ion channel opening, or via alpha functions and their variants.
 
-Проводимость синапса $g_{syn\_i}(t)$ часто моделируется с использованием кинетических схем, описывающих связывание нейротрансмиттера с рецептором и открытие ионных каналов, или с помощью альфа-функции или ее вариантов.
+**Action Potential Generation Threshold:**
 
-**Порог генерации потенциала действия:**
+In single-compartment models, action potential generation is usually not modeled in detail within the soma. Instead, it is assumed that if the somatic membrane potential $V_{soma}(t)$ reaches a threshold value $\theta_{AP}$, an action potential is initiated at the axon hillock. However, more sophisticated models may include detailed modeling of axon hillock ion channels to accurately reproduce spike initiation.
 
-В однокамерной модели, генерация потенциала действия обычно не моделируется детально в соме. Вместо этого, предполагается, что если мембранный потенциал сомы $V_{soma}(t)$ достигает определенного порогового значения $\theta_{AP}$, то в аксонном холмике инициируется потенциал действия. Однако, более сложные модели могут включать детальное моделирование ионных каналов аксонного холмика для точного воспроизведения процесса инициации спайка.
+**Advantages and Limitations of This Model:**
 
-**Преимущества и ограничения этой модели:**
+- **Advantages**:  
+  - Accounts for active soma membrane properties, enabling simulation of local potential generation and more realistic signal integration.  
+  - Can reproduce diverse neuronal firing patterns depending on ion channel composition and parameters.  
+- **Limitations**:  
+  - Assumes the soma is isopotential, which may not hold for neurons with large or complex somata.  
+  - Model parameters (maximum conductances, ion channel kinetics) must be experimentally determined for specific neuron types, which can be challenging.
 
-*   **Преимущества:**
-    *   Учитывает активные свойства мембраны сомы, позволяя моделировать генерацию локальных потенциалов и более реалистично описывать интеграцию сигналов.
-    *   Может воспроизводить различные паттерны активности нейрона в зависимости от набора и параметров ионных каналов.
-*   **Ограничения:**
-    *   Предполагает, что сома является изопотенциальной, что не всегда верно для нейронов с большими или сложными сомами.
-    *   Параметры модели (максимальные проводимости, кинетика ионных каналов) должны быть определены экспериментально для конкретного типа нейрона, что может быть сложной задачей.
+**More Complex Models:**
 
-**Более сложные модели:**
+For more accurate simulation of somatic electrical activity—especially when the isopotential assumption fails—**multi-compartment models** are used. In these models, the soma is divided into several interconnected compartments, each described by a set of equations similar to those above, incorporating passive membrane properties linking the compartments.
 
-Для более точного моделирования электрической активности сомы, особенно в случаях, когда предположение об изопотенциальности не выполняется, используются **многокамерные модели**. В этих моделях сома разбивается на несколько связанных компартментов, каждый из которых описывается набором уравнений, аналогичных приведенным выше, с учетом пассивных свойств мембраны, связывающих компартменты.
+**Conclusion:**
 
-**Заключение:**
-
-Представленная математическая модель сомы, основанная на однокамерном подходе с учетом активных свойств мембраны, является гораздо более актуальной и полной, чем простая модель суммирования ПСП. Она позволяет моделировать динамику мембранного потенциала сомы, обусловленную работой различных ионных каналов и синаптическими входами. Для научной работы, требующей детального понимания электрической активности сомы, использование такой модели или ее многокамерных расширений является необходимым. Важно отметить, что точность модели напрямую зависит от корректной параметризации, основанной на экспериментальных данных для конкретного типа нейрона.
+The presented single-compartment mathematical model of the soma, incorporating active membrane properties, is far more relevant and comprehensive than a simple postsynaptic potential (PSP) summation model. It enables simulation of somatic membrane potential dynamics driven by various ion channels and synaptic inputs. For scientific work requiring detailed understanding of somatic electrical activity, using such a model—or its multi-compartment extensions—is essential. Importantly, model accuracy directly depends on correct parameterization based on experimental data for the specific neuron type.
 
 
-## Дендриты: Прием и интеграция входящих сигналов
+## Dendrites: Receiving and Integrating Incoming Signals
 
-Дендриты представляют собой многочисленные, обычно короткие и сильно ветвящиеся отростки, отходящие от сомы. Их основная функция – прием входящих сигналов от других нейронов.
+Dendrites are numerous, typically short and highly branched processes extending from the soma. Their primary function is to receive incoming signals from other neurons.
 
-**Внутреннее строение дендрита:**
-*   **Морфология дендритов:**  Разнообразие форм и размеров дендритных деревьев значительно варьируется в зависимости от типа нейрона и его функции. Сложная разветвленная структура увеличивает площадь поверхности для приема синаптических входов.
-*   **Дендритные шипики:**  На поверхности многих дендритов располагаются мелкие выросты – дендритные шипики. Шипики являются основными местами формирования возбуждающих синапсов. Их динамическая структура (изменение формы и количества) играет важную роль в синаптической пластичности, лежащей в основе процессов обучения и памяти. Шипик состоит из головки, шейки и основания, и его морфология влияет на электрические свойства синаптического сигнала.
-*   **Синаптические контакты:**  Большинство синаптических контактов образуется на дендритах, как на гладкой поверхности, так и на шипиках. Пресинаптический нейрон высвобождает нейромедиаторы, которые связываются с рецепторами на постсинаптической мембране дендрита, вызывая изменение ее проницаемости для ионов.
-*   **Локальные потенциалы:**  Связывание нейромедиаторов с рецепторами на дендритах приводит к возникновению локальных изменений мембранного потенциала – постсинаптических потенциалов (ПСП). Возбуждающие ПСП (ВПСП) деполяризуют мембрану, приближая ее к порогу генерации потенциала действия. Тормозные ПСП (ТПСП) гиперполяризуют мембрану, отдаляя ее от порога.
-*   **Интеграция сигналов:**  Дендриты не только принимают сигналы, но и участвуют в их интеграции. Пространственная суммация происходит, когда сигналы от нескольких синапсов, расположенных на разных участках дендрита, достигают сомы практически одновременно. Временная суммация происходит, когда последовательные сигналы от одного синапса достигают сомы с небольшой задержкой. Форма и электрические свойства дендритов (например, наличие ионных каналов, зависимых от напряжения) влияют на эффективность интеграции сигналов.
+**Internal Dendritic Structure:**  
+- **Dendritic morphology**: The shape and size of dendritic trees vary significantly depending on neuron type and function. Their complex branching structure increases surface area for receiving synaptic inputs.  
+- **Dendritic spines**: Many dendrites are covered with small protrusions called dendritic spines. Spines are the primary sites of excitatory synapse formation. Their dynamic structure (changes in shape and number) plays a crucial role in synaptic plasticity, which underlies learning and memory. A spine consists of a head, neck, and base, and its morphology influences the electrical properties of the synaptic signal.  
+- **Synaptic contacts**: Most synaptic contacts form on dendrites—either on smooth surfaces or on spines. The presynaptic neuron releases neurotransmitters that bind to receptors on the dendritic postsynaptic membrane, altering its ion permeability.  
+- **Local potentials**: Neurotransmitter binding to dendritic receptors generates local changes in membrane potential—postsynaptic potentials (PSPs). Excitatory PSPs (EPSPs) depolarize the membrane, bringing it closer to the action potential threshold. Inhibitory PSPs (IPSPs) hyperpolarize the membrane, moving it further from threshold.  
+- **Signal integration**: Dendrites not only receive signals but also participate in their integration. Spatial summation occurs when signals from multiple synapses at different dendritic locations reach the soma nearly simultaneously. Temporal summation occurs when successive signals from a single synapse reach the soma with minimal delay. Dendritic shape and electrical properties (e.g., presence of voltage-gated ion channels) affect integration efficiency.
 
-**Дендриты - математическая модель:**
+**Dendrites – Mathematical Model:**
 
-**Фундаментальное уравнение мембранного потенциала** [2]
+**Fundamental Membrane Potential Equation** [2]
 
-Динамика мембранного потенциала дендрита в любой точке может быть описана на основе закона сохранения заряда и моделирования мембраны как электрической цепи:
+The dynamics of dendritic membrane potential at any point can be described using charge conservation and modeling the membrane as an electrical circuit:
 
 $$C_m \frac{dV_m(x,t)}{dt} = -I_{ion}(x,t) + I_{ext}(x,t)$$
 
-где:
-*   $V_m(x,t)$ - мембранный потенциал в точке $x$ в момент времени $t$.
-*   $C_m$ - мембранная емкость на единицу площади.
-*   $I_{ion}(x,t)$ - суммарный ионный ток через мембрану в точке $x$ в момент времени $t$.
-*   $I_{ext}(x,t)$ - внешний ток, приложенный к мембране в точке $x$ в момент времени $t$ (например, синаптический ток).
+where:  
+- $V_m(x,t)$ — membrane potential at location $x$ and time $t$.  
+- $C_m$ — membrane capacitance per unit area.  
+- $I_{ion}(x,t)$ — total ionic current across the membrane at location $x$ and time $t$.  
+- $I_{ext}(x,t)$ — external current applied to the membrane at location $x$ and time $t$ (e.g., synaptic current).
 
-Ионный ток $I_{ion}$ включает в себя токи утечки и токи через различные ионные каналы:
+The ionic current $I_{ion}$ includes leak and various ion channel currents:
 
 $$I_{ion}(x,t) = g_L (V_m(x,t) - E_L) + \sum_i I_i(x,t)$$
 
-где:
-*   $g_L$ - удельная проводимость утечки.
-*   $E_L$ - потенциал реверсии тока утечки.
-*   $I_i(x,t)$ - ток через $i$-й тип ионных каналов, который может зависеть от напряжения и концентрации ионов.
+where:  
+- $g_L$ — specific leak conductance.  
+- $E_L$ — reversal potential for leak current.  
+- $I_i(x,t)$ — current through the $i$-th type of ion channel, which may depend on voltage and ion concentration.
 
-**Моделирование синаптического тока**
+**Modeling Synaptic Current**
 
-Синаптический ток $I_{syn}(t)$, являющийся частным случаем $I_{ext}(x,t)$, возникает при связывании нейромедиатора с рецепторами на постсинаптической мембране. Его можно моделировать различными способами, отражающими кинетику связывания и проводимость ионных каналов:
+Synaptic current $I_{syn}(t)$, a special case of $I_{ext}(x,t)$, arises when neurotransmitters bind to postsynaptic receptors. It can be modeled in various ways reflecting binding kinetics and ion channel conductance:
 
-*   **Мгновенный скачок проводимости:**
+- **Instantaneous conductance jump**:
 
     $$I_{syn}(t) = g_{syn} \cdot s(t) \cdot (V_m(t) - E_{syn})$$
 
-    где:
-    *   $g_{syn}$ - максимальная синаптическая проводимость.
-    *   $s(t)$ - бинарная функция, равная 1 во время действия синапса и 0 в противном случае.
-    *   $E_{syn}$ - потенциал реверсии синаптического тока.
+    where:  
+    - $g_{syn}$ — maximum synaptic conductance.  
+    - $s(t)$ — binary function equal to 1 during synaptic activity and 0 otherwise.  
+    - $E_{syn}$ — synaptic current reversal potential.
 
-*   **Модель с кинетикой первого порядка:**
+- **First-order kinetics model**:
 
     $$I_{syn}(t) = g_{syn} \cdot r(t) \cdot (V_m(t) - E_{syn})$$
 
-    где $r(t)$ описывает долю открытых ионных каналов и подчиняется дифференциальному уравнению:
+    where $r(t)$ describes the fraction of open ion channels and obeys the differential equation:
 
     $$\frac{dr}{dt} = \alpha [T](t) (1-r) - \beta r$$
 
-    где:
-    *   $\alpha$ - скорость связывания нейромедиатора.
-    *   $\beta$ - скорость отсоединения нейромедиатора.
-    *   $[T](t)$ - концентрация нейромедиатора в синаптической щели.
+    where:  
+    - $\alpha$ — neurotransmitter binding rate.  
+    - $\beta$ — neurotransmitter unbinding rate.  
+    - $[T](t)$ — neurotransmitter concentration in the synaptic cleft.
 
-**Вывод моделей постсинаптических потенциалов (PSP)**
+**Derivation of Postsynaptic Potential (PSP) Models**
 
-Модели PSP, представленные ранее, являются аппроксимациями динамики мембранного потенциала в ответ на синаптический ток. Их можно вывести из более фундаментальных уравнений при определенных допущениях.
+The PSP models introduced earlier are approximations of membrane potential dynamics in response to synaptic current. They can be derived from more fundamental equations under specific assumptions.
 
-*   **Экспоненциальная модель PSP:**  Эта модель возникает при предположении, что синаптическая проводимость нарастает и спадает экспоненциально. Рассматривая упрощенную модель мембраны с утечкой и синаптическим током, можно получить решение, имеющее форму:
+- **Exponential PSP model**: This model arises when assuming synaptic conductance rises and decays exponentially. Considering a simplified leaky membrane model with synaptic current yields a solution of the form:
 
     $$PSP(t) \propto e^{-t/\tau_{m}} \int_0^t I_{syn}(\tau) e^{\tau/\tau_{m}} d\tau$$
 
-    где $\tau_m = C_m / g_L$ - мембранная временная константа. При аппроксимации формы синаптического тока, можно получить выражения, близкие к представленной ранее экспоненциальной модели.
+    where $\tau_m = C_m / g_L$ is the membrane time constant. Approximating the synaptic current shape leads to expressions similar to the exponential PSP model presented earlier.
 
-*   **Альфа-функция PSP:** Эта модель часто используется для описания PSP, опосредованных AMPA-рецепторами. Она может быть получена из модели с кинетикой первого порядка при определенных предположениях о форме $[T](t)$.
+- **Alpha-function PSP**: This model is often used for AMPA receptor-mediated PSPs. It can be derived from the first-order kinetics model under certain assumptions about $[T](t)$.
 
-**Важно отметить:** Эти модели являются феноменологическими и не всегда точно отражают сложную кинетику ионных каналов и рецепторов.
+**Important note**: These models are phenomenological and do not always accurately reflect the complex kinetics of ion channels and receptors.
 
-**Пространственная интеграция сигналов и кабельная теория**
+**Spatial Signal Integration and Cable Theory**
 
-Дендриты не являются изопотенциальными структурами. Входящие синаптические сигналы распространяются вдоль дендритных ветвей, затухая по мере удаления от места возникновения. Для описания этого процесса используется **кабельная теория**.
+Dendrites are not isopotential structures. Incoming synaptic signals propagate along dendritic branches, attenuating with distance from their origin. **Cable theory** describes this process.
 
-Дендритная ветвь моделируется как цилиндрический кабель с удельным мембранным сопротивлением $R_m$, удельным аксиальным сопротивлением $R_a$ и удельной мембранной емкостью $C_m$. Изменения мембранного потенциала $v(x,t)$ вдоль дендрита описываются **кабельным уравнением:**
+A dendritic branch is modeled as a cylindrical cable with specific membrane resistance $R_m$, specific axial resistance $R_a$, and specific membrane capacitance $C_m$. Changes in membrane potential $v(x,t)$ along the dendrite are described by the **cable equation**:
 
 $$\lambda^2 \frac{\partial^2 v(x,t)}{\partial x^2} - \tau_m \frac{\partial v(x,t)}{\partial t} - v(x,t) = r_m i_{ext}(x,t)$$
 
-где:
-*   $v(x,t) = V_m(x,t) - V_{rest}$ - отклонение мембранного потенциала от потенциала покоя.
-*   $\lambda = \sqrt{\frac{r_m}{r_a}}$ - **пространственная константа** (длина затухания), определяющая, насколько далеко сигнал распространяется вдоль дендрита. Здесь $r_m = R_m / \pi d$, $r_a = R_a / (\pi d^2 / 4)$, где $d$ - диаметр дендрита.
-*   $\tau_m = r_m c_m$ - **мембранная временная константа**. Здесь $c_m = C_m \pi d$.
-*   $r_m$ - мембранное сопротивление на единицу длины.
-*   $i_{ext}(x,t)$ - внешний ток на единицу длины (например, синаптический ток).
+where:  
+- $v(x,t) = V_m(x,t) - V_{rest}$ — deviation of membrane potential from resting potential.  
+- $\lambda = \sqrt{\frac{r_m}{r_a}}$ — **space constant** (length constant), determining how far a signal propagates along the dendrite. Here $r_m = R_m / \pi d$, $r_a = R_a / (\pi d^2 / 4)$, where $d$ is dendrite diameter.  
+- $\tau_m = r_m c_m$ — **membrane time constant**. Here $c_m = C_m \pi d$.  
+- $r_m$ — membrane resistance per unit length.  
+- $i_{ext}(x,t)$ — external current per unit length (e.g., synaptic current).
 
-Решение этого уравнения позволяет рассчитать вклад каждого синаптического входа в потенциал в любой точке дендрита, включая сому. Пространственная суммация возникает как результат линейной суперпозиции этих вкладов (в случае пассивных дендритов).
+Solving this equation allows calculation of each synaptic input’s contribution to the potential at any dendritic location, including the soma. Spatial summation results from linear superposition of these contributions (in passive dendrites).
 
-**Влияние морфологии дендритов**
+**Influence of Dendritic Morphology**
 
-Сложная разветвленная структура дендритных деревьев существенно влияет на интеграцию сигналов. Кабельная теория может быть расширена для анализа разветвленных структур, рассматривая каждую ветвь как отдельный кабель с соответствующими граничными условиями в точках ветвления.
+The complex branching structure of dendritic trees significantly affects signal integration. Cable theory can be extended to analyze branched structures by treating each branch as a separate cable with appropriate boundary conditions at branch points.
 
-*   **Входное сопротивление:** Морфология дендрита определяет его входное сопротивление, которое влияет на амплитуду PSP. Более разветвленные дендриты с меньшим диаметром ветвей обычно имеют более высокое входное сопротивление.
-*   **Электротоническое расстояние:**  Эффективное расстояние между синапсами и сомой определяется не только физическим расстоянием, но и электротоническим расстоянием, которое учитывает затухание сигнала. Синапсы, расположенные на дистальных ветвях, оказывают меньшее влияние на потенциал сомы из-за большего электротонического расстояния.
+- **Input resistance**: Dendritic morphology determines input resistance, which affects PSP amplitude. More branched dendrites with smaller branch diameters typically have higher input resistance.  
+- **Electrotonic distance**: The effective distance between synapses and the soma is determined not only by physical distance but also by electrotonic distance, which accounts for signal attenuation. Synapses on distal branches exert less influence on somatic potential due to greater electrotonic distance.
 
-**Временная интеграция сигналов**
+**Temporal Signal Integration**
 
-Временная суммация происходит, когда последовательные PSP от одного или нескольких синапсов достигают сомы с небольшой задержкой. Математически это можно описать как суперпозицию PSP, учитывая их временную динамику:
+Temporal summation occurs when successive PSPs from one or more synapses reach the soma with minimal delay. Mathematically, this can be described as superposition of PSPs, accounting for their temporal dynamics:
 
 $$V_{soma}(t) = \sum_i w_i \cdot PSP_i(t - t_i)$$
 
-где:
-*   $w_i$ - эффективный вес $i$-го синапса, учитывающий его силу и электротоническое расстояние до сомы.
-*   $PSP_i(t - t_i)$ - форма PSP, вызванного $i$-м синапсом, с учетом времени его активации $t_i$.
+where:  
+- $w_i$ — effective weight of the $i$-th synapse, accounting for its strength and electrotonic distance to the soma.  
+- $PSP_i(t - t_i)$ — PSP waveform evoked by the $i$-th synapse, accounting for its activation time $t_i$.
 
-Для более точного моделирования необходимо учитывать взаимодействие между последовательными PSP, особенно если они происходят достаточно быстро, чтобы перекрываться.
+More accurate modeling requires considering interactions between successive PSPs, especially if they occur rapidly enough to overlap.
 
-**Активные дендриты: учет нелинейностей**
+**Active Dendrites: Accounting for Nonlinearities**
 
-В отличие от пассивных кабелей, дендриты многих типов нейронов содержат **потенциал-зависимые ионные каналы**. Эти каналы вносят нелинейность в процесс интеграции сигналов, позволяя дендритам генерировать локальные спайки или усиливать входящие сигналы.
+Unlike passive cables, dendrites in many neuron types contain **voltage-gated ion channels**. These channels introduce nonlinearity into signal integration, enabling dendrites to generate local spikes or amplify incoming signals.
 
-Моделирование активных дендритов требует включения уравнений Ходжкина-Хаксли или их модификаций для описания динамики различных ионных каналов (например, натриевых, калиевых, кальциевых):
+Modeling active dendrites requires incorporating Hodgkin-Huxley equations or their modifications to describe various ion channel dynamics (e.g., sodium, potassium, calcium):
 
 $$C_m \frac{dV_m}{dt} = -g_L(V_m - E_L) - g_{Na} m^3 h (V_m - E_{Na}) - g_K n^4 (V_m - E_K) - ... + I_{syn}$$
 
-где $m$, $h$, $n$ - переменные активации и инактивации ионных каналов, описываемые дифференциальными уравнениями первого порядка.
+where $m$, $h$, $n$ are ion channel activation/inactivation variables described by first-order differential equations.
 
-Наличие активных каналов позволяет дендритам выполнять более сложные вычислительные операции, такие как пороговая логика на уровне отдельных ветвей.
+Active channels enable dendrites to perform more complex computations, such as threshold logic at the level of individual branches.
 
-**Компартментное моделирование**
+**Compartmental Modeling**
 
-Для моделирования сложных дендритных деревьев с нелинейными свойствами часто используется **компартментное моделирование**. Дендритное дерево разбивается на множество небольших изопотенциальных сегментов (компартментов). Каждый компартмент описывается системой дифференциальных уравнений, учитывающих токи через мембрану и токи между соседними компартментами.
+**Compartmental modeling** is commonly used to simulate complex dendritic trees with nonlinear properties. The dendritic tree is divided into many small isopotential segments (compartments). Each compartment is described by a system of differential equations accounting for transmembrane currents and inter-compartmental currents.
 
-Этот подход позволяет численно решать уравнения для сложных геометрий и включать различные типы ионных каналов в разных частях дендрита.
+This approach allows numerical solution of equations for complex geometries and inclusion of various ion channel types in different dendritic regions.
 
-**Влияние дендритных шипиков**
+**Influence of Dendritic Spines**
 
-Дендритные шипики, являющиеся местами формирования большинства возбуждающих синапсов, играют важную роль в синаптической передаче и пластичности. Их морфология (размер головки и шейки) влияет на:
+Dendritic spines, the sites of most excitatory synapses, play a key role in synaptic transmission and plasticity. Their morphology (head and neck size) affects:
 
-*   **Входное сопротивление:** Шипик с узкой шейкой увеличивает локальное входное сопротивление, что приводит к большей деполяризации при поступлении синаптического тока.
-*   **Электрическую изоляцию:** Шейка шипика может электрически изолировать головку от основной дендритной ветви, позволяя шипикам функционировать как относительно независимые вычислительные единицы.
-*   **Диффузию кальция:** Морфология шипика влияет на диффузию ионов кальция, играющих ключевую роль в синаптической пластичности.
+- **Input resistance**: A spine with a narrow neck increases local input resistance, resulting in greater depolarization for a given synaptic current.  
+- **Electrical isolation**: The spine neck can electrically isolate the head from the main dendritic branch, allowing spines to function as relatively independent computational units.  
+- **Calcium diffusion**: Spine morphology influences calcium ion diffusion, which plays a key role in synaptic plasticity.
 
-Математическое моделирование шипиков часто включает рассмотрение их как дополнительных компартментов с определенными геометрическими и электрическими свойствами.
+Mathematical spine modeling often treats them as additional compartments with specific geometric and electrical properties.
 
-**Стохастичность синаптической передачи**
+**Stochasticity of Synaptic Transmission**
 
-Важно отметить, что синаптическая передача является стохастическим процессом. Высвобождение нейромедиатора и открытие ионных каналов происходят с определенной вероятностью. Для более реалистичного моделирования можно использовать вероятностные модели синаптической передачи, например, модели Пуассона для описания высвобождения нейромедиатора.
+It is important to note that synaptic transmission is a stochastic process. Neurotransmitter release and ion channel opening occur with certain probabilities. More realistic modeling can employ probabilistic synaptic transmission models—for example, Poisson models for neurotransmitter release.
 
-### Заключение
+### Conclusion
 
-Представленная математическая формализация демонстрирует сложность и многогранность процессов, происходящих в дендритах. От фундаментальных уравнений мембранного потенциала до моделей активных дендритов и компартментного моделирования, существует широкий спектр инструментов для изучения интеграции сигналов в дендритах.
+The presented mathematical formalization demonstrates the complexity and multifaceted nature of dendritic processes. From fundamental membrane potential equations to active dendrite models and compartmental modeling, a wide range of tools exists for studying dendritic signal integration.
 
-**Ограничения и будущие направления:**
+**Limitations and Future Directions:**  
+- **Simplifications**: Most models simplify biological reality. For example, exact dendritic geometry and ion channel distribution are often unknown.  
+- **Parameterization**: Determining precise model parameter values (channel conductances, kinetic constants) remains challenging.  
+- **Computational complexity**: Simulating complex dendritic trees with active properties requires significant computational resources.
 
-*   **Упрощения:** Большинство моделей являются упрощением биологической реальности. Например, точная геометрия дендритов и распределение ионных каналов часто неизвестны.
-*   **Параметризация:** Определение точных значений параметров моделей (проводимости каналов, кинетические константы) остается сложной задачей.
-*   **Вычислительная сложность:** Моделирование сложных дендритных деревьев с активными свойствами требует значительных вычислительных ресурсов.
+## Axon: Long-Distance Action Potential Transmission
 
-## Аксон: Передача потенциала действия на большие расстояния
+The axon is typically a single, long, thin process extending from the soma at the axon hillock. Its primary function is to transmit electrical signals (action potentials or spikes) over long distances to other neurons, muscle cells, or glands.
 
-Аксон – это обычно единственный, длинный и тонкий отросток, отходящий от сомы в области аксонного холмика. Основная функция аксона – передача электрического сигнала (потенциала действия или спайка) на большие расстояния к другим нейронам, мышечным клеткам или железам.
+**Internal Axonal Structure:**  
+- **Axon hillock**: A specialized region of the soma where incoming signals are integrated and the action potential is initiated. The axon hillock contains a high concentration of voltage-gated sodium channels, making it the most excitable part of the neuron.  
+- **Axon initial segment**: Directly adjacent to the axon hillock, this is where the action potential is usually generated.  
+- **Myelin sheath**: In many neurons, the axon is covered by a myelin sheath formed by glial cells (oligodendrocytes in the central nervous system and Schwann cells in the peripheral nervous system). Myelin is a lipid-based insulator that greatly increases action potential conduction velocity.  
+- **Nodes of Ranvier**: Periodic gaps in the myelin sheath where the axon remains uninsulated. Voltage-gated sodium channels are concentrated at the nodes, enabling the action potential to "jump" from one node to the next (saltatory conduction), significantly increasing transmission speed.  
+- **Axon terminals (presynaptic endings)**: At the distal end, the axon branches into multiple terminals. Each terminal forms a synapse with another cell.  
+- **Synaptic vesicles**: Membrane-bound structures within axon terminals containing neurotransmitters.  
+- **Action potential transmission mechanism**: When the action potential reaches the axon terminal, membrane depolarization opens voltage-gated calcium channels. Calcium influx triggers synaptic vesicle fusion with the presynaptic membrane (exocytosis) and neurotransmitter release into the synaptic cleft.
 
-**Внутреннее строение аксона:**
-*   **Аксонный холмик:**  Специализированная область сомы, где происходит интеграция входящих сигналов и инициация потенциала действия. Аксонный холмик содержит высокую концентрацию потенциал-зависимых натриевых каналов, что делает его наиболее возбудимой частью нейрона.
-*   **Начальный сегмент аксона:**  Непосредственно примыкает к аксонному холмику и является местом, где обычно генерируется потенциал действия.
-*   **Миелиновая оболочка:**  У многих нейронов аксон покрыт миелиновой оболочкой, образованной глиальными клетками (олигодендроцитами в центральной нервной системе и шванновскими клетками в периферической нервной системе). Миелин представляет собой липидную изоляцию, которая значительно увеличивает скорость проведения потенциала действия.
-*   **Перехваты Ранвье:**  Периодические разрывы в миелиновой оболочке, где аксон остается неизолированным. Потенциал-зависимые натриевые каналы сконцентрированы в перехватах Ранвье, что позволяет потенциалу действия "перескакивать" от одного перехвата к другому (сальтаторная проводимость), значительно увеличивая скорость передачи сигнала.
-*   **Аксонные терминалы (пресинаптические окончания):**  На дистальном конце аксон разветвляется на множество терминалей. Каждая терминаль формирует синапс с другой клеткой.
-*   **Синаптические пузырьки:**  Внутри аксонных терминалей находятся синаптические пузырьки – мембранные структуры, содержащие нейромедиаторы.
-*   **Механизм передачи потенциала действия:**  Когда потенциал действия достигает аксонной терминали, происходит деполяризация мембраны, что приводит к открытию потенциал-зависимых кальциевых каналов. Приток ионов кальция внутрь терминала запускает процесс слияния синаптических пузырьков с пресинаптической мембраной (экзоцитоз) и высвобождение нейромедиаторов в синаптическую щель.
+**Axon – Mathematical Model:**
 
-**Аксон - математическая модель:**
+**Action Potential Generation: Hodgkin-Huxley Model**
 
-**Генерация потенциала действия: модель Ходжкина-Хаксли**
-
-Фундаментальной моделью, описывающей генерацию потенциала действия, является **модель Ходжкина-Хаксли (HH)**. Она основана на экспериментальных данных о токах ионных каналов в аксоне гигантского кальмара и описывает динамику мембранного потенциала $V_m$ с помощью системы нелинейных дифференциальных уравнений:
+The foundational model describing action potential generation is the **Hodgkin-Huxley (HH) model**. Based on experimental data from the squid giant axon, it describes membrane potential $V_m$ dynamics using a system of nonlinear differential equations:
 
 $$C_m \frac{dV_m}{dt} = -I_{ion} + I_{ext}$$
 
-где $I_{ion}$ - суммарный ионный ток, включающий токи натрия ($I_{Na}$), калия ($I_K$) и утечки ($I_L$):
+where $I_{ion}$ is the total ionic current, including sodium ($I_{Na}$), potassium ($I_K$), and leak ($I_L$) currents:
 
 $$I_{ion} = I_{Na} + I_K + I_L$$
 
-Каждый ионный ток моделируется как:
+Each ionic current is modeled as:
 
 $$I_{Na} = g_{Na} m^3 h (V_m - E_{Na})$$
 $$I_K = g_K n^4 (V_m - E_K)$$
 $$I_L = g_L (V_m - E_L)$$
 
-где:
-*   $g_{Na}$, $g_K$, $g_L$ - максимальные проводимости натриевых, калиевых каналов и каналов утечки соответственно.
-*   $E_{Na}$, $E_K$, $E_L$ - равновесные потенциалы для ионов натрия, калия и утечки соответственно.
-*   $m$, $h$, $n$ - безразмерные переменные, описывающие активацию натриевых каналов, инактивацию натриевых каналов и активацию калиевых каналов соответственно. Они подчиняются дифференциальным уравнениям первого порядка:
+where:  
+- $g_{Na}$, $g_K$, $g_L$ — maximum conductances for sodium, potassium, and leak channels, respectively.  
+- $E_{Na}$, $E_K$, $E_L$ — equilibrium potentials for sodium, potassium, and leak ions, respectively.  
+- $m$, $h$, $n$ — dimensionless variables describing sodium channel activation, sodium channel inactivation, and potassium channel activation, respectively. They obey first-order differential equations:
 
 $$\frac{dm}{dt} = \alpha_m(V_m) (1-m) - \beta_m(V_m) m$$
 $$\frac{dh}{dt} = \alpha_h(V_m) (1-h) - \beta_h(V_m) h$$
 $$\frac{dn}{dt} = \alpha_n(V_m) (1-n) - \beta_n(V_m) n$$
 
-где $\alpha(V_m)$ и $\beta(V_m)$ - потенциал-зависимые скорости открытия и закрытия каналов, определяемые экспериментально.
+where $\alpha(V_m)$ and $\beta(V_m)$ are voltage-dependent channel opening/closing rates determined experimentally.
 
-**Упрощения и альтернативные модели генерации потенциала действия**
+**Simplifications and Alternative Action Potential Models**
 
-Модель Ходжкина-Хаксли, несмотря на свою точность, является вычислительно затратной. Для определенных задач используются упрощенные модели:
+Despite its accuracy, the Hodgkin-Huxley model is computationally expensive. Simplified models are used for specific tasks:
 
-*   **Модель ФитцХью-Нагумо:**  Двумерная модель, описывающая динамику мембранного потенциала и переменную восстановления, имитирующую инактивацию натриевых каналов и активацию калиевых каналов.
+- **FitzHugh-Nagumo model**: A two-dimensional model describing membrane potential dynamics and a recovery variable mimicking sodium channel inactivation and potassium channel activation.
 
     $$\frac{dV}{dt} = c(V - \frac{V^3}{3} + R + I_{ext})$$
     $$\frac{dR}{dt} = - \frac{1}{c} (V - a + bR)$$
 
-    где $a$, $b$, $c$ - параметры модели.
+    where $a$, $b$, $c$ are model parameters.
 
-*   **Интегрируй-и-стреляй модели (Integrate-and-Fire):**  Абстрактные модели, где мембранный потенциал интегрирует входящий ток, и при достижении порога генерируется спайк, после чего потенциал сбрасывается. Существуют различные варианты, включая модели с адаптацией порога или подпороговыми колебаниями.
+- **Integrate-and-Fire models**: Abstract models where membrane potential integrates input current and generates a spike upon reaching threshold, after which the potential resets. Variants include models with adaptive thresholds or subthreshold oscillations.
 
     $$ \tau_m \frac{dV_m}{dt} = -(V_m - V_{rest}) + R I_{ext}$$
-    Если $V_m(t) \geq V_{thresh}$, то $V_m \rightarrow V_{reset}$.
+    If $V_m(t) \geq V_{thresh}$, then $V_m \rightarrow V_{reset}$.
 
-Выбор модели зависит от требуемой точности и вычислительных ресурсов.
+Model choice depends on required accuracy and computational resources.
 
-**Распространение потенциала действия в немиелинизированном аксоне**
+**Action Potential Propagation in Unmyelinated Axons**
 
-Распространение потенциала действия вдоль аксона можно описать с помощью **кабельной теории**, аналогично дендритам, но с учетом наличия потенциал-зависимых ионных каналов. Уравнение для мембранного потенциала $v(x,t)$ вдоль аксона принимает вид:
+Action potential propagation along the axon can be described using **cable theory**, similar to dendrites, but accounting for voltage-gated ion channels. The equation for membrane potential $v(x,t)$ along the axon is:
 
 $$c_m \frac{\partial v}{\partial t} = \frac{1}{r_a} \frac{\partial^2 v}{\partial x^2} - I_{ion}(v)$$
 
-где $I_{ion}(v)$ - нелинейный ионный ток, описываемый уравнениями Ходжкина-Хаксли (или другой моделью ионных каналов). Это уравнение является нелинейным параболическим уравнением в частных производных, и его аналитическое решение затруднительно. Обычно используются численные методы для его решения.
+where $I_{ion}(v)$ is the nonlinear ionic current described by Hodgkin-Huxley equations (or another ion channel model). This is a nonlinear parabolic partial differential equation, and analytical solutions are difficult. Numerical methods are typically used.
 
-**Сальтаторное проведение в миелинизированном аксоне**
+**Saltatory Conduction in Myelinated Axons**
 
-Миелиновая оболочка значительно увеличивает скорость проведения потенциала действия за счет **сальтаторного проведения**. Миелин действует как изолятор, увеличивая мембранное сопротивление и уменьшая мембранную емкость в междоузлиях (интернодах). Потенциал действия генерируется только в **перехватах Ранвье**, где сконцентрированы потенциал-зависимые натриевые каналы.
+The myelin sheath greatly increases conduction velocity through **saltatory conduction**. Myelin acts as an insulator, increasing membrane resistance and decreasing membrane capacitance in internodes. Action potentials are generated only at **Nodes of Ranvier**, where voltage-gated sodium channels are concentrated.
 
-**Математическая модель сальтаторного проведения**
+**Mathematical Model of Saltatory Conduction**
 
-Моделирование сальтаторного проведения включает рассмотрение свойств как миелинизированных интернодов, так и немиелинизированных перехватов Ранвье.
+Modeling saltatory conduction involves considering both myelinated internodes and unmyelinated Nodes of Ranvier.
 
-*   **Интерноды:**  В интернодах преобладают пассивные электрические свойства. Распространение потенциала описывается кабельным уравнением без активных ионных токов, но с высокими значениями $r_m$ и низкими значениями $c_m$.
+- **Internodes**: Passive electrical properties dominate in internodes. Potential propagation is described by the cable equation without active ionic currents, but with high $r_m$ and low $c_m$ values.
 
-*   **Перехваты Ранвье:**  В перехватах динамика мембранного потенциала описывается моделью Ходжкина-Хаксли (или ее аналогом), поскольку здесь происходит генерация потенциала действия.
+- **Nodes of Ranvier**: Membrane potential dynamics at nodes are described by the Hodgkin-Huxley model (or equivalent), as action potentials are generated here.
 
-Модель миелинизированного аксона можно представить как последовательное соединение сегментов, представляющих интерноды и перехваты Ранвье. Ток распространяется пассивно через интерноды и активно усиливается в перехватах.
+A myelinated axon model can be represented as a series of segments representing internodes and nodes. Current propagates passively through internodes and is actively amplified at nodes.
 
-Математически это можно описать системой связанных дифференциальных уравнений для каждого сегмента. Для $i$-го перехвата Ранвье:
+Mathematically, this is described by a system of coupled differential equations for each segment. For the $i$-th Node of Ranvier:
 
 $$C_{m,node} \frac{dV_{m,i}}{dt} = -I_{ion,node}(V_{m,i}) + I_{axial,i-1 \rightarrow i} - I_{axial,i \rightarrow i+1}$$
 
-где $I_{axial}$ - аксиальный ток между сегментами, который зависит от разности потенциалов и аксиального сопротивления между ними.
+where $I_{axial}$ is the axial current between segments, depending on potential differences and axial resistance.
 
-Для $j$-го интернода:
+For the $j$-th internode:
 
 $$C_{m,internode} \frac{dV_{m,j}}{dt} = \frac{V_{m,j-1} - V_{m,j}}{R_{axial,j-1 \rightarrow j}} - \frac{V_{m,j} - V_{m,j+1}}{R_{axial,j \rightarrow j+1}}$$
 
-где $R_{axial}$ - аксиальное сопротивление интернода.
+where $R_{axial}$ is the internodal axial resistance.
 
-**Передача сигнала в аксонной терминали: синаптическая передача**
+**Signal Transmission at Axon Terminals: Synaptic Transmission**
 
-Когда потенциал действия достигает аксонной терминали, он запускает процесс **синаптической передачи**. Деполяризация пресинаптической мембраны приводит к открытию **потенциал-зависимых кальциевых каналов**.
+When the action potential reaches the axon terminal, it triggers **synaptic transmission**. Presynaptic membrane depolarization opens **voltage-gated calcium channels**.
 
-Динамику концентрации ионов кальция $[Ca^{2+}]_i$ внутри терминали можно описать уравнением:
+Intraterminal calcium ion concentration $[Ca^{2+}]_i$ dynamics can be described by:
 
 $$\frac{d[Ca^{2+}]_i}{dt} = - \beta I_{Ca} - \frac{[Ca^{2+}]_i - [Ca^{2+}]_{rest}}{\tau_{Ca}}$$
 
-где:
-*   $\beta$ - константа, связывающая кальциевый ток с изменением концентрации.
-*   $I_{Ca}$ - ток через кальциевые каналы, моделируемый аналогично натриевым и калиевым каналам в модели HH.
-*   $[Ca^{2+}]_{rest}$ - базовая концентрация кальция.
-*   $\tau_{Ca}$ - время буферизации и удаления кальция.
+where:  
+- $\beta$ — constant linking calcium current to concentration change.  
+- $I_{Ca}$ — calcium channel current, modeled similarly to sodium/potassium channels in the HH model.  
+- $[Ca^{2+}]_{rest}$ — resting calcium concentration.  
+- $\tau_{Ca}$ — calcium buffering and removal time constant.
 
-Приток ионов кальция запускает слияние синаптических пузырьков с пресинаптической мембраной и высвобождение нейромедиатора в синаптическую щель.
+Calcium influx triggers synaptic vesicle fusion with the presynaptic membrane and neurotransmitter release into the synaptic cleft.
 
-**Моделирование высвобождения нейромедиатора**
+**Modeling Neurotransmitter Release**
 
-Высвобождение нейромедиатора является вероятностным процессом. Вероятность высвобождения $P_{release}$ зависит от концентрации кальция в пресинаптической терминали. Можно использовать различные модели:
+Neurotransmitter release is a probabilistic process. Release probability $P_{release}$ depends on presynaptic terminal calcium concentration. Various models can be used:
 
-*   **Модель с порогом:** Высвобождение происходит, когда концентрация кальция превышает определенный порог.
+- **Threshold model**: Release occurs when calcium concentration exceeds a threshold.
 
-*   **Модель с сигмоидальной зависимостью:**
+- **Sigmoidal dependence model**:
 
     $$P_{release} = \frac{1}{1 + e^{-( [Ca^{2+}]_i - K_d ) / s}}$$
 
-    где $K_d$ - константа диссоциации, $s$ - параметр крутизны.
+    where $K_d$ is the dissociation constant and $s$ is the slope parameter.
 
-Количество высвобожденного нейромедиатора $N_{trans}$ можно моделировать как случайную величину, например, с использованием биномиального распределения:
+The amount of released neurotransmitter $N_{trans}$ can be modeled as a random variable, e.g., using a binomial distribution:
 
 $$P(N_{trans} = k) = \binom{N_{ves}}{k} P_{release}^k (1 - P_{release})^{N_{ves} - k}$$
 
-где $N_{ves}$ - количество готовых к высвобождению везикул.
+where $N_{ves}$ is the number of readily releasable vesicles.
 
-**Связь с постсинаптическим нейроном**
+**Connection to the Postsynaptic Neuron**
 
-Высвобожденный нейромедиатор связывается с рецепторами на постсинаптической мембране, вызывая постсинаптический ток, который был рассмотрен в разделе о дендритах. Таким образом, модель аксона соединяется с моделью дендрита через синаптическую передачу.
+Released neurotransmitter binds to postsynaptic membrane receptors, generating a postsynaptic current as described in the dendrite section. Thus, the axon model connects to the dendrite model via synaptic transmission.
 
-**Факторы, влияющие на скорость проведения потенциала действия**
+**Factors Affecting Action Potential Conduction Velocity**
 
-Скорость проведения потенциала действия зависит от нескольких факторов, которые можно отразить в математических моделях:
+Conduction velocity depends on several factors reflected in mathematical models:
 
-*   **Диаметр аксона:**  Увеличение диаметра аксона снижает аксиальное сопротивление, увеличивая скорость проведения.
-*   **Миелинизация:**  Наличие и толщина миелиновой оболочки значительно увеличивают скорость за счет сальтаторного проведения.
-*   **Плотность ионных каналов:**  Плотность потенциал-зависимых натриевых каналов в перехватах Ранвье влияет на эффективность генерации потенциала действия.
-*   **Температура:**  Температура влияет на кинетику ионных каналов.
+- **Axon diameter**: Larger diameter reduces axial resistance, increasing conduction velocity.  
+- **Myelination**: Presence and thickness of the myelin sheath greatly increase velocity via saltatory conduction.  
+- **Ion channel density**: Voltage-gated sodium channel density at Nodes of Ranvier affects action potential generation efficiency.  
+- **Temperature**: Temperature affects ion channel kinetics.
 
-**Заключение**
+**Conclusion**
 
-Математическая формализация аксона включает моделирование генерации потенциала действия на основе динамики ионных каналов, описание распространения сигнала вдоль аксона с учетом миелинизации и моделирование процесса синаптической передачи. Модель Ходжкина-Хаксли является фундаментальной, но существуют и более простые модели для определенных задач. Понимание математических основ функционирования аксона критически важно для изучения нейронных сетей и разработки нейроинспирированных технологий.
+Mathematical axon formalization includes modeling action potential generation based on ion channel dynamics, describing signal propagation along the axon accounting for myelination, and modeling synaptic transmission. The Hodgkin-Huxley model is foundational, though simpler models exist for specific tasks. Understanding the mathematical basis of axonal function is critical for studying neural networks and developing neuromorphic technologies.
 
-**Ограничения и будущие направления:**
+**Limitations and Future Directions:**  
+- **Heterogeneity**: Significant heterogeneity exists in axon properties across neuron types.  
+- **Plasticity**: Axonal properties—including channel conductance and myelination—can change over time.  
+- **Molecular details**: Models can be extended to include more detailed molecular mechanisms of synaptic transmission.
 
-*   **Гетерогенность:**  Существует значительная гетерогенность в свойствах аксонов различных типов нейронов.
-*   **Пластичность:**  Свойства аксона, включая проводимость каналов и миелинизацию, могут изменяться со временем.
-*   **Молекулярные детали:**  Модели могут быть расширены для включения более детальных молекулярных механизмов синаптической передачи.
+## Synapses: The Site of Intercellular Signal Transmission
 
-## Синапсы: Место межклеточной передачи сигнала
+Synapses are specialized structures that transmit information from one neuron to another or to effector cells (muscle or glandular cells). There are two main types of synapses: chemical and electrical.
 
-Синапсы – это специализированные структуры, обеспечивающие передачу информации от одного нейрона к другому или к клеткам-эффекторам (мышечным или железистым клеткам). Существует два основных типа синапсов: химические и электрические.
+**Internal Synaptic Structure:**  
+- **Chemical synapses**: The most common type of synapse. Signal transmission occurs via chemical messengers—neurotransmitters.  
+  - **Presynaptic membrane**: The membrane of the axon terminal that releases neurotransmitters. It contains voltage-gated calcium channels and mechanisms for synaptic vesicle exocytosis.  
+  - **Synaptic cleft**: A narrow space (approximately 20–40 nm) between the pre- and postsynaptic membranes.  
+  - **Postsynaptic membrane**: The membrane of the target cell (usually a dendrite or soma of another neuron), containing neurotransmitter receptors.  
+  - **Neurotransmitters**: Chemical substances synthesized by the neuron and stored in synaptic vesicles. Examples include glutamate (the primary excitatory neurotransmitter), GABA (the primary inhibitory neurotransmitter), acetylcholine, dopamine, serotonin, norepinephrine, etc. Different neurotransmitters exert distinct effects on the postsynaptic cell.  
+  - **Receptors**: Protein molecules on the postsynaptic membrane with specific affinity for particular neurotransmitters. Neurotransmitter binding induces a conformational change in the receptor, opening or closing ion channels and thereby altering the postsynaptic membrane potential (EPSP or IPSP). There are two main receptor types:  
+    - **Ionotropic receptors**: Ligand-gated ion channels. Neurotransmitter binding directly opens an ion channel, producing a fast and transient effect.  
+    - **Metabotropic receptors**: Coupled to G-proteins. Neurotransmitter binding activates a G-protein, which either directly modulates ion channels or triggers second messenger cascades, resulting in slower and more prolonged effects.  
+  - **Neurotransmitter inactivation**: To prevent continuous stimulation of the postsynaptic cell, neurotransmitters must be rapidly removed from the synaptic cleft. This occurs via:  
+    - **Reuptake**: Transporter proteins on the presynaptic membrane or glial cells actively take up the neurotransmitter back into the presynaptic terminal or glial cell.  
+    - **Enzymatic degradation**: Enzymes in the synaptic cleft break down the neurotransmitter into inactive components.  
+- **Electrical synapses**: Less common than chemical synapses. Characterized by direct electrical coupling between pre- and postsynaptic cells via gap junctions.  
+  - **Gap junctions**: Composed of protein channels (connexons) that connect the cytoplasm of two adjacent cells, allowing ions and small molecules to move freely between them.  
+  - **Rapid signal transmission**: Signal transmission occurs almost instantaneously, without the delay characteristic of chemical synapses.  
+  - **Bidirectional transmission**: Signals can propagate in both directions.  
+  - **Activity synchronization**: Electrical synapses play a key role in synchronizing the activity of neuronal groups.
 
-**Внутреннее строение синапсов:**
-*   **Химические синапсы:**  Наиболее распространенный тип синапсов. Передача сигнала осуществляется посредством химических посредников – нейромедиаторов.
-    *   **Пресинаптическая мембрана:**  Мембрана аксонной терминали, высвобождающая нейромедиаторы. Содержит потенциал-зависимые кальциевые каналы и механизмы для экзоцитоза синаптических пузырьков.
-    *   **Синаптическая щель:**  Узкое пространство (около 20-40 нм) между пре- и постсинаптической мембранами.
-    *   **Постсинаптическая мембрана:**  Мембрана клетки-мишени (обычно дендрита или сомы другого нейрона), содержащая рецепторы к нейромедиаторам.
-    *   **Нейромедиаторы:**  Химические вещества, синтезируемые нейроном и хранящиеся в синаптических пузырьках. Примеры: глутамат (основной возбуждающий нейромедиатор), ГАМК (основной тормозной нейромедиатор), ацетилхолин, дофамин, серотонин, норадреналин и др. Различные нейромедиаторы оказывают различное воздействие на постсинаптическую клетку.
-    *   **Рецепторы:**  Белковые молекулы на постсинаптической мембране, обладающие специфическим сродством к определенным нейромедиаторам. Связывание нейромедиатора с рецептором приводит к изменению конформации рецептора и открытию или закрытию ионных каналов, что вызывает изменение мембранного потенциала постсинаптической клетки (ВПСП или ТПСП). Существуют два основных типа рецепторов:
-        *   **Ионотропные рецепторы:**  Лиганд-зависимые ионные каналы. Связывание нейромедиатора непосредственно открывает ионный канал, вызывая быстрый и кратковременный эффект.
-        *   **Метаботропные рецепторы:**  Связаны с G-белками. Связывание нейромедиатора активирует G-белок, который, в свою очередь, может либо непосредственно воздействовать на ионные каналы, либо активировать вторичные мессенджеры, вызывая каскад внутриклеточных событий и более медленный и продолжительный эффект.
-    *   **Инактивация нейромедиаторов:**  Для предотвращения постоянной стимуляции постсинаптической клетки нейромедиаторы должны быть быстро удалены из синаптической щели. Это может происходить посредством:
-        *   **Обратного захвата:**  Транспортные белки на пресинаптической мембране или глиальных клетках активно захватывают нейромедиатор обратно в пресинаптическую терминаль или глиальную клетку.
-        *   **Ферментативной деградации:**  Ферменты в синаптической щели расщепляют нейромедиатор на неактивные компоненты.
-*   **Электрические синапсы:**  Менее распространены, чем химические синапсы. Характеризуются прямым электрическим соединением между пре- и постсинаптическими клетками через щелевые контакты (gap junctions).
-    *   **Щелевые контакты:**  Образованы белковыми каналами (коннексонами), которые соединяют цитоплазму двух соседних клеток, позволяя ионам и малым молекулам свободно перемещаться между ними.
-    *   **Быстрая передача сигнала:**  Передача сигнала происходит практически мгновенно, без задержки, характерной для химических синапсов.
-    *   **Двунаправленная передача:**  Сигнал может передаваться в обоих направлениях.
-    *   **Синхронизация активности:**  Электрические синапсы играют важную роль в синхронизации активности групп нейронов.
+Understanding the structure of the biological neuron and synaptic signal transmission mechanisms is fundamental to studying nervous system function, developing treatments for neurological and psychiatric disorders, and designing more advanced artificial neural networks. Ongoing research in this field continues to reveal the intricate details of these remarkable cells.
 
-Понимание структуры биологического нейрона и механизмов передачи сигналов в синапсах является фундаментальным для изучения работы нервной системы, разработки методов лечения неврологических и психических заболеваний, а также для создания более совершенных искусственных нейронных сетей. Дальнейшие исследования в этой области продолжают раскрывать сложные детали функционирования этих удивительных клеток.
+### **Synapses – Mathematical Model:**
 
-### **Синапсы - математическая модель:**
+### Chemical Synapses: Mathematical Formalization
 
-### Химические синапсы: Математическая формализация
+Signal transmission at a chemical synapse is a complex cascade of events that can be divided into several stages, each amenable to mathematical modeling.
 
-Передача сигнала в химическом синапсе представляет собой сложный каскад событий, который можно разбить на несколько этапов, каждый из которых поддается математическому моделированию.
+**Presynaptic processes: action potential arrival and calcium influx**
 
-**Пресинаптические процессы: приход потенциала действия и вход кальция**
-
-Приход потенциала действия в пресинаптическую терминали вызывает деполяризацию мембраны, что приводит к открытию потенциал-зависимых кальциевых каналов. Динамика тока через кальциевые каналы $I_{Ca}$ может быть описана аналогично модели Ходжкина-Хаксли:
+Action potential arrival at the presynaptic terminal causes membrane depolarization, opening voltage-gated calcium channels. Calcium current dynamics $I_{Ca}$ can be described analogously to the Hodgkin-Huxley model:
 
 $$I_{Ca} = P_{Ca} g_{Ca} s^p (V_{pre} - E_{Ca})$$
 
-где:
-*   $P_{Ca}$ - максимальная проницаемость кальциевых каналов.
-*   $g_{Ca}$ - проводимость одиночного кальциевого канала.
-*   $s$ - переменная активации кальциевых каналов, подчиняющаяся дифференциальному уравнению первого порядка.
-*   $p$ - коэффициент Хилла, отражающий кооперативность открытия каналов.
-*   $V_{pre}$ - потенциал пресинаптической терминали.
-*   $E_{Ca}$ - равновесный потенциал для ионов кальция.
+where:  
+- $P_{Ca}$ — maximum calcium channel permeability.  
+- $g_{Ca}$ — single calcium channel conductance.  
+- $s$ — calcium channel activation variable, governed by a first-order differential equation.  
+- $p$ — Hill coefficient reflecting channel opening cooperativity.  
+- $V_{pre}$ — presynaptic terminal potential.  
+- $E_{Ca}$ — calcium ion equilibrium potential.
 
-Изменение концентрации ионов кальция $[Ca^{2+}]_{pre}$ в пресинаптической терминали описывается уравнением:
+Presynaptic terminal calcium concentration $[Ca^{2+}]_{pre}$ dynamics are described by:
 
 $$\frac{d[Ca^{2+}]_{pre}}{dt} = - \alpha I_{Ca} - \frac{[Ca^{2+}]_{pre} - [Ca^{2+}]_{rest}}{\tau_{Ca}}$$
 
-где:
-*   $\alpha$ - константа, связывающая кальциевый ток с изменением концентрации.
-*   $[Ca^{2+}]_{rest}$ - базовая концентрация кальция.
-*   $\tau_{Ca}$ - эффективная временная константа удаления кальция (буферизация, экструзия).
+where:  
+- $\alpha$ — constant linking calcium current to concentration change.  
+- $[Ca^{2+}]_{rest}$ — resting calcium concentration.  
+- $\tau_{Ca}$ — effective calcium removal time constant (buffering, extrusion).
 
-**Высвобождение нейромедиатора: вероятностные модели**
+**Neurotransmitter release: probabilistic models**
 
-Высвобождение нейромедиатора является квантованным и вероятностным процессом. Вероятность высвобождения везикулы $P_{release}$ зависит от концентрации кальция в пресинаптической терминали. Более точная модель, чем простая сигмоидная функция, учитывает несколько сайтов связывания кальция, необходимых для слияния везикулы:
+Neurotransmitter release is a quantal and probabilistic process. Vesicle release probability $P_{release}$ depends on presynaptic terminal calcium concentration. A more accurate model than a simple sigmoid accounts for multiple calcium-binding sites required for vesicle fusion:
 
 $$P_{release} = \frac{[Ca^{2+}]_{pre}^n}{K_d^n + [Ca^{2+}]_{pre}^n}$$
 
-где $n$ - количество ионов кальция, необходимых для запуска высвобождения, а $K_d$ - константа диссоциации.
+where $n$ is the number of calcium ions required to trigger release, and $K_d$ is the dissociation constant.
 
-Количество высвобожденных везикул можно моделировать как случайную величину, подчиняющуюся биномиальному распределению (как было указано ранее) или распределению Пуассона, если вероятность высвобождения мала, а количество потенциальных мест высвобождения велико.
+The number of released vesicles can be modeled as a random variable following a binomial distribution (as previously noted) or a Poisson distribution if release probability is low and the number of potential release sites is large.
 
-Динамику пула готовых к высвобождению везикул можно описать дифференциальным уравнением:
+The dynamics of the readily releasable vesicle pool can be described by a differential equation:
 
 $$\frac{dN_{ves}}{dt} = -k_{release} P_{release} N_{ves} + k_{refill} (N_{max} - N_{ves})$$
 
-где:
-*   $N_{ves}$ - количество готовых к высвобождению везикул.
-*   $k_{release}$ - константа скорости высвобождения.
-*   $k_{refill}$ - константа скорости пополнения пула везикул.
-*   $N_{max}$ - максимальная емкость пула везикул.
+where:  
+- $N_{ves}$ — number of readily releasable vesicles.  
+- $k_{release}$ — release rate constant.  
+- $k_{refill}$ — vesicle pool replenishment rate constant.  
+- $N_{max}$ — maximum vesicle pool capacity.
 
-**Диффузия и связывание нейромедиатора в синаптической щели**
+**Neurotransmitter diffusion and binding in the synaptic cleft**
 
-Динамику концентрации нейромедиатора $[NT]$ в синаптической щели можно описать уравнением реакции-диффузии:
+Neurotransmitter concentration $[NT]$ dynamics in the synaptic cleft can be described by a reaction-diffusion equation:
 
 $$\frac{\partial [NT](x,t)}{\partial t} = D \nabla^2 [NT](x,t) - k_{bind} [NT](x,t) (R_{max} - [R_{bound}](x,t)) + k_{unbind} [R_{bound}](x,t) - k_{decay} [NT](x,t)$$
 
-где:
-*   $D$ - коэффициент диффузии нейромедиатора.
-*   $\nabla^2$ - оператор Лапласа.
-*   $k_{bind}$ - константа скорости связывания нейромедиатора с рецептором.
-*   $R_{max}$ - общая концентрация рецепторов.
-*   $[R_{bound}]$ - концентрация связанных рецепторов.
-*   $k_{unbind}$ - константа скорости отсоединения нейромедиатора от рецептора.
-*   $k_{decay}$ - константа скорости распада или удаления нейромедиатора.
+where:  
+- $D$ — neurotransmitter diffusion coefficient.  
+- $\nabla^2$ — Laplacian operator.  
+- $k_{bind}$ — neurotransmitter-receptor binding rate constant.  
+- $R_{max}$ — total receptor concentration.  
+- $[R_{bound}]$ — bound receptor concentration.  
+- $k_{unbind}$ — neurotransmitter-receptor unbinding rate constant.  
+- $k_{decay}$ — neurotransmitter degradation or removal rate constant.
 
-В большинстве случаев для упрощения моделирования предполагается равномерное распределение нейромедиатора в щели, и уравнение сводится к обыкновенному дифференциальному уравнению (как в предоставленном тексте).
+In most cases, for modeling simplicity, uniform neurotransmitter distribution in the cleft is assumed, reducing the equation to an ordinary differential equation (as in the provided text).
 
-**Постсинаптический ответ: ионотропные и метаботропные рецепторы**
+**Postsynaptic response: ionotropic and metabotropic receptors**
 
-**Ионотропные рецепторы:** Связывание нейромедиатора с ионотропным рецептором приводит к быстрому открытию ионного канала. Ток через ионотропный рецептор $I_{iono}$ можно моделировать как:
+**Ionotropic receptors**: Neurotransmitter binding to an ionotropic receptor rapidly opens an ion channel. The ionotropic receptor current $I_{iono}$ can be modeled as:
 
 $$I_{iono} = g_{iono} P_{open} (V_{post} - E_{rev})$$
 
-где:
-*   $g_{iono}$ - максимальная проводимость канала.
-*   $P_{open}$ - вероятность открытия канала, зависящая от концентрации связанного нейромедиатора. Например, для одноканальной модели: $P_{open} = \frac{[NT]}{K_d + [NT]}$. Для многоканальных моделей зависимость может быть более сложной.
-*   $V_{post}$ - потенциал постсинаптической мембраны.
-*   $E_{rev}$ - реверсивный потенциал ионного канала.
+where:  
+- $g_{iono}$ — maximum channel conductance.  
+- $P_{open}$ — channel open probability, dependent on bound neurotransmitter concentration. For a single-site model: $P_{open} = \frac{[NT]}{K_d + [NT]}$. Multisite models may exhibit more complex dependencies.  
+- $V_{post}$ — postsynaptic membrane potential.  
+- $E_{rev}$ — channel reversal potential.
 
-**Метаботропные рецепторы:** Связывание нейромедиатора с метаботропным рецептором активирует G-белок, который запускает каскад внутриклеточных событий. Моделирование этого процесса может быть сложным и включать уравнения для концентрации G-белков, вторичных мессенджеров и активности киназ. В простейшем случае влияние метаботропных рецепторов на проводимость ионных каналов можно моделировать как:
+**Metabotropic receptors**: Neurotransmitter binding to a metabotropic receptor activates a G-protein, triggering intracellular signaling cascades. Modeling this process can be complex, involving equations for G-protein, second messenger, and kinase concentrations. In the simplest case, metabotropic receptor effects on ion channel conductance can be modeled as:
 
 $$g_{metabotropic}(t) = g_{max} \cdot f([NT](t))$$
 
-где $f([NT](t))$ - функция, описывающая зависимость проводимости от концентрации нейромедиатора, например, сигмоидальная функция. Более детальные модели учитывают кинетику активации G-белков и вторичных мессенджеров.
+where $f([NT](t))$ is a function describing conductance dependence on neurotransmitter concentration (e.g., a sigmoidal function). More detailed models account for G-protein and second messenger activation kinetics.
 
-**Инактивация нейромедиаторов**
+**Neurotransmitter inactivation**
 
-Процессы обратного захвата и ферментативной деградации влияют на константу $k_{decay}$ в уравнении для концентрации нейромедиатора. Обратный захват можно моделировать с использованием уравнения Михаэлиса-Ментен для скорости транспорта:
+Reuptake and enzymatic degradation processes affect the $k_{decay}$ constant in the neurotransmitter concentration equation. Reuptake can be modeled using the Michaelis-Menten equation for transport rate:
 
 $$v_{uptake} = V_{max} \frac{[NT]}{K_m + [NT]}$$
 
-где $V_{max}$ - максимальная скорость транспорта, а $K_m$ - константа Михаэлиса-Ментен. Ферментативная деградация обычно моделируется как процесс первого порядка.
+where $V_{max}$ is the maximum transport rate and $K_m$ is the Michaelis-Menten constant. Enzymatic degradation is typically modeled as a first-order process.
 
-### Электрические синапсы: Математическая формализация
+### Electrical Synapses: Mathematical Formalization
 
-Передача сигнала в электрических синапсах осуществляется через щелевые контакты, обеспечивающие прямое электрическое соединение между клетками. Ток через щелевой контакт $I_{gap}$ между клетками $i$ и $j$ можно описать как:
+Signal transmission at electrical synapses occurs through gap junctions, providing direct electrical coupling between cells. The gap junction current $I_{gap}$ between cells $i$ and $j$ can be described as:
 
 $$I_{gap, ij} = g_{gap, ij} (V_i - V_j)$$
 
-где:
-*   $g_{gap, ij}$ - проводимость щелевого контакта между клетками $i$ и $j$.
-*   $V_i$ и $V_j$ - мембранные потенциалы клеток $i$ и $j$ соответственно.
+where:  
+- $g_{gap, ij}$ — gap junction conductance between cells $i$ and $j$.  
+- $V_i$ and $V_j$ — membrane potentials of cells $i$ and $j$, respectively.
 
-Проводимость щелевого контакта $g_{gap, ij}$ может быть постоянной или зависеть от различных факторов, таких как pH, концентрация кальция и потенциал мембраны. Моделирование динамики проводимости щелевых контактов может включать уравнения, описывающие открытие и закрытие коннексонов, образующих щелевой контакт.
+Gap junction conductance $g_{gap, ij}$ may be constant or depend on various factors such as pH, calcium concentration, and membrane potential. Modeling gap junction conductance dynamics may include equations describing connexon opening and closing.
 
-### Факторы, влияющие на синаптическую силу и пластичность
+### Factors Influencing Synaptic Strength and Plasticity
 
-Синаптическая сила, определяющая величину постсинаптического ответа на пресинаптический сигнал, зависит от множества факторов, которые могут изменяться в процессе синаптической пластичности:
+Synaptic strength—the magnitude of the postsynaptic response to a presynaptic signal—depends on numerous factors that can change during synaptic plasticity:
 
-*   **Пресинаптические факторы:** Вероятность высвобождения нейромедиатора, количество готовых к высвобождению везикул, концентрация кальция в пресинаптической терминали.
-*   **Постсинаптические факторы:** Количество и тип рецепторов, аффинность рецепторов к нейромедиатору, эффективность внутриклеточных сигнальных каскадов.
-*   **Свойства синаптической щели:** Скорость диффузии и удаления нейромедиатора.
+- **Presynaptic factors**: Neurotransmitter release probability, number of readily releasable vesicles, presynaptic terminal calcium concentration.  
+- **Postsynaptic factors**: Number and type of receptors, receptor affinity for neurotransmitter, efficiency of intracellular signaling cascades.  
+- **Synaptic cleft properties**: Neurotransmitter diffusion and removal rates.
 
-Математические модели синаптической пластичности описывают динамику этих параметров в зависимости от активности синапса (например, частоты пресинаптических спайков). Примеры включают модели, описывающие долговременную потенциацию (LTP) и долговременную депрессию (LTD) на основе изменений в количестве и эффективности AMPA-рецепторов.
+Mathematical models of synaptic plasticity describe the dynamics of these parameters as a function of synaptic activity (e.g., presynaptic spike frequency). Examples include models of long-term potentiation (LTP) and long-term depression (LTD) based on changes in AMPA receptor number and efficacy.
 
-### Заключение
+### Conclusion
 
-Математическая формализация синапсов требует учета множества взаимодействующих процессов, от прихода потенциала действия в пресинаптическую терминали до генерации постсинаптического потенциала. Выбор конкретных моделей и уровня детализации зависит от исследуемого вопроса и доступных вычислительных ресурсов. Понимание математических основ синаптической передачи является ключевым для изучения работы нейронных сетей, механизмов обучения и памяти, а также для разработки новых терапевтических подходов к лечению нейрологических и психических расстройств.
+Mathematical synapse formalization requires accounting for numerous interacting processes—from action potential arrival at the presynaptic terminal to postsynaptic potential generation. The choice of specific models and level of detail depends on the research question and available computational resources. Understanding the mathematical foundations of synaptic transmission is key to studying neural network function, learning and memory mechanisms, and developing novel therapeutic approaches for neurological and psychiatric disorders.
 
-**Ограничения и будущие направления:**
+**Limitations and Future Directions:**  
+- **Complexity and heterogeneity**: Synapses exhibit significant structural and functional complexity and heterogeneity.  
+- **Stochasticity**: Many synaptic-level processes are stochastic, requiring probabilistic models.  
+- **Multiscale integration**: Linking molecular-level models (e.g., receptor kinetics) with cellular and network-level models remains challenging.
 
-*   **Сложность и гетерогенность:** Синапсы демонстрируют значительную сложность и гетерогенность в своей структуре и функциях.
-*   **Стохастичность:** Многие процессы на синаптическом уровне являются стохастическими, что требует использования вероятностных моделей.
-*   **Интеграция масштабов:**  Связывание моделей молекулярного уровня (например, кинетики рецепторов) с моделями клеточного и сетевого уровня остается сложной задачей.
+# **The Artificial Neuron and Its Components**
 
+## Introduction
 
+Artificial neural networks (ANNs) are a class of computational models inspired by the structure and operating principles of biological neural networks. Historically, interest in artificial intelligence led to the development of mathematical models capable of mimicking cognitive functions. ANNs, emerging from this research, are a powerful tool for solving a wide range of tasks—from pattern recognition to natural language processing. It is important to understand that ANNs are not exact replicas of biological systems but rather mathematical abstractions of them. The purpose of this section is to examine in detail the structure and operating principles of the artificial neuron—the fundamental building block of any artificial neural network. Understanding its components and mechanisms is necessary for further comparison with biological counterparts and for appreciating the capabilities and limitations of modern neural network technologies.
 
-# **Искусственный нейрон и его состав**
+## The Artificial Neuron and Its Components
 
-## Введение
+### Structure of the Artificial Neuron
 
-Искусственные нейронные сети (ИНС) представляют собой класс вычислительных моделей, вдохновленных структурой и принципами работы биологических нейронных сетей. Исторически, интерес к созданию искусственного интеллекта привел к разработке математических моделей, способных имитировать когнитивные функции. ИНС, возникшие как результат этих исследований, являются мощным инструментом для решения широкого спектра задач, от распознавания образов до обработки естественного языка. Важно понимать, что ИНС не являются точной копией биологических систем, а скорее представляют собой их математическую абстракцию. Целью данной части работы является детальное рассмотрение структуры и принципов функционирования искусственного нейрона, являющегося фундаментальным строительным блоком любой искусственной нейронной сети. Понимание его компонентов и механизмов работы необходимо для дальнейшего сравнения с биологическими аналогами и осмысления возможностей и ограничений современных нейросетевых технологий.
+In its basic form, an artificial neuron is a mathematical function that processes input signals and generates an output signal. To understand its operation, consider its main components and draw analogies with the biological neuron:
 
-## Искусственный нейрон и его состав
+1. **Inputs**: An artificial neuron receives multiple input signals, mathematically represented as numerical values ($x_1, x_2, ..., x_n$). These inputs are analogous to the dendrites of a biological neuron, which receive signals from other neurons.
 
-### Структура искусственного нейрона
+2. **Weights**: Each input signal is associated with a specific weight ($w_1, w_2, ..., w_n$). Weights are numerical coefficients that determine the strength or importance of the corresponding input signal. Analogous to synaptic strength in a biological neuron, a weight determines how strongly an input signal will influence the artificial neuron’s activation.
 
-Искусственный нейрон, в своей базовой форме, представляет собой математическую функцию, которая обрабатывает входные сигналы и генерирует выходной сигнал. Для понимания его работы, рассмотрим основные компоненты и проведем аналогии с биологическим нейроном:
+3. **Aggregation function**: The weighted input signals are combined using an aggregation function. The most common function is simple summation of weighted inputs. This is analogous to the integration of incoming signals in the soma of a biological neuron.
 
-1. **Входы (Inputs):**  Искусственный нейрон получает на вход несколько сигналов, которые математически представляются как числовые значения ($x_1, x_2, ..., x_n$). Эти входы аналогичны дендритам биологического нейрона, принимающим сигналы от других нейронов.
+4. **Activation function**: The result of the aggregation function is passed to an activation function. This function performs a nonlinear transformation of the aggregated signal, determining whether the neuron will be "activated" and the intensity of its output signal. The activation function plays a crucial role in enabling ANNs to model complex nonlinear relationships. Numerous types of activation functions exist, each with its own properties.
 
-2. **Веса (Weights):**  Каждый входной сигнал связан с определенным весом ($w_1, w_2, ..., w_n$). Веса представляют собой числовые коэффициенты, которые определяют силу или важность соответствующего входного сигнала. Аналогично синаптической силе в биологическом нейроне, вес определяет, насколько сильно входной сигнал будет влиять на активацию искусственного нейрона.
+5. **Output**: The output signal of the artificial neuron is the result of applying the activation function. This signal ($y$) is passed to the inputs of other neurons in the network, analogous to how a biological neuron’s axon transmits signals to other cells.
 
-3. **Функция агрегации (Aggregation Function):**  Полученные входные сигналы, взвешенные соответствующими весами, объединяются с помощью функции агрегации. Наиболее распространенной функцией является простое суммирование взвешенных входов. Это аналогично процессу интеграции входящих сигналов в соме биологического нейрона.
+![Structure_of_artificial_neuron](https://neerc.ifmo.ru/wiki/images/a/a5/%D0%98%D1%81%D0%BA%D1%83%D1%81%D1%81%D1%82%D0%B2%D0%B5%D0%BD%D0%BD%D1%8B%D0%B9_%D0%BD%D0%B5%D0%B9%D1%80%D0%BE%D0%BD_%D1%81%D1%85%D0%B5%D0%BC%D0%B0.png)
 
-4. **Функция активации (Activation Function):**  Результат функции агрегации передается на функцию активации. Эта функция выполняет нелинейное преобразование агрегированного сигнала, определяя, будет ли нейрон "активирован" и какой будет интенсивность его выходного сигнала. Функция активации играет ключевую роль в способности ИНС моделировать сложные нелинейные зависимости. Существует множество типов функций активации, каждая из которых обладает своими свойствами.
+### Inputs and Weights: Modeling Synaptic Connections
 
-5. **Выход (Output):**  Выходным сигналом искусственного нейрона является результат применения функции активации. Этот сигнал ($y$) передается на входы других нейронов в сети, аналогично тому, как аксон биологического нейрона передает сигнал другим клеткам.
+The input signals of an artificial neuron ($x_i$) are numerical values received from other neurons or from the external environment. Weights ($w_i$) are the key parameters of the artificial neuron that determine the strength of the connection between the current neuron and the source of the input signal. A large absolute weight value indicates strong influence of the corresponding input on neuron activation, whereas a weight close to zero indicates weak influence. Negative weights can model inhibitory connections.
 
-![Структура_искусственного_нейрона](https://neerc.ifmo.ru/wiki/images/a/a5/%D0%98%D1%81%D0%BA%D1%83%D1%81%D1%81%D1%82%D0%B2%D0%B5%D0%BD%D0%BD%D1%8B%D0%B9_%D0%BD%D0%B5%D0%B9%D1%80%D0%BE%D0%BD_%D1%81%D1%85%D0%B5%D0%BC%D0%B0.png)
+In addition to weights, the concept of **bias** ($b$) is often used. Bias is an additional parameter added to the weighted sum of inputs. Its role is to shift the activation function, allowing the neuron to activate even with zero input signals or, conversely, preventing activation with nonzero inputs. Bias can be viewed as analogous to the excitation threshold in a biological neuron.
 
-### Входы и веса: Моделирование синаптических связей
-
-Входные сигналы искусственного нейрона ($x_i$) представляют собой числовые значения, поступающие от других нейронов или из внешней среды. Веса ($w_i$) являются ключевыми параметрами искусственного нейрона, которые определяют силу связи между текущим нейроном и источником входного сигнала. Большое абсолютное значение веса указывает на сильное влияние соответствующего входа на активацию нейрона, в то время как вес, близкий к нулю, означает слабое влияние. Отрицательные веса могут моделировать ингибирующие связи.
-
-Помимо весов, часто используется концепция **смещения (bias)** ($b$). Смещение представляет собой дополнительный параметр, который добавляется к взвешенной сумме входов. Его роль заключается в сдвиге функции активации, позволяя нейрону активироваться даже при нулевых входных сигналах или, наоборот, предотвращать активацию при ненулевых входах. Смещение можно рассматривать как аналог порога возбуждения в биологическом нейроне.
-
-Математически взвешенная сумма входов с учетом смещения записывается следующим образом:
+Mathematically, the weighted sum of inputs including bias is expressed as:
 
 $$\sum_{i=1}^{n} w_i x_i + b$$
 
-где:
-*   $x_i$ - значение i-го входного сигнала
-*   $w_i$ - вес, связанный с i-м входным сигналом
-*   $n$ - общее количество входных сигналов
-*   $b$ - значение смещения
+where:  
+- $x_i$ — value of the $i$-th input signal  
+- $w_i$ — weight associated with the $i$-th input signal  
+- $n$ — total number of input signals  
+- $b$ — bias value
 
-### Функция агрегации: Суммирование входящих сигналов
+### Aggregation Function: Summing Incoming Signals
 
-Наиболее распространенной функцией агрегации в искусственных нейронах является **взвешенная сумма**, как было показано выше. Эта функция просто суммирует произведения каждого входного сигнала на соответствующий ему вес, а затем добавляет смещение. Результатом этой операции является **net input** (или просто *net*) нейрона.
+The most common aggregation function in artificial neurons is the **weighted sum**, as shown above. This function simply sums the products of each input signal and its corresponding weight, then adds the bias. The result of this operation is the neuron’s **net input** (or simply *net*).
 
 $$net = \sum_{i=1}^{n} w_i x_i + b$$
 
-Хотя взвешенная сумма является наиболее распространенной, существуют и другие возможные функции агрегации. Например, в некоторых специализированных архитектурах могут использоваться функции, основанные на расстоянии между входными векторами и весами, но они встречаются значительно реже в стандартных моделях.
+Although the weighted sum is the most prevalent, other aggregation functions exist. For example, some specialized architectures use distance-based functions between input vectors and weights, but these are far less common in standard models.
 
-### Функция активации: Введение нелинейности
+### Activation Function: Introducing Nonlinearity
 
-Функция активации играет критически важную роль в работе искусственного нейрона, вводя **нелинейность** в модель. Без нелинейности многослойная нейронная сеть эквивалентна однослойному персептрону, поскольку последовательные линейные преобразования можно свести к одному линейному преобразованию. Нелинейность позволяет нейронным сетям аппроксимировать сложные, нелинейные зависимости в данных.
+The activation function plays a critically important role in the operation of an artificial neuron by introducing **nonlinearity** into the model. Without nonlinearity, a multilayer neural network would be equivalent to a single-layer perceptron, since sequential linear transformations can be reduced to a single linear transformation. Nonlinearity enables neural networks to approximate complex, nonlinear dependencies in data.
 
-Рассмотрим наиболее распространенные типы функций активации:
+Consider the most common types of activation functions:
 
-*   **Пороговая функция (Threshold function):**  Это простейшая функция активации, которая выдает 1, если вход превышает определенный порог, и 0 в противном случае. Она является аналогом принципа "все или ничего" при генерации потенциала действия в биологическом нейроне. Математически ее можно представить как:
+- **Threshold function**: The simplest activation function, which outputs 1 if the input exceeds a certain threshold and 0 otherwise. It is analogous to the "all-or-nothing" principle of action potential generation in biological neurons. Mathematically:
 
-    $$f(x) = \begin{cases} 1, & \text{если } x \ge \theta \\ 0, & \text{если } x < \theta \end{cases}$$
+    $$f(x) = \begin{cases} 1, & \text{if } x \ge \theta \\ 0, & \text{if } x < \theta \end{cases}$$
 
-    где $\theta$ - пороговое значение.
+    where $\theta$ is the threshold value.
 
-*   **Сигмоидная функция (Sigmoid function):**  Сигмоидная функция, также известная как логистическая функция, является гладкой, дифференцируемой функцией, которая отображает входное значение в диапазон от 0 до 1. Исторически она была очень популярна, поскольку ее выход можно интерпретировать как вероятность. Математическая запись:
+- **Sigmoid function**: Also known as the logistic function, the sigmoid is a smooth, differentiable function that maps input values to the range 0 to 1. Historically very popular, its output can be interpreted as a probability. Mathematical form:
 
     $$\sigma(x) = \frac{1}{1 + e^{-x}}$$
 
-*   **Гиперболический тангенс (Tanh function):**  Функция гиперболического тангенса аналогична сигмоидной функции, но ее диапазон значений составляет от -1 до 1. Это может быть полезно в некоторых архитектурах, где требуется центрирование данных. Математическая запись:
+- **Hyperbolic tangent (Tanh)**: The tanh function is similar to the sigmoid but has an output range from –1 to 1. This can be useful in some architectures where data centering is beneficial. Mathematical form:
 
     $$\tanh(x) = \frac{e^x - e^{-x}}{e^x + e^{-x}}$$
 
-*   **Функция ReLU (Rectified Linear Unit):**  ReLU является одной из самых популярных функций активации в современных глубоких нейронных сетях благодаря своей простоте и эффективности в обучении. Она возвращает входное значение, если оно положительное, и 0 в противном случае. Математическая запись:
+- **ReLU (Rectified Linear Unit)**: ReLU is one of the most popular activation functions in modern deep neural networks due to its simplicity and training efficiency. It returns the input value if positive and 0 otherwise. Mathematical form:
 
     $$f(x) = \max(0, x)$$
 
-    Существуют различные варианты ReLU, такие как **Leaky ReLU** и **ELU (Exponential Linear Unit)**, которые вводят небольшой наклон для отрицательных входных значений, чтобы избежать проблемы "мертвых" нейронов, когда нейрон перестает активироваться.
+    Various ReLU variants exist, such as **Leaky ReLU** and **ELU (Exponential Linear Unit)**, which introduce a small slope for negative inputs to avoid the "dead neuron" problem, where a neuron stops activating.
 
-    *   **Leaky ReLU:** $f(x) = \begin{cases} x, & \text{если } x > 0 \\ \alpha x, & \text{если } x \le 0 \end{cases}$, где $\alpha$ - небольшая константа (например, 0.01).
-    *   **ELU:** $f(x) = \begin{cases} x, & \text{если } x > 0 \\ \alpha (e^x - 1), & \text{если } x \le 0 \end{cases}$, где $\alpha$ - положительная константа.
+    - **Leaky ReLU**: $f(x) = \begin{cases} x, & \text{if } x > 0 \\ \alpha x, & \text{if } x \le 0 \end{cases}$, where $\alpha$ is a small constant (e.g., 0.01).  
+    - **ELU**: $f(x) = \begin{cases} x, & \text{if } x > 0 \\ \alpha (e^x - 1), & \text{if } x \le 0 \end{cases}$, where $\alpha$ is a positive constant.
 
-*   **Другие функции активации:**  Существует множество других функций активации, разработанных для решения конкретных задач, таких как **Softmax**, которая используется в выходных слоях для задач многоклассовой классификации, и **Swish**, которая показала хорошие результаты в некоторых архитектурах.
+- **Other activation functions**: Numerous other activation functions have been developed for specific tasks, such as **Softmax**, used in output layers for multiclass classification, and **Swish**, which has shown good performance in some architectures.
 
-Выбор функции активации является важным аспектом проектирования нейронной сети и зависит от конкретной задачи и архитектуры сети. Различные функции активации обладают разными свойствами, такими как дифференцируемость, диапазон значений, вычислительная сложность и способность предотвращать затухание или взрыв градиентов в процессе обучения.
+The choice of activation function is an important aspect of neural network design and depends on the specific task and network architecture. Different activation functions have different properties, such as differentiability, output range, computational complexity, and ability to mitigate vanishing or exploding gradients during training.
 
-### Выход искусственного нейрона
+### Output of the Artificial Neuron
 
-Выходной сигнал искусственного нейрона ($y$) является результатом применения функции активации ($\phi$) к агрегированному сигналу (*net*). Математически это можно записать как:
+The output signal of the artificial neuron ($y$) is the result of applying the activation function ($\phi$) to the aggregated signal (*net*). Mathematically:
 
 $$y = \phi(net) = \phi(\sum_{i=1}^{n} w_i x_i + b)$$
 
-Этот выходной сигнал затем передается на входы других нейронов в последующих слоях сети. В зависимости от задачи, выходной сигнал может представлять собой классификацию, регрессионное значение или другие типы данных. В многослойных нейронных сетях выход одного нейрона становится входом для нейронов следующего слоя, формируя сложную сеть взаимосвязей.
+This output signal is then passed to the inputs of other neurons in subsequent network layers. Depending on the task, the output signal may represent a classification, regression value, or other data types. In multilayer neural networks, one neuron’s output becomes the input for neurons in the next layer, forming a complex web of interconnections.
 
-## Математическая модель искусственного нейрона
+## Mathematical Model of the Artificial Neuron
 
-Всю работу искусственного нейрона можно свести к единому математическому уравнению, которое описывает преобразование входных сигналов в выходной сигнал:
+The entire operation of an artificial neuron can be summarized in a single mathematical equation describing the transformation of input signals into an output signal:
 
 $$y = \phi(\sum_{i=1}^{n} w_i x_i + b)$$
 
-где:
-*   $y$ - выходной сигнал нейрона
-*   $\phi$ - функция активации
-*   $w_i$ - веса входных сигналов
-*   $x_i$ - входные сигналы
-*   $b$ - смещение
-*   $n$ - количество входных сигналов
+where:  
+- $y$ — neuron output signal  
+- $\phi$ — activation function  
+- $w_i$ — input signal weights  
+- $x_i$ — input signals  
+- $b$ — bias  
+- $n$ — number of input signals
 
-В процессе обучения нейронной сети именно параметры модели – **веса ($w_i$) и смещение ($b$)** – настраиваются таким образом, чтобы сеть могла выполнять поставленную задачу, например, правильно классифицировать изображения или предсказывать значения. Функция активации ($\phi$) обычно выбирается заранее и остается неизменной в процессе обучения.
+During neural network training, it is precisely the model parameters—**weights ($w_i$) and bias ($b$)**—that are adjusted so the network can perform the assigned task, such as correctly classifying images or predicting values. The activation function ($\phi$) is typically chosen in advance and remains unchanged during training.
 
-## Заключение
+## Conclusion
 
-Искусственный нейрон, несмотря на свою кажущуюся простоту, является мощным строительным блоком для создания сложных искусственных нейронных сетей. Он представляет собой математическую модель, которая имитирует некоторые аспекты работы биологического нейрона, такие как получение входных сигналов, их взвешивание, агрегацию и генерацию выходного сигнала. Важно понимать, что искусственный нейрон является **упрощенной моделью** биологического нейрона, игнорируя многие сложные биохимические и физиологические процессы, происходящие в реальных нейронных клетках. Тем не менее, эта упрощенная модель оказалась чрезвычайно эффективной для решения широкого круга задач.
+The artificial neuron, despite its apparent simplicity, is a powerful building block for constructing complex artificial neural networks. It is a mathematical model that mimics certain aspects of biological neuron operation, such as receiving input signals, weighting them, aggregating them, and generating an output signal. It is important to understand that the artificial neuron is a **simplified model** of the biological neuron, ignoring many complex biochemical and physiological processes occurring in real neural cells. Nevertheless, this simplified model has proven extremely effective for solving a wide range of tasks.
 
-В следующей части нашей работы мы проведем подробное сравнение структуры и функционирования биологических и искусственных нейронов, выявив как сходства, так и принципиальные различия между этими системами.
+In the next part of our work, we will conduct a detailed comparison of the structure and function of biological and artificial neurons, identifying both similarities and fundamental differences between these systems.
 
-# **Сравнительный анализ биологического и искусственного нейрона**
+# **Comparative Analysis of Biological and Artificial Neurons**
 
-Проведем углубленный сравнительный анализ биологических и искусственных нейронов, рассматривая их структурные, функциональные и вычислительные аспекты.
+We now conduct an in-depth comparative analysis of biological and artificial neurons, examining their structural, functional, and computational aspects.
 
-1. **Структурное сравнение:**
+1. **Structural Comparison:**
 
-**Биологический нейрон:**
-- **Сома:**  Сложная клеточная структура, содержащая ядро с генетическим материалом и разнообразные органеллы, обеспечивающие метаболические процессы и синтез необходимых молекул. Цитоскелет обеспечивает структурную поддержку и участвует в транспорте веществ.
-- **Дендриты:** Разветвленные отростки, специализирующиеся на приеме входящих сигналов от других нейронов через синапсы. Морфология дендритов (количество, длина, ветвление) существенно влияет на интеграцию сигналов. Дендритные шипики увеличивают поверхность для синаптических контактов и обладают пластичностью.
-- **Аксон:**  Единственный длинный отросток, предназначенный для передачи исходящего сигнала в виде потенциала действия. Начальный сегмент аксона (axon hillock) играет ключевую роль в инициации потенциала действия. Аксон может быть покрыт миелиновой оболочкой, обеспечивающей быструю сальтаторную проводимость.
-- **Синапсы:**  Специализированные структуры, обеспечивающие передачу сигналов между нейронами. Химические синапсы используют нейротрансмиттеры, высвобождаемые пресинаптическим нейроном и связывающиеся с рецепторами на постсинаптическом нейроне, вызывая возбуждающие или тормозные постсинаптические потенциалы. Существуют также электрические синапсы (щелевые контакты), обеспечивающие прямое и быстрое ионное соединение между нейронами.
+**Biological neuron:**  
+- **Soma**: A complex cellular structure containing a nucleus with genetic material and diverse organelles supporting metabolic processes and molecular synthesis. The cytoskeleton provides structural support and participates in intracellular transport.  
+- **Dendrites**: Branched processes specialized for receiving incoming signals from other neurons via synapses. Dendritic morphology (number, length, branching) significantly affects signal integration. Dendritic spines increase surface area for synaptic contacts and exhibit plasticity.  
+- **Axon**: A single long process designed to transmit outgoing signals as action potentials. The axon initial segment (axon hillock) plays a key role in action potential initiation. The axon may be myelinated, enabling fast saltatory conduction.  
+- **Synapses**: Specialized structures enabling signal transmission between neurons. Chemical synapses use neurotransmitters released by the presynaptic neuron and binding to receptors on the postsynaptic neuron, causing excitatory or inhibitory postsynaptic potentials. Electrical synapses (gap junctions) provide direct, rapid ionic coupling between neurons.
 
-**Искусственный нейрон:**
-- **Входы:**  Представляют собой числовые значения, соответствующие активности предыдущих нейронов или входным данным. Количество входов определяет размерность входного вектора.
-- **Веса:**  Числовые параметры, моделирующие силу синаптических связей. Положительные веса соответствуют возбуждающим связям, отрицательные – тормозным. В процессе обучения веса настраиваются для оптимизации производительности сети.
-- **Функция агрегации:**  Обычно представляет собой взвешенную сумму входных сигналов. Может включать в себя смещение (bias), аналогичное порогу возбуждения нейрона.
-- **Функция активации:**  Нелинейная функция, применяемая к результату агрегации для определения выходного сигнала нейрона. Различные функции активации (сигмоид, ReLU, tanh и др.) вводят нелинейность в модель, позволяя ей аппроксимировать сложные зависимости.
-- **Выход:**  Числовое значение, представляющее активность нейрона и передаваемое на входы других нейронов.
+**Artificial neuron:**  
+- **Inputs**: Numerical values corresponding to the activity of previous neurons or input data. Input count determines input vector dimensionality.  
+- **Weights**: Numerical parameters modeling synaptic connection strength. Positive weights correspond to excitatory connections, negative to inhibitory. Weights are tuned during training to optimize network performance.  
+- **Aggregation function**: Typically a weighted sum of input signals. May include bias, analogous to neuronal excitation threshold.  
+- **Activation function**: A nonlinear function applied to the aggregation result to determine neuron output. Different activation functions (sigmoid, ReLU, tanh, etc.) introduce nonlinearity, enabling complex dependency modeling.  
+- **Output**: A numerical value representing neuron activity and passed to other neurons’ inputs.
 
-2. **Функциональное сравнение:**
+2. **Functional Comparison:**
 
-**Биологический нейрон:**
-- **Электрохимические сигналы:**  Передача информации основана на изменениях мембранного потенциала, вызванных потоком ионов через ионные каналы.
-- **Сложная система ионных каналов:**  Различные типы потенциал-зависимых и лиганд-зависимых ионных каналов обеспечивают генерацию и распространение потенциала действия, а также модулируют синаптическую передачу.
-- **Нелинейная передача сигналов:**  Нелинейность возникает на различных уровнях, включая нелинейное поведение ионных каналов, насыщение синаптической передачи и дендритную интеграцию.
-- **Адаптивная пластичность синапсов:**  Сила синаптических связей может изменяться со временем в зависимости от активности нейронов (синаптическая пластичность, например, долговременная потенциация и депрессия), что является основой обучения и памяти. Существуют различные формы пластичности, зависящие от времени и механизмов.
-- **Непрерывная работа в реальном времени:**  Биологические нейроны функционируют асинхронно и непрерывно, обрабатывая информацию в реальном времени.
+**Biological neuron:**  
+- **Electrochemical signaling**: Information transmission is based on membrane potential changes caused by ion flow through ion channels.  
+- **Complex ion channel systems**: Various voltage-gated and ligand-gated ion channels enable action potential generation and propagation and modulate synaptic transmission.  
+- **Nonlinear signal transmission**: Nonlinearity arises at multiple levels, including ion channel behavior, synaptic transmission saturation, and dendritic integration.  
+- **Adaptive synaptic plasticity**: Synaptic connection strength can change over time based on neuronal activity (synaptic plasticity, e.g., long-term potentiation and depression), forming the basis of learning and memory. Multiple forms of plasticity exist, dependent on timing and mechanisms.  
+- **Continuous real-time operation**: Biological neurons operate asynchronously and continuously, processing information in real time.
 
-**Искусственный нейрон:**
-- **Числовые значения:**  Обработка информации осуществляется посредством манипулирования числовыми значениями.
-- **Математические операции взвешивания и суммирования:**  Основной механизм обработки входных сигналов.
-- **Нелинейные функции активации:**  Вводят нелинейность, необходимую для моделирования сложных функций. Выбор функции активации влияет на обучаемость и производительность сети.
-- **Настройка весов при обучении:**  Обучение происходит путем итеративной настройки весов с использованием алгоритмов оптимизации (например, градиентного спуска) на основе обучающих данных.
-- **Дискретная обработка данных:**  В большинстве реализаций искусственные нейронные сети обрабатывают данные дискретно, хотя существуют модели, имитирующие непрерывное время.
+**Artificial neuron:**  
+- **Numerical values**: Information processing involves manipulation of numerical values.  
+- **Weighting and summation mathematical operations**: The core mechanism for processing input signals.  
+- **Nonlinear activation functions**: Introduce necessary nonlinearity for modeling complex functions. Activation function choice affects trainability and performance.  
+- **Weight adjustment during training**: Learning occurs through iterative weight tuning using optimization algorithms (e.g., gradient descent) based on training data.  
+- **Discrete data processing**: Most implementations process data discretely, although models simulating continuous time exist.
 
-**Математические модели:**
+**Mathematical Models:**
 
-**Биологический нейрон:**
-- **Модель Ходжкина-Хаксли для потенциала действия:**
-  $$C_m \frac{dV_m}{dt} = -I_{ion} + I_{ext}$$
-  где $C_m$ – мембранная емкость, $V_m$ – мембранный потенциал, $t$ – время, $I_{ion}$ – общий ионный ток (включающий токи натрия, калия и утечки), $I_{ext}$ – внешний приложенный ток. Эта модель описывает динамику мембранного потенциала на основе поведения отдельных ионных каналов и является фундаментальной для понимания генерации потенциала действия. Существуют и другие, более упрощенные модели, такие как модель Фитцхью-Нагумо, которые сохраняют основные динамические свойства, но с меньшей вычислительной сложностью.
+**Biological neuron:**  
+- **Hodgkin-Huxley model for action potential**:  
+  $$C_m \frac{dV_m}{dt} = -I_{ion} + I_{ext}$$  
+  where $C_m$ is membrane capacitance, $V_m$ is membrane potential, $t$ is time, $I_{ion}$ is total ionic current (including sodium, potassium, and leak currents), and $I_{ext}$ is externally applied current. This model describes membrane potential dynamics based on individual ion channel behavior and is fundamental to understanding action potential generation. Other, simpler models exist, such as the FitzHugh-Nagumo model, which preserves core dynamic properties with lower computational complexity.
 
-**Искусственный нейрон:**
-- **Простая математическая модель:**
-  $$y = \phi(\sum_{i=1}^{n} w_i x_i + b)$$
-  где $y$ – выход нейрона, $\phi$ – функция активации, $w_i$ – вес $i$-го входа, $x_i$ – значение $i$-го входа, $b$ – смещение. Эта модель представляет собой значительное упрощение биологического нейрона, фокусируясь на основных принципах взвешенного суммирования и нелинейного преобразования. Существуют более сложные модели искусственных нейронов, например, рекуррентные нейроны, которые включают в себя обратные связи и способны обрабатывать последовательные данные, или сверточные нейроны, специализирующиеся на обработке пространственно организованных данных.
+**Artificial neuron:**  
+- **Simple mathematical model**:  
+  $$y = \phi(\sum_{i=1}^{n} w_i x_i + b)$$  
+  where $y$ is neuron output, $\phi$ is activation function, $w_i$ is the weight of the $i$-th input, $x_i$ is the value of the $i$-th input, $b$ is bias. This model represents a significant simplification of the biological neuron, focusing on core principles of weighted summation and nonlinear transformation. More complex artificial neuron models exist, such as recurrent neurons (with feedback connections for sequential data processing) or convolutional neurons (specialized for spatially structured data).
 
+**Key Conclusions from Comparative Analysis:**
 
-**Ключевые выводы сравнительного анализа:**
+1. **Core similarities:**  
+- **Functional analogy in signal processing**: Both neuron types perform the fundamental function of receiving, processing, and transmitting information. Biological neurons integrate electrochemical signals; artificial neurons integrate numerical values.  
+- **Input signal integration principle**: Both biological and artificial neurons sum incoming signals, though integration mechanisms differ significantly (spatiotemporal integration in dendrites vs. weighted summation).  
+- **Presence of nonlinear transformation**: Nonlinearity is a key property of both neuron types, enabling complex dependency modeling. In biological neurons, nonlinearity arises from ion channel properties and synaptic transmission; in artificial neurons, from activation functions.  
+- **Capacity for learning and adaptation**: Both biological and artificial neural networks can modify their parameters (synaptic strength or weights) in response to experience, enabling adaptation to new tasks and data. However, learning mechanisms differ fundamentally.
 
-1. **Основные сходства:**
-- **Функциональное подобие в обработке сигналов:** Оба типа нейронов выполняют фундаментальную функцию приема, обработки и передачи информации. Биологические нейроны интегрируют электрохимические сигналы, а искусственные – числовые.
-- **Принцип интеграции входных сигналов:**  И биологические, и искусственные нейроны суммируют входящие сигналы, хотя механизмы суммирования существенно различаются (пространственно-временная интеграция в дендритах против взвешенного суммирования).
-- **Наличие нелинейного преобразования:**  Нелинейность является ключевым свойством обоих типов нейронов, позволяющим им моделировать сложные зависимости. В биологических нейронах нелинейность обусловлена свойствами ионных каналов и синаптической передачи, а в искусственных – функциями активации.
-- **Способность к обучению и адаптации:**  И биологические нейронные сети, и искусственные нейронные сети обладают способностью изменять свои параметры (силу синапсов или веса) в ответ на опыт, что позволяет им адаптироваться к новым задачам и данным. Однако механизмы обучения кардинально отличаются.
+2. **Fundamental differences:**  
+- **Information processing substrate**: The biological neuron relies on complex biochemical and electrophysiological processes involving ion movement, neurotransmitters, and membrane potentials. The artificial neuron operates with abstract mathematical operations on numbers.  
+- **Structural and dynamic complexity**: Biological neurons exhibit far greater structural complexity at molecular, cellular, and network levels. Their dynamics involve numerous interacting processes not yet fully replicated in artificial models.  
+- **Timescales and synchrony**: Biological neurons operate on millisecond timescales and can exhibit complex synchronous activity patterns. Artificial neural networks often operate in discrete time, though spiking neural network research aims for more realistic temporal dynamics modeling.  
+- **Learning and adaptation mechanisms**: Biological learning involves complex biochemical processes like synaptic plasticity modulated by various neurotransmitters and factors. Artificial neural network learning typically uses optimization algorithms like backpropagation.  
+- **Energy consumption**: Biological neurons demonstrate remarkable energy efficiency compared to modern computing systems implementing artificial neural networks.
 
-2. **Принципиальные различия:**
-- **Субстрат обработки информации:** Биологический нейрон основан на сложных биохимических и электрофизиологических процессах, включающих движение ионов, нейротрансмиттеры и мембранные потенциалы. Искусственный нейрон оперирует абстрактными математическими операциями над числами.
-- **Структурная и динамическая сложность:** Биологические нейроны демонстрируют гораздо более высокую структурную сложность на молекулярном, клеточном и сетевом уровнях. Их динамика включает в себя множество взаимодействующих процессов, которые пока не полностью воспроизведены в искусственных моделях.
-- **Временные масштабы и синхронность:**  Биологические нейроны работают в миллисекундных временных масштабах и могут демонстрировать сложные паттерны синхронной активности. Искусственные нейронные сети часто работают в дискретном времени, хотя исследования в области спайковых нейронных сетей стремятся к более реалистичному моделированию временной динамики.
-- **Механизмы обучения и адаптации:**  Обучение в биологических системах включает в себя сложные биохимические процессы, такие как синаптическая пластичность, модулируемую различными нейромедиаторами и факторами. Обучение в искусственных нейронных сетях обычно реализуется с помощью алгоритмов оптимизации, таких как обратное распространение ошибки.
-- **Энергопотребление:** Биологические нейроны демонстрируют поразительную энергоэффективность по сравнению с современными вычислительными системами, реализующими искусственные нейронные сети.
+3. **Advantages and Limitations:**
 
-3. **Преимущества и ограничения:**
+**Biological neuron:**  
++ **High adaptability and learnability**: Biological neural networks possess exceptional ability to adapt to new conditions and learn from limited examples.  
++ **Energy efficiency**: Operates with extremely low power consumption, a subject of active research in neuromorphic computing.  
++ **Parallel and distributed information processing**: Massive parallelism and distributed processing provide fault tolerance and high efficiency.  
+– **Relatively slow signal transmission speed**: Action potential propagation speed is limited by physiological factors.  
+– **Susceptibility to fatigue and biological constraints**: Neuron function depends on metabolic processes and can be disrupted by various factors.
 
-**Биологический нейрон:**
-+ **Высокая адаптивность и обучаемость:**  Биологические нейронные сети обладают исключительной способностью адаптироваться к новым условиям и учиться на ограниченном количестве примеров.
-+ **Энергоэффективность:**  Работает с крайне низким энергопотреблением, что является предметом активных исследований в области нейроморфных вычислений.
-+ **Параллельная и распределенная обработка информации:**  Массивная параллельность и распределенность обработки обеспечивают устойчивость к повреждениям и высокую эффективность.
-- **Относительно медленная скорость передачи сигналов:**  Скорость распространения потенциала действия ограничена физиологическими факторами.
-- **Подверженность утомлению и биологическим ограничениям:**  Работа нейронов зависит от метаболических процессов и может быть нарушена различными факторами.
+**Artificial neuron:**  
++ **High computational speed**: Can perform mathematical operations significantly faster than biological neurons.  
++ **Ease of scaling and reproducibility**: ANN architecture and parameters can be easily scaled and reproduced.  
++ **Stability and predictability**: Properly configured ANNs demonstrate stable operation.  
+– **Simplified information processing model**: Does not reflect the full complexity of biological neurons, limiting capabilities in some domains.  
+– **High energy consumption**: Training and operating large ANNs require substantial computational resources and energy.  
+– **Limited generalization and adaptation capacity**: May struggle to generalize to novel, unseen data and require large amounts of training examples.
 
-**Искусственный нейрон:**
-+ **Высокая скорость вычислений:**  Может выполнять математические операции значительно быстрее, чем биологические нейроны.
-+ **Простота масштабирования и воспроизводимости:**  Архитектура и параметры искусственных нейронных сетей могут быть легко масштабированы и воспроизведены.
-+ **Стабильность и предсказуемость работы:**  При правильной настройке искусственные нейронные сети демонстрируют стабильную работу.
-- **Упрощенная модель обработки информации:**  Не отражает всей сложности биологических нейронов, что ограничивает их возможности в некоторых областях.
-- **Высокое энергопотребление:**  Обучение и работа крупных искусственных нейронных сетей требует значительных вычислительных ресурсов и энергии.
-- **Ограниченная способность к обобщению и адаптации:**  Могут испытывать трудности с обобщением на новые, не виденные ранее данные и требуют большого количества обучающих примеров.
+This in-depth analysis demonstrates that the artificial neuron, despite its simplicity compared to its biological prototype, successfully mimics key information processing principles, enabling effective solutions to a wide range of AI tasks. However, it is crucial to understand the fundamental differences and limitations of artificial models and to continue research toward more biologically realistic neural networks. Future research directions include developing neuromorphic chips mimicking biological neural network architecture and dynamics, and deepening our understanding of biological learning and plasticity mechanisms for integration into artificial models.
 
-Данный углубленный анализ демонстрирует, что искусственный нейрон, несмотря на свою простоту по сравнению с биологическим прототипом, успешно имитирует ключевые принципы обработки информации, что позволяет эффективно решать широкий спектр задач в области искусственного интеллекта. Однако важно понимать фундаментальные различия и ограничения искусственных моделей, а также продолжать исследования, направленные на создание более биологически реалистичных нейронных сетей. Будущие направления исследований включают разработку нейроморфных чипов, имитирующих архитектуру и динамику биологических нейронных сетей, а также углубленное изучение механизмов обучения и пластичности в биологических системах для их интеграции в искусственные модели.
-
-
-### Используемые источники
+### References
 
 [1] Nature Neuroscience: The Hodgkin-Huxley theory of the action potential
 

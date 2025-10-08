@@ -1,63 +1,71 @@
-# 🧠 Процесс обучения в биологических и искусственных нейронных сетях 🤖
+# 🧠 Learning in Biological and Artificial Neural Networks 🤖
 
-### 📊 Общие сведения
+### 📊 Overview
 
-В этом разделе представлено подробное исследование механизмов обучения в биологических и искусственных нейронных сетях. Особое внимание уделяется правилу Хебба и его производным, которые играют ключевую роль в понимании процессов обучения и памяти. Материал является продолжением сравнительного анализа биологических и искусственных нейронных сетей.
+This section presents a detailed investigation of learning mechanisms in biological and artificial neural networks. Special attention is devoted to Hebb’s rule and its derivatives, which play a pivotal role in understanding learning and memory processes. This material extends the comparative analysis of biological and artificial neural networks.
 
-🔗 Основное внимание уделяется:
-- Синаптической пластичности как основе биологического обучения 🧬
-- Правилу Хебба и его математическому описанию 📐
-- Молекулярным механизмам обучения в биологических системах 🔬
-- Современным представлениям о синаптической пластичности 🔄
-- Адаптации правила Хебба в искусственных нейронных сетях 💻
-- Методам обучения в современных ИНС 📊
+🔗 Key focus areas:
+- Synaptic plasticity as the foundation of biological learning 🧬
+- Hebb’s rule and its mathematical formulation 📐
+- Molecular mechanisms of learning in biological systems 🔬
+- Modern perspectives on synaptic plasticity 🔄
+- Adaptation of Hebb’s rule in artificial neural networks 💻
+- Learning methods in modern ANNs 📊
 
-## 📌 Ключевые аспекты исследования
+## 📌 Key Research Aspects
 
-- Детальный анализ синаптической пластичности и её роли в обучении
-- Математическая формализация правила Хебба и его современных модификаций
-- Исследование молекулярных механизмов обучения в биологических системах
-- Рассмотрение спайк-зависимой пластичности (STDP)
-- Сравнительный анализ методов обучения в ИНС
-- Изучение связи между градиентным спуском и принципами Хеббовского обучения
+- Detailed analysis of synaptic plasticity and its role in learning
+- Mathematical formalization of Hebb’s rule and its modern modifications
+- Investigation of molecular learning mechanisms in biological systems
+- Examination of spike-timing-dependent plasticity (STDP)
+- Comparative analysis of learning methods in ANNs
+- Exploration of the connection between gradient descent and Hebbian learning principles
 
-## 💡 Основные темы
+## 💡 Core Topics
 
-- **Биологическое обучение:**
-  - Синаптическая пластичность
-  - Долговременная потенциация (LTP)
-  - Долговременная депрессия (LTD)
-  - Молекулярные механизмы обучения
+- **Biological learning:**
+  - Synaptic plasticity
+  - Long-term potentiation (LTP)
+  - Long-term depression (LTD)
+  - Molecular mechanisms of learning
 
-- **Искусственные нейронные сети:**
-  - Сети Хебба
-  - Самоорганизующиеся карты Кохонена
-  - Сети Хопфилда
-  - Градиентный спуск и обратное распространение ошибки
+- **Artificial neural networks:**
+  - Hebbian networks
+  - Kohonen self-organizing maps
+  - Hopfield networks
+  - Gradient descent and backpropagation
 
-## 🔗 Содержание статьи
+## 🔗 Article Contents
 
-Статья доступна в файле `review.md` и включает:
-- Подробное описание механизмов обучения
-- Математические модели и формулы
-- Сравнительный анализ биологических и искусственных систем
-- Современные представления о нейронном обучении
+The article is available in the file `review.md` and includes:
+- Detailed descriptions of learning mechanisms
+- Mathematical models and formulas
+- Comparative analysis of biological and artificial systems
+- Modern perspectives on neural learning
 
-## 🔄 Связь с предыдущим исследованием
+## 🔄 Connection to Previous Research
 
-Данный материал является продолжением  предыдущего исследования от week-01-02, где расскрываются механизмы обучения как ключевой аспект функционирования нейронных сетей. Понимание этих механизмов критически важно для:
-- Разработки более эффективных архитектур ИНС
-- Создания биологически правдоподобных моделей обучения
-- Улучшения энергоэффективности искусственных систем
-- Развития нейроморфных вычислений
+This material is a continuation of the prior study from week-01-02, which elucidates learning mechanisms as a key aspect of neural network function. Understanding these mechanisms is critical for:
+- Developing more efficient ANN architectures
+- Creating biologically plausible learning models
+- Enhancing energy efficiency in artificial systems
+- Advancing neuromorphic computing
 
-## 🎯 Практическое применение
+## 🎯 Practical Applications
 
-Представленные в исследовании знания находят применение в:
-- Разработке новых алгоритмов машинного обучения
-- Создании нейроморфных процессоров
-- Исследованиях нейропластичности и памяти
-- Разработке методов лечения нейродегенеративных заболеваний
-- Оптимизации архитектур глубоких нейронных сетей
+The knowledge presented in this research finds application in:
+- Development of new machine learning algorithms
+- Design of neuromorphic processors
+- Studies of neuroplasticity and memory
+- Development of treatments for neurodegenerative diseases
+- Optimization of deep neural network architectures
 
-<p align="center">Исследуйте механизмы обучения вместе с нами! 🚀</p>
+---
+
+<div align="center">
+
+**Explore with us 🚀**
+
+⭐ Star this repository if you found it helpful
+
+</div>

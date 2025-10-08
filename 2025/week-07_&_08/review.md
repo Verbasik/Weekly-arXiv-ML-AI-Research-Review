@@ -1,444 +1,444 @@
-# От генерации к рассуждению: эволюция языковых моделей от Generative Pre-trained Transformers до reasoning-систем
+# From Generation to Reasoning: The Evolution of Language Models from Generative Pre-trained Transformers to Reasoning Systems
 
-## Абстракция
+## Abstract
 
-В контексте стремительного развития больших языковых моделей (LLM) особое внимание уделяется повышению их способности к логическим рассуждениям. Одним из значимых достижений в этой области является модель **DeepSeek-R1**, разработанная для стимулирования reasoning-способностей LLM с помощью методов обучения с подкреплением (Reinforcement Learning, RL). DeepSeek-R1 представляет собой инновационный подход, направленный на улучшение качества генерации ответов в задачах, требующих многошаговых логических выводов.
+In the context of the rapid advancement of large language models (LLMs), particular attention is devoted to enhancing their capacity for logical reasoning. One significant achievement in this domain is the **DeepSeek-R1** model, developed to stimulate LLM reasoning capabilities through reinforcement learning (Reinforcement Learning, RL) methods. DeepSeek-R1 represents an innovative approach aimed at improving the quality of response generation in tasks requiring multi-step logical inference.
 
-#### Основные характеристики DeepSeek-R1
+#### Key Characteristics of DeepSeek-R1
 
-DeepSeek-R1 относится к классу reasoning-моделей, таких как **OpenAI o1/o3**, **Google Gemini 2.0 Flash Thinking** и **Alibaba Cloud Qwen QwQ**. В отличие от традиционных LLM, которые стремятся сразу сгенерировать финальный ответ, DeepSeek-R1 использует метод **Chain-of-Thought (CoT)**, предполагающий генерацию последовательности промежуточных шагов рассуждения перед выдачей окончательного результата. Этот подход позволяет модели не только улучшить точность ответов, но и повысить прозрачность и интерпретируемость процесса принятия решений.
+DeepSeek-R1 belongs to the class of reasoning models such as **OpenAI o1/o3**, **Google Gemini 2.0 Flash Thinking**, and **Alibaba Cloud Qwen QwQ**. Unlike traditional LLMs, which aim to generate a final answer immediately, DeepSeek-R1 employs the **Chain-of-Thought (CoT)** method, which involves generating a sequence of intermediate reasoning steps before delivering the final result. This approach enables the model not only to improve answer accuracy but also to enhance the transparency and interpretability of the decision-making process.
 
-#### Технические детали и вклад в развитие LLM
+#### Technical Details and Contribution to LLM Development
 
-DeepSeek-R1 основана на парадигме обучения с подкреплением, что позволяет модели адаптироваться к сложным задачам, требующим глубокого анализа и логического вывода. В отличие от стандартных методов fine-tuning, RL-подход обеспечивает более гибкое обучение, ориентированное на долгосрочные цели. Это особенно важно для задач, где требуется не только генерация текста, но и последовательное рассуждение, например, в математических задачах, вопросах на общие знания и символических рассуждениях.
+DeepSeek-R1 is based on a reinforcement learning paradigm, enabling the model to adapt to complex tasks requiring deep analysis and logical deduction. Unlike standard fine-tuning methods, the RL approach provides more flexible, goal-oriented training. This is especially important for tasks requiring not merely text generation but sequential reasoning—for instance, in mathematical problems, commonsense questions, and symbolic reasoning.
 
-#### Сравнение с другими reasoning-моделями
+#### Comparison with Other Reasoning Models
 
-DeepSeek-R1 выделяется среди аналогичных моделей благодаря своей способности эффективно комбинировать CoT с методами RL. В то время как OpenAI o1/o3 и Google Gemini 2.0 Flash Thinking также используют CoT, DeepSeek-R1 делает акцент на оптимизации процесса рассуждения через reinforcement learning, что позволяет модели лучше адаптироваться к задачам с высокой степенью неопределённости.
+DeepSeek-R1 distinguishes itself among analogous models through its effective integration of CoT with RL techniques. While OpenAI o1/o3 and Google Gemini 2.0 Flash Thinking also utilize CoT, DeepSeek-R1 emphasizes optimizing the reasoning process via reinforcement learning, allowing the model to better adapt to tasks with high uncertainty.
 
-Таким образом, DeepSeek-R1 представляет собой важный шаг в развитии reasoning-моделей, предлагая новый подход к повышению способности LLM к логическим рассуждениям через интеграцию методов CoT и RL.
+Thus, DeepSeek-R1 represents an important step in the evolution of reasoning models, offering a novel approach to enhancing LLM logical reasoning capabilities through the integration of CoT and RL methods.
 
-# 1. Техника Chain-of-Thought (CoT)
+# 1. Chain-of-Thought (CoT) Technique
 
-#### Суть метода и предпосылки возникновения
+#### Core Concept and Origins
 
-Техника **Chain-of-Thought (CoT)**, предложенная в работе **"Chain-of-Thought Prompting Elicits Reasoning in Large Language Models"** (Wei et al., 2022) [[1](https://arxiv.org/abs/2201.11903)], стала важным инструментом в арсенале промпт-инженерии для повышения качества ответов LLM, особенно в задачах, требующих рассуждений.  CoT возникла из наблюдения, что большие языковые модели, в отличие от моделей меньшего размера, демонстрируют **эмерджентное свойство** – способность значительно улучшать свои ответы при использовании подсказок, направляющих их на генерацию промежуточных шагов рассуждения.  Это свойство становится заметным для моделей с количеством параметров от 100 миллиардов и выше.
+The **Chain-of-Thought (CoT)** technique, introduced in the paper **"Chain-of-Thought Prompting Elicits Reasoning in Large Language Models"** (Wei et al., 2022) [[1](https://arxiv.org/abs/2201.11903  )], has become a vital tool in prompt engineering for improving LLM answer quality, particularly in reasoning tasks. CoT emerged from the observation that large language models, unlike smaller models, exhibit an **emergent property**—the ability to significantly improve their responses when prompted to generate intermediate reasoning steps. This property becomes evident in models with 100 billion parameters or more.
 
-#### Реализация и преимущества CoT Prompting
+#### Implementation and Advantages of CoT Prompting
 
-**CoT prompting** заключается в том, чтобы в запросе к модели явно попросить её не сразу выдавать финальный ответ, а сначала сгенерировать последовательность промежуточных шагов, объясняющих ход мысли, и лишь затем предоставить окончательный результат.  Этот подход часто комбинируется с **few-shot learning**, когда модели предоставляются несколько примеров запросов с демонстрацией желаемых цепочек рассуждений и соответствующих ответов.
+**CoT prompting** involves explicitly instructing the model not to provide the final answer immediately, but first to generate a sequence of intermediate reasoning steps explaining its thought process, and only then to deliver the final result. This approach is often combined with **few-shot learning**, where the model is provided with several examples of queries demonstrating the desired reasoning chains and corresponding answers.
 
-Применение CoT prompting приводит к заметному **повышению качества ответов**, особенно в таких областях, как:
+Applying CoT prompting leads to a noticeable **improvement in answer quality**, especially in areas such as:
 
-*   **Математические задачи (арифметические рассуждения):**  Решение задач на сложение, вычитание, умножение, деление и более сложные математические операции.
-*   **Рассуждения с использованием общих знаний (commonsense reasoning):**  Ответы на вопросы, требующие применения знаний о мире и здравого смысла.
-*   **Символические рассуждения:**  Задачи, связанные с манипуляцией символами и логическими операциями.
+*   **Mathematical problems (arithmetic reasoning):** Solving tasks involving addition, subtraction, multiplication, division, and more complex mathematical operations.
+*   **Commonsense reasoning:** Answering questions requiring application of world knowledge and common sense.
+*   **Symbolic reasoning:** Tasks involving manipulation of symbols and logical operations.
 
-Помимо повышения точности, CoT обладает дополнительными преимуществами:
+Beyond improved accuracy, CoT offers additional advantages:
 
-*   **Прозрачность принятия решений:**  Цепочка рассуждений позволяет понять, как модель пришла к тому или иному ответу.
-*   **Интерпретируемость:**  Промежуточные шаги рассуждения делают процесс вывода более понятным и анализируемым.
-*   **Эффективное использование вычислительных ресурсов:** CoT побуждает модели выделять больше вычислительных ресурсов (в виде генерации промежуточных токенов) на более сложные задачи.
+*   **Decision transparency:** The reasoning chain allows understanding how the model arrived at a particular answer.
+*   **Interpretability:** Intermediate reasoning steps make the inference process more comprehensible and analyzable.
+*   **Efficient resource utilization:** CoT encourages models to allocate more computational resources (via generation of intermediate tokens) to complex tasks.
 
 <details> 
-    <summary><em><strong>Краткий обзор основных статей о Chain-of-Thought и Tree-of-Thought: развитие методов рассуждения в LLM, которые привели нас к R1📚</strong></em></summary>
+    <summary><em><strong>Brief Overview of Key Papers on Chain-of-Thought and Tree-of-Thought: The Evolution of Reasoning Methods in LLMs Leading to R1📚</strong></em></summary>
 
-### **Статья Chain-of-thought prompting elicits reasoning in large language models (2022) [[1](https://arxiv.org/abs/2201.11903)]  детально исследует метод Chain-of-Thought Prompting и его влияние на способности LLM к рассуждению.**  
+### **Paper "Chain-of-thought prompting elicits reasoning in large language models" (2022) [[1](https://arxiv.org/abs/2201.11903  )] comprehensively investigates Chain-of-Thought Prompting and its impact on LLM reasoning capabilities.**
 
-Ключевые аспекты и выводы работы включают:
+Key aspects and findings of the paper include:
 
-1.  **Преимущества CoT Prompting:**  CoT повышает точность решения задач в различных областях рассуждений, включая арифметику, общие знания и символьные задачи.  Метод заключается в создании последовательности промежуточных шагов рассуждения, ведущих к ответу, и легко реализуется с помощью нескольких демонстрационных примеров.  В частности, отмечается улучшение арифметических рассуждений, где модель PaLM 540B, использующая CoT, достигла нового state-of-the-art результата на бенчмарке GSM8K для математических задач.
+1.  **Advantages of CoT Prompting:** CoT improves accuracy across diverse reasoning domains, including arithmetic, commonsense, and symbolic tasks. The method involves generating a sequence of intermediate reasoning steps leading to the answer and is easily implemented using a few demonstration examples. Notably, the PaLM 540B model using CoT achieved a new state-of-the-art result on the GSM8K benchmark for math word problems.
 
-2.  **Применимость к различным типам рассуждений:** CoT эффективно применяется для:
-    *   **Арифметических рассуждений:** задачи из наборов данных GSM8K, SVAMP, ASDiv, AQuA, MAWPS.
-    *   **Рассуждений на основе общих знаний:** задачи из наборов данных CSQA, StrategyQA, задачи на понимание дат и спортивных событий, а также в задачах инструктирования роботов (SayCan).
-    *   **Символических рассуждений:** задачи Letter Concatenation, Coin Flip.
+2.  **Applicability to Various Reasoning Types:** CoT is effectively applied to:
+    *   **Arithmetic reasoning:** Tasks from datasets GSM8K, SVAMP, ASDiv, AQuA, MAWPS.
+    *   **Commonsense reasoning:** Tasks from datasets CSQA, StrategyQA, date and sports event understanding, and robot instruction tasks (SayCan).
+    *   **Symbolic reasoning:** Letter Concatenation, Coin Flip tasks.
 
-3.  **Необходимость масштаба модели:**  CoT является **эмерджентной способностью**, проявляющейся с увеличением размера модели.  Эффективность CoT значительно возрастает при использовании очень больших моделей, таких как PaLM (540B параметров) и GPT-3 (175B параметров), по сравнению с моделями меньшего размера.
+3.  **Model Scale Requirement:** CoT is an **emergent ability** that manifests with increasing model size. Effectiveness significantly increases when using very large models such as PaLM (540B parameters) and GPT-3 (175B parameters), compared to smaller models.
 
-4.  **Примеры CoT Prompting:** В статье приводятся примеры CoT для различных типов рассуждений, демонстрирующие, как разбиение задачи на более простые шаги и объяснение каждого шага на естественном языке ведет к конечному ответу.
+4.  **Examples of CoT Prompting:** The paper provides CoT examples for various reasoning types, demonstrating how breaking a task into simpler steps and explaining each step in natural language leads to the final answer.
 
-5.  **Ablation Studies и Robustness Testing:**  Исследования различных вариантов CoT prompting показывают, что выражение промежуточных шагов на естественном языке играет ключевую роль в успехе метода.  Анализ устойчивости подтверждает, что CoT достаточно устойчива к изменениям в стиле аннотации и различиям между аннотаторами.
+5.  **Ablation Studies and Robustness Testing:** Analyses of various CoT prompting variants show that expressing intermediate steps in natural language is crucial to the method's success. Robustness analysis confirms that CoT is sufficiently resilient to changes in annotation style and differences between annotators.
 
-6.  **Анализ ошибок:** Анализ неправильных цепочек рассуждений позволяет классифицировать ошибки (ошибка калькулятора, пропуск шага, ошибка понимания смысла, непоследовательная цепочка рассуждений) и определить направления для улучшения моделей.  При этом подчеркивается, что нет гарантий полной корректности и последовательности рассуждений, генерируемых LLM.
+6.  **Error Analysis:** Analysis of incorrect reasoning chains enables classification of errors (calculator error, skipped step, meaning misunderstanding, inconsistent chain) and identifies directions for model improvement. Importantly, the paper emphasizes that there are no guarantees of complete correctness and coherence in LLM-generated reasoning.
 
-7.  **Сравнение с существующими методами:** CoT prompting отличается от методов, требующих обучения или дообучения нейронных сетей для генерации промежуточных шагов.  CoT позволяет выполнять рассуждения без необходимости большого количества аннотаций и подходит для широкого спектра NLP задач типа "текст в текст".
+7.  **Comparison with Existing Methods:** CoT prompting differs from methods requiring neural network training or fine-tuning to generate intermediate steps. CoT enables reasoning without requiring extensive annotations and is suitable for a wide range of text-to-text NLP tasks.
 
-**Заключение:**
+**Conclusion:**
 
-Исследование Chain-of-Thought prompting подчеркивает важность промптинга как ключевого метода для улучшения качества рассуждений моделей. Основные выводы включают:
+The Chain-of-Thought prompting study underscores the importance of prompting as a key method for improving reasoning quality. Key conclusions include:
 
-- **Промптинг**: Вместо дополнительных этапов обучения, Chain-of-Thought prompting использует специально сформулированные промпты, стимулирующие модель к последовательным логическим рассуждениям.
-- **Масштаб модели**: Эффективность метода возрастает с увеличением размера модели, особенно при использовании крупных моделей с миллиардными параметрами.
-- **Few-shot примеры**: Добавление нескольких примеров further enhances the model's ability to scale and reason logically.
+- **Prompting:** Instead of additional training stages, Chain-of-Thought prompting uses specially formulated prompts to stimulate the model toward sequential logical reasoning.
+- **Model Scale:** Method effectiveness increases with model size, especially with large models with billions of parameters.
+- **Few-shot Examples:** Adding a few examples further enhances the model’s ability to scale and reason logically.
 
-Этот подход демонстрирует прямую корреляцию между качеством масштабирования модели и ее параметрами, что открывает новые горизонты в области искусственного интеллекта.
+This approach demonstrates a direct correlation between model scaling quality and its parameters, opening new horizons in artificial intelligence.
 
-### **Self-Consistency для улучшения CoT**
+### **Self-Consistency for Enhancing CoT**
 
-В контексте стремления к дальнейшему повышению надежности и точности рассуждений, техника Chain-of-Thought получила развитие в виде метода **Self-Consistency (CoT-SC)**, предложенной в значимой работе "Self-Consistency Improves Chain of Thought Reasoning in Language Models" [[2](https://arxiv.org/abs/2203.11171)].  В то время как стандартный CoT prompting, как правило, полагается на жадное декодирование, выбирая наиболее вероятную цепочку рассуждений, CoT-SC вводит принцип **самосогласованности**, основанный на интуитивном понимании, что сложные задачи рассуждения могут иметь несколько равноценных и корректных путей решения.
+In the pursuit of further improving the reliability and accuracy of reasoning, the Chain-of-Thought technique has evolved into the **Self-Consistency (CoT-SC)** method, introduced in the significant work "Self-Consistency Improves Chain of Thought Reasoning in Language Models" [[2](https://arxiv.org/abs/2203.11171  )]. While standard CoT prompting typically relies on greedy decoding, selecting the most probable reasoning chain, CoT-SC introduces the principle of **self-consistency**, grounded in the intuitive understanding that complex reasoning tasks may have multiple equally valid solution paths.
 
-Ключевая идея CoT-SC заключается в генерации **ансамбля разнообразных цепочек рассуждений** для одного и того же входного запроса посредством стохастического семплирования из языковой модели.  Вместо того, чтобы полагаться на единственный, потенциально подверженный ошибкам, вывод, CoT-SC агрегирует результаты, выбирая в качестве финального ответа тот, который демонстрирует **наибольшую согласованность** среди сгенерированных цепочек – принцип, известный как **мажоритарное голосование**.  Такой подход позволяет существенно снизить зависимость от случайных флуктуаций в процессе генерации и повысить общую робастность итогового ответа.
+The core idea of CoT-SC is to generate an **ensemble of diverse reasoning chains** for the same input query via stochastic sampling from the language model. Instead of relying on a single, potentially error-prone output, CoT-SC aggregates results by selecting the final answer that demonstrates the **highest consistency** among generated chains—the principle known as **majority voting**. This approach significantly reduces dependence on random fluctuations during generation and enhances the overall robustness of the final answer.
 
-**Преимущества Self-Consistency (CoT-SC):**
+**Advantages of Self-Consistency (CoT-SC):**
 
-*   **Повышенная надежность и точность:**  За счет учета множественности возможных путей рассуждения, CoT-SC обеспечивает более стабильные, надежные и точные результаты, особенно при решении сложных задач, требующих глубокого логического вывода.
-*   **Простота реализации и вычислительная эффективность:**  Метод отличается простотой интеграции, не требуя дополнительного обучения или трудоемкой разметки данных, и при этом демонстрирует значительное улучшение производительности.
-*   **Устойчивость к вариативности промптов и стратегий семплирования:** CoT-SC проявляет замечательную устойчивость к незначительным изменениям в формулировке промптов и к использованию различных стратегий семплирования, что подчеркивает его практическую ценность.
+*   **Increased Reliability and Accuracy:** By accounting for multiple possible reasoning paths, CoT-SC delivers more stable, reliable, and accurate results, particularly for complex tasks requiring deep logical deduction.
+*   **Simple Implementation and Computational Efficiency:** The method is straightforward to integrate, requiring no additional training or labor-intensive data labeling, while demonstrating significant performance improvements.
+*   **Robustness to Prompt Variability and Sampling Strategies:** CoT-SC exhibits remarkable resilience to minor changes in prompt phrasing and different sampling strategies, highlighting its practical value.
 
-Экспериментальные исследования, представленные в [[2](https://arxiv.org/abs/2203.11171)], убедительно демонстрируют эмпирическое превосходство CoT-SC над стандартным CoT prompting и рядом альтернативных методов декодирования.  На широком спектре авторегрессионных моделей, включая UL2-20B, GPT-3-175B, LaMDA-137B и PaLM-540B, CoT-SC продемонстрировал статистически значимое улучшение точности в задачах как арифметического, так и здравого смысла.  В частности, метод продемонстрировал впечатляющий прирост на авторитетных бенчмарках GSM8K, SVAMP, AQuA, StrategyQA и ARC-challenge, что подтверждает его эффективность и универсальность.
+Experimental research presented in [[2](https://arxiv.org/abs/2203.11171  )] convincingly demonstrates the empirical superiority of CoT-SC over standard CoT prompting and several alternative decoding methods. Across a broad spectrum of autoregressive models—including UL2-20B, GPT-3-175B, LaMDA-137B, and PaLM-540B—CoT-SC showed statistically significant accuracy improvements on both arithmetic and commonsense tasks. Notably, the method demonstrated impressive gains on authoritative benchmarks GSM8K, SVAMP, AQuA, StrategyQA, and ARC-challenge, confirming its effectiveness and universality.
 
-Таким образом, Self-Consistency (CoT-SC) представляет собой важный шаг вперед в эволюции техник рассуждения для больших языковых моделей, предлагая элегантный и действенный способ повышения надежности и точности ответов посредством использования ансамблевого подхода к рассуждениям и принципа мажоритарного голосования.
+Thus, Self-Consistency (CoT-SC) represents an important advancement in the evolution of reasoning techniques for large language models, offering an elegant and effective way to enhance answer reliability and accuracy through an ensemble approach to reasoning and majority voting.
 
-> Стохастическое семплирование в языковой модели позволяет создавать ансамбль разнообразных цепочек рассуждений, внося вариативность через разные гиперпараметры. Лучшие цепочки выбираются по принципу мажоритарного голосования, где наиболее согласованный ответ считается лучшим.
+> Stochastic sampling in a language model enables the creation of an ensemble of diverse reasoning chains, introducing variability through different hyperparameters. The best chains are selected by majority voting, where the most consistent answer is considered the best.
 
-### Развитие CoT: Tree-of-Thought (ToT)
+### Evolution of CoT: Tree-of-Thought (ToT)
 
-Несмотря на признанную эффективность Chain-of-Thought (CoT) в задачах, требующих логических рассуждений, присущая CoT линейная структура последовательности мыслей может стать ограничивающим фактором при решении особо сложных и многоаспектных проблем.  В таких сценариях, где требуется глубокое исследование различных гипотез, оценка альтернативных путей решения и возможность возврата к предыдущим этапам рассуждения, линейная траектория CoT оказывается недостаточной.  В ответ на указанные ограничения были предложены инновационные подходы **Tree-of-Thoughts (ToT)**, представленные в знаковых работах **"Large Language Model Guided Tree-of-Thought"** (Yao et al., 2023) [[3](https://arxiv.org/abs/2305.08291)] и **"Tree of Thoughts: Deliberate Problem Solving with Large Language Models"** (Long, 2023) [[4](https://arxiv.org/abs/2305.10601)].  Фреймворк ToT концептуально расширяет парадигму CoT, вводя древовидную организацию процесса рассуждения, что позволяет моделям осуществлять более гибкий и стратегический поиск решений.
+Despite the recognized effectiveness of Chain-of-Thought (CoT) in tasks requiring logical reasoning, the linear structure of CoT's thought sequence can become a limiting factor when solving particularly complex and multi-faceted problems. In such scenarios—where deep exploration of hypotheses, evaluation of alternative solution paths, and the ability to backtrack to previous reasoning stages are required—the linear trajectory of CoT proves insufficient. In response to these limitations, innovative approaches, **Tree-of-Thoughts (ToT)**, were proposed in landmark works **"Large Language Model Guided Tree-of-Thought"** (Yao et al., 2023) [[3](https://arxiv.org/abs/2305.08291  )] and **"Tree of Thoughts: Deliberate Problem Solving with Large Language Models"** (Long, 2023) [[4](https://arxiv.org/abs/2305.10601  )]. The ToT framework conceptually extends the CoT paradigm by introducing a tree-like organization of the reasoning process, enabling models to perform more flexible and strategic search for solutions.
 
-#### Нелинейный процесс рассуждения и когнитивная аналогия с "System 2"
+#### Non-linear Reasoning Process and Cognitive Analogy to "System 2"
 
-В кардинальном отличии от линейного развертывания мыслительной цепочки в CoT, Tree-of-Thoughts (ToT) архитектурно представляет процесс когнитивного вывода в виде **иерархического дерева**.  Каждая дискретная "мысль" в рамках ToT определяется как семантически целостная последовательность вербальных единиц, представляющая собой концептуально значимый промежуточный шаг на пути к решению целевой задачи.  Принципиальным нововведением ToT выступает имплементация механизма **backtracking**, обеспечивающего возможность рекурсивного возврата к предшествующим узлам дерева рассуждений и выбора альтернативных ветвей исследования в случае, если текущая траектория оказывается семантически тупиковой или эвристически неоптимальной.  Данная функциональная особенность ToT коррелирует с более сложным и рефлексивным режимом человеческого мышления, часто концептуализируемым в когнитивной психологии как "System 2".  В то время как CoT демонстрирует аналогию с интуитивным, быстродействующим "System 1" мышлением, ToT стремится к эмуляции более обдуманного, стратегического и ресурсоемкого "System 2" мышления в контексте больших языковых моделей.
+In stark contrast to the linear unfolding of thought chains in CoT, Tree-of-Thoughts (ToT) architecturally represents the cognitive inference process as an **hierarchical tree**. Each discrete "thought" within ToT is defined as a semantically coherent sequence of verbal units, representing a conceptually meaningful intermediate step toward solving the target task. The pivotal innovation of ToT is the implementation of a **backtracking** mechanism, enabling recursive return to previous nodes in the reasoning tree and selection of alternative exploration branches if the current trajectory proves semantically dead-ended or heuristically suboptimal. This functional feature of ToT correlates with the more complex and reflective mode of human thinking often conceptualized in cognitive psychology as "System 2". While CoT demonstrates an analogy to intuitive, fast "System 1" thinking, ToT aims to emulate the more deliberate, strategic, and resource-intensive "System 2" thinking within the context of large language models.
 
-#### Декомпозиция и ключевые компоненты фреймворка Tree-of-Thoughts
+#### Decomposition and Key Components of the Tree-of-Thoughts Framework
 
-В отличие от преимущественной ориентации CoT на техники промпт-инженерии, Tree-of-Thoughts (ToT) конституируется как развернутый фреймворк, требующий **программного управления** для оркестрации древовидного процесса поиска решения.  Эффективная реализация ToT базируется на интеграции ряда взаимосвязанных ключевых компонентов, синергетически взаимодействующих для навигации в пространстве древовидных рассуждений:
+Unlike CoT's predominant focus on prompt engineering techniques, Tree-of-Thoughts (ToT) constitutes a comprehensive framework requiring **programmatic orchestration** to manage the tree-based search process. Effective implementation of ToT relies on the integration of several interrelated key components, synergistically interacting to navigate the space of tree-based reasoning:
 
-1.  **Декомпозиция мысли (Thought Decomposition):**  Начальным этапом является процедура декомпозиции исходной задачи на дискретные, семантически различимые "мыслительные единицы" или шаги рассуждения.  Критически важным аспектом декомпозиции является достижение оптимального баланса между детализацией и содержательностью "мысли".  Слишком мелкая декомпозиция может привести к комбинаторному взрыву и потере контекстной целостности, в то время как излишне укрупненные "мысли" могут затруднить генерацию разнообразных и релевантных альтернатив.
+1.  **Thought Decomposition:** The initial stage involves decomposing the original task into discrete, semantically distinct "thought units" or reasoning steps. A critical aspect of decomposition is achieving an optimal balance between detail and semantic richness of each "thought". Excessive decomposition may lead to combinatorial explosion and loss of contextual integrity, while overly coarse "thoughts" may hinder generation of diverse and relevant alternatives.
 
-2.  **Генератор мысли (Thought Generator):**  Данный компонент отвечает за автоматизированную генерацию спектра потенциальных "мыслей" на каждом узле дерева рассуждений.  В литературе выделяются два доминирующих подхода к генерации:
-    *   **Независимое идентичное распределение (sampling):**  Метод предполагает генерацию ансамбля статистически независимых "мыслей" на основе заданного CoT-промпта, инициирующего процесс рассуждения.  Данный подход оказывается особенно продуктивным в условиях обширного пространства возможных "мыслей", где требуется максимизация разнообразия генерируемых альтернатив.
-    *   **Последовательное предложение (propose prompting):**  Альтернативный метод заключается в итеративной генерации "мыслей" с использованием специализированных промптов, целенаправленно ориентированных на стимулирование генерации новых и концептуально отличных идей.  Данный подход демонстрирует эффективность в ситуациях с ограниченным пространством "мыслей", где приоритетом является избежание семантического дублирования и избыточности.
+2.  **Thought Generator:** This component is responsible for automated generation of a spectrum of potential "thoughts" at each tree node. Literature identifies two dominant approaches to generation:
+    *   **Independent and Identical Distribution (sampling):** This method generates an ensemble of statistically independent "thoughts" based on a given CoT prompt initiating the reasoning process. This approach proves particularly productive in scenarios with a vast space of possible "thoughts," where maximizing diversity of generated alternatives is essential.
+    *   **Sequential Proposing (propose prompting):** An alternative method involves iterative generation of "thoughts" using specialized prompts deliberately designed to stimulate the generation of new and conceptually distinct ideas. This approach demonstrates effectiveness in situations with a limited "thought" space, where priority is avoiding semantic duplication and redundancy.
 
-3.  **Оценщик состояния (State Evaluator):**  Для обеспечения направленного и эвристически оправданного поиска в пространстве древовидных рассуждений необходим механизм оценки промежуточного прогресса, достигаемого на каждом этапе решения.  Функциональность оценщика состояния реализуется посредством следующих методологических решений:
-    *   **Независимая оценка ценности (value prompting):**  Метод заключается в автономной оценке эвристической "ценности" или перспективности каждого отдельного состояния рассуждения на основе специализированных промптов, акцентирующих внимание на релевантных критериях прогресса.
-    *   **Коллегиальное голосование между состояниями (vote prompting):**  Альтернативный подход предполагает сравнительную оценку множества конкурирующих состояний и эвристический выбор наиболее перспективного варианта посредством процедуры "голосования" или ранжирования, основанной на заданных критериях.
+3.  **State Evaluator:** To ensure directed and heuristically justified search within the tree of reasoning, a mechanism for evaluating intermediate progress at each step is required. The state evaluator's functionality is implemented through the following methodological solutions:
+    *   **Independent Value Prompting:** This method involves autonomous evaluation of the heuristic "value" or promise of each individual reasoning state based on specialized prompts emphasizing relevant progress criteria.
+    *   **Collaborative State Voting (vote prompting):** An alternative approach entails comparative evaluation of multiple competing states and heuristic selection of the most promising option through a voting or ranking procedure based on defined criteria.
 
-4.  **Алгоритм поиска (Search Algorithm):**  Заключительным, но критически важным компонентом фреймворка ToT является алгоритм, определяющий глобальную стратегию навигации и исследования дерева "мыслей".  В пионерских работах по ToT были предложены два фундаментальных алгоритма поиска:
-    *   **Поиск в ширину (Breadth-First Search, BFS):**  Алгоритм BFS поддерживает динамический пул из *b* наиболее эвристически перспективных состояний на каждом уровне дерева и параллельно исследует все возможные "мысли", исходящие из каждого состояния в пуле.
-    *   **Поиск в глубину (Depth-First Search, DFS):**  Алгоритм DFS, напротив, приоритизирует углубленное исследование наиболее перспективной ветви дерева до достижения терминального состояния (решения) или до момента эвристического признания текущего пути бесперспективным, после чего осуществляется возврат к ближайшей альтернативной ветви и продолжение поиска.
+4.  **Search Algorithm:** The final, yet critically important, component of the ToT framework is the algorithm defining the global strategy for navigating and exploring the "thought" tree. In pioneering ToT works, two fundamental search algorithms were proposed:
+    *   **Breadth-First Search (BFS):** The BFS algorithm maintains a dynamic pool of *b* most heuristically promising states at each tree level and concurrently explores all possible "thoughts" emanating from each state in the pool.
+    *   **Depth-First Search (DFS):** Conversely, the DFS algorithm prioritizes deep exploration of the most promising tree branch until reaching a terminal state (solution) or until heuristic recognition of the current path as unpromising, after which it backtracks to the nearest alternative branch and continues the search.
 
-#### Ключевые преимущества парадигмы Tree-of-Thoughts
+#### Key Advantages of the Tree-of-Thoughts Paradigm
 
-Фреймворк Tree-of-Thoughts характеризуется набором значимых преимуществ, определяющих его потенциал в качестве перспективного направления развития reasoning-способностей LLM:
+The Tree-of-Thoughts framework is characterized by a set of significant advantages that define its potential as a promising direction for advancing LLM reasoning capabilities:
 
-*   **Универсальность и обобщающая способность (Generality):**  ToT обладает свойством концептуальной универсальности, позволяющим рассматривать предшествующие методы, такие как Input-Output (IO), Chain-of-Thought (CoT), Self-Consistency CoT (CoT-SC) и подходы, основанные на самосовершенствовании, как частные, редуцированные случаи ToT, характеризующиеся ограниченной глубиной и шириной дерева поиска.
-*   **Модульность архитектуры (Modularity):**  Архитектурная организация ToT отличается выраженной модульностью, обеспечивая возможность независимой модификации и оптимизации отдельных компонентов – базовой LLM, механизмов декомпозиции, генерации и оценки "мыслей", а также алгоритма поиска.  Данная модульность способствует гибкости настройки и открывает перспективы для целенаправленного совершенствования отдельных функциональных блоков.
-*   **Адаптивность к контексту задач (Adaptability):**  ToT демонстрирует высокую степень адаптивности к специфическим характеристикам решаемых задач, когнитивным возможностям используемой LLM и ограничениям вычислительных ресурсов.  Различные классы задач могут требовать вариативных конфигураций ToT, включая выбор оптимального алгоритма поиска, стратегии декомпозиции и методов оценки состояния.
-*   **Практическая применимость и удобство интеграции (Convenience):**  Фреймворк ToT отличается практической ориентированностью, не требуя ресурсоемкого процесса дополнительного обучения или тонкой настройки LLM.  ToT может быть эффективно имплементирован поверх существующих предварительно обученных языковых моделей посредством программной оркестрации, что существенно упрощает его практическое применение и масштабирование.
+*   **Generality:** ToT possesses conceptual universality, allowing prior methods such as Input-Output (IO), Chain-of-Thought (CoT), Self-Consistency CoT (CoT-SC), and self-improvement approaches to be viewed as specialized, reduced cases of ToT, characterized by limited search tree depth and width.
+*   **Architectural Modularity:** ToT architecture exhibits pronounced modularity, enabling independent modification and optimization of individual components—the base LLM, thought decomposition, generation, and evaluation mechanisms, and the search algorithm. This modularity fosters flexibility in tuning and opens prospects for targeted enhancement of specific functional blocks.
+*   **Contextual Adaptability:** ToT demonstrates high adaptability to the specific characteristics of solved tasks, cognitive capabilities of the employed LLM, and computational resource constraints. Different classes of tasks may require varied ToT configurations, including optimal search algorithm selection, decomposition strategy, and state evaluation methods.
+*   **Practical Applicability and Integration Convenience:** The ToT framework is practically oriented, requiring no resource-intensive additional training or fine-tuning of LLMs. ToT can be efficiently implemented on top of existing pre-trained language models via programmatic orchestration, significantly simplifying its practical application and scaling.
 
-#### Эмпирическая валидация и экспериментальные результаты
+#### Empirical Validation and Experimental Results
 
-Эмпирическая валидация эффективности Tree-of-Thoughts была осуществлена на ряде когнитивно сложных задач, для которых традиционные линейные подходы демонстрируют ограниченную результативность.  В частности, ToT продемонстрировал статистически значимое превосходство в следующих задачах:
+Empirical validation of Tree-of-Thoughts effectiveness was conducted on several cognitively complex tasks where traditional linear approaches demonstrate limited efficacy. Specifically, ToT demonstrated statistically significant superiority in the following tasks:
 
-*   **Математическая игра "24" (Game of 24):**  Классическая головоломка, требующая манипуляции четырьмя заданными числами посредством арифметических операций для достижения целевого значения 24.  Применение ToT позволило достичь показателя успешности решения в 74% случаев, в то время как CoT показал результат лишь 4%.
-*   **Креативное письмо с заданным финалом (Creative Writing):**  Задача генерации связного и когерентного четырехпараграфного текста, завершающегося четырьмя заранее определенными финальными предложениями.  Экспертные оценки, проведенные как с привлечением GPT-4, так и с участием людей-оценщиков, консистентно указывают на превосходство ToT в генерации более качественных и семантически целостных текстов по сравнению с IO и CoT.
-*   **Решение мини-кроссвордов (Mini Crosswords):**  Задача, требующая интеграции лексических знаний, логического рассуждения и пространственного мышления для заполнения сетки кроссворда 5x5 на основе заданных вербальных подсказок.  ToT продемонстрировал существенное улучшение результативности по сравнению с IO и CoT в решении данной комплексной задачи, интегрирующей reasoning и knowledge retrieval.
+*   **Mathematical Game "24" (Game of 24):** A classic puzzle requiring manipulation of four given numbers via arithmetic operations to achieve the target value of 24. Application of ToT achieved a 74% success rate, whereas CoT achieved only 4%.
+*   **Creative Writing with a Given Ending (Creative Writing):** The task of generating a coherent, four-paragraph text ending with four predetermined final sentences. Expert evaluations, conducted both with GPT-4 and human raters, consistently indicated ToT's superiority in generating higher-quality and semantically cohesive texts compared to IO and CoT.
+*   **Solving Mini Crosswords (Mini Crosswords):** A task requiring integration of lexical knowledge, logical reasoning, and spatial thinking to fill a 5x5 crossword grid based on verbal clues. ToT demonstrated substantial improvement in performance compared to IO and CoT in solving this complex task integrating reasoning and knowledge retrieval.
 
-#### Потенциальные ограничения и перспективные направления развития
+#### Potential Limitations and Future Development Directions
 
-Несмотря на обнадеживающие результаты, фреймворк Tree-of-Thoughts не лишен определенных ограничений и открывает ряд перспективных направлений для дальнейшего развития.  Одним из ключевых ограничений является **возрастающая вычислительная сложность**, обусловленная необходимостью многократной инференции LLM и экспоненциальным ростом пространства поиска при увеличении глубины и ширины дерева рассуждений.  Кроме того, **эффективность ToT критически зависит от качества и адекватности реализации отдельных компонентов фреймворка**, включая стратегию декомпозиции мысли, генератор и оценщик состояния.  Будущие исследования могут быть направлены на разработку более эффективных и масштабируемых алгоритмов древовидного поиска, оптимизацию методов эвристической оценки состояний и адаптацию ToT к специфическим требованиям различных классов задач и ресурсным ограничениям.  Весьма перспективным направлением представляется также исследование возможности **интеграции принципов ToT в процесс предварительного обучения LLM**, что может способствовать созданию моделей, изначально обладающих более развитыми способностями к стратегическому и многошаговому решению сложных проблем.
+Despite encouraging results, the Tree-of-Thoughts framework is not without certain limitations and opens several promising directions for further development. One key limitation is **increasing computational complexity**, driven by the need for multiple LLM inferences and exponential growth of the search space with increasing tree depth and width. Additionally, **ToT effectiveness critically depends on the quality and adequacy of implementation of individual framework components**, including thought decomposition strategy, generator, and state evaluator. Future research may focus on developing more efficient and scalable tree-search algorithms, optimizing heuristic state evaluation methods, and adapting ToT to specific requirements of diverse task classes and resource constraints. A highly promising direction also involves exploring the possibility of **integrating ToT principles into the pre-training process of LLMs**, potentially leading to models inherently possessing more developed capabilities for strategic and multi-step resolution of complex problems.
 
-### Заключение
+### Conclusion
 
-Технологии **Chain-of-Thought (CoT)** и **Tree-of-Thought (ToT)** знаменуют собой фундаментальные этапы в прогрессивном развитии методологий повышения **reasoning-компетенций** больших языковых моделей.  CoT, как проявление эмерджентных свойств масштабных нейросетевых архитектур, открыл новые горизонты в улучшении качества генерации ответов в задачах, требующих логического вывода и использования семантических знаний.  ToT, в свою очередь, концептуально и функционально развивает идеи CoT, предлагая более гибкий, нелинейный и стратегически ориентированный подход к процессу рассуждения, приближающийся к когнитивным механизмам человеческого problem-solving.  Вектор будущих исследований в данной области, по всей видимости, будет направлен на разработку еще более эффективных, ресурсосберегающих и масштабируемых алгоритмов управления древовидным рассуждением, а также на интеграцию парадигмы ToT в широкий спектр прикладных доменов, требующих от LLM не только генерации лингвистически связного текста, но и продвинутого интеллектуального анализа, стратегического планирования и надежного решения сложных задач в условиях реального мира.
+Technologies **Chain-of-Thought (CoT)** and **Tree-of-Thought (ToT)** mark fundamental milestones in the progressive development of methodologies for enhancing **reasoning competencies** of large language models. CoT, as an emergent property of large neural network architectures, opened new horizons in improving answer generation quality for tasks requiring logical deduction and semantic knowledge utilization. ToT, in turn, conceptually and functionally advances CoT ideas by offering a more flexible, non-linear, and strategically oriented approach to reasoning, approximating human cognitive mechanisms of problem-solving. The future research vector in this domain appears directed toward developing even more efficient, resource-efficient, and scalable algorithms for managing tree-like reasoning, as well as integrating the ToT paradigm into a wide spectrum of application domains requiring LLMs not merely to generate linguistically coherent text, but to perform advanced intellectual analysis, strategic planning, and reliable solution of complex real-world problems.
 
 </details>
 
 ---
 
-> Эти подходы уже не чистый промпт инжиниринг, одним текстом тут не обойдёшься, надо писать какие-то программы, управляющие процессом. В этом смысле это уже в парадигме LLM Programs.
+> These approaches are no longer pure prompt engineering—you cannot solve them with a single text. You need to write programs that manage the process. In this sense, they are already within the LLM Programs paradigm.
 
 # 2. Large Language Model Programs
 
-### Аннотация
+### Abstract
 
-В статье рассматриваются современные методы повышения reasoning-способностей больших языковых моделей (LLM). Помимо хорошо известных техник Chain-of-Thought (CoT) и Tree-of-Thought (ToT), акцент делается на новой парадигме «LLM Programs», предполагающей интеграцию LLM в традиционные алгоритмические структуры. Такой подход позволяет эффективно декомпозировать сложные задачи, минимизировать интерференцию между шагами решения и расширить доступный контекст без значительного дообучения модели. Представленный обзор включает анализ преимуществ и ограничений существующих методов кастомизации LLM, а также детальное описание концепции LLM Programs на основе работ Schlag et al. [[5](https://arxiv.org/abs/2305.05364)] и связанных исследований.
+This paper examines modern methods for enhancing the reasoning capabilities of large language models (LLMs). Beyond well-known techniques such as Chain-of-Thought (CoT) and Tree-of-Thought (ToT), emphasis is placed on the new paradigm of "**LLM Programs**," which involves integrating LLMs into traditional algorithmic structures. This approach enables efficient decomposition of complex tasks, minimizes interference between solution steps, and expands available context without significant model fine-tuning. The presented review includes analysis of advantages and limitations of existing LLM customization methods, along with a detailed description of the LLM Programs concept based on the work of Schlag et al. [[5](https://arxiv.org/abs/2305.05364  )] and related research.
 
-### Введение
+### Introduction
 
-За последние годы наблюдается значительный прогресс в развитии больших языковых моделей, способных выполнять многошаговые рассуждения благодаря методам типа Chain-of-Thought. При этом традиционные подходы кастомизации LLM можно условно разделить на два направления:
+Over the past years, significant progress has been made in developing large language models capable of performing multi-step reasoning through methods such as Chain-of-Thought. Traditional approaches to customizing LLMs can be broadly divided into two directions:
 
-1. **Файнтюнинг (дообучение)** предобученной модели, требующий значительных вычислительных ресурсов, сбора большого объёма данных и наличия соответствующей инфраструктуры.
-2. **In-context learning** – метод, ориентированный на промпт-инжиниринг, когда с помощью специально сконструированных запросов и демонстрационных примеров (в том числе с применением CoT) достигается требуемая функциональность. Однако данный подход ограничен объёмом доступного контекста и может сталкиваться с проблемами интерференции между различными этапами рассуждений.
+1.  **Fine-tuning** a pre-trained model, requiring substantial computational resources, large volumes of data, and appropriate infrastructure.
+2.  **In-context learning**—a method focused on prompt engineering, where desired functionality is achieved through specially constructed queries and demonstration examples (including those employing CoT). However, this approach is limited by available context volume and may encounter problems of interference between different reasoning stages.
 
-В связи с этим возникает необходимость разработки новых методологий, способных объединить преимущества in-context learning и избежать его ограничений.
+Consequently, there is a need to develop new methodologies capable of combining the advantages of in-context learning while avoiding its limitations.
 
-### Переход к парадигме LLM Programs
+### Transition to the LLM Programs Paradigm
 
-#### Мотивация и концептуальные основы
+#### Motivation and Conceptual Foundations
 
-Современные методы, основанные исключительно на промпт-инжиниринге, зачастую не способны эффективно управлять процессом многошаговых рассуждений. Для решения этой проблемы предлагается интегрировать LLM в классические программные алгоритмы. В рамках парадигмы **Large Language Model Programs** LLM используется для решения отдельных подзадач, при этом основное управление состоянием и последовательностью шагов поручается внешнему коду (например, написанному на Python). Такой подход позволяет:
+Modern methods based solely on prompt engineering often fail to effectively manage multi-step reasoning processes. To address this challenge, it is proposed to integrate LLMs into classical algorithmic programs. Within the **Large Language Model Programs** paradigm, the LLM is used to solve individual subtasks, while external code (e.g., written in Python) manages state and step sequence. This approach enables:
 
-- **Декомпозировать задачу** на ряд независимых шагов, для каждого из которых формируется специализированный запрос;
-- **Увеличить доступный контекст** за счет разделения информации между шагами, что предотвращает перегрузку одного запроса лишними данными;
-- **Повысить интерпретируемость** процесса, поскольку каждый этап решения имеет чётко заданные входы и выходы;
-- **Сократить требования к дообучению (файнтюнингу)**, так как модель выполняет локальные подзадачи, не неся ответственность за поддержание глобального состояния.
+- **Task Decomposition:** Breaking the task into a series of logically independent steps, each addressed with a specialized query.
+- **Increased Context Availability:** Separating information across steps prevents overload of a single query with excessive data.
+- **Enhanced Interpretability:** Each solution stage has clearly defined inputs and outputs.
+- **Reduced Fine-tuning Requirements:** The model performs local subtasks and does not bear responsibility for maintaining global state.
 
-#### Техническая реализация
+#### Technical Implementation
 
-В отличие от методов, где за поддержание состояния отвечает сама LLM (например, в системах с внешними инструментами типа Toolformer или LaMDA), при LLM Programs основное управление переносится на программный уровень. Ключевыми элементами данного подхода являются:
+Unlike methods where the LLM itself maintains state (e.g., systems with external tools like Toolformer or LaMDA), in LLM Programs, primary control is shifted to the programmatic level. Key elements of this approach include:
 
-- **Декомпозиция решения:** Задача разбивается на последовательность логически независимых шагов, каждый из которых решается отдельно.
-- **Парсинг и сбор состояния:** Результаты каждого шага анализируются и необходимые данные сохраняются для формирования нового запроса.
-- **Специфичные промпты для каждого шага:** Каждый запрос формируется с учетом только релевантной информации для конкретного этапа, что минимизирует интерференцию между шагами.
+- **Solution Decomposition:** The task is divided into a sequence of logically independent steps, each solved separately.
+- **Parsing and State Assembly:** Results from each step are analyzed, and relevant data is saved to form the next query.
+- **Specialized Prompts per Step:** Each query is formulated using only information relevant to the specific stage, minimizing interference between steps.
 
-#### Преимущества подхода
+#### Advantages of the Approach
 
-Подход LLM Programs обладает рядом существенных преимуществ по сравнению с традиционными методами:
+The LLM Programs approach offers several significant advantages over traditional methods:
 
-- **Минимизация необходимости дообучения:** Модель не требует значительного дополнительного обучения, поскольку основное управление контекстом осуществляется внешней программой.
-- **Возможность описания сложных алгоритмических задач:** Декомпозиция задачи позволяет задать точные спецификации входных и выходных данных для каждого шага.
-- **Повышенная интерпретируемость и отладка:** Благодаря явному разделению этапов решения упрощается тестирование, отладка и оценка качества работы системы.
-- **Расширение доступного контекста:** За счет распределения информации по различным шагам избегается перегрузка одного запроса, что положительно сказывается на качестве генерации.
+- **Minimized Fine-tuning Requirements:** The model requires no significant additional training, as external program manages context.
+- **Ability to Describe Complex Algorithmic Tasks:** Task decomposition allows precise specification of input and output data for each step.
+- **Enhanced Interpretability and Debugging:** Explicit separation of solution stages simplifies testing, debugging, and quality assessment.
+- **Expanded Context Availability:** Distributing information across steps avoids query overload, positively impacting generation quality.
 
-### Пример применения: Вопросно-ответные системы с поддержкой доказательств
+### Example Application: Evidence-Based Question Answering Systems
 
-В работе Schlag et al. [[5](https://arxiv.org/abs/2305.05364)] рассматривается пример создания вопросно-ответной системы, ориентированной на комплексное многошаговое рассуждение. Система разделена на две основные компоненты:
+In the work by Schlag et al. [[5](https://arxiv.org/abs/2305.05364  )], an example of a question-answering system designed for complex multi-step reasoning is presented. The system is divided into two main components:
 
-1. **Фильтрация релевантных фактов:** Из множества источников выбираются параграфы, наиболее вероятно содержащие ответ на заданный вопрос, при этом используется оценка правдоподобия (likelihood evaluation).
-2. **Древовидный поиск цепочек рассуждений:** Для каждого шага генерируются альтернативные варианты рассуждений с использованием различных параграфов в качестве контекста. Затем посредством мажоритарного голосования выбирается наиболее консистентная цепочка.
+1.  **Filtering Relevant Facts:** From multiple sources, paragraphs most likely containing the answer to the given question are selected, using likelihood evaluation.
+2.  **Tree-Based Search of Reasoning Chains:** For each step, alternative reasoning variants are generated using different paragraphs as context. The most consistent chain is then selected via majority voting.
 
-Полученные результаты демонстрируют улучшение точности по сравнению с базовыми моделями, использующими стандартный Chain-of-Thought.
+Results demonstrate improved accuracy compared to baseline models using standard Chain-of-Thought.
 
-### Краткий обзор статьи «Large Language Model Programs»
+### Brief Overview of the Paper "Large Language Model Programs"
 
-Статья «Large Language Model Programs» (Schlag et al., 2023) [[5](https://arxiv.org/abs/2305.05364)] предлагает методологию интеграции LLM в алгоритмические программы с целью расширения возможностей систем без значительного дообучения. Основные положения работы можно суммировать следующим образом:
+The paper "Large Language Model Programs" (Schlag et al., 2023) [[5](https://arxiv.org/abs/2305.05364  )] proposes a methodology for integrating LLMs into algorithmic programs to expand system capabilities without significant fine-tuning. The paper's key propositions can be summarized as follows:
 
-- **Ограничения традиционных LLM:** Трудности в демонстрации алгоритмических способностей (например, сортировка, поиск) и проблемы обобщения, вызванные конечным размером контекста Transformer-архитектуры.
-- **Альтернативный подход LLM Programs:** Вместо того чтобы LLM отвечала за поддержание глобального состояния, на каждом шаге ей предоставляется узкоспециализированный промпт с контекстом, релевантным только для данного этапа.
-- **Преимущества LLM Programs:**  
-  - Расширение теоретических и практических возможностей системы при минимальном дообучении.
-  - Включение алгоритмической информации через разбиение сложных задач на простые подзадачи.
-  - Улучшение интерпретируемости, тестируемости и управляемости системы.
-- **Примеры применения:**  
-  - Вопросно-ответные системы с поддержкой доказательств, где система сначала фильтрует релевантные факты, а затем проводит древовидный поиск цепочек рассуждений.
-  - Задачи по извлечению правил из естественного языка, рекурсивное суммирование текстов, планирование действий робота, а также интеграция внешних инструментов (например, калькулятора или поисковой системы).
+- **Limitations of Traditional LLMs:** Difficulties in demonstrating algorithmic abilities (e.g., sorting, searching) and generalization problems caused by the finite context size of Transformer architectures.
+- **Alternative Approach: LLM Programs:** Instead of the LLM maintaining global state, on each step it is provided with a narrowly specialized prompt containing context relevant only to that specific stage.
+- **Advantages of LLM Programs:**  
+  - Expansion of theoretical and practical system capabilities with minimal or no fine-tuning.
+  - Incorporation of algorithmic information through decomposition of complex tasks into simple subtasks.
+  - Improved interpretability, testability, and controllability of the system.
+- **Application Examples:**  
+  - Evidence-based question-answering systems, where the system first filters relevant facts and then performs a tree-based search of reasoning chains.
+  - Tasks of extracting rules from natural language, recursive text summarization, robot action planning, and integration with external tools (e.g., calculators or search engines).
 
-Авторы цитируют следующие утверждения:
+The authors cite the following statements:
 
 > *"As an alternative, we propose embedding LLMs into a program or algorithm."*  
 > *"Embedding an LLM in a program can significantly expand the theoretical and practical capabilities of the system with no or little finetuning and can help the system generalise more systematically."*  
 > *"In this work, we present the advantages and disadvantages of programming with LLMs and present a general approach which we call a Large Language Model Program."*
 
-Таким образом, методология LLM Programs представляется многообещающим направлением для преодоления ограничений больших языковых моделей и расширения их функциональных возможностей.
+Thus, the LLM Programs methodology represents a promising direction for overcoming the limitations of large language models and expanding their functional capabilities.
 
-### Вывод
+### Conclusion
 
-Обзор современных подходов к повышению reasoning-способностей LLM демонстрирует, что интеграция языковых моделей в классические программные системы (LLM Programs) представляет собой эффективное средство преодоления ограничений как fine-tuning, так и in-context learning. Такой подход обеспечивает более гибкое управление состоянием, позволяет декомпозировать сложные задачи на простые шаги и существенно расширяет функциональные возможности LLM без значительного дополнительного обучения.
+The review of modern approaches to enhancing LLM reasoning capabilities demonstrates that integrating language models into classical programming systems (LLM Programs) is an effective means of overcoming the limitations of both fine-tuning and in-context learning. This approach ensures more flexible state management, enables decomposition of complex tasks into simple steps, and substantially expands LLM functional capabilities without significant additional training.
 
 <details> 
-    <summary><em><strong>Пару интересных примеров практической реализации Tree-of-Thought</strong></em></summary>
+    <summary><em><strong>A few interesting examples of practical Tree-of-Thought implementations</strong></em></summary>
 
-Помимо указанных в предыдущих исследованиях концептуальных разработок, целесообразно рассмотреть конкретные примеры, демонстрирующие, как можно использовать и дорабатывать подход Tree-of-Thought (ToT) в реальных задачах.
+Beyond the conceptual developments outlined in prior research, it is worthwhile to examine concrete examples demonstrating how the Tree-of-Thought (ToT) approach can be utilized and refined in real-world tasks.
 
-### 1. Система Tree-of-Thought Puzzle Solver (Theta Labs)
+### 1. Tree-of-Thought Puzzle Solver System (Theta Labs)
 
-В первой работе, разработанной командой под руководством Jieyi Long (Theta Labs), предложена архитектура, в которой **LLM** (большая языковая модель) получает входные задачи в виде промптов и выдаёт промежуточные ответы. Ключевым элементом системы выступает специализированный **prompter agent** – модуль, принимающий исходный запрос от пользователя. Задача prompter agent заключается в формировании таких промптов к LLM, которые **не требуют немедленного получения финального решения**, а позволяют собрать промежуточные результаты решения.
+In the first work, developed by a team led by Jieyi Long (Theta Labs), an architecture is proposed where a **LLM** (Large Language Model) receives input tasks as prompts and generates intermediate responses. The key component of the system is a specialized **prompter agent**—a module that receives the user’s initial query. The prompter agent’s task is to formulate prompts to the LLM that **do not require an immediate final solution**, but instead facilitate the collection of intermediate reasoning results.
 
-Полученные от LLM промежуточные ответы проверяются с помощью **модуля валидации (checker module)**. Если промежуточное решение оказывается корректным, оно **парсится** и сохраняется во **внутренней памяти (memory module)**. В случае недопустимой или противоречивой генерации запускается процесс отката: **ToT controller** инструктирует prompter agent модифицировать подсказку и вновь запросить у LLM более приемлемое решение. При необходимости система может откатиться не только к родительскому узлу дерева рассуждений, но и к более ранним состояниям, если текущая ветвь поиска не приводит к успеху.
+The intermediate responses generated by the LLM are validated using a **checker module**. If an intermediate solution is deemed correct, it is **parsed** and stored in an **internal memory module**. In the case of invalid or contradictory generation, a backtracking process is triggered: the **ToT controller** instructs the prompter agent to modify the prompt and request a more acceptable solution from the LLM. When necessary, the system can backtrack not only to the parent node of the reasoning tree but also to earlier states if the current search branch proves unsuccessful.
 
-В данной постановке **LLM** отвечает за “short-range reasoning” – локальные шаги логического вывода, в то время как возможность возвращения к предыдущим промежуточным состояниям повышает способность системы к “long-range reasoning” и расширяет пространство потенциальных решений. Кроме того, многошаговое взаимодействие увеличивает количество вычислительных шагов, доступных системе, и тем самым повышает глубину поиска.
+In this setup, the **LLM** handles “short-range reasoning”—local logical inference steps—while the ability to return to prior intermediate states enhances the system’s capacity for “long-range reasoning” and expands the space of potential solutions. Moreover, multi-step interaction increases the number of computational steps available to the system, thereby deepening the search.
 
-- **Проверочный модуль (checker module)** может быть основан как на явно прописанных правилах (например, для логических задач, 3SAT или решения уравнений), так и на дополнительных нейронных сетях, когда задача требует более гибкой оценки корректности.
-- **Memory module** хранит всю историю диалога между LLM и prompter agent, что способствует повышению прозрачности и удобству анализа.
-- **ToT controller** осуществляет мониторинг всей деревообразной структуры поиска. Он может быть задан набором жёстко закодированных правил (например, откат к родителю, если текущая ветвь долго не даёт результата), или реализован в форме обучаемой **policy network**.
-- **Prompter agent** генерирует адаптивные “hints” (подсказки) для LLM, подстраиваясь под динамику решения и статус проверок.
+- The **checker module** can be based on explicitly coded rules (e.g., for logical tasks, 3SAT, or equation solving) or on additional neural networks when tasks require more flexible correctness evaluation.
+- The **memory module** stores the entire history of dialogue between the LLM and the prompter agent, enhancing transparency and facilitating analysis.
+- The **ToT controller** monitors the entire tree-structured search. It can be implemented as a set of hard-coded rules (e.g., backtracking to the parent if a branch yields no result for too long) or as a trainable **policy network**.
+- The **prompter agent** generates adaptive “hints” for the LLM, adjusting dynamically to the progress and validation status of the solution.
 
-В рамках данной системы авторы также применили **алгоритм REINFORCE** для обучения policy network, предполагая, что в будущем возможно использование более продвинутых методов (например, многоагентного обучения с подкреплением – MARL). По аналогии с AlphaGo, модель способна совершенствовать стратегию поиска через итеративные взаимодействия и самообучение.
+Within this system, the authors also applied the **REINFORCE algorithm** to train the policy network, suggesting that in the future, more advanced methods (e.g., multi-agent reinforcement learning—MARL) may be employed. Analogous to AlphaGo, the model can refine its search strategy through iterative interactions and self-learning.
 
-Работа тестировалась на упрощённых вариантах **судоку** (размерностью от 3×3 до 5×5), где подход с ToT и обучаемым контроллером продемонстрировал более высокую эффективность по сравнению с zero-shot, one-shot и few-shot генерациями на основе классического Chain-of-Thought. Код и примеры доступны в открытом репозитории [GitHub: tree-of-thought-puzzle-solver](https://github.com/jieyilong/tree-of-thought-puzzle-solver).
+The system was tested on simplified variants of **Sudoku** (sizes from 3×3 to 5×5), where the ToT approach with a trainable controller demonstrated higher efficiency compared to zero-shot, one-shot, and few-shot generations based on classical Chain-of-Thought. Code and examples are available in the open repository [GitHub: tree-of-thought-puzzle-solver](https://github.com/jieyilong/tree-of-thought-puzzle-solver  ).
 
-### 2. Исследование от команды Принстона и Google DeepMind
+### 2. Research from Princeton and Google DeepMind
 
-Во второй работе, выполненной коллективом авторов из Принстона и Google DeepMind, представлен схожий взгляд на реализацию Tree-of-Thought. Аналогично предыдущим исследованиям, **LLM** здесь также служит эвристикой для поиска решения, а каждый узел дерева соответствует одной “мысли” (thought), то есть промежуточному шагу в решении.
+In a second work, conducted by a team of authors from Princeton and Google DeepMind, a similar perspective on implementing Tree-of-Thought is presented. Similar to prior research, the **LLM** here also serves as a heuristic for solution search, with each tree node corresponding to one “thought”—an intermediate step in the reasoning process.
 
-Авторы подчёркивают, что для создания эффективной реализации ToT необходимо ответить на четыре ключевых вопроса:
+The authors emphasize that to create an effective ToT implementation, four key questions must be addressed:
 
-1. **Декомпозиция процесса решения на мысли:** Нужно подобрать оптимальный “размер” мысли, чтобы модель могла производить полезные идеи, сохраняя при этом разнообразие и осмысленность сгенерированных гипотез.
-2. **Генерация кандидатов для следующего шага:** Предлагается либо проводить независимую выборку (i.i.d. sampling) нескольких мыслей с помощью CoT-промпта, либо поочерёдно запрашивать последовательные варианты посредством “propose prompt”.
-3. **Эвристическая оценка промежуточных состояний:** Предлагаются два механизма – независимо оценивать каждое состояние специальным промптом или формировать несколько состояний сразу и применять процедуру голосования, выбирая наиболее многообещающий вариант.
-4. **Алгоритм поиска:** Рассматриваются классические методы: поиск в глубину (DFS) и поиск в ширину (BFS), при этом выбор подхода может зависеть от конкретной задачи и доступных вычислительных ресурсов.
+1. **Decomposing the solution process into thoughts:** Finding the optimal “size” of a thought so the model generates useful ideas while preserving diversity and semantic meaningfulness of generated hypotheses.
+2. **Generating candidates for the next step:** Either perform independent sampling (i.i.d. sampling) of multiple thoughts using a CoT prompt, or iteratively request sequential alternatives via “propose prompt.”
+3. **Heuristic evaluation of intermediate states:** Two mechanisms are proposed—individually evaluating each state with a specialized prompt, or generating multiple states simultaneously and applying a voting procedure to select the most promising candidate.
+4. **Search algorithm:** Classical methods are considered: Depth-First Search (DFS) and Breadth-First Search (BFS), with the choice depending on the specific task and available computational resources.
 
-Для эмпирической проверки методологии ToT в данной работе были выбраны следующие задачи:
+For empirical validation of the ToT methodology, the following tasks were selected:
 
-- **Game of 24** (арифметическая головоломка),  
-- **Творческое письмо (Creative Writing)**,  
-- **Решение мини-кроссвордов (5×5 Crosswords)**.
+- **Game of 24** (arithmetic puzzle),  
+- **Creative Writing**,  
+- **Solving Mini Crosswords (5×5)**.
 
-В экспериментах использовалась модель GPT-4, и по всем задачам авторы отмечают значительное превосходство ToT над классическими Input-Output подходами, а также над Chain-of-Thought (CoT) и даже Self-Consistency CoT (CoT-SC). Репозиторий с реализацией доступен на [GitHub: tree-of-thought-llm](https://github.com/princeton-nlp/tree-of-thought-llm).
+Experiments used the GPT-4 model, and across all tasks, the authors noted significant superiority of ToT over classical Input-Output approaches, as well as over Chain-of-Thought (CoT) and even Self-Consistency CoT (CoT-SC). The implementation repository is available at [GitHub: tree-of-thought-llm](https://github.com/princeton-nlp/tree-of-thought-llm  ).
 
-Несмотря на определённые различия в формальной постановке и деталях, обе указанные работы демонстрируют принципиальную идею: Tree-of-Thought можно рассматривать как **расширение** стандартного CoT, интегрирующее механизмы нелинейного поиска, отката и проверки промежуточных гипотез. Подобные системы фактически приближаются к тому, что иногда называется **LLM Programs**, когда внешняя логика (контроллер, проверяющие модули, управляемая память) берёт на себя функции координации рассуждений, а сама языковая модель решает локальные подзадачи и генерирует кандидатные пути решения.  
+Despite certain differences in formal framing and details, both works demonstrate the fundamental idea: Tree-of-Thought can be regarded as an **extension** of standard CoT, integrating mechanisms for nonlinear search, backtracking, and validation of intermediate hypotheses. Such systems effectively approach what is sometimes termed **LLM Programs**, where external logic (controller, validation modules, managed memory) assumes coordination of reasoning, while the language model itself solves local subtasks and generates candidate solution paths.
 
-Отдельным направлением развития ToT выступают проекты, изучающие расширение поиска до более сложных структур (например, **Graph of Thoughts** [[arXiv:2308.09687](https://arxiv.org/abs/2308.09687)]). Это свидетельствует о постоянном движении исследовательского сообщества в сторону более гибких схем управления большим количеством промежуточных шагов рассуждения.  
+A distinct development direction for ToT involves projects exploring expansion of search into more complex structures (e.g., **Graph of Thoughts** [[arXiv:2308.09687](https://arxiv.org/abs/2308.09687  )]). This reflects the research community’s continuous movement toward more flexible schemes for managing large numbers of intermediate reasoning steps.  
 
 ---
 
-Таким образом, современные исследования наглядно подтверждают высокую эффективность Tree-of-Thought и смежных подходов при решении нестандартных и сложных задач, требующих ветвящегося процесса рассуждения. Развитие данного направления позволяет надеяться, что в обозримом будущем будут созданы ещё более совершенные системы, способные к глубоко структурированным многошаговым рассуждениям и самостоятельному планированию поиска решений.
+Thus, contemporary research clearly confirms the high effectiveness of Tree-of-Thought and related approaches in solving non-standard and complex tasks requiring branching reasoning processes. The advancement of this direction offers hope that in the foreseeable future, even more sophisticated systems capable of deeply structured multi-step reasoning and autonomous search planning will be developed.
 
 </details>
 
 ---
 
-# 3. Test-time Compute: новое измерение масштабирования языковых моделей
+# 3. Test-time Compute: A New Dimension of Scaling Language Models
 
-В контексте развития парадигмы LLM Programs, открывающей новые возможности для управления процессом рассуждений, возникает еще одно важное направление – **Test-time compute**, представляющее собой революционный подход к масштабированию языковых моделей.
+In the context of the LLM Programs paradigm, which unlocks new possibilities for managing reasoning processes, another important direction emerges—**Test-time compute**, representing a revolutionary approach to scaling language models.
 
-### Эволюция масштабирования LLM: от обучения к инференсу
+### Evolution of LLM Scaling: From Training to Inference
 
-Традиционно, масштабирование больших языковых моделей (LLM) было сосредоточено на этапе обучения.  Увеличение размера модели, объема обучающих данных и вычислительных ресурсов для обучения было основным способом повышения производительности. Однако с появлением моделей, таких как OpenAI o1, открылась новая эра – эра "Test-time compute", предлагающая масштабирование на этапе инференса.
+Traditionally, scaling large language models (LLMs) focused on the training stage. Increasing model size, training data volume, and computational resources for training was the primary means of improving performance. However, with the emergence of models like OpenAI o1, a new era has opened—the era of “Test-time compute,” proposing scaling during inference.
 
-### Сущность Test-time Compute
+### Essence of Test-time Compute
 
-"**Test-time compute**" (вычисления во время тестирования/инференса) представляет собой парадигму масштабирования LLM, которая акцентирует внимание на увеличении вычислительных ресурсов, доступных модели непосредственно в момент обработки пользовательского запроса (inference time).  В отличие от традиционного подхода, "Test-time compute" позволяет улучшить производительность уже обученной модели, предоставляя ей больше времени и вычислительной мощности для "размышления" над каждым конкретным запросом.
+“**Test-time compute**” (computation during testing/inference) is a scaling paradigm for LLMs that emphasizes increasing computational resources available to the model directly at the moment of processing a user query (inference time). Unlike the traditional approach, “Test-time compute” allows enhancing the performance of a pre-trained model by providing it with more time and computational power to “think” about each specific query.
 
-### Отличие от традиционного масштабирования
+### Difference from Traditional Scaling
 
-Традиционное масштабирование LLM фокусировалось на следующих аспектах **во время обучения**:
+Traditional LLM scaling focused on the following aspects **during training**:
 
-* **Размер модели:** Увеличение количества параметров и сложности архитектуры.
-* **Объем данных:** Расширение и разнообразие обучающих данных.
-* **Вычислительные ресурсы для обучения:** Использование более мощных GPU и увеличение времени обучения.
+* **Model size:** Increasing the number of parameters and architectural complexity.
+* **Data volume:** Expanding and diversifying training data.
+* **Training computational resources:** Utilizing more powerful GPUs and increasing training time.
 
-"Test-time compute" вводит **дополнительное измерение масштабирования**, применяемое **после обучения модели**.  Это позволяет повысить эффективность модели, не изменяя ее архитектуру или параметры, а оптимизируя вычислительные ресурсы в момент инференса.
+“Test-time compute” introduces an **additional scaling dimension**, applied **after model training**. This allows improving model efficiency without altering its architecture or parameters, by optimizing computational resources at inference time.
 
-### Механизм и преимущества Test-time Compute
+### Mechanism and Advantages of Test-time Compute
 
-Предоставление модели больше вычислительных ресурсов во время инференса позволяет:
+Providing the model with greater computational resources during inference enables:
 
-* **Углубленная обработка запросов:**  Модель может проводить более детальный анализ входного текста и контекста.
-* **Улучшение рассуждений:**  Дополнительные вычисления способствуют более эффективному планированию, поиску оптимальных решений и генерации логически обоснованных ответов.
-* **Использование сложных алгоритмов инференса:**  Возможность применения ресурсоемких, но более качественных методов декодирования и генерации.
+* **Deeper query processing:** The model can conduct more detailed analysis of input text and context.
+* **Improved reasoning:** Additional computation facilitates more effective planning, search for optimal solutions, and generation of logically grounded answers.
+* **Use of complex inference algorithms:** Enables application of resource-intensive but higher-quality decoding and generation methods.
 
-### Как итог
+### In Summary
 
-"Test-time compute" знаменует собой важный сдвиг в подходах к масштабированию LLM.  Он дополняет традиционные методы, сосредотачиваясь на оптимизации вычислительных ресурсов в момент использования модели.  Это открывает перспективы для создания более интеллектуальных и reasoning-ориентированных языковых моделей, особенно в задачах, требующих глубокого анализа и логического вывода.
+“Test-time compute” marks a significant shift in approaches to scaling LLMs. It complements traditional methods by focusing on optimizing computational resources at the moment of model usage. This opens prospects for creating more intelligent and reasoning-oriented language models, particularly in tasks requiring deep analysis and logical deduction.
 
-### DeepSeek-R1: использование Test-time Compute и Reinforcement Learning для Reasoning
+### DeepSeek-R1: Utilizing Test-time Compute and Reinforcement Learning for Reasoning
 
-В контексте эры Test-time compute, модель DeepSeek-R1 представляет собой яркий пример использования этого подхода для усиления reasoning-способностей LLM.  Более того, DeepSeek-R1 демонстрирует, что обучение reasoning возможно не только через Supervised Fine-Tuning (SFT) на больших объемах данных, но и эффективно достигается с помощью масштабного обучения с подкреплением (Reinforcement Learning, RL).
+Within the context of the Test-time compute era, the DeepSeek-R1 model exemplifies the application of this approach to enhance LLM reasoning capabilities. Moreover, DeepSeek-R1 demonstrates that reasoning capabilities can be trained not only via Supervised Fine-Tuning (SFT) on large datasets but also effectively achieved through large-scale Reinforcement Learning (RL).
 
-Главным достижением DeepSeek-R1, аналогично AlphaZero, является демонстрация того, что для обучения reasoning-способностям не требуется обширных наборов данных для SFT.  Эти способности могут быть эффективно усвоены посредством масштабного обучения с подкреплением (RL), что позволяет в значительной степени обойтись без "человеческих демонстраций" в виде SFT.  Тем не менее, использование небольшого объема SFT с качественными примерами может способствовать более эффективному "холодному старту" обучения.
+The primary achievement of DeepSeek-R1, analogous to AlphaZero, is demonstrating that extensive datasets for SFT are not required to train reasoning capabilities. These capabilities can be efficiently acquired through large-scale Reinforcement Learning (RL), significantly reducing dependence on “human demonstrations” in the form of SFT. Nonetheless, using a small volume of high-quality SFT examples can aid in a more efficient “cold start” of training.
 
-В качестве базовой модели для DeepSeek-R1 была выбрана DeepSeek-V3-Base – модель после Pre-training, но до Post-training, то есть без SFT и RL.  В качестве алгоритма RL был применен Group Relative Policy Optimization (GRPO), ранее использованный в DeepSeek-V3 и DeepSeekMath, который позволяет избежать необходимости в отдельной модели критика.
+As the base model for DeepSeek-R1, DeepSeek-V3-Base was selected—a model after pre-training but before post-training, i.e., without SFT and RL. The RL algorithm applied was Group Relative Policy Optimization (GRPO), previously used in DeepSeek-V3 and DeepSeekMath, which avoids the need for a separate critic model.
 
-# 4. Технические детали DeepSeek-V3 и Multi-Head Latent Attention (MLA)
+# 4. Technical Details of DeepSeek-V3 and Multi-Head Latent Attention (MLA)
 
-Для более глубокого понимания архитектурных особенностей DeepSeek-R1, важно рассмотреть технические детали базовой модели DeepSeek-V3, на которой она основана.  DeepSeek-V3 представляет собой значительный шаг вперед в развитии LLM, сочетая в себе классическую архитектуру декодера-трансформера с элементами Mixture-of-Experts (MoE) и инновационными решениями в механизмах внимания, такими как Multi-Head Latent Attention (MLA).
+To gain a deeper understanding of the architectural features of DeepSeek-R1, it is essential to examine the technical details of its foundational model, DeepSeek-V3. DeepSeek-V3 represents a significant advancement in LLM development, combining the classical decoder-transformer architecture with elements of Mixture-of-Experts (MoE) and innovative attention mechanisms such as Multi-Head Latent Attention (MLA).
 
-### Обзор архитектуры DeepSeek-V3
+### Overview of DeepSeek-V3 Architecture
 
-Согласно техническому отчету DeepSeek-V3 [[6](https://arxiv.org/abs/2412.19437)] и репозиторию [GitHub](https://github.com/deepseek-ai/DeepSeek-V3), модель представляет собой декодер-трансформер с архитектурой Mixture-of-Experts (MoE).  DeepSeek-V3 содержит 671 миллиард параметров, из которых 37 миллиардов являются активными для каждого токена.  Модель состоит из 61 слоя-трансформера со скрытым измерением $d_h=7168$.
+According to the DeepSeek-V3 technical report [[6](https://arxiv.org/abs/2412.19437  )] and the [GitHub repository](https://github.com/deepseek-ai/DeepSeek-V3  ), the model is a decoder-transformer with a Mixture-of-Experts (MoE) architecture. DeepSeek-V3 contains 671 billion parameters, of which 37 billion are active per token. The model consists of 61 transformer layers with a hidden dimension $d_h=7168$.
 
-![Table_1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_1.jpg)
+![Table_1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_1.jpg  )
 
-В разработке DeepSeek-V3 были применены несколько интересных технических решений, которые представляют исторический интерес в контексте эволюции LLM.  Некоторые из этих решений, включая MLA, были протестированы и усовершенствованы в предыдущей версии модели, DeepSeek-V2 [[7](https://arxiv.org/abs/2405.04434)].
+Several interesting technical solutions were applied in the development of DeepSeek-V3, historically significant in the context of LLM evolution. Some of these solutions, including MLA, were tested and refined in the previous model version, DeepSeek-V2 [[7](https://arxiv.org/abs/2405.04434  )].
 
-### Многоголовое латентное внимание (Multi-Head Latent Attention, MLA)
+### Multi-Head Latent Attention (MLA)
 
-Одним из ключевых нововведений DeepSeek-V3 является **многоголовое латентное внимание (MLA)**.  Этот механизм направлен на повышение эффективности и масштабируемости модели, особенно в контексте задач, требующих обработки длинных последовательностей и сложных рассуждений. Для понимания MLA, рассмотрим сначала классический механизм Multi-Head Attention (MHA).
+One of the key innovations in DeepSeek-V3 is **Multi-Head Latent Attention (MLA)**. This mechanism aims to enhance model efficiency and scalability, particularly in tasks requiring processing of long sequences and complex reasoning. To understand MLA, consider first the classical Multi-Head Attention (MHA) mechanism.
 
 <details> 
-    <summary><em><strong> Классический Multi-Head Attention (MHA) на примере декодера в Transformer🤖</strong></em></summary>
+    <summary><em><strong>Classical Multi-Head Attention (MHA) in the Transformer Decoder🤖</strong></em></summary>
 
-#### 1. Ключевая роль декодера в Transformer
+#### 1. Key Role of the Decoder in Transformer
 
-В классической задаче **авторегрессионной** генерации последовательностей (например, машинный перевод) декодер выполняет функцию **пошагового (условного) формирования выходной последовательности**. При этом он «подсматривает» на выход кодера, чтобы учитывать контекст входного предложения (в случае перевода), и одновременно вычисляет вероятности для следующего токена на основе **частично сгенерированной** последовательности.
+In a classic **autoregressive** sequence generation task (e.g., machine translation), the decoder performs the function of **step-by-step (conditional) formation** of the output sequence. It “looks at” the encoder’s output to incorporate context from the input sentence (in translation) while simultaneously computing probabilities for the next token based on the **partially generated** sequence.
 
-Схематично в исходной статье "Attention Is All You Need" декодер находится **справа**, принимая:
-1. **Собственные входы** (для языковых задач — "сдвинутые вправо" токены предыдущих слов).
-2. **Выход кодера** (контекст, полученный при обработке входной последовательности).
+Schematically, in the original "Attention Is All You Need" paper, the decoder is located on the **right**, receiving:
+1. **Its own inputs** (for language tasks—“shifted right” tokens of previous words).
+2. **The encoder’s output** (context obtained from processing the input sequence).
 
-![Figure_1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-04/assets/Figure_1.png)
+![Figure_1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-04/assets/Figure_1.png  )
 
-#### 2. Архитектура декодера
+#### 2. Decoder Architecture
 
-Каждый слой декодера (Decoder Layer) состоит из следующих подблоков:
+Each decoder layer (Decoder Layer) consists of the following sub-blocks:
 
 1. **Masked Multi-Head Attention**  
-   - Почти такой же, как обычный Multi-Head Attention, но с **маскировкой будущих позиций** (чтобы модель не «подглядывала» за токенами, которые ей ещё нельзя видеть во время авторегрессии).
+   - Nearly identical to standard Multi-Head Attention but with **masking of future positions** (to prevent the model from “peeking” at tokens it cannot yet see during autoregression).
 
 2. **Add & Norm**  
-   - Остаточное соединение и Layer Normalization, аналогично кодеру.
+   - Residual connection and Layer Normalization, analogous to the encoder.
 
 3. **Multi-Head Attention (Cross-Attention)**  
-   - Механизм внимания с запросами (Q) из **текущего состояния декодера**, а ключами (K) и значениями (V) из **выхода кодера** (т. е. декодер учится извлекать нужную информацию из контекстных эмбеддингов, полученных кодером).
+   - Attention mechanism with queries (Q) from the **current decoder state** and keys (K) and values (V) from the **encoder’s output** (i.e., the decoder learns to extract relevant information from contextual embeddings produced by the encoder).
 
 4. **Add & Norm**  
-   - Остаточное соединение и Layer Normalization.
+   - Residual connection and Layer Normalization.
 
 5. **Feed Forward (FFN)**  
-   - Двухслойная полносвязная сеть с функцией активации, аналогичная модулю в кодере.
+   - A two-layer fully connected network with an activation function, analogous to the encoder module.
 
 6. **Add & Norm**  
-   - Остаточное соединение и Layer Normalization.
+   - Residual connection and Layer Normalization.
 
-> Как и в кодере, эти шесть стадий повторяются несколько раз (например, 6 слоёв декодера), формируя **глубокую** модель.
+> As in the encoder, these six stages repeat multiple times (e.g., 6 decoder layers), forming a **deep** model.
 
-#### 3. Вход для декодера (shifted right)
+#### 3. Decoder Input (shifted right)
 
-В **задачах генерации текста** (например, при машинном переводе), декодер на каждом шаге стремится предсказать **следующий токен**, используя ранее сгенерированные токены. Чтобы модель **не видела** будущие токены, входная последовательность декодера обычно сдвигается на один токен вправо (shifted right).  
+In **text generation tasks** (e.g., machine translation), the decoder, at each step, seeks to predict the **next token**, using previously generated tokens. To prevent the model from **seeing future tokens**, the decoder’s input sequence is typically shifted one token to the right (shifted right).  
 
-- Например, в задаче перевода при обучении в качестве "правильного выхода" используют предложение-цель:
+- For example, in a translation task, the target sentence is used as the “correct output”:
   ```
-  [BOS] Я люблю кошек . [EOS]
+  [BOS] I love cats . [EOS]
   ```
-- На вход декодера (X_dec_inp) подаётся «сдвинутая вправо» версия:
+- The input to the decoder (X_dec_inp) is the “shifted right” version:
   ```
-  [BOS] Я люблю кошек .
+  [BOS] I love cats .
   ```
-  а последний токен `[EOS]` уже не подаётся, так как он не нужен для предсказания.
+  The final token `[EOS]` is not fed, as it is unnecessary for prediction.
 
-- Это позволяет реализовать авторегрессионную схему:  
-  *На шаге i модель не видит токены (i+1, i+2, ...), она учится предсказывать i-й токен, имея только предыдущие.*  
+- This enables the autoregressive scheme:  
+  *At step i, the model does not see tokens (i+1, i+2, ...); it learns to predict the i-th token using only previous ones.*  
 
-#### 4. Маскированное многоголовое самовнимание (Masked Multi-Head Attention)
+#### 4. Masked Multi-Head Self-Attention (Masked Multi-Head Attention)
 
-##### 4.1 Мотивация  
-В отличие от кодера, где в Self-Attention можно смотреть на **все** позиции последовательности, декодер **маскирует** будущие токены, чтобы модель не училась «жульничать» и «заглядывать» вперёд.
+##### 4.1 Motivation  
+Unlike the encoder, where Self-Attention can observe **all** positions in the sequence, the decoder **masks** future tokens to prevent the model from “cheating” and “looking ahead.”
 
-![Figure_2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_2.png)
+![Figure_2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_2.png  )
 
-##### 4.2 Математическая формула  
-Практически это тот же Multi-Head Attention, что и в кодере, но при вычислении  
+##### 4.2 Mathematical Formula  
+Practically, this is the same Multi-Head Attention as in the encoder, but when computing  
 
 $$
 \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{Q K^T}{\sqrt{d_k}}\right)V
 $$
 
-*   **Q** (Query) – **Матрица запросов**. В контексте **Masked Multi-Head Attention** в декодере Transformer, запросы (Q) поступают из **входных эмбеддингов декодера** (после прохождения через линейный слой).  Для каждого токена во входной последовательности декодера формируется вектор запроса.  По сути, запросы представляют собой то, на что текущая позиция в декодере "смотрит" при вычислении внимания.
+*   **Q** (Query) – **Query matrix**. In the context of **Masked Multi-Head Attention** in the Transformer decoder, queries (Q) come from the **decoder’s input embeddings** (after passing through a linear layer). For each token in the decoder’s input sequence, a query vector is formed. In essence, queries represent what the current decoder position “looks at” when computing attention.
 
-*   **K** (Key) – **Матрица ключей**. В **Masked Multi-Head Attention** в декодере, ключи (K) также поступают из **входных эмбеддингов декодера** (после прохождения через другой линейный слой). Ключи представляют собой информацию, с которой запросы сравниваются для определения релевантности. Они соответствуют позициям во входной последовательности декодера, на которые модель обращает внимание.
+*   **K** (Key) – **Key matrix**. In **Masked Multi-Head Attention** in the decoder, keys (K) also come from the **decoder’s input embeddings** (after passing through another linear layer). Keys represent the information against which queries are compared to determine relevance. They correspond to positions in the decoder’s input sequence that the model attends to.
 
-*   **V** (Value) – **Матрица значений**.  В **Masked Multi-Head Attention** в декодере, значения (V) также поступают из **входных эмбеддингов декодера** (после прохождения через еще один линейный слой). Значения представляют собой информацию, которая будет агрегирована взвешенным образом, на основе рассчитанных весов внимания.  Именно значения "суммируются" с весами, полученными из сравнения запросов и ключей, чтобы сформировать выходное представление внимания.
+*   **V** (Value) – **Value matrix**. In **Masked Multi-Head Attention** in the decoder, values (V) also come from the **decoder’s input embeddings** (after passing through another linear layer). Values represent the information that will be aggregated in a weighted manner based on the attention weights calculated from query-key comparisons. It is these values that are “summed” with the weights obtained from query-key comparisons to form the attention output representation.
 
-*   $d_k$ – **Размерность векторов ключей** (и запросов, так как в Self-Attention размерности обычно совпадают).  $\sqrt{d_k}$ используется в знаменателе для **масштабирования**, чтобы предотвратить насыщение функции softmax, особенно при больших значениях $d_k$. Это помогает стабилизировать процесс обучения.
+*   $d_k$ – **Key vector dimension** (and query dimension, as in Self-Attention dimensions are typically equal).  $\sqrt{d_k}$ is used in the denominator for **scaling** to prevent softmax saturation, especially with large $d_k$. This helps stabilize training.
 
-**В кратце, в Masked Multi-Head Attention декодера:**
+**In brief, in Masked Multi-Head Attention in the decoder:**
 
-*   **Q, K, V** происходят из **одной и той же входной последовательности декодера** (эмбеддинги с учетом маскирования будущих позиций).
-*   Механизм внимания позволяет каждой позиции в декодере взвешенно учитывать другие позиции в **предыдущей части** декодированной последовательности (из-за маскирования).
+*   **Q, K, V** all originate from the **same decoder input sequence** (embeddings with future position masking applied).
+*   The attention mechanism allows each position in the decoder to weighingly consider other positions in the **preceding part** of the decoded sequence (due to masking).
 
-мы **зануляем (или ставим -∞) те позиции**, которые ещё не должны быть видны для текущего токена. Так получается **треугольная маска** для языка, когда позиция i не видит позиции i+1, i+2, …  
+we **zero out (or set to -∞) those positions** that should not yet be visible to the current token. This results in a **triangular mask** for language, where position i cannot see positions i+1, i+2, …  
 
 ```python
-# Пример генерации треугольной маски в PyTorch (L - длина последовательности)
+# Example of generating a triangular mask in PyTorch (L - sequence length)
 import torch
 from typing import Tuple
 
 def subsequent_mask(size: int) -> torch.Tensor:
     """
     Description:
-        Создаёт маску, запрещающую связь с будущими позициями.
-        Выход имеет форму [size, size] со значениями True/False:
-          True  - те места, где смотреть можно
-          False - где смотреть нельзя (будущий токен)
+        Creates a mask that prohibits connections to future positions.
+        Output has shape [size, size] with True/False values:
+          True  - positions where attention is allowed
+          False - positions where attention is forbidden (future tokens)
 
     Args:
-        size (int): Размер маски (длина последовательности).
+        size (int): Size of the mask (sequence length).
 
     Returns:
-        torch.Tensor: Треугольная маска формы [size, size] с значениями True/False.
+        torch.Tensor: Triangular mask of shape [size, size] with True/False values.
 
     Examples:
         >>> mask = subsequent_mask(5)
@@ -449,29 +449,29 @@ def subsequent_mask(size: int) -> torch.Tensor:
                 [ True,  True,  True,  True, False],
                 [ True,  True,  True,  True,  True]])
     """
-    # Треугольная матрица из единиц на нижнем треугольнике (включая диагональ)
+    # Triangular matrix of ones on the lower triangle (including diagonal)
     mask = torch.tril(torch.ones(size, size)).bool()
     return mask
 
-# Пример использования
+# Example usage
 L = 5
 mask = subsequent_mask(L)
-print("Сгенерированная треугольная маска:\n", mask)
+print("Generated triangular mask:\n", mask)
 
-# Пример использования маски в softmax
+# Example of applying mask to softmax
 def apply_softmax_with_mask(Q: torch.Tensor, K: torch.Tensor, V: torch.Tensor, mask: torch.Tensor) -> torch.Tensor:
     """
     Description:
-        Применяет softmax с маской к результату скалярного произведения Q и K.
+        Applies softmax with mask to the result of Q and K scalar product.
 
     Args:
-        Q (torch.Tensor): Тензор запросов.
-        K (torch.Tensor): Тензор ключей.
-        V (torch.Tensor): Тензор значений.
-        mask (torch.Tensor): Маска для применения.
+        Q (torch.Tensor): Query tensor.
+        K (torch.Tensor): Key tensor.
+        V (torch.Tensor): Value tensor.
+        mask (torch.Tensor): Mask to apply.
 
     Returns:
-        torch.Tensor: Результат применения softmax с маской.
+        torch.Tensor: Result of applying softmax with mask.
 
     Examples:
         >>> Q = torch.randn(5, 5)
@@ -483,31 +483,31 @@ def apply_softmax_with_mask(Q: torch.Tensor, K: torch.Tensor, V: torch.Tensor, m
     """
     d_k = Q.size(-1)
     scores = Q @ K.transpose(-2, -1) / math.sqrt(d_k)
-    # mask == False -> зануляем/ставим -inf
+    # mask == False -> zero out/set to -inf
     scores = scores.masked_fill(~mask, float('-inf'))
     attn_weights = torch.softmax(scores, dim=-1)
     Z = attn_weights @ V
     return Z
 ```
 
-#### 5. Механизм Cross-Attention на выход кодера
+#### 5. Cross-Attention Mechanism at the Decoder Output
 
-После слоя Masked Multi-Head Attention и последующих Add & Norm, декодер имеет более «свежее» представление текущей частично сгенерированной последовательности. Далее идёт **Multi-Head Attention**, где:
+After the Masked Multi-Head Attention layer and subsequent Add & Norm, the decoder has a more "fresh" representation of the currently partially generated sequence. Next comes the **Multi-Head Attention**, where:
 
-1. **Q** (запросы) берутся из **текущих скрытых состояний декодера** (после Masked MHA).  
-2. **K** (ключи) и **V** (значения) берутся из **выхода кодера**.  
+1. **Q** (queries) are taken from the **current decoder hidden states** (after Masked MHA).  
+2. **K** (keys) and **V** (values) are taken from the **encoder output**.  
 
-Так декодер «запрашивает» нужную информацию из выходных эмбеддингов кодера, где уже закодирован весь контекст входной последовательности.  
+Thus, the decoder "queries" the necessary information from the encoder's output embeddings, which already encode the entire context of the input sequence.  
 
-Формулы те же:  
+The formulas remain the same:  
 
 $$
 \text{CrossAttention}(Q_\text{dec}, K_\text{enc}, V_\text{enc}) = \text{softmax}\left(\frac{Q_\text{dec}K_\text{enc}^T}{\sqrt{d_k}}\right) V_\text{enc}
 $$
 
-#### 6. Остаточные соединения (Add) и нормализация (Norm)
+#### 6. Residual Connections (Add) and Normalization (Norm)
 
-Аналогично кодеру, **после каждого** подслоя идёт этап Add & Norm:
+Similar to the encoder, **after each** sublayer comes the Add & Norm step:
 
 1. **Add (Residual Connection):**  
    
@@ -520,170 +520,171 @@ $$
    \text{Norm}_\text{dec} = \text{LayerNorm}(\text{Add}_\text{dec})
    $$
 
-Это помогает стабилизировать обучение, улучшает прохождение градиентов и позволяет учить более глубокие сети.
+This helps stabilize training, improves gradient flow, and enables learning deeper networks.
 
-#### 7. Feed Forward Network (FFN) и финальное Add & Norm
+#### 7. Feed Forward Network (FFN) and Final Add & Norm
 
-Так же, как в кодере, **FFN** в декодере — это два линейных слоя с функцией активации (ReLU/GELU). Формула:
+Similarly to the encoder, the **FFN** in the decoder consists of two linear layers with an activation function (ReLU/GELU). The formula is:
 
 $$
 \text{FFN}(x) = \max(0, xW_1 + b_1)\,W_2 + b_2
 $$
-Затем идёт **остаточное соединение** + **Layer Normalization**.
 
-> Повторим: структура слоя декодера такая:
+This is followed by a **residual connection** + **Layer Normalization**.
+
+> Let’s reiterate: the decoder layer structure is as follows:  
 > 1) Masked Multi-Head Attention → Add & Norm  
-> 2) (Cross) Multi-Head Attention (на выход кодера) → Add & Norm  
+> 2) (Cross) Multi-Head Attention (on encoder output) → Add & Norm  
 > 3) Feed Forward → Add & Norm  
 
-#### 8. Финальный линейный слой и Softmax (для предсказания следующего токена)
+#### 8. Final Linear Layer and Softmax (for Next Token Prediction)
 
-В задаче **генерации текста** после прохождения всех слоёв декодера получаем скрытые векторы (hidden states). Далее применяют **Линейный слой (Projection)** в размерность словаря и **Softmax**, чтобы превратить в вероятности токенов. Обычно это делается отдельным «Output Projection» слоем:
+In the task of **text generation**, after passing through all decoder layers, we obtain hidden states. Then, a **Linear layer (Projection)** maps these to the vocabulary size, followed by **Softmax** to convert them into token probabilities. Typically, this is done via a separate "Output Projection" layer:
 
 $$
 \hat{y}_t = \text{softmax}(\text{DecoderOutput}_t \cdot W_\text{out} + b_\text{out})
 $$
 
-где $(\hat{y}_t)$ – распределение вероятностей по словарю в момент времени $(t)$.
+where $(\hat{y}_t)$ is the probability distribution over the vocabulary at time step $(t)$.
 
-### Давайте разберем процесс выбора следующего токена более детально:
+### Let’s examine the process of selecting the next token in more detail:
 
-**Выход декодера как контекстное представление:**
+**Decoder output as a contextual representation:**
 
-На каждом шаге генерации текста декодер (например, в архитектуре Transformer) обрабатывает входную последовательность и уже сгенерированные токены.  Результатом работы декодера на временном шаге $t$ является **вектор скрытого состояния** $DecoderOutput_t$. Этот вектор – это **сжатое представление всего контекста**, который модель учла к этому моменту. Он "знает" о начале предложения, предыдущих сгенерированных словах и, в случае seq2seq моделей, о входной последовательности (например, при переводе).  Размерность этого вектора определяется архитектурой модели и является гиперпараметром.
+At each generation step, the decoder (e.g., in a Transformer architecture) processes the input sequence and previously generated tokens. The result of the decoder’s operation at time step $t$ is a **hidden state vector** $DecoderOutput_t$. This vector is a **compressed representation of all context** the model has accounted for up to this point. It "knows" about the beginning of the sentence, previously generated words, and—in seq2seq models—about the input sequence (e.g., during translation). The dimensionality of this vector is determined by the model architecture and is a hyperparameter.
 
-**I. Вектор скрытого состояния $DecoderOutput_t$ как вход для предсказания:**
+**I. Hidden state vector $DecoderOutput_t$ as input for prediction:**
 
-Как мы уже выяснили, вектор $DecoderOutput_t$ является результатом работы **последнего блока декодера** на временном шаге $t$.  Предположим, что каждый блок декодера имеет одинаковую внутреннюю размерность, которую мы обозначим как $D_{model}$ (например, 512 или 768 в оригинальном Transformer).  Таким образом, $DecoderOutput_t$ является вектором размерности $D_{model}$:
+As we established, the vector $DecoderOutput_t$ is the output of the **final decoder block** at time step $t$. Assume each decoder block has the same internal dimensionality, denoted as $D_{model}$ (e.g., 512 or 768 in the original Transformer). Thus, $DecoderOutput_t$ is a vector of dimension $D_{model}$:
 
 $$
 DecoderOutput_t \in \mathbb{R}^{D_{model}}
 $$
 
-Этот вектор $DecoderOutput_t$ содержит в себе сжатую информацию о контексте, накопленную декодером к моменту времени $t$.
+This vector $DecoderOutput_t$ contains compressed information about the context accumulated by the decoder up to time $t$.
 
-**II. Линейный слой (Projection):**
+**II. Linear Layer (Projection):**
 
-Цель линейного слоя – преобразовать вектор контекстного представления $DecoderOutput_t$ в вектор **логитов**, размерность которого равна размеру словаря $V$.  Пусть размер словаря будет $|V|$.
+The purpose of the linear layer is to transform the contextual representation vector $DecoderOutput_t$ into a vector of **logits**, whose dimension equals the vocabulary size $V$. Let the vocabulary size be $|V|$.
 
-Линейный слой реализуется с помощью матрицы весов $W_{out}$ и вектора смещения $b_{out}$.
+The linear layer is implemented using a weight matrix $W_{out}$ and a bias vector $b_{out}$.
 
-* **Матрица весов $W_{out}$:**  Эта матрица осуществляет линейное преобразование и имеет размерность $(|V| \times D_{model})$:
+* **Weight matrix $W_{out}$:** This matrix performs a linear transformation and has dimensions $(|V| \times D_{model})$:
 
 $$
 W_{out} \in \mathbb{R}^{|V| \times D_{model}}
 $$
 
-* **Вектор смещения $b_{out}$:**  Этот вектор добавляется после матричного умножения и имеет размерность $(|V|)$:
+* **Bias vector $b_{out}$:** This vector is added after matrix multiplication and has dimensions $(|V|)$:
 
 $$
 b_{out} \in \mathbb{R}^{|V|}
 $$
 
-**Операция линейного преобразования:**  Вектор логитов, который мы обозначим как $Logits_t$, вычисляется следующим образом:
+**Linear transformation operation:** The logits vector, denoted as $Logits_t$, is computed as follows:
 
 $$
 Logits_t = DecoderOutput_t \cdot W_{out}^T + b_{out}
 $$
 
-Здесь:
+Here:
 
-* $DecoderOutput_t$ – вектор скрытого состояния размерности $(1 \times D_{model})$ (мы представляем его как вектор-строку для удобства матричного умножения).
-* $W_{out}^T$ – транспонированная матрица весов $W_{out}$ размерности $(D_{model} \times |V|)$.
-* $Logits_t$ – вектор логитов размерности $(1 \times |V|)$. Каждый элемент $Logits_{t, i}$ соответствует $i$-му токену в словаре.
+* $DecoderOutput_t$ — hidden state vector of dimension $(1 \times D_{model})$ (represented as a row vector for convenient matrix multiplication).
+* $W_{out}^T$ — transposed weight matrix $W_{out}$ of dimension $(D_{model} \times |V|)$.
+* $Logits_t$ — logits vector of dimension $(1 \times |V|)$. Each element $Logits_{t, i}$ corresponds to the $i$-th token in the vocabulary.
 
-**Пояснение:**
+**Explanation:**
 
-* Умножение $DecoderOutput_t \cdot W_{out}^T$  фактически выполняет взвешенную сумму элементов вектора $DecoderOutput_t$. Каждая строка матрицы $W_{out}^T$ (или столбец $W_{out}$) соответствует одному токену в словаре.  Таким образом, для каждого токена в словаре вычисляется оценка на основе контекстного вектора $DecoderOutput_t$.
-* Добавление вектора смещения $b_{out}$ позволяет модели смещать оценки для определенных токенов независимо от входного вектора.
+* Multiplication $DecoderOutput_t \cdot W_{out}^T$ effectively computes a weighted sum of elements in the vector $DecoderOutput_t$. Each row of matrix $W_{out}^T$ (or column of $W_{out}$) corresponds to one token in the vocabulary. Thus, a score is computed for each vocabulary token based on the contextual vector $DecoderOutput_t$.
+* Adding the bias vector $b_{out}$ allows the model to independently shift scores for specific tokens regardless of the input vector.
 
-**III. Функция Softmax - преобразование логитов в вероятности:**
+**III. Softmax Function — Converting Logits to Probabilities:**
 
-После получения вектора логитов $Logits_t$, мы применяем функцию Softmax, чтобы преобразовать их в распределение вероятностей по всем токенам словаря.
+After obtaining the logits vector $Logits_t$, we apply the Softmax function to convert them into a probability distribution over all vocabulary tokens.
 
-Для каждого элемента $Logits_{t, i}$ вектора логитов, Softmax вычисляет вероятность $P(\text{token}_i | \text{context})$ следующим образом:
+For each element $Logits_{t, i}$ in the logits vector, Softmax computes the probability $P(\text{token}_i | \text{context})$ as follows:
 
 $$
 P(\text{token}_i | \text{context}) = \frac{\exp(Logits_{t, i})}{\sum_{j=1}^{|V|} \exp(Logits_{t, j})}
 $$
 
-где:
+where:
 
-* $Logits_{t, i}$ – $i$-й элемент вектора логитов $Logits_t$, соответствующий $i$-му токену в словаре.
-* $|V|$ – размер словаря.
-* $\exp(x)$ – экспоненциальная функция.
-* $\sum_{j=1}^{|V|} \exp(Logits_{t, j})$ – сумма экспоненциалов всех логитов, используется для нормализации.
+* $Logits_{t, i}$ — the $i$-th element of the logits vector $Logits_t$, corresponding to the $i$-th token in the vocabulary.
+* $|V|$ — vocabulary size.
+* $\exp(x)$ — exponential function.
+* $\sum_{j=1}^{|V|} \exp(Logits_{t, j})$ — sum of exponentials of all logits, used for normalization.
 
-**Результат Softmax:**  Вектор вероятностей $\hat{y}_t$ размерности $(1 \times |V|)$, где каждый элемент $\hat{y}_{t, i} = P(\text{token}_i | \text{context})$ представляет собой вероятность того, что $i$-й токен из словаря является следующим токеном в последовательности, учитывая контекст, представленный $DecoderOutput_t$.
+**Softmax Result:** A probability vector $\hat{y}_t$ of dimension $(1 \times |V|)$, where each element $\hat{y}_{t, i} = P(\text{token}_i | \text{context})$ represents the probability that the $i$-th token from the vocabulary is the next token in the sequence, given the context represented by $DecoderOutput_t$.
 
 $$
 \hat{y}_t = \text{softmax}(Logits_t) \in \mathbb{R}^{|V|}
 $$
 
-**IV. Выбор следующего токена (как и ранее):**
+**IV. Selecting the Next Token (as before):**
 
-На основе полученного распределения вероятностей $\hat{y}_t$, мы выбираем следующий токен, используя одну из стратегий, таких как argmax, семплирование, top-k семплирование или ядерное семплирование.
+Based on the resulting probability distribution $\hat{y}_t$, we select the next token using one of the strategies, such as argmax, sampling, top-k sampling, or nucleus sampling.
 
-**Связь с архитектурой декодера:**
+**Connection to Decoder Architecture:**
 
-Важно понимать, что вектор $DecoderOutput_t$, который подается на вход линейному слою, является результатом сложной обработки входных данных через **все подслои блока декодера**:
+It is crucial to understand that the vector $DecoderOutput_t$, fed into the linear layer, is the result of complex processing of inputs through **all sublayers of the decoder block**:
 
-1. **Masked Multi-Head Attention:**  Позволяет декодеру учитывать предыдущие сгенерированные токены, формируя контекстное представление на основе **самовнимания**.
-2. **(Cross) Multi-Head Attention:**  Позволяет декодеру учитывать **входную последовательность** (если есть кодер), фокусируясь на релевантной информации из выхода кодера.
-3. **Feed Forward Network:**  Добавляет **нелинейность** и позволяет модели более сложно обрабатывать информацию, полученную от слоев внимания.
-4. **Add & Norm:**  **Residual connections и Layer Normalization** стабилизируют обучение и улучшают градиентный поток, позволяя строить более глубокие и эффективные декодеры.
+1. **Masked Multi-Head Attention:** Allows the decoder to attend to previously generated tokens, forming a contextual representation via self-attention.
+2. **(Cross) Multi-Head Attention:** Enables the decoder to attend to the **input sequence** (if an encoder exists), focusing on relevant information from the encoder output.
+3. **Feed Forward Network:** Adds **non-linearity** and allows the model to process information from attention layers in a more complex manner.
+4. **Add & Norm:** **Residual connections and Layer Normalization** stabilize training and improve gradient flow, enabling the construction of deeper and more efficient decoders.
 
-Таким образом, $DecoderOutput_t$ – это не просто случайный вектор, а **высокоуровневое, контекстно-зависимое представление**, полученное в результате работы сложной архитектуры декодера. Линейный слой и Softmax – это заключительные шаги, которые преобразуют это абстрактное представление в конкретное предсказание следующего токена в виде распределения вероятностей по словарю.
+Thus, $DecoderOutput_t$ is not merely a random vector but a **high-level, context-dependent representation** derived from the complex architecture of the decoder. The linear layer and Softmax are the final steps that transform this abstract representation into a concrete prediction of the next token as a probability distribution over the vocabulary.
 
-Понимание этих шагов позволяет лучше понять, как работают модели генерации текста и как различные параметры и стратегии влияют на качество и разнообразие генерируемого текста.
+Understanding these steps allows for a better grasp of how text generation models work and how various parameters and strategies influence the quality and diversity of generated text.
 
 </details> 
 
-#### Инновация Multi-Head Latent Attention (MLA): Сжатие низкого ранга для ключей и значений
+#### Innovation: Multi-Head Latent Attention (MLA): Low-Rank Compression for Keys and Values
 
-MLA вводит **сжатие низкого ранга** для ключей и значений.  В MLA, входное вложение токена ($h_t$) сначала проецируется в **скрытый вектор низкого ранга ($c_t$)**.  Затем этот вектор расширяется обратно в векторы ключей ($k_t$) и значений ($v_t$) через отдельные матрицы ($W_{uk}, W_{uv}$).  Важно отметить, что размерность скрытого вектора ($d_c$) значительно меньше размерности векторов ключей и значений после разделения на головы ($d_h \times n_h$).
+MLA introduces **low-rank compression** for keys and values. In MLA, the input token embedding ($h_t$) is first projected into a **low-rank latent vector ($c_t$)**. This vector is then expanded back into key ($k_t$) and value ($v_t$) vectors via separate matrices ($W_{uk}, W_{uv}$). Crucially, the dimension of the latent vector ($d_c$) is significantly smaller than the dimension of the split key and value vectors after head separation ($d_h \times n_h$).
 
-Во время инференса, MLA позволяет **уменьшить размер KV-кэша**, поскольку кэшированию подлежат только скрытые векторы ($c_t$) низкой размерности, а не полномерные векторы ключей ($k_t$), как в классическом MHA.  Это снижение вычислительных затрат особенно важно для эффективной реализации Test-time compute, позволяя модели "размышлять" дольше при ограниченных ресурсах.
+During inference, MLA enables **reduction of the KV-cache size**, since only the low-dimensional latent vectors ($c_t$) are cached, rather than full-dimensional key vectors ($k_t$) as in standard MHA. This reduction in computational cost is particularly important for efficient test-time compute, allowing the model to "think" longer under limited resources.
 
-**Давайте начнем последовательно раскрывать каждый аспект MLA, предоставляя математическую формализацию, пояснения и код.**
+**Let’s sequentially unpack each aspect of MLA, providing mathematical formalization, explanations, and code.**
 
-**1. Низкоранговое сжатие ключей и значений**
+**1. Low-Rank Compression of Keys and Values**
 
-**1.1. Инженерный и математический взгляд на низкоранговое сжатие KV**
+**1.1. Engineering and Mathematical View of Low-Rank KV Compression**
 
-**Инженерный аспект:**
+**Engineering Aspect:**
 
-В стандартном Multi-Head Attention (MHA), для каждой головы внимания, входной эмбеддинг токена $h_t \in \mathbb{R}^{d_{model}}$ проецируется в три вектора: запрос $q_t$, ключ $k_t$ и значение $v_t$, каждый размерностью $d_h = d_{model} / n_h$, где $n_h$ - количество голов.  В процессе инференса, ключи и значения для всех предыдущих токенов кэшируются в KV-кэше.  Размер этого кэша растет линейно с длиной последовательности, что может стать узким местом при длинных последовательностях.
+In standard Multi-Head Attention (MHA), for each attention head, the input token embedding $h_t \in \mathbb{R}^{d_{model}}$ is projected into three vectors: query $q_t$, key $k_t$, and value $v_t$, each of dimension $d_h = d_{model} / n_h$, where $n_h$ is the number of heads. During inference, keys and values for all previous tokens are cached in the KV-cache. The size of this cache grows linearly with sequence length, which can become a bottleneck for long sequences.
 
-**KV-кэш (Key-Value Cache)** — это механизм, используемый в моделях на основе трансформеров для ускорения процесса вывода (inference) путем хранения вычисленных ключей (Keys) и значений (Values) для всех предыдущих токенов в последовательности. Это позволяет избежать повторного вычисления ключей и значений для уже обработанных токенов при генерации новых токенов.
+**KV-cache (Key-Value Cache)** — a mechanism used in transformer-based models to accelerate inference by storing computed keys (Keys) and values (Values) for all previous tokens in the sequence. This avoids recomputing keys and values for already processed tokens during generation of new tokens.
 
-MLA решает эту проблему, вводя **низкоранговое представление**.  Вместо прямого проецирования в $k_t$ и $v_t$, $h_t$ сначала проецируется в **скрытый вектор низкой размерности** $c_t \in \mathbb{R}^{d_c}$, где $d_c \ll d_h$.  Затем $c_t$ проецируется обратно в $k_t$ и $v_t$.  Так как в KV-кэше хранятся векторы $c_t$ вместо $k_t$, размер кэша существенно уменьшается.
+MLA addresses this issue by introducing a **low-rank representation**. Instead of directly projecting into $k_t$ and $v_t$, $h_t$ is first projected into a **low-dimensional latent vector** $c_t \in \mathbb{R}^{d_c}$, where $d_c \ll d_h$. Then, $c_t$ is projected back into $k_t$ and $v_t$. Since the KV-cache stores $c_t$ instead of $k_t$, the cache size is substantially reduced.
 
-**Математическая формализация:**
+**Mathematical Formalization:**
 
-1.  **Проецирование в скрытое пространство:**
+1. **Projection into latent space:**
     $$
     c_t = h_t W_{uc}
     $$
-    где $W_{uc} \in \mathbb{R}^{d_{model} \times d_c}$ - матрица проекции в скрытое пространство.
+    where $W_{uc} \in \mathbb{R}^{d_{model} \times d_c}$ is the projection matrix into the latent space.
 
-2.  **Расширение из скрытого пространства в ключи и значения:**
+2. **Expansion from latent space to keys and values:**
     $$
     k_t = c_t W_{uk} \\
     v_t = c_t W_{uv}
     $$
-    где $W_{uk} \in \mathbb{R}^{d_c \times d_h}$ и $W_{uv} \in \mathbb{R}^{d_c \times d_h}$ - матрицы проекции из скрытого пространства в пространство ключей и значений соответственно.
+    where $W_{uk} \in \mathbb{R}^{d_c \times d_h}$ and $W_{uv} \in \mathbb{R}^{d_c \times d_h}$ are projection matrices from the latent space to the key and value spaces, respectively.
 
-**Размерности:**
+**Dimensions:**
 
-*   $h_t \in \mathbb{R}^{d_{model}}$ - входной эмбеддинг токена
-*   $c_t \in \mathbb{R}^{d_c}$ - скрытый вектор низкой размерности ($d_c \ll d_h$)
-*   $k_t, v_t \in \mathbb{R}^{d_h}$ - векторы ключей и значений для одной головы внимания
-*   $W_{uc} \in \mathbb{R}^{d_{model} \times d_c}$ - матрица проекции в скрытое пространство
-*   $W_{uk} \in \mathbb{R}^{d_c \times d_h}$ - матрица проекции из скрытого пространства в ключи
-*   $W_{uv} \in \mathbb{R}^{d_c \times d_h}$ - матрица проекции из скрытого пространства в значения
+* $h_t \in \mathbb{R}^{d_{model}}$ — input token embedding
+* $c_t \in \mathbb{R}^{d_c}$ — low-dimensional latent vector ($d_c \ll d_h$)
+* $k_t, v_t \in \mathbb{R}^{d_h}$ — key and value vectors for one attention head
+* $W_{uc} \in \mathbb{R}^{d_{model} \times d_c}$ — projection matrix into latent space
+* $W_{uk} \in \mathbb{R}^{d_c \times d_h}$ — projection matrix from latent space to keys
+* $W_{uv} \in \mathbb{R}^{d_c \times d_h}$ — projection matrix from latent space to values
 
-**1.2. Пример кода на Python (PyTorch):**
+**1.2. Python Code Example (PyTorch):**
 
 ```python
 from typing import Tuple
@@ -693,12 +694,12 @@ import torch.nn as nn
 class MLALinearProjection(nn.Module):
     """
     Description:
-        Класс для линейной проекции в модели MLA.
+        Class for linear projection in MLA model.
 
     Args:
-        d_model: Размерность входного эмбеддинга.
-        d_latent: Размерность скрытого вектора.
-        d_head: Размерность ключа и значения.
+        d_model: Dimension of input embedding.
+        d_latent: Dimension of latent vector.
+        d_head: Dimension of key and value.
     """
 
     def __init__(self, d_model: int, d_latent: int, d_head: int) -> None:
@@ -710,15 +711,15 @@ class MLALinearProjection(nn.Module):
     def forward(self, h_t: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """
         Description:
-            Выполняет линейную проекцию входного эмбеддинга токена.
+            Performs linear projection of input token embedding.
 
         Args:
-            h_t: torch.Tensor of shape [..., d_model] - входной эмбеддинг токена.
+            h_t: torch.Tensor of shape [..., d_model] — input token embedding.
 
         Returns:
-            k_t: torch.Tensor of shape [..., d_head] - ключ.
-            v_t: torch.Tensor of shape [..., d_head] - значение.
-            c_t: torch.Tensor of shape [..., d_latent] - скрытый вектор (для KV-кэша).
+            k_t: torch.Tensor of shape [..., d_head] — key.
+            v_t: torch.Tensor of shape [..., d_head] — value.
+            c_t: torch.Tensor of shape [..., d_latent] — latent vector (for KV-cache).
 
         Examples:
             >>> d_model = 512
@@ -738,19 +739,19 @@ class MLALinearProjection(nn.Module):
         v_t = self.W_uv(c_t)
         return k_t, v_t, c_t
 
-# Пример использования
+# Example usage
 def main() -> None:
     """
     Description:
-        Пример использования класса MLALinearProjection.
+        Example usage of MLALinearProjection class.
 
     Examples:
         >>> main()
-        Размерность latent KV-cache: torch.Size([2, 10, 64])
-        Размерность keys KV-cache (для сравнения): torch.Size([2, 10, 64])
+        Latent KV-cache dimension: torch.Size([2, 10, 64])
+        Keys KV-cache dimension (for comparison): torch.Size([2, 10, 64])
     """
     d_model    = 512
-    d_latent   = 64  # Низкая размерность
+    d_latent   = 64  # Low dimension
     d_head     = 64
     batch_size = 2
     seq_len    = 10
@@ -769,140 +770,140 @@ def main() -> None:
         values_list.append(v_t)
         latent_vectors_list.append(c_t)
 
-    # KV-кэш в MLA будет хранить latent_vectors_list (размерность d_latent)
-    # вместо keys_list (размерность d_head) в стандартном MHA, если бы кэшировались ключи.
+    # MLA KV-cache stores latent_vectors_list (dimension d_latent)
+    # instead of keys_list (dimension d_head) in standard MHA if keys were cached.
     latent_kv_cache = torch.stack(latent_vectors_list, dim=1)                 # [batch_size, seq_len, d_latent]
-    print("Размерность latent KV-cache:", latent_kv_cache.shape)              # -> torch.Size([2, 10, 64])
+    print("Latent KV-cache dimension:", latent_kv_cache.shape)              # -> torch.Size([2, 10, 64])
 
-    # Для сравнения, если бы кэшировались ключи (как в стандартном MHA)
+    # For comparison, if keys were cached (as in standard MHA)
     keys_kv_cache = torch.stack(keys_list, dim=1)                             # [batch_size, seq_len, d_head]
-    print("Размерность keys KV-cache (для сравнения):", keys_kv_cache.shape)  # -> torch.Size([2, 10, 64])
+    print("Keys KV-cache dimension (for comparison):", keys_kv_cache.shape)  # -> torch.Size([2, 10, 64])
 
-    # В данном примере d_latent и d_head одинаковы (64), но в MLA d_latent << d_head,
-    # что приводит к существенному уменьшению размера KV-кэша.
+    # In this example, d_latent and d_head are equal (64), but in MLA d_latent << d_head,
+    # leading to substantial reduction in KV-cache size.
 
 main()
 ```
 
-**2. Оптимизация матриц проекций в MLA**
+**2. Optimization of Projection Matrices in MLA**
 
-**2.1. Инженерный и математический взгляд на оптимизацию матриц проекций**
+**2.1. Engineering and Mathematical View of Projection Matrix Optimization**
 
-**Инженерный аспект:**
+**Engineering Aspect:**
 
-MLA использует **низкоранговое проецирование** для **запросов (Q), ключей (K) и значений (V)**.  Это означает, что исходные матрицы проекций в стандартном Multi-Head Attention (MHA) заменяются на **пару матриц для каждой проекции (Q, K, V): матрицу для понижения размерности и матрицу для восстановления размерности**.  Цель этой оптимизации - **снизить вычислительные затраты и уменьшить размер KV-кэша (для K и V) и памяти активаций (для Q)**, сохраняя при этом выразительность модели.
+MLA employs **low-rank projection** for **queries (Q), keys (K), and values (V)**. This means the original projection matrices in standard Multi-Head Attention (MHA) are replaced by **a pair of matrices for each projection (Q, K, V): a dimensionality-reducing matrix and a dimensionality-restoring matrix**. The goal of this optimization is to **reduce computational cost and decrease KV-cache size (for K and V) and activation memory (for Q)**, while preserving model expressiveness.
 
-**Математическая формализация:**
+**Mathematical Formalization:**
 
-В стандартном MHA, запросы, ключи и значения вычисляются как:
-$Q = XW^Q$, $K = XW^K$, $V = XW^V$, где $X$ - входные эмбеддинги.
+In standard MHA, queries, keys, and values are computed as:
+$Q = XW^Q$, $K = XW^K$, $V = XW^V$, where $X$ is the input embeddings.
 
-В MLA, эти проекции заменяются на низкоранговые:
+In MLA, these projections are replaced with low-rank equivalents:
 
-1.  **Низкоранговое проецирование для Ключей и Значений (KV):**
+1. **Low-Rank Projection for Keys and Values (KV):**
 
-    *   **Сжатие (Down-projection):** Входные эмбеддинги $X$ проецируются в латентное пространство низкой размерности $r$:
+    * **Down-projection:** Input embeddings $X$ are projected into a low-dimensional latent space of rank $r$:
 
         $$
         C^{KV} = XW^{DKV}
         $$
 
-        где:
+        where:
          
-        - $W^{DKV} \in \mathbb{R}^{d_{model} \times r}$ - матрица понижения размерности для KV 
-        - $r \ll d_k$ (где $d_k$ - размерность ключей/запросов в стандартном MHA)
+        - $W^{DKV} \in \mathbb{R}^{d_{model} \times r}$ — down-projection matrix for KV 
+        - $r \ll d_k$ (where $d_k$ is key/query dimension in standard MHA)
 
-    *   **Восстановление (Up-projection):**  Из латентного представления $C^{KV}$ восстанавливаются ключи $K$ и значения $V$:
+    * **Up-projection:** From the latent representation $C^{KV}$, keys $K$ and values $V$ are reconstructed:
 
         $$
         K = C^{KV}W^{UK} \\
         V = C^{KV}W^{UV}
         $$
 
-        где:
+        where:
         
-        - $W^{UK} \in \mathbb{R}^{r \times d_k}$ и $W^{UV} \in \mathbb{R}^{r \times d_k}$ - матрицы восстановления размерности для ключей и значений соответственно.
+        - $W^{UK} \in \mathbb{R}^{r \times d_k}$ and $W^{UV} \in \mathbb{R}^{r \times d_k}$ — up-projection matrices for keys and values, respectively.
 
-2.  **Низкоранговое проецирование для Запросов (Q):**
+2. **Low-Rank Projection for Queries (Q):**
 
-    *   **Сжатие (Down-projection):** Входные эмбеддинги $X$ также проецируются в латентное пространство низкой размерности $r$ (ранг сжатия может быть одинаковым или другим для Q и KV):
+    * **Down-projection:** Input embeddings $X$ are also projected into a low-dimensional latent space of rank $r$ (the compression rank may be the same or different for Q and KV):
 
         $$
         C^{Q} = XW^{DQ}
         $$
 
-        где:
+        where:
         
-        - $W^{DQ} \in \mathbb{R}^{d_{model} \times r}$ - матрица понижения размерности для запросов.
+        - $W^{DQ} \in \mathbb{R}^{d_{model} \times r}$ — down-projection matrix for queries.
 
-    *   **Восстановление (Up-projection):** Из латентного представления $C^{Q}$ восстанавливаются запросы $Q$:
+    * **Up-projection:** From the latent representation $C^{Q}$, queries $Q$ are reconstructed:
 
         $$
         Q = C^{Q}W^{UQ}
         $$
 
-        где:
+        where:
          
-        - $W^{UQ} \in \mathbb{R}^{r \times d_k}$ - матрица восстановления размерности для запросов.
+        - $W^{UQ} \in \mathbb{R}^{r \times d_k}$ — up-projection matrix for queries.
 
-**Размерности:**
+**Dimensions:**
 
-*   $X \in \mathbb{R}^{n \times d_{model}}$ - входные эмбеддинги (пакет из $n$ токенов, каждый размерности $d_{model}$)
-*   $C^{KV} \in \mathbb{R}^{n \times r}$ - латентное представление для ключей и значений (ранг $r$)
-*   $C^{Q} \in \mathbb{R}^{n \times r}$ - латентное представление для запросов (ранг $r$, может быть другим рангом)
-*   $K, V, Q \in \mathbb{R}^{n \times d_k}$ - восстановленные ключи, значения и запросы (размерность $d_k$)
-*   $W^{DKV} \in \mathbb{R}^{d_{model} \times r}$, $W^{UK} \in \mathbb{R}^{r \times d_k}$, $W^{UV} \in \mathbb{R}^{r \times d_k}$, $W^{DQ} \in \mathbb{R}^{d_{model} \times r}$, $W^{UQ} \in \mathbb{R}^{r \times d_k}$ - матрицы проекций.
+* $X \in \mathbb{R}^{n \times d_{model}}$ — input embeddings (batch of $n$ tokens, each of dimension $d_{model}$)
+* $C^{KV} \in \mathbb{R}^{n \times r}$ — latent representation for keys and values (rank $r$)
+* $C^{Q} \in \mathbb{R}^{n \times r}$ — latent representation for queries (rank $r$, may differ)
+* $K, V, Q \in \mathbb{R}^{n \times d_k}$ — reconstructed keys, values, and queries (dimension $d_k$)
+* $W^{DKV} \in \mathbb{R}^{d_{model} \times r}$, $W^{UK} \in \mathbb{R}^{r \times d_k}$, $W^{UV} \in \mathbb{R}^{r \times d_k}$, $W^{DQ} \in \mathbb{R}^{d_{model} \times r}$, $W^{UQ} \in \mathbb{R}^{r \times d_k}$ — projection matrices.
 
-**2.2. Пример кода на Python (PyTorch) (Исправленный):**
+**2.2. Python Code Example (PyTorch) (Corrected):**
 
 ```python
-# Импорт стандартных библиотек
+# Import standard libraries
 import math
 
-# Импорт сторонних библиотек
+# Import third-party libraries
 import torch
 import torch.nn as nn
 
 class MLALowRankProjection(nn.Module):
     """
     Description:
-        Класс для низкоранговой проекции в модели MLA.
+        Class for low-rank projection in MLA model.
 
     Args:
-        d_model: Размерность входного вектора.
-        d_latent: Размерность латентного пространства.
-        d_head: Размерность выходного вектора.
+        d_model: Dimension of input vector.
+        d_latent: Dimension of latent space.
+        d_head: Dimension of output vector.
 
     Attributes:
-        W_dq: Линейный слой для down-проекции запросов.
-        W_uq: Линейный слой для up-проекции запросов.
-        W_dkv: Линейный слой для down-проекции ключей и значений.
-        W_uk: Линейный слой для up-проекции ключей.
-        W_uv: Линейный слой для up-проекции значений.
+        W_dq: Linear layer for down-projection of queries.
+        W_uq: Linear layer for up-projection of queries.
+        W_dkv: Linear layer for down-projection of keys and values.
+        W_uk: Linear layer for up-projection of keys.
+        W_uv: Linear layer for up-projection of values.
     """
 
     def __init__(self, d_model: int, d_latent: int, d_head: int) -> None:
         super().__init__()
-        self.W_dq = nn.Linear(d_model, d_latent)  # Down-проекция для запросов
-        self.W_uq = nn.Linear(d_latent, d_head)   # Up-проекция для запросов
-        self.W_dkv = nn.Linear(d_model, d_latent) # Down-проекция для ключей и значений
-        self.W_uk = nn.Linear(d_latent, d_head)   # Up-проекция для ключей
-        self.W_uv = nn.Linear(d_latent, d_head)   # Up-проекция для значений
+        self.W_dq = nn.Linear(d_model, d_latent)  # Down-projection for queries
+        self.W_uq = nn.Linear(d_latent, d_head)   # Up-projection for queries
+        self.W_dkv = nn.Linear(d_model, d_latent) # Down-projection for keys and values
+        self.W_uk = nn.Linear(d_latent, d_head)   # Up-projection for keys
+        self.W_uv = nn.Linear(d_latent, d_head)   # Up-projection for values
 
     def forward(self, x: torch.Tensor) -> tuple:
         """
         Description:
-            Выполняет низкоранговую проекцию входных данных.
+            Performs low-rank projection on input data.
 
         Args:
-            x: Входной тензор размерности [..., seq_len, d_model].
+            x: Input tensor of shape [..., seq_len, d_model].
 
         Returns:
-            Q: Тензор запросов размерности [..., seq_len, d_head].
-            K: Тензор ключей размерности [..., seq_len, d_head].
-            V: Тензор значений размерности [..., seq_len, d_head].
-            C_kv: Латентное представление KV размерности [..., seq_len, d_latent].
-            C_q: Латентное представление Q размерности [..., seq_len, d_latent].
+            Q: Query tensor of shape [..., seq_len, d_head].
+            K: Key tensor of shape [..., seq_len, d_head].
+            V: Value tensor of shape [..., seq_len, d_head].
+            C_kv: Latent KV representation of shape [..., seq_len, d_latent].
+            C_q: Latent Q representation of shape [..., seq_len, d_latent].
 
         Examples:
             >>> d_model = 512
@@ -913,11 +914,11 @@ class MLALowRankProjection(nn.Module):
             >>> projection_layer = MLALowRankProjection(d_model, d_latent, d_head)
             >>> input_embeddings = torch.randn(batch_size, seq_len, d_model)
             >>> Q, K, V, C_kv, C_q = projection_layer(input_embeddings)
-            >>> print("Размерность Q:", Q.shape)  # -> torch.Size([2, 10, 64])
-            >>> print("Размерность K:", K.shape)  # -> torch.Size([2, 10, 64])
-            >>> print("Размерность V:", V.shape)  # -> torch.Size([2, 10, 64])
-            >>> print("Размерность C_kv (KV-cache):", C_kv.shape)  # -> torch.Size([2, 10, 64])
-            >>> print("Размерность C_q (Q activations):", C_q.shape)  # -> torch.Size([2, 10, 64])
+            >>> print("Q dimension:", Q.shape)  # -> torch.Size([2, 10, 64])
+            >>> print("K dimension:", K.shape)  # -> torch.Size([2, 10, 64])
+            >>> print("V dimension:", V.shape)  # -> torch.Size([2, 10, 64])
+            >>> print("C_kv dimension (KV-cache):", C_kv.shape)  # -> torch.Size([2, 10, 64])
+            >>> print("C_q dimension (Q activations):", C_q.shape)  # -> torch.Size([2, 10, 64])
         """
         C_kv = self.W_dkv(x)    # [..., seq_len, d_latent]
         C_q = self.W_dq(x)      # [..., seq_len, d_latent]
@@ -926,10 +927,10 @@ class MLALowRankProjection(nn.Module):
         Q = self.W_uq(C_q)      # [..., seq_len, d_head]
         return Q, K, V, C_kv, C_q
 
-# Пример использования
+# Example usage
 if __name__ == "__main__":
     d_model    = 512
-    d_latent   = 64  # Низкая размерность
+    d_latent   = 64  # Low dimension
     d_head     = 64
     batch_size = 2
     seq_len    = 10
@@ -939,50 +940,50 @@ if __name__ == "__main__":
 
     Q, K, V, C_kv, C_q = projection_layer(input_embeddings)
 
-    print("Размерность Q:", Q.shape)       # -> torch.Size([2, 10, 64])
-    print("Размерность K:", K.shape)       # -> torch.Size([2, 10, 64])
-    print("Размерность V:", V.shape)       # -> torch.Size([2, 10, 64])
-    print("Размерность C_kv (KV-cache):", C_kv.shape)     # -> torch.Size([2, 10, 64])
-    print("Размерность C_q (Q activations):", C_q.shape)  # -> torch.Size([2, 10, 64])
+    print("Q dimension:", Q.shape)       # -> torch.Size([2, 10, 64])
+    print("K dimension:", K.shape)       # -> torch.Size([2, 10, 64])
+    print("V dimension:", V.shape)       # -> torch.Size([2, 10, 64])
+    print("C_kv dimension (KV-cache):", C_kv.shape)     # -> torch.Size([2, 10, 64])
+    print("C_q dimension (Q activations):", C_q.shape)  # -> torch.Size([2, 10, 64])
 
-    # В MLA, KV-кэш хранит C_kv (размерность d_latent), что меньше, чем если бы хранились K или V (размерность d_head),
-    # если d_latent < d_head. Аналогично, активации для Q могут быть уменьшены за счет использования C_q во время обучения, если это возможно.
+    # In MLA, KV-cache stores C_kv (dimension d_latent), which is smaller than storing K or V (dimension d_head)
+    # if d_latent < d_head. Similarly, Q activations can be reduced by using C_q during training, if feasible.
 ```
 
-**3. Низкоранговое сжатие запросов**
+**3. Low-Rank Compression of Queries**
 
-**3.1. Инженерный и математический взгляд на низкоранговое сжатие запросов**
+**3.1. Engineering and Mathematical View of Low-Rank Compression of Queries**
 
-**Инженерный аспект:**
+**Engineering Aspect:**
 
-В DeepSeek-V3, помимо низкорангового сжатия ключей и значений, также применяется **низкоранговое сжатие запросов** $q_t$.  В отличие от сжатия KV, сжатие запросов **не влияет на размер KV-кэша**, так как запросы не кэшируются.  Основная цель сжатия запросов - **снижение объема памяти для активаций во время обучения**.  Уменьшение размера промежуточных активаций позволяет обучать модели с большими батч-сайзами или более крупные модели при ограниченных ресурсах GPU.
+In DeepSeek-V3, in addition to low-rank compression of keys and values, **low-rank compression of queries** $q_t$ is also applied. Unlike KV compression, query compression **does not affect the KV-cache size**, since queries are not cached. The primary goal of query compression is to **reduce memory requirements for activations during training**. Reducing the size of intermediate activations enables training models with larger batch sizes or larger models under limited GPU resources.
 
-**4. Развязанная стратегия RoPE для позиционных вложений**
+**4. Decoupled RoPE Strategy for Positional Embeddings**
 
-**4.1. Инженерный и математический взгляд на развязанную стратегию RoPE**
+**4.1. Engineering and Mathematical View of Decoupled RoPE Strategy**
 
-**Инженерный аспект и проблема несовместимости RoPE:**
+**Engineering Aspect and RoPE Incompatibility Problem:**
 
-Rotary Positional Embeddings (RoPE) - это метод добавления позиционной информации в Transformer, который использует вращающиеся матрицы для кодирования относительных позиций токенов.  RoPE применяется непосредственно к векторам запросов и ключей.
+Rotary Positional Embeddings (RoPE) is a method for adding positional information to Transformers that uses rotation matrices to encode relative token positions. RoPE is applied directly to query and key vectors.
 
 <details> 
-    <summary><em><strong>Механизм работы Rotary Positional Embeddings (RoPE)</strong></em></summary>
+    <summary><em><strong>Mechanism of Rotary Positional Embeddings (RoPE)</strong></em></summary>
 
-#### Механизм работы Rotary Positional Embeddings (RoPE)
+#### Mechanism of Rotary Positional Embeddings (RoPE)
 
-**Зачем нужны Rotary Positional Embeddings (RoPE)?**  В то время как традиционные позиционные кодирования (PE) добавляют статическую позиционную информацию к эмбеддингам токенов, Rotary Positional Embeddings (RoPE) представляют собой **альтернативный и более гибкий метод** внедрения информации о положении токенов в архитектуру Transformer.  RoPE были разработаны для решения некоторых ограничений стандартных PE и для улучшения способности модели обрабатывать **относительные позиции** токенов в последовательности, что особенно важно для задач, где порядок и взаимосвязь токенов играют ключевую роль.
+**Why are Rotary Positional Embeddings (RoPE) needed?** While traditional positional encodings (PE) add static positional information to token embeddings, Rotary Positional Embeddings (RoPE) represent an **alternative and more flexible method** for embedding positional information into the Transformer architecture. RoPE were developed to address certain limitations of standard PE and to improve the model's ability to handle **relative token positions** in sequences, which is crucial for tasks where order and token relationships play a key role.
 
-Как и стандартные PE, RoPE необходимы, потому что механизм Self-Attention в Transformer обрабатывает все токены параллельно и **не имеет встроенного понимания порядка** токенов в последовательности. RoPE вводят позиционную информацию таким образом, чтобы она **естественно интегрировалась в механизм внимания**, влияя на взаимодействие между запросами и ключами и кодируя относительные позиции непосредственно в векторах внимания.
+Like standard PE, RoPE are necessary because the Self-Attention mechanism in Transformers processes all tokens in parallel and **lacks inherent understanding** of token order in a sequence. RoPE introduce positional information in a way that **naturally integrates** into the attention mechanism, influencing interactions between queries and keys and encoding relative positions directly into attention vectors.
 
-**Как работают Rotary Positional Embeddings (RoPE)?**
+**How do Rotary Positional Embeddings (RoPE) work?**
 
-RoPE применяют **вращательное преобразование** к векторам запросов ($q$) и ключей ($k$) в механизме внимания, в зависимости от их абсолютной позиции в последовательности.  Основная идея заключается в том, чтобы кодировать позиционную информацию через **вращение векторов в подпространствах**, что позволяет эффективно моделировать относительные позиции.
+RoPE apply a **rotational transformation** to query ($q$) and key ($k$) vectors in the attention mechanism, depending on their absolute position in the sequence. The core idea is to encode positional information via **rotation of vectors in subspaces**, enabling efficient modeling of relative positions.
 
-Математически, RoPE реализуется следующим образом:
+Mathematically, RoPE are implemented as follows:
 
-1. **Разделение размерности на пары:**  Вектор запроса $q$ и вектор ключа $k$ (размерности $d_k$) разделяются на пары измерений.  Для каждого измерения $2i$ и $2i+1$ (где $i = 0, 1, 2, ..., d_k/2 - 1$), применяется вращение.
+1. **Splitting dimensions into pairs:** The query vector $q$ and key vector $k$ (of dimension $d_k$) are split into pairs of dimensions. For each pair of dimensions $2i$ and $2i+1$ (where $i = 0, 1, 2, ..., d_k/2 - 1$), a rotation is applied.
 
-2. **Матрица вращения:** Для каждой позиции $pos$ в последовательности и для каждой пары измерений $(2i, 2i+1)$ определяется угол вращения $\theta_{pos} = pos \cdot \theta_0$, где $\theta_0$ - базовая частота (обычно выбирается как $10000^{-2i/d_k}$, аналогично PE).  Матрица вращения $R_{\theta_{pos}}$ в двумерном подпространстве $(2i, 2i+1)$ имеет вид:
+2. **Rotation matrix:** For each position $pos$ in the sequence and for each dimension pair $(2i, 2i+1)$, a rotation angle $\theta_{pos} = pos \cdot \theta_0$ is defined, where $\theta_0$ is the base frequency (typically chosen as $10000^{-2i/d_k}$, similar to PE). The 2D rotation matrix $R_{\theta_{pos}}$ in the subspace $(2i, 2i+1)$ has the form:
 
    $$
    R_{\theta_{pos}} = \begin{pmatrix}
@@ -991,635 +992,632 @@ RoPE применяют **вращательное преобразование*
    \end{pmatrix}
    $$
 
-3. **Применение вращения:**  Для вектора запроса $q = [q_0, q_1, ..., q_{d_k-1}]$ и вектора ключа $k = [k_0, k_1, ..., k_{d_k-1}]$, RoPE применяется попарно к измерениям:
+3. **Applying rotation:** For query vector $q = [q_0, q_1, ..., q_{d_k-1}]$ and key vector $k = [k_0, k_1, ..., k_{d_k-1}]$, RoPE is applied pairwise to dimensions:
 
-   Для четных измерений $2i$:
+   For even dimensions $2i$:
    $$
    q'_{2i} = q_{2i} \cos \theta_{pos} - q_{2i+1} \sin \theta_{pos} \\
    k'_{2i} = k_{2i} \cos \theta_{pos} - k_{2i+1} \sin \theta_{pos}
    $$
-   Для нечетных измерений $2i+1$:
+   For odd dimensions $2i+1$:
    $$
    q'_{2i+1} = q_{2i} \sin \theta_{pos} + q_{2i+1} \cos \theta_{pos} \\
    k'_{2i+1} = k_{2i} \sin \theta_{pos} + k_{2i+1} \cos \theta_{pos}
    $$
 
-   В матричной форме, для каждой пары измерений $(2i, 2i+1)$, это можно представить как умножение 2x1 под-вектора на матрицу вращения $R_{\theta_{pos}}$.  Это применяется ко всем парам измерений в $q$ и $k$ для позиции $pos$.
+   In matrix form, for each dimension pair $(2i, 2i+1)$, this can be represented as multiplying a 2x1 sub-vector by the rotation matrix $R_{\theta_{pos}}$. This is applied to all dimension pairs in $q$ and $k$ for position $pos$.
 
-4. **Объединение вращенных векторов:**  После применения вращения к каждой паре измерений, вращенные компоненты $q' = [q'_0, q'_1, ..., q'_{d_k-1}]$ и $k' = [k'_0, k'_1, ..., k'_{d_k-1}]$ формируют векторы запроса и ключа с позиционным кодированием.
+4. **Combining rotated vectors:** After applying rotation to each dimension pair, the rotated components $q' = [q'_0, q'_1, ..., q'_{d_k-1}]$ and $k' = [k'_0, k'_1, ..., k'_{d_k-1}]$ form the query and key vectors with positional encoding.
 
-**Почему используются вращения? Преимущества RoPE:**
+**Why use rotations? Advantages of RoPE:**
 
-*   **Эффективное кодирование относительных позиций:**  RoPE по своей конструкции хорошо подходит для кодирования относительных позиций.  Скалярное произведение между двумя векторами с RoPE, зависящее от их позиций, становится функцией только *относительного расстояния* между этими позициями.  Это свойство является ключевым преимуществом RoPE, позволяя модели эффективно улавливать зависимости, основанные на расстоянии между токенами.
+*   **Efficient encoding of relative positions:** RoPE are inherently well-suited for encoding relative positions. The dot product between two RoPE-encoded vectors depends only on the *relative distance* between their positions. This property is a key advantage of RoPE, enabling the model to effectively capture dependencies based on token distances.
 
-*   **Улучшенная экстраполяция на длинные последовательности:**  Благодаря механизму вращения и кодированию относительных позиций, RoPE демонстрируют лучшую способность к экстраполяции на последовательности длиннее, чем те, на которых модель была обучена, по сравнению со стандартными PE.
+*   **Improved extrapolation to long sequences:** Due to the rotational mechanism and relative position encoding, RoPE demonstrate better extrapolation capabilities to sequences longer than those used during training compared to standard PE.
 
-*   **Гибкость и интеграция в механизм внимания:** RoPE интегрируются непосредственно в механизм внимания, модифицируя взаимодействие между запросами и ключами.  Это позволяет позиционной информации влиять на веса внимания и, следовательно, на формирование контекстуализированных представлений.
+*   **Flexibility and integration into attention mechanism:** RoPE are directly integrated into the attention mechanism, modifying interactions between queries and keys. This allows positional information to influence attention weights and thus the formation of contextualized representations.
 
-*   **Возможность эффективной реализации:**  Вычисления с RoPE могут быть реализованы эффективно, особенно на аппаратном уровне, благодаря использованию тригонометрических функций и матричных операций.
+*   **Efficient implementation potential:** RoPE computations can be implemented efficiently, especially on hardware, due to the use of trigonometric functions and matrix operations.
 
-**Генерация позиционной информации через вращение:**
+**Generating positional information through rotation:**
 
-RoPE генерируют позиционную информацию, **вращая векторы запросов и ключей в двумерных подпространствах**.  Угол вращения зависит от позиции токена, что обеспечивает уникальное преобразование для каждой позиции.  Важно, что вращение применяется попарно к измерениям, что позволяет сохранить размерность векторов запросов и ключей и эффективно кодировать позиционную информацию.
+RoPE generate positional information by **rotating query and key vectors in 2D subspaces**. The rotation angle depends on the token's position, ensuring a unique transformation for each position. Crucially, rotation is applied pairwise to dimensions, preserving the original vector dimensions and efficiently encoding positional information.
 
-**Интеграция в архитектуру Transformer:**
+**Integration into Transformer architecture:**
 
-RoPE **не добавляются** к входным эмбеддингам, как стандартные PE. Вместо этого, RoPE **применяются непосредственно к векторам запросов и ключей** в каждом слое механизма Multi-Head Attention.  Это означает, что позиционная информация вводится на уровне механизма внимания, влияя на то, как модель взаимодействует с различными позициями в последовательности.  Размерность векторов запросов и ключей остается неизменной после применения RoPE.
+RoPE are **not added** to input embeddings like standard PE. Instead, RoPE are **applied directly to query and key vectors** in each Multi-Head Attention layer. This means positional information is introduced at the attention mechanism level, affecting how the model interacts with different sequence positions. The dimensionality of query and key vectors remains unchanged after applying RoPE.
 
-**В кратце, RoPE:**
+**In summary, RoPE:**
 
-*   **Не добавляются к эмбеддингам, а применяются к Q и K.**
-*   **Кодируют позицию через вращение векторов в подпространствах.**
-*   **Эффективно моделируют относительные позиции.**
-*   **Улучшают экстраполяцию на длинные последовательности.**
-*   **Интегрируются непосредственно в механизм внимания.**
+*   **Are not added to embeddings, but applied to Q and K.**
+*   **Encode position via rotation of vectors in subspaces.**
+*   **Effectively model relative positions.**
+*   **Improve extrapolation to long sequences.**
+*   **Are directly integrated into the attention mechanism.**
 
 </details> 
 
 ---
 
-Проблема возникает при **комбинации RoPE с низкоранговым сжатием KV**.  Если RoPE применяется после низкорангового сжатия и расширения, то позиционная информация может быть "размыта" или недостаточно эффективно интегрирована из-за низкорангового представления.  Чтобы решить эту проблему, MLA вводит **развязанную стратегию RoPE**.
+The problem arises when **combining RoPE with low-rank KV compression**. If RoPE is applied after low-rank compression and expansion, positional information may be "blurred" or insufficiently integrated due to the low-rank representation. To solve this issue, MLA introduces a **decoupled RoPE strategy**.
 
-**Развязанная стратегия RoPE:**
+**Decoupled RoPE Strategy:**
 
-Развязанная RoPE предполагает введение **дополнительных многоголовочных запросов ($q_R$) и общих ключей ($k_R$)**, которые **специализированы для обработки позиционной информации RoPE**.  Эти векторы $q_R$ и $k_R$ имеют собственную размерность $d^R_h$.  RoPE применяется **только к $q_R$ и $k_R$**.
+The decoupled RoPE strategy introduces **additional multi-head queries ($q_R$) and shared keys ($k_R$)**, which are **specialized for processing RoPE positional information**. These vectors $q_R$ and $k_R$ have their own dimension $d^R_h$. RoPE is applied **only to $q_R$ and $k_R$**.
 
-Окончательные векторы запросов ($Q$) и ключей ($K$) для механизма внимания формируются путем **конкатенации** векторов, полученных из низкорангового представления ($c_t$) и векторов RoPE ($q_R, k_R$).
+The final query ($Q$) and key ($K$) vectors for the attention mechanism are formed by **concatenating** vectors derived from low-rank representations ($c_t$) and RoPE vectors ($q_R, k_R$).
 
-**Математическая формализация:**
+**Mathematical Formalization:**
 
-1.  **Вычисление низкоранговых векторов:**
+1.  **Computing low-rank vectors:**
     $$
     c_t = h_t W_{uc}
     $$
 
-2.  **Проецирование для RoPE векторов:**
+2.  **Projection for RoPE vectors:**
     $$
     q_R = h_t W_{qR} \\
     k_R = h_t W_{kR}
     $$
-    где $W_{qR} \in \mathbb{R}^{d_{model} \times d^R_h}$ и $W_{kR} \in \mathbb{R}^{d_{model} \times d^R_h}$ - матрицы проекции для RoPE запросов и ключей.
+    where $W_{qR} \in \mathbb{R}^{d_{model} \times d^R_h}$ and $W_{kR} \in \mathbb{R}^{d_{model} \times d^R_h}$ are projection matrices for RoPE queries and keys.
 
-3.  **Применение RoPE к $q_R$ и $k_R$:**
+3.  **Applying RoPE to $q_R$ and $k_R$:**
     $$
     \tilde{q}_R = \text{RoPE}(q_R, \text{position}) \\
     \tilde{k}_R = \text{RoPE}(k_R, \text{position})
     $$
-    где $\text{RoPE}(\cdot, \text{position})$ - функция применения Rotary Positional Embeddings, зависящая от позиции токена.
+    where $\text{RoPE}(\cdot, \text{position})$ is the function applying Rotary Positional Embeddings, dependent on token position.
 
-4.  **Расширение низкорангового вектора для основной части запросов и ключей:**
+4.  **Expanding low-rank vector for main query and key parts:**
     $$
     q_L = c_t W_{uq} \\
     k_L = c_t W_{uk}
     $$
-    где $W_{uq} \in \mathbb{R}^{d_c \times d^L_h}$ и $W_{uk} \in \mathbb{R}^{d_c \times d^L_h}$.  Здесь $d^L_h$ - размерность "низкоранговой" части запросов и ключей.  Важно, что общая размерность головы внимания $d_h = d^L_h + d^R_h$.
+    where $W_{uq} \in \mathbb{R}^{d_c \times d^L_h}$ and $W_{uk} \in \mathbb{R}^{d_c \times d^L_h}$. Here $d^L_h$ is the dimension of the "low-rank" part of queries and keys. Crucially, the total head dimension $d_h = d^L_h + d^R_h$.
 
-5.  **Конкатенация для формирования окончательных запросов и ключей:**
+5.  **Concatenation to form final queries and keys:**
     $$
     Q = \text{Concat}(q_L, \tilde{q}_R) \\
     K = \text{Concat}(k_L, \tilde{k}_R)
     $$
-    где $\text{Concat}(\cdot, \cdot)$ - операция конкатенации векторов.  Окончательные $Q, K \in \mathbb{R}^{d_h}$, где $d_h = d^L_h + d^R_h$.
+    where $\text{Concat}(\cdot, \cdot)$ is the vector concatenation operation. Final $Q, K \in \mathbb{R}^{d_h}$, where $d_h = d^L_h + d^R_h$.
 
-**Размерности:**
+**Dimensions:**
 
-*   $h_t \in \mathbb{R}^{d_{model}}$ - входной эмбеддинг токена
-*   $c_t \in \mathbb{R}^{d_c}$ - низкоранговый вектор
-*   $q_R, k_R \in \mathbb{R}^{d^R_h}$ - RoPE запросы и ключи
-*   $\tilde{q}_R, \tilde{k}_R \in \mathbb{R}^{d^R_h}$ - RoPE запросы и ключи после применения RoPE
-*   $q_L, k_L \in \mathbb{R}^{d^L_h}$ - низкоранговые запросы и ключи
-*   $Q, K \in \mathbb{R}^{d_h}$ - окончательные запросы и ключи, $d_h = d^L_h + d^R_h$
-*   $W_{uc} \in \mathbb{R}^{d_{model} \times d_c}$, $W_{qR} \in \mathbb{R}^{d_{model} \times d^R_h}$, $W_{kR} \in \mathbb{R}^{d_{model} \times d^R_h}$, $W_{uq} \in \mathbb{R}^{d_c \times d^L_h}$, $W_{uk} \in \mathbb{R}^{d_c \times d^L_h}$ - матрицы проекций
+*   $h_t \in \mathbb{R}^{d_{model}}$ — input token embedding
+*   $c_t \in \mathbb{R}^{d_c}$ — low-rank vector
+*   $q_R, k_R \in \mathbb{R}^{d^R_h}$ — RoPE queries and keys
+*   $\tilde{q}_R, \tilde{k}_R \in \mathbb{R}^{d^R_h}$ — RoPE queries and keys after applying RoPE
+*   $q_L, k_L \in \mathbb{R}^{d^L_h}$ — low-rank queries and keys
+*   $Q, K \in \mathbb{R}^{d_h}$ — final queries and keys, $d_h = d^L_h + d^R_h$
+*   $W_{uc} \in \mathbb{R}^{d_{model} \times d_c}$, $W_{qR} \in \mathbb{R}^{d_{model} \times d^R_h}$, $W_{kR} \in \mathbb{R}^{d_{model} \times d^R_h}$, $W_{uq} \in \mathbb{R}^{d_c \times d^L_h}$, $W_{uk} \in \mathbb{R}^{d_c \times d^L_h}$ — projection matrices
 
-#### Детализация формул MLA
+#### Detailed MLA Formulas
 
-В MLA DeepSeek-V3 имеется 128 голов внимания, каждая с размерностью 128. Размерность d_c составляет 512.
-Для более детального понимания механизма MLA, рекомендуется обратиться к разделу 2.1.2 технического отчета DeepSeek-V3 [[6](https://arxiv.org/abs/2412.19437)].
+In MLA DeepSeek-V3, there are 128 attention heads, each with a dimension of 128. The dimension $d_c$ is 512.
+For a more detailed understanding of the MLA mechanism, refer to section 2.1.2 of the DeepSeek-V3 technical report [[6](https://arxiv.org/abs/2412.19437)].
 
-В заключение, Multi-Head Latent Attention (MLA) представляет собой ключевую техническую инновацию в DeepSeek-V3, направленную на оптимизацию вычислительной эффективности и масштабируемости модели.  Уменьшение размера KV-кэша и снижение требований к памяти активаций способствуют более эффективному использованию вычислительных ресурсов, что, в свою очередь, позволяет реализовывать стратегии Test-time compute и создавать более мощные reasoning-системы, такие как DeepSeek-R1.
+In conclusion, Multi-Head Latent Attention (MLA) is a key technical innovation in DeepSeek-V3 aimed at optimizing computational efficiency and model scalability. Reducing KV-cache size and lowering activation memory requirements contribute to more efficient use of computational resources, enabling strategies for Test-time compute and building powerful reasoning systems like DeepSeek-R1.
 
 ![Figure_3](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_3.jpg)
 
-Помните, что это не единственный способ оптимизировать внимание для более быстрой генерации. Многие перешли от классического MHA к Multi-Query Attention (MQA) Ноама Шазира [[7](https://arxiv.org/abs/1911.02150)], где K и V являются общими для всех головок внимания (что значительно ускоряет вывод с небольшим ухудшением качества), и Grouped-Query Attention (GQA) также от Google [[8](https://arxiv.org/abs/2305.13245)], который был промежуточным звеном между MHA и MQA. В GQA количество головок ключ-значение было больше одной, но меньше полного набора, как в запросе — здесь одна голова ключ-значение на группу головок запроса — и качество могло приближаться к исходному MHA.
+Remember, this is not the only way to optimize attention for faster generation. Many have transitioned from classical MHA to Noam Shazeer's Multi-Query Attention (MQA) [[7](https://arxiv.org/abs/1911.02150)], where K and V are shared across all attention heads (significantly accelerating inference with minor quality degradation), and Grouped-Query Attention (GQA) from Google [[8](https://arxiv.org/abs/2305.13245)], which served as an intermediate step between MHA and MQA. In GQA, the number of key-value heads was greater than one but less than the full set of query heads—here, one key-value head serves a group of query heads—and quality could approach that of original MHA.
 
 ![Figure_4](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_4.jpg)
 
-MLA эффективно экономит место в кэше, сравнимо с GQA с 2,25 группами, а производительность даже превосходит MHA.
+MLA effectively saves cache space comparable to GQA with 2.25 groups, while performance even exceeds MHA.
 
 # 5. DeepSeekMoE
 
-Далее рассмотрим DeepSeekMoE [[10](https://arxiv.org/abs/2401.06066)], который также используется в DeepSeek-V2.
+Next, we examine DeepSeekMoE [[10](https://arxiv.org/abs/2401.06066)], which is also used in DeepSeek-V2.
 
-DeepSeekMoE, представленная в работе Baidu (2024) [https://arxiv.org/abs/2401.06066] и являющаяся ключевым компонентом DeepSeek-V2, представляет собой архитектуру Mixture-of-Experts (MoE), нацеленную на повышение эффективности и специализации экспертных подсетей.  В отличие от традиционных MoE, где эксперты могут располагаться в различных слоях, в DeepSeekMoE экспертные блоки интегрированы в слои Feed-Forward Network (FFN), заменяя собой стандартные FFN слои.
+DeepSeekMoE, introduced in the work by Baidu (2024) [https://arxiv.org/abs/2401.06066] and serving as a key component of DeepSeek-V2, is a Mixture-of-Experts (MoE) architecture designed to enhance efficiency and expert specialization. Unlike traditional MoE, where experts may reside in different layers, in DeepSeekMoE, expert blocks are integrated into Feed-Forward Network (FFN) layers, replacing standard FFN layers.
 
-В архитектуре DeepSeekMoE слой FFN модифицируется путем внедрения механизма селекции и активации определенного числа экспертов из общего набора. Каждый эксперт представляет собой независимый слой FFN, активируемый алгоритмом маршрутизации.  В контексте архитектур MoE, следует отметить, что GShard (Shazeer et al., 2020) [https://arxiv.org/abs/2006.16668] активировал два эксперта на слой, в то время как Switch Transformer (Fedus et al., 2021) [https://arxiv.org/abs/2101.03961] использовал одного.  В DeepSeekMoE входные токены направляются на обработку к отобранным экспертам, и в случае активации нескольких экспертов, их выходные данные агрегируются посредством, например, весового усреднения.
+In the DeepSeekMoE architecture, the FFN layer is modified by introducing a mechanism to select and activate a specified number of experts from a total pool. Each expert represents an independent FFN layer activated by a routing algorithm. In the context of MoE architectures, note that GShard (Shazeer et al., 2020) [https://arxiv.org/abs/2006.16668] activated two experts per layer, while Switch Transformer (Fedus et al., 2021) [https://arxiv.org/abs/2101.03961] used one. In DeepSeekMoE, input tokens are routed to selected experts, and when multiple experts are activated, their outputs are aggregated, for example, via weighted averaging.
 
-Ключевой целью DeepSeekMoE является достижение более выраженной специализации экспертов.  Для реализации данной цели применяется метод мелкозернистой сегментации экспертов.  В соответствии с этим методом, каждый эксперт подразделяется на $m$ фрагментов, и пропорционально увеличивается количество активируемых экспертов в $m$ раз.  Такой подход позволяет сохранить вычислительные ресурсы на прежнем уровне, при этом обеспечивая активацию $mK$ экспертов из $mN$ вместо $K$ из $N$.  Мелкозернистая сегментация расширяет комбинаторное пространство, потенциально способствуя более глубокой и дифференцированной специализации экспертов в рамках модели.
+The primary goal of DeepSeekMoE is to achieve more pronounced expert specialization. To realize this goal, a fine-grained expert segmentation method is applied. According to this method, each expert is subdivided into $m$ fragments, and the number of activated experts is proportionally increased by a factor of $m$. This approach maintains computational resources at the same level while enabling activation of $mK$ experts from $mN$ instead of $K$ from $N$. Fine-grained segmentation expands the combinatorial space, potentially promoting deeper and more differentiated expert specialization within the model.
 
-Для обеспечения эффективного усвоения общих знаний, архитектура DeepSeekMoE включает выделение общих экспертов, на которые входные данные направляются на постоянной основе.  Данный подход направлен на концентрацию обучения общим знаниям в специализированных общих экспертах, в отличие от распределения общих знаний между маршрутизируемыми экспертами.  В результате, DeepSeekMoE включает $N_s$ общих и $N_r$ маршрутизируемых экспертов.  В конфигурации DeepSeek-V3 используется один общий эксперт и 256 маршрутизируемых экспертов, из которых 8 активируются на каждом слое.
+To ensure efficient acquisition of common knowledge, DeepSeekMoE incorporates dedicated shared experts, to which input data is consistently routed. This approach concentrates the learning of common knowledge within specialized shared experts, rather than distributing it among routed experts. Consequently, DeepSeekMoE includes $N_s$ shared and $N_r$ routed experts. In the DeepSeek-V3 configuration, one shared expert and 256 routed experts are used, with 8 activated per layer.
 
 ![Figure_5](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_5.jpg)
 
-Отбор маршрутизируемых экспертов осуществляется на основе принципа top-k, с использованием оценки сродства, вычисляемой как скалярное произведение вектора представления входного токена и центроида соответствующего эксперта.  Несмотря на отсутствие детального описания метода расчета центроида в доступной технической документации, предполагается, что центроид представляет собой среднее значение активаций (или входных векторов) токенов, обработанных данным экспертом.  В DeepSeek-V3 используется сигмоидальная функция и процедура нормализации оценок сродства перед применением в механизме маршрутизации.
+Routed experts are selected based on the top-k principle, using a similarity score computed as the dot product between the input token's representation vector and the expert's centroid. Although the technical documentation does not detail the centroid calculation method, it is assumed that the centroid represents the mean activation (or input vector) of tokens processed by that expert. In DeepSeek-V3, a sigmoid function and normalization procedure are applied to the similarity scores before routing.
 
 ![Figure_6](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_6.jpg)
 
-Для предотвращения коллапса маршрутизации, DeepSeek-V2 применял механизм балансировочных потерь, включающий компоненты на уровне экспертов и вычислительных устройств.  В DeepSeek-V3 от использования дополнительных потерь отказались, внедрив стратегию балансировки нагрузки без дополнительных потерь (Baidu, 2024) [https://arxiv.org/abs/2408.15664].  Данная стратегия предполагает добавление смещения к оценке сродства в процессе маршрутизации, с последующим выбором top-k экспертов на основе скорректированных оценок.  Важно отметить, что смещение используется исключительно для маршрутизации и не влияет на вычисление экспертных весов смешивания.  Контроль смещения осуществляется путем мониторинга активности экспертов в пакете данных.  При обнаружении перегрузки эксперта, его смещение уменьшается, и наоборот, увеличивается при низкой активности.  Указанный подход демонстрирует большую эффективность по сравнению с методами, основанными на потерях.
+To prevent routing collapse, DeepSeek-V2 employed auxiliary loss mechanisms, including expert-level and device-level components. In DeepSeek-V3, additional losses were abandoned in favor of a loss-free load balancing strategy (Baidu, 2024) [https://arxiv.org/abs/2408.15664]. This strategy introduces a bias to the similarity score during routing, followed by selecting top-k experts based on the adjusted scores. Crucially, the bias is used exclusively for routing and does not affect the computation of expert mixing weights. Bias control is achieved by monitoring expert activity within the data batch. When an expert is detected as overloaded, its bias is decreased; conversely, it is increased when activity is low. This approach demonstrates greater efficiency compared to loss-based methods.
 
 ![Figure_7](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_7.jpg)
 
-На рисунуке выше представлено сравнение различных методов балансировки нагрузки. Loss-Free Balancing устраняет компромисс между балансировкой нагрузки и качеством модели, которое наблюдается в других методах. В отличие от альтернативных подходов, он обеспечивает одновременно сбалансированную нагрузку между экспертами, устраняя градиенты помех, и предотвращает утечку будущих токенов, что критично для языковых моделей.
+The figure above compares various load balancing methods. Loss-Free Balancing eliminates the trade-off between load balancing and model quality observed in other methods. Unlike alternative approaches, it ensures balanced expert load, eliminates gradient interference, and prevents future token leakage, which is critical for language models.
 
 ![Figure_8](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_8.jpg)
 
-Рисунок выше  демонстрирует сам процесс маршрутизации экспертов в DeepSeekMoE. Сначала вычисляются оценочные показатели (gating score), к которым добавляется экспертное смещение (expert bias). После этого происходит отбор экспертов по принципу top-k, что определяет распределение нагрузки. Затем на основе обратной связи выполняется обновление смещения (bias updating), что помогает динамически сбалансировать нагрузку между экспертами. Этот механизм снижает вероятность перегрузки отдельных экспертов и повышает равномерность использования вычислительных ресурсов.
+The figure above illustrates the expert routing process in DeepSeekMoE. First, gating scores are computed, to which expert bias is added. Then, top-k experts are selected, determining the load distribution. Subsequently, bias updating is performed based on feedback, helping dynamically balance load among experts. This mechanism reduces the likelihood of individual expert overload and improves computational resource utilization.
 
 ![Figure_9](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_9.jpg)
 
-На графике выше иллюстрирует компромисс между балансировкой нагрузки и качеством модели при использовании вспомогательной функции потерь (auxiliary loss). Увеличение коэффициента 
-$𝛼$ улучшает балансировку нагрузки, но ухудшает показатель perplexity, что снижает эффективность модели. Метод Loss-Free позволяет избежать этого компромисса, обеспечивая наилучший баланс и производительность без необходимости в дополнительных функциях потерь.
+The graph above illustrates the trade-off between load balancing and model quality when using auxiliary loss functions. Increasing the coefficient $𝛼$ improves load balancing but worsens perplexity, reducing model effectiveness. The Loss-Free method avoids this trade-off, achieving optimal balance and performance without requiring additional loss functions.
 
-В архитектуру DeepSeekMoE также интегрирована Complementary Sequence-Wise Auxiliary Loss с малым весовым коэффициентом, направленная на минимизацию дисбаланса при обработке последовательностей.  Кроме того, применяется алгоритмическая техника Node-Limited Routing, ограничивающая максимальное количество вычислительных узлов, задействованных для обработки каждого токена.  Данный механизм концептуально аналогичен балансировочным потерям, использовавшимся в DeepSeek-V2, и позволяет ограничить распространение нагрузки, направляя каждый токен не более чем на 4 вычислительных узла.
+The DeepSeekMoE architecture also integrates a Complementary Sequence-Wise Auxiliary Loss with a small weight coefficient, aimed at minimizing imbalance during sequence processing. Additionally, an algorithmic technique called Node-Limited Routing limits the maximum number of computational nodes involved in processing each token. This mechanism is conceptually analogous to the balancing losses used in DeepSeek-V2 and restricts each token to be routed to no more than four computational nodes.
 
 <details> 
-    <summary><em><strong>Математическая формализация DeepSeekMoE</strong></em></summary>
+    <summary><em><strong>Mathematical Formalization of DeepSeekMoE</strong></em></summary>
 
-Архитектура DeepSeekMoE использует несколько ключевых математических концепций для реализации механизма Mixture-of-Experts с акцентом на специализацию экспертов и балансировку нагрузки. Рассмотрим каждую из них подробно:
+The DeepSeekMoE architecture employs several key mathematical concepts to implement the Mixture-of-Experts mechanism, emphasizing expert specialization and load balancing. Let us examine each in detail:
 
-#### 1. **Маршрутизация экспертов (Expert Routing)**
+#### 1. **Expert Routing**
 
-**Цель:** Определить, какие эксперты должны обрабатывать входной токен.
+**Goal:** Determine which experts should process each input token.
 
-**Формула оценки сродства:**
+**Affinity Score Formula:**
 
 $$
 a_i = \sigma( h^T c_i + b_i )
 $$
 
-**Пояснение:**
+**Explanation:**
 
-*   $a_i$ – оценка сродства (affinity score) входного токена к $i$-му эксперту. Чем выше $a_i$, тем больше "подходит" токен этому эксперту.
-*   $h = \text{LayerNorm}(x)$ –  представление входного токена $x$ после применения Layer Normalization. Layer Normalization помогает стабилизировать обучение и улучшить обобщающую способность модели.
-*   $c_i \in \mathbb{R}^d$ – центроид $i$-го эксперта.  Предполагается, что $c_i$ представляет собой "центр" пространства представлений токенов, которые должен обрабатывать $i$-й эксперт.  Как указано в тексте, центроид, вероятно, рассчитывается как среднее значение представлений токенов, обработанных этим экспертом.
-*   $b_i$ – динамическое смещение (bias) для $i$-го эксперта. Это смещение используется для балансировки нагрузки между экспертами. Оно динамически корректируется, чтобы предотвратить перегрузку одних экспертов и недозагрузку других.
-*   $\sigma(\cdot)$ – сигмоидальная функция. Применяется для нормализации оценки сродства в диапазон от 0 до 1. Сигмоида преобразует скалярное произведение и смещение в вероятность или уверенность в том, что токен должен быть направлен к данному эксперту.
+*   $a_i$ – affinity score of the input token to the $i$-th expert. Higher $a_i$ indicates greater suitability of the token for this expert.
+*   $h = \text{LayerNorm}(x)$ – representation of the input token $x$ after applying Layer Normalization. Layer Normalization helps stabilize training and improves model generalization.
+*   $c_i \in \mathbb{R}^d$ – centroid of the $i$-th expert. It is assumed that $c_i$ represents the "center" of the representation space of tokens this expert should process. As noted in the text, the centroid is likely computed as the mean of representations of tokens processed by this expert.
+*   $b_i$ – dynamic bias for the $i$-th expert. This bias is used to balance load across experts. It is dynamically adjusted to prevent overloading some experts and underutilizing others.
+*   $\sigma(\cdot)$ – sigmoid function. Applied to normalize the affinity score into the range [0, 1]. The sigmoid transforms the dot product and bias into a probability or confidence that the token should be routed to this expert.
 
-**Формула выбора экспертов (Top-K Selection):**
+**Expert Selection Formula (Top-K Selection):**
 
 $$
 \text{Top-K} = \arg\max_{i \in \{1,...,N_r\}} ( a_i )
 $$
 
-**Пояснение:**
+**Explanation:**
 
-*   $\text{Top-K}$ –  множество индексов $K$ экспертов с наивысшими оценками сродства $a_i$.
-*   $\arg\max_{i \in \{1,...,N_r\}} ( a_i )$ –  операция, которая выбирает индексы $K$ экспертов из общего числа маршрутизируемых экспертов $N_r$, для которых оценка сродства $a_i$ является наибольшей.
-*   В DeepSeek-V3, как указано, $K=8$ и $N_r=256$. Это означает, что для каждого входного токена выбираются 8 из 256 маршрутизируемых экспертов для обработки.
+*   $\text{Top-K}$ – set of indices of $K$ experts with the highest affinity scores $a_i$.
+*   $\arg\max_{i \in \{1,...,N_r\}} ( a_i )$ – operation selecting the $K$ expert indices from the total number of routed experts $N_r$ with the largest affinity scores $a_i$.
+*   In DeepSeek-V3, as stated, $K=8$ and $N_r=256$. This means that for each input token, 8 out of 256 routed experts are selected for processing.
 
-#### 2. **Мелкозернистая сегментация экспертов (Fine-Grained Expert Segmentation)**
+#### 2. **Fine-Grained Expert Segmentation**
 
-**Цель:** Увеличить специализацию экспертов без увеличения вычислительных затрат.
+**Goal:** Increase expert specialization without increasing computational cost.
 
-**Формула агрегации выходов с мелкозернистой сегментацией:**
+**Fine-Grained Aggregation Formula:**
 
 $$
-y = \sum_{j=1}^{mK} g_j \cdot E_j^{(m)}(h), \quad \text{где } \sum g_j = 1
+y = \sum_{j=1}^{mK} g_j \cdot E_j^{(m)}(h), \quad \text{where } \sum g_j = 1
 $$
 
-**Пояснение:**
+**Explanation:**
 
-*   $m$ – коэффициент мелкозернистой сегментации (например, $m=4$). Каждый исходный эксперт разделяется на $m$ подэкспертов.
-*   $E_j^{(m)}(h)$ –  $j$-й подэксперт (из общего числа $mN$) обрабатывает входное представление $h$.  Важно отметить, что каждый подэксперт имеет меньший размер, чем исходный эксперт (примерно в $m$ раз меньше по FLOPs).
-*   $mK$ – количество активируемых подэкспертов.  Если изначально активировалось $K$ экспертов, то после сегментации активируется $mK$ подэкспертов.
-*   $g_j$ – весовой коэффициент (gate weight) для $j$-го подэксперта.  Эти веса определяют, насколько сильно вклад каждого подэксперта влияет на итоговый выход.  Сумма всех весов $g_j$ равна 1, что обеспечивает нормализацию выходных данных.
-*   $y$ –  выход слоя MoE после агрегации выходов активированных подэкспертов с учетом весовых коэффициентов.
+*   $m$ – fine-grained segmentation factor (e.g., $m=4$). Each original expert is split into $m$ sub-experts.
+*   $E_j^{(m)}(h)$ – the $j$-th sub-expert (among $mN$ total) processes the input representation $h$. Importantly, each sub-expert is smaller than the original expert (approximately $m$ times fewer FLOPs).
+*   $mK$ – number of activated sub-experts. If originally $K$ experts were activated, after segmentation, $mK$ sub-experts are activated.
+*   $g_j$ – gate weight for the $j$-th sub-expert. These weights determine how strongly each sub-expert contributes to the final output. The sum of all weights $g_j$ equals 1, ensuring output normalization.
+*   $y$ – MoE layer output after aggregating outputs of activated sub-experts with their respective weights.
 
-**Сохранение вычислительных затрат:**
+**Computational Cost Preservation:**
 
-Мелкозернистая сегментация позволяет увеличить количество "специализированных" вычислительных блоков (подэкспертов) без увеличения общего объема вычислений, поскольку каждый подэксперт меньше исходного эксперта.  Как показано в примере, активация $mK$ подэкспертов, каждый из которых требует $\text{FLOPs}/m$, приводит к тем же общим FLOPs, что и активация $K$ исходных экспертов.
+Fine-grained segmentation allows increasing the number of "specialized" computational blocks (sub-experts) without increasing total computation, since each sub-expert is smaller than the original expert. As shown in the example, activating $mK$ sub-experts, each requiring $\text{FLOPs}/m$, results in the same total FLOPs as activating $K$ original experts.
 
-#### 3. **Совместное использование общих экспертов (Shared Experts)**
+#### 3. **Shared Experts**
 
-**Цель:** Обеспечить усвоение общих знаний, которые должны быть доступны для всех входных токенов.
+**Goal:** Ensure learning of general knowledge accessible to all input tokens.
 
-**Формула выходного слоя с общим экспертом:**
+**Output Layer Formula with Shared Expert:**
 
 $$
 y = E_{\text{shared}}(h) + \sum_{j \in \text{Top-K}} g_j \cdot E_j(h)
 $$
 
-**Пояснение:**
+**Explanation:**
 
-*   $E_{\text{shared}}(h)$ –  выход общего эксперта, который обрабатывает представление $h$ каждого входного токена. Общий эксперт всегда активен и не участвует в маршрутизации.
-*   $E_j(h)$ –  выход $j$-го маршрутизируемого эксперта (здесь уже подразумеваются исходные эксперты, а не подэксперты, если мелкозернистая сегментация применяется к маршрутизируемым экспертам).
-*   Сумма $\sum_{j \in \text{Top-K}} g_j \cdot E_j(h)$ –  представляет собой агрегированный выход выбранных маршрутизируемых экспертов, как описано в разделе 1 и 2.
-*   $y$ –  итоговый выход слоя MoE, который является суммой выхода общего эксперта и агрегированного выхода маршрутизируемых экспертов.
+*   $E_{\text{shared}}(h)$ – output of the shared expert, which processes the representation $h$ of every input token. The shared expert is always active and not involved in routing.
+*   $E_j(h)$ – output of the $j$-th routed expert (here, referring to original experts, not sub-experts, if fine-grained segmentation is applied to routed experts).
+*   $\sum_{j \in \text{Top-K}} g_j \cdot E_j(h)$ – aggregated output of selected routed experts, as described in sections 1 and 2.
+*   $y$ – final MoE layer output, which is the sum of the shared expert output and the aggregated output of routed experts.
 
-Общий эксперт позволяет модели изучать общие закономерности и знания, которые применимы ко всем типам входных данных, в то время как маршрутизируемые эксперты специализируются на более конкретных и узких областях.
+The shared expert enables the model to learn general patterns and knowledge applicable to all types of input data, while routed experts specialize in narrower, more specific domains.
 
-#### 4. **Динамическая балансировка нагрузки (Dynamic Load Balancing)**
+#### 4. **Dynamic Load Balancing**
 
-**Цель:** Равномерно распределить нагрузку между маршрутизируемыми экспертами, чтобы избежать ситуации, когда некоторые эксперты перегружены, а другие недоиспользуются.
+**Goal:** Distribute load evenly among routed experts to avoid situations where some experts are overloaded and others underutilized.
 
-**Формула обновления смещения $b_i$:**
+**Bias Update Formula:**
 
 $$
 b_i^{(t+1)} = b_i^{(t)} - \eta \cdot \left( \text{load}_i - \frac{\text{Total load}}{N_r} \right)
 $$
 
-**Пояснение:**
+**Explanation:**
 
-*   $b_i^{(t+1)}$ –  новое значение смещения для $i$-го эксперта на следующем шаге обновления.
-*   $b_i^{(t)}$ –  текущее значение смещения для $i$-го эксперта.
-*   $\eta$ –  скорость обучения (learning rate) для обновления смещения.  Определяет, насколько быстро смещение корректируется в ответ на дисбаланс нагрузки.
-*   $\text{load}_i$ –  количество токенов, обработанных $i$-м экспертом в текущем пакете (batch).
-*   $\text{Total load}$ –  общее количество токенов в пакете, обработанных всеми маршрутизируемыми экспертами.
-*   $N_r$ –  общее количество маршрутизируемых экспертов.
-*   $\frac{\text{Total load}}{N_r}$ –  средняя нагрузка на эксперта, если нагрузка была бы идеально распределена.
-*   $\left( \text{load}_i - \frac{\text{Total load}}{N_r} \right)$ –  разница между фактической нагрузкой на $i$-го эксперта и средней нагрузкой.  Если эта разница положительная, эксперт перегружен; если отрицательная, недогружен.
+*   $b_i^{(t+1)}$ – new bias value for the $i$-th expert at the next update step.
+*   $b_i^{(t)}$ – current bias value for the $i$-th expert.
+*   $\eta$ – learning rate for bias update. Determines how quickly the bias adjusts in response to load imbalance.
+*   $\text{load}_i$ – number of tokens processed by the $i$-th expert in the current batch.
+*   $\text{Total load}$ – total number of tokens in the batch processed by all routed experts.
+*   $N_r$ – total number of routed experts.
+*   $\frac{\text{Total load}}{N_r}$ – average load per expert under ideal uniform distribution.
+*   $\left( \text{load}_i - \frac{\text{Total load}}{N_r} \right)$ – difference between actual load on expert $i$ and average load. A positive value indicates overload; a negative value indicates underload.
 
-**Механизм балансировки:**
+**Balancing Mechanism:**
 
-Формула обновляет смещение $b_i$ таким образом, чтобы уменьшить нагрузку на перегруженных экспертов и увеличить нагрузку на недогруженных. Если эксперт перегружен ($\text{load}_i > \frac{\text{Total load}}{N_r}$), смещение $b_i$ уменьшается, что снижает оценку сродства $a_i$ для этого эксперта в будущем, и, следовательно, уменьшает вероятность его выбора.  И наоборот, если эксперт недогружен, его смещение увеличивается, повышая вероятность его выбора.
+The formula updates bias $b_i$ to reduce load on overloaded experts and increase load on underloaded ones. If an expert is overloaded ($\text{load}_i > \frac{\text{Total load}}{N_r}$), its bias $b_i$ decreases, lowering its affinity score $a_i$ in future steps and thus reducing its selection probability. Conversely, if an expert is underloaded, its bias increases, raising its selection probability.
 
-#### 5. **Агрегация выходов экспертов - Веса смешивания (Gate Weights)**
+#### 5. **Expert Output Aggregation – Gate Weights**
 
-**Цель:** Определить вклад каждого выбранного эксперта в итоговый выход.
+**Goal:** Determine the contribution of each selected expert to the final output.
 
-**Формула весов смешивания $g_j$:**
+**Gate Weight Formula:**
 
 $$
 g_j = \frac{\exp(a_j / \tau)}{\sum_{k \in \text{Top-K}} \exp(a_k / \tau)}
 $$
 
-**Пояснение:**
+**Explanation:**
 
-*   $g_j$ –  весовой коэффициент для $j$-го выбранного эксперта.
-*   $a_j$ –  оценка сродства для $j$-го эксперта, рассчитанная ранее.
-*   $\tau$ –  температура (temperature).  Параметр, который контролирует "мягкость" распределения весов.
-    *   При высоком $\tau$ распределение весов становится более равномерным, и вклад всех выбранных экспертов становится более схожим.
-    *   При низком $\tau$ распределение становится более резким, и эксперт с самой высокой оценкой сродства получает значительно больший вес, чем остальные.
-*   $\exp(a_j / \tau)$ –  экспонента от нормированной оценки сродства.  Экспоненцирование усиливает различия между оценками сродства.
-*   $\sum_{k \in \text{Top-K}} \exp(a_k / \tau)$ –  сумма экспонент от нормированных оценок сродства для всех выбранных экспертов.  Используется для нормализации весов $g_j$ так, чтобы их сумма была равна 1.
+*   $g_j$ – weight coefficient for the $j$-th selected expert.
+*   $a_j$ – affinity score for the $j$-th expert, computed previously.
+*   $\tau$ – temperature. Parameter controlling the "softness" of the weight distribution.
+    *   High $\tau$ makes the weight distribution more uniform; contributions from all selected experts become more similar.
+    *   Low $\tau$ makes the distribution sharper; the expert with the highest affinity score receives significantly greater weight than others.
+*   $\exp(a_j / \tau)$ – exponential of the normalized affinity score. Exponentiation amplifies differences between affinity scores.
+*   $\sum_{k \in \text{Top-K}} \exp(a_k / \tau)$ – sum of exponentials of normalized affinity scores for all selected experts. Used to normalize weights $g_j$ so their sum equals 1.
 
-**Механизм смешивания:**
+**Mixing Mechanism:**
 
-Формула использует softmax-подобный механизм для расчета весов смешивания.  Эксперты с более высокими оценками сродства $a_j$ получают более высокие веса $g_j$, что означает, что их выходной вклад в итоговый результат будет больше. Температура $\tau$ позволяет регулировать степень "концентрации" внимания на наиболее подходящих экспертах.
+The formula employs a softmax-like mechanism to compute gate weights. Experts with higher affinity scores $a_j$ receive higher weights $g_j$, meaning their output contributes more to the final result. Temperature $\tau$ allows tuning the degree of "focus" on the most suitable experts.
 
-#### 6. **Дополнительные механизмы**
+#### 6. **Additional Mechanisms**
 
-**a) Complementary Sequence-Wise Auxiliary Loss (Дополнительная вспомогательная потеря для балансировки последовательностей)**
+**a) Complementary Sequence-Wise Auxiliary Loss (Complementary Sequence-Level Auxiliary Loss)**
 
-**Цель:** Обеспечить баланс нагрузки на уровне последовательностей, чтобы избежать дисбаланса в обработке длинных последовательностей.
+**Goal:** Ensure load balance at the sequence level to avoid imbalance in processing long sequences.
 
-**Формула вспомогательной потери $\mathcal{L}_{\text{aux}}$:**
-
-$$
-\mathcal{L}_{\text{aux}} = \lambda \cdot \sum_{s=1}^S \left( \frac{1}{L} \sum_{t=1}^L \mathbb{I}(E_j \text{ обработал } x_t^s) - \mu \right)^2
-$$
-
-**Пояснение:**
-
-*   $\mathcal{L}_{\text{aux}}$ –  значение вспомогательной потери.
-*   $\lambda$ –  коэффициент масштабирования для вспомогательной потери ($\lambda \ll 1$).  Вспомогательная потеря имеет небольшой вес, чтобы не доминировать над основной функцией потерь.
-*   $S$ –  количество последовательностей в пакете.
-*   $L$ –  длина последовательности (предполагается, что все последовательности в пакете имеют одинаковую длину для упрощения, но в общем случае может быть средняя длина или максимальная длина).
-*   $x_t^s$ –  $t$-й токен в $s$-й последовательности.
-*   $\mathbb{I}(E_j \text{ обработал } x_t^s)$ –  индикаторная функция, которая равна 1, если эксперт $E_j$ обработал токен $x_t^s$, и 0 в противном случае.
-*   $\frac{1}{L} \sum_{t=1}^L \mathbb{I}(E_j \text{ обработал } x_t^s)$ –  доля токенов в $s$-й последовательности, обработанных экспертом $E_j$.  Это мера нагрузки на эксперта $E_j$ в рамках одной последовательности.
-*   $\mu$ –  целевая средняя нагрузка (target average load).  Желаемое среднее значение доли токенов, которые должен обрабатывать каждый эксперт в последовательности.
-*   $\left( \frac{1}{L} \sum_{t=1}^L \mathbb{I}(E_j \text{ обработал } x_t^s) - \mu \right)^2$ –  квадрат отклонения фактической нагрузки эксперта $E_j$ в последовательности от целевой средней нагрузки.  Квадрат используется для штрафования как перегрузки, так и недогрузки.
-*   $\sum_{s=1}^S ( \ldots )^2$ –  сумма квадратов отклонений по всем последовательностям в пакете.
-*   $\sum_{j}$ (неявно присутствует суммирование по всем экспертам, хотя в формуле не указано явно, но логично предположить, что потеря рассчитывается для каждого эксперта и суммируется).
-
-**Механизм балансировки на уровне последовательностей:**
-
-Вспомогательная потеря штрафует модель, если нагрузка на экспертов в рамках отдельных последовательностей сильно отклоняется от целевой средней нагрузки. Это способствует более равномерному распределению нагрузки не только в целом по пакету, но и внутри каждой последовательности, что может быть важно для обработки длинных текстов.
-
-**b) Node-Limited Routing (Маршрутизация с ограничением по узлам)**
-
-**Цель:** Ограничить количество вычислительных узлов, на которые направляется каждый токен, для повышения эффективности и снижения задержек.
-
-**Формула ограничения:**
+**Auxiliary Loss Formula:**
 
 $$
-\sum_{n=1}^4  \mathbb{I}(\text{Токен } x \text{ направлен на узел } n) \leq 4
+\mathcal{L}_{\text{aux}} = \lambda \cdot \sum_{s=1}^S \left( \frac{1}{L} \sum_{t=1}^L \mathbb{I}(E_j \text{ processed } x_t^s) - \mu \right)^2
 $$
 
-**Пояснение:**
+**Explanation:**
 
-*   $\mathbb{I}(\text{Токен } x \text{ направлен на узел } n)$ –  индикаторная функция, которая равна 1, если токен $x$ направлен на вычислительный узел $n$, и 0 в противном случае.
-*   $n$ –  индекс вычислительного узла (предполагается, что используется до 4 узлов, как указано в тексте).
-*   $\sum_{n=1}^4 \mathbb{I}(\text{Токен } x \text{ направлен на узел } n)$ –  общее количество вычислительных узлов, на которые направлен токен $x$.
+*   $\mathcal{L}_{\text{aux}}$ – value of the auxiliary loss.
+*   $\lambda$ – scaling factor for auxiliary loss ($\lambda \ll 1$). The auxiliary loss has low weight to avoid dominating the main loss function.
+*   $S$ – number of sequences in the batch.
+*   $L$ – sequence length (assumed equal for all sequences in the batch for simplicity; generally, average or maximum length may be used).
+*   $x_t^s$ – $t$-th token in the $s$-th sequence.
+*   $\mathbb{I}(E_j \text{ processed } x_t^s)$ – indicator function equal to 1 if expert $E_j$ processed token $x_t^s$, and 0 otherwise.
+*   $\frac{1}{L} \sum_{t=1}^L \mathbb{I}(E_j \text{ processed } x_t^s)$ – fraction of tokens in sequence $s$ processed by expert $E_j$. This measures the load on expert $E_j$ within one sequence.
+*   $\mu$ – target average load. Desired average fraction of tokens each expert should process per sequence.
+*   $\left( \frac{1}{L} \sum_{t=1}^L \mathbb{I}(E_j \text{ processed } x_t^s) - \mu \right)^2$ – squared deviation of actual expert $E_j$ load in the sequence from target average load. Squaring penalizes both overload and underload.
+*   $\sum_{s=1}^S ( \ldots )^2$ – sum of squared deviations across all sequences in the batch.
+*   $\sum_{j}$ (implicit summation over all experts; though not explicitly written, it is logically assumed the loss is computed for each expert and summed).
 
-**Механизм ограничения:**
+**Sequence-Level Balancing Mechanism:**
 
-Ограничение $\sum_{n=1}^4 \mathbb{I}(\text{Токен } x \text{ направлен на узел } n) \leq 4$ гарантирует, что каждый токен направляется не более чем на 4 вычислительных узла. Это может быть реализовано на уровне инфраструктуры или алгоритмически при выборе экспертов.  Ограничение по узлам помогает уменьшить коммуникационные издержки и повысить параллелизм вычислений, особенно в распределенных вычислительных средах.
+The auxiliary loss penalizes the model if load distribution across experts within individual sequences deviates significantly from the target average load. This promotes more uniform load distribution not only overall across the batch but also within each sequence, which may be critical for processing long texts.
+
+**b) Node-Limited Routing**
+
+**Goal:** Limit the number of computational nodes each token is routed to, to improve efficiency and reduce latency.
+
+**Constraint Formula:**
+
+$$
+\sum_{n=1}^4  \mathbb{I}(\text{Token } x \text{ routed to node } n) \leq 4
+$$
+
+**Explanation:**
+
+*   $\mathbb{I}(\text{Token } x \text{ routed to node } n)$ – indicator function equal to 1 if token $x$ is routed to computational node $n$, and 0 otherwise.
+*   $n$ – index of computational node (assumed up to 4 nodes, as stated in the text).
+*   $\sum_{n=1}^4 \mathbb{I}(\text{Token } x \text{ routed to node } n)$ – total number of computational nodes to which token $x$ is routed.
+
+**Constraint Mechanism:**
+
+The constraint $\sum_{n=1}^4 \mathbb{I}(\text{Token } x \text{ routed to node } n) \leq 4$ ensures each token is routed to no more than four computational nodes. This may be implemented at the infrastructure level or algorithmically during expert selection. Node limitation reduces communication overhead and enhances computational parallelism, especially in distributed computing environments.
 
 ---
 
-**Ключевые выводы по DeepSeekMoE:**
+**Key Takeaways on DeepSeekMoE:**
 
-*   **Маршрутизация экспертов:**  Основана на оценке сродства, сигмоиде и динамическом смещении для балансировки нагрузки. Выбираются Top-K экспертов.
-*   **Мелкозернистая сегментация:**  Увеличивает специализацию экспертов без увеличения FLOPs за счет разделения экспертов на подэкспертов и активации большего их количества.
-*   **Общий эксперт:**  Обеспечивает усвоение общих знаний, обрабатывая каждый токен.
-*   **Динамическая балансировка нагрузки:**  Регулирует смещения экспертов на основе текущей нагрузки для равномерного распределения работы.
-*   **Веса смешивания:**  Используют softmax-подобный механизм для агрегации выходов экспертов, определяя вклад каждого эксперта на основе оценки сродства и температуры.
-*   **Дополнительные механизмы:**
-    *   Вспомогательная потеря для балансировки нагрузки на уровне последовательностей.
-    *   Ограничение маршрутизации по узлам для повышения эффективности в распределенных системах.
+*   **Expert Routing:** Based on affinity scores, sigmoid, and dynamic bias for load balancing. Top-K experts selected.
+*   **Fine-Grained Segmentation:** Increases expert specialization without increasing FLOPs by splitting experts into sub-experts and activating more of them.
+*   **Shared Expert:** Ensures learning of general knowledge by processing every token.
+*   **Dynamic Load Balancing:** Adjusts expert biases based on current load to distribute work evenly.
+*   **Gate Weights:** Uses a softmax-like mechanism to aggregate expert outputs, determining each expert’s contribution based on affinity score and temperature.
+*   **Additional Mechanisms:**
+    *   Auxiliary loss for sequence-level load balancing.
+    *   Node routing limit to enhance efficiency in distributed systems.
 
 </details>
 
-# 6. Прогнозирование нескольких токенов (MTP)
+# 6. Multi-Token Prediction (MTP)
 
-Обратимся к рассмотрению инновационной функции, получившей название "Прогнозирование Множественных Токенов" (Multi-Token Prediction, MTP). Суть MTP заключается в концептуальном расширении парадигмы предсказания, предполагая прогнозирование не единичного токена, а целого набора токенов для каждой позиции в последовательности. В текущей архитектуре модели, в частности, реализовано предсказание двух токенов – текущего и непосредственно следующего за ним.  В теоретическом плане, подобный подход призван усилить обучающий сигнал, что, в свою очередь, потенциально ведет к повышению эффективности использования обучающих данных.  Более того, выдвигается гипотеза, что MTP способствует более основательной подготовке модели к задаче прогнозирования будущих токенов, обеспечивая более глубокое понимание контекстуальных зависимостей.
+We now turn to examining the innovative feature known as "Multi-Token Prediction" (MTP). The essence of MTP lies in a conceptual expansion of the prediction paradigm, assuming forecasting not a single token but an entire set of tokens for each position in the sequence. In the current model architecture, specifically, prediction of two tokens is implemented—the current token and the one immediately following it. Theoretically, this approach aims to strengthen the training signal, which in turn potentially enhances data efficiency. Moreover, it is hypothesized that MTP facilitates more thorough preparation of the model for predicting future tokens by enabling deeper understanding of contextual dependencies.
 
-![Figure_10](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_10.jpg)
+![Figure_10](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_10.jpg    )
 
-Реализация прогнозирования токенов в MTP осуществляется в последовательном порядке.  Для предсказания *D* дополнительных токенов используются *D* специализированных модулей MTP, отличающихся общей структурой вложений и выходной головкой.  В качестве входных данных каждый модуль получает выходные данные либо из основного слоя модели, либо из предыдущего модуля MTP, а также вложения следующего токена.  Предварительно данные подвергаются процедуре нормализации RMSNorm и последующему объединению.  Каждый модуль MTP вычисляет значение потерь кросс-энтропии.  Среднее значение потерь, рассчитанное по всем модулям, интегрируется в общую функцию потерь модели в качестве дополнительного слагаемого, умноженного на коэффициент λ (значение которого составляет 0.3 для первых 10T токенов и 0.1 для последующих 4.8T).  Важно отметить, что в процессе инференса модули MTP отключаются, однако сохраняется возможность их применения в рамках спекулятивного декодирования, что открывает перспективы для дальнейших исследований и оптимизаций.
+Token prediction in MTP is implemented sequentially. For predicting $D$ additional tokens, $D$ specialized MTP modules are employed, differing in their embedding structure and output head. Each module receives as input either the output from the main model layer or the output from the preceding MTP module, along with embeddings of the next token. Data are preprocessed with RMSNorm and subsequent concatenation. Each MTP module computes a cross-entropy loss. The average loss across all modules is integrated into the model’s overall loss function as an additional term, scaled by coefficient $\lambda$ (set to 0.3 for the first 10T tokens and 0.1 for subsequent 4.8T). Importantly, during inference, MTP modules are disabled, yet their application remains feasible within speculative decoding, opening avenues for future research and optimizations.
 
-![Figure_11](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_11.jpg)
+![Figure_11](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_11.jpg    )
 
-Эффективность MTP подтверждается последовательным улучшением производительности на разнообразных бенчмарках.  Эмпирические исследования демонстрируют, что точность предсказания следующего токена колеблется в диапазоне от 85% до 90%.  Примечательно, что в сочетании со спекулятивным декодированием наблюдается значительное увеличение показателя TPS (токенов в секунду) – в 1.8 раза.
+The effectiveness of MTP is confirmed by consistent performance improvements across diverse benchmarks. Empirical studies show that accuracy in predicting the next token ranges from 85% to 90%. Notably, when combined with speculative decoding, TPS (tokens per second) increases significantly—by 1.8 times.
 
-### Инфраструктура
+### Infrastructure
 
-Инфраструктурное обеспечение, лежащее в основе обучения DeepSeek-V3, представляет собой не менее важный аспект.  Обучение модели было проведено на мощном вычислительном кластере, включающем 2048 графических процессоров NVIDIA H800.  Здесь уместно отметить, что H800 является специализированной версией H100, адаптированной для китайского рынка.  В архитектуре H800 наблюдается оптимизация параметров межсоединения, выражающаяся в более чем двукратном снижении пропускной способности и уменьшении числа соединений NVLink.  Производительность в операциях FP64 FLOPS также снижена на порядок, что, хотя и не является критическим фактором для задач обучения нейронных сетей, может представлять собой ограничение в других областях, таких как, например, вычислительные задачи в ядерной физике.  В рамках продуктовой линейки NVIDIA, модель H200 позиционируется как усовершенствованная итерация H100, отличающаяся увеличенным объемом и повышенной скоростью доступа к памяти.
+The infrastructure underpinning DeepSeek-V3 training is equally critical. Model training was conducted on a powerful compute cluster comprising 2048 NVIDIA H800 GPUs. It is worth noting that the H800 is a specialized variant of the H100 adapted for the Chinese market. The H800 architecture features optimized interconnect parameters, resulting in more than a twofold reduction in bandwidth and fewer NVLink connections. FP64 FLOPS performance is also reduced by an order of magnitude—a factor not critical for neural network training but potentially limiting in other domains such as nuclear physics computations. Within NVIDIA’s product lineup, the H200 is positioned as an enhanced iteration of the H100, featuring increased memory capacity and faster memory access.
 
-![Figure_12](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_12.jpg)
+![Figure_12](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_12.jpg    )
 
-Для проведения обучения была разработана специализированная проприетарная платформа под названием HAI-LLM.  Архитектура DeepSeek-V3 интегрирует комплексный набор стратегий параллелизма, включающий 16-сторонний конвейерный параллелизм (Pipeline Parallelism, PP), 64-сторонний экспертный параллелизм (Expert Parallelism, EP) с распределением нагрузки на 8 узлов, а также параллелизм данных ZeRO-1 (Data Parallelism, DP).  Для достижения максимальной эффективности конвейерного параллелизма был разработан инновационный алгоритм DualPipe, обеспечивающий перекрытие фаз коммуникации и вычислений как в прямом, так и в обратном проходах.  Данный подход позволяет существенно сократить время простоя конвейера, повышая общую пропускную способность системы.  Благодаря значительным достижениям в области оптимизации использования памяти, разработчикам удалось обойтись без применения тензорного параллелизма (Tensor Parallelism, TP).  В дополнение к этому, были разработаны высокопроизводительные межузловые ядра коммуникации типа all-to-all, обеспечивающие эффективный обмен данными между вычислительными узлами.
+A proprietary training platform named HAI-LLM was developed for this purpose. The DeepSeek-V3 architecture integrates a comprehensive set of parallelism strategies, including 16-way pipeline parallelism (Pipeline Parallelism, PP), 64-way expert parallelism (Expert Parallelism, EP) distributed across 8 nodes, and ZeRO-1 data parallelism (Data Parallelism, DP). To maximize pipeline parallelism efficiency, an innovative DualPipe algorithm was developed, enabling overlap of communication and computation phases in both forward and backward passes. This approach significantly reduces pipeline idle time, enhancing overall system throughput. Thanks to substantial advances in memory optimization, tensor parallelism (Tensor Parallelism, TP) was not required. Additionally, high-performance inter-node all-to-all communication kernels were developed to enable efficient data exchange between compute nodes.
 
-![Figure_13](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_13.jpg)
+![Figure_13](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_13.jpg    )
 
-# 7. Обучение FP8
+# 7. FP8 Training
 
-Особый интерес представляет собой методология обучения модели с применением формата FP8.  Для читателей, не обладающих достаточным знакомством с форматами FP32, FP16, BF16, рекомендуется обратиться к следующему детальному описанию.
+Particular interest lies in the methodology of training the model using the FP8 format. For readers unfamiliar with FP32, FP16, and BF16 formats, we recommend reviewing the following detailed explanation.
 
 <details> 
-    <summary><em><strong>Понимание форматов чисел с плавающей точкой (Floating-Point) в машинном обучении</strong></em></summary>
+    <summary><em><strong>Understanding Floating-Point Formats in Machine Learning</strong></em></summary>
 
-В машинном обучении, особенно в глубоком обучении, мы работаем с огромными объемами числовых данных – весами моделей, входными данными, промежуточными вычислениями и т.д.  Для представления этих чисел в компьютерах используются различные форматы.  Среди наиболее распространенных – форматы чисел с плавающей точкой (floating-point), которые позволяют представлять как очень большие, так и очень маленькие числа.
+In machine learning, particularly deep learning, we work with vast volumes of numerical data—model weights, inputs, intermediate computations, etc. To represent these numbers, computers use various formats. Among the most common are floating-point formats, which enable representation of both very large and very small numbers.
 
-**Почему важны разные форматы?**
+**Why are different formats important?**
 
-Выбор формата чисел влияет на несколько ключевых аспектов:
+The choice of numeric format affects several critical aspects:
 
-* **Точность вычислений:**  Формат определяет, насколько точно можно представить число. Более высокая точность (например, FP32) позволяет более точно хранить и обрабатывать значения.
-* **Объем памяти:**  Формат определяет, сколько памяти требуется для хранения одного числа. Менее точные форматы (например, FP16, BF16, FP8) занимают меньше места.
-* **Скорость вычислений:**  Операции с менее точными форматами могут выполняться быстрее на специализированном оборудовании (например, на GPU и специализированных ускорителях).
+* **Computational precision:** The format determines how accurately a number can be represented. Higher precision (e.g., FP32) allows more accurate storage and processing.
+* **Memory footprint:** The format determines how much memory is required to store one number. Less precise formats (e.g., FP16, BF16, FP8) consume less space.
+* **Computational speed:** Operations on less precise formats can execute faster on specialized hardware (e.g., GPUs and dedicated accelerators).
 
-В контексте обучения нейронных сетей, особенно больших моделей, баланс между этими аспектами критически важен.  Использование менее точных форматов может ускорить обучение и снизить потребление памяти, но при этом нужно следить, чтобы не потерять в качестве модели из-за недостаточной точности.
+In the context of training neural networks, especially large models, balancing these aspects is critical. Using less precise formats can accelerate training and reduce memory consumption, but care must be taken to avoid quality degradation due to insufficient precision.
 
-### Основные форматы: FP32, FP16, BF16
+### Core Formats: FP32, FP16, BF16
 
-Давайте рассмотрим каждый из этих форматов подробнее.
+Let us examine each of these formats in detail.
 
-#### 1. FP32 (Single-Precision Floating Point - Одинарная точность)
+#### 1. FP32 (Single-Precision Floating Point)
 
-* **Полное название:**  IEEE 754 single-precision binary floating-point format.
-* **Размер:** 32 бита (4 байта) на число.
-* **Структура:** Состоит из трех частей:
-    * **Знак (Sign):** 1 бит (определяет, положительное или отрицательное число).
-    * **Экспонента (Exponent):** 8 бит (определяет порядок числа).
-    * **Мантисса (Fraction/Mantissa):** 23 бита (определяет значащие цифры числа).
+* **Full name:** IEEE 754 single-precision binary floating-point format.
+* **Size:** 32 bits (4 bytes) per number.
+* **Structure:** Composed of three parts:
+    * **Sign (Sign):** 1 bit (indicates positive or negative number).
+    * **Exponent (Exponent):** 8 bits (determines number magnitude).
+    * **Fraction/Mantissa (Fraction/Mantissa):** 23 bits (determines significant digits).
 
-**Характеристики FP32:**
+**FP32 Characteristics:**
 
-* **Высокая точность:**  FP32 обеспечивает достаточную точность для большинства задач машинного обучения. Это "стандартный" формат, который долгое время использовался по умолчанию.
-* **Большой диапазон значений:**  Может представлять как очень большие, так и очень маленькие числа.
-* **Умеренное потребление памяти:**  4 байта на число – это не самое экономное, но и не чрезмерное потребление.
-* **Производительность:**  Производительность операций FP32 может быть ограничена на некоторых типах оборудования, особенно при работе с очень большими моделями.
+* **High precision:** FP32 provides sufficient precision for most machine learning tasks. It has long been the "standard" format.
+* **Large value range:** Can represent both very large and very small numbers.
+* **Moderate memory usage:** 4 bytes per number—not the most economical, but not excessive.
+* **Performance:** FP32 operations may be limited on certain hardware, especially when handling very large models.
 
-**Применение FP32:**
+**FP32 Applications:**
 
-* **Традиционно использовался для обучения нейронных сетей.**  Долгое время был стандартом де-факто.
-* **Используется, когда требуется высокая точность вычислений.**
-* **Может использоваться для хранения весов моделей и активаций.**
+* **Traditionally used for training neural networks.** Long the de facto standard.
+* **Used when high computational precision is required.**
+* **May be used for storing model weights and activations.**
 
-**Аналогия:** Представьте себе линейку длиной 1 метр с миллиметровыми делениями. FP32 – это как такая линейка: достаточно точная для большинства измерений в обычной жизни.
+**Analogy:** Imagine a 1-meter ruler marked in millimeters. FP32 is like such a ruler: sufficiently precise for most everyday measurements.
 
-#### 2. FP16 (Half-Precision Floating Point - Половинная точность)
+#### 2. FP16 (Half-Precision Floating Point)
 
-* **Полное название:** IEEE 754 half-precision binary floating-point format.
-* **Размер:** 16 бит (2 байта) на число.
-* **Структура:**
-    * **Знак (Sign):** 1 бит.
-    * **Экспонента (Exponent):** 5 бит.
-    * **Мантисса (Fraction/Mantissa):** 10 бит.
+* **Full name:** IEEE 754 half-precision binary floating-point format.
+* **Size:** 16 bits (2 bytes) per number.
+* **Structure:**
+    * **Sign (Sign):** 1 bit.
+    * **Exponent (Exponent):** 5 bits.
+    * **Fraction/Mantissa (Fraction/Mantissa):** 10 bits.
 
-**Характеристики FP16:**
+**FP16 Characteristics:**
 
-* **Половинная точность:**  Точность FP16 значительно ниже, чем у FP32.  Диапазон представимых чисел также меньше.
-* **Низкое потребление памяти:**  В два раза меньше памяти, чем FP32.
-* **Высокая производительность:**  Операции FP16 могут быть значительно быстрее, чем FP32, на оборудовании, оптимизированном для FP16 (например, на современных GPU NVIDIA Tensor Cores).
+* **Half precision:** FP16 precision is significantly lower than FP32. The representable range is also smaller.
+* **Low memory usage:** Requires half the memory of FP32.
+* **High performance:** FP16 operations can be significantly faster than FP32 on hardware optimized for FP16 (e.g., modern NVIDIA GPU Tensor Cores).
 
-**Применение FP16:**
+**FP16 Applications:**
 
-* **Ускорение обучения и инференса нейронных сетей.**  Использование FP16 позволяет увеличить пропускную способность и снизить задержки.
-* **Снижение потребления памяти.**  Позволяет обучать и развертывать более крупные модели при ограниченных ресурсах памяти.
-* **Часто используется в технике "смешанной точности" (Mixed Precision Training).**  В этом подходе часть вычислений (например, градиенты) выполняется в FP32 для стабильности, а другие части (например, прямые и обратные проходы) – в FP16 для скорости.
+* **Accelerating neural network training and inference.** FP16 enables higher throughput and reduced latency.
+* **Reducing memory consumption.** Allows training and deploying larger models under memory constraints.
+* **Frequently used in mixed-precision training.** In this technique, some computations (e.g., gradients) are performed in FP32 for stability, while others (e.g., forward and backward passes) are performed in FP16 for speed.
 
-**Аналогия:**  FP16 – это как линейка длиной 30 см с делениями в полсантиметра.  Менее точная, чем метровая линейка, но более компактная и быстрая в использовании для приблизительных измерений.
+**Analogy:** FP16 is like a 30-cm ruler marked in half-centimeter increments. Less precise than the meter ruler, but more compact and faster for approximate measurements.
 
-**Ограничения FP16:**
+**FP16 Limitations:**
 
-* **Ограниченный диапазон и точность:**  Может вызвать проблемы с "переполнением" (overflow) или "недополнением" (underflow) при работе с очень большими или очень маленькими числами.  Также может возникнуть потеря точности, особенно при накоплении ошибок в глубоких сетях.
-* **Требует осторожного использования:**  Не всегда можно просто заменить FP32 на FP16 без дополнительных мер, таких как масштабирование градиентов, loss scaling и т.д.
+* **Limited range and precision:** May cause overflow or underflow with very large or very small numbers. Precision loss may accumulate in deep networks.
+* **Requires careful usage:** FP32 cannot always be directly replaced with FP16 without additional measures such as gradient scaling or loss scaling.
 
-#### 3. BF16 (BFloat16 - Brain Floating Point 16-bit)
+#### 3. BF16 (BFloat16)
 
-* **Полное название:**  Brain Floating Point 16-bit.  Разработан Google для использования в TPU (Tensor Processing Units).
-* **Размер:** 16 бит (2 байта) на число.
-* **Структура:**
-    * **Знак (Sign):** 1 бит.
-    * **Экспонента (Exponent):** 8 бит.
-    * **Мантисса (Fraction/Mantissa):** 7 бит.
+* **Full name:** Brain Floating Point 16-bit. Developed by Google for use in TPUs (Tensor Processing Units).
+* **Size:** 16 bits (2 bytes) per number.
+* **Structure:**
+    * **Sign (Sign):** 1 bit.
+    * **Exponent (Exponent):** 8 bits.
+    * **Fraction/Mantissa (Fraction/Mantissa):** 7 bits.
 
-**Характеристики BF16:**
+**BF16 Characteristics:**
 
-* **Точность:**  Меньше, чем FP32, но **важно отметить, что BF16 жертвует точностью мантиссы, но сохраняет диапазон экспоненты FP32.**  Это ключевое отличие от FP16.
-* **Диапазон значений:**  **Диапазон значений BF16 практически такой же, как у FP32.**  Это означает, что BF16 лучше подходит для предотвращения переполнения/недополнения, чем FP16, особенно при работе с градиентами в глубоком обучении.
-* **Низкое потребление памяти:**  Как и FP16, занимает 2 байта на число.
-* **Высокая производительность:**  Поддерживается многими современными ускорителями, включая GPU NVIDIA и TPU Google.
+* **Precision:** Lower than FP32, but **crucially, BF16 sacrifices mantissa precision while preserving FP32’s exponent range.** This is its key distinction from FP16.
+* **Value range:** **BF16’s range is nearly identical to FP32.** This means BF16 better prevents overflow/underflow than FP16, especially for gradients in deep learning.
+* **Low memory usage:** Like FP16, occupies 2 bytes per number.
+* **High performance:** Supported by many modern accelerators, including NVIDIA GPUs and Google TPUs.
 
-**Применение BF16:**
+**BF16 Applications:**
 
-* **Альтернатива FP16 для ускорения обучения и инференса.**  BF16 часто рассматривается как более "безопасная" альтернатива FP16, особенно для обучения больших моделей, благодаря более широкому диапазону.
-* **Широко используется в экосистеме Google (TPU, TensorFlow).**
-* **Рассматривается как "отраслевой стандарт" или распространенная комбинация FP32/16.**  Это связано с тем, что BF16 обеспечивает хороший баланс между точностью, диапазоном и производительностью.
+* **Alternative to FP16 for accelerating training and inference.** BF16 is often considered a safer alternative to FP16, especially for training large models, due to its wider range.
+* **Widely used in Google’s ecosystem (TPU, TensorFlow).**
+* **Considered an "industry standard" or common FP32/16 combination.** This stems from BF16’s good balance of precision, range, and performance.
 
-**Аналогия:** BF16 – это как метровая линейка, но с делениями в сантиметрах, а не миллиметрах.  Точность делений ниже, чем у миллиметровой линейки (FP32), но длина линейки (диапазон) остается такой же.  Для многих задач, где не нужна сверхвысокая точность, но важен широкий диапазон измерений, такая линейка может быть вполне достаточной и удобнее в использовании.
+**Analogy:** BF16 is like a 1-meter ruler with centimeter markings instead of millimeters. The markings are less precise than millimeters (FP32), but the ruler’s length (range) remains unchanged. For many tasks where ultra-high precision is unnecessary but wide range is essential, such a ruler may be perfectly adequate and more convenient.
 
-**Сравнение FP16 и BF16:**
+**FP16 vs BF16 Comparison:**
 
-| Характеристика        | FP16                                  | BF16                                  |
+| Characteristic        | FP16                                  | BF16                                  |
 |-----------------------|---------------------------------------|---------------------------------------|
-| Размер                | 16 бит                                | 16 бит                                |
-| Диапазон экспоненты   | Меньше, чем FP32                      | **Сопоставим с FP32**                 |
-| Точность мантиссы     | Выше, чем BF16                        | Ниже, чем FP16                        |
-| Риск переполнения/недополнения | Выше, чем BF16                      | Ниже, чем FP16, сопоставим с FP32     |
-| Производительность    | Высокая                               | Высокая                               |
-| Потребление памяти    | Низкое                                | Низкое                                |
-| Когда использовать?   | Когда важна скорость и экономия памяти, но нужно быть осторожным с диапазоном и точностью | Когда важен широкий диапазон и скорость, часто более "безопасный" выбор, чем FP16 |
+| Size                  | 16 bits                               | 16 bits                               |
+| Exponent Range        | Smaller than FP32                     | **Comparable to FP32**                |
+| Mantissa Precision    | Higher than BF16                      | Lower than FP16                       |
+| Overflow/Underflow Risk | Higher than BF16                   | Lower than FP16, comparable to FP32   |
+| Performance           | High                                  | High                                  |
+| Memory Usage          | Low                                   | Low                                   |
+| When to use?          | When speed and memory savings are critical, but range and precision require caution | When wide range and speed are critical; often a safer choice than FP16 |
 
 ### FP8
 
-Теперь вернемся к формату **FP8**.  FP8 – это еще более "компактный" формат чисел с плавающей точкой, занимающий всего 8 бит (1 байт) на число.  Существует несколько вариантов FP8, но общая идея заключается в дальнейшем снижении точности и диапазона для достижения еще большей производительности и экономии памяти.
+Now we return to the **FP8** format. FP8 is an even more "compact" floating-point format, occupying only 8 bits (1 byte) per number. Several variants of FP8 exist, but the general idea is to further reduce precision and range to achieve even greater performance and memory savings.
 
-**Из тех.отчета видно, что:**
+**As seen in the technical report:**
 
-* **FP8 – это новый и перспективный формат для обучения больших моделей.**  DeepSeek-V3, возможно, первая публично представленная крупномасштабная модель, обученная на FP8.
-* **FP8 может обеспечить значительное увеличение пропускной способности.**  Пример Habana/Intel Gaudi2 показывает увеличение на 34% по сравнению с BF16 при сохранении сопоставимого качества.
-* **Microsoft также активно исследует FP8 (FP8-LM, библиотека MS-AMP).**
-* **Другие компании (OpenAI, Google) могут также интересоваться FP8, хотя их стратегии могут отличаться.**  Google, по-видимому, пока предпочитает BF16.
+* **FP8 is a novel and promising format for training large models.** DeepSeek-V3 may be the first publicly presented large-scale model trained on FP8.
+* **FP8 can provide significant throughput gains.** For example, Habana/Intel Gaudi2 shows a 34% increase over BF16 while maintaining comparable quality.
+* **Microsoft is also actively researching FP8 (FP8-LM, MS-AMP library).**
+* **Other companies (OpenAI, Google) may also be exploring FP8, though their strategies may differ.** Google, apparently, still prefers BF16.
 
-**Почему FP8 становится актуальным?**
+**Why is FP8 becoming relevant?**
 
-* **Рост размеров моделей:**  Современные нейронные сети становятся все больше и больше.  Снижение точности и потребления памяти становится критически важным для обучения и развертывания таких моделей.
-* **Специализированное оборудование:**  Производители аппаратного обеспечения (NVIDIA, Intel, Google и др.) разрабатывают специализированные ускорители, которые оптимизированы для работы с низкоточными форматами, включая FP8.
-* **Баланс между точностью и эффективностью:**  Исследования показывают, что для многих задач глубокого обучения, особенно на этапе инференса, полная точность FP32 не всегда необходима.  Использование менее точных форматов может обеспечить значительное ускорение и экономию ресурсов без существенной потери качества.
+* **Growing model sizes:** Modern neural networks are becoming ever larger. Reducing precision and memory consumption is critical for training and deploying such models.
+* **Specialized hardware:** Hardware manufacturers (NVIDIA, Intel, Google, etc.) are developing specialized accelerators optimized for low-precision formats, including FP8.
+* **Balance between precision and efficiency:** Research shows that for many deep learning tasks, especially during inference, full FP32 precision is not always necessary. Using lower-precision formats can yield substantial speedups and resource savings without significant quality loss.
 
-**В заключение:**
+**In conclusion:**
 
-Форматы FP32, FP16, BF16 и FP8 представляют собой спектр компромиссов между точностью, диапазоном, производительностью и потреблением памяти.  Выбор формата зависит от конкретной задачи, аппаратного обеспечения и требований к точности.  FP32 долгое время был стандартом, но в последние годы форматы половинной точности (FP16, BF16) и, в перспективе, форматы еще меньшей точности (FP8) становятся все более важными для обучения и развертывания больших и эффективных моделей машинного обучения.  Разработка и внедрение FP8, является активной областью исследований и разработок, направленной на дальнейшее повышение эффективности глубокого обучения.
+FP32, FP16, BF16, and FP8 represent a spectrum of trade-offs between precision, range, performance, and memory usage. The choice of format depends on the specific task, hardware, and precision requirements. FP32 long served as the standard, but in recent years, half-precision formats (FP16, BF16) and, prospectively, even lower-precision formats (FP8) have become increasingly important for training and deploying large, efficient machine learning models. Development and adoption of FP8 is an active area of research and development aimed at further improving the efficiency of deep learning.
 </details>
 
 ---
 
-Несмотря на то, что формат FP8 не является предметом рассмотрения в указанной публикации, аналогия позволит сформировать адекватное представление о его ключевых характеристиках.  Весьма вероятно, что DeepSeek-V3 является первой в своем роде публично представленной крупномасштабной производственной моделью, обучение которой было осуществлено с использованием формата FP8.  В качестве контрастного примера можно привести Llama3, обучение которой, по имеющимся сведениям, проводилось в формате BF16, который в настоящее время рассматривается как своего рода отраслевой стандарт или, по крайней мере, распространенная комбинация FP32/16.  В контексте предшествующих исследований следует упомянуть работу израильских ученых из Habana (ныне Intel) [[11](https://arxiv.org/abs/2409.12517)].  Ими была успешно обучена 7B модель на 2T токенах, используя аппаратную платформу Gaudi2 от Intel-Habana, достигнув при этом качества, сопоставимого с BF16, и продемонстрировав увеличение пропускной способности на 34%.  Также заслуживает внимания более ранняя инициатива FP8-LM от Microsoft [[12](https://arxiv.org/abs/2310.18313)], в рамках которой была обучена модель GPT-175B.  Microsoft также предоставила в открытый доступ соответствующую библиотеку программного обеспечения [ссылка на github.com/Azure/MS-AMP], способствующую дальнейшему развитию исследований в данной области.  Нельзя исключать вероятность того, что OpenAI также перешла на использование FP8 в своих внутренних разработках, по крайней мере, для некоторых моделей, однако официальная информация по этому вопросу отсутствует.  Стратегия Google в отношении выбора форматов обучения остается не вполне определенной, однако, по всей видимости, предпочтение отдается формату BF16.
+Despite the fact that the FP8 format is not the subject of the cited publication, this analogy enables a proper understanding of its key characteristics. It is highly likely that DeepSeek-V3 is the first publicly released large-scale production model trained using the FP8 format. As a contrasting example, Llama3, according to available information, was trained using the BF16 format, which is currently regarded as an industry standard or at least a widely adopted FP32/16 combination. In the context of prior research, the work of Israeli scientists from Habana (now Intel) [[11](https://arxiv.org/abs/2409.12517)] should be mentioned. They successfully trained a 7B model on 2T tokens using Intel-Habana’s Gaudi2 hardware platform, achieving quality comparable to BF16 while demonstrating a 34% increase in throughput. Another noteworthy earlier initiative is FP8-LM by Microsoft [[12](https://arxiv.org/abs/2310.18313)], in which the GPT-175B model was trained. Microsoft has also open-sourced the corresponding software library [link to github.com/Azure/MS-AMP], facilitating further research in this field. It cannot be ruled out that OpenAI has also transitioned to FP8 in its internal developments, at least for some models, although official information on this matter is lacking. Google’s strategy regarding training format selection remains somewhat ambiguous, but BF16 appears to be the preferred choice.
 
 ![Figure_14](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_14.jpg)
 
-Вместе с тем, следует отметить, что DeepSeek-V3 реализует стратегию смешанной точности, при которой определенный набор операций по-прежнему выполняется с использованием форматов BF16 или даже FP32.  В частности, форматы повышенной точности применяются к таким ключевым компонентам, как модуль встраивания (embedding module), выходная головка (output head), модули стробирования MoE (Mixture of Experts), операторы нормализации и механизмы внимания.  Более того, основные веса модели, градиенты весов и состояния оптимизатора сохраняются с повышенной точностью.  Данный подход обусловлен стремлением обеспечить стабильность процесса обучения, которая, как известно, является одним из основных вызовов при использовании форматов с низкой точностью, наряду с ограничениями, связанными с аппаратной поддержкой.  Несмотря на это, подавляющее большинство вычислительно затратных операций выполняется в формате FP8, что позволяет достичь значительной экономии ресурсов.
+Nevertheless, it should be noted that DeepSeek-V3 implements a mixed-precision strategy, in which a specific set of operations continues to be performed using BF16 or even FP32 formats. In particular, higher-precision formats are applied to critical components such as the embedding module, output head, MoE gating modules, normalization operators, and attention mechanisms. Moreover, the model's primary weights, weight gradients, and optimizer states are preserved with higher precision. This approach is motivated by the need to ensure training stability, which is known to be one of the main challenges when using low-precision formats, alongside hardware support limitations. Despite this, the overwhelming majority of computationally intensive operations are performed in FP8, enabling substantial resource savings.
 
 ![Figure_15](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_15.jpg)
 
-Выдвигается предположение, что именно применение формата FP8 в значительной степени обусловило существенное снижение вычислительных издержек.  В идеализированном сценарии, переход на FP8 потенциально позволяет удвоить объем доступных вычислений, одновременно сокращая требования к объему памяти вдвое.  С целью повышения точности вычислений в формате FP8 был реализован ряд дополнительных методологических приемов, включая более совершенные техники квантования, повышенную точность аккумуляции и приоритизацию мантиссы над экспонентой.  В результате, для представления всех тензоров используется формат E4M3 (4 бита для экспоненты и 3 бита для мантиссы), что представляет собой более унифицированный подход по сравнению с потенциально возможным использованием комбинации форматов E4M3 и E5M2.
+It is hypothesized that the application of the FP8 format has been a major factor in significantly reducing computational overhead. In an idealized scenario, transitioning to FP8 potentially doubles available compute while halving memory requirements. To enhance computational accuracy in FP8, several methodological enhancements were implemented, including more sophisticated quantization techniques, increased accumulation precision, and prioritizing mantissa over exponent. As a result, the E4M3 format (4 bits for exponent, 3 bits for mantissa) is uniformly used for representing all tensors, offering a more standardized approach compared to potentially combining E4M3 and E5M2 formats.
 
-Также были предприняты целенаправленные усилия по оптимизации процессов хранения данных и межпроцессорной коммуникации, что позволило добиться сокращения как потребления памяти, так и накладных расходов, связанных с передачей данных.  Эффективность обучения в формате FP8 была тщательно верифицирована на модели DeepSeek-V2 в конфигурациях с 16B и 230B параметрами.  Полученные результаты свидетельствуют о том, что различия в производительности между моделями, обученными с использованием FP8 и BF16, находятся в пределах статистической погрешности, что подтверждает состоятельность подхода FP8.
+Targeted efforts were also made to optimize data storage and inter-processor communication, resulting in reduced memory consumption and data transfer overhead. The effectiveness of FP8 training was rigorously verified on the DeepSeek-V2 model in 16B and 230B parameter configurations. Results indicate that performance differences between models trained with FP8 and BF16 fall within statistical noise, confirming the viability of the FP8 approach.
 
 ![Figure_16](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_16.jpg)
 
-В заключение, следует отметить оптимизацию, проведенную в отношении процесса инференса.  Развертывание фаз предварительного заполнения (prefill) и декодирования (decoding) осуществляется на раздельной основе.  Напомним, что фаза предварительного заполнения включает в себя обработку всех входных токенов (prompt tokens) и вычисление промежуточных KV-пар (ключ-значение), в то время как фаза декодирования представляет собой итеративный процесс авторегрессивной генерации токенов.  Более детальное описание данного процесса можно найти по следующей ссылке: [ссылка на подробности].  Для фазы предварительного заполнения минимальная конфигурация развертывания предполагает использование 4 узлов, оснащенных 32 GPU, с соответствующими параметрами параллелизма.  В свою очередь, для фазы декодирования, требующей задействования 9 экспертных моделей, минимальная конфигурация увеличивается до 40 узлов, включающих 320 GPU, и характеризуется индивидуальным набором настроек, оптимизированных для данной фазы.
+In conclusion, optimization of the inference process should be noted. The prefill and decoding phases are deployed separately. Recall that the prefill phase involves processing all input tokens (prompt tokens) and computing intermediate KV pairs, while the decoding phase is an iterative autoregressive token generation process. A more detailed description of this process can be found at the following link: [link to details]. For the prefill phase, the minimal deployment configuration assumes 4 nodes equipped with 32 GPUs, with corresponding parallelism settings. For the decoding phase, which requires 9 expert models, the minimal configuration increases to 40 nodes comprising 320 GPUs and features a distinct set of optimizations tailored for this phase.
 
-# 8. Процедура обучения модели DeepSeek-V3
+# 8. DeepSeek-V3 Model Training Procedure
 
-Процесс обучения модели DeepSeek-V3 включает два основных этапа: предварительное обучение (pretraining) и постобучение (posttraining). В ходе предварительного обучения осуществляется обработка значительных объемов данных и применение различных стратегий машинного обучения для формирования базовой модели. На этапе постобучения производится тонкая настройка (supervised fine-tuning, SFT) и обучение с подкреплением (reinforcement learning, RL), что позволяет оптимизировать модель для интерактивного использования. Мы рассмотрим ключевые аспекты обоих этапов, включая использование новых методик и сравнительный анализ с аналогичными моделями.
+The training process of the DeepSeek-V3 model consists of two main stages: pretraining and posttraining. During pretraining, large volumes of data are processed and various machine learning strategies are applied to form the base model. In the posttraining stage, supervised fine-tuning (SFT) and reinforcement learning (RL) are performed to optimize the model for interactive use. We examine key aspects of both stages, including the use of novel techniques and comparative analysis with analogous models.
 
-### Предварительное обучение
+### Pretraining
 
-#### Подготовка данных и токенизация
+#### Data Preparation and Tokenization
 
-В сравнении с предыдущей версией DeepSeek-V2 [[13](https://arxiv.org/abs/2405.04434)], в DeepSeek-V3 была увеличена доля данных, относящихся к математике и программированию, а также расширен языковой охват. Однако основную часть датасета по-прежнему составляют англоязычные и китайские тексты. В окончательный корпус включено 14,8 трлн токенов (против 8,1 трлн в DeepSeek-V2). В качестве метода токенизации использован byte pair encoding (BPE) со словарем объемом 128 тысяч слов. В новой версии токенизатор был переработан для более эффективной обработки многоязычных данных, а также были добавлены токены, сочетающие знаки пунктуации с разрывами строк.
+Compared to the previous version, DeepSeek-V2 [[13](https://arxiv.org/abs/2405.04434)], DeepSeek-V3 increased the proportion of mathematics and programming-related data and expanded its linguistic coverage. However, the majority of the dataset still consists of English and Chinese texts. The final corpus includes 14.8 trillion tokens (compared to 8.1 trillion in DeepSeek-V2). Byte Pair Encoding (BPE) with a vocabulary of 128k tokens was used for tokenization. The new tokenizer was redesigned for more efficient processing of multilingual data, and punctuation-combining tokens with line breaks were added.
 
-#### Методология предварительного обучения
+#### Pretraining Methodology
 
-В процессе обучения используется стратегия прогнозирования следующего токена (next-token prediction) в сочетании с техникой восстановления пропущенного фрагмента текста (fill-in-the-middle, FIM). Последняя реализована с частотой 0,1, аналогично DeepSeekCoder-V2 [[14](https://arxiv.org/abs/2406.11931)], и была первоначально предложена OpenAI [[15](https://arxiv.org/abs/2207.14255)]. В данном методе модель обучается восстанавливать центральную часть текста, используя структуру "Префикс-Суффикс-Середина" (prefix-suffix-middle, PSM):
+During training, the next-token prediction strategy is combined with the fill-in-the-middle (FIM) technique. The latter is implemented with a frequency of 0.1, similar to DeepSeekCoder-V2 [[14](https://arxiv.org/abs/2406.11931)], and was originally proposed by OpenAI [[15](https://arxiv.org/abs/2207.14255)]. In this method, the model is trained to reconstruct the central portion of text using the "Prefix-Suffix-Middle" (PSM) structure:
 
 ```
 <|fim_begin|>𝑓_pre<|fim_hole|>𝑓_suf<|fim_end|>𝑓_middle<|eos_token|>
 ```
 
-В ходе предварительного обучения максимальная длина последовательности составляла 4000 токенов. Для расширения контекста применялся алгоритм YaRN [[16](https://arxiv.org/abs/2309.00071)], который позволил увеличить контекстное окно сначала до 32 тысяч токенов, а затем до 128 тысяч. Этот процесс включал две дополнительные фазы обучения по 1000 шагов каждая.
+During pretraining, the maximum sequence length was 4000 tokens. To extend the context, the YaRN algorithm [[16](https://arxiv.org/abs/2309.00071)] was applied, increasing the context window first to 32k tokens and then to 128k. This process included two additional training phases of 1000 steps each.
 
 <details> 
-    <summary><em><strong>Краткий обзор метода YaRN</strong></em></summary>
+    <summary><em><strong>Short Overview of YaRN</strong></em></summary>
 
-**Введение**  
-Современные большие языковые модели (LLM), такие как LLaMA, GPT-NeoX и PaLM, демонстрируют впечатляющие результаты в задачах обработки естественного языка (NLP). Однако их применение ограничено фиксированным размером контекстного окна — максимальной длиной последовательности, на которой модель была обучена. Это становится критическим препятствием для задач, требующих анализа длинных текстов, таких как суммаризация документов, многоэтапные диалоги или обработка научных статей. В статье "YaRN: Efficient Context Window Extension of Large Language Models" предлагается инновационный метод расширения контекстного окна моделей, использующих Rotary Position Embeddings (RoPE), который сочетает вычислительную эффективность с сохранением производительности.  
+**Introduction**  
+Modern large language models (LLMs), such as LLaMA, GPT-NeoX, and PaLM, demonstrate impressive results in natural language processing (NLP) tasks. However, their applicability is constrained by a fixed context window—the maximum sequence length on which the model was trained. This becomes a critical barrier for tasks requiring analysis of long texts, such as document summarization, multi-turn dialogues, or processing scientific articles. In the paper "YaRN: Efficient Context Window Extension of Large Language Models," an innovative method for extending the context window of models using Rotary Position Embeddings (RoPE) is proposed, combining computational efficiency with maintained performance.  
 
-**Проблема ограниченного контекстного окна**  
-Контекстное окно определяет, сколько токенов модель может одновременно учитывать при генерации ответа. Например, если модель обучена на 2048 токенах, она «не видит» информацию за пределами этого диапазона. Авторы подчеркивают, что это ограничение снижает практическую применимость LLM в реальных сценариях, где контекст часто превышает стандартные 4k–8k токенов. Проблема усугубляется тем, что большинство моделей плохо экстраполируют за пределы обученной длины, что приводит к резкому падению качества при работе с длинными последовательностями.  
+**The Problem of Limited Context Window**  
+The context window determines how many tokens the model can simultaneously consider when generating a response. For example, if a model is trained on 2048 tokens, it "cannot see" information beyond this range. The authors emphasize that this limitation reduces the practical applicability of LLMs in real-world scenarios where context often exceeds standard 4k–8k tokens. The problem is exacerbated by the fact that most models poorly extrapolate beyond their trained length, leading to a sharp decline in quality when handling long sequences.  
 
-**RoPE и вызовы экстраполяции**  
-Rotary Position Embeddings (RoPE) — популярный метод кодирования позиционной информации, который использует вращательные матрицы для учета относительных позиций токенов. Несмотря на эффективность, RoPE, как и другие позиционные эмбеддинги, страдает от неспособности обобщать за пределы обученной длины. Например, если модель обучалась на последовательностях длиной 2048, попытка обработать 4096 токенов без модификаций приведет к искажению позиционной информации и снижению точности.  
+**RoPE and Extrapolation Challenges**  
+Rotary Position Embeddings (RoPE)—a popular method for encoding positional information—uses rotational matrices to account for relative token positions. Despite its efficiency, RoPE, like other positional embeddings, suffers from an inability to generalize beyond the trained length. For instance, if a model was trained on sequences of length 2048, attempting to process 4096 tokens without modification leads to distorted positional information and reduced accuracy.  
 
-**Недостатки существующих методов**  
-До появления YaRN существовало два основных подхода:  
-1. **Position Interpolation (PI)** — линейное «растягивание» позиционных эмбеддингов для умещения большего контекста.  
-2. **«NTK-aware» интерполяция** — метод, вдохновленный нейронными тангенциальными ядрами, который распределяет интерполяцию неравномерно по частотам.  
+**Drawbacks of Existing Methods**  
+Before YaRN, two primary approaches existed:  
+1. **Position Interpolation (PI)** — linearly "stretching" positional embeddings to accommodate a larger context.  
+2. **"NTK-aware" interpolation** — a method inspired by neural tangent kernels that distributes interpolation unevenly across frequencies.  
 
-Однако оба метода требуют значительных вычислительных ресурсов для дообучения (fine-tuning) — например, PI нуждается в 10–100 миллионах токенов. Кроме того, после расширения контекста модели демонстрируют ухудшение производительности на коротких последовательностях, что ограничивает их универсальность.  
+However, both methods require substantial computational resources for fine-tuning—for example, PI needs 10–100 million tokens. Furthermore, after context extension, models exhibit degraded performance on short sequences, limiting their versatility.  
 
-**Метод YaRN: Компоненты и инновации**  
-YaRN (Yet another RoPE extensioN method) решает эти проблемы за счет трех ключевых компонентов:  
+**YaRN Method: Components and Innovations**  
+YaRN (Yet another RoPE extensioN method) solves these issues through three key components:  
 
-1. **«NTK-by-parts» интерполяция**  
-   В отличие от предыдущих методов, YaRN учитывает неоднородность частот в RoPE. Высокочастотные компоненты (отвечающие за локальные связи между соседними токенами) интерполируются минимально, чтобы сохранить детализацию, а низкочастотные (глобальный контекст) — более агрессивно. Это позволяет модели корректно обрабатывать как близкие, так и удаленные токены в расширенном окне.  
+1. **"NTK-by-parts" Interpolation**  
+   Unlike previous methods, YaRN accounts for the heterogeneity of frequencies in RoPE. High-frequency components (responsible for local connections between adjacent tokens) are interpolated minimally to preserve detail, while low-frequency components (global context) are interpolated more aggressively. This enables the model to correctly handle both nearby and distant tokens in the extended window.  
 
-2. **Масштабирование внимания через температуру**  
-   В механизм внимания вводится температурный коэффициент \( t \), который смягчает softmax-функцию. Это снижает дисбаланс между логитами при увеличении контекста и стабилизирует обучение. Важно, что модификация не требует изменения кода модели и не добавляет вычислительных затрат.  
+2. **Attention Scaling via Temperature**  
+   A temperature coefficient $ t $ is introduced into the attention mechanism to soften the softmax function. This reduces logit imbalance during context extension and stabilizes training. Importantly, this modification requires no changes to the model code and adds no computational overhead.  
 
-3. **Динамическое масштабирование**  
-   Во время инференса модель постепенно адаптируется к превышению исходного контекстного окна, избегая резкого падения производительности. Например, при достижении предела в 64k токенов YaRN позволяет плавно ухудшать качество, а не «ломаться» мгновенно.  
+3. **Dynamic Scaling**  
+   During inference, the model gradually adapts to exceeding the original context window, avoiding abrupt performance drops. For example, upon reaching the 64k token limit, YaRN allows for a smooth degradation in quality rather than an immediate failure.  
 
-**Экспериментальные результаты**  
-YaRN демонстрирует state-of-the-art результаты в расширении контекста:  
-- Модели LLaMA 7B/13B успешно масштабируются до 128k токенов, сохраняя низкую перплексию.  
-- Для дообучения требуется всего **0.1% данных** от исходного предобучения (в 10 раз меньше, чем у PI) и **2.5 раза меньше шагов**.  
-- На стандартных бенчмарках (например, PG19, arXiv) YaRN превосходит PI и «NTK-aware» на 15–20% по точности.  
+**Experimental Results**  
+YaRN demonstrates state-of-the-art results in context extension:  
+- LLaMA 7B/13B models successfully scale to 128k tokens while maintaining low perplexity.  
+- Fine-tuning requires only **0.1% of the original pretraining data** (10x less than PI) and **2.5x fewer training steps**.  
+- On standard benchmarks (e.g., PG19, arXiv), YaRN outperforms PI and "NTK-aware" by 15–20% in accuracy.  
 
-Интересно, что YaRN позволяет **экстраполировать** контекст: модель, обученная на 64k токенах, корректно обрабатывает 128k без дополнительной настройки. Это открывает путь к эффективному использованию «длинного контекста» без полного переобучения.  
+Interestingly, YaRN enables **extrapolation**: a model trained on 64k tokens correctly handles 128k without additional tuning. This opens the path to efficient utilization of "long context" without full retraining.  
 
-**Практические преимущества**  
-- **Совместимость**: YaRN легко интегрируется в существующие архитектуры и поддерживается библиотеками вроде Flash Attention 2, что ускоряет инференс.  
-- **Масштабируемость**: Метод работает для моделей разных размеров (от 7B до 70B параметров) и типов (LLaMA, GPT-NeoX).  
-- **Экономия ресурсов**: Сокращение данных и шагов обучения снижает стоимость развертывания.  
+**Practical Advantages**  
+- **Compatibility**: YaRN integrates easily into existing architectures and is supported by libraries like Flash Attention 2, accelerating inference.  
+- **Scalability**: The method works for models of varying sizes (from 7B to 70B parameters) and types (LLaMA, GPT-NeoX).  
+- **Resource Efficiency**: Reducing data and training steps lowers deployment cost.  
 
-**Ключевые цитаты и их значимость**  
-- *«YaRN достигает современного уровня производительности… на менее чем ∼0.1% от исходных данных»* — это подчеркивает революционную эффективность метода.  
-- *«Динамическое масштабирование позволяет модели постепенно ухудшаться, а не ломаться»* — ключевое преимущество для промышленного применения, где стабильность критична.  
+**Key Quotes and Their Significance**  
+- *«YaRN achieves state-of-the-art performance… on less than ∼0.1% of the original data»* — highlighting the revolutionary efficiency of the method.  
+- *«Dynamic scaling allows the model to degrade gradually, not fail abruptly»* — a key advantage for industrial applications where stability is critical.  
 
-**Заключение и перспективы**  
-YaRN устанавливает новый стандарт в расширении контекстного окна LLM. Его способность сохранять производительность на коротких контекстах, минимизировать затраты на дообучение и поддерживать экстраполяцию делает его универсальным инструментом для NLP-сообщества. В будущем метод может быть адаптирован для других типов позиционных эмбеддингов, а также интегрирован в frameworks обучения, такие как Hugging Face Transformers, что ускорит его внедрение в промышленность.  
+**Conclusion and Prospects**  
+YaRN establishes a new standard for extending LLM context windows. Its ability to maintain performance on short contexts, minimize fine-tuning costs, and support extrapolation makes it a universal tool for the NLP community. In the future, the method may be adapted for other positional embedding types and integrated into frameworks like Hugging Face Transformers, accelerating its adoption in industry.  
 
-**Вывод**  
-Статья о YaRN не только решает конкретную техническую проблему, но и открывает новые возможности для применения LLM в реальных задачах — от анализа юридических документов до создания диалоговых агентов с долгосрочной памятью. Это важный шаг к преодолению одного из ключевых ограничений современных языковых моделей.
+**Conclusion**  
+The YaRN paper not only solves a specific technical problem but also opens new possibilities for applying LLMs in real-world tasks—from analyzing legal documents to creating dialogue agents with long-term memory. This is a crucial step toward overcoming one of the key limitations of modern language models.
 
 </details>
 
-
 ![Figure_17](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_17.png)
 
-Результат превосходит предыдущую модель DeepSeek-V2 и две плотные модели, Qwen2.5 72B Base и LLaMA-3.1 405B Base, по нескольким бенчмаркам, включая английский язык, китайский язык, код, математику и один многоязычный бенчмарк, что делает ее самой сильной открытой моделью.
+The result surpasses the previous model DeepSeek-V2 and two dense models, Qwen2.5 72B Base and LLaMA-3.1 405B Base, across multiple benchmarks including English, Chinese, code, mathematics, and one multilingual benchmark, making it the strongest open model.
 
 ![Figure_18](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_18.jpg)
 
-Интересно сравнение с Qwen2.5 72B Base — это одна из сильных моделей с почти вдвое большим количеством активных параметров, чем DeepSeek. LLaMA-3.1 405B Base имеет в 11 раз больше параметров, но работает хуже в этих тестах.
+It is interesting to compare with Qwen2.5 72B Base—a strong model with nearly twice as many active parameters as DeepSeek. LLaMA-3.1 405B Base has 11 times more parameters but performs worse on these tests.
 
-Результатом этого этапа является базовая модель DeepSeek-V3-Base . Следующий этап постобучения создает модель чата с тонкой настройкой инструкций DeepSeek-V3.
+The output of this stage is the base model DeepSeek-V3-Base. The subsequent posttraining stage creates the instruction-tuned chat model DeepSeek-V3.
 
-### Постобучение
+### Posttraining
 
-#### Контролируемая тонкая настройка (SFT)
+#### Supervised Fine-Tuning (SFT)
 
-На этапе SFT использовались два типа данных: относящиеся к задачам рассуждения (reasoning) и не относящиеся к ним (non-reasoning). Финальный датасет инструкционной настройки содержал 1,5 млн примеров.
+During SFT, two types of data were used: reasoning-related and non-reasoning. The final instruction tuning dataset contained 1.5 million examples.
 
-Данные reasoning были сосредоточены на математике, программировании и логических задачах. Они были сгенерированы внутренней моделью DeepSeek-R1, которая, в свою очередь, была обучена на основе DeepSeek-V3. Однако модель DeepSeek-R1 была подвержена проблемам многословия, избыточного анализа и некорректного форматирования. Для решения этой проблемы использовался специализированный экспертный подход, включавший этапы SFT и RL. Генерация данных осуществлялась с высокой температурой, что позволило выявить закономерности в ответах модели R1 и использовать их при создании обучающего корпуса.
+Reasoning data focused on mathematics, programming, and logical problems. These were generated by the internal DeepSeek-R1 model, which was itself trained based on DeepSeek-V3. However, the DeepSeek-R1 model suffered from verbosity, over-analysis, and incorrect formatting. To address this, a specialized expert approach was employed, incorporating SFT and RL stages. Data generation was performed with high temperature to identify patterns in R1’s responses and leverage them during dataset construction.
 
-Данные non-reasoning включали примеры творческого письма, ролевых сценариев и простых ответов на вопросы. Они были созданы на основе DeepSeek-V2.5 и прошли дополнительную проверку с участием аннотаторов.
+Non-reasoning data included examples of creative writing, role-playing scenarios, and simple question answering. These were created based on DeepSeek-V2.5 and underwent additional annotation review.
 
-> Как итог, качество и объем данных в Supervised Fine-Tuning (SFT) критически влияют на финальное качество модели.
+> As a result, the quality and volume of data in Supervised Fine-Tuning (SFT) critically affect the final model quality.
 
-#### Обучение с подкреплением (RL)
+#### Reinforcement Learning (RL)
 
-Обучение с подкреплением основывалось на двух подходах: использовании модели вознаграждения (reward model, RM) с правилами и RM на основе модели. Первый метод применялся в ситуациях, где возможна формальная верификация ответа, например, при решении математических задач с детерминированными результатами или задач программирования, проверяемых с помощью компилятора. Там, где формальная проверка затруднена (например, в заданиях на творческое письмо), использовалась модель вознаграждения, оценивающая соответствие ответа запросу.
+Reinforcement learning was based on two approaches: a rule-based reward model (RM) and an RM based on a model. The first method was applied in situations where formal verification of answers was possible, such as solving deterministic mathematical problems or programming tasks verifiable via a compiler. Where formal verification was difficult (e.g., creative writing tasks), a model-based reward model evaluated answer alignment with the prompt.
 
-В DeepSeek-V3 применен алгоритм Group Relative Policy Optimization (GRPO) [[17](https://arxiv.org/abs/2402.03300)], являющийся модификацией Proximal Policy Optimization (PPO). В отличие от PPO, данный метод позволяет отказаться от отдельной функции стоимости (value function), что снижает вычислительные затраты. Вместо этого используется среднее вознаграждение по выборкам, полученным из одного запроса. Для обеспечения стабильности модели в процессе RL применялись меры по ограничению расхождений с базовой моделью (KL-regularization), упрощенные за счет прямого сравнения между эталонной моделью и политикой.
-
-<details> 
-    <summary><em><strong>Краткий обзор алгоритма GRPO</strong></em></summary>
-
-### **Введение в GRPO**
-GRPO — это алгоритм обучения с подкреплением, предназначенный для оптимизации LLM в задачах, требующих структурированного рассуждения, таких как математика и логика. Он был представлен в работах DeepSeekMath и DeepSeek-R1 **как ответ на вызовы обучения моделей с миллиардами параметров**. GRPO предлагает более эффективный подход по сравнению с традиционными методами, такими как Proximal Policy Optimization (PPO), **за счет устранения ключевых узких мест, связанных с вычислением advantage-функций**.
-
+DeepSeek-V3 employs the Group Relative Policy Optimization (GRPO) algorithm [[17](https://arxiv.org/abs/2402.03300)], a modification of Proximal Policy Optimization (PPO). Unlike PPO, this method eliminates the need for a separate value function, reducing computational cost. Instead, it uses the average reward across samples from a single prompt. To ensure model stability during RL, KL-regularization measures were applied to constrain divergence from the base model, simplified through direct comparison between reference and policy models.
 
 <details> 
-    <summary><em><strong>Объяснение Advantage-функций</strong></em></summary>
+    <summary><em><strong>Short Overview of GRPO</strong></em></summary>
 
-**Advantage-функция** — это ключевое понятие в обучении с подкреплением (Reinforcement Learning, RL), которое **количественно оценивает преимущество выбора конкретного действия `a` в состоянии `s` по сравнению со средним действием, предписанным текущей политикой модели**. Формально она выражается как разница между **Q-функцией** (ожидаемая суммарная награда за действие `a` в состоянии `s`) и **V-функцией** (средняя ожидаемая награда в состоянии `s` при текущей политике):
+### **Introduction to GRPO**
+GRPO is a reinforcement learning algorithm designed to optimize LLMs in tasks requiring structured reasoning, such as mathematics and logic. It was introduced in DeepSeekMath and DeepSeek-R1 **as a response to challenges in training models with billions of parameters**. GRPO offers a more efficient approach compared to traditional methods like Proximal Policy Optimization (PPO), **by eliminating key bottlenecks related to advantage-function computation**.
+
+<details> 
+    <summary><em><strong>Explanation of Advantage Functions</strong></em></summary>
+
+**Advantage function** is a key concept in reinforcement learning (RL), which **quantitatively evaluates the advantage of taking a specific action `a` in state `s` compared to the average action prescribed by the current policy**. Formally, it is expressed as the difference between the **Q-function** (expected cumulative reward for action `a` in state `s`) and the **V-function** (average expected reward in state `s` under the current policy):
 
 $$
 A(s, a) = Q(s, a) - V(s)
@@ -1627,151 +1625,151 @@ $$
 
 ---
 
-### **Зачем нужны Advantage-функции?**
-1. **Оценка относительной ценности действий**:
-   - Помогает модели понять, насколько конкретное действие лучше или хуже "стандартного" поведения в данном контексте.
-   - Пример: В математической задаче действие "выбрать метод интегрирования по частям" может иметь высокий advantage, если приводит к правильному ответу, и низкий — если усложняет решение.
+### **Why are Advantage Functions Needed?**
+1. **Assessing relative value of actions**:
+   - Helps the model understand how much better or worse a specific action is compared to the "standard" behavior in a given context.
+   - Example: In a math problem, the action "choose integration by parts" may have high advantage if it leads to the correct answer, and low advantage if it complicates the solution.
 
-2. **Снижение дисперсии градиентов**:
-   - Использование относительных advantage-значений вместо абсолютных наград делает обновления политики более стабильными.
+2. **Reducing gradient variance**:
+   - Using relative advantage values instead of absolute rewards makes policy updates more stable.
 
 ---
 
-### **Как вычисляются Advantage-функции в классическом RL (например, PPO)?**
-В Proximal Policy Optimization (PPO):
-1. **Value-сеть** (отдельная нейросеть) обучается предсказывать `V(s)` — ожидаемую награду для состояния `s`.
-2. **Q(s, a)** оценивается через фактическую полученную награду + дисконтированные будущие награды.
-3. **Advantage** вычисляется как:
+### **How are Advantage Functions Computed in Classical RL (e.g., PPO)?**
+In Proximal Policy Optimization (PPO):
+1. A **value network** (a separate neural network) is trained to predict `V(s)`—the expected reward for state `s`.
+2. **Q(s, a)** is estimated via the actual received reward plus discounted future rewards.
+3. **Advantage** is computed as:
    $$
    A(s, a) = R_{\text{total}} - V(s)
    $$
-   где $( R_{\text{total}} )$ — дисконтированная сумма наград за траекторию.
+   where $( R_{\text{total}} )$ is the discounted sum of rewards over a trajectory.
 
-**Проблемы PPO**:
-- Value-сеть требует дополнительных вычислительных ресурсов и памяти.
-- Ошибки в предсказаниях `V(s)` (особенно в задачах с **многомодальным распределением наград**, как в LLM) искажают advantage-значения.
+**Problems with PPO**:
+- The value network requires additional computational resources and memory.
+- Errors in `V(s)` predictions (especially in tasks with **multimodal reward distributions**, as in LLMs) distort advantage values.
 </details> 
 
 ---
 
-### **Новаторский подход GRPO к Advantage-функциям**
+### **GRPO's Innovative Approach to Advantage Functions**
 
-GRPO полностью устраняет необходимость в value-сети, используя **групповую относительную нормализацию**:
-для каждого промпта $P$ генерируется группа из $N$ ответов $G = \{O_1, O_2, ..., O_N\}$ с использованием политики $\pi$.  Каждому ответу $O_i$ присваивается награда $R_i = R(O_i)$, отражающая его качество.  Advantage-функция для $i$-го ответа $O_i$ относительно группы $G$ вычисляется по формуле:
+GRPO entirely eliminates the need for a value network by using **group-wise relative normalization**:
+For each prompt $P$, a group of $N$ responses $G = \{O_1, O_2, ..., O_N\}$ is generated using policy $\pi$. Each response $O_i$ receives a reward $R_i = R(O_i)$ reflecting its quality. The advantage function for the $i$-th response $O_i$ relative to group $G$ is computed as:
 
 $$
 A_i(O_i, G) = R_i - \bar{R}_G = R_i - \frac{1}{N} \sum_{j=1}^N R_j
 $$
 
-где $\bar{R}_G = \frac{1}{N} \sum_{j=1}^N R_j$ — средняя награда по группе $G$.
+where $\bar{R}_G = \frac{1}{N} \sum_{j=1}^N R_j$ is the average reward across group $G$.
 
-> По сути, Advantage-функция в GRPO для каждого конкретного ответа рассчитывается как награда конкретного ответа  минус  среднее арифметическое наград всех ответов в группе.
+> In essence, the advantage function in GRPO for each specific response is calculated as the reward of that response minus the arithmetic mean of all rewards in the group.
 
-**Ключевые особенности GRPO подхода:**
+**Key Features of the GRPO Approach:**
 
-*   **Групповая относительная нормализация:** Advantage-функция вычисляется относительно группы ответов, сгенерированных для одного и того же промпта, что обеспечивает относительную оценку качества.
-*   **Устранение value-сети:**  Средняя награда по группе $\bar{R}_G$ служит в качестве baseline, заменяя необходимость в отдельной value-сети для оценки ценности состояний или действий.
-*   **Обучение на основе сравнения:**  GRPO фокусируется на обучении политики, которая генерирует ответы, превосходящие в среднем другие ответы в группе, что делает его эффективным в задачах, где важна относительная оценка качества.
-* **KL-дивергенция: Жесткая интеграция в loss-функцию через относительные веса**: KL-дивергенция вводится в функцию потерь для регуляризации, ограничивая величину изменения политики на каждом шаге обучения и предотвращая её резкие колебания, что способствует стабильности обучения.
+*   **Group-wise Relative Normalization**: The advantage function is computed relative to a group of responses generated for the same prompt, ensuring a relative assessment of quality.
+*   **Elimination of Value Network**: The group average reward $\bar{R}_G$ serves as a baseline, replacing the need for a separate value network to estimate state or action values.
+*   **Learning via Comparison**: GRPO focuses on training a policy that generates responses superior to the average within its group, making it effective in tasks where relative quality assessment matters.
+* **KL-Divergence: Tight Integration into Loss Function via Relative Weights**: KL-divergence is incorporated into the loss function for regularization, limiting the magnitude of policy changes per training step and preventing sharp fluctuations, thereby enhancing training stability.
 
-**Ограничения и замечания:**
+**Limitations and Remarks:**
 
-*   Эффективность GRPO подхода зависит от качества функции награды $R(O)$.  Необходимо корректно определить функцию награды, чтобы она адекватно отражала желаемые свойства ответов.
-*   Размер группы $N$ является гиперпараметром, который может влиять на стабильность и эффективность обучения.  Выбор оптимального значения $N$ может потребовать экспериментальной настройки.
-*   GRPO, как и другие методы обучения с подкреплением, может быть чувствителен к выбору гиперпараметров оптимизации и архитектуры модели.
-
----
-
-### **Практическая интерпретация для LLM**
-В GRPO advantage-функция становится **инструментом ранжирования вариантов ответа**:
-- Модель учится генерировать ответы, которые не просто "хороши", но **значительно лучше среднего в своей группе**.
-- Это стимулирует:
-  - Поиск неочевидных, но эффективных цепочек рассуждений.
-  - Избегание шаблонных ошибок, типичных для группы.
-
-**Эффект**: Модель фокусируется на **качественных различиях между ответами**, а не на абсолютных значениях наград, что критично для сложных задач с неоднозначными критериями успеха.
-
-**Контекст проблемы**:
-- В задачах рассуждения LLM часто генерируют множественные "рассуждения-цепочки" (chain-of-thought), но стандартные алгоритмы RL слабо адаптированы для их оценки.
-- **Value-сети в PPO требуют значительных ресурсов для обучения и склонны к ошибкам в многомодальных распределениях наград**.
+*   GRPO's effectiveness depends on the quality of the reward function $R(O)$. The reward function must be correctly designed to adequately reflect desired response properties.
+*   Group size $N$ is a hyperparameter that can affect training stability and efficiency. Choosing the optimal $N$ may require experimental tuning.
+*   GRPO, like other reinforcement learning methods, may be sensitive to optimization hyperparameters and model architecture.
 
 ---
 
-### **Основные отличия GRPO от PPO**
+### **Practical Interpretation for LLMs**
+In GRPO, the advantage function becomes an **instrument for ranking response variants**:
+- The model learns to generate responses that are not merely "good," but **significantly better than the group average**.
+- This encourages:
+  - Discovery of non-obvious, yet effective reasoning chains.
+  - Avoidance of template-based errors common in the group.
 
-| **Характеристика**                   | **PPO**                               | **GRPO**                                                                 |
+**Effect**: The model focuses on **qualitative differences between responses**, not absolute reward values, which is critical for complex tasks with ambiguous success criteria.
+
+**Problem Context**:
+- In reasoning tasks, LLMs often generate multiple "reasoning chains" (chain-of-thought), but standard RL algorithms are poorly adapted for evaluating them.
+- **Value networks in PPO require significant resources to train and are prone to errors in multimodal reward distributions**.
+
+---
+
+### **Key Differences Between GRPO and PPO**
+
+| **Characteristic**                   | **PPO**                               | **GRPO**                                                                 |
 |-------------------------------------|---------------------------------------|---------------------------------------------------------------------------|
-| Наличие value-сети                   | Требуется                             | Исключена                                                                |
-| Оценка преимущества                  | На основе value-сети                  | **Групповая относительная нормализация внутри траекторий**               |
-| KL-дивергенция                       | Опциональная регуляризация            | **Жесткая интеграция в loss-функцию через относительные веса**           |
-| Использование памяти                 | Высокое (2 модели)                    | **Снижено на 40-60% за счет удаления value-сети**                         |
-| Сходимость                           | Зависит от точности value-сети        | **Стабильнее благодаря групповой стабилизации градиентов**               |
+| Presence of value network           | Required                              | Eliminated                                                                |
+| Advantage estimation                | Based on value network                | **Group-wise relative normalization within trajectories**               |
+| KL-divergence                       | Optional regularization               | **Tightly integrated into loss function via relative weights**           |
+| Memory usage                        | High (2 models)                       | **Reduced by 40-60% due to removal of value network**                         |
+| Convergence                         | Depends on value network accuracy     | **More stable due to group-wise gradient stabilization**               |
 
 ---
 
-### **Математические основы GRPO**
-**Функция потерь в GRPO**:
+### **Mathematical Foundations of GRPO**
+**Loss Function in GRPO**:
 
 $$
 L(\theta) = \mathbb{E}_{(s,a) \sim \pi_{\text{old}}} \left[ \frac{\pi_\theta(a|s)}{\pi_{\text{old}}(a|s)} \, A(s,a) \;-\; \beta \cdot D_{KL}(\pi_\theta \,\|\, \pi_{\text{old}}) \right],
 $$
 
-где:
-- **$\theta$** — параметры **текущей политики** (нейронной сети), которые оптимизируются в процессе обучения.
-- **$s$** — текущее **состояние** (state) среды, в котором находится агент.
-- **$a$** — **действие** (action), выбранное агентом в состоянии $s$.
-- **$\pi_\theta(a|s)$** — вероятность выбора действия $a$ в состоянии $s$ согласно **текущей политике**.
-- **$\pi_{\text{old}}(a|s)$** — вероятность выбора действия $a$ в состоянии $s$ согласно **старой политике**, зафиксированной на момент сбора данных.
-- **$A(s,a)$** — **преимущество** (advantage) действия $a$ в состоянии $s$, вычисляемое как разница между ожидаемой наградой при выборе $a$ и средней наградой в состоянии $s$. Формально:  
+where:
+- **$\theta$** — parameters of the **current policy** (neural network) being optimized.
+- **$s$** — the current **state** (state) of the environment.
+- **$a$** — the **action** (action) selected by the agent in state $s$.
+- **$\pi_\theta(a|s)$** — probability of selecting action $a$ in state $s$ according to the **current policy**.
+- **$\pi_{\text{old}}(a|s)$** — probability of selecting action $a$ in state $s$ according to the **old policy**, fixed at the time of data collection.
+- **$A(s,a)$** — the **advantage** of action $a$ in state $s$, computed as the difference between the expected reward for choosing $a$ and the average reward in state $s$. Formally:  
   $$A(s,a) = Q(s,a) - V(s),$$  
-  где $Q(s,a)$ — оценка общей награды за выбор $a$ в $s$, а $V(s)$ — средняя ценность состояния $s$.
-- **$\mathbb{E}_{(s,a) \sim \pi_{\text{old}}}$** — математическое ожидание, взятое по состояниям и действиям из **опыта**, собранного старой политикой $\pi_{\text{old}}$ (off-policy данные).
-- **$D_{KL}(\pi_\theta \,\|\, \pi_{\text{old}})$** — KL-дивергенция между распределениями действий текущей и старой политик в состоянии $s$:  
+  where $Q(s,a)$ is the estimated total reward for choosing $a$ in $s$, and $V(s)$ is the average value of state $s$.
+- **$\mathbb{E}_{(s,a) \sim \pi_{\text{old}}}$** — expectation taken over states and actions from the **experience** collected by the old policy $\pi_{\text{old}}$ (off-policy data).
+- **$D_{KL}(\pi_\theta \,\|\, \pi_{\text{old}})$** — KL-divergence between the action distributions of the current and old policies in state $s$:  
   $$D_{KL}(\pi_\theta \,\|\, \pi_{\text{old}}) = \mathbb{E}_{a \sim \pi_\theta} \left[ \log \frac{\pi_\theta(a|s)}{\pi_{\text{old}}(a|s)} \right].$$
-- **$\beta$** — гиперпараметр, регулирующий силу KL-регуляризации (**типичные значения: 0.05–0.2**).
+- **$\beta$** — hyperparameter regulating the strength of KL-regularization (**typical values: 0.05–0.2**).
 
 ---
 
-### **Пояснения**
-1. **Off-policy обучение**: Градиенты вычисляются на данных, собранных старой политикой ($\pi_{\text{old}}$), но оптимизируется новая политика ($\pi_\theta$).  
-2. **Importance weighting** $\frac{\pi_\theta}{\pi_{\text{old}}}$ корректирует градиенты с учетом различий между политиками, предотвращая смещение оценок.  
-3. **KL-дивергенция** ограничивает скорость изменения политики, обеспечивая устойчивость обучения.  
-4. **Преимущество $A(s,a)$** направляет обновление в сторону действий с большей ожидаемой наградой. Если $A(s,a) > 0$, действие $a$ в состоянии $s$ считается лучше среднего.
+### **Explanations**
+1. **Off-policy learning**: Gradients are computed on data collected by the old policy ($\pi_{\text{old}}$), but the new policy ($\pi_\theta$) is optimized.  
+2. **Importance weighting** $\frac{\pi_\theta}{\pi_{\text{old}}}$ corrects gradients to account for differences between policies, preventing estimator bias.  
+3. **KL-divergence** limits the speed of policy change, ensuring training stability.  
+4. **Advantage $A(s,a)$** directs updates toward actions with higher expected reward. If $A(s,a) > 0$, action $a$ in state $s$ is considered better than average.
 
-**Оптимизация**:
-- Градиенты обновляются только для токенов, критически влияющих на награду (**например, ключевых шагов в математическом выводе**).  
-  - *Формально*, это можно представить как применение маски $( M )$ к градиентам, где $( M_i = 1 )$ для «критических» токенов и $( M_i = 0 )$ для остальных. Таким образом, обновляются только параметры, связанные с «критическими» токенами, что повышает эффективность обучения, фокусируясь на наиболее значимых частях рассуждения.
-- **Сэмплирование ответов**: Для каждого промпта параллельно генерируются 4–8 вариантов, что улучшает покрытие пространства решений.
-
----
-
-### **Немного цифр**
-1. **Эффективность**:
-   - Удаление value-сети сокращает объем памяти на **18.2 GB для модели с 33B параметров** (эксперименты DeepSeek-R1).
-   - Время обучения сокращается на **35%** при решении задач уровня MATH dataset.
-
-2. **Стабильность**:
-   - Групповая нормализация уменьшает дисперсию градиентов (**на 60% по сравнению с PPO**).
-   - KL-регуляризация предотвращает "распад политики" — типичную проблему PPO.
-
-3. **Результативность**:
-   - На бенчмарке MATH GRPO повысил точность модели DeepSeek-Math-7B с **51.2% до 58.7%**.
-   - В логических задачах (например, FOLIO) улучшение составило **12.3%**.
+**Optimization**:
+- Gradients are updated only for tokens critically affecting reward (**e.g., key steps in mathematical derivation**).  
+  - *Formally*, this can be represented by applying a mask $( M )$ to gradients, where $( M_i = 1 )$ for "critical" tokens and $( M_i = 0 )$ for others. Thus, only parameters associated with "critical" tokens are updated, improving learning efficiency by focusing on the most significant parts of reasoning.
+- **Response sampling**: For each prompt, 4–8 variants are generated in parallel, improving solution space coverage.
 
 ---
 
-### **Практическая реализация GRPO**
+### **A Few Numbers**
+1. **Efficiency**:
+   - Removing the value network reduces memory usage by **18.2 GB for a 33B parameter model** (DeepSeek-R1 experiments).
+   - Training time is reduced by **35%** on MATH dataset tasks.
 
-**Шаги внедрения**:
-1. **Супервизионное дообучение (SFT)**:
-   - Используются данные формата:  
+2. **Stability**:
+   - Group normalization reduces gradient variance (**by 60% compared to PPO**).
+   - KL-regularization prevents "policy collapse"—a typical PPO issue.
+
+3. **Performance**:
+   - On the MATH benchmark, GRPO improved DeepSeek-Math-7B accuracy from **51.2% to 58.7%**.
+   - In logical reasoning tasks (e.g., FOLIO), improvement was **12.3%**.
+
+---
+
+### **Practical Implementation of GRPO**
+
+**Implementation Steps**:
+1. **Supervised Fine-Tuning (SFT)**:
+   - Use data in format:  
      ```json
-     {"prompt": "Решите уравнение ∫₀¹ x² dx", "response": "∫₀¹ x² dx = [x³/3]₀¹ = 1/3"}
+     {"prompt": "Solve the equation ∫₀¹ x² dx", "response": "∫₀¹ x² dx = [x³/3]₀¹ = 1/3"}
      ```
-   - **Ключевой аспект**: очистка данных от ошибок через self-consistency проверку.
+   - **Key aspect**: Clean data via self-consistency checks.
 
-2. **Моделирование награды**:
-   - Для математических задач (пример):  
+2. **Reward Modeling**:
+   - For mathematical tasks (example):  
      
     $$
      [
@@ -1779,330 +1777,329 @@ $$
      ]
     $$
 
-   - Разработка эффективной функции награды является ключевым аспектом GRPO. В общем случае, она должна быть спроектирована так, чтобы поощрять желаемые свойства рассуждений — корректность, логическую последовательность, краткость и эффективность решения. Веса коэффициентов (например, 1, 0.5, -0.3 в примере) могут быть настроены эмпирически для достижения оптимального баланса между этими свойствами.
+   - Designing an effective reward function is key to GRPO. Generally, it should be designed to reward desirable reasoning properties—correctness, logical sequence, conciseness, and solution efficiency. Weight coefficients (e.g., 1, 0.5, -0.3 in the example) can be empirically tuned to achieve optimal balance between these properties.
 
-3. **Обучение с GRPO**:
-   - **Гиперпараметры**:
-     - Batch size: 512 промптов (по 4 ответа на промпт → 2048 примеров/шаг).
-     - Learning rate: 1e-6 с линейным затуханием.
-   - **Трюк**: Заморозка первых 10% слоев модели для сохранения общих знаний.
+3. **Training with GRPO**:
+   - **Hyperparameters**:
+     - Batch size: 512 prompts (4 responses per prompt → 2048 examples/step).
+     - Learning rate: 1e-6 with linear decay.
+   - **Trick**: Freeze the first 10% of model layers to preserve general knowledge.
 
 ---
 
-### **Кейсы применения**
+### **Use Cases**
 1. **DeepSeek-Math-33B**:
-   - Решение задач Международной математической олимпиады (IMO) с точностью **44.5%**.
-   - **Особенность**: Использование GRPO + деревоискока (MCTS) для генерации шагов.
+   - Solving International Mathematical Olympiad (IMO) problems with **44.5%** accuracy.
+   - **Feature**: Use of GRPO + Monte Carlo Tree Search (MCTS) for step generation.
 
-2. **Логический планировщик AlphaLogic**:
-   - Автоматическое доказательство теорем в Coq с успешностью **68%** (против 52% у PPO).
+2. **Logical Planner AlphaLogic**:
+   - Automated theorem proving in Coq with **68%** success rate (vs. 52% for PPO).
 
 ---
 
-### **Заключение**
-GRPO представляет собой значительный шаг вперёд в области обучения с подкреплением для LLM, особенно в задачах, требующих сложного рассуждения. **Его применение уже выходит за рамки математики — текущие исследования тестируют GRPO в юридическом анализе и генерации научных гипотез.** Несмотря на ограничения, алгоритм демонстрирует потенциал для создания "мыслящих" ИИ-систем, способных к глубокому абстрактному мышлению.
+### **Conclusion**
+GRPO represents a significant advancement in reinforcement learning for LLMs, particularly in tasks requiring complex reasoning. **Its application is already extending beyond mathematics—current research is testing GRPO in legal analysis and scientific hypothesis generation.** Despite limitations, the algorithm demonstrates potential for creating "thinking" AI systems capable of deep abstract reasoning.
 
 </details> 
 
 ---
 
-Дополнительно использовался метод "самовознаграждения" (Self-Rewarding), основанный на концепции конституционного ИИ [[18](https://arxiv.org/abs/2212.08073)]. Этот подход позволил улучшить качество модели в субъективных задачах, где отсутствуют строгие критерии оценки.
+Additionally, the Self-Rewarding method, based on the concept of constitutional AI [[18](https://arxiv.org/abs/2212.08073)], was employed. This approach improved model quality in subjective tasks lacking strict evaluation criteria.
 
 <details> 
-    <summary><em><strong>Краткий обзор метода "самовознаграждения" (Self-Rewarding)</strong></em></summary>
+    <summary><em><strong>Short Overview of Self-Rewarding</strong></em></summary>
 
-### **Введение**  
+### **Introduction**  
 
-Данный раздел обобщает ключевые положения статьи *"Самообучающиеся языковые модели"* (Self-Rewarding Language Models). Работа посвящена инновационному подходу к обучению больших языковых моделей (LLM), в рамках которого модель самостоятельно генерирует и оценивает данные для своего обучения. Это позволяет минимизировать зависимость от антропогенных (человеко-ориентированных) данных, преодолевая ограничения традиционных методов выравнивания ИИ.
+This section summarizes key points from the paper *"Self-Rewarding Language Models."* The work presents an innovative approach to training large language models (LLMs) in which the model autonomously generates and evaluates its own training data. This minimizes dependence on anthropogenic (human-oriented) data, overcoming limitations of traditional AI alignment methods.
 
-**Основные темы и идеи**  
-1. **Критика классических методов выравнивания**  
-   Авторы подвергают анализу недостатки методов Reinforcement Learning from Human Feedback (RLHF) и Direct Preference Optimization (DPO). Подчеркивается, что RLHF зависит от «замороженной» модели вознаграждения, качество которой ограничено объёмом человеческих данных, а DPO — от прямого использования антропогенных предпочтений. Оба подхода, по мнению исследователей, сталкиваются с «бутылочным горлышком» в виде конечности и субъективности человеческих оценок [[18](https://arxiv.org/abs/2212.08073)]:  
+**Core Themes and Ideas**  
+1. **Critique of Classical Alignment Methods**  
+   The authors analyze shortcomings of Reinforcement Learning from Human Feedback (RLHF) and Direct Preference Optimization (DPO). They emphasize that RLHF depends on a "frozen" reward model, whose quality is limited by the volume of human data, while DPO relies directly on anthropogenic preferences. Both approaches, according to the researchers, face a "bottleneck" in the finiteness and subjectivity of human evaluations [[18](https://arxiv.org/abs/2212.08073)]:  
    > *"The standard approach of RLHF learns a reward model from human preferences... A recent alternative is DPO... In both cases, the approach is bottlenecked by the size and quality of the human preference data"*.
 
-2. **Архитектура самообучающихся моделей**  
-   Ключевая инновация — создание агента, объединяющего две функции:  
-   - **Генерация ответов** (instruction following);  
-   - **Создание и оценка обучающих данных** (self-instruction creation).  
-   Модель действует как генератор-критик, итеративно улучшая как свои ответы, так и критерии их оценки. Этот процесс авторы называют *Self-Rewarding Language Models*.
+2. **Architecture of Self-Training Models**  
+   The key innovation is creating an agent combining two functions:  
+   - **Generating responses** (instruction following);  
+   - **Creating and evaluating training data** (self-instruction creation).  
+   The model acts as a generator-critic, iteratively improving both its responses and its criteria for evaluation. The authors term this process *Self-Rewarding Language Models*.
 
-3. **Итеративное обучение через DPO**  
-   Обучение реализуется циклически:  
-   - **Шаг 1**: Генерация новых промптов и ответов с последующей оценкой через LLM-as-a-Judge (модель анализирует релевантность, полноту, ясность и другие критерии);  
-   - **Шаг 2**: Формирование пар предпочтений (preference pairs) для обучения через DPO.  
-   Каждая итерация (Mt → Mt+1) улучшает как способность модели следовать инструкциям, так и её навыки оценки [[18](https://arxiv.org/abs/2212.08073)]:  
+3. **Iterative Learning via DPO**  
+   Training is implemented cyclically:  
+   - **Step 1**: Generate new prompts and responses, followed by evaluation via LLM-as-a-Judge (model assesses relevance, completeness, clarity, and other criteria);  
+   - **Step 2**: Form preference pairs for DPO training.  
+   Each iteration (Mt → Mt+1) improves both the model’s ability to follow instructions and its evaluation skills [[18](https://arxiv.org/abs/2212.08073)]:  
    > *"Our self-alignment method consists of two steps: (i) Self-Instruction creation... (ii) Instruction following training... This whole procedure can then be iterated..."*.
 
-4. **Экспериментальные результаты**  
-   - Модель Llama 2 70B после трёх итераций превзошла Claude 2, Gemini Pro и GPT-4 0613 на бенчмарке AlpacaEval 2.0.  
-   - Наибольший прогресс зафиксирован в задачах, требующих экспертизы (STEM, гуманитарные науки, ролевые игры).  
-   - Способность модели к самовознаграждению (reward modeling) коррелирует с человеческими оценками (r = 0.89).
+4. **Experimental Results**  
+   - The Llama 2 70B model, after three iterations, outperformed Claude 2, Gemini Pro, and GPT-4 0613 on the AlpacaEval 2.0 benchmark.  
+   - The greatest progress was observed in expertise-demanding tasks (STEM, humanities, role-playing).  
+   - The model’s self-rewarding (reward modeling) capability correlates with human evaluations (r = 0.89).
 
-**Важные детали реализации**  
-- **Инициализация**: Базой служит предобученная модель (Llama 2 70B) с добавлением seed-данных из Open Assistant.  
-- **Генерация данных**: Используется few-shot prompting для создания промптов и вариативных ответов.  
-- **Безопасность**: Авторы отмечают риски reward hacking и необходимость дальнейшего анализа этических аспектов.
+**Important Implementation Details**  
+- **Initialization**: Based on a pretrained model (Llama 2 70B) augmented with seed data from Open Assistant.  
+- **Data Generation**: Uses few-shot prompting to create prompts and varied responses.  
+- **Safety**: Authors note risks of reward hacking and the need for further ethical analysis.
 
-**Выводы и перспективы**  
-Предложенный метод демонстрирует потенциал для создания автономных систем, способных к непрерывному самоулучшению. Однако для масштабирования подхода требуются:  
-- Декомпозиция пределов итеративного обучения;  
-- Механизмы предотвращения reward hacking;  
-- Независимые оценки безопасности.  
+**Conclusions and Prospects**  
+The proposed method demonstrates potential for creating autonomous systems capable of continuous self-improvement. However, scaling this approach requires:  
+- Decomposing limits of iterative learning;  
+- Mechanisms to prevent reward hacking;  
+- Independent safety evaluations.  
 
-Работа вносит вклад в развитие конституционного ИИ, предлагая альтернативу антропоцентричным подходам к выравниванию LLM.
+The work contributes to constitutional AI development by offering an alternative to anthropocentric LLM alignment approaches.
 
 </details> 
 
 ---
 
-![Figure_19](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_19.jpg)
-![Figure_19.1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_19.jpeg)
+![Figure_19](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_19.jpg  )
+![Figure_19.1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_19.jpeg  )
 
-Потери KL (необходимые для предотвращения генерации моделью кардинально отличающегося и нечитаемого текста) также упрощены, поскольку сравнение выполняется непосредственно между эталонной моделью и политикой, а не между вознаграждением и политикой.
+The KL losses (necessary to prevent the model from generating radically different and unreadable text) are also simplified, since the comparison is performed directly between the reference model and the policy, rather than between the reward and the policy.
 
-![Figure_20](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_20.jpg)
+![Figure_20](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_20.jpg  )
 
-Преимущество в GRPO по сути рассчитывается как z-оценка.
+The advantage in GRPO is essentially computed as a z-score.
 
-![Figure_21](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_21.jpg)
+![Figure_21](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_21.jpg  )
 
-### Сравнительный анализ и заключение
+### Comparative Analysis and Conclusion
 
-Результаты тестирования DeepSeek-V3 демонстрируют превосходство модели над ее предшественниками и конкурентами. По результатам бенчмарков DeepSeek-V3 обходит такие модели, как Qwen2.5 72B Base и LLaMA-3.1 405B Base, в задачах на обработку английского и китайского языков, программирования, математики и многоязычного анализа.
+The evaluation results of DeepSeek-V3 demonstrate its superiority over its predecessors and competitors. On benchmark tests, DeepSeek-V3 outperforms models such as Qwen2.5 72B Base and LLaMA-3.1 405B Base in tasks involving English and Chinese language processing, programming, mathematics, and multilingual analysis.
 
-Примечательно, что DeepSeek-V3 достигла показателей, сопоставимых с GPT-4o-0513 и Claude-Sonnet-3.5-1022, несмотря на значительно меньшие затраты на обучение. В частности, общие вычислительные затраты на обучение DeepSeek-V3 составили 180 тыс. GPU-часов на H800, что существенно ниже затрат на создание модели Sonnet, которые оцениваются в десятки миллионов долларов.
+Notably, DeepSeek-V3 achieved performance comparable to GPT-4o-0513 and Claude-Sonnet-3.5-1022, despite significantly lower training costs. In particular, the total training computational cost for DeepSeek-V3 amounted to 180,000 GPU-hours on H800, substantially lower than the estimated tens of millions of dollars required to create the Sonnet model.
 
-![Figure_22](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_22.jpg)
+![Figure_22](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_22.jpg  )
 
-В статье представлен интересный анализ дистилляции из модели рассуждений (R1). Это улучшает качество, но также увеличивает среднюю длину ответа, требуя тщательного баланса в настройках. Они протестировали это на математике и программировании, но планируют расширить дальше.
+The paper presents an interesting analysis of distillation from the reasoning model (R1). This improves quality but also increases average response length, requiring careful tuning balance. They tested this on mathematics and programming but plan to extend it further.
 
-![Figure_23](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_23.jpg)
+![Figure_23](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_23.jpg  )
 
-Они также упоминают использование конституционного ИИ ( https://arxiv.org/abs/2212.08073 ) — подход, который мне очень нравится (в первую очередь из-за его масштабируемости) — для задач, где проверка и алгоритмическая обратная связь затруднены. По сути, модель оценивала сама себя, что они назвали Self-Rewarding . Этот подход улучшил качество, особенно в субъективных оценках. Я понимаю, что они планируют добавить больше конституционных входов.
+They also mention the use of Constitutional AI (https://arxiv.org/abs/2212.08073)—an approach I greatly appreciate (primarily due to its scalability)—for tasks where verification and algorithmic feedback are difficult. Essentially, the model evaluated itself, which they called Self-Rewarding. This approach improved quality, particularly in subjective evaluations. I understand they plan to add more constitutional inputs.
 
-Я не буду углубляться в бенчмарки, но статья содержит более подробный анализ. В любом случае, это впечатляющая модель.
+I will not delve into the benchmarks, but the paper contains a more detailed analysis. In any case, this is an impressive model.
 
-![Figure_24](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_24.jpg)
+![Figure_24](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_24.jpg  )
 
-Таким образом, DeepSeek-V3 представляет собой не только мощную языковую модель, но и инновационную платформу для дальнейших исследований в области искусственного интеллекта. Дальнейшее развитие модели может включать оптимизацию алгоритмов обучения, расширение языкового покрытия и улучшение методик RL для более точного моделирования сложных взаимодействий.
+Thus, DeepSeek-V3 is not only a powerful language model but also an innovative platform for further AI research. Future development of the model may include optimizing learning algorithms, expanding language coverage, and improving RL techniques for more accurate modeling of complex interactions.
 
+# 9. The Drumroll! 🥁 Here we are at R1
 
-# 9. Барабанная дробь! 🥁 Вот мы и добрались до R1
+## What's Innovative About R1? 🤔
 
-## Что новаторского в R1? 🤔
+### Development of the DeepSeek-R1 Reasoning Model
 
-### Разработка модели рассуждений DeepSeek-R1
+As part of the DeepSeek model family development, the DeepSeek-R1 reasoning model was created, built upon the DeepSeek-V3-Base foundation. The DeepSeek-R1 architecture includes DeepSeek-R1-Zero, DeepSeek-R1, and an ensemble of six smaller distilled models.
 
-В рамках развития семейства моделей DeepSeek была разработана модель рассуждений DeepSeek-R1, построенная на основе базовой модели DeepSeek-V3-Base.  Архитектура DeepSeek-R1 включает в себя DeepSeek-R1-Zero, DeepSeek-R1, а также ансамбль из шести дистиллированных моделей меньшего размера.
+#### Key Innovations of DeepSeek-R1
 
-#### Новаторские аспекты DeepSeek-R1
+The key achievement of DeepSeek-R1, particularly the DeepSeek-R1-Zero version (whose name references AlphaZero), is demonstrating the feasibility of effective reasoning training primarily through reinforcement learning (RL) with a relatively limited volume of supervised fine-tuning (SFT) data. This suggests the potential to reduce dependence on extensive "human demonstrations" during SFT, although it is noted that initializing training with a small set of high-quality SFT examples contributes to improved results.
 
-Ключевым достижением DeepSeek-R1, в частности версии DeepSeek-R1-Zero (название которой отсылает к Alpha Zero), является демонстрация возможности эффективного обучения рассуждению преимущественно посредством обучения с подкреплением (RL) при относительно ограниченном объеме данных для контролируемой тонкой настройки (SFT).  Это указывает на потенциальную возможность снижения зависимости от обширных "человеческих демонстраций" в процессе SFT, хотя отмечается, что инициализация обучения с использованием ограниченного набора высококачественных примеров SFT способствует достижению улучшенных результатов.
+A significant outcome is the creation of an open model demonstrating advanced reasoning capabilities. It is anticipated that further development and adaptation of such models by the research community will lead to substantial progress in building AI capable of reasoning.
 
-Значимым результатом также является создание открытой модели, демонстрирующей развитые способности к обоснованию выводов.  Ожидается, что дальнейшее развитие и адаптация подобных моделей сообществом исследователей приведет к существенному прогрессу в области создания ИИ, способного к рассуждению.
+#### DeepSeek-R1-Zero: Implementation Details
 
-#### DeepSeek-R1-Zero: Детали реализации
+The DeepSeek-V3-Base model served as the foundation for DeepSeek-R1-Zero. During training, the Group Relative Policy Optimization (GRPO) algorithm [[17](https://arxiv.org/abs/2402.03300)], previously used in DeepSeek-V3 and DeepSeekMath, was applied. Using GRPO eliminated the need for a separate critic model, which in traditional approaches is comparable in size to the policy model.
 
-В качестве основы для DeepSeek-R1-Zero была использована модель DeepSeek-V3-Base.  При обучении применялся алгоритм Group Relative Policy Optimization (GRPO) [[17](https://arxiv.org/abs/2402.03300)], ранее использованный в DeepSeek-V3 и DeepSeekMath.  Использование GRPO позволило избежать необходимости в отдельной модели критика, которая в традиционных подходах сопоставима по размеру с моделью политики.
+> *As previously described, GRPO is a method that eliminates the need for an explicit value function, reducing computational cost.*
 
-> *Как было описано ранее, GRPO представляет собой метод, устраняющий потребность в явной функции ценности, что снижает вычислительные затраты.*
+The reward system in DeepSeek-R1-Zero is implemented based on rule modeling, which also reduces computational overhead compared to using neural network reward models. This approach is an evolution of the rule-based RM used during DeepSeek-V3's posttraining phase.
 
-Система вознаграждения в DeepSeek-R1-Zero реализована на основе моделирования правил, что также способствует снижению вычислительных издержек по сравнению с использованием нейросетевых моделей вознаграждения.  Данный подход является развитием RM на основе правил, применявшихся на этапе постобучения DeepSeek-V3.
+Within the reward system, two types of rewards were implemented:
 
-В рамках системы вознаграждения были реализованы два типа наград:
+* **Accuracy rewards**: Evaluation of answer correctness, applied in tasks with an objective criterion for correctness, such as mathematical problems or code-writing tasks.
+* **Format rewards**: Ensuring the structure of the "reasoning process" adheres to a specified format, particularly using XML tags `<think>` to delineate reasoning steps.
 
-* **Награды за точность**:  оценка корректности ответа, применяемая в задачах, где существует объективный критерий правильности, например, в математических задачах или задачах на написание кода.
-* **Награды за формат**:  обеспечение соответствия структуры "мыслительного процесса" заданному формату, в частности, использование XML-тегов `<think>` для выделения этапов рассуждения.
+The developers deliberately avoided neural network RM due to their vulnerability to adversarial attacks, high computational cost, and additional complexity associated with training such models.
 
-Разработчики целенаправленно отказались от использования нейросетевых RM из-за их уязвимости к манипуляциям (adversarial attacks), высокой ресурсоемкости и дополнительной сложности, связанной с обучением таких моделей.
+A simple CoT prompt was used to activate the reasoning mechanism, instructing the model to "think" before generating an answer.
 
-Для активации механизма рассуждения использовалась простая CoT-подсказка, предписывающая модели предварительно "подумать" перед генерацией ответа.
+![Figure_25](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_25.jpg  )
 
-![Figure_25](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_25.jpg)
+DeepSeek-R1-Zero demonstrates significant progress during training, achieving AIME 2024 benchmark performance comparable to OpenAI o1-0912 and surpassing o1-mini after just 8,000 training steps. Applying a majority voting strategy (e.g., based on 64 generated answers) substantially improves final result quality.
 
-DeepSeek-R1-Zero демонстрирует значительный прогресс в процессе обучения, достигая уровней производительности в бенчмарке AIME 2024, сопоставимых с моделью OpenAI o1-0912 и превосходя o1-mini уже после 8000 шагов обучения.  Применение стратегии голосования по большинству (например, на основе 64 сгенерированных ответов) существенно повышает качество итоговых результатов.
+![Figure_26](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_26.jpg  )
 
-![Figure_26](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_26.jpg)
+![Figure_27](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_27.jpg  )
 
-![Figure_27](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_27.jpg)
+The Zero approach, based solely on RL without prior SFT, allows direct observation of the model's characteristic evolution during training. In particular, a consistent trend toward increased generated response length is noted, interpreted as the model spontaneously learning the relationship between reasoning detail and solution quality. During training, emergent abilities such as reflection (re-evaluating previous steps) and exploration of alternative solution approaches—none of which were explicitly programmed into the model architecture—are also observed.
 
-Подход Zero, основанный исключительно на RL без предварительного SFT, позволяет наблюдать эволюцию характеристик модели непосредственно в процессе обучения.  В частности, отмечается устойчивая тенденция к увеличению длины генерируемых ответов, что интерпретируется как спонтанное усвоение моделью зависимости между детализацией рассуждений и качеством решения.  В ходе обучения также наблюдается эмерджентное возникновение способностей к рефлексии (переоценке предыдущих шагов) и исследованию альтернативных подходов к решению задач, которые не были явно запрограммированы в архитектуре модели.
+![Figure_28](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_28.jpg  )
 
-![Figure_28](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_28.jpg)
+A particularly interesting phenomenon is the observed "insight moment," demonstrating the model's ability to revise and correct its own answers, analogous to cognitive processes observed in humans.
 
-Особый интерес представляет зафиксированный феномен "момента озарения" (insight), демонстрирующий способность модели к пересмотру и коррекции собственных ответов, аналогично когнитивным процессам, наблюдаемым у человека.
+![Figure_29](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_29.jpg  )
 
-![Figure_29](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_29.jpg)
-
-Несмотря на отмеченные достижения, DeepSeek-R1-Zero не лишена ограничений.  Выходные данные модели могут характеризоваться недостаточной читаемостью и лингвистической неоднородностью, включая смешение языков.  Для решения этих проблем и улучшения качества "холодного старта" модели было принято решение о проведении предварительной тонкой настройки на высококачественном наборе данных перед началом этапа RL.
+Despite these achievements, DeepSeek-R1-Zero is not without limitations. Output data may exhibit insufficient readability and linguistic inconsistency, including language mixing. To address these issues and improve the model's "cold start" quality, a decision was made to conduct preliminary fine-tuning on a high-quality dataset before beginning the RL phase.
 
 ### DeepSeek-R1
 
-В основе разработки DeepSeek-R1 лежит усовершенствованный процесс обучения, структурированный на четырех последовательных этапах, каждый из которых играет ключевую роль в достижении желаемых характеристик модели.
+The development of DeepSeek-R1 is based on an enhanced training process structured into four sequential stages, each playing a crucial role in achieving the desired model characteristics.
 
-Первый этап, получивший название **"Cold Start"**, был посвящен сбору обширного корпуса данных, включающего тысячи примеров, демонстрирующих длинные цепочки рассуждений (Chain-of-Thought, CoT).  Исследовательская группа использовала метод "подсказок с несколькими выстрелами" (few-shot prompting), предоставляя модели подробные примеры CoT, явно стимулируя генерацию развернутых ответов и тщательную верификацию каждого шага рассуждения.  Примечательно, что в качестве исходных данных были задействованы результаты, полученные DeepSeek-R1-Zero, прошедшие процедуру ручной постобработки, что обеспечило высокое качество и релевантность примеров.  Каждый пример завершался лаконичным резюме, аккумулирующим ключевые моменты цепочки рассуждений.
+The first stage, named **"Cold Start,"** focused on collecting an extensive corpus of data, including thousands of examples demonstrating long Chain-of-Thought (CoT) reasoning. The research team used "few-shot prompting," providing the model with detailed CoT examples to explicitly stimulate the generation of extended responses and thorough verification of each reasoning step. Notably, the initial data were derived from outputs generated by DeepSeek-R1-Zero, which underwent manual post-processing to ensure high quality and relevance. Each example concluded with a concise summary capturing the key points of the reasoning chain.
 
-Второй этап, обозначенный как **"Reasoning-oriented Reinforcement Learning"** (обучение с подкреплением, ориентированное на рассуждение), был направлен на тонкую настройку модели DeepSeek-V3-Base на основе данных, собранных на этапе "Cold Start".  При этом был применен аналогичный процесс обучения с подкреплением (RL), что и в случае с -Zero.  Для решения проблемы неоднородности языкового состава в генерируемых текстах, было введено дополнительное **вознаграждение за языковую консистентность**, определяемое как пропорция целевого языка в рамках CoT.  Финальная функция вознаграждения представляла собой интеграцию точности выполнения задачи и языковой согласованности, что позволило обучать модель до достижения конвергенции, обеспечивая как качество рассуждений, так и лингвистическую однородность.
+The second stage, labeled **"Reasoning-oriented Reinforcement Learning,"** aimed to fine-tune the DeepSeek-V3-Base model using data collected during the "Cold Start" phase. A similar reinforcement learning (RL) process as in -Zero was applied. To address the issue of linguistic heterogeneity in generated texts, an additional **language consistency reward** was introduced, defined as the proportion of the target language within the CoT. The final reward function integrated task accuracy and linguistic consistency, enabling training to convergence while ensuring both reasoning quality and linguistic uniformity.
 
-Третий этап, названный **"Rejection Sampling and Supervised Fine-Tuning"** (отбор отклонением и обучение с учителем), использовал контрольную точку, полученную на предыдущем этапе, для генерации данных, предназначенных для последующего обучения с учителем (SFT).  В то время как первоначальные данные "холодного старта" были преимущественно ориентированы на развитие навыков рассуждения, данные, собранные на данном этапе, охватывали более широкий спектр задач, включая письмо, ролевые игры и другие задачи общего назначения, что способствовало расширению функциональных возможностей модели.  Данные были классифицированы на две категории: данные, ориентированные на рассуждение (**Reasoning**), и данные, не связанные с рассуждением (**Non-Reasoning**).
+The third stage, termed **"Rejection Sampling and Supervised Fine-Tuning,"** used a checkpoint obtained from the previous stage to generate data for subsequent supervised fine-tuning (SFT). While the initial "cold start" data were primarily oriented toward developing reasoning skills, the data collected in this stage covered a broader spectrum of tasks, including writing, role-playing, and other general-purpose tasks, thereby expanding the model's functional capabilities. The data were classified into two categories: reasoning-oriented (**Reasoning**) and non-reasoning (**Non-Reasoning**).
 
-Для категории **Reasoning** (600 000 примеров) были сгенерированы новые цепочки рассуждений, отправной точкой для которых послужила контрольная точка с предыдущего этапа.  Эти цепочки подверглись тщательной фильтрации, частично с использованием DeepSeek-V3 в качестве оценочной модели.  Для каждой подсказки генерировалось несколько вариантов ответа, после чего отбраковывались проблемные результаты, характеризующиеся смешением языков, излишней многословностью (длинные абзацы) или некорректным форматированием (блоки кода).
+For the **Reasoning** category (600,000 examples), new reasoning chains were generated, using the checkpoint from the previous stage as the starting point. These chains underwent rigorous filtering, partially using DeepSeek-V3 as an evaluation model. For each prompt, multiple answer variants were generated, after which problematic results—characterized by language mixing, excessive verbosity (long paragraphs), or incorrect formatting (code blocks)—were discarded.
 
-Категория **Non-Reasoning** (200 000 примеров) включала примеры, охватывающие широкий спектр задач, таких как письмо, ответы на фактические вопросы (QA), самопознание и перевод.  Для формирования этой категории был задействован конвейер DeepSeek-V3, при этом частично использовался его набор данных SFT, а также возможности DeepSeek-V3 для генерации новых примеров.
+The **Non-Reasoning** category (200,000 examples) included examples covering a wide range of tasks such as writing, factual question answering (QA), self-reflection, and translation. To form this category, the DeepSeek-V3 pipeline was employed, partially using its SFT dataset and leveraging DeepSeek-V3's capabilities to generate new examples.
 
-Завершающим шагом данного этапа стала тонкая настройка DeepSeek-V3-Base (исходной модели, а не контрольной точки с предыдущего этапа) в течение двух эпох на полном наборе данных, включающем 800 000 примеров, что позволило интегрировать и обобщить знания, полученные на предыдущих этапах.
+The final step of this stage involved fine-tuning the DeepSeek-V3-Base model (the original model, not the checkpoint from the previous stage) for two epochs on the full dataset comprising 800,000 examples, enabling integration and generalization of knowledge acquired in prior stages.
 
-Четвертый этап, озаглавленный **"Reinforcement Learning для всех сценариев"**, представлял собой вторую фазу обучения с подкреплением, направленную на повышение как **полезности**, так и **безвредности** модели (аналогично подходам конституционного искусственного интеллекта), одновременно с дальнейшим совершенствованием способностей к рассуждению.  Для данных, ориентированных на рассуждение, применялись вознаграждения, основанные на правилах, в то время как для общих данных использовались модели вознаграждения из конвейера DeepSeek-V3.  В контексте полезности акцент был сделан исключительно на итоговом резюме, тогда как оценка безвредности учитывала весь вывод модели в целом.  Хотя конкретные детали реализации данного этапа представлены в ограниченном объеме, имеющиеся сведения позволяют предположить, что был реализован подход, аналогичный конституционному ИИ (или RLAIF), для оптимизации обоих аспектов – как полезности, так и безвредности, а не только безвредности, как это было предложено в исходной концепции CAI.
+The fourth stage, titled **"Reinforcement Learning for All Scenarios,"** represented a second phase of reinforcement learning aimed at enhancing both **usefulness** and **harmlessness** of the model (analogous to Constitutional AI approaches), while further refining reasoning capabilities. For reasoning-oriented data, rule-based rewards were applied, while for general data, reward models from the DeepSeek-V3 pipeline were used. In the context of usefulness, emphasis was placed solely on the final summary, whereas harmlessness evaluation considered the entire model output. Although specific implementation details of this stage are presented in limited scope, available information suggests an approach analogous to Constitutional AI (or RLAIF) was implemented to optimize both aspects—usefulness and harmlessness—rather than harmlessness alone, as originally proposed in the CAI concept.
 
-### Дистилляция
+### Distillation
 
-Исследовательская группа признала, что, несмотря на высокую эффективность больших моделей MoE, существует значительная потребность в более компактных и плотных моделях.  С целью удовлетворения этой потребности, была проведена **дистилляция** DeepSeek-R1 в различные архитектуры с открытым исходным кодом, включая Qwen и Llama.  Процесс дистилляции заключался в тонкой настройке этих моделей на выходах DeepSeek, с использованием вышеупомянутого набора данных из 800 000 образцов.
+The research team acknowledged that despite the high efficiency of large MoE models, there is significant demand for more compact and dense models. To meet this need, **distillation** of DeepSeek-R1 into various open-source architectures, including Qwen and Llama, was conducted. The distillation process involved fine-tuning these models on DeepSeek's outputs, using the aforementioned 800,000-sample dataset.
 
-Результатом данного процесса стало семейство дистиллированных моделей, включающее:
+The result of this process was a family of distilled models, including:
 
-* Qwen2.5-Математика-1.5B
-* Qwen2.5-Математика-7B
+* Qwen2.5-Math-1.5B
+* Qwen2.5-Math-7B
 * Qwen2.5-14B
 * Qwen2.5-32B
-* Лама-3.1-8B
-* Llama-3.3-70B-Инструктировать
+* Llama-3.1-8B
+* Llama-3.3-70B-Instruct
 
-Важно отметить, что данные дистиллированные версии прошли только этап обучения с учителем (SFT) без дополнительного обучения с подкреплением (RL).  Это открывает перспективы для сообщества по дальнейшему улучшению их производительности посредством тонкой настройки RL и других методов оптимизации.
+It is important to note that these distilled versions underwent only the supervised fine-tuning (SFT) stage without additional reinforcement learning (RL). This opens prospects for the community to further enhance their performance through RL fine-tuning and other optimization methods.
 
-### Результаты оценки
+### Evaluation Results
 
-Для всесторонней оценки производительности DeepSeek-R1 и его дистиллированных версий, исследовательская группа провела серию сравнительных тестов, используя в качестве эталонов такие модели, как DeepSeek-V3, Claude-Sonnet-3.5-1022, GPT-4o-0513, OpenAI-o1-mini и OpenAI-o1-1217.
+To comprehensively evaluate the performance of DeepSeek-R1 and its distilled versions, the research team conducted a series of comparative tests, using models such as DeepSeek-V3, Claude-Sonnet-3.5-1022, GPT-4o-0513, OpenAI-o1-mini, and OpenAI-o1-1217 as baselines.
 
-Результаты оценки **способностей к рассуждению** продемонстрировали, что R1 по производительности сопоставима с OpenAI-o1-1217, значительно превосходя Sonnet, 4o и mini.
+The evaluation results for **reasoning capabilities** demonstrated that R1 performs comparably to OpenAI-o1-1217, significantly surpassing Sonnet, 4o, and mini.
 
-![Figure_30](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_30.jpg)
+![Figure_30](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_30.jpg  )
 
-Дистиллированные модели также продемонстрировали впечатляющие результаты. В качестве базовой линии для сравнения была использована открытая модель QwQ-32B-Preview:
+The distilled models also demonstrated impressive results. As a baseline for comparison, the open model QwQ-32B-Preview was used:
 
-![Figure_31](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_31.jpg)
+![Figure_31](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_31.jpg  )
 
-* DeepSeek-R1-Distill-Qwen-7B превосходит, что примечательно, GPT-4o-0513.
-* DeepSeek-R1-14B демонстрирует превосходство над QwQ-32B-Preview.
-* DeepSeek-R1-32B и DeepSeek-R1-70B по производительности опережают o1-mini.
+* DeepSeek-R1-Distill-Qwen-7B surpasses, notably, GPT-4o-0513.
+* DeepSeek-R1-14B demonstrates superiority over QwQ-32B-Preview.
+* DeepSeek-R1-32B and DeepSeek-R1-70B outperform o1-mini.
 
-Примечательно, что теперь в распоряжении сообщества имеются открытые модели столь высокого качества, которые могут быть запущены локально.  Можно ожидать дальнейшего улучшения их характеристик по мере того, как сообщество будет совершенствовать эти модели с помощью RL и других методов тонкой настройки.
+Notably, the community now has access to open models of such high quality that can be run locally. Further improvement of their characteristics can be expected as the community refines these models using RL and other fine-tuning methods.
 
-Отдельный эксперимент, проведенный с Qwen-32B-Base, был посвящен сравнению **чистого обучения RL** (DeepSeek-R1-Zero-Qwen-32B) с **дистилляцией**.  Полученные результаты свидетельствуют о том, что дистилляция из более крупной модели является более эффективным подходом, чем прямое обучение моделей меньшего размера посредством RL.
+A separate experiment with Qwen-32B-Base compared **pure RL training** (DeepSeek-R1-Zero-Qwen-32B) with **distillation**. The results demonstrate that distillation from a larger model is a more effective approach than directly training smaller models via RL.
 
-![Figure_32](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_32.jpg)
+![Figure_32](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_32.jpg  )
 
-Иными словами, для создания эффективной модели меньшего размера предпочтительнее использовать метод дистилляции из более мощной модели, нежели пытаться обучить ее напрямую через RL, причем успех в последнем случае не гарантирован.  Примечательно, что разработка эффективных небольших моделей посредством прямого обучения по-прежнему представляет собой сложную задачу, в то время как путь через большие модели оказывается более продуктивным.
+In other words, for creating an effective smaller model, distillation from a more powerful model is preferable to attempting direct RL training, for which success is not guaranteed. Notably, developing effective small models through direct training remains a challenging task, whereas the path through larger models proves more productive.
 
-Еще один важный вывод заключается в том, что **масштабирование** по-прежнему играет решающую роль: более крупные модели демонстрируют более высокую производительность.  Следовательно, потенциал R1 мог бы быть еще более значительным, если бы он был получен в результате дистилляции из модели еще большего размера.
+Another important conclusion is that **scaling** still plays a decisive role: larger models demonstrate higher performance. Consequently, R1's potential could be even greater if it were obtained through distillation from an even larger model.
 
-### Что не сработало?
+### What Did Not Work?
 
-Применение **модели вознаграждения за процесс (PRM)**, в которой вознаграждения начисляются не только за конечный результат, но и за отдельные этапы CoT, оказалось сопряжено со значительными трудностями.  На практике, выделение четко определенных этапов в общем процессе рассуждения зачастую представляет собой нетривиальную задачу.  Даже в случаях, когда такое выделение возможно, оценка точности отдельных шагов является крайне сложной.  Более того, данный подход имеет тенденцию провоцировать **"взлом вознаграждения"** (reward hacking), что усложняет процесс и влечет за собой значительные накладные расходы.  В конечном итоге, полученные преимущества оказались ограниченными и не оправдали затраченных усилий.
+The application of a **Process Reward Model (PRM)**, in which rewards are awarded not only for the final result but also for individual CoT steps, proved fraught with significant difficulties. In practice, identifying clearly defined steps within the overall reasoning process is often a non-trivial task. Even when such identification is possible, evaluating the accuracy of individual steps is extremely challenging. Moreover, this approach tends to provoke **reward hacking**, complicating the process and incurring substantial overhead. Ultimately, the benefits gained were limited and did not justify the effort expended.
 
-Использование **поиска по дереву Монте-Карло (MCTS)**, аналогичного тому, что применяется в AlphaGo, предполагает декомпозицию ответа на более мелкие шаги для исследования пространства решений.  Модель получила указание использовать специальные теги для разграничения различных этапов рассуждения.  На начальном этапе, исследовательская группа использовала подсказки для поиска ответов посредством MCTS с предварительно обученной моделью оценки.  В дальнейшем, на основе полученных пар "вопрос-ответ", проводилось обучение моделей актора и критика, с целью итеративного улучшения процесса.
+The use of **Monte Carlo Tree Search (MCTS)**, analogous to that used in AlphaGo, entails decomposing the answer into finer steps to explore the solution space. The model was instructed to use special tags to delineate different reasoning stages. Initially, the research team used prompts to search for answers via MCTS with a pre-trained evaluation model. Subsequently, based on the obtained question-answer pairs, actor and critic models were trained to iteratively improve the process.
 
-Однако, масштабирование данного подхода столкнулось с серьезными препятствиями.  Пространство решений в задачах обработки естественного языка не обладает такой четкой структурой, как в играх.  Генерация токенов экспоненциально усложняется с увеличением глубины поиска, что вынудило исследователей ограничить максимальную глубину, приводя к поиску локальных оптимумов.  Кроме того, обучение эффективной модели оценки является непростой задачей, и качество этой модели напрямую влияет на процесс генерации.  В конечном счете, достичь итеративного улучшения не удалось, что остается нерешенной проблемой.
+However, scaling this approach encountered serious obstacles. The solution space in natural language processing tasks lacks the clear structure found in games. Token generation becomes exponentially more complex with increased search depth, forcing researchers to limit maximum depth, leading to searches for local optima. Additionally, training an effective evaluation model is a challenging task, and the quality of this model directly impacts the generation process. Ultimately, achieving iterative improvement was not possible, leaving this as an unsolved problem.
 
-### Планы на будущее
+### Future Plans
 
-Авторы исследования обозначили ряд направлений для дальнейшего совершенствования модели, и R2, безусловно, является ожидаемым этапом в этом процессе.
+The authors outlined several directions for further model improvement, with R2 undoubtedly being the anticipated next step.
 
-В число планируемых улучшений входят:
+Planned enhancements include:
 
-* Оптимизация механизма вызова функций, расширение возможностей многооборотного диалога, усовершенствование сложных ролевых игр и генерации JSON.
-* Устранение проблемы смешения языков: поскольку модель оптимизирована для английского и китайского языков, она демонстрирует склонность к переключению на эти языки при обработке запросов на других языках.  Хотя это может не являться критической проблемой, подобное поведение может дезориентировать пользователей.
-* Снижение чувствительности модели к формулировке подсказок:  наблюдается тенденция к ухудшению производительности при использовании "малого количества выстрелов" (few-shot), в связи с чем рекомендуется использовать подход "нулевого количества выстрелов" (zero-shot prompting).  Данная рекомендация согласуется с руководствами для o1.
-* Дальнейшая оптимизация модели для задач Software Engineering, что открывает перспективы для создания локального open-source copilot, способного существенно повысить эффективность разработки программного обеспечения.
+* Optimizing function calling mechanisms, expanding multi-turn dialogue capabilities, improving complex role-playing, and JSON generation.
+* Eliminating language mixing: Since the model is optimized for English and Chinese, it exhibits a tendency to switch to these languages when processing queries in other languages. Although this may not be a critical issue, such behavior can disorient users.
+* Reducing model sensitivity to prompt phrasing: A trend of degraded performance with "few-shot" prompting has been observed, leading to the recommendation to use "zero-shot prompting." This recommendation aligns with guidance for o1.
+* Further optimizing the model for Software Engineering tasks, opening prospects for creating a local open-source copilot capable of significantly enhancing software development efficiency.
 
 ---
 
-### **Ссылки:**
+### **References:**
 
 1. **Wei, J., Zhou, D., Wei, Q., Zou, C., Bastings, J., Cheng, C. Y., ... & Le, Q. V.** (2022).  
    *Chain-of-thought prompting elicits reasoning in large language models.*  
    arXiv preprint arXiv:2201.11903.  
-   [📄 Статья](https://arxiv.org/abs/2201.11903)
+   [📄 Paper](https://arxiv.org/abs/2201.11903  )
 
 2. **Wang, X., Wei, J., Schuurmans, D., Le, Q. V., & Chi, E. H.** (2022).  
    *Self-consistency improves chain of thought reasoning in language models.*  
    arXiv preprint arXiv:2203.11171.  
-   [📄 Статья](https://arxiv.org/abs/2203.11171)
+   [📄 Paper](https://arxiv.org/abs/2203.11171  )
 
 3. **Yao, S., Yu, D., Zhao, J., Cui, Y., Rao, I., Zhao, J., ... & Zhang, C.** (2023).  
    *Large language model guided tree-of-thought.*  
    arXiv preprint arXiv:2305.08291.  
-   [📄 Статья](https://arxiv.org/abs/2305.08291)
+   [📄 Paper](https://arxiv.org/abs/2305.08291  )
 
 4. **Long, L.** (2023).  
    *Tree of thoughts: Deliberate problem solving with large language models.*  
    arXiv preprint arXiv:2305.10601.  
-   [📄 Статья](https://arxiv.org/abs/2305.10601)
+   [📄 Paper](https://arxiv.org/abs/2305.10601  )
 
 5. **Schlag, I., Sukhbaatar, S., Celikyilmaz, A., Yih, W.-t., Weston, J., Schmidhuber, J., & Li, X.** (2023).  
    *Large Language Model Programs.*  
    arXiv preprint arXiv:2305.05364.  
-   [📄 Статья](https://arxiv.org/abs/2305.05364)
+   [📄 Paper](https://arxiv.org/abs/2305.05364  )
 
 6. **DeepSeek-AI, Aixin Liu, Bei Feng, Bing Xue, Bingxuan Wang, ..., & Zizheng Pan.** (2024).  
    *DeepSeek-V3 Technical Report.*  
    arXiv preprint arXiv:2412.19437.  
-   [📄 Статья](https://arxiv.org/abs/2412.19437)
+   [📄 Paper](https://arxiv.org/abs/2412.19437  )
 
 7. **DeepSeek-AI, Aixin Liu, Bei Feng, Bin Wang, Bingxuan Wang, Bo Liu, Chenggang Zhao, ..., & Ziwei Xie.** (2024).  
    *DeepSeek Team et al., 2024b.*  
    arXiv preprint arXiv:2405.04434.  
-   [📄 Статья](https://arxiv.org/abs/2405.04434)
+   [📄 Paper](https://arxiv.org/abs/2405.04434  )
 
 8. **Anonymous.** (2019).  
    *Fast Transformer Decoding: One Write-Head is All You Need.*  
    arXiv preprint arXiv:1911.02150.  
-   [📄 Статья](https://arxiv.org/abs/1911.02150)
+   [📄 Paper](https://arxiv.org/abs/1911.02150  )
 
 9. **Anonymous.** (2023).  
    *GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints.*  
    arXiv preprint arXiv:2305.13245.  
-   [📄 Статья](https://arxiv.org/abs/2305.13245)
+   [📄 Paper](https://arxiv.org/abs/2305.13245  )
 
 10. **Dai, D., Deng, C., Zhao, C., Xu, R. X., Gao, H., Chen, D., ... & Liang, W.** (2024).  
     *arXiv preprint arXiv:2401.06066.*  
-    [📄 Статья](https://arxiv.org/abs/2401.06066)
+    [📄 Paper](https://arxiv.org/abs/2401.06066  )
 
 11. **Fishman, M., Chmiel, B., Banner, R., & Soudry, D.** (2025).  
     *Scaling FP8 training to trillion-token LLMs.*  
     arXiv preprint arXiv:2409.12517.  
-    [📄 Статья](https://arxiv.org/abs/2409.12517)
+    [📄 Paper](https://arxiv.org/abs/2409.12517  )
 
 12. **Peng, H., Wu, K., Wei, Y., Zhao, G., Yang, Y., Liu, Z., ... & Hu, H.** (2023).  
     *FP8-LM: Training FP8 Large Language Models.*  
     arXiv preprint arXiv:2310.18313.  
-    [📄 Статья](https://arxiv.org/abs/2310.18313)
+    [📄 Paper](https://arxiv.org/abs/2310.18313  )
 
 13. **DeepSeek-AI, Aixin Liu, Bei Feng, Bin Wang, Bingxuan Wang, Bo Liu, Chenggang Zhao, ..., & Ziwei Xie.** (2024).  
     *DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model.*  
     arXiv preprint arXiv:2405.04434.  
-    [📄 Статья](https://arxiv.org/abs/2405.04434)
+    [📄 Paper](https://arxiv.org/abs/2405.04434  )
 
 14. **DeepSeek-AI, Zhu, Q., Guo, D., Shao, Z., Yang, D., Wang, P., ..., & Liang, W.** (2024).  
     *DeepSeek-Coder-V2: Breaking the Barrier of Closed-Source Models in Code Intelligence.*  
     arXiv preprint arXiv:2406.11931.  
-    [📄 Статья](https://arxiv.org/abs/2406.11931)
+    [📄 Paper](https://arxiv.org/abs/2406.11931  )
 
 15. **Bavarian, M., Jun, H., Tezak, N., Schulman, J., McLeavey, C., Tworek, J., & Chen, M.** (2022).  
     *Efficient Training of Language Models to Fill in the Middle.*  
     arXiv preprint arXiv:2207.14255.  
-    [📄 Статья](https://arxiv.org/abs/2207.14255)
+    [📄 Paper](https://arxiv.org/abs/2207.14255  )
 
 16. **Peng, B., Quesnelle, J., Fan, H., & Shippole, E.** (2023).  
     *YaRN: Efficient Context Window Extension of Large Language Models.*  
     arXiv preprint arXiv:2309.00071.  
-    [📄 Статья](https://arxiv.org/abs/2309.00071)
+    [📄 Paper](https://arxiv.org/abs/2309.00071  )
 
 17. **Shao, Z., Wang, P., Zhu, Q., Xu, R., Song, J., Bi, X., ... & Guo, D.** (2024).  
     *DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models.*  
     arXiv preprint arXiv:2402.03300.  
-    [📄 Статья](https://arxiv.org/abs/2402.03300)
+    [📄 Paper](https://arxiv.org/abs/2402.03300  )
 
 18. **Bai, Y., Kadavath, S., Kundu, S., Askell, A., Kernion, J., Jones, A., Chen, A., ..., & Kaplan, J.** (2022).  
     *Constitutional AI: Harmlessness from AI Feedback.*  
     arXiv preprint arXiv:2212.08073.  
-    [📄 Статья](https://arxiv.org/abs/2212.08073)
+    [📄 Paper](https://arxiv.org/abs/2212.08073  )

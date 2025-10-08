@@ -1,33 +1,45 @@
-# Evo-2 — ИИ, который проектирует жизнь 🧬🤖
+# Evo-2 — AI That Designs Life 🧬🤖  
 
 [![arXiv](https://img.shields.io/badge/arXiv-2501.12948-b31b1b.svg)](https://www.biorxiv.org/content/10.1101/2025.02.18.638918v1)
-[![Telegram Channel](https://img.shields.io/badge/Telegram-TheWeeklyBrief-blue)](https://t.me/TheWeeklyBrief)
 
-Привет, друзья! Сегодня я хочу представить вам обзор модели **Evo-2**, разработанной совместно **NVIDIA** и **Arc Institute**. Это не просто очередной ИИ — это настоящий прорыв в биологии, который меняет правила игры.  
+Hi everyone! Today I want to introduce you to a review of the **Evo-2** model, developed jointly by **NVIDIA** and the **Arc Institute**. This is not just another AI — it’s a genuine breakthrough in biology that changes the rules of the game.
 
-## Что такое Evo-2?  
-**Evo-2** — это крупнейшая ИИ-модель для биологии, обученная на **9,3 триллионах пар ДНК** из геномного атласа всех форм жизни. Представьте, что это LLM (языковая модель), но вместо текста она работает с ДНК. Модель умеет:  
-- 📖 **Читать и интерпретировать** сложные геномные последовательности, включая некодирующие регионы.  
-- 🧬 **Генерировать** целые хромосомы, новые геномы и предсказывать мутации, вызывающие заболевания.  
-- 🧪 **Проектировать** синтетическую жизнь с нуля, программируемые белки и потенциальные генные терапии.  
+## What is Evo-2?
 
-## Почему это важно?  
-**Evo-2** переводит биологию из описательной науки в вычислительную. Теперь мы можем не только изучать жизнь, но и проектировать её. Это открывает двери для создания новых лекарств, синтетических организмов и даже моделирования целых клеток.  
+**Evo-2** is the largest AI model for biology, trained on **9.3 trillion DNA base pairs** from a curated genomic atlas spanning all forms of life. Imagine an LLM (language model), but instead of text, it operates on DNA. The model can:
 
-## Как это работает?  
-Модель использует **StripedHyena 2** — гибридную архитектуру, которая сочетает сверточные операторы и механизмы внимания. Она обучается автономно, улавливая даже слабые взаимодействия в ДНК, такие как границы экзонов и интронов.  
+- 📖 **Read and interpret** complex genomic sequences, including non-coding regions.
+- 🧬 **Generate** entire chromosomes, novel genomes, and predict disease-causing mutations.
+- 🧪 **Design** synthetic life from scratch, programmable proteins, and potential gene therapies.
 
-## Ключевые особенности:  
-- 🟢 **Evo-2 (7B и 40B)** — обрабатывает до **1 миллиона пар оснований** в одном контекстном окне.  
-- 🟠 **Evo-2 Base (1B, 7B, 40B)** — работает с последовательностями длиной **8192**.  
-- 🧪 Модель уже успешно создала **синтетические дрожжевые хромосомы** и **митохондриальные геномы**.  
+## Why is this important?
 
-## Открытый доступ  
-Проект полностью открыт: веса моделей, код и датасет **OpenGenome 2** доступны для всех. Это значит, что каждый может внести свой вклад в развитие синтетической биологии.  
+**Evo-2** transforms biology from a descriptive science into a computational one. Now we can do more than just study life — we can design it. This opens the door to creating new drugs, synthetic organisms, and even modeling entire cells.
 
-## Что дальше?  
-**Evo-2** — это только начало. Мы стоим на пороге новой эры, где ИИ становится инструментом для проектирования жизни. Осталось понять, как мы будем использовать эту силу.  
+## How does it work?
+
+The model uses **StripedHyena 2** — a hybrid architecture combining convolutional operators and attention mechanisms. It learns autonomously, capturing even weak interactions in DNA, such as exon–intron boundaries.
+
+## Key features:
+
+- 🟢 **Evo-2 (7B and 40B)** — processes up to **1 million base pairs** in a single contextual window.
+- 🟠 **Evo-2 Base (1B, 7B, 40B)** — works with sequences of length **8192**.
+- 🧪 The model has already successfully generated **synthetic yeast chromosomes** and **mitochondrial genomes**.
+
+## Open access
+
+The project is fully open: model weights, code, and the **OpenGenome2** dataset are available to all. This means anyone can contribute to the advancement of synthetic biology.
+
+## What’s next?
+
+**Evo-2** is only the beginning. We stand on the threshold of a new era where AI becomes a tool for designing life. The question remains: how will we choose to use this power?
 
 ---
 
-<p align="center">Исследуйте вместе с нами 🚀</p>
+<div align="center">
+
+**Explore with us 🚀**
+
+⭐ Star this repository if you found it helpful
+
+</div>

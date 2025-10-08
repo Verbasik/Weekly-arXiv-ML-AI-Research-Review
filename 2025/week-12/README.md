@@ -1,48 +1,52 @@
-[![Telegram Channel](https://img.shields.io/badge/Telegram-TheWeeklyBrief-blue)](https://t.me/TheWeeklyBrief)
+# Model Context Protocol (MCP)
 
-# Model Context Protocol (MCP) 
+## Description
+This repository contains an overview of the **Model Context Protocol (MCP)** developed by Anthropic. MCP is a new protocol that standardizes interactions between large language models (LLMs) and external tools and data, making the AI ecosystem more modular, extensible, and universal.
 
-## Описание
-Этот репозиторий содержит обзор технологии **Model Context Protocol (MCP)**, разработанной компанией Anthropic. MCP — это новый протокол, который стандартизирует взаимодействие больших языковых моделей (LLM) с внешними инструментами и данными, делая экосистему ИИ более модульной, расширяемой и универсальной.
+## Overview Contents
+1. **What is MCP?** 🤔
+   - MCP is an open standard introduced by Anthropic on November 25, 2024.
+   - Its primary goal is to create a unified interface for LLMs to interact with external data sources and tools.
 
-## Содержание обзора
-1. **Что такое MCP?** 🤔
-   - MCP — это открытый стандарт, представленный Anthropic 25 ноября 2024 года.
-   - Основная цель — создание унифицированного интерфейса для взаимодействия LLM с внешними источниками данных и инструментами.
+2. **MCP Architecture** 🏗️
+   - **Host**: Coordinates the system and manages LLM interactions.
+   - **Clients**: Enable connections between hosts and servers.
+   - **Servers**: Provide tools, resources, and prompt templates.
+   - **Base Protocol**: Defines interactions between components.
 
-2. **Архитектура MCP** 🏗️
-   - **Хост**: Координирует систему и управляет взаимодействиями LLM.
-   - **Клиенты**: Обеспечивают подключение хостов к серверам.
-   - **Серверы**: Предоставляют инструменты, ресурсы и шаблоны подсказок.
-   - **Базовый протокол**: Определяет взаимодействие между компонентами.
+3. **Advantages of MCP** ✨
+   - **Clustering**: Grouping functions into a single service.
+   - **Decoupling**: Independent deployment of tools.
+   - **Reusability**: Universal protocols enabling tool reuse.
+   - **Unification**: A single protocol for both client-side and cloud-based tools.
 
-3. **Преимущества MCP** ✨
-   - **Кластеризация**: Объединение функций в одну службу.
-   - **Развязка**: Независимое развертывание инструментов.
-   - **Повторное использование**: Универсальные протоколы для повторного использования инструментов.
-   - **Унификация**: Единый протокол для клиентских и облачных инструментов.
+4. **How MCP Works** ⚙️
+   - LLMs interact with MCP servers via JSON-RPC.
+   - Tools are registered on the server using the `@mcp.tool()` decorator.
+   - Clients request a list of tools and invoke them through a standardized protocol.
 
-4. **Как работает MCP?** ⚙️
-   - LLM взаимодействует с MCP-сервером через JSON-RPC.
-   - Инструменты регистрируются на сервере с помощью декоратора `@mcp.tool()`.
-   - Клиент запрашивает список инструментов и вызывает их через стандартизированный протокол.
+5. **Use Cases** 🛠️
+   - Integration with local file systems.
+   - Interaction with internet resources and development tools.
+   - Web and browser automation.
 
-5. **Примеры использования** 🛠️
-   - Интеграция с локальными файловыми системами.
-   - Взаимодействие с интернет-ресурсами и инструментами разработки.
-   - Автоматизация веб-сайтов и браузеров.
+6. **Future Prospects of MCP** 🚀
+   - MCP has the potential to become a foundational protocol for realizing the "Internet of Everything" in AI.
+   - Simplification of AI application development and integration.
 
-6. **Перспективы MCP** 🚀
-   - MCP может стать ключевым протоколом для реализации концепции "Интернета всего" в сфере ИИ.
-   - Упрощение разработки и интеграции приложений ИИ.
+## How to Use This Overview?
+- Review the file [review.md](review.md) for a detailed analysis of MCP.
+- Examine examples of MCP server and client implementations in the [MCP](MCP) folder.
 
-## Как использовать этот обзор?
-- Изучите файл [review.md](review.md) для получения подробного анализа MCP.
-- Ознакомьтесь с примерами реализации MCP-сервера и клиента в папке [MCP](MCP).
-
-## Ссылки
-- [Публикация от Anthropic](https://www.anthropic.com/news/model-context-protocol)
+## Links
+- [Anthropic's Publication](https://www.anthropic.com/news/model-context-protocol  )
 
 ---
 
-<p align="center">Исследуйте вместе с нами 🚀</p>
+<div align="center">
+
+**Explore with us 🚀**
+
+⭐ Star this repository if you found it helpful
+
+</div>

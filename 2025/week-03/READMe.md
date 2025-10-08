@@ -1,48 +1,44 @@
-# rStar-Math: Математическая революция для малых языковых моделей 🚀
+# rStar-Math: The Mathematical Revolution for Small Language Models 🚀
 
 [![arXiv](https://img.shields.io/badge/arXiv-2406.XXXXX-b31b1b.svg)](https://arxiv.org/abs/2501.04519)
-[![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/main/2024/week-XX/experiments.ipynb) 
-[![Telegram](https://img.shields.io/badge/📢_Telegram_Channel-2CA5E0?style=flat)](https://t.me/TheWeeklyBrief)
 
-> p.s. чуть позже актуализирую ссылку на тетрадку с разбором кода
+## **"Surpassing OpenAI o1 in Mathematics: Deep Thinking for Small Models is Now a Reality"**
 
-## **«Превосходит OpenAI o1 в математике: глубокое мышление для малых моделей стало реальностью»**
+## 📌 Key Advantages
 
-## 📌 Ключевые преимущества
+- 🚀 **Surpassed o1:** Small models achieve and surpass the performance of OpenAI o1 in mathematical tasks.
+- 🧠 **MCTS Deep Thinking:** Simulation of human thinking through Monte Carlo Tree Search for unprecedented accuracy.
+- ✅ **Code Verification:** Instant error elimination at each step through verification of solutions with generated Python code.
+- 🔄 **Self-Learning in 4 Iterations:** Revolutionary enhancement of models through an iterative self-improvement process.
+- 🏆 **PPM Preference-Based Training:** Intelligent optimization of reasoning without manual intervention, selecting the best solution paths.
 
-- 🚀 **Превзойдено o1:**  Маленькие модели достигают уровня и превосходят производительность OpenAI o1 в математических задачах.
-- 🧠 **Глубокое мышление MCTS:**  Имитация человеческого мышления с помощью поиска по дереву Монте-Карло для беспрецедентной точности.
-- ✅ **Автоматическая проверка кодом:**  Мгновенное устранение ошибок на каждом шаге благодаря верификации решений сгенерированным Python кодом.
-- 🔄 **Самообучение в 4 итерации:**  Революционное усиление моделей за счет итеративного процесса самосовершенствования.
-- 🏆 **Обучение на предпочтениях PPM:**  Интеллектуальная оптимизация рассуждений без ручного вмешательства, выбирая лучшие пути решения.
+## 📊 Revolution in Performance
 
-## 📊 Революция в производительности
-
-| Модель                             | Бенчмарк MATH (Точность) | Улучшение | Бенчмарк AIME (Успешность) |
+| Model                             | MATH Benchmark (Accuracy) | Improvement | AIME Benchmark (Success Rate) |
 |------------------------------------|--------------------------|------------|---------------------------|
-| Базовые SLM (Qwen2.5-Math-7B, Phi3-mini-3.8B) | ~50-60%                  | -          | -                         |
+| Baseline SLMs (Qwen2.5-Math-7B, Phi3-mini-3.8B) | ~50-60%                  | -          | -                         |
 | **Qwen2.5-Math-7B (rStar-Math)**     | **90.0%**                | **+31.2%** | **53.3%**                 |
 | **Phi3-mini-3.8B (rStar-Math)**     | **86.4%**                | **+45.0%** | **53.3%**                 |
-| OpenAI o1 (Оценка)                 | ~85-90%                  | ~0%        | -                         |
+| OpenAI o1 (Estimate)                 | ~85-90%                  | ~0%        | -                         |
 | USA Math Olympiad (rStar-Math)      | **53.3%**                | -          | **53.3%**                 |
-| Уровень старшеклассников (Топ 20%)   | ~50%                   | -          | ~50%                      |
+| Top 20% High School Students        | ~50%                   | -          | ~50%                      |
 
-## 🧠 Инновационная методология
+## 🧠 Innovative Methodology
 
-1. **Глубокое мышление MCTS:**  Имитация когнитивного процесса решения задач, позволяющая моделям исследовать и выбирать оптимальные стратегии.
-2. **Верификация решений кодом:**  Автоматизированная система контроля качества рассуждений, гарантирующая точность и надежность каждого шага.
-3. **Итеративное самообучение:**  Динамический процесс улучшения моделей, основанный на принципах обратной связи и постоянного совершенствования.
-4. **PPM для обучения на основе предпочтений:**  Механизм тонкой настройки моделей, позволяющий им выявлять и воспроизводить наиболее эффективные подходы к решению математических задач.
+1. **Deep Thinking MCTS:** Simulation of the cognitive process of solving problems, allowing models to explore and select optimal strategies.
+2. **Solution Verification with Code:** An automated quality control system for reasoning, ensuring the accuracy and reliability of each step.
+3. **Iterative Self-Learning:** A dynamic model improvement process based on feedback principles and continuous refinement.
+4. **PPM for Preference-Based Training:** A fine-tuning mechanism allowing models to identify and reproduce the most effective approaches to solving mathematical problems.
 
-## 🌟 Области применения
+## 🌟 Application Areas
 
-- тьюторы и персональные ассистенты для интерактивного изучения математики
-- 🚀 **Интеллектуальные RAG-системы нового поколения** для экспертных ответов на сложные математические и логические запросы в критически важных областях: наука, финансы, инженерия.
-- 💻 **Системы автоматической верификации и отладки кода**:  Революционное повышение надежности программного обеспечения за счет математической строгости.
-- 📊 **Продвинутые аналитические инструменты для научных исследований и бизнеса**:  Мощный математический интеллект для глубокого анализа данных и принятия обоснованных решений.
-- 🧩 **Энергоэффективные встраиваемые решения**:  Высокая математическая производительность для edge-устройств с ограниченными ресурсами, открывающая новые возможности для автономных систем.
+- Tutoring and personal assistants for interactive mathematics learning
+- 🚀 **Next-Generation Intelligent RAG Systems** for expert responses to complex mathematical and logical queries in critical domains: science, finance, engineering.
+- 💻 **Advanced Code Verification and Debugging Systems**: Revolutionary improvement in software reliability through mathematical rigor.
+- 📊 **Advanced Analytical Tools for Scientific Research and Business**: Powerful mathematical intelligence for deep data analysis and informed decision-making.
+- 🧩 **Energy-Efficient Embedded Solutions**: High mathematical performance for edge devices with limited resources, opening new possibilities for autonomous systems.
 
-## 📜 Цитирование
+## 📜 Citation
 
 ```bibtex
 @misc{guan2025rstar,
@@ -57,4 +53,4 @@
 
 ---
 
-<p align="center">⚡ Внедрите rStar-Math и откройте новую эру математического интеллекта в ваших проектах уже сегодня!</p>
+<p align="center">⚡ Integrate rStar-Math and unlock a new era of mathematical intelligence in your projects today!</p>

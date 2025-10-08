@@ -1,281 +1,277 @@
 # Native Sparse Attention: Hardware-Aligned and Natively Trainable Sparse Attention
 
-Когда Маск выпустил Grok 3, а Сэм Альтман все еще колебался, стоит ли открывать исходный код, Лян Вэньфэн, как соавтор, работал с исследовательской группой DeepSeek над созданием шокирующей и сенсационной исследовательской статьи. DeepSeek официально представила свой последний научный прорыв — **Native Sparse Attention (NSA)**! Эта технология имеет большое значение. Она, скорее всего, значительно повысит способность следующего поколения больших языковых моделей обрабатывать длинные тексты, полностью учитывая при этом операционную эффективность. Нет сомнений, что это еще одна веха в области больших языковых моделей (LLM)!
+When Musk released Grok 3, while Sam Altman was still hesitating whether to open-source, Liang Wenfeng, as a co-author, worked with the DeepSeek research team to create a shocking and sensational research paper. DeepSeek officially unveiled its latest scientific breakthrough — **Native Sparse Attention (NSA)**! This technology is of great significance. It is likely to significantly enhance the next generation of large language models' ability to process long texts, while fully accounting for operational efficiency. There is no doubt that this is another milestone in the field of large language models (LLMs)!
 
-## 1. Предпосылки исследования и общие выводы
+## 1. Research Background and General Findings
 
-Проблема, на решение которой направлена данная статья, заключается в высоких вычислительных затратах на моделирование длинных контекстов. Стандартный механизм внимания имеет высокую вычислительную сложность при обработке длинных последовательностей, что становится узким местом для производительности модели. Трудности исследования этой проблемы включают:
+The problem addressed by this paper is the high computational cost of modeling long contexts. The standard attention mechanism has high computational complexity when processing long sequences, becoming a performance bottleneck. Challenges in researching this problem include:
 
-- Как повысить эффективность, сохранив при этом возможности модели.
-- Как добиться сквозного обучения, чтобы сократить предварительные вычисления, не жертвуя при этом производительностью модели.
+- How to improve efficiency while preserving model capabilities.
+- How to achieve end-to-end training to reduce pre-computations without sacrificing model performance.
 
-Сопутствующие исследовательские работы по этой проблеме включают:
+Related research efforts on this problem include:
 
-- Метод исключения кэша KV.
-- Метод выбора блочного кэша KV.
-- Метод выборки, кластеризации или выбора хэша и т. д.
+- KV cache pruning methods.
+- KV cache block selection methods.
+- Sampling, clustering, or hashing-based selection methods, among others.
 
-Однако эти методы часто не позволяют достичь теоретического эффекта ускорения в реальном развертывании и в основном сосредоточены на этапе вывода, не имея эффективной поддержки во время обучения.
+However, these methods often fail to achieve theoretical acceleration effects in real-world deployments and primarily focus on the inference stage, lacking effective support during training.
 
-### Общий вывод
+### General Conclusion
 
-Архитектура NSA, предложенная в данной статье, обеспечивает ускоренное обучение и вывод, сохраняя при этом полную концентрацию внимания, за счет интеграции иерархического сжатия токенов и поблочного выбора токенов в обучаемую архитектуру. NSA соответствует базовому уровню полного внимания по общим показателям, превосходит возможности моделирования при оценке длительного контекста и улучшает возможности рассуждения, при этом значительно сокращая вычислительную задержку и достигая существенного ускорения.
+The NSA architecture proposed in this paper enables accelerated training and inference while preserving full attention through the integration of hierarchical token compression and block-wise token selection into a trainable architecture. NSA matches the baseline full attention in overall metrics, surpasses long-context modeling capabilities, and improves reasoning performance, while significantly reducing computational latency and achieving substantial speedup.
 
-### Ключевые инновации NSA
+### Key NSA Innovations
 
-1. **Собственная конструкция разреженного внимания**:
-   - Позволяет проводить сквозную оптимизацию разреженного шаблона на этапе предварительного обучения.
-   - Модуль разреженного внимания может быть синхронно адаптирован с другими компонентами модели, улучшая общую производительность.
+1. **Natively Designed Sparse Attention**:
+   - Enables end-to-end optimization of the sparse pattern during pre-training.
+   - The sparse attention module can be synchronously adapted with other model components, enhancing overall performance.
 
-2. **Иерархический механизм разреженного внимания**:
-   - Умело достигает баланса между локальной обработкой информации и глобальной обработкой информации.
-   - Предоставляет более эффективное и комплексное решение для модели обработки длинных текстов.
+2. **Hierarchical Sparse Attention Mechanism**:
+   - Skillfully balances local and global information processing.
+   - Provides a more efficient and comprehensive solution for long-text modeling.
 
-![Table_1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-09/assets/Figure_1.png)
+![Table_1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-09/assets/Figure_1.png  )
 
-> **Рисунок 1 | Сравнение производительности и эффективности между полным вниманием (Full Attention) и нашим NSA.**  
-> **Слева:** Несмотря на то, что NSA является разреженной (sparse) моделью, она в среднем превосходит базовый вариант с полным вниманием по общим бенчмаркам, задачам с длинным контекстом и оценке умозаключений.  
-> **Справа:** Для обработки последовательностей длиной 64k NSA обеспечивает значительный выигрыш в скорости вычислений по сравнению с полным вниманием на всех этапах: декодировании, прямом проходе и обратном распространении ошибки.
+> **Figure 1 | Performance and efficiency comparison between Full Attention and our NSA.**  
+> **Left:** Despite being a sparse model, NSA on average outperforms the full attention baseline across general benchmarks, long-context tasks, and reasoning evaluations.  
+> **Right:** For processing 64k-length sequences, NSA delivers significant computational speedup compared to full attention across all stages: decoding, forward pass, and backpropagation.
 
-# 2. Методы исследования
+# 2. Research Methods
 
-В данной статье предлагается NSA (Native Sparse Attention) — аппаратно-ориентированный и обучаемый механизм разреженного внимания, позволяющий решить проблему высоких вычислительных затрат при моделировании длительного контекста.  Чтобы задействовать потенциал внимания в разреженном режиме, NSA заменяет исходные пары «ключ-значение» $(k_t, v_t)$ на более компактный и информативный набор представлений $(\tilde{k}, \tilde{v})$, зависящих от каждого запроса $(q_t)$. Так же инженеры стремились оптимизировать арифметическую интенсивность. 
+This paper proposes NSA (Native Sparse Attention) — a hardware-aligned and trainable sparse attention mechanism designed to address the high computational cost of modeling long contexts. To leverage the potential of sparse attention, NSA replaces the original key-value pairs $(k_t, v_t)$ with a more compact and informative representation $(\tilde{k}, \tilde{v})$ conditioned on each query $(q_t)$. Engineers also aimed to optimize arithmetic intensity.
 
-**Арифметическая интенсивность** — отношение числа вычислительных операций к числу обращений к памяти — становится важным фактором, определяющим оптимизацию на уровне аппаратуры. Для эффективного использования GPU необходимо учитывать этот параметр, стремясь к высокой арифметической интенсивности, чтобы вычисления были ограничены производительностью GPU, а не пропускной способностью памяти. В контексте причинного самовнимания, особенно при авторегрессионном декодировании, проблема пропускной способности памяти становится особенно актуальной из-за необходимости загружать все пространство ключей и значений.
+**Arithmetic intensity** — the ratio of computational operations to memory accesses — becomes a critical factor in hardware-level optimization. Efficient GPU utilization requires maximizing arithmetic intensity to ensure computations are bound by GPU throughput rather than memory bandwidth. In the context of causal self-attention, especially during autoregressive decoding, memory bandwidth becomes particularly critical due to the need to load the entire key and value space.
 
-![Table_2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-09/assets/Figure_2.png)
+![Table_2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-09/assets/Figure_2.png  )
 
-> **Рисунок 2 | Общий обзор архитектуры NSA.**  
-> **Слева:** Фреймворк обрабатывает входные последовательности через три параллельные ветви внимания. Для заданного запроса предыдущие ключи и значения преобразуются в сжатое внимание (compressed attention) для крупнозернистых паттернов, выборочное внимание (selected attention) для важных токенов и скользящее внимание (sliding attention) для локального контекста.  
-> **Справа:** Визуализация различных паттернов внимания, которые формируются каждой ветвью. Зелёные области показывают зоны, где необходимо вычислять коэффициенты внимания, а белые области — это зоны, которые можно пропускать.
+> **Figure 2 | Overall NSA architecture overview.**  
+> **Left:** The framework processes input sequences through three parallel attention branches. For a given query, previous keys and values are transformed into compressed attention for coarse-grained patterns, selected attention for important tokens, and sliding attention for local context.  
+> **Right:** Visualization of the distinct attention patterns generated by each branch. Green areas indicate regions where attention coefficients must be computed; white areas are regions that can be skipped.
 
-## 2.1 Общая схема алгоритма
+## 2.1 Algorithm Overview
 
-Для эффективного использования механизма внимания в разреженном режиме в статье предлагается заменить исходные пары ключ-значение в уравнении (1) на более компактное и информационно насыщенное представление. 
+To effectively exploit sparse attention, this paper proposes replacing the original key-value pairs in Equation (1) with a more compact and information-rich representation. 
 
-Это представление формируется для каждого запроса $( q_t )$ следующим образом:
-- Оно основывается на текущем запросе $( q_t )$ и контекстной памяти.
-- Динамически строится в зависимости от контекста. 
+This representation is constructed for each query $(q_t)$ as follows:
+- It is based on the current query $(q_t)$ and contextual memory.
+- It is dynamically built depending on context.
 
-Таким образом, предлагаемый подход позволяет оптимизировать вычисления и улучшить эффективность работы механизма внимания.
+Thus, the proposed approach enables optimization of computations and enhances the efficiency of the attention mechanism.
 
-В NSA используются три стратегии отображения $( C = \{ \text{cmp}, \text{slc}, \text{win} \} )$, которые представляют собой сжатие, выбор и скользящее окно соответственно.  Выход внимания в NSA формируется как комбинация результатов этих стратегий:
+NSA employs three mapping strategies $(C = \{ \text{cmp}, \text{slc}, \text{win} \})$, corresponding to compression, selection, and sliding window, respectively. The output attention in NSA is formed as a combination of results from these strategies:
 
 $$
 o'_t = \sum_{c \in C} g^c_t \cdot Attn(q_t, \tilde{k}^c, \tilde{v}^c)
 $$
 
-где каждая стратегия $(c \in C)$ генерирует свои $(\tilde{k}^c, \tilde{v}^c)$.  Величина $(g^c_t \in [0,1])$ — это «gate»-оценка для каждой стратегии, вычисляемая на основе входных признаков с помощью MLP и сигмоидной активации. Она управляет вкладом каждой стратегии и общим количеством переназначенных ключей и значений:
+where each strategy $(c \in C)$ generates its own $(\tilde{k}^c, \tilde{v}^c)$. The value $(g^c_t \in [0,1])$ is a "gate" score for each strategy, computed via an MLP with sigmoid activation based on input features. It controls the contribution of each strategy and the total number of reassigned keys and values:
 
 $$
 N_t = \sum_{c \in C} g^c_t \cdot size[\tilde{k}^c]
 $$
 
-Таким образом, NSA поддерживает высокую степень разреженности, гарантируя, что $N_t \ll t$, что позволяет снизить вычислительные затраты и повысить эффективность обработки длинных последовательностей. В частности, оптимизированный выход внимания формально определяется представленными выше уравнениями.
+Thus, NSA maintains high sparsity by ensuring $N_t \ll t$, reducing computational cost and improving efficiency in processing long sequences. In particular, the optimized attention output is formally defined by the equations above.
 
-## 2.2 Динамическая многоуровневая разреженная стратегия:
+## 2.2 Dynamic Multi-Level Sparse Strategy:
 
-NSA использует динамическую иерархическую разреженную стратегию, которая сочетает в себе грубое сжатие токенов и точный выбор токенов со скользящим окном для сохранения глобальной осведомленности о контексте и локальной точности. Архитектура NSA использует иерархическое моделирование токенов и обрабатывает входную последовательность через три параллельные ветви внимания, которые представляют собой следующие три вещи.
+NSA employs a dynamic hierarchical sparse strategy that combines coarse token compression and precise token selection with a sliding window to preserve global contextual awareness and local accuracy. The NSA architecture uses hierarchical token modeling and processes the input sequence through three parallel attention branches, representing the following three mechanisms.
 
-1. Сжатое внимание: имеет дело с крупнозернистыми шаблонами и собирает глобальную информацию путем сжатия блоков токенов.
+1. **Compressed Attention**: Handles coarse-grained patterns and gathers global information by compressing token blocks.
+2. **Selected Attention**: Processes important token blocks and selectively retains detailed information.
+3. **Sliding Window Attention**: Processes local contextual information.
 
-2. Выбранное внимание: обработка важных блоков токенов и выборочное сохранение подробной информации.
+### (1) Coarse-Grained Compression (Global Attention):
 
-3. Скользящее окно Внимание: Обработка локальной контекстной информации.
+Coarse compression reduces the number of tokens to be processed by aggregating consecutive token blocks into block-level representations. Specifically, the model compresses token blocks of a fixed length (e.g., 32 tokens) into a single representation, thereby capturing higher-level semantic information. This compression method significantly reduces computational volume, especially for long sequences, and effectively lowers the computational complexity of the attention mechanism. This step can intuitively be understood as summarizing text.
 
-### (1) Крупнозернистое сжатие (глобальное внимание):
-
-Грубое сжатие сокращает количество токенов, которые необходимо обработать, путем объединения последовательных блоков токенов в представления на уровне блоков. В частности, модель сжимает блоки токенов определенной длины (например, 32 токена) в единое представление, тем самым фиксируя семантическую информацию более высокого уровня. Этот метод сжатия значительно сокращает объем вычислений, особенно при обработке длинных последовательностей, и может эффективно снизить вычислительную сложность механизма внимания. Фактически этот шаг можно понимать как резюмирование текста.
-
-Ниже приведена формула расчета для крупнозернистого сжатия:
+Below is the formula for coarse-grained compression:
 
 $$
 K_{t}^{\text{cmp}} \;=\; f_{k}^{\text{cmp}}\bigl(k_{t}\bigr) \;=\; \Bigl\{\,\varphi\bigl(k_{id + 1:id+l}\bigr)\;\Bigm|\;1 \leqslant i \leqslant \Bigl\lfloor\frac{t - l}{d}\Bigr\rfloor \Bigr\}
 $$
 
-где:
+where:
 
-- **$k_t$** – исходная последовательность векторов-ключей $[k_1, k_2, \dots, k_t]$ до момента $t$.
-- **$f_k^{\text{cmp}}$** – функция сжатия, применяемая к исходным ключам.
-- **$\varphi$** – обучаемый многослойный персептрон (MLP), который преобразует блок последовательных ключей в один сжатый вектор. При этом может использоваться позиционное кодирование, чтобы учитывать порядок токенов внутри блока.
-- **$k_{id+1:id+l}$** – блок из $l$ последовательных ключей, начинающийся с индекса $id+1$ и заканчивающийся индексом $id+l$; параметр $l$ определяет длину блока.
-- **$d$** – шаг скольжения между блоками. Если $d < l$, блоки будут перекрываться, что помогает сохранить непрерывность информации.
-- **$\lfloor\frac{t-l}{d}\rfloor$** – число полных блоков, которые можно сформировать из последовательности длины $t$.
+- **$k_t$** – the original sequence of key vectors $[k_1, k_2, \dots, k_t]$ up to time $t$.
+- **$f_k^{\text{cmp}}$** – the compression function applied to the original keys.
+- **$\varphi$** – a trainable multilayer perceptron (MLP) that transforms a block of consecutive keys into a single compressed vector. Positional encoding may be used to preserve token order within the block.
+- **$k_{id+1:id+l}$** – a block of $l$ consecutive keys starting at index $id+1$ and ending at index $id+l$; parameter $l$ defines block length.
+- **$d$** – the stride between blocks. If $d < l$, blocks overlap, helping preserve information continuity.
+- **$\lfloor\frac{t-l}{d}\rfloor$** – the number of complete blocks that can be formed from a sequence of length $t$.
 
 $$
 \tilde{K}_{t}^{\mathrm{cmp}} \;\in\; \mathbb{R}^{\,d_k\times\left\lfloor \frac{t-l}{d} \right\rfloor}
 $$
 
-представляет собой тензор, состоящий из сжатых ключей. Обычно мы принимаем d < l, чтобы уменьшить фрагментацию информации. Для сжатых значений
-есть похожая формула. Сжатое представление фиксирует более грубую семантическую информацию более высокого уровня и снижает вычислительную нагрузку на внимание.
+represents a tensor of compressed keys. We typically adopt $d < l$ to reduce information fragmentation. A similar formula applies to compressed values. The compressed representation captures coarser, higher-level semantic information and reduces attention computational load.
 
-#### **Как работает $\varphi$** – обучаемый многослойный персептрон (MLP):
+#### **How $\varphi$ works** – the trainable multilayer perceptron (MLP):
 
-Функция **$\varphi$** реализована как обучаемый многослойный перцептрон (MLP), который преобразует блок из **$l$** последовательных ключей в один сжатый вектор размерности **$d_{\text{model}}$**. Вот пошаговое объяснение процесса:
+The function **$\varphi$** is implemented as a trainable MLP that transforms a block of **$l$** consecutive keys into a single compressed vector of dimension **$d_{\text{model}}$**. Here is a step-by-step explanation:
 
-#### 1. **Входные данные**
-- Блок ключей:  
+#### 1. **Input Data**
+- Key block:  
   
   $$
   k_{id+1:id+l} \in \mathbb{R}^{l \times d_{\text{model}}}
   $$
 
-  где:
-  - **$l$** — размер блока (например, 32 токена),
-  - **$d_{\text{model}}$** — размерность эмбеддинга каждого токена.
+  where:
+  - **$l$** — block size (e.g., 32 tokens),
+  - **$d_{\text{model}}$** — embedding dimension per token.
 
-#### 2. **Подготовка входного вектора**
-1. **Конкатенация токенов**:  
-   Все токены блока объединяются в один вектор:  
+#### 2. **Input Vector Preparation**
+1. **Token Concatenation**:  
+   All tokens in the block are concatenated into a single vector:  
    
    $$
    x_{\text{concat}} = \text{concat}(k_{id+1}, k_{id+2}, \dots, k_{id+l}) \in \mathbb{R}^{l \cdot d_{\text{model}}}
    $$
 
-   Например, для **$l=32$** и **$d_{\text{model}}=512$**, размерность **$x_{\text{concat}}$** будет **$32 \times 512 = 16384$**.
+   For example, with **$l=32$** and **$d_{\text{model}}=512$**, the dimension of **$x_{\text{concat}}$** becomes **$32 \times 512 = 16384$**.
 
-2. **Добавление позиционного кодирования**:  
-   Каждому токену в блоке добавляется позиционное кодирование, чтобы сохранить информацию о порядке:  
+2. **Addition of Positional Encoding**:  
+   Positional encoding is added to each token in the block to preserve order information:  
    
    $$
    x_{\text{pos}} = x_{\text{concat}} + \text{PositionalEncoding}(id+1, id+2, \dots, id+l)
    $$
 
-#### 3. **Архитектура MLP**
-MLP состоит из следующих слоёв:  
+#### 3. **MLP Architecture**
+The MLP consists of the following layers:  
 
 $$
 \varphi(x) = \text{LayerNorm}(W_2 \cdot \text{GELU}(W_1 \cdot x_{\text{pos}} + b_1) + b_2)
 $$
 
-где:
+where:
 
-- **$W_1 \in \mathbb{R}^{(l \cdot d_{\text{model}}) \times h}$** — матрица весов первого слоя,
-- **$W_2 \in \mathbb{R}^{h \times d_{\text{model}}}$** — матрица весов второго слоя,
-- **$h$** — размер скрытого слоя (обычно **$h = d_{\text{model}}$**),
-- **GELU** — активационная функция,
-- **LayerNorm** — слой нормализации.
+- **$W_1 \in \mathbb{R}^{(l \cdot d_{\text{model}}) \times h}$** — weight matrix of the first layer,
+- **$W_2 \in \mathbb{R}^{h \times d_{\text{model}}}$** — weight matrix of the second layer,
+- **$h$** — hidden layer size (typically **$h = d_{\text{model}}$**),
+- **GELU** — activation function,
+- **LayerNorm** — normalization layer.
 
-#### 4. **Как это работает**
-1. **Сохранение семантики**:  
-   MLP обучается выделять наиболее важные признаки из блока токенов. Например, для текста он может акцентировать ключевые слова или фразы.
+#### 4. **How It Works**
+1. **Semantic Preservation**:  
+   The MLP learns to extract the most important features from the token block. For text, it may emphasize key words or phrases.
 
-2. **Динамическая адаптация**:  
-   Веса **$W_1$** и **$W_2$** обучаются в процессе тренировки модели, что позволяет φ гибко адаптироваться к разным типам данных.
+2. **Dynamic Adaptation**:  
+   Weights **$W_1$** and **$W_2$** are trained during model training, allowing $\varphi$ to flexibly adapt to different data types.
 
-3. **Позиционная информация**:  
-   Добавление позиционного кодирования помогает модели учитывать порядок токенов внутри блока.
+3. **Positional Information**:  
+   Adding positional encoding helps the model preserve token order within the block.
 
-#### 5. **Пример сжатия**
-- **Исходный блок**: 32 токена → 32 × 512 = 16384 параметров.
-- **После сжатия**: 1 × 512 параметров.  
-Сокращение в **32 раза** по числу токенов.
+#### 5. **Compression Example**
+- **Original block**: 32 tokens → 32 × 512 = 16,384 parameters.
+- **After compression**: 1 × 512 parameters.  
+Compression ratio: **32×** in token count.
 
-#### 6. **Преимущества подхода**
-- **Вычислительная эффективность**: Уменьшает размерность ключей/значений для механизма внимания.
-- **Адаптивность**: MLP учится агрегировать информацию лучше, чем фиксированные методы (усреднение, максимум).
-- **Сохранение контекста**: Позиционное кодирование и нелинейности сохраняют семантику блока.
+#### 6. **Advantages of This Approach**
+- **Computational Efficiency**: Reduces dimensionality of keys/values for attention.
+- **Adaptability**: The MLP learns better aggregation than fixed methods (averaging, max-pooling).
+- **Context Retention**: Positional encoding and nonlinearities preserve block semantics.
 
-#### Итог
-Функция **$\varphi$** динамически "резюмирует" блок токенов в компактный вектор, сохраняя ключевую информацию. Это позволяет NSA обрабатывать длинные последовательности с низкими вычислительными затратами.
+#### Summary
+Function **$\varphi$** dynamically "summarizes" a token block into a compact vector while preserving key information. This allows NSA to process long sequences with low computational cost.
 
+#### **How the Formula Works:**
 
-#### **Как работает формула:**
+1. **Sequence Segmentation**: The original key sequence $k_t$ is segmented into blocks of length $l$ with stride $d$. For example, if $l=32$ and $d=16$, each new block starts 16 tokens after the previous one, with partial overlap.
+2. **Application of Compression Function**: For each block $k_{id+1:id+l}$, the function $\varphi$ (MLP) transforms this token set into a single compressed vector. This process "compresses" information from a group of tokens into a compact representation while preserving critical semantic connections.
+3. **Formation of Compressed Key Set**: The result is a set of compressed keys $K_t^{\text{cmp}}$ consisting of $\lfloor\frac{t-l}{d}\rfloor$ elements — far fewer than the original $t$ tokens. These compressed keys replace the original ones in the attention mechanism, significantly reducing computational complexity.
 
-1. **Разбиение последовательности:** Исходная последовательность ключей $k_t$ разбивается на блоки длины $l$ с шагом $d$. Например, если $l=32$ и $d=16$, каждый новый блок начинается на 16 токенов дальше предыдущего, а сами блоки могут частично перекрываться.
-2. **Применение функции сжатия:** Для каждого блока $k_{id+1:id+l}$ функция $\varphi$ (MLP) преобразует этот набор токенов в один сжатый вектор. Этот процесс позволяет "сжать" информацию из группы токенов в компактное представление, сохраняя при этом важные семантические связи.
-3. **Формирование множества сжатых ключей:** Результатом является множество сжатых ключей $K_t^{\text{cmp}}$, состоящее из $\lfloor\frac{t-l}{d}\rfloor$ элементов, что существенно меньше исходного числа токенов $t$. Эти сжатые ключи далее используются в механизме внимания вместо исходных, что значительно снижает вычислительную сложность.
+**Intuitive Understanding:**
 
-**Интуитивное понимание:**
+Imagine you need to quickly grasp the content of a long text, such as a novel or news summary. Instead of reading every page, you divide the text into chapters and skim the summary of each. Here:
+- **Original text** – the key sequence $k_t$,
+- **Chapter** – a block $k_{id+1:id+l}$,
+- **Chapter summary** – the compressed vector produced by $\varphi$.
 
-Представьте, что вам нужно быстро ознакомиться с содержанием длинного текста, например, романа или новостной сводки. Вместо того чтобы читать каждую страницу, вы разбиваете текст на главы и просматриваете краткие резюме каждой из них. Здесь:
-- **Исходный текст** – это последовательность ключей $k_t$,
-- **Глава** – это блок $k_{id+1:id+l}$,
-- **Резюме главы** – это сжатый вектор, полученный посредством $\varphi$.
+This approach efficiently processes large volumes of information while preserving core meaning and dramatically saving computational resources.
 
-Такой подход позволяет эффективно обрабатывать большие объёмы информации, сохраняя при этом основную смысловую нагрузку, и значительно экономит вычислительные ресурсы.
+**Advantages of This Method:**
 
-**Преимущества данного метода:**
+- **Computational Efficiency**: Reducing token count lowers attention complexity, especially critical for long sequences.
+- **Scalability**: The model can handle significantly larger contexts.
+- **Adaptability**: The trainable function $\varphi$ dynamically extracts the most relevant information in each block, making the method more flexible than simple averaging or pooling.
 
-- **Вычислительная эффективность:** Сокращение числа токенов снижает сложность механизма внимания, что особенно важно для длинных последовательностей.
-- **Масштабируемость:** Модель способна обрабатывать значительно большие контексты.
-- **Адаптивность:** Обучаемая функция $\varphi$ позволяет динамически выделять наиболее важную информацию в каждом блоке, что делает метод более гибким по сравнению с простыми операциями усреднения или пуллинга.
+> **Note**: An example of this method is demonstrated in the Jupyter notebook 'CompressedAttention.ipynb'.
 
-> **Примечание:** В юпитер тетрадке 'CompressedAttention.ipynb' представлен пример использования данного метода.
+Based on experimental results, the following conclusions can be drawn:
 
-На основе проведенных экспериментов можно сделать следующие выводы:
+#### **Key Findings from Testing**
 
-#### **Ключевые выводы при тестировании**
+1. **Efficiency Depends on Sequence Length**:
+   - For sequences <1000 tokens, standard attention is more efficient.
+   - For sequences >10K tokens, compressed attention provides substantial advantages.
+   - Potential speedup increases with sequence length.
 
-1. **Эффективность зависит от длины последовательности:**
-   - Для последовательностей <1000 токенов стандартное внимание эффективнее
-   - Для последовательностей >10K токенов сжатое внимание дает существенное преимущество
-   - Потенциальное ускорение растет с увеличением длины последовательности
+2. **Optimal Compression Parameters**:
+   - For long sequences, larger block sizes (256 instead of 32) are more effective.
+   - Optimal stride/block_size ratio is close to 0.5, balancing compression and information retention.
 
-2. **Оптимальные параметры сжатия:**
-   - Для длинных последовательностей эффективнее использовать большие размеры блоков (256 вместо 32)
-   - Оптимальное соотношение размера блока и шага (stride/block_size) близко к 0.5, что обеспечивает хороший баланс между сжатием и сохранением информации
+3. **Trade-off Between Efficiency and Accuracy**:
+   - Compressed attention sacrifices token-level attention granularity for long-context processing.
+   - In the full NSA architecture, this trade-off is compensated by combining it with other attention mechanisms.
 
-3. **Компромисс между эффективностью и точностью:**
-   - Сжатое внимание жертвует гранулярностью внимания на уровне отдельных токенов ради обработки длинных контекстов
-   - Для полной архитектуры NSA этот компромисс компенсируется комбинированием с другими механизмами внимания
-
-4. **Аппаратные соображения:**
-   - Сжатое внимание не только ускоряет вычисления, но и значительно сокращает требования к памяти
-   - Потенциально позволяет обрабатывать контексты длиной 100K+ токенов на стандартном оборудовании
+4. **Hardware Considerations**:
+   - Compressed attention not only accelerates computation but also significantly reduces memory requirements.
+   - Potentially enables processing of 100K+ token contexts on standard hardware.
 
 <details> 
-    <summary><em><strong>Пример расчета руками: Step-by-Step</strong></em></summary>
+    <summary><em><strong>Manual Calculation Example: Step-by-Step</strong></em></summary>
 
-## 1. Исходные данные для примера
+## 1. Example Input Data
 
-Рассмотрим последовательность из 16 векторов-ключей, каждый размерности 4. Для наглядности организуем их в 4 семантические группы:
+Consider a sequence of 16 key vectors, each of dimension 4. For clarity, we organize them into 4 semantic groups:
 
-**Группа 1 (токены, описывающие погоду):**
+**Group 1 (tokens describing weather):**
 - $k_1 = [0.2, 0.3, 0.8, 0.1]$
 - $k_2 = [0.3, 0.2, 0.7, 0.2]$
 - $k_3 = [0.1, 0.4, 0.9, 0.1]$
 - $k_4 = [0.2, 0.3, 0.8, 0.2]$
 
-**Группа 2 (токены, описывающие место):**
+**Group 2 (tokens describing location):**
 - $k_5 = [0.7, 0.8, 0.2, 0.5]$
 - $k_6 = [0.8, 0.9, 0.1, 0.6]$
 - $k_7 = [0.6, 0.7, 0.3, 0.4]$
 - $k_8 = [0.7, 0.8, 0.2, 0.5]$
 
-**Группа 3 (токены, описывающие время):**
+**Group 3 (tokens describing time):**
 - $k_9 = [0.4, 0.1, 0.3, 0.9]$
 - $k_{10} = [0.5, 0.2, 0.2, 0.8]$
 - $k_{11} = [0.3, 0.1, 0.4, 0.9]$
 - $k_{12} = [0.4, 0.2, 0.3, 0.8]$
 
-**Группа 4 (токены, описывающие действие):**
+**Group 4 (tokens describing action):**
 - $k_{13} = [0.9, 0.5, 0.6, 0.3]$
 - $k_{14} = [0.8, 0.6, 0.7, 0.2]$
 - $k_{15} = [0.9, 0.4, 0.5, 0.4]$
 - $k_{16} = [0.8, 0.5, 0.6, 0.3]$
 
-## 2. Настройка параметров алгоритма
+## 2. Algorithm Parameter Configuration
 
-Определим параметры крупнозернистого сжатия:
+Define parameters for coarse-grained compression:
 
-- **Длина блока $(l) = 4$**: объединяем по 4 последовательных вектора
-- **Шаг скольжения $(d) = 2$**: каждый новый блок начинается через 2 позиции от начала предыдущего
-- **Функция сжатия $\varphi$**: для простоты примера используем среднее арифметическое векторов в блоке
+- **Block length $(l) = 4$**: Aggregate every 4 consecutive vectors
+- **Stride $(d) = 2$**: Each new block starts 2 positions after the start of the previous block
+- **Compression function $\varphi$**: For simplicity, use the arithmetic mean of vectors within each block
 
-Согласно формуле, количество сжатых векторов будет:
+According to the formula, the number of compressed vectors will be:
 $$\Bigl\lfloor\frac{t - l}{d}\Bigr\rfloor = \Bigl\lfloor\frac{16 - 4}{2}\Bigr\rfloor = \lfloor 6 \rfloor = 6$$
 
-## 3. Применение формулы крупнозернистого сжатия
+## 3. Application of Coarse-Grained Compression Formula
 
-Формула крупнозернистого сжатия:
+The coarse-grained compression formula:
 $$K_{t}^{\text{cmp}} = f_{k}^{\text{cmp}}(k_{t}) = \Bigl\{\varphi(k_{id + 1:id+l})\Bigm|1 \leqslant i \leqslant \Bigl\lfloor\frac{t - l}{d}\Bigr\rfloor \Bigr\}$$
 
-Рассчитаем все 6 сжатых векторов, применяя функцию $\varphi$ к каждому блоку:
+Compute all 6 compressed vectors by applying function $\varphi$ to each block:
 
-### Блок 1 (i=1):
-Индексы токенов: $id+1 = 1×2+1 = 3$ до $id+l = 1×2+4 = 6$
-Токены в блоке: $k_3, k_4, k_5, k_6$
+### Block 1 (i=1):
+Token indices: $id+1 = 1×2+1 = 3$ to $id+l = 1×2+4 = 6$  
+Tokens in block: $k_3, k_4, k_5, k_6$
 
 $$\varphi(k_{3:6}) = \frac{k_3 + k_4 + k_5 + k_6}{4}$$
 
@@ -283,9 +279,9 @@ $$= \frac{[0.1, 0.4, 0.9, 0.1] + [0.2, 0.3, 0.8, 0.2] + [0.7, 0.8, 0.2, 0.5] + [
 
 $$= \frac{[1.8, 2.4, 2.0, 1.4]}{4} = [0.45, 0.6, 0.5, 0.35]$$
 
-### Блок 2 (i=2):
-Индексы токенов: $id+1 = 2×2+1 = 5$ до $id+l = 2×2+4 = 8$
-Токены в блоке: $k_5, k_6, k_7, k_8$
+### Block 2 (i=2):
+Token indices: $id+1 = 2×2+1 = 5$ to $id+l = 2×2+4 = 8$  
+Tokens in block: $k_5, k_6, k_7, k_8$
 
 $$\varphi(k_{5:8}) = \frac{k_5 + k_6 + k_7 + k_8}{4}$$
 
@@ -293,9 +289,9 @@ $$= \frac{[0.7, 0.8, 0.2, 0.5] + [0.8, 0.9, 0.1, 0.6] + [0.6, 0.7, 0.3, 0.4] + [
 
 $$= \frac{[2.8, 3.2, 0.8, 2.0]}{4} = [0.7, 0.8, 0.2, 0.5]$$
 
-### Блок 3 (i=3):
-Индексы токенов: $id+1 = 3×2+1 = 7$ до $id+l = 3×2+4 = 10$
-Токены в блоке: $k_7, k_8, k_9, k_{10}$
+### Block 3 (i=3):
+Token indices: $id+1 = 3×2+1 = 7$ to $id+l = 3×2+4 = 10$  
+Tokens in block: $k_7, k_8, k_9, k_{10}$
 
 $$\varphi(k_{7:10}) = \frac{k_7 + k_8 + k_9 + k_{10}}{4}$$
 
@@ -303,9 +299,9 @@ $$= \frac{[0.6, 0.7, 0.3, 0.4] + [0.7, 0.8, 0.2, 0.5] + [0.4, 0.1, 0.3, 0.9] + [
 
 $$= \frac{[2.2, 1.8, 1.0, 2.6]}{4} = [0.55, 0.45, 0.25, 0.65]$$
 
-### Блок 4 (i=4):
-Индексы токенов: $id+1 = 4×2+1 = 9$ до $id+l = 4×2+4 = 12$
-Токены в блоке: $k_9, k_{10}, k_{11}, k_{12}$
+### Block 4 (i=4):
+Token indices: $id+1 = 4×2+1 = 9$ to $id+l = 4×2+4 = 12$  
+Tokens in block: $k_9, k_{10}, k_{11}, k_{12}$
 
 $$\varphi(k_{9:12}) = \frac{k_9 + k_{10} + k_{11} + k_{12}}{4}$$
 
@@ -313,9 +309,9 @@ $$= \frac{[0.4, 0.1, 0.3, 0.9] + [0.5, 0.2, 0.2, 0.8] + [0.3, 0.1, 0.4, 0.9] + [
 
 $$= \frac{[1.6, 0.6, 1.2, 3.4]}{4} = [0.4, 0.15, 0.3, 0.85]$$
 
-### Блок 5 (i=5):
-Индексы токенов: $id+1 = 5×2+1 = 11$ до $id+l = 5×2+4 = 14$
-Токены в блоке: $k_{11}, k_{12}, k_{13}, k_{14}$
+### Block 5 (i=5):
+Token indices: $id+1 = 5×2+1 = 11$ to $id+l = 5×2+4 = 14$  
+Tokens in block: $k_{11}, k_{12}, k_{13}, k_{14}$
 
 $$\varphi(k_{11:14}) = \frac{k_{11} + k_{12} + k_{13} + k_{14}}{4}$$
 
@@ -323,9 +319,9 @@ $$= \frac{[0.3, 0.1, 0.4, 0.9] + [0.4, 0.2, 0.3, 0.8] + [0.9, 0.5, 0.6, 0.3] + [
 
 $$= \frac{[2.4, 1.4, 2.0, 2.2]}{4} = [0.6, 0.35, 0.5, 0.55]$$
 
-### Блок 6 (i=6):
-Индексы токенов: $id+1 = 6×2+1 = 13$ до $id+l = 6×2+4 = 16$
-Токены в блоке: $k_{13}, k_{14}, k_{15}, k_{16}$
+### Block 6 (i=6):
+Token indices: $id+1 = 6×2+1 = 13$ to $id+l = 6×2+4 = 16$  
+Tokens in block: $k_{13}, k_{14}, k_{15}, k_{16}$
 
 $$\varphi(k_{13:16}) = \frac{k_{13} + k_{14} + k_{15} + k_{16}}{4}$$
 
@@ -333,9 +329,9 @@ $$= \frac{[0.9, 0.5, 0.6, 0.3] + [0.8, 0.6, 0.7, 0.2] + [0.9, 0.4, 0.5, 0.4] + [
 
 $$= \frac{[3.4, 2.0, 2.4, 1.2]}{4} = [0.85, 0.5, 0.6, 0.3]$$
 
-## 4. Результат сжатия
+## 4. Compression Result
 
-Итоговое сжатое представление (обозначим как $c_i$):
+The final compressed representation (denoted as $c_i$):
 
 - $c_1 = [0.45, 0.6, 0.5, 0.35]$
 - $c_2 = [0.7, 0.8, 0.2, 0.5]$
@@ -344,252 +340,252 @@ $$= \frac{[3.4, 2.0, 2.4, 1.2]}{4} = [0.85, 0.5, 0.6, 0.3]$$
 - $c_5 = [0.6, 0.35, 0.5, 0.55]$
 - $c_6 = [0.85, 0.5, 0.6, 0.3]$
 
-## 5. Математическое обоснование и интуитивное понимание
+## 5. Mathematical Justification and Intuitive Understanding
 
-### Ключевые особенности алгоритма:
+### Key Features of the Algorithm:
 
-1. **Разбиение на перекрывающиеся блоки**:
-   Обратите внимание, как формируются блоки с перекрытием:
-   - Блок 1: $[k_3, k_4, k_5, k_6]$
-   - Блок 2: $[k_5, k_6, k_7, k_8]$
+1. **Overlapping Block Partitioning**:
+   Notice how blocks are formed with overlap:
+   - Block 1: $[k_3, k_4, k_5, k_6]$
+   - Block 2: $[k_5, k_6, k_7, k_8]$
    
-   Такое перекрытие (общие токены $k_5$ и $k_6$) обеспечивает непрерывность информации между блоками.
+   This overlap (shared tokens $k_5$ and $k_6$) ensures continuity of information between blocks.
 
-2. **Непрерывное представление на стыке семантических групп**:
-   - $c_1$ содержит информацию о погоде (группа 1) и месте (группа 2)
-   - $c_3$ объединяет информацию о месте (группа 2) и времени (группа 3)
-   - $c_5$ связывает информацию о времени (группа 3) и действии (группа 4)
+2. **Continuous Representation at Semantic Group Boundaries**:
+   - $c_1$ contains information from weather (Group 1) and location (Group 2)
+   - $c_3$ combines location (Group 2) and time (Group 3)
+   - $c_5$ links time (Group 3) and action (Group 4)
 
-3. **Сохранение семантической информации**:
-   Для блоков, совпадающих с семантическими группами:
-   - $c_2 = [0.7, 0.8, 0.2, 0.5]$ точно представляет группу "место"
-   - $c_4 = [0.4, 0.15, 0.3, 0.85]$ точно представляет группу "время"
-   - $c_6 = [0.85, 0.5, 0.6, 0.3]$ точно представляет группу "действие"
+3. **Semantic Information Preservation**:
+   For blocks aligned with semantic groups:
+   - $c_2 = [0.7, 0.8, 0.2, 0.5]$ exactly represents the "location" group
+   - $c_4 = [0.4, 0.15, 0.3, 0.85]$ exactly represents the "time" group
+   - $c_6 = [0.85, 0.5, 0.6, 0.3]$ exactly represents the "action" group
 
-### Схематическое представление процесса:
+### Schematic Representation of the Process:
 
-Если представить семантические группы буквами:
+If we represent semantic groups with letters:
 ```
 [A][A][A][A][B][B][B][B][C][C][C][C][D][D][D][D]
  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16
 ```
 
-То процесс формирования блоков выглядит так:
+Then the block formation process looks like:
 ```
-    [--Блок 1--]                     → c₁ (A+B)
-        [--Блок 2--]                 → c₂ (B)
-            [--Блок 3--]             → c₃ (B+C)
-                [--Блок 4--]         → c₄ (C)
-                    [--Блок 5--]     → c₅ (C+D)
-                        [--Блок 6--] → c₆ (D)
+    [--Block 1--]                     → c₁ (A+B)
+        [--Block 2--]                 → c₂ (B)
+            [--Block 3--]             → c₃ (B+C)
+                [--Block 4--]         → c₄ (C)
+                    [--Block 5--]     → c₅ (C+D)
+                        [--Block 6--] → c₆ (D)
 ```
 
-## 6. Эффективность сжатия
+## 6. Compression Efficiency
 
-В нашем примере:
-- Исходный размер: 16 векторов × 4 значения = 64 числовых значения
-- Сжатый размер: 6 векторов × 4 значения = 24 числовых значения
-- Коэффициент сжатия: 64/24 = 2.67 (сокращение на 62.5%)
+In our example:
+- Original size: 16 vectors × 4 values = 64 numerical values
+- Compressed size: 6 vectors × 4 values = 24 numerical values
+- Compression ratio: 64/24 = 2.67 (62.5% reduction)
 
-В реальных системах с большими последовательностями (например, 10,000 токенов) и блоками размером 256 с шагом 128, коэффициент сжатия может достигать 100 и более, что сильно снижает вычислительную сложность механизма внимания.
+In real systems with longer sequences (e.g., 10,000 tokens) and block sizes of 256 with stride 128, compression ratios can reach 100x or more, drastically reducing the computational complexity of the attention mechanism.
 
-## 7. Реальная реализация функции сжатия
+## 7. Practical Implementation of the Compression Function
 
-В практических системах вместо простого среднего арифметического используется многослойный персептрон (MLP):
+In practical systems, instead of simple arithmetic averaging, a multilayer perceptron (MLP) is used:
 
 $$\varphi(k_{id+1:id+l}) = \text{MLP}([k_{id+1} \oplus \text{pe}_1; k_{id+2} \oplus \text{pe}_2; \ldots; k_{id+l} \oplus \text{pe}_l])$$
 
-где:
-- $\oplus$ - операция конкатенации
-- $\text{pe}_j$ - позиционное кодирование для j-й позиции в блоке
-- $\text{MLP}$ - нейронная сеть, обучаемая выделять наиболее важную информацию в блоке
+where:
+- $\oplus$ denotes concatenation
+- $\text{pe}_j$ is positional encoding for the j-th position in the block
+- $\text{MLP}$ is a neural network trained to extract the most important information within the block
 </details> 
 
-### Вывод
+### Conclusion
 
-Эксперимент убедительно демонстрирует, что механизм сжатого внимания является эффективным решением проблемы квадратичной сложности стандартного внимания для длинных последовательностей. Фактическое ускорение составило (4.69×), оно будет увеличиваться с ростом длины последовательности.
+The experiment convincingly demonstrates that compressed attention is an effective solution to the quadratic complexity problem of standard attention for long sequences. The actual speedup achieved was (4.69×), and it will increase further with longer sequence lengths.
 
-### (2) Выборочное внимание (локальное внимание):
+### (2) Selected Attention (Local Attention):
 
-Выборочное внимание (Selected Attention) — вторая ветвь в архитектуре NSA, которая фокусируется на выборе наиболее релевантных блоков токенов для текущего запроса. В отличие от крупнозернистого сжатия, которое обрабатывает глобальный контекст путем сжатия информации, выборочное внимание сохраняет детальную информацию на уровне отдельных токенов, но только для наиболее важных частей последовательности. Этот механизм выбора гарантирует, что модель сможет сохранить ключевую локальную информацию при обработке длинных последовательностей и избежать потери важных деталей из-за сжатия. Формула выглядит следующим образом:
+Selected Attention — the second branch in the NSA architecture — focuses on selecting the most relevant token blocks for the current query. Unlike coarse-grained compression, which processes global context through information aggregation, selected attention preserves fine-grained detail at the individual token level, but only for the most important segments of the sequence. This selection mechanism ensures the model retains critical local information during long-sequence processing and avoids losing important details due to compression. The formula is as follows:
 
-#### 1. Вычисление оценок важности для сжатых блоков:
+#### 1. Compute Importance Scores for Compressed Blocks:
 
 $$p_{t}^{slc} = \text{Softmax} \left( q_{t}^{T} \tilde{K}_{t}^{cmp} \right)$$
 
-где:
-- $q_t$ — текущий запрос (query vector) для позиции $t$
-- $\tilde{K}_{t}^{cmp}$ — матрица сжатых ключей, полученных на этапе крупнозернистого сжатия
-- $p_{t}^{slc}$ — вектор вероятностей (оценок важности), где каждый элемент $p_{t}^{slc}[i]$ представляет относительную важность $i$-го сжатого блока для текущего запроса
+where:
+- $q_t$ — the current query vector at position $t$
+- $\tilde{K}_{t}^{cmp}$ — the matrix of compressed keys obtained during coarse-grained compression
+- $p_{t}^{slc}$ — a probability vector (importance scores), where each element $p_{t}^{slc}[i]$ represents the relative importance of the $i$-th compressed block for the current query
 
-Здесь мы вычисляем скалярное произведение запроса $q_t$ с каждым сжатым ключом, а затем применяем функцию Softmax для нормализации этих оценок в распределение вероятностей. Это позволяет определить, насколько каждый сжатый блок релевантен для текущего запроса.
+Here, we compute the dot product of the query $q_t$ with each compressed key, then apply the Softmax function to normalize these scores into a probability distribution. This identifies how relevant each compressed block is to the current query.
 
-#### 2. Выбор наиболее важных блоков:
+#### 2. Select the Most Important Blocks:
 
 $$I_{t} = \left\{ i \mid \text{rank} \left( p_{t}^{slc}[i] \right) \leq n \right\}$$
 
-где:
-- $I_{t}$ — множество индексов выбранных блоков
-- $\text{rank}(p_{t}^{slc}[i])$ — ранг $i$-го элемента в векторе вероятностей, где ранг 1 соответствует наивысшей вероятности
-- $n$ — гиперпараметр, определяющий число выбираемых блоков
+where:
+- $I_{t}$ — set of indices of selected blocks
+- $\text{rank}(p_{t}^{slc}[i])$ — the rank of the $i$-th element in the probability vector, where rank 1 corresponds to the highest probability
+- $n$ — a hyperparameter defining the number of blocks to select
 
-Эта формула означает, что мы выбираем $n$ блоков с наивысшими оценками важности. Параметр $n$ является ключевым для определения компромисса между вычислительной эффективностью и качеством моделирования.
+This formula means we select the $n$ blocks with the highest importance scores. The parameter $n$ is critical in determining the trade-off between computational efficiency and modeling quality.
 
-### (3) Скользящее окно:
+### (3) Sliding Window:
 
-Механизм скользящего окна используется для обработки локальной контекстной информации. Он сохраняет самые последние токены (например, самые последние 512 токенов), гарантируя, что модель может быстро адаптироваться к изменениям в локальных шаблонах при обработке текущего токена. Этот механизм предотвращает «короткое замыкание» модели локальными шаблонами во время сжатия и выбора, тем самым гарантируя, что модель сможет обрабатывать как локальные, так и долгосрочные зависимости. Формула выглядит следующим образом:
+The sliding window mechanism is used to process local contextual information. It retains the most recent tokens (e.g., the last 512 tokens), ensuring the model can rapidly adapt to changes in local patterns when processing the current token. This mechanism prevents "short-circuiting" of the model due to compression or selection, guaranteeing that both local and long-range dependencies can be captured. The formula is as follows:
 
 $$\tilde{K}_{t}^{win} = k_{t-w:t}, \tilde{V}_{t}^{win} = v_{t-w:t}$$
 
-Давайте разберем каждый элемент формулы:
+Let’s break down each component:
 
-- **$\tilde{K}_{t}^{win}$** — модифицированная матрица ключей для механизма скользящего окна в позиции $t$
-- **$\tilde{V}_{t}^{win}$** — модифицированная матрица значений для механизма скользящего окна в позиции $t$
-- **$k_{t-w:t}$** — подпоследовательность векторов-ключей от позиции $t-w$ до текущей позиции $t$
-- **$v_{t-w:t}$** — соответствующая подпоследовательность векторов-значений
-- **$w$** — размер окна (гиперпараметр, например, равный 512 токенам)
+- **$\tilde{K}_{t}^{win}$** — modified key matrix for the sliding window mechanism at position $t$
+- **$\tilde{V}_{t}^{win}$** — modified value matrix for the sliding window mechanism at position $t$
+- **$k_{t-w:t}$** — subsequence of key vectors from position $t-w$ to current position $t$
+- **$v_{t-w:t}$** — corresponding subsequence of value vectors
+- **$w$** — window size (hyperparameter, e.g., 512 tokens)
 
-#### Принцип работы скользящего окна
+#### How the Sliding Window Works
 
-Механизм скользящего окна предельно прост, но при этом чрезвычайно эффективен. Вместо использования всей истории векторов-ключей и значений с начала последовательности (что привело бы к квадратичной сложности), модель учитывает только фиксированное количество последних токенов:
+The sliding window mechanism is extremely simple yet highly effective. Instead of using the entire history of key and value vectors from the start of the sequence (which would lead to quadratic complexity), the model considers only a fixed number of the most recent tokens:
 
-1. Для каждого текущего запроса $q_t$ формируется локальное окно внимания шириной $w$.
-2. В это окно попадают только $w$ последних токенов.
-3. Токены за пределами окна игнорируются при вычислении внимания.
+1. For each current query $q_t$, a local attention window of width $w$ is formed.
+2. Only the $w$ most recent tokens are included in this window.
+3. Tokens outside the window are ignored during attention computation.
 
-Графически это можно представить так:
+Graphically, this can be represented as:
 ```
-История токенов: [t₁, t₂, ..., t_{t-w-1}, t_{t-w}, t_{t-w+1}, ..., t_{t-1}, t_t]
+Token history: [t₁, t₂, ..., t_{t-w-1}, t_{t-w}, t_{t-w+1}, ..., t_{t-1}, t_t]
                                           └─────────────────────────────┘
-                                                Скользящее окно
+                                                Sliding Window
 ```
 
-#### Вычислительные преимущества
+#### Computational Advantages
 
-Скользящее окно обеспечивает постоянную вычислительную сложность O(w) для каждого токена, в отличие от стандартного внимания, где сложность растет линейно с длиной последовательности O(t). Это дает существенные преимущества:
+The sliding window provides constant computational complexity O(w) per token, in contrast to standard attention, whose complexity grows linearly with sequence length O(t). This yields significant advantages:
 
-1. **Постоянное потребление памяти**: Для каждой позиции хранится фиксированное количество пар ключ-значение.
-2. **Стабильное время вычислений**: Время обработки токена не зависит от длины предыдущего контекста.
-3. **Оптимизация для GPU**: Фиксированный размер окна позволяет эффективно использовать GPU-память и вычислительные блоки.
+1. **Constant Memory Consumption**: A fixed number of key-value pairs are stored for each position.
+2. **Stable Computation Time**: Token processing time is independent of prior context length.
+3. **GPU Optimization**: Fixed window size enables efficient utilization of GPU memory and compute units.
 
-#### Роль скользящего окна в архитектуре NSA
+#### Role of the Sliding Window in NSA Architecture
 
-В общей архитектуре NSA скользящее окно выполняет три критические функции:
+In the overall NSA architecture, the sliding window performs three critical functions:
 
-1. **Локальная контекстуализация**: Обеспечивает доступ к непосредственному контексту, что важно для семантического понимания текущего токена.
+1. **Local Contextualization**: Provides access to immediate context, crucial for semantic understanding of the current token.
 
-2. **Предотвращение "короткого замыкания"**: Даже если две другие компоненты NSA (сжатое и выборочное внимание) пропустят важную локальную информацию, скользящее окно гарантирует, что недавние токены будут учтены.
+2. **Prevention of "Short-Circuiting"**: Even if the other two NSA components (compressed and selected attention) miss important local information, the sliding window ensures recent tokens are accounted for.
 
-3. **Повышение арифметической интенсивности**: Ограничение размера окна приводит к лучшему соотношению вычислений к обращениям к памяти, что важно для оптимизации производительности на современных GPU.
+3. **Improved Arithmetic Intensity**: Limiting window size improves the ratio of computations to memory accesses, which is vital for optimizing performance on modern GPUs.
 
-#### Практический пример
+#### Practical Example
 
-Представим задачу генерации текста с длинным контекстом. При генерации слова в позиции 10000:
+Consider text generation with a long context. When generating the word at position 10,000:
 
-- **Скользящее окно (w=512)**: Учитывает токены с позиций 9488-10000
-- **Сжатое внимание**: Предоставляет общую информацию обо всем предыдущем контексте
-- **Выборочное внимание**: Выделяет ключевые токены из всего контекста, важные для текущего запроса
+- **Sliding window (w=512)**: Considers tokens from positions 9488–10000
+- **Compressed attention**: Provides overall summary of all prior context
+- **Selected attention**: Identifies key tokens across the entire context relevant to the current query
 
-При этом скользящее окно гарантирует, что непосредственный локальный контекст не будет потерян из-за сжатия или селективного выбора, которые могут упустить важные локальные связи.
+The sliding window ensures that immediate local context is not lost due to compression or selective sampling, which might otherwise overlook critical local dependencies.
 
-Все три механизма дополняют друг друга, обеспечивая как глобальное понимание контекста, так и детальное восприятие локальной информации.
+All three mechanisms complement each other, enabling both global context understanding and detailed perception of local information.
 
-### Итог
+### Summary
 
-#### Шаг 1: Сжатие (обобщение фраз):
+#### Step 1: Compression (Phrase Generalization)
 
- NSA отказывается от традиционного метода хранения каждого отдельного слова в тексте и вместо этого берет на себя инициативу по сжатию фраз и преобразованию их в обобщающие «блоки». Эту операцию можно наглядно представить, используя процесс обобщения глав книги. Когда мы кратко излагаем главу в книге, мы не запоминаем каждое слово дословно, а вместо этого выделяем несколько ключевых моментов, чтобы суммировать основные идеи . То же самое относится и к NSA, который преобразует фразы в тексте в более мелкие и компактные представления. Таким образом, можно существенно сократить объем данных, повысить эффективность обработки и сохранить основную информацию текста.
+NSA abandons the traditional method of storing every individual word in text and instead takes initiative to compress phrases into summarized "blocks." This operation can be intuitively visualized as summarizing a chapter in a book: when we summarize a chapter, we do not memorize every word verbatim but extract several key points to capture the main ideas. Similarly, NSA transforms phrases in text into smaller, compact representations. This dramatically reduces data volume, improves processing efficiency, and retains essential information.
 
-#### Шаг 2: Выборка (выбор важных слов):
+#### Step 2: Selection (Choosing Important Words)
 
- После завершения сжатия текста NSA отфильтрует наиболее релевантные слова для дальнейшей обработки. Этот процесс похож на тот, когда мы читаем статью: мы выделяем самые важные предложения. NSA не пытается сохранить каждую деталь в тексте, а вместо этого отдает приоритет наиболее значимым словам на основе определенных правил и алгоритмов . Это позволит сосредоточиться на ключевой информации и избежать траты вычислительных ресурсов на нерелевантный контент, тем самым улучшая способность модели обрабатывать важную информацию.
+After text compression, NSA filters the most relevant words for further processing. This resembles reading an article: we highlight the most important sentences. NSA does not attempt to preserve every detail but prioritizes the most significant words based on defined rules and algorithms. This allows focus on critical information and avoids wasting computational resources on irrelevant content, thereby enhancing the model’s ability to process meaningful data.
 
-#### Шаг 3: Скользящее окно (сохранение локального контекста):
+#### Step 3: Sliding Window (Preserving Local Context)
 
- Хотя NSA выполняет сжатие фраз и проверку важного словарного запаса, ему все равно необходимо отслеживать соседние слова, чтобы гарантировать, что информация о связях между словами не будет упущена. Это похоже на то, как когда мы читаем сложное предложение, мы не только сосредотачиваемся на главных словах, но и обращаем внимание на содержание до и после него, чтобы получить полную контекстную информацию. NSA фиксирует важную информацию, находящуюся поблизости, перемещая небольшое окно поверх текста. Этот механизм помогает модели лучше понимать семантические связи между словами, что позволяет ей делать более точные суждения и анализ при обработке длинных текстов. Подводя итог, можно сказать, что NSA обеспечивает эффективную обработку длинных текстов посредством совместной работы сжатия, выбора и скользящих окон, предоставляя более эффективное решение для больших языковых моделей при обработке длинных текстовых задач.
+Although NSA performs phrase compression and selects key vocabulary, it must still track neighboring words to ensure relationships between words are not lost. This is similar to reading a complex sentence: we not only focus on main words but also pay attention to content before and after them to obtain full contextual understanding. NSA captures nearby important information by moving a small window over the text. This mechanism helps the model better understand semantic relationships between words, enabling more accurate judgments and analysis when processing long texts. In summary, NSA enables efficient long-text processing through the combined operation of compression, selection, and sliding windows, providing a superior solution for large language models handling long-text tasks.
 
-## 2.3 Дизайн обучения восприятия:  
+## 2.3 Perception Training Design:
 
-NSA реализует сквозное обучение, сокращая объем предварительных вычислений без ущерба для качества модели, что позволяет эффективно использовать разреженные режимы внимания на протяжении всего жизненного цикла модели.  
+NSA implements end-to-end training by reducing pre-computation overhead without compromising model quality, enabling efficient use of sparse attention modes throughout the model’s lifecycle.
 
-## 2.4 Система аппаратного выравнивания: 
+## 2.4 Hardware-Aligned System:
 
-Для достижения ускорения на уровне FlashAttention во время обучения и предварительного заполнения, в статье реализовано аппаратно-оптимизированное ядро разреженного внимания на Triton. Оптимизировано блочное разреженное внимание для использования Tensor Core и доступа к памяти, обеспечивая сбалансированную арифметическую интенсивность. Конкретно, были применены следующие оптимизации:  
+To achieve FlashAttention-level acceleration during training and pre-filling, the paper implements a hardware-optimized sparse attention kernel in Triton. Block-wise sparse attention is optimized for Tensor Core utilization and memory access patterns, ensuring balanced arithmetic intensity. Specifically, the following optimizations were applied:
 
-- **Блочный режим доступа к памяти**: Увеличивает использование Tensor Core за счет объединенной загрузки, уменьшая избыточную передачу ключей и значений (KV).  
-- **Циклическое планирование**: Умное расположение циклов в ядре для устранения избыточной передачи KV.  
-- **Групповая загрузка данных**: Для каждого внутреннего цикла загружаются все запросы внутри группы и их общие индексы разреженных блоков ключей/значений.  
-- **Совместное получение KV**: Внутри внутреннего цикла последовательно загружаются непрерывные блоки ключей/значений в SRAM для минимизации загрузки памяти.  
-- **Внешний цикл с планированием сетки**: Поскольку длина внутреннего цикла почти одинакова для разных блоков запросов, циклы запросов/выводов размещаются в планировщике сетки Triton для упрощения и оптимизации ядра.
+- **Blocked Memory Access**: Increases Tensor Core utilization through coalesced loading, reducing redundant key-value (KV) transfers.
+- **Cyclic Scheduling**: Intelligent loop ordering within the kernel to eliminate redundant KV transfers.
+- **Grouped Data Loading**: For each inner loop, all queries within a group and their shared sparse KV block indices are loaded together.
+- **Coalesced KV Fetching**: Within the inner loop, continuous KV blocks are sequentially loaded into SRAM to minimize memory fetches.
+- **Grid-Level Outer Loop Scheduling**: Since inner loop lengths are nearly uniform across query blocks, query/output loops are scheduled in Triton’s grid scheduler to simplify and optimize the kernel.
 
-![Table_3](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-09/assets/Figure_3.png)
+![Table_3](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-09/assets/Figure_3.png  )
 
-> **Рисунок 3 | Конструкция ядра NSA.** 
-> Ядро загружает запрос через группу GQA (сетчатый цикл), извлекает соответствующие разреженные блоки «ключ-значение» (внутренний цикл) и выполняет вычисления внимания в SRAM. 
-> Зеленые блоки представляют данные на SRAM, а синие блоки представляют данные на HBM.
+> **Figure 3 | NSA kernel design.**  
+> The kernel loads queries via GQA group (outer loop), retrieves corresponding sparse key-value blocks (inner loop), and performs attention computation in SRAM.  
+> Green blocks represent data in SRAM; blue blocks represent data in HBM.
 
-# 3. Настройки обучения  
+# 3. Training Settings
 
-## 3.1 Настройки предварительного обучения  
+## 3.1 Pre-training Configuration
 
-Следуя передовым практикам в современных крупных языковых моделях (LLM), в их экспериментах используется архитектура, сочетающая групповое внимание запросов (GQA) и смесь экспертов (MoE). Модель содержит 27 миллиардов параметров, из которых 3 миллиарда являются активными. Модель состоит из 30 слоев с размерностью скрытого слоя 2560. Для GQA количество групп установлено на 4, с общим количеством голов внимания 64. Для каждой головы размерности скрытых слоев для запросов, ключей и значений настроены как $(d_q = d_k = 192)$ и $ (d_v = 128)$. Для MoE используется структура DeepSeekMoE с 72 маршрутизируемыми экспертами и 2 общими экспертами, при этом количество выбираемых экспертов $(K)$ установлено на 6. Для обеспечения стабильности обучения, первый слой MoE заменен на многослойный перцептрон (MLP) в форме SwiGLU.  
+Following state-of-the-art practices in modern large language models (LLMs), their experiments use an architecture combining Grouped Query Attention (GQA) and Mixture of Experts (MoE). The model contains 27 billion parameters, of which 3 billion are active. The model consists of 30 layers with a hidden dimension of 2560. For GQA, the number of groups is set to 4, with a total of 64 attention heads. For each head, the hidden dimensions for queries, keys, and values are configured as $(d_q = d_k = 192)$ and $(d_v = 128)$. For MoE, the DeepSeekMoE structure is used with 72 routing experts and 2 shared experts, with the number of selected experts $(K)$ set to 6. To ensure training stability, the first MoE layer is replaced with an MLP in SwiGLU form.
 
-## 3.2 Параметры архитектуры NSA  
+## 3.2 NSA Architecture Parameters
 
-Архитектура обеспечивает эффективный баланс между вычислительными затратами и производительностью модели. Для NSA установлены следующие параметры:  
-- Размер сжатого блока $(l = 32)$,  
-- Шаг скользящего окна $(d = 16)$,  
-- Размер выбранного блока $(l' = 64)$,  
-- Количество выбранных блоков $(n = 16)$ (включая 1 фиксированный начальный блок и 2 локальных блока),  
-- Размер скользящего окна $(w = 512)$.  
+The architecture achieves an efficient balance between computational cost and model performance. The following parameters are set for NSA:
+- Compressed block size $(l = 32)$,
+- Sliding window stride $(d = 16)$,
+- Selected block size $(l' = 64)$,
+- Number of selected blocks $(n = 16)$ (including 1 fixed initial block and 2 local blocks),
+- Sliding window size $(w = 512)$.
 
-Модели с полным вниманием и разреженным вниманием предварительно обучаются на 270 миллиардах токенов с длиной текста 8k, а затем дообучаются на текстах длиной 32k с использованием YaRN для адаптации к длинному контексту. Обе модели обучаются до полной сходимости для обеспечения справедливого сравнения.
+Both full-attention and sparse-attention models are pre-trained on 270 billion tokens with 8k context length, then fine-tuned on 32k-length texts using YaRN for long-context adaptation. Both models are trained to full convergence to ensure fair comparison.
 
-# 4. Результаты и анализ
+# 4. Results and Analysis
 
-## 4.1 Общая оценка:
+## 4.1 General Evaluation:
 
-В таких бенчмарках, как MMLU, MMLU-PRO, CMMLU, BBH, GSM8K, MATH, DROP, MBPP и HumanEval , NSA превосходит базовый уровень полного внимания по большинству показателей, несмотря на его более высокую разреженность.
+On benchmarks such as MMLU, MMLU-PRO, CMMLU, BBH, GSM8K, MATH, DROP, MBPP, and HumanEval, NSA outperforms the full-attention baseline on most metrics, despite its higher sparsity.
 
-![Table_4](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-09/assets/Figure_4.png)
+![Table_4](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-09/assets/Figure_4.png  )
 
-## 4.2 Длинная оценка контекста :
+## 4.2 Long-Context Evaluation:
 
-Авторы оценили методику собственного разреженного внимания (NSA) на тестовой платформе LongBench и сравнили ее эффективность с современным методом разреженного внимания (SOTA) и базовым уровнем полного внимания. Чтобы обеспечить единообразие разреженности между различными методами, исследователи установили количество токенов, активируемых для каждого запроса во всех базовых уровнях разреженного внимания, равным 2560, что в точности соответствует среднему количеству токенов, активируемых NSA при обработке последовательностей длиной 32 тыс.
+The authors evaluated the Native Sparse Attention (NSA) method on the LongBench benchmark and compared its performance against state-of-the-art (SOTA) sparse attention methods and the full-attention baseline. To ensure consistent sparsity across methods, researchers set the number of activated tokens per query in all sparse baselines to 2560, exactly matching the average number of tokens activated by NSA when processing 32k-length sequences.
 
-Согласно правилам StreamLLM, бюджет в 2560 токенов включает в себя первые 128 токенов и 512 локальных токенов. Учитывая, что некоторые подмножества в LongBench имеют в целом низкие оценки по всем моделям, участвующим в оценке, и не могут служить ценным источником для сравнения производительности различных методов, авторы исключили эти подмножества из области оценки. Результаты оценки показаны в Таблице ниже. NSA показывает исключительно хорошие результаты, лидируя со средним баллом 0,469, что значительно превосходит все базовые показатели. В частности, его средний балл на 0,032 выше, чем у метода полного внимания, и на 0,046 выше, чем у метода Exact-Top.
+Per StreamLLM rules, the 2560-token budget includes the first 128 tokens and 512 local tokens. Given that some subsets in LongBench exhibit uniformly low scores across all evaluated models and thus provide limited discriminative value for comparing method performance, the authors excluded these subsets from evaluation. Results are shown in the table below. NSA demonstrates exceptionally strong performance, leading with a mean score of 0.469, significantly surpassing all baselines. In particular, its mean score is 0.032 higher than full attention and 0.046 higher than Exact-Top.
 
-![Table_5](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-09/assets/Figure_5.png)
+![Table_5](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-09/assets/Figure_5.png  )
 
-![Table_6](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-09/assets/Figure_6.png)
+![Table_6](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-09/assets/Figure_6.png  )
 
-## 4.3 Оценка цепного мышления:
+## 4.3 Chain-of-Thought Evaluation:
 
-При оценке рассуждений по инструкциям AIME NSA-R после контролируемой тонкой настройки превосходит базовый уровень полного внимания-R при длине контекста как 8 тыс., так и 16 тыс.
+After supervised fine-tuning, NSA-R outperforms the full-attention baseline (Full Attention-R) on AIME instruction-based reasoning benchmarks at both 8k and 16k context lengths.
 
-![Table_7](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/main/2025/week-09/assets/Figure_7.png)
-> Таблица 3 | Оценка на основе инструкций AIME после обучения с учителем. Наш NSA-R демонстрирует лучшую производительность по сравнению с Full Attention-R как при длине последовательности 8k, так и при 16k.  
+![Table_7](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/main/2025/week-09/assets/Figure_7.png  )
+> **Table 3** | AIME instruction-based evaluation after supervised training. Our NSA-R demonstrates superior performance over Full Attention-R at both 8k and 16k sequence lengths.  
 
-> Рисунок 6 | Сравнение ядра NSA на базе Triton с ядром FlashAttention-2 на базе Triton. Наша реализация значительно снижает задержку при всех длинах контекста, и улучшение становится более заметным по мере увеличения длины входных данных.
+> **Figure 6** | Comparison of the Triton-based NSA kernel against the Triton-based FlashAttention-2 kernel. Our implementation significantly reduces latency across all context lengths, with improvements becoming more pronounced as input length increases.
 
-# 5. Подведем итог
+# 5. Conclusion
 
-## 5.1. Инновации которые были достигнуты в данной работе
+## 5.1 Innovations Achieved in This Work
 
-**Значительное ускорение:**
-Благодаря оптимизации разработки алгоритма и современной аппаратной реализации, NSA достигает значительного ускорения по сравнению с моделью полного внимания на этапах декодирования, прямого распространения и обратного распространения, особенно при обработке последовательностей длиной 64 тысячи токенов.
+**Significant Acceleration:**  
+Through algorithmic design optimization and modern hardware implementation, NSA achieves substantial acceleration compared to the full-attention model during decoding, forward pass, and backpropagation, particularly for 64k-length sequences.
 
-**Поддержка сквозного обучения:**
-NSA поддерживает сквозное обучение, что сокращает объем предварительных вычислений без ущерба для производительности модели, позволяя эффективно использовать модель разреженного внимания на протяжении всего жизненного цикла модели.
+**End-to-End Training Support:**  
+NSA supports end-to-end training, reducing pre-computation overhead without sacrificing model performance, enabling efficient deployment of sparse attention throughout the model’s lifecycle.
 
-**Стратегия динамической иерархической разреженности:**
-NSA сочетает грубое сжатие токенов и точный выбор токенов для сохранения как глобальной осведомленности о контексте, так и локальной точности.
+**Dynamic Hierarchical Sparsity Strategy:**  
+NSA combines coarse token compression and precise token selection to preserve both global contextual awareness and local accuracy.
 
-**Оптимизация системы на основе аппаратного обеспечения:**
-Обеспечили сбалансированную арифметическую интенсивность и максимизируйте фактическую эффективность за счет оптимизации разреженного внимания к блокам для использования преимуществ тензорных ядер и доступа к памяти.
+**Hardware-Aware System Optimization:**  
+Balanced arithmetic intensity is achieved by optimizing block-wise sparse attention for Tensor Core utilization and memory access patterns, maximizing real-world efficiency.
 
-**Разработка алгоритма с учетом обучения:**
-Стабильное сквозное обучение достигается за счет эффективных алгоритмов и обратных операторов, поддерживающих эффективное развертывание и сквозное обучение.
+**Learning-Aware Algorithm Design:**  
+Stable end-to-end training is enabled by efficient algorithms and backward operators that support effective deployment and end-to-end learning.
 
-**Комплексная экспериментальная оценка:**
-Проводятся комплексные эксперименты с разными текстовыми корпусами, и NSA показывает хорошие результаты при выполнении общих тестов, задач с длинным контекстом и оценок цепочечных рассуждений, превосходя базовый уровень полного внимания.
+**Comprehensive Experimental Evaluation:**  
+Extensive experiments across diverse text corpora demonstrate that NSA delivers strong performance on general benchmarks, long-context tasks, and chain-of-thought reasoning evaluations, surpassing the full-attention baseline.

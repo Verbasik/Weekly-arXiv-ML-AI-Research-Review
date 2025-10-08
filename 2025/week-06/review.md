@@ -1,512 +1,511 @@
-# **MoE: 🤖 Как Смесь Экспертов меняет правила игры в мире AI 🚀**
+# **MoE: 🤖 How Mixture of Experts is Changing the Rules of AI 🚀**
 
-При просмотре последних опубликованных статей вы можете заметить в названиях слово «MoE». Что же означает это «MoE» и почему его так часто используют сейчас? В этом наглядном руководстве мы подробно рассмотрим этот важный компонент с более чем 50 иллюстрациями: **Смесь Экспертов (MoE)**!
+When reviewing recently published papers, you may notice the term "MoE" appearing frequently in titles. What exactly does "MoE" mean, and why is it being used so often today? In this visual guide, we will thoroughly examine this critical component with over 50 illustrations: **Mixture of Experts (MoE)**!
 
-![Table_1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_1.png)
+![Table_1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_1.png  )
 
-## **Введение**
+## **Introduction**
 
-В этом руководстве обсуждается применение двух основных компонентов MoE — экспертов и маршрутизаторов — в типичной архитектуре на основе LLM.
-
----
-
-## **Что такое модель «Смешанные Эксперты»?**
-
-Метод «Смешанные Эксперты» (MoE) позволяет улучшить качество обучения моделей на основе LLM за счет использования нескольких различных подмоделей (или «экспертов»).
-
-### Основные компоненты MoE:
-
-1. **Эксперты**:
-   - Каждый слой FFNN теперь имеет набор «экспертов», которых можно выбрать.
-   - Эти «эксперты» зачастую сами являются нейронными сетями прямого распространения (FFNN).
-
-2. **Маршрутизатор или сеть шлюзов**:
-   - Решает, какие токены отправлять тем или иным экспертам.
-
-На каждом уровне LLM с MoE мы можем найти некоторых (относительно специализированных) экспертов:
-
-![Table_2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_2.png)
-
-Обратите внимание, что эти «эксперты» не являются узкоспециализированными специалистами в конкретной области, как эксперты по «психологии» или «биологии» в области гуманитарных наук. На самом деле они усваивают больше синтаксической информации на лексическом уровне и отлично справляются с обработкой определенных токенов в определенных контекстах:
-
-![Table_3](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_3.png)
-
-Маршрутизатор (или сеть шлюзов) отвечает за выбор наиболее подходящего эксперта для каждого входа: 
-
-![Table_4](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_4.png)
-
-Каждый эксперт не является полноценным LLM, а лишь частью подмодели в архитектуре LLM.
+This guide discusses the application of two core MoE components—experts and routers—in a typical LLM-based architecture.
 
 ---
 
-## **Роль экспертов**
+## **What is a Mixture of Experts Model?**
 
-Чтобы понять, что имеют в виду эксперты и как они работают, сначала нужно понять, что заменяет MoE: плотные слои.
+The Mixture of Experts (MoE) method improves the training quality of LLM-based models by employing multiple distinct submodels (or "experts").
 
-### (1) Плотные слои
+### Core MoE Components:
 
-Модель «Смесь Экспертов» (MoE) изначально возникла из относительно базовой функции в больших языковых моделях (LLM), а именно нейронной сети прямого распространения (FFNN).
+1. **Experts**:
+   - Each FFNN layer now has a set of selectable "experts".
+   - These "experts" are often themselves feedforward neural networks (FFNNs).
 
-В стандартной архитектуре Transformer, работающей только с декодированием, FFNN обычно применяются после нормализации слоев: 
+2. **Router or Gating Network**:
+   - Decides which tokens to send to which experts.
 
-![Table_5](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_5.png)
+At each level of an MoE-enabled LLM, we find some (relatively specialized) experts:
 
-FFNN позволяет модели использовать контекстную информацию, генерируемую механизмом внимания, и дополнительно преобразовывать эту информацию для фиксации более сложных взаимосвязей в данных.
+![Table_2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_2.png  )
 
-Однако размер FFNN быстро растет. Чтобы изучить эти сложные взаимосвязи, ему обычно необходимо расширить получаемые входные данные:
+Note that these "experts" are not narrowly specialized specialists in specific domains like "psychology" or "biology" as in the humanities. Rather, they capture more syntactic information at the lexical level and excel at processing certain tokens in specific contexts:
 
-![Table_6](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_6.png)
+![Table_3](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_3.png  )
+
+The router (or gating network) is responsible for selecting the most suitable expert for each input:
+
+![Table_4](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_4.png  )
+
+Each expert is not a full LLM but rather a subcomponent within the LLM architecture.
+
+---
+
+## **Role of Experts**
+
+To understand what experts are and how they function, we must first understand what MoE replaces: dense layers.
+
+### (1) Dense Layers
+
+The Mixture of Experts (MoE) method originated from a relatively basic function in large language models (LLMs): the feedforward neural network (FFNN).
+
+In a standard decoder-only Transformer architecture, FFNNs are typically applied after layer normalization:
+
+![Table_5](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_5.png  )
+
+The FFNN enables the model to utilize contextual information generated by the attention mechanism and further transform it to capture more complex relationships in the data.
+
+However, the size of the FFNN grows rapidly. To learn these complex relationships, it typically needs to expand the input dimensions:
+
+![Table_6](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_6.png  )
 
 <details>
-  <summary>Нейронная сеть прямого распространения (Feed Forward Network):</summary>
+  <summary>Feed Forward Network (FFN):</summary>
 
-  **Назначение FFN:**
+  **Purpose of FFN:**
 
-  FFN - это ключевой компонент в каждом блоке Transformer, который отвечает за **нелинейное преобразование представлений токенов на уровне отдельных позиций**.  В то время как Multi-Head Attention позволяет токенам взаимодействовать друг с другом и учитывать контекст, FFN обрабатывает представление каждого токена **индивидуально**, но уже с учетом контекста, полученного от слоя внимания.
+  FFN is a key component in each Transformer block, responsible for **nonlinear transformation of token representations at individual positions**. While Multi-Head Attention enables tokens to interact and consider context, FFN processes each token's representation **individually**, yet with context provided by the attention layer.
 
-  - На вход подслоя FFN поступает $\text{Output}_{Norm1}$.
-  - FFN состоит из двух линейных слоев с функцией активации (например, ReLU, GeLU) между ними:
+  - Input to the FFN sublayer: $\text{Output}_{Norm1}$.
+  - FFN consists of two linear layers with an activation function (e.g., ReLU, GeLU) between them:
   $$
   \text{FFN}(\text{Output}_{Norm1}) = \text{Activation}(\text{Output}_{Norm1} W_1 + b_1) W_2 + b_2
   $$
-  где:
+  where:
 
    - $W_1 \in \mathbb{R}^{D_{model} \times D_{ff}}$
-   - $W_2 \in \mathbb{R}^{D_{ff} \times D_{model}}$ - весовые матрицы
-   - $b_1 \in \mathbb{R}^{D_{ff}}$, $b_2 \in \mathbb{R}^{D_{model}}$ - векторы смещений
-   - $D_{ff}$ - внутренняя размерность FFN (обычно $4 \times D_{model}$).
+   - $W_2 \in \mathbb{R}^{D_{ff} \times D_{model}}$ — weight matrices
+   - $b_1 \in \mathbb{R}^{D_{ff}}$, $b_2 \in \mathbb{R}^{D_{model}}$ — bias vectors
+   - $D_{ff}$ — internal FFN dimension (typically $4 \times D_{model}$).
 
-   **Выход:** FFN преобразует вход и выдает тензор **той же размерности** $(N, L, D_{model})$, где:
+   **Output:** FFN transforms the input and outputs a tensor of the **same dimension** $(N, L, D_{model})$, where:
 
-   - $N$ — размер батча (количество примеров в батче),
-   - $L$ — длина последовательности (число токенов),
-   - $D_{model}$ — скрытая размерность (размер эмбеддингов).
+   - $N$ — batch size (number of examples in batch),
+   - $L$ — sequence length (number of tokens),
+   - $D_{model}$ — hidden dimension (embedding size).
 
-   Этот выход затем передается в следующий слой Transformer или используется для решения задачи (например, классификации или генерации текста).
+   This output is then passed to the next Transformer layer or used for downstream tasks (e.g., classification or text generation).
 
-  **Структура FFN:**
+  **FFN Structure:**
 
-  FFN состоит из **двух последовательных линейных слоев** с **функцией активации** между ними.  Это можно представить как двухслойную полносвязную нейронную сеть, применяемую к каждой позиции в последовательности.
+  FFN consists of **two sequential linear layers** with an **activation function** between them. This can be viewed as a two-layer fully connected neural network applied to each position in the sequence.
 
-  **Компоненты FFN и формула:**
+  **FFN Components and Formula:**
 
   $$
   \text{FFN}(x) = \text{Activation}(x W_1 + b_1) W_2 + b_2
   $$
 
-  Разберем каждый компонент формулы:
+  Let’s break down each component of the formula:
 
-  1.  **Первый линейный слой (Expansion Layer):**  $(x W_1 + b_1)$
+  1.  **First Linear Layer (Expansion Layer):**  $(x W_1 + b_1)$
 
-   *   **Вход:**  $x$ - это вход FFN, то есть $\text{Output}_{Norm1}$ размерности `[batch_size, sequence_length, hidden_size]` ($D_{model}$).
+   *   **Input:**  $x$ — the FFN input, i.e., $\text{Output}_{Norm1}$ of dimension `[batch_size, sequence_length, hidden_size]` ($D_{model}$).
 
-   *   **Весовая матрица $W_1$**:  $W_1 \in \mathbb{R}^{D_{model} \times D_{ff}}$ - это **матрица весов первого линейного слоя**.  Она является **обучаемым параметром**.
+   *   **Weight matrix $W_1$**:  $W_1 \in \mathbb{R}^{D_{model} \times D_{ff}}$ — the **weight matrix of the first linear layer**. It is an **adjustable parameter**.
 
-   *   **Вектор смещения $b_1$**: $b_1 \in \mathbb{R}^{D_{ff}}$ - это **вектор смещения первого линейного слоя**. Он также является **обучаемым параметром**.
+   *   **Bias vector $b_1$**: $b_1 \in \mathbb{R}^{D_{ff}}$ — the **bias vector of the first linear layer**. Also an **adjustable parameter**.
    
-   *   **Внутренняя размерность $D_{ff}$**: $D_{ff}$ - это **внутренняя (промежуточная) размерность FFN**.  Обычно она **больше, чем $D_{model}$**, часто в 4 раза больше ($D_{ff} = 4 \times D_{model}$).  Например, если $D_{model} = 512$, то $D_{ff} = 2048$.  **Увеличение размерности** на этом этапе называется **"расширением" (expansion)**.
+   *   **Internal dimension $D_{ff}$**: $D_{ff}$ — the **internal (intermediate) dimension** of the FFN.  It is typically **larger than $D_{model}$**, often 4 times larger ($D_{ff} = 4 \times D_{model}$). For example, if $D_{model} = 512$, then $D_{ff} = 2048$.  **Increasing the dimension** at this stage is called **"expansion"**.
 
-   *   **Операция:**  Происходит **линейное преобразование** входа $x$ путем матричного умножения на $W_1$ и добавления смещения $b_1$.
+   *   **Operation:**  A **linear transformation** of input $x$ via matrix multiplication with $W_1$ and addition of bias $b_1$.
 
-   *   **Выход первого линейного слоя:**  Результатом является тензор размерности `[batch_size, sequence_length, D_{ff}]`.  Размерность признакового пространства **увеличилась** с $D_{model}$ до $D_{ff}$.
+   *   **Output of first linear layer:**  The result is a tensor of dimension `[batch_size, sequence_length, D_{ff}]`. The feature space dimension has **increased** from $D_{model}$ to $D_{ff}$.
 
-  2.  **Функция активации (Activation Function):**  $\text{Activation(...)}$
+  2.  **Activation Function:**  $\text{Activation(...)}$
 
-   *   **Вход:**  Выход первого линейного слоя размерности `[batch_size, sequence_length, D_{ff}]`.
+   *   **Input:**  Output of first linear layer of dimension `[batch_size, sequence_length, D_{ff}]`.
    
-   *   **Функция активации:**  $\text{Activation}$ - это **нелинейная функция активации**.  В Transformer обычно используются:
-      *   **ReLU (Rectified Linear Unit):**  $\text{ReLU}(z) = \max(0, z)$.  Простая и эффективная функция, обнуляющая отрицательные значения.
-      *   **GeLU (Gaussian Error Linear Unit):**  Более гладкая функция активации, которая в некоторых случаях показывает лучшие результаты, чем ReLU.  Формула GeLU немного сложнее, но суть в том, что она также вносит нелинейность.
+   *   **Activation Function:**  $\text{Activation}$ — a **nonlinear activation function**. In Transformers, commonly used are:
+      *   **ReLU (Rectified Linear Unit):**  $\text{ReLU}(z) = \max(0, z)$. A simple and efficient function that zeros negative values.
+      *   **GeLU (Gaussian Error Linear Unit):** A smoother activation function that sometimes yields better results than ReLU. The GeLU formula is slightly more complex, but its essence is introducing nonlinearity.
 
-   *   **Назначение функции активации:**  Функция активации **вводит нелинейность** в преобразование.  Без нелинейности, FFN был бы просто еще одним линейным слоем, и Transformer в целом был бы эквивалентен линейной модели, что сильно ограничило бы его выразительность.  Нелинейность позволяет модели учить **сложные, нелинейные зависимости** в данных.
+   *   **Purpose of Activation Function:**  The activation function **introduces nonlinearity** into the transformation. Without nonlinearity, FFN would be just another linear layer, and the entire Transformer would be equivalent to a linear model, severely limiting its expressiveness. Nonlinearity enables the model to learn **complex, nonlinear dependencies** in the data.
    
-   *   **Выход функции активации:**  Размерность тензора **не меняется** после применения функции активации.  Выход по-прежнему имеет размерность `[batch_size, sequence_length, D_{ff}]`.
+   *   **Output of Activation Function:**  The tensor dimension **remains unchanged** after applying the activation function. The output still has dimension `[batch_size, sequence_length, D_{ff}]`.
 
-  3.  **Второй линейный слой (Contraction Layer):**  $FFN(... ) W_2 + b_2$
+  3.  **Second Linear Layer (Contraction Layer):**  $FFN(... ) W_2 + b_2$
 
-   *   **Вход:**  Выход функции активации размерности `[batch_size, sequence_length, D_{ff}]`.
+   *   **Input:**  Output of activation function of dimension `[batch_size, sequence_length, D_{ff}]`.
 
-   *   **Весовая матрица $W_2$**:  $W_2 \in \mathbb{R}^{D_{ff} \times D_{model}}$ - это **матрица весов второго линейного слоя**.  Также является **обучаемым параметром**.
+   *   **Weight matrix $W_2$**:  $W_2 \in \mathbb{R}^{D_{ff} \times D_{model}}$ — the **weight matrix of the second linear layer**. Also an **adjustable parameter**.
 
-   *   **Вектор смещения $b_2$**: $b_2 \in \mathbb{R}^{D_{model}}$ - это **вектор смещения второго линейного слоя**.  Также **обучаемый параметр**.
+   *   **Bias vector $b_2$**: $b_2 \in \mathbb{R}^{D_{model}}$ — the **bias vector of the second linear layer**. Also an **adjustable parameter**.
 
-   *   **Операция:**  Происходит **линейное преобразование** выхода функции активации путем матричного умножения на $W_2$ и добавления смещения $b_2$.
+   *   **Operation:**  A **linear transformation** of the activation output via matrix multiplication with $W_2$ and addition of bias $b_2$.
 
-   *   **Выход второго линейного слоя (и FFN в целом):**  Результатом является тензор размерности `[batch_size, sequence_length, D_{model}]`.  Размерность признакового пространства **возвращается** к исходной $D_{model}$.  Это **"сжатие" (contraction)** размерности.
+   *   **Output of second linear layer (and FFN overall):**  The result is a tensor of dimension `[batch_size, sequence_length, D_{model}]`. The feature space dimension is **restored** to the original $D_{model}$. This is **"contraction"** of dimension.
 
-  **Размерности в FFN на примере:**
+  **FFN Dimensions in Example:**
 
-  Предположим, $D_{model} = 512$ и $D_{ff} = 4 \times D_{model} = 2048$.
+  Assume $D_{model} = 512$ and $D_{ff} = 4 \times D_{model} = 2048$.
 
-  1.  **Вход $x$**:  `[batch_size, sequence_length, 512]`
+  1.  **Input $x$**:  `[batch_size, sequence_length, 512]`
 
-  2.  **Первый линейный слой $(x W_1 + b_1)$**:
+  2.  **First linear layer $(x W_1 + b_1)$**:
 
-   *   $W_1$ имеет размерность `[512, 2048]`
+   *   $W_1$ has dimension `[512, 2048]`
 
-   *   Выход: `[batch_size, sequence_length, 2048]` (размерность расширилась)
+   *   Output: `[batch_size, sequence_length, 2048]` (dimension expanded)
 
-  3.  **Функция активации $\text{Activation}$**:
+  3.  **Activation Function $\text{Activation}$**:
 
-   *   Вход: `[batch_size, sequence_length, 2048]`
+   *   Input: `[batch_size, sequence_length, 2048]`
 
-   *   Выход: `[batch_size, sequence_length, 2048]` (размерность не меняется)
+   *   Output: `[batch_size, sequence_length, 2048]` (dimension unchanged)
 
-  4.  **Второй линейный слой $(... ) W_2 + b_2)$**:
+  4.  **Second linear layer $(... ) W_2 + b_2)$**:
 
-   *   $W_2$ имеет размерность `[2048, 512]`
+   *   $W_2$ has dimension `[2048, 512]`
 
-   *   Выход: `[batch_size, sequence_length, 512]` (размерность сжалась обратно к исходной)
+   *   Output: `[batch_size, sequence_length, 512]` (dimension contracted back to original)
 
-  **Назначение матрицы $W_1$ и $W_2$:**
+  **Purpose of Matrices $W_1$ and $W_2$:**
 
-  *   **$W_1$ (матрица расширения):**  Матрица $W_1$ отвечает за **проекцию входного пространства размерности $D_{model}$ в более широкое пространство размерности $D_{ff}$**.  Это позволяет FFN **увеличить выразительность** и "запомнить" больше информации на промежуточном этапе.
-  *   **$W_2$ (матрица сжатия):**  Матрица $W_2$ отвечает за **проекцию обратно из пространства размерности $D_{ff}$ в исходное пространство размерности $D_{model}$**.  Это необходимо, чтобы выход FFN имел ту же размерность, что и вход, и мог быть интегрирован в остальную часть архитектуры Transformer.  Также, матрица $W_2$ позволяет **смешать и агрегировать информацию**, полученную на промежуточном этапе в пространстве большей размерности.
+  *   **$W_1$ (Expansion Matrix):**  Matrix $W_1$ is responsible for **projecting the input space of dimension $D_{model}$ into a wider space of dimension $D_{ff}$**. This allows FFN to **increase expressiveness** and "remember" more information at the intermediate stage.
+  *   **$W_2$ (Contraction Matrix):**  Matrix $W_2$ is responsible for **projecting back from the $D_{ff}$ space into the original $D_{model}$ space**. This is necessary so that the FFN output has the same dimension as the input and can be integrated into the rest of the Transformer architecture. Additionally, matrix $W_2$ allows **mixing and aggregating** information obtained at the higher-dimensional intermediate stage.
 
-  **Зачем нужен FFN в Transformer?**
+  **Why is FFN needed in Transformer?**
 
-  *   **Введение нелинейности:**  FFN вносит **нелинейность** в модель, что критически важно для обучения сложных зависимостей в данных.
-  *   **Обработка информации на уровне позиций:**  FFN применяется **независимо к каждой позиции** в последовательности.  Это позволяет модели выполнять **более сложное, нелинейное преобразование** представления каждого токена после того, как контекст был учтен слоем внимания.
-  *   **Увеличение выразительности модели:**  За счет расширения размерности до $D_{ff}$ и последующего сжатия обратно до $D_{model}$, FFN позволяет модели **увеличить свою выразительность** и способность к обучению более сложным закономерностям.  Промежуточное пространство большей размерности действует как своего рода "скрытое пространство", где модель может более гибко манипулировать представлениями данных.
+  *   **Introducing Nonlinearity:**  FFN introduces **nonlinearity** into the model, which is critical for learning complex dependencies in data.
+  *   **Processing Information at Position Level:**  FFN is applied **independently to each position** in the sequence. This enables the model to perform **more complex, nonlinear transformations** of each token's representation after context has been captured by the attention layer.
+  *   **Increasing Model Expressiveness:**  By expanding the dimension to $D_{ff}$ and then contracting back to $D_{model}$, FFN allows the model to **increase its expressiveness** and ability to learn more complex patterns. The intermediate higher-dimensional space acts as a kind of "hidden space" where the model can more flexibly manipulate data representations.
 </details>
 
-### (2) Редкие слои
+### (2) Sparse Layers
 
-В традиционном Transformer FFNN (Feedforward Neural Network) называется плотной моделью, поскольку все её параметры (включая веса и смещения) активированы. Все параметры используются для вычисления выходных данных, и ни одна часть не отбрасывается.
+In a traditional Transformer, the FFNN (Feedforward Neural Network) is called a dense model because all its parameters (including weights and biases) are activated. All parameters are used to compute outputs, and none are discarded.
 
-Если внимательно рассмотреть плотную модель, то можно увидеть, что входные данные в той или иной степени активируют все параметры:
+If we examine a dense model closely, we see that input data in some way activates all parameters:
 
-![Table_7](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_7.png)
+![Table_7](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_7.png  )
 
-Напротив, разреженные модели активируют только подмножество общих параметров, что тесно связано с моделью смеси экспертов (MoE).
+In contrast, sparse models activate only a subset of overall parameters, closely related to the Mixture of Experts (MoE) model.
 
-Чтобы проиллюстрировать это, мы можем разложить плотную модель на несколько частей (называемых экспертами) и переобучить её.
+To illustrate this, we can decompose the dense model into several parts (called experts) and retrain it.
 
-Затем одновременно активируются только некоторые эксперты:
+Then, only some experts are activated simultaneously:
 
-![Table_8](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_8.png)
+![Table_8](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_8.png  )
 
-Основная идея заключается в том, что каждый эксперт в ходе обучения усваивает различную информацию. При рассуждениях используются только конкретные эксперты, наиболее соответствующие поставленной задаче.
+The core idea is that each expert learns different information during training. During inference, only specific experts most relevant to the task are used.
 
-Столкнувшись с проблемой, мы можем выбрать эксперта, наиболее подходящего для решения задачи:
+Faced with a problem, we can select the expert most suited to solve it:
 
-![Table_9](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_9.png)
+![Table_9](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_9.png  )
 
-### (3) Что узнали эксперты?
+### (3) What Have Experts Learned?
 
-Как мы уже видели, информация, полученная экспертом, более детализирована, чем информация обо всей предметной области. Поэтому иногда называть их «экспертами» может быть некорректно.
+As we have seen, the information acquired by an expert is more granular than information about the entire domain. Therefore, calling them "experts" may sometimes be misleading.
 
-![Table_10](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_10.png)
+![Table_10](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_10.png  )
 
-Однако эксперты в модели декодера, похоже, не демонстрируют такой же тип специализации. Это не означает, что все эксперты равны.
+However, experts in the decoder model do not appear to exhibit the same type of specialization. This does not mean all experts are equal.
 
-Хорошим примером этого является статья Mixtral 8x7B, где каждый токен раскрашивается первым выбранным им экспертом.
+A good example is the Mixtral 8x7B paper, where each token is colored by its first selected expert.
 
-![Table_11](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_11.png)
+![Table_11](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_11.png  )
 
-Эта визуализация также показывает, что эксперты склонны больше концентрироваться на синтаксисе, а не на содержании, специфичном для конкретной области.
+This visualization also shows that experts tend to focus more on syntax rather than domain-specific content.
 
-Таким образом, хотя эксперты по декодеру, по-видимому, не имеют определенной специализации, они ведут себя более последовательно с определенными типами токенов.
+Thus, although decoder experts seemingly lack specific specialization, they behave more consistently with certain token types.
 
-### (4) Экспертная архитектура
+### (4) Expert Architecture
 
-Хотя полезно визуализировать экспертов как плотные модели со скрытыми слоями, разделенными на части, в действительности они сами часто представляют собой полноценные FFNN.
+Although it is useful to visualize experts as dense models with hidden layers divided into parts, in reality, they are often full FFNNs themselves.
 
-![Table_11](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_12.png)
+![Table_11](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_12.png  )
 
-Поскольку большинство LLM имеют несколько блоков декодера, заданный текст проходит через нескольких экспертов, прежде чем будет сгенерирован:
+Since most LLMs have multiple decoder blocks, a given text passes through several experts before being generated:
 
-![Table_13](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_13.png)
+![Table_13](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_13.png  )
 
-Эксперты, выбранные для разных токенов, могут быть разными, что приводит к выбору разных «путей»:
+Experts selected for different tokens may differ, leading to different "paths":
 
-![Table_14](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_14.png)
+![Table_14](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_14.png  )
 
-Если мы обновим визуализацию блока декодера, то теперь он будет содержать несколько FFNN (по одной для каждого «эксперта»):
+If we update the decoder block visualization, it now contains multiple FFNNs (one for each "expert"):
 
-![Table_15](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_15.png)
+![Table_15](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_15.png  )
 
-Блок декодера теперь содержит несколько FFNN (т. е. «экспертов»), которые можно использовать во время вывода.
+The decoder block now contains multiple FFNNs (i.e., "experts") that can be used during inference.
 
-## **Механизм маршрутизации**
+## **Routing Mechanism**
 
-Теперь, когда у нас есть набор экспертов, как модель узнает, каких экспертов использовать?
+Now that we have a set of experts, how does the model learn which experts to use?
 
-Перед экспертами добавляется маршрутизатор (также называемый сетью шлюзов), который обучен выбирать эксперта, который должен быть выбран для каждого токена.
+A router (also called a gating network) is placed before the experts and is trained to select the expert that should be activated for each token.
 
-### (1) Маршрутизатор
+### (1) Router
 
-Маршрутизатор (или сеть шлюзов) сам по себе также является FFNN, которая выбирает эксперта на основе определенных входных данных.
+The router (or gating network) itself is also an FFNN that selects an expert based on specific inputs.
 
-Маршрутизатор выводит значения вероятностей и использует эти вероятности для выбора наиболее подходящего эксперта:
+The router outputs probability values and uses these to select the most suitable expert:
 
-![Table_16](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_16.png)
+![Table_16](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_16.png  )
 
-Экспертный слой возвращает выходные данные выбранного эксперта и умножает их на значение гейта (вероятность выбора).
+The expert layer returns the output of the selected expert and multiplies it by the gate value (selection probability).
 
-Маршрутизаторы и эксперты (лишь немногие из них) вместе образуют уровень MoE:
+Routers and experts (only a few of them) together form an MoE layer:
 
-![Table_17](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_17.png)
+![Table_17](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_17.png  )
 
-Существует два типа слоев MoE: разреженная смесь экспертов и плотная смесь экспертов.
+There are two types of MoE layers: sparse Mixture of Experts and dense Mixture of Experts.
 
-Оба варианта используют маршрутизаторы для выбора экспертов, но разреженный MoE выбирает только нескольких экспертов, тогда как плотный MoE выбирает всех экспертов, но может выбирать их в разных распределениях.
+Both variants use routers to select experts, but sparse MoE selects only a few experts, whereas dense MoE selects all experts but may distribute them in different proportions.
 
-![Table_18](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_18.png)
+![Table_18](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_18.png  )
 
-Например, столкнувшись с набором токенов, MoE распределит эти токены среди всех экспертов, в то время как разреженный MoE выберет только нескольких экспертов.
+For example, faced with a set of tokens, MoE distributes these tokens among all experts, whereas sparse MoE selects only a few experts.
 
-В современных LLM, когда вы видите «MoE», это обычно относится к разреженным моделям MoE, поскольку разреженные модели позволяют использовать частичных экспертов, тем самым сокращая вычислительные затраты, что является важной особенностью для LLM.
+In modern LLMs, when you see "MoE," it usually refers to sparse MoE models, since sparse models allow partial expert usage, thereby reducing computational cost—a crucial feature for LLMs.
 
-### (2) Отбор экспертов
+### (2) Expert Selection
 
-Сеть управления, пожалуй, является наиболее важным компонентом MoE, поскольку она определяет не только, каких экспертов выбирать на этапе вывода, но и выбор на этапе обучения.
+The routing network is perhaps the most critical component of MoE, as it determines not only which experts to select during inference but also during training.
 
-В самой простой форме мы умножаем входные данные (x) на матрицу весов маршрутизатора (W):
+In the simplest form, we multiply the input (x) by the router’s weight matrix (W):
 
-![Table_19](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_19.png)
+![Table_19](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_19.png  )
 
-Затем мы применяем операцию SoftMax к выходным данным, чтобы создать распределение вероятностей G(x) для каждого эксперта:
+Then we apply the SoftMax operation to the output to create a probability distribution G(x) for each expert:
 
-![Table_20](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_20.png)
+![Table_20](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_20.png  )
 
-Маршрутизатор использует это распределение вероятностей для выбора наиболее подходящего эксперта для заданных входных данных.
+The router uses this probability distribution to select the most suitable expert for the given input.
 
-Наконец, мы умножаем вывод каждого маршрутизатора на вывод соответствующего выбранного эксперта и складываем результаты:
+Finally, we multiply each router output by the output of the corresponding selected expert and sum the results:
 
-![Table_21](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_21.png)
+![Table_21](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_21.png  )
 
-Давайте соберем все вместе и рассмотрим, как входные данные проходят через маршрутизатор и экспертов:
+Let’s put it all together and trace how input data passes through the router and experts:
 
-![Table_22](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_22.png)
+![Table_22](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_22.png  )
 
-### (3) Сложность маршрутизации
+### (3) Routing Complexity
 
-Однако эта простая функция часто приводит к тому, что маршрутизатор всегда выбирает одного и того же эксперта, поскольку некоторые эксперты могут обучаться быстрее других:
+However, this simple function often leads to the router always selecting the same expert, since some experts may learn faster than others:
 
-![Table_23](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_23.png)
+![Table_23](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_23.png  )
 
-Это привело бы не только к неравномерному распределению отбора экспертов, но и к тому, что некоторые эксперты оказались бы практически неподготовленными. Это вызывает проблемы во время обучения и вывода.
+This would lead not only to uneven expert selection distribution but also to some experts being practically untrained. This causes problems during both training and inference.
 
-Поэтому мы хотим использовать каждого эксперта с одинаковой важностью во время обучения и вывода, что называется балансировкой нагрузки. Частично это делается для того, чтобы предотвратить переобучение модели на одном и том же наборе экспертов.
+Therefore, we want to use each expert with equal importance during training and inference, known as **load balancing**. This is partially done to prevent the model from overfitting to a single set of experts.
 
-## **Балансировка нагрузки и оптимизация**
+## **Load Balancing and Optimization**
 
-Чтобы сбалансировать важность экспертов, нам необходимо сосредоточиться на маршрутизаторе, поскольку это основной компонент, определяющий, какие эксперты выбираются в данный момент.
+To balance expert importance, we must focus on the router, as it is the primary component determining which experts are selected at any given time.
 
 ### (1) KeepTopK
 
-Одним из способов балансировки нагрузки маршрутизаторов является использование простой политики масштабирования под названием KeepTopK.
+One way to balance router load is to use a simple scaling policy called KeepTopK.
 
-Вводя обучаемый (гауссовский) шум, мы можем предотвратить выбор одного и того же эксперта:
+By introducing trainable (Gaussian) noise, we can prevent the selection of the same expert:
 
-![Table_24](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_24.png)
+![Table_24](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_24.png  )
 
-Затем веса всех экспертов, за исключением первых k экспертов (например, 2), которых мы хотим активировать, устанавливаются на -∞:
+Then, weights of all experts except the top k experts (e.g., 2) we wish to activate are set to -∞:
 
-![Table_25](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_25.png)
+![Table_25](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_25.png  )
 
-Если эти веса установлены на -∞, выходная вероятность после операции SoftMax становится равной 0:
+If these weights are set to -∞, the output probability after SoftMax becomes 0:
 
-![Table_26](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_26.png)
+![Table_26](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_26.png  )
 
-Следует отметить, что KeepTopK можно реализовать и без использования дополнительного шума.
+Note that KeepTopK can be implemented without additional noise.
 
-**Стратегия выбора токенов**
+**Token Selection Strategy**
 
-Стратегия KeepTopK направляет каждый токен нескольким выбранным экспертам.
+The KeepTopK strategy directs each token to several selected experts.
 
-Такой подход называется выбором токена и позволяет направить заданный токен эксперту (маршрутизация топ-1):
+This approach is called **token selection** and allows directing a given token to one expert (top-1 routing):
 
-![Table_27](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_27.png)
+![Table_27](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_27.png  )
 
-Или направить нескольким экспертам (маршрутизация top-k):
+Or to multiple experts (top-k routing):
 
-![Table_28](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_28.png)
+![Table_28](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_28.png  )
 
-Главное преимущество этой стратегии заключается в том, что она взвешивает вклады отдельных экспертов и объединяет их.
+The main advantage of this strategy is that it weighs individual expert contributions and combines them.
 
-**Вспомогательные потери**
+**Auxiliary Losses**
 
-Для достижения равномерного распределения экспертов во время обучения к обычным потерям сети добавляются вспомогательные потери (также называемые потерями балансировки нагрузки).
+To achieve uniform expert distribution during training, auxiliary losses (also called load balancing losses) are added to the network’s standard losses.
 
-Вспомогательная потеря добавляет ограничение, которое заставляет экспертов иметь одинаковую значимость в процессе обучения.
+The auxiliary loss adds a constraint forcing experts to have equal importance during training.
 
-Первый компонент вспомогательного убытка представляет собой сумму значений маршрутизации каждого эксперта по всей партии:
+The first component of the auxiliary loss is the sum of routing values for each expert across the entire batch:
 
-![Table_29](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_29.png)
+![Table_29](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_29.png  )
 
-Это дает нам оценку важности для каждого эксперта, т. е. вероятность выбора данного эксперта независимо от входных данных.
+This gives us an importance score for each expert—that is, the probability of selecting a given expert independent of input.
 
-Мы можем использовать эти оценки важности для расчета коэффициента вариации (CV), который представляет собой степень различия между оценками важности разных экспертов.
+We can use these importance scores to compute the **Coefficient of Variation (CV)**, representing the degree of variation between importance scores of different experts.
 
-![Table_30](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_30.png)
+![Table_30](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_30.png  )
 
-Например, если различия между оценками важности велики, то значение CV будет высоким:
+For example, if differences in importance scores are large, the CV value will be high:
 
-![Table_31](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_31.png)
+![Table_31](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_31.png  )
 
-Напротив, если все эксперты имеют схожие оценки, значение CV будет низким (чего мы и ожидаем):
+Conversely, if all experts have similar scores, the CV value will be low (which is what we expect):
 
-![Table_32](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_32.png)
+![Table_32](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_32.png  )
 
-Используя эту оценку CV, мы можем обновить вспомогательные потери во время обучения, чтобы минимизировать оценку CV (тем самым придав каждому эксперту одинаковую важность):
+Using this CV score, we can update the auxiliary loss during training to minimize the CV score (thereby assigning equal importance to each expert):
 
-![Table_33](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_33.png)
+![Table_33](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_33.png  )
 
-Наконец, вспомогательный убыток будет использоваться как независимый член убытка для участия в оптимизации обучения.
+Finally, the auxiliary loss is used as an independent term in the loss function during optimization.
 
-### (2) Экспертные возможности
+### (2) Expert Capacity
 
-Дисбаланс экспертов отражается не только в выбранных экспертах, но и в распределении токенов, выделенных этим экспертам.
+Expert imbalance is reflected not only in selected experts but also in the distribution of tokens assigned to these experts.
 
-Например, если входные токены распределяются непропорционально среди определенных экспертов, это может привести к недообучению некоторых экспертов:
+For example, if input tokens are disproportionately distributed among certain experts, some experts may become undertrained:
 
-![Table_34](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_34.png)
+![Table_34](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_34.png  )
 
-Здесь нам нужно учитывать не только то, какие эксперты привлекаются, но и то, как часто эти эксперты привлекаются.
+Here, we must consider not only which experts are engaged but also how frequently these experts are engaged.
 
-Решением этой проблемы является ограничение количества токенов, которые может обрабатывать каждый эксперт, а именно пропускной способности эксперта.
+The solution to this problem is to limit the number of tokens each expert can process—known as **expert capacity**.
 
-Когда эксперт достигает своего лимита, излишки токенов будут переданы следующему эксперту:
+When an expert reaches its limit, excess tokens are passed to the next expert:
 
-![Table_35](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_35.png)
+![Table_35](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_35.png  )
 
-Если оба эксперта достигли своей емкости, токен не будет обработан ни одним экспертом, а будет передан непосредственно на следующий уровень. Такая ситуация называется переполнением токена.
+If both experts reach their capacity, the token is not processed by any expert and is passed directly to the next level. This situation is called **token overflow**.
 
-![Table_36](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_36.png)
+![Table_36](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_36.png  )
 
-### (3) Использование трансформера-переключателя для упрощения MoE
+### (3) Using Switch Transformer to Simplify MoE
 
-Первой моделью MoE на основе трансформера, которая решает проблемы нестабильности обучения MoE, такие как балансировка нагрузки, является Switch Transformer. Техннология переключателя повышает стабильность обучения за счет упрощения архитектуры и процесса обучения.
+The first MoE model based on Transformer that solves MoE training instability problems, such as load balancing, is the Switch Transformer. The switching technology improves training stability by simplifying the architecture and training process.
 
-**Коммутационный слой**
+**Switch Layer**
 
-Switch Transformer — это модель T5 (структура кодер-декодер), которая заменяет традиционный слой FFNN на коммутационный слой.
+Switch Transformer is a T5 model (encoder-decoder structure) that replaces the traditional FFNN layer with a switch layer.
 
-Уровень коммутации представляет собой разреженный уровень MoE, который выбирает одного эксперта (маршрутизация топ-1) для каждого токена.
+The switch layer is a sparse MoE layer that selects one expert (top-1 routing) for each token.
 
-![Table_37](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_37.png)
+![Table_37](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_37.png  )
 
-Маршрутизатор не использует специальный метод для выбора эксперта, а просто берет softmax результата умножения входных данных на вес эксперта (так же, как и в предыдущем методе).
+The router does not use a special method for expert selection; it simply takes the softmax of the result of multiplying input data by expert weights (same as the previous method).
 
-![Table_38](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_38.png)
+![Table_38](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_38.png  )
 
-**Коэффициент мощности**
+**Capacity Factor**
 
-Коэффициент мощности — важный параметр, определяющий количество токенов, с которыми может работать каждый эксперт. Трансформер-переключатель расширяет эту концепцию, вводя коэффициент мощности, который напрямую влияет на пропускную способность эксперта.
+The capacity factor is a critical parameter determining the number of tokens each expert can handle. The Switch Transformer extends this concept by introducing a capacity factor that directly affects expert capacity.
 
-![Table_39](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_39.png)
+![Table_39](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_39.png  )
 
-Компоненты экспертного потенциала довольно просты:
+Expert capacity components are quite simple:
 
-![Table_40](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_40.png)
+![Table_40](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_40.png  )
 
-Если мы увеличим коэффициент мощности, каждый специалист сможет обрабатывать больше токенов.
+If we increase the capacity factor, each expert can process more tokens.
 
+![Table_41](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_41.png  )
 
-![Table_41](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_41.png)
+However, if the capacity factor is too large, computational resources are wasted. Conversely, if the capacity factor is too small, model performance degrades due to token overflow.
 
-Однако если коэффициент мощности слишком велик, вычислительные ресурсы будут расходоваться впустую. Напротив, если коэффициент мощности слишком мал, производительность модели ухудшится из-за переполнения токенов.
+**Auxiliary Losses**
 
-**Вспомогательные потери**
+To further prevent token dropping, Switch Transformer introduces a simplified version of auxiliary loss.
 
-Чтобы еще больше предотвратить выбрасывание токенов, Switch Transformer вводит упрощенную версию вспомогательной потери.
+In the simplified auxiliary loss variant, the coefficient of variation is no longer calculated; instead, the number of assigned tokens is weighted against the routing probability of each expert:
 
-В упрощенной версии вспомогательного лосса коэффициент вариации больше не рассчитывается, но количество назначенных токенов сравнивается взвешенно с вероятностью маршрутизации каждого эксперта:
+![Table_42](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_42.png  )
 
-![Table_42](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_42.png)
+Since the goal is to uniformly distribute tokens among N experts, we want the values in vectors P and f to equal 1/N.
 
-Поскольку цель состоит в том, чтобы равномерно распределить токены среди N экспертов, мы хотим, чтобы значения векторов P и f были равны 1/N.
+α is a hyperparameter used for fine-tuning the importance of this loss during training. Too large a value will affect the main loss function, while too small a value will not enable effective load balancing.
 
-α — гиперпараметр, используемый для точной настройки важности этой потери во время обучения. Слишком большое значение повлияет на основную функцию потерь, тогда как слишком малое значение не позволит эффективно выполнять балансировку нагрузки.
+## **Mixture of Experts in Vision Modeling**
 
-## **Смесь моделей экспертов в моделировании видения**
+MoE is not limited to language models. Vision models such as ViT use Transformer architecture and can therefore also adopt MoE.
 
-MoE не ограничивается языковыми моделями. Модели машинного зрения, такие как ViT, используют архитектуру Transformer и, следовательно, могут также использовать MoE.
+Briefly recalling, ViT (Vision Transformer) is an architecture that splits an image into multiple patches and processes them as tokens.
 
-Кратко напомним, что ViT (Vision Transformer) — это архитектура, которая разбивает изображение на несколько блоков и обрабатывает их как токены.
+![Table_43](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_43.png  )
 
-![Table_43](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_43.png)
+These image patches (or tokens) are projected into representation vectors (plus an additional positional embedding vector) and then fed into a standard encoder:
 
-Эти фрагменты изображения (или токены) проецируются в векторы представления (плюс дополнительный позиционный вектор представления), а затем передаются в обычный кодер:
+![Table_44](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_44.png  )
 
-![Table_44](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_44.png)
-
-Когда эти фрагменты изображения поступают в кодер, они обрабатываются как токены, что делает эту архитектуру хорошо подходящей для MoE.
+When these image patches enter the encoder, they are processed as tokens, making this architecture well-suited for MoE.
 
 ### (1) Vision-MoE
 
-Vision-MoE (V-MoE) — один из первых примеров реализации MoE в модели изображения. Он заменяет плотные слои FFNN в ViT на разреженные MoE.
+Vision-MoE (V-MoE) is one of the first examples of implementing MoE in an image model. It replaces dense FFNN layers in ViT with sparse MoE.
 
-![Table_45](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_45.png)
+![Table_45](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_45.png  )
 
-Это улучшение позволяет моделям ViT (которые обычно меньше языковых моделей) существенно масштабироваться за счет увеличения числа экспертов.
+This improvement allows ViT models (which are typically smaller than language models) to scale significantly by increasing the number of experts.
 
-Для уменьшения ограничений оборудования для каждого эксперта устанавливается небольшая предопределенная емкость, поскольку изображения обычно содержат большое количество участков.
+To reduce hardware constraints for each expert, a small predefined capacity is set, as images typically contain many patches.
 
-Однако низкая емкость часто приводит к отбрасыванию блоков изображений (аналогично переполнению токена).
+However, low capacity often leads to discarded image patches (analogous to token overflow).
 
-![Table_46](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_46.png)
+![Table_46](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_46.png  )
 
-Чтобы поддерживать низкую емкость, сеть присваивает каждому патчу оценку важности и отдает приоритет патчам с более высокими оценками, тем самым избегая потери переполненных патчей.
+To maintain low capacity, the network assigns each patch an importance score and prioritizes patches with higher scores, thereby avoiding loss from overflowed patches.
 
-Такой подход называется пакетной приоритетной маршрутизацией.
+This approach is called **batched priority routing**.
 
-![Table_47](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_47.png)
+![Table_47](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_47.png  )
 
-Таким образом, даже при уменьшении количества токенов мы все равно можем видеть, что важные фрагменты изображения успешно маршрутизируются.
+Thus, even with reduced token count, we can still see that important image patches are successfully routed.
 
-![Table_48](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_48.png)
+![Table_48](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_48.png  )
 
-Приоритетная маршрутизация позволяет сосредоточиться на наиболее важных блоках изображения, обрабатывая меньшее количество блоков изображения.
+Priority routing allows focusing on the most important image patches by processing fewer patches.
 
-### (2) От разреженного MoE к мягкому MoE
+### (2) From Sparse MoE to Soft MoE
 
-В V-MoE механизм оценки приоритетов позволяет различать важные и неважные участки изображения. Однако после того, как фрагменты изображения назначены каждому эксперту, информация в необработанных фрагментах изображения теряется.
+In V-MoE, the priority scoring mechanism allows distinguishing between important and unimportant image patches. However, once image patches are assigned to each expert, information in unprocessed patches is lost.
 
-Целью Soft-MoE является переход от распределения дискретных блоков изображений (токенов) к мягкому распределению путем смешивания блоков изображений.
+The goal of Soft-MoE is to transition from discrete distribution of image patches (tokens) to a soft distribution by mixing image patches.
 
-На первом этапе мы умножаем входные данные x (внедрение фрагмента изображения) на обучаемую матрицу Φ. Это позволит сгенерировать информацию о маршрутизации, которая покажет нам, насколько токен релевантен конкретному эксперту.
+In the first step, we multiply the input x (image patch embedding) by a trainable matrix Φ. This generates routing information indicating how relevant a token is to a specific expert.
 
-![Table_49](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_49.png)
+![Table_49](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_49.png  )
 
-Затем матрица маршрутной информации подвергается операции softmax (по столбцам) для обновления вектора внедрения каждого фрагмента изображения.
+Then, the routing information matrix undergoes a softmax operation (along columns) to update each image patch embedding.
 
-![Table_50](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_50.png)
+![Table_50](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_50.png  )
 
-Обновленное внедрение фрагмента изображения по сути представляет собой средневзвешенное значение всех внедрений фрагментов изображения.
+The updated image patch embedding essentially represents a weighted average of all image patch embeddings.
 
-![Table_51](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_51.png)
+![Table_51](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_51.png  )
 
-Визуально это выглядит так, как будто все фрагменты изображения смешаны. Объединенные фрагменты изображений отправляются каждому эксперту. После генерации выходных данных они снова умножаются на матрицу маршрутизации.
+Visually, this looks as if all image patches are mixed. Combined image patches are sent to each expert. After generating outputs, they are multiplied again by the routing matrix.
 
-![Table_52](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_52.png)
+![Table_52](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_52.png  )
 
-Матрица маршрутизации влияет на вход на уровне токенов и выход на уровне экспертов.
+The routing matrix affects input at the token level and output at the expert level.
 
-В результате мы получаем «мягкие» фрагменты/токены изображений, которые обрабатываются вместо дискретных входных данных.
+As a result, we obtain "soft" image patches/tokens that are processed instead of discrete inputs.
 
-## **Активация Mixtral 8x7B и сравнение разреженных параметров**
+## **Activation of Mixtral 8x7B and Comparison of Sparse Parameters**
 
-Важной характеристикой MoE являются его вычислительные требования. Поскольку одновременно используется только часть экспертов, у нас может быть больше параметров, чем фактически используется.
+An important characteristic of MoE is its computational requirements. Since only a portion of experts is used simultaneously, we can have more parameters than are actually activated.
 
-Хотя данный MoE имеет больше параметров (разреженные параметры), активируется меньше параметров, поскольку во время вывода мы используем только подмножество экспертов (активные параметры).
+Although this MoE has more parameters (sparse parameters), fewer parameters are activated because during inference we use only a subset of experts (active parameters).
 
-![Table_53](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_53.png)
+![Table_53](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_53.png  )
 
-Другими словами, нам по-прежнему необходимо загрузить всю модель (включая всех экспертов) в устройство (разреженные параметры), но при фактическом выполнении вывода нам нужно использовать только подмножество параметров (активные параметры). Модель MoE требует больше памяти графического процессора для загрузки всех экспертов, но работает быстрее во время вывода.
+In other words, we still need to load the entire model (including all experts) into the device (sparse parameters), but during actual inference, we only need to use a subset of parameters (active parameters). An MoE model requires more GPU memory to load all experts but operates faster during inference.
 
-Давайте возьмем в качестве примера Mixtral 8x7B, чтобы изучить разницу в количестве разреженных параметров и активных параметров.
+Let’s take Mixtral 8x7B as an example to examine the difference between sparse and active parameters.
 
-![Table_54](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_54.png)
+![Table_54](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_54.png  )
 
-В этом примере мы видим, что количество параметров на одного эксперта составляет 5,6 млрд, а не 7 млрд (хотя всего экспертов 8).
+In this example, we see that the number of parameters per expert is 5.6B, not 7B (though there are 8 experts total).
 
-![Table_55](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_55.png)
+![Table_55](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-06/assets/Table_55.png  )
 
-Нам необходимо загрузить 8x5,6 Б (46,7 Б) параметров (плюс все общие параметры), но для вывода необходимо только 2x5,6 Б (12,8 Б) параметров.
+We need to load 8x5.6B (46.7B) parameters (plus all shared parameters), but for inference, we need only 2x5.6B (12.8B) parameters.
 
-## **В заключение**
+## **Conclusion**
 
-На этом наше исследование моделей «Смесь экспертов» (MoE) закончено! Надеюсь, эта статья помогла вам лучше понять потенциал этой интересной технологии. Сегодня практически каждая модель архитектуры имеет вариант MoE, что говорит о том, что она, вероятно, будет существовать еще долгое время.
+Our investigation of Mixture of Experts (MoE) models is now complete! We hope this article has helped you better understand the potential of this fascinating technology. Today, nearly every architecture has an MoE variant, indicating that it will likely persist for a long time.

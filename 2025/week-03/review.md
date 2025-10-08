@@ -1,347 +1,477 @@
-# Брифинг-документ: rStar-Math
+# rStar-Math Briefing Document
 
-## Математическая революция глубокого мышления: как rStar-Math превращает небольшие языковые модели в мастера математических рассуждений
+## The Mathematical Revolution of Deep Reasoning: How rStar-Math Transforms Small Language Models into Masters of Mathematical Reasoning
 
-### Аннотация
+### Abstract
 
-В данной статье представлен метод rStar-Math, демонстрирующий способность малых языковых моделей (SLM) достигать конкурентоспособных результатов, сопоставимых и даже превосходящих показатели модели OpenAI o1 в задачах математического рассуждения, без использования дистилляции знаний из более крупных моделей. Ключевой особенностью rStar-Math является применение "глубокого мышления" посредством поиска по дереву Монте-Карло (MCTS), где SLM выступает в роли модели политики, генерируя последовательность шагов решения, а другая SLM оценивает их, действуя как модель вознаграждения за процесс. Представлены три ключевые инновации: метод синтеза данных CoT с расширением кода, новый подход к обучению модели предпочтения процессов (PPM) и стратегия саморазвития. Экспериментальные результаты показывают значительное улучшение математических способностей SLM, подтверждая эффективность предложенного подхода.
+This paper presents the rStar-Math method, demonstrating the ability of small language models (SLMs) to achieve competitive results comparable to, or even surpassing, those of the OpenAI o1 model in mathematical reasoning tasks, without distilling knowledge from larger models. The key feature of rStar-Math is the application of "deep reasoning" through Monte Carlo Tree Search (MCTS), where an SLM acts as the policy model, generating a sequence of solution steps, and another SLM evaluates them, acting as the process reward model. Three key innovations are presented: the CoT data synthesis method with code expansion, a novel approach to training the Process Preference Model (PPM), and a self-development strategy. Experimental results show significant improvement in the mathematical capabilities of SLMs, confirming the effectiveness of the proposed approach.
 
-### 1. Введение
+### 1. Introduction
 
-Современные большие языковые модели (LLM) демонстрируют впечатляющие возможности в различных задачах, включая математическое рассуждение. Однако их значительные размеры и вычислительные требования создают препятствия для широкого применения. В связи с этим, возрастает интерес к разработке эффективных методов обучения малых языковых моделей (SLM), способных решать сложные задачи, сохраняя при этом вычислительную эффективность. В области математического рассуждения, традиционные подходы к обучению SLM часто уступают LLM. В данной работе представлен метод rStar-Math, позволяющий SLM достигать результатов, сравнимых и даже превосходящих возможности передовых моделей, таких как OpenAI o1, в задачах математического рассуждения. Ключевой идеей rStar-Math является внедрение механизма "глубокого мышления" посредством поиска по дереву Монте-Карло (MCTS) и итеративного самосовершенствования моделей.
+Modern large language models (LLMs) demonstrate impressive capabilities across various tasks, including mathematical reasoning. However, their large size and computational requirements create barriers to widespread application. In response, there is growing interest in developing efficient methods for training small language models (SLMs) capable of solving complex tasks while maintaining computational efficiency. In the domain of mathematical reasoning, traditional approaches to training SLMs often lag behind LLMs. This paper presents the rStar-Math method, enabling SLMs to achieve results comparable to, or even surpassing, those of advanced models like OpenAI o1 in mathematical reasoning tasks. The core idea of rStar-Math is the integration of a "deep reasoning" mechanism through Monte Carlo Tree Search (MCTS) and iterative self-improvement of models.
 
-### 2. Методология rStar-Math
+### 2. Methodology rStar-Math
 
-Метод rStar-Math основан на трех ключевых инновациях, направленных на эффективное обучение SLM для математического рассуждения:
+The rStar-Math method is based on three key innovations aimed at effectively training SLMs for mathematical reasoning:
 
-### Визуальные идеи
+### Visual Ideas
 
 ![Figure_1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-03/assets/Figure_1.png)
 
-> На этом рисунке представлен общий обзор системы rStar-Math. Он иллюстрирует три ключевых нововведения, которые позволяют малым языковым моделям (SLM) овладевать математическими рассуждениями: (a) показывает генерацию пошаговых траекторий рассуждений с помощью поиска по дереву Монте-Карло (MCTS), где каждый шаг проверяется с помощью выполнения кода Python, что гарантирует правильность; (b) изображает построение пар предпочтений на каждом шаге на основе Q-значений, полученных из MCTS, что позволяет обучать модель предпочтений процесса (PPM) без необходимости ручных аннотаций на уровне шагов; (c) показывает итеративный, саморазвивающийся процесс, где политика SLM и PPM многократно обучаются и совершенствуются с использованием все более высококачественных данных, генерируемых системой.
+> This figure presents an overview of the rStar-Math system. It illustrates three key innovations that enable small language models (SLMs) to master mathematical reasoning: (a) shows the generation of step-by-step reasoning trajectories using Monte Carlo Tree Search (MCTS), where each step is verified by executing Python code, ensuring correctness; (b) depicts the construction of preference pairs at each step based on Q-values obtained from MCTS, enabling the training of the Process Preference Model (PPM) without the need for manual step-level annotations; (c) shows the iterative, self-developing process where the policy SLM and PPM are repeatedly trained and refined using higher-quality data generated by the system.
 
-#### 2.1. Саморазвитие (Self-evolution)
+#### 2.1. Self-evolution
 
-rStar-Math использует процесс саморазвития, в котором модель политики (policy SLM), генерирующая шаги решения, и модель предпочтения процессов (PPM), оценивающая эти шаги, итеративно улучшаются, начиная с нуля. В течение нескольких раундов саморазвития, модели обучаются на миллионах синтезированных решений для большого набора математических задач. Этот итеративный процесс позволяет SLM постепенно наращивать свои возможности в математическом рассуждении, достигая уровня современных моделей. Например, в рамках исследования было проведено четыре раунда саморазвития, в ходе которых были сгенерированы миллионы решений для 747 тысяч математических задач. Процесс синтеза этих решений является итеративным и включает несколько ключевых моментов:
+rStar-Math employs a self-evolution process in which the policy SLM, generating solution steps, and the Process Preference Model (PPM), evaluating these steps, are iteratively improved, starting from scratch. Over several rounds of self-evolution, the models are trained on millions of synthesized solutions for a large set of mathematical problems. This iterative process allows SLMs to gradually build their mathematical reasoning capabilities, reaching the level of modern models. For example, within the study, four rounds of self-evolution were conducted, generating millions of solutions for 747,000 mathematical problems. The process of synthesizing these solutions is iterative and includes several key aspects:
 
-*   **Итеративное улучшение:** В каждом раунде модели (policy SLM и PPM) улучшаются на основе данных, сгенерированных в предыдущем раунде.
-*   **Использование поиска по дереву Монте-Карло (MCTS):** Для генерации траекторий рассуждений применяется алгоритм MCTS, разбивающий сложные задачи на более простые одношаговые задачи. MCTS автоматически присваивает Q-значение каждому шагу, основанное на его вкладе в правильный окончательный ответ.
-*   **Метод синтеза данных CoT с расширением кода:** На каждом шаге SLM генерирует текстовое описание рассуждения (CoT) и соответствующий код Python.
-*   **Модель предпочтения процессов (PPM):** PPM оценивает каждый шаг рассуждения на основе пар предпочтений, полученных из Q-значений MCTS.
-*   **Генерация множества траекторий:** Для каждой задачи генерируется множество траекторий рассуждений для обеспечения разнообразия данных.
-*   **Фильтрация и отбор:** Траектории, приводящие к правильному ответу, отбираются для обучения модели политики. Использование кода позволяет отфильтровать некачественные шаги.
+*   **Iterative Improvement:** In each round, the models (policy SLM and PPM) are improved based on data generated in the previous round.
+*   **Use of Monte Carlo Tree Search (MCTS):** To generate reasoning trajectories, the MCTS algorithm is employed, breaking down complex problems into simpler single-step problems. MCTS automatically assigns a Q-value to each step based on its contribution to the correct final answer.
+*   **Code-augmented CoT Data Synthesis Method:** At each step, the SLM generates a textual description of the reasoning (Chain-of-Thought, CoT) and the corresponding Python code.
+*   **Process Preference Model (PPM):** The PPM evaluates each step of the reasoning based on preference pairs derived from MCTS Q-values.
+*   **Generation of Multiple Trajectories:** For each problem, multiple reasoning trajectories are generated to ensure data diversity.
+*   **Filtering and Selection:** Trajectories leading to the correct answer are selected for training the policy model. Using code allows filtering out subpar steps.
 
-> **Цитата:**
+> **Quote:**
 > *"rStar-Math introduces a self-evolution recipe in which the policy SLM and PPM are built from scratch and iteratively evolved to improve reasoning capabilities."*
 
-#### 2.2. Новый метод синтеза данных CoT с расширением кода (Code-augmented CoT)
+#### 2.2. Novel Code-augmented CoT Data Synthesis Method
 
 ![Figure 2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-03/assets/Figure_2.png)
 
-> Исследователи потребовали, чтобы модель включала ответы на естественном языке в виде комментариев к коду Python, и только те выходные данные, которые получены с использованием Python, будут использоваться для обучения модели.
+> Researchers required the model to include answers in natural language as comments in the Python code, and only outputs obtained using Python would be used for training the model.
 
-Для обучения модели политики используется поиск по дереву Монте-Карло (MCTS) для генерации траекторий рассуждений с пошаговой верификацией. На каждом шаге SLM генерирует не только текстовое описание рассуждения (Chain-of-Thought, CoT), но и соответствующий код Python, реализующий этот шаг. Для обеспечения качества генерируемых данных, сохраняются только те узлы дерева поиска, где выполнение сгенерированного кода Python было успешным. Этот подход позволяет отфильтровать ошибочные промежуточные шаги рассуждения, обеспечивая высокое качество обучающих данных. Таким образом, формируются "траектории рассуждения с расширенным кодом", где каждый шаг подкреплен исполняемым кодом, что повышает надежность процесса обучения. В случаях, когда сгенерированный код Python на каком-либо шаге не выполняется, соответствующий узел в дереве поиска отбрасывается. Такой подход фильтрует ошибочные или некорректные промежуточные шаги рассуждения, сохраняя только траектории, где каждый шаг подтвержден успешным выполнением кода. Хотя это может привести к потере потенциально полезных, но "закодированных" иным способом рассуждений, rStar-Math намеренно делает акцент на исполняемом коде как на критерий качества, особенно важный для математических рассуждений, включающих точные вычисления. Это компромисс между полнотой данных и их качеством, где приоритет отдается точности и верифицируемости каждого шага.
+To train the policy model, Monte Carlo Tree Search (MCTS) is used to generate reasoning trajectories with step-by-step verification. At each step, the SLM generates not only a textual description of the reasoning (Chain-of-Thought, CoT), but also the corresponding Python code implementing that step. To ensure the quality of the generated data, only those tree nodes where the execution of the generated Python code was successful are retained. This approach allows filtering out erroneous intermediate reasoning steps, ensuring high-quality training data. Thus, "reasoning trajectories with expanded code" are formed, where each step is backed by executable code, enhancing the reliability of the training process. In cases where the generated Python code fails at any step, the corresponding node in the search tree is discarded. This approach filters out erroneous or incorrect intermediate reasoning steps, retaining only trajectories where each step is confirmed by successful code execution. Although this may lead to the loss of potentially useful, but "encoded" in other ways, reasoning, rStar-Math deliberately emphasizes executable code as a quality criterion, especially important for mathematical reasoning involving precise calculations. This is a compromise between data completeness and quality, where priority is given to the accuracy and verifiability of each step.
 
-> **Цитата:**
+> **Quote:**
 > *"a novel code-augmented CoT data synthesis method, which performs extensive MCTS rollouts to generate step-by-step verified reasoning trajectories with self-annotated MCTS Q-values."*
 
-#### 2.3. Новая модель предпочтения процессов (Process Preference Model, PPM)
+#### 2.3. New Process Preference Model (Process Preference Model, PPM)
 
-В качестве модели вознаграждения используется модель предпочтения процессов (PPM), которая оценивает каждый шаг рассуждения. Обучение PPM строится на основе пар предпочтений (положительных и отрицательных шагов), полученных на основе Q-значений, присваиваемых MCTS. В отличие от моделей вознаграждения за результат (ORM), которые оценивают только конечный ответ, PPM оценивает качество каждого промежуточного шага, что позволяет более эффективно направлять процесс обучения. Использование пар предпочтений позволяет избежать прямого использования зашумленных Q-значений в качестве меток вознаграждения, что повышает стабильность и эффективность обучения. Функция потерь для PPM определяется как:
-
-$$
-L_{ppm}(\theta) = -\frac{1}{2 \times N} \sum_{(x, y_{pos}, y_{neg}) \in D} \log \left( \sigma \left( r_{\theta} \langle x, y_{pos} \rangle - r_{\theta} \langle x, y_{neg} \rangle \right) \right)
-$$
-
-где:
-- $( \theta )$ — параметры модели
-- $( N )$ — количество примеров
-- $( x )$ — входные данные
-- $( y_{pos} )$ и $( y_{neg} )$ — положительный и отрицательный примеры соответственно
-- $( D )$ — набор данных
-- $( \sigma )$ — сигмоидная функция
-- $( r_{\theta} )$ — функция оценки предпочтений модели.
-
-**Формирование пар предпочтений:**
-
-Ключевым аспектом PPM является использование *пар предпочтений*. Для каждого входного примера $(x)$ создается пара $(y_{pos}, y_{neg})$, где:
-
-*   $y_{pos}$ представляет собой "положительный" пример шага рассуждения, который считается более предпочтительным (например, шаг, ведущий к состоянию с более высоким Q-значением).
-*   $y_{neg}$ представляет собой "отрицательный" пример шага рассуждения, который считается менее предпочтительным (например, шаг, ведущий к состоянию с более низким Q-значением).
-
-Эти пары предпочтений формируют обучающий набор данных $D$.
-
-**Функция оценки предпочтений ($r_{\theta}$):**
-
-Модель PPM использует функцию оценки предпочтений $r_{\theta}$, параметризованную $\theta$. Эта функция принимает на вход входные данные $x$ и шаг рассуждения $y$ и выдает скалярное значение, представляющее "предпочтительность" этого шага в контексте входных данных. Чем выше значение $r_{\theta}\langle x, y \rangle$, тем более предпочтительным считается шаг $y$ для входных данных $x$.
-
-**Функция потерь ($L_{ppm}(\theta)$):**
-
-Функция потерь $L_{ppm}(\theta)$ используется для обучения параметров $\theta$ модели $r_{\theta}$. Цель состоит в том, чтобы настроить параметры $\theta$ таким образом, чтобы модель присваивала более высокие значения предпочтения положительным примерам ($y_{pos}$) по сравнению с отрицательными примерами ($y_{neg}$).
-
-Рассмотрим функцию потерь более детально:
+As the reward model, the Process Preference Model (PPM) is used, which evaluates each step of the reasoning. Training the PPM is based on preference pairs (positive and negative steps) derived from Q-values assigned by MCTS. Unlike result-based reward models (ORM), which evaluate only the final answer, the PPM evaluates the quality of each intermediate step, allowing for more effective guidance of the training process. Using preference pairs allows avoiding the direct use of noisy Q-values as reward labels, enhancing the stability and efficiency of training. The loss function for the PPM is defined as:
 
 $$
 L_{ppm}(\theta) = -\frac{1}{2 \times N} \sum_{(x, y_{pos}, y_{neg}) \in D} \log \left( \sigma \left( r_{\theta} \langle x, y_{pos} \rangle - r_{\theta} \langle x, y_{neg} \rangle \right) \right)
 $$
 
-**Разбор компонентов функции потерь:**
+where:
+- $( \theta )$ — model parameters
+- $( N )$ — number of examples
+- $( x )$ — input data
+- $( y_{pos} )$ and $( y_{neg} )$ — positive and negative examples, respectively
+- $( D )$ — dataset
+- $( \sigma )$ — sigmoid function
+- $( r_{\theta} )$ — preference evaluation function of the model.
+
+**Preference Pair Formation:**
+
+A key aspect of the PPM is the use of *preference pairs*. For each input example $(x)$, a pair $(y_{pos}, y_{neg})$ is created, where:
+
+*   $y_{pos}$ represents a "positive" example of a reasoning step considered more preferable (e.g., a step leading to a state with a higher Q-value).
+*   $y_{neg}$ represents a "negative" example of a reasoning step considered less preferable (e.g., a step leading to a state with a lower Q-value).
+
+These preference pairs form the training dataset $D$.
+
+**Preference Evaluation Function ($r_{\theta}$):**
+
+The PPM uses a preference evaluation function $r_{\theta}$, parameterized by $\theta$. This function takes as input the input data $x$ and the reasoning step $y$ and outputs a scalar value representing the "preference" of this step in the context of the input data. The higher the value $r_{\theta}\langle x, y \rangle$, the more preferable the step $y$ is considered for the input data $x$.
+
+**Loss Function ($L_{ppm}(\theta)$):**
+
+The loss function $L_{ppm}(\theta)$ is used to train the parameters $\theta$ of the model $r_{\theta}$. The goal is to tune the parameters $\theta$ such that the model assigns higher preference values to positive examples ($y_{pos}$) compared to negative examples ($y_{neg}$).
+
+Let's examine the loss function in more detail:
+
+$$
+L_{ppm}(\theta) = -\frac{1}{2 \times N} \sum_{(x, y_{pos}, y_{neg}) \in D} \log \left( \sigma \left( r_{\theta} \langle x, y_{pos} \rangle - r_{\theta} \langle x, y_{neg} \rangle \right) \right)
+$$
+
+**Breakdown of Loss Function Components:**
 
 1. **$-\frac{1}{2 \times N} \sum_{(x, y_{pos}, y_{neg}) \in D}$**:
-    *   **$\sum_{(x, y_{pos}, y_{neg}) \in D}$**:  Суммирование происходит по всем примерам в обучающем наборе данных $D$. Каждый пример состоит из входных данных $x$, положительного примера $y_{pos}$ и отрицательного примера $y_{neg}$.
-    *   **$N$**: Общее количество примеров в обучающем наборе данных $D$.
-    *   **$\frac{1}{N}$**:  Нормировка, усредняющая потери по всем примерам.
-    *   **$\frac{1}{2}$**:  Дополнительный коэффициент масштабирования, который может быть использован для удобства или соответствия определенной реализации.
-    *   **$-$**: Отрицательный знак перед суммой указывает на то, что мы хотим *минимизировать* функцию потерь.
+    *   **$\sum_{(x, y_{pos}, y_{neg}) \in D}$**: Summation occurs over all examples in the training dataset $D$. Each example consists of input data $x$, a positive example $y_{pos}$, and a negative example $y_{neg}$.
+    *   **$N$**: Total number of examples in the training dataset $D$.
+    *   **$\frac{1}{N}$**: Normalization, averaging the losses across all examples.
+    *   **$\frac{1}{2}$**: Additional scaling factor, which may be used for convenience or to match a specific implementation.
+    *   **$-$**: The negative sign before the summation indicates that we want to *minimize* the loss function.
 
 2. **$\log \left( \sigma \left( r_{\theta} \langle x, y_{pos} \rangle - r_{\theta} \langle x, y_{neg} \rangle \right) \right)$**:
-    *   **$r_{\theta} \langle x, y_{pos} \rangle$**:  Выход функции оценки предпочтений для входных данных $x$ и положительного примера $y_{pos}$. Это значение представляет собой оценку "предпочтительности" шага $y_{pos}$ в контексте $x$.
-    *   **$r_{\theta} \langle x, y_{neg} \rangle$**:  Выход функции оценки предпочтений для входных данных $x$ и отрицательного примера $y_{neg}$. Это значение представляет собой оценку "предпочтительности" шага $y_{neg}$ в контексте $x$.
-    *   **$r_{\theta} \langle x, y_{pos} \rangle - r_{\theta} \langle x, y_{neg} \rangle$**:  Разница между оценками предпочтений для положительного и отрицательного примеров. Мы хотим, чтобы эта разница была положительной, то есть $r_{\theta} \langle x, y_{pos} \rangle > r_{\theta} \langle x, y_{neg} \rangle$.
-    *   **$\sigma(\cdot)$**: Сигмоидная функция. Сигмоидная функция $\sigma(z) = \frac{1}{1 + e^{-z}}$ преобразует любое вещественное число в диапазон $(0, 1)$. В данном контексте она интерпретируется как вероятность того, что положительный пример $y_{pos}$ действительно предпочтительнее отрицательного примера $y_{neg}$. Если разница $r_{\theta} \langle x, y_{pos} \rangle - r_{\theta} \langle x, y_{neg} \rangle$ велика и положительна, то $\sigma(\cdot)$ будет близка к 1. Если разница велика и отрицательна, то $\sigma(\cdot)$ будет близка к 0.
-    *   **$\log(\cdot)$**: Натуральный логарифм. Применяется к выходу сигмоидной функции. Поскольку $\sigma(\cdot)$ находится в диапазоне $(0, 1)$, $\log(\sigma(\cdot))$ будет отрицательным числом. Отрицательный знак перед суммой в функции потерь превращает это в положительное значение, которое мы стремимся минимизировать. Использование логарифма связано с концепцией кросс-энтропии в задачах классификации.
+    *   **$r_{\theta} \langle x, y_{pos} \rangle$**: Output of the preference evaluation function for input data $x$ and the positive example $y_{pos}$. This value represents the evaluation of the "preference" of the step $y_{pos}$ in the context of $x$.
+    *   **$r_{\theta} \langle x, y_{neg} \rangle$**: Output of the preference evaluation function for input data $x$ and the negative example $y_{neg}$. This value represents the evaluation of the "preference" of the step $y_{neg}$ in the context of $x$.
+    *   **$r_{\theta} \langle x, y_{pos} \rangle - r_{\theta} \langle x, y_{neg} \rangle$**: Difference between the preference evaluations for the positive and negative examples. We want this difference to be positive, i.e., $r_{\theta} \langle x, y_{pos} \rangle > r_{\theta} \langle x, y_{neg} \rangle$.
+    *   **$\sigma(\cdot)$**: Sigmoid function. The sigmoid function $\sigma(z) = \frac{1}{1 + e^{-z}}$ transforms any real number into the range $(0, 1)$. In this context, it is interpreted as the probability that the positive example $y_{pos}$ is indeed preferable to the negative example $y_{neg}$. If the difference $r_{\theta} \langle x, y_{pos} \rangle - r_{\theta} \langle x, y_{neg} \rangle$ is large and positive, then $\sigma(\cdot)$ will be close to 1. If the difference is large and negative, then $\sigma(\cdot)$ will be close to 0.
+    *   **$\log(\cdot)$**: Natural logarithm. Applied to the output of the sigmoid function. Since $\sigma(\cdot)$ is in the range $(0, 1)$, $\log(\sigma(\cdot))$ will be a negative number. The negative sign before the summation in the loss function turns this into a positive value that we aim to minimize. The use of the logarithm is related to the concept of cross-entropy in classification tasks.
 
 3. **$r_{\theta}\langle x, y \rangle$**:
-    *   **Входные данные:**
-        *   На вход модели подаются текстовые данные, представляющие собой **условие задачи** $x$ и **последовательность шагов рассуждения** $s$.
-        *   На первом шаге, на вход подается только условие задачи $x$. На последующих шагах, на вход подается конкатенация условия задачи ($x$) и последовательности предыдущих шагов решения до текущего шага $s_i$: $x \oplus s_1 \oplus s_2 \oplus ... \oplus s_{i-1} \oplus s_i$.
-        *   **Важно**: эти текстовые данные включают в себя не только текст задачи, но и **последовательность шагов рассуждения на естественном языке и код на Python, включая комментарии**.
-    *   **Представление в виде векторов:**
-        *   Текстовые данные **не подаются напрямую** в нейронную сеть. Вместо этого, они **преобразуются в векторные представления** с помощью механизма эмбеддинга, как и в других языковых моделях.
-        *   Эти векторные представления являются **числовыми массивами**, которые улавливают семантическую и синтаксическую информацию, содержащуюся в тексте.
-    *   **Нейронная сеть:**
-        *   Векторные представления входных данных подаются на вход **нейронной сети**, которая реализует функцию $r_{\theta}$.
-        *   Эта сеть состоит из нескольких слоев, выполняющих **нелинейные преобразования** векторных представлений.
-    *   **Скалярный выход:**
-        *   На выходе нейронной сети получается **одно вещественное число** — скалярное значение в диапазоне от -1 до 1.
-        *   Это число представляет собой **оценку "предпочтительности"** текущего шага рассуждения $s_i$ для задачи $x$. Чем выше значение, тем более предпочтителен этот шаг.
-    *   **Обучение модели:**
-        *   Модель PPM **не обучается на "абсолютных" значениях предпочтительности**. Вместо этого, она обучается различать **"пары предпочтений"**.
-        *   Для каждого шага рассуждения создаются пары из "положительных" шагов с более высокими Q-значениями и "отрицательных" шагов с более низкими Q-значениями.
-        *   Модель PPM обучается предсказывать **более высокие значения для положительных шагов** и **более низкие значения для отрицательных**, используя парную функцию ранжирования.
+    *   **Input Data:**
+        *   The input to the model consists of textual data representing the **problem statement** $x$ and the **sequence of reasoning steps** $s$.
+        *   At the first step, only the problem statement $x$ is input. At subsequent steps, the concatenation of the problem statement ($x$) and the sequence of previous solution steps up to the current step $s_i$ is input: $x \oplus s_1 \oplus s_2 \oplus ... \oplus s_{i-1} \oplus s_i$.
+        *   **Important**: These textual data include not only the problem text but also the **sequence of reasoning steps in natural language and Python code, including comments**.
+    *   **Representation as Vectors:**
+        *   The textual data **are not input directly** into the neural network. Instead, they are **transformed into vector representations** using an embedding mechanism, as in other language models.
+        *   These vector representations are **numerical arrays** that capture the semantic and syntactic information contained within the text.
+    *   **Neural Network:**
+        *   The vector representations of the input data are fed into a **neural network** that implements the function $r_{\theta}$.
+        *   This network consists of several layers performing **nonlinear transformations** on the vector representations.
+    *   **Scalar Output:**
+        *   At the output of the neural network, a **single real number** is obtained — a scalar value in the range from -1 to 1.
+        *   This number represents the **"preference" evaluation** of the current reasoning step $s_i$ for the problem $x$. The higher the value, the more preferable this step is.
+    *   **Model Training:**
+        *   The PPM model **is not trained on "absolute" preference values**. Instead, it is trained to distinguish between **"positive" and "negative" steps**.
+        *   For each reasoning step, pairs are created from "positive" steps with higher Q-values and "negative" steps with lower Q-values.
+        *   The PPM model is trained to predict **higher values for positive steps** and **lower values for negative steps**, using a pairwise ranking function.
 
-**Ключевые моменты:**
+**Key Points:**
 
-*   Функция $r_{\theta}(x, y)$ не вычисляет скалярное произведение, а представляет собой **прямой проход** по слоям нейросети, которая обрабатывает **векторные представления** текстовых входных данных.
-*   На выходе этой сети получается **одно вещественное число** от -1 до 1, которое оценивает "предпочтительность" шага.
-*   Модель обучается не на абсолютных значениях, а на **различии между "положительными" и "отрицательными" шагами**.
+*   The function $r_{\theta}(x, y)$ does not compute a dot product, but rather represents a **direct pass** through the network layers that processes the **textual input representations**.
+*   At the output of this network, a **single real number** from -1 to 1 is obtained, which evaluates the "preference" of the step.
+*   The model is trained not on absolute values, but on the **difference between "positive" and "negative" steps**.
 
-Таким образом, функция $r_{\theta}(x, y)$ - это **нейронная сеть, которая принимает текстовые представления задачи и шагов решения, преобразует их в векторы, и выдает скалярную оценку предпочтительности на выходе.**
+Thus, the function $r_{\theta}(x, y)$ is a **neural network that takes textual representations of the problem and solution steps, transforms them into vectors, and outputs a scalar preference evaluation at the output.**
 
 
-**Цель минимизации функции потерь:**
+# rStar-Math Briefing Document
 
-Минимизируя $L_{ppm}(\theta)$, мы настраиваем параметры $\theta$ модели $r_{\theta}$ таким образом, чтобы для каждой пары предпочтений $(y_{pos}, y_{neg})$ модель присваивала более высокое значение предпочтения $y_{pos}$ по сравнению с $y_{neg}$. Другими словами, модель учится согласовываться с предоставленными данными о предпочтениях.
+## The Mathematical Revolution of Deep Reasoning: How rStar-Math Transforms Small Language Models into Masters of Mathematical Reasoning
 
-**Преимущества PPM по сравнению с ORM:**
+### Abstract
 
-*   **Более эффективное обучение:** Оценивая каждый шаг, PPM предоставляет более плотный сигнал обратной связи для обучения. ORM, оценивая только конечный результат, может столкнуться с проблемой разреженного вознаграждения, особенно в сложных задачах, где успешный результат достигается после множества шагов.
-*   **Устойчивость к зашумленным Q-значениям:**  Использование пар предпочтений позволяет избежать прямого использования Q-значений в качестве меток вознаграждения. Q-значения, особенно на ранних этапах обучения MCTS, могут быть шумными и нестабильными. Сравнивая предпочтения, PPM фокусируется на относительной полезности шагов, что делает обучение более робастным.
+This paper presents the rStar-Math method, demonstrating the ability of small language models (SLMs) to achieve competitive results comparable to, or even surpassing, those of the OpenAI o1 model in mathematical reasoning tasks, without distilling knowledge from larger models. The key feature of rStar-Math is the application of "deep reasoning" through Monte Carlo Tree Search (MCTS), where an SLM acts as the policy model, generating a sequence of solution steps, and another SLM evaluates them, acting as the process reward model. Three key innovations are presented: the CoT data synthesis method with code expansion, a novel approach to training the Process Preference Model (PPM), and a self-development strategy. Experimental results show significant improvement in the mathematical capabilities of SLMs, confirming the effectiveness of the proposed approach.
 
-#### Q-значения в rStar-Math MCTS (Monte Carlo Tree Search)
+### 1. Introduction
 
-В rStar-Math MCTS (Monte Carlo Tree Search) каждому шагу присваиваются Q-значения, которые отражают его вклад в достижение правильного окончательного ответа. Эти значения используются для направления выбора узлов MCTS в сторону наиболее перспективных путей решения задачи. Процесс присвоения Q-значений включает несколько этапов:
+Modern large language models (LLMs) demonstrate impressive capabilities across various tasks, including mathematical reasoning. However, their large size and computational requirements create barriers to widespread application. In response, there is growing interest in developing efficient methods for training small language models (SLMs) capable of solving complex tasks while maintaining computational efficiency. In the domain of mathematical reasoning, traditional approaches to training SLMs often lag behind LLMs. This paper presents the rStar-Math method, enabling SLMs to achieve results comparable to, or even surpassing, those of advanced models like OpenAI o1 in mathematical reasoning tasks. The core idea of rStar-Math is the integration of a "deep reasoning" mechanism through Monte Carlo Tree Search (MCTS) and iterative self-improvement of models.
 
-**1. Генерация траекторий**
+### 2. Methodology rStar-Math
 
-- **Построение дерева поиска**: MCTS итеративно строит дерево поиска, начиная с корневого узла, который представляет собой вопрос.
-- **Генерация кандидатов**: На каждом шаге модель политики (SLM) генерирует несколько кандидатов (узлов), представляющих промежуточные шаги решения.
-- **Извлечение траекторий**: Из дерева поиска извлекаются траектории решения, где каждая траектория представляет собой путь от корня к терминальному узлу (конечный шаг).
-- **Присвоение Q-значений**: Каждому шагу $s_i$ в траектории $t = x \oplus s_1 \oplus s_2 \oplus \ldots \oplus s_d$ присваивается Q-значение $Q(s_i)$.
+The rStar-Math method is based on three key innovations aimed at effectively training SLMs for mathematical reasoning:
 
-**2. Самоаннотация Q-значений (смотрим на результат)**
+### Visual Ideas
 
-Для присвоения Q-значений используются два метода, каждый из которых оценивает качество шага на основе его вклада в получение правильного окончательного ответа:
+![Figure_1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-03/assets/Figure_1.png)
 
-**Терминально-ориентированная аннотация (оценка по финишу)**
+> This figure presents an overview of the rStar-Math system. It illustrates three key innovations that enable small language models (SLMs) to master mathematical reasoning: (a) shows the generation of step-by-step reasoning trajectories using Monte Carlo Tree Search (MCTS), where each step is verified by executing Python code, ensuring correctness; (b) depicts the construction of preference pairs at each step based on Q-values obtained from MCTS, enabling the training of the Process Preference Model (PPM) without the need for manual step-level annotations; (c) shows the iterative, self-developing process where the policy SLM and PPM are repeatedly trained and refined using higher-quality data generated by the system.
 
-- **Применение**: Используется в первых двух раундах обучения, когда модель PPM еще недостаточно надежна.
-- **Обновление Q-значений**: Q-значение шага $s_i$ в $k$-м развертывании $q(s_i)_k$ обновляется на основе Q-значения терминального (финишного) узла $s_d$ $q(s_d)$.
-- **Оценка терминальных узлов**: Терминальные узлы оцениваются как $q(s_d) = 1$, если конечный ответ правильный, и $q(s_d) = -1$, если ответ неверный.
-- **Формула обновления**: $q(s_i)_k = q(s_i)_{k-1} + q(s_d)_k$, где $q(s_i)_0 = 0$ в первом развертывании.
-- **Результат**: Шаги, которые часто ведут к правильному ответу, получают более высокие Q-значения, а шаги, приводящие к неправильным ответам, получают низкие Q-значения.
-- **Когда используется:**  В самом начале обучения, когда модель еще ничего не знает и просто пробует все подряд.
+#### 2.1. Self-evolution
 
-**PRM-расширенная аннотация (оценка с подсказкой)**
+rStar-Math employs a self-evolution process in which the policy SLM, generating solution steps, and the Process Preference Model (PPM), evaluating these steps, are iteratively improved, starting from scratch. Over several rounds of self-evolution, the models are trained on millions of synthesized solutions for a large set of mathematical problems. This iterative process allows SLMs to gradually build their mathematical reasoning capabilities, reaching the level of modern models. For example, within the study, four rounds of self-evolution were conducted, generating millions of solutions for 747,000 mathematical problems. The process of synthesizing these solutions is iterative and includes several key aspects:
 
-- **Применение**: Используется, начиная с третьего раунда, когда модель PPM уже обучена.
-- **Предсказание Q-значений**: Модель PPM предсказывает начальное Q-значение $q(s_i)_0$ для каждого шага $s_i$, основываясь на частичной траектории $x \oplus s_1 \oplus s_2 \oplus \ldots \oplus s_{i-1} \oplus s_i$. Формально, $q(s_i)_0 = PPM(x \oplus s_1 \oplus s_2 \oplus \ldots \oplus s_{i-1} \oplus s_i)$.
-- **Обновление Q-значений**: Это начальное Q-значение обновляется на основе Q-значения терминального узла $q(s_d)$ в процессе обратного распространения MCTS. Обновление происходит по формуле $q(s_i)_k = q(s_i)_{k-1} + q(s_d)_k$, как и в терминальной аннотации.
-- **Результат**: PPM-расширенный MCTS помогает модели политики генерировать более качественные шаги, так как он направляет решения в сторону правильных путей.
-- **Когда используется:**  Когда модель PPM уже немного обучилась и может делать более осознанные выборы.
+*   **Iterative Improvement:** In each round, the models (policy SLM and PPM) are improved based on data generated in the previous round.
+*   **Use of Monte Carlo Tree Search (MCTS):** To generate reasoning trajectories, the MCTS algorithm is employed, breaking down complex problems into simpler single-step problems. MCTS automatically assigns a Q-value to each step based on its contribution to the correct final answer.
+*   **Code-augmented CoT Data Synthesis Method:** At each step, the SLM generates a textual description of the reasoning (Chain-of-Thought, CoT) and the corresponding Python code.
+*   **Process Preference Model (PPM):** The PPM evaluates each step of the reasoning based on preference pairs derived from MCTS Q-values.
+*   **Generation of Multiple Trajectories:** For each problem, multiple reasoning trajectories are generated to ensure data diversity.
+*   **Filtering and Selection:** Trajectories leading to the correct answer are selected for training the policy model. Using code allows filtering out subpar steps.
 
-**Итог**
+> **Quote:**
+> *"rStar-Math introduces a self-evolution recipe in which the policy SLM and PPM are built from scratch and iteratively evolved to improve reasoning capabilities."*
 
-В обоих методах, после большого количества развертываний MCTS, шаги, которые последовательно приводят к правильным ответам, получают более высокие Q-значения, а шаги, которые не приводят к правильным ответам, получают низкие Q-значения.
+#### 2.2. Novel Code-augmented CoT Data Synthesis Method
 
-**3. Использование Q-значений в MCTS**
+![Figure 2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-03/assets/Figure_2.png)
 
-- **Выбор узлов**: Q-значения используются для выбора наиболее перспективных узлов во время фазы выбора MCTS (selection).
-- **Формула UCT**: Для выбора узла $s$ используется формула UCT (Upper Confidence bounds for Trees):
+> Researchers required the model to include answers in natural language as comments in the Python code, and only outputs obtained using Python would be used for training the model.
+
+To train the policy model, Monte Carlo Tree Search (MCTS) is used to generate reasoning trajectories with step-by-step verification. At each step, the SLM generates not only a textual description of the reasoning (Chain-of-Thought, CoT), but also the corresponding Python code implementing that step. To ensure the quality of the generated data, only those tree nodes where the execution of the generated Python code was successful are retained. This approach allows filtering out erroneous intermediate reasoning steps, ensuring high-quality training data. Thus, "reasoning trajectories with expanded code" are formed, where each step is backed by executable code, enhancing the reliability of the training process. In cases where the generated Python code fails at any step, the corresponding node in the search tree is discarded. This approach filters out erroneous or incorrect intermediate reasoning steps, retaining only trajectories where each step is confirmed by successful code execution. Although this may lead to the loss of potentially useful, but "encoded" in other ways, reasoning, rStar-Math deliberately emphasizes executable code as a quality criterion, especially important for mathematical reasoning involving precise calculations. This is a compromise between data completeness and quality, where priority is given to the accuracy and verifiability of each step.
+
+> **Quote:**
+> *"a novel code-augmented CoT data synthesis method, which performs extensive MCTS rollouts to generate step-by-step verified reasoning trajectories with self-annotated MCTS Q-values."*
+
+#### 2.3. New Process Preference Model (Process Preference Model, PPM)
+
+As the reward model, the Process Preference Model (PPM) is used, which evaluates each step of the reasoning. Training the PPM is based on preference pairs (positive and negative steps) derived from Q-values assigned by MCTS. Unlike result-based reward models (ORM), which evaluate only the final answer, PPM evaluates the quality of each intermediate step, allowing for more effective guidance of the training process. Using preference pairs allows avoiding the direct use of noisy Q-values as reward labels, enhancing the stability and efficiency of training. The loss function for the PPM is defined as:
+
+$$
+L_{ppm}(\theta) = -\frac{1}{2 \times N} \sum_{(x, y_{pos}, y_{neg}) \in D} \log \left( \sigma \left( r_{\theta} \langle x, y_{pos} \rangle - r_{\theta} \langle x, y_{neg} \rangle \right) \right)
+$$
+
+where:
+- $( \theta )$ — model parameters
+- $( N )$ — number of examples
+- $( x )$ — input data
+- $( y_{pos} )$ and $( y_{neg} )$ — positive and negative examples, respectively
+- $( D )$ — dataset
+- $( \sigma )$ — sigmoid function
+- $( r_{\theta} )$ — preference evaluation function of the model.
+
+**Preference Pair Formation:**
+
+A key aspect of the PPM is the use of *preference pairs*. For each input example $(x)$, a pair $(y_{pos}, y_{neg})$ is created, where:
+
+*   $y_{pos}$ represents a "positive" example of a reasoning step considered more preferable (e.g., a step leading to a state with a higher Q-value).
+*   $y_{neg}$ represents a "negative" example of a reasoning step considered less preferable (e.g., a step leading to a state with a lower Q-value).
+
+These preference pairs form the training dataset $D$.
+
+**Preference Evaluation Function ($r_{\theta}$):**
+
+The PPM uses a preference evaluation function $r_{\theta}$, parameterized by $\theta$. This function takes as input the input data $x$ and the reasoning step $y$ and outputs a scalar value representing the "preference" of this step in the context of the input data. The higher the value $r_{\theta}\langle x, y \rangle$, the more preferable the step $y$ is considered for the input data $x$.
+
+**Loss Function ($L_{ppm}(\theta)$):**
+
+The loss function $L_{ppm}(\theta)$ is used to train the parameters $\theta$ of the model $r_{\theta}$. The goal is to tune the parameters $\theta$ such that the model assigns higher preference values to positive examples ($y_{pos}$) compared to negative examples ($y_{neg}$).
+
+Let's examine the loss function in more detail:
+
+$$
+L_{ppm}(\theta) = -\frac{1}{2 \times N} \sum_{(x, y_{pos}, y_{neg}) \in D} \log \left( \sigma \left( r_{\theta} \langle x, y_{pos} \rangle - r_{\theta} \langle x, y_{neg} \rangle \right) \right)
+$$
+
+**Breakdown of Loss Function Components:**
+
+1. **$-\frac{1}{2 \times N} \sum_{(x, y_{pos}, y_{neg}) \in D}$**:
+    *   **$\sum_{(x, y_{pos}, y_{neg}) \in D}$**: Summation occurs over all examples in the training dataset $D$. Each example consists of input data $x$, a positive example $y_{pos}$, and a negative example $y_{neg}$.
+    *   **$N$**: Total number of examples in the training dataset $D$.
+    *   **$\frac{1}{N}$**: Normalization, averaging the losses across all examples.
+    *   **$\frac{1}{2}$**: Additional scaling factor, which may be used for convenience or to match a specific implementation.
+    *   **$-$**: Negative sign before the summation indicates that we want to *minimize* the loss function.
+
+2. **$\log \left( \sigma \left( r_{\theta} \langle x, y_{pos} \rangle - r_{\theta} \langle x, y_{neg} \rangle \right) \right)$**:
+    *   **$r_{\theta} \langle x, y_{pos} \rangle$**: Output of the preference evaluation function for input data $x$ and the positive example $y_{pos}$. This value represents the evaluation of the "preference" of the step $y_{pos}$ in the context of $x$.
+    *   **$r_{\theta} \langle x, y_{neg} \rangle$**: Output of the preference evaluation function for input data $x$ and the negative example $y_{neg}$. This value represents the evaluation of the "preference" of the step $y_{neg}$ in the context of $x$.
+    *   **$r_{\theta} \langle x, y_{pos} \rangle - r_{\theta} \langle x, y_{neg} \rangle$**: Difference between the preference evaluations for the positive and negative examples. We want this difference to be positive, i.e., $r_{\theta} \langle x, y_{pos} \rangle > r_{\theta} \langle x, y_{neg} \rangle$.
+    *   **$\sigma(\cdot)$**: Sigmoid function. The sigmoid function $\sigma(z) = \frac{1}{1 + e^{-z}}$ transforms any real number into the range $(0, 1)$. In this context, it is interpreted as the probability that the positive example $y_{pos}$ is indeed preferable to the negative example $y_{neg}$. If the difference $r_{\theta} \langle x, y_{pos} \rangle - r_{\theta} \langle x, y_{neg} \rangle$ is large and positive, then $\sigma(\cdot)$ will be close to 1. If the difference is large and negative, then $\sigma(\cdot)$ will be close to 0.
+    *   **$\log(\cdot)$**: Natural logarithm. Applied to the output of the sigmoid function. Since $\sigma(\cdot)$ is in the range $(0, 1)$, $\log(\sigma(\cdot))$ will be a negative number. The negative sign before the summation in the loss function turns this into a positive value that we aim to minimize. The use of the logarithm is related to the concept of cross-entropy in classification tasks.
+
+3. **$r_{\theta}\langle x, y \rangle$**:
+    *   **Input Data:**
+        *   The input to the model consists of textual data representing the **problem statement** $x$ and the **sequence of reasoning steps** $s$.
+        *   At the first step, only the problem statement $x$ is input. At subsequent steps, the concatenation of the problem statement ($x$) and the sequence of previous solution steps up to the current step $s_i$ is input: $x \oplus s_1 \oplus s_2 \oplus ... \oplus s_{i-1} \oplus s_i$.
+        *   **Important**: These textual data include not only the problem text but also the **sequence of reasoning steps in natural language and Python code, including comments**.
+    *   **Representation as Vectors:**
+        *   The textual data **are not input directly** into the neural network. Instead, they are **transformed into vector representations** using an embedding mechanism, as in other language models.
+        *   These vector representations are **numerical arrays** that capture the semantic and syntactic information contained within the text.
+    *   **Neural Network:**
+        *   The vector representations of the input data are fed into a **neural network** that implements the function $r_{\theta}$.
+        *   This network consists of several layers performing **nonlinear transformations** on the vector representations.
+    *   **Scalar Output:**
+        *   At the output of the neural network, a **single real number** — a scalar value in the range from -1 to 1 — is obtained.
+        *   This number represents the **"preference" evaluation** of the current reasoning step $s_i$ for the problem $x$. The higher the value, the more preferable this step is.
+    *   **Model Training:**
+        *   The PPM model **is not trained on "absolute" preference values**. Instead, it is trained to distinguish between **"positive" and "negative" steps**.
+        *   For each reasoning step, pairs are created from "positive" steps with higher Q-values and "negative" steps with lower Q-values.
+        *   The PPM model is trained to predict **higher values for positive steps** and **lower values for negative steps**, using a pairwise ranking function.
+
+**Key Points:**
+
+*   The function $r_{\theta}(x, y)$ does not compute a dot product, but rather represents a **direct pass** through the network layers that processes the **textual input representations**.
+*   At the output of this network, a **single real number** from -1 to 1 is obtained, which evaluates the "preference" of the step.
+*   The model is trained not on absolute values, but on the **difference between "positive" and "negative" steps**.
+
+Thus, the function $r_{\theta}(x, y)$ is a **neural network that takes textual representations of the problem and solution steps, transforms them into vectors, and outputs a scalar preference evaluation at the output.**
+
+**Objective of Minimizing the Loss Function:**
+
+By minimizing $L_{ppm}(\theta)$, we tune the parameters $\theta$ of the model $r_{\theta}$ such that for each preference pair $(y_{pos}, y_{neg})$, the model assigns a higher preference value to $y_{pos}$ compared to $y_{neg}$. In other words, the model learns to align with the provided preference data.
+
+**Advantages of PPM over ORM:**
+
+*   **More Effective Training:** By evaluating each step, the PPM provides a denser feedback signal for training. ORM, evaluating only the final answer, may face a sparse reward problem, especially in complex tasks where a successful outcome is reached after multiple steps.
+*   **Robustness to Noisy Q-values:** Using preference pairs allows avoiding the direct use of Q-values as reward labels. Q-values, especially during the early stages of MCTS training, can be noisy and unstable. By comparing preferences, the PPM focuses on the relative usefulness of steps, making training more robust.
+
+#### Q-values in rStar-Math MCTS (Monte Carlo Tree Search)
+
+In rStar-Math MCTS (Monte Carlo Tree Search), each step is assigned Q-values reflecting its contribution to achieving the correct final answer. These values are used to guide node selection in MCTS towards more promising solution paths. The process of assigning Q-values involves several stages:
+
+**1. Generating Trajectories**
+
+- **Building the Search Tree**: MCTS iteratively builds a search tree, starting from the root node representing the question.
+- **Generating Candidates**: At each step, the policy model (SLM) generates several candidates (nodes) representing intermediate solution steps.
+- **Extracting Solution Trajectories**: From the search tree, solution trajectories are extracted, where each trajectory represents a path from the root to a terminal node (final step).
+- **Assigning Q-values**: Each step $s_i$ in trajectory $t = x \oplus s_1 \oplus s_2 \oplus \ldots \oplus s_d$ is assigned a Q-value $Q(s_i)$.
+
+**2. Self-Annotating Q-values (Looking at the Result)**
+
+Two methods are used to assign Q-values, each evaluating the step's quality based on its contribution to obtaining the correct final answer:
+
+**Terminal-Oriented Annotation (Finish-line Evaluation)**
+
+- **Application**: Used in the first two training rounds when the PPM model is not yet reliable enough.
+- **Updating Q-values**: The Q-value of step $s_i$ in $k$-th rollout $q(s_i)_k$ is updated based on the Q-value of the terminal (finish) node $s_d$ $q(s_d)$.
+- **Evaluating Terminal Nodes**: Terminal nodes are evaluated as $q(s_d) = 1$ if the final answer is correct, and $q(s_d) = -1$ if the answer is incorrect.
+- **Update Formula**: $q(s_i)_k = q(s_i)_{k-1} + q(s_d)_k$, where $q(s_i)_0 = 0$ in the first rollout.
+- **Result**: Steps that frequently lead to the correct answer receive higher Q-values, while steps leading to incorrect answers receive low Q-values.
+- **When Used**: At the very beginning of training, when the model knows nothing and is just trying everything.
+
+**PPM-Enhanced Annotation (Hint-based Evaluation)**
+
+- **Application**: Used starting from the third round, when the PPM model is already trained.
+- **Predicting Q-values**: The PPM model predicts the initial Q-value $q(s_i)_0$ for each step $s_i$, based on the partial trajectory $x \oplus s_1 \oplus s_2 \oplus \ldots \oplus s_{i-1} \oplus s_i$. Formally, $q(s_i)_0 = PPM(x \oplus s_1 \oplus s_2 \oplus \ldots \oplus s_{i-1} \oplus s_i)$.
+- **Updating Q-values**: This initial Q-value is updated based on the Q-value of the terminal node $q(s_d)$ during the backpropagation phase of MCTS. The update occurs according to the formula $q(s_i)_k = q(s_i)_{k-1} + q(s_d)_k$, as in terminal annotation.
+- **Result**: PPM-enhanced MCTS helps the policy model generate higher-quality steps, as it guides solutions towards correct paths.
+- **When Used**: When the PPM model has learned a bit and can make more informed choices.
+
+**Summary**
+
+In both methods, after a large number of MCTS rollouts, steps that consistently lead to correct answers receive higher Q-values, while steps that do not lead to correct answers receive low Q-values.
+
+**3. Using Q-values in MCTS**
+
+- **Node Selection**: Q-values are used to select the most promising nodes during the selection phase of MCTS.
+- **UCT Formula**: The node $s$ is selected using the UCT (Upper Confidence bounds for Trees) formula:
 
   $$
   UCT(s) = Q(s) + c \sqrt{\frac{\ln N_{\text{parent}}(s)}{N(s)}}
   $$
 
-Разберем каждый компонент формулы UCT:
+Let's break down each component of the UCT formula:
 
-* **$Q(s)$ – Среднее Q-значение узла $s$:**
-    * Как ты правильно отметил, $Q(s)$ рассчитывается как среднее всех Q-значений, полученных при посещении узла $s$.
-    * Формально:  $Q(s) = \frac{q(s)}{N(s)}$, где:
-        * $q(s)$ – это *сумма* всех Q-значений, которые были "возвращены" в узел $s$ после завершения симуляций, начинавшихся с этого узла. Каждый раз, когда симуляция достигает терминального состояния, результат этой симуляции (например, +1 за правильный ответ, -1 за неправильный) распространяется обратно по дереву, обновляя $q(s)$ для каждого узла на пути.
-        * $N(s)$ – общее количество раз, когда узел $s$ был посещен.
-    * **Интерпретация:** $Q(s)$ представляет собой текущую оценку "ценности" перехода в состояние $s$. Высокое $Q(s)$ говорит о том, что посещение этого узла в среднем приводило к хорошим результатам в прошлом.
+* **$Q(s)$ – Average Q-value of node $s$:**
+    * As you correctly noted, $Q(s)$ is calculated as the average of all Q-values obtained when visiting node $s$.
+    * Formally: $Q(s) = \frac{q(s)}{N(s)}$, where:
+        * $q(s)$ – this is the *sum* of all Q-values that were "returned" to node $s$ after completing simulations starting from this node. Each time a simulation reaches a terminal state, the result of this simulation (e.g., +1 for a correct answer, -1 for an incorrect one) is propagated back up the tree, updating $q(s)$ for each node on the path.
+        * $N(s)$ – the total number of times node $s$ has been visited.
+    * **Interpretation:** $Q(s)$ represents the current "value" or "quality" of transitioning to state $s$. A high $Q(s)$ indicates that visiting this node has, on average, led to good results in the past.
 
-* **$c$ – Константа баланса исследования и использования:**
-    * Эта константа является гиперпараметром, который нужно настраивать.
-    * **Роль:**  Она определяет, насколько MCTS склонен исследовать менее изученные ветви дерева.
-    * **Высокое значение $c$:**  Поощряет *исследование* (exploration). Алгоритм будет чаще выбирать узлы, у которых было меньше посещений, даже если их текущее среднее Q-значение не самое высокое. Это помогает находить потенциально хорошие, но еще не до конца изученные пути.
-    * **Низкое значение $c$:** Поощряет *использование* (exploitation). Алгоритм будет чаще выбирать узлы с высоким текущим средним Q-значением, полагаясь на уже накопленную информацию.
-    * **Выбор $c$:**  Обычно требует экспериментов. Слишком высокое $c$ может привести к неэффективному исследованию неперспективных ветвей, а слишком низкое $c$ может заставить алгоритм застрять на субоптимальных решениях.
+* **$c$ – Exploration-Exploitation Balance Constant:**
+    * This is a hyperparameter that needs to be tuned.
+    * **Role:** It determines how much MCTS is inclined to explore less visited branches of the tree.
+    * **High $c$ value:** Encourages *exploration*. The algorithm will more frequently select nodes that have been visited fewer times, even if their current average Q-value is not the highest. This helps find potentially good but not yet fully explored paths.
+    * **Low $c$ value:** Encourages *exploitation*. The algorithm will more frequently select nodes with high current average Q-values, relying on already accumulated information.
+    * **Choosing $c$:** Usually requires experimentation. Too high a $c$ can lead to inefficient exploration of unpromising branches, while too low a $c$ can cause the algorithm to get stuck on suboptimal solutions.
 
-* **$N(s)$ – Количество посещений узла $s$:**
-    * Это просто счетчик того, сколько раз MCTS проходил через узел $s$.
-    * **Роль в формуле UCT:**  Чем меньше посещений у узла, тем больше вторая часть формулы UCT ($\sqrt{\frac{\ln N_{\text{parent}}(s)}{N(s)}}$) будет влиять на выбор. Это стимулирует исследование менее посещаемых узлов.
+* **$N(s)$ – Number of Visits to Node $s$:**
+    * This is simply a counter of how many times MCTS has passed through node $s$.
+    * **Role in the UCT formula:** The less a node has been visited, the more the second part of the UCT formula ($\sqrt{\frac{\ln N_{\text{parent}}(s)}{N(s)}}$) will influence the selection. This encourages the exploration of less-visited nodes.
 
-* **$N_{\text{parent}}(s)$ – Количество посещений родительского узла $s$:**
-    * Это количество раз, когда родительский узел узла $s$ был посещен.
-    * **Роль в формуле UCT:**  Вместе с $N(s)$ определяет степень "неизведанности" узла $s$ относительно его родителя. Логарифм от количества посещений родителя растет медленнее, чем количество посещений самого узла, что со временем уменьшает вклад исследовательской части формулы для часто посещаемых узлов.
+* **$N_{\text{parent}}(s)$ – Number of Visits to Parent Node $s$:**
+    * This is the number of times the parent node of node $s$ has been visited.
+    * **Role in the UCT formula:** Together with $N(s)$, it determines the degree of "unexploredness" of node $s$ relative to its parent. The logarithm of the number of parent visits grows more slowly than the number of visits to the node itself, which over time reduces the influence of the exploration part of the formula for frequently visited nodes.
 
-**Баланс исследования и использования на практике:**
+**Balancing Exploration and Exploitation in Practice:**
 
-В начале работы MCTS, когда большинство узлов посещены мало раз, исследовательская часть формулы UCT играет большую роль, побуждая алгоритм пробовать разные пути. Со временем, по мере накопления информации, средние Q-значения становятся более надежными, и эксплуатационная часть формулы (сами $Q(s)$) начинает доминировать, направляя поиск к наиболее перспективным ветвям.
+At the beginning of MCTS operation, when most nodes have been visited few times, the exploration part of the UCT formula plays a larger role, prompting the algorithm to try different paths. Over time, as information accumulates, the average Q-values become more reliable, and the exploitation part of the formula (the $Q(s)$ itself) begins to dominate, guiding the search towards the most promising branches.
 
-### Пример работы функции потерь PPM
+### Example of PPM Loss Function
 
-Теперь давай разберем пример с функцией потерь PPM. PPM (Policy Prediction Model) обучается предсказывать, какие шаги являются хорошими в заданном контексте. Функция потерь используется для измерения того, насколько хорошо PPM делает эти предсказания, и для корректировки параметров модели в процессе обучения.
+Now let's examine an example with the PPM loss function. The PPM (Policy Prediction Model) is trained to predict which steps are good in a given context. The loss function is used to measure how well the PPM makes these predictions and to adjust the model parameters during training.
 
-**Сценарий:**
+**Scenario:**
 
-Предположим, в процессе MCTS, находясь в определенном состоянии (контексте) `x`, модель политики PPM рассматривает два возможных следующих шага:
+Suppose, during MCTS, in a certain state (context) `x`, the PPM considers two possible next steps:
 
-* **`y_pos`:** Шаг, который, как выяснилось в результате MCTS, ведет к правильному решению и имеет высокую Q-оценку.
-* **`y_neg`:** Шаг, который не приводит к успеху и имеет низкую Q-оценку.
+* **`y_pos`:** A step that, as revealed by MCTS, leads to a correct solution and has a high Q-score.
+* **`y_neg`:** A step that does not lead to success and has a low Q-score.
 
-**Оценки PPM:**
+**PPM Evaluations:**
 
-PPM, основываясь на контексте `x`, выдает оценки вероятности (или "предпочтения") для каждого из этих шагов. Например:
+Based on the context `x`, the PPM assigns evaluations (or "preferences") to each of these steps. For example:
 
-* PPM оценивает `y_pos` с вероятностью 0.7.
-* PPM оценивает `y_neg` с вероятностью -0.3. (Здесь стоит отметить, что PPM может выдавать "сырые" оценки, которые затем могут быть преобразованы в вероятности, например, через softmax. В данном контексте, можно интерпретировать эти значения как относительные "оценки качества" шага).
+* The PPM evaluates `y_pos` with a probability of 0.7.
+* The PPM evaluates `y_neg` with a probability of -0.3. (Note that the PPM may output "raw" scores that are then converted into probabilities, for example, via softmax. In this context, these values can be interpreted as relative "quality scores" of the steps.)
 
-**Разница и сигмоидная функция:**
+**Difference and Sigmoid Function:**
 
-Далее, рассматривается разница в оценках между положительным и отрицательным примерами:
+Next, the difference between the evaluations of the positive and negative examples is considered:
 
-* Разница = Оценка(`y_pos`) - Оценка(`y_neg`) = 0.7 - (-0.3) = 1.0
+* Difference = Evaluation(`y_pos`) - Evaluation(`y_neg`) = 0.7 - (-0.3) = 1.0
 
-Эта разница показывает, насколько PPM различает хороший и плохой шаг. Затем эта разница пропускается через сигмоидную функцию:
+This difference shows how much the PPM distinguishes the good step from the bad one. Then, this difference is passed through the sigmoid function:
 
-* Сигмоид(1.0) ≈ 0.73
+* Sigmoid(1.0) ≈ 0.73
 
-Сигмоидная функция сжимает значения в диапазон от 0 до 1, что можно интерпретировать как "уверенность" модели в том, что `y_pos` лучше, чем `y_neg`.
+The sigmoid function compresses values into the range from 0 to 1, which can be interpreted as the "confidence" of the model that `y_pos` is better than `y_neg`.
 
-**Функция потерь (логистическая потеря):**
+**PPM Loss Function (Logistic Loss):**
 
-В данном случае, используется форма логистической функции потерь (binary cross-entropy), которая часто применяется в задачах классификации, где нужно отличить "положительный" пример от "отрицательного". Функция потерь измеряет "расстояние" между предсказанием модели и истинной меткой.
+In this case, a form of logistic loss function is used, which is often applied in classification tasks where one needs to distinguish a "positive" example from a "negative" one. The loss function measures the "distance" between the model's prediction and the true label.
 
-В упрощенном виде, функция потерь стремится минимизировать значение, если модель правильно предсказывает предпочтение, и максимизировать его, если ошибается. В нашем примере, вклад в функцию потерь связан с логарифмом значения, полученного после сигмоиды:
+In a simplified form, the loss function aims to minimize the value when the model correctly predicts the preference and maximizes it when it makes a mistake. In our example, the contribution to the loss function is related to the logarithm of the value obtained after the sigmoid:
 
-* Логарифм(0.73) ≈ -0.32
+* Logarithm(0.73) ≈ -0.32
 
-**Интерпретация вклада в функцию потерь:**
+**Interpretation of Loss Contribution:**
 
-* **Если PPM правильно предсказывает предпочтение `y_pos`:**  Разница между оценками будет положительной, значение после сигмоиды будет близко к 1, а логарифм этого значения будет близок к 0 (или небольшое отрицательное число). Это означает *небольшую потерю*.
-* **Если PPM неправильно предсказывает предпочтение (например, оценка `y_neg` выше, чем `y_pos`):** Разница будет отрицательной, значение после сигмоиды будет близко к 0, а логарифм этого значения будет большим отрицательным числом. В контексте функции потерь, это приведет к *большой потере*.
+* **If the PPM correctly predicts the preference of `y_pos`:** The difference between the evaluations will be positive, the value after the sigmoid will be close to 1, and the logarithm of this value will be close to 0 (or a small negative number). This means a *small loss*.
+* **If the PPM incorrectly predicts the preference (e.g., the evaluation of `y_neg` is higher than `y_pos`):** The difference will be negative, the value after the sigmoid will be close to 0, and the logarithm of this value will be a large negative number. In the context of the loss function, this leads to a *large loss*.
 
-**Цель обучения PPM:**
+**PPM Training Goal:**
 
-Цель обучения PPM состоит в том, чтобы минимизировать общую функцию потерь на большом наборе данных. Когда PPM делает неправильные предсказания (например, не отличает хороший шаг от плохого), функция потерь "штрафует" модель, генерируя большой вклад в общую потерю. Это заставляет алгоритм оптимизации (например, градиентный спуск) корректировать параметры PPM таким образом, чтобы в будущем его предсказания лучше соответствовали наблюдаемым результатам (Q-оценкам, полученным от MCTS).
+The goal of training the PPM is to minimize the total loss on a large dataset. When the PPM makes incorrect predictions (e.g., fails to distinguish a good step from a bad one), the loss function "penalizes" the model, generating a large contribution to the total loss. This causes the optimization algorithm (e.g., gradient descent) to adjust the PPM parameters so that in the future, its predictions better match the observed results (Q-scores obtained from MCTS).
 
-**В заключение:**
+**In Conclusion:**
 
-Q-значения в MCTS направляют поиск, помогая алгоритму исследовать перспективные области пространства решений. Функция потерь PPM, в свою очередь, использует информацию о Q-значениях, чтобы обучить модель политики делать более точные предсказания о ценности различных шагов, что, в свою очередь, улучшает эффективность MCTS.
+Q-values in MCTS guide the search, helping the algorithm explore promising areas of the solution space. The PPM loss function, in turn, uses information from Q-values to train the policy model to make more accurate predictions about the value of different steps, which in turn improves the effectiveness of MCTS.
 
-> **Цитата:**
+> **Quote:**
 > *"a novel method that trains an SLM acting as a process preference model, i.e., a PPM to implement the desired PRM, that reliably predicts a reward label for each math reasoning step."*
 
-#### 2.4. Использование Монте-Карло (MCTS) для эффективного мышления System 2
+#### 2.4. Using Monte Carlo (MCTS) for Effective System 2 Thinking
 
-Поиск по дереву Монте-Карло (MCTS) играет ключевую роль в реализации "глубокого мышления". MCTS разбивает сложные математические задачи на более простые одношаговые генерации, что снижает сложность задачи для модели политики. MCTS автоматически назначает Q-значение каждому шагу на основе его вклада в получение правильного окончательного ответа. Этот подход устраняет необходимость в трудоемкой пошаговой аннотации человеком для обучения модели вознаграждения. MCTS позволяет модели исследовать различные траектории решения и выбирать наиболее перспективные, имитируя процесс обдуманного мышления (System 2).
+Monte Carlo Tree Search (MCTS) plays a key role in implementing "deep thinking." MCTS breaks down complex mathematical problems into simpler single-step generation tasks, reducing the difficulty for the policy SLM compared to other System 2 methods. MCTS automatically assigns Q-values to each step based on its contribution to obtaining the correct final answer. This approach eliminates the need for labor-intensive, step-by-step human annotation for training the reward model. MCTS allows the model to explore various solution trajectories and select the most promising ones, simulating the process of deliberate thinking (System 2).
 
-> **Цитата:**
+> **Quote:**
 > *"MCTS breaks down complex math problems into simpler single-step generation tasks, reducing the difficulty for the policy SLM compared to other System 2 methods... Second, the step-by-step generation in MCTS naturally yields step-level training data for both models."*
 
-### 3. Экспериментальные результаты
+### 3. Experimental Results
 
 ![Table_1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-03/assets/Table_1.png)
 
-> В этой таблице представлена ​​производительность модели rStar-Math при решении различных задач на математическое мышление. Она показывает точность (pass@1), достигнутую rStar-Math при применении к нескольким малым языковым моделям (SLM) различных размеров. Результаты сравниваются с производительностью моделей OpenAI и другими базовыми показателями, подчеркивая значительные улучшения в возможностях математического мышления, достигнутые rStar-Math благодаря ее подходу глубокого мышления. Таблица демонстрирует способность модели достигать самых современных результатов на стандартных тестах и ​​даже превосходить производительность более крупных и мощных моделей.
+> This table presents the performance of the rStar-Math model on various mathematical reasoning tasks. It shows the accuracy (pass@1) achieved by rStar-Math when applied to several small language models (SLM) of different sizes. The results are compared with the performance of OpenAI models and other baseline metrics, highlighting the significant improvements in mathematical reasoning capabilities achieved by rStar-Math through its deep thinking approach. The table demonstrates the model's ability to achieve state-of-the-art results on standard benchmarks and even surpass the performance of larger and more powerful models.
 
-Эффективность rStar-Math была оценена на различных математических бенчмарках. **rStar-Math значительно улучшает возможности SLM в математических рассуждениях.** На бенчмарке MATH, rStar-Math значительно повысил точность модели Qwen2.5-Math-7B с 58.8% до 90.0%, а модели Phi3-mini-3.8B с 41.4% до 86.4%. Примечательно, что rStar-Math превзошел результаты OpenAI o1-preview на +4.5% и +0.9% соответственно. На олимпиаде AIME, rStar-Math продемонстрировал способность решать в среднем 53.3% (8 из 15) задач, что соответствует уровню 20% лучших среди старшеклассников с высокими достижениями в математике. Эти результаты демонстрируют, что rStar-Math позволяет SLM не только достигать уровня LLM, но и превосходить их в сложных задачах математического рассуждения. Сравнительные анализы показывают, что rStar-Math превосходит ряд моделей System 1, таких как DeepSeek-Coder-V2-Instruct, Mathstral-7B-v0.1, NuminaMath-72B-CoT, LLaMA3.1-8B-Instruct, LLaMA3.1-70B-Instruct, Qwen2.5-Math-72B-Instruct, на различных бенчмарках (MATH, AIME 2024, AMC 2023, Olympiad Bench, College Math, GaokaoEn 2023). rStar-Math также демонстрирует превосходство над System 2 моделью Qwen2.5-Math-72B-Instruct+72B ORM и моделями, использующими подход Best-of-N (Qwen2.5-Math-1.5B-Instruct+72B ORM, Qwen2-Math-7B-Instruct+72B ORM, Qwen2.5-Math-7B-Instruct+72B ORM). Это подчеркивает эффективность "глубокого мышления" System 2, реализуемого в rStar-Math, и ключевую роль PPM. Также было отмечено, что увеличение вычислительной мощности во время тестирования (увеличение количества траекторий поиска) дополнительно улучшает результаты rStar-Math. Анализ показал, что PPM является критически важным компонентом для повышения производительности System 2 рассуждения, в то время как модель политики важна, но ее вклад менее значителен по сравнению с PPM при достижении наивысшего уровня производительности.
+The effectiveness of rStar-Math was evaluated on various mathematical benchmarks. **rStar-Math significantly improves the mathematical reasoning capabilities of SLMs.** On the MATH benchmark, rStar-Math significantly increased the accuracy of the Qwen2.5-Math-7B model from 58.8% to 90.0%, and the Phi3-mini-3.8B model from 41.4% to 86.4%. Notably, rStar-Math surpassed the results of OpenAI o1-preview by +4.5% and +0.9% respectively. On the AIME Olympiad, rStar-Math demonstrated the ability to solve on average 53.3% (8 out of 15) of the problems, corresponding to the level of the top 20% of high-achieving high school students in mathematics. These results demonstrate that rStar-Math enables SLMs not only to reach the level of LLMs but also to surpass them in complex mathematical reasoning tasks. Comparative analyses show that rStar-Math outperforms several System 1 models, such as DeepSeek-Coder-V2-Instruct, Mathstral-7B-v0.1, NuminaMath-72B-CoT, LLaMA3.1-8B-Instruct, LLaMA3.1-70B-Instruct, Qwen2.5-Math-72B-Instruct, on various benchmarks (MATH, AIME 2024, AMC 2023, Olympiad Bench, College Math, GaokaoEn 2023). rStar-Math also demonstrates superiority over the System 2 model Qwen2.5-Math-72B-Instruct+72B ORM and models using the Best-of-N approach (Qwen2.5-Math-1.5B-Instruct+72B ORM, Qwen2-Math-7B-Instruct+72B ORM, Qwen2.5-Math-7B-Instruct+72B ORM). This underscores the effectiveness of the "deep thinking" System 2 implemented in rStar-Math and the critical role of the PPM. It was also noted that increasing computational power during testing (increasing the number of search trajectories) further improves rStar-Math results. Analysis showed that the PPM is a critically important component for enhancing System 2 reasoning performance, while the policy model is important but contributes less significantly to achieving the highest level of performance compared to the PPM.
 
-### 4. Обсуждение
+### 4. Discussion
 
-Результаты, полученные с помощью rStar-Math, имеют важное значение для развития эффективных и доступных моделей искусственного интеллекта. Метод демонстрирует, что небольшие языковые модели, при использовании инновационных подходов к обучению, могут освоить сложные задачи, традиционно считавшиеся прерогативой больших моделей. Использование MCTS и PPM позволяет эффективно исследовать пространство решений и выбирать наиболее верные траектории рассуждений, имитируя процесс глубокого человеческого мышления. Важно отметить, что rStar-Math превосходит как одношаговые (System 1), так и многошаговые (System 2) подходы, включая модели, основанные на дистилляции знаний. Предложенный метод является общим и потенциально может быть применен к различным областям, где требуется многошаговое рассуждение и верификация, таким как доказательства теорем, кодирование и задачи на здравый смысл. В частности, rStar-Math продемонстрировал потенциал для доказательства математических утверждений, успешно справившись с задачей олимпиадного уровня, применив малую теорему Ферма. Применение rStar-Math к областям кодирования и рассуждений на основе здравого смысла представляется перспективным, однако требует разработки эффективного механизма обратной связи для оценки качества генерируемых траекторий рассуждений. Для кодирования это могут быть обширные тестовые случаи, а для общих рассуждений — человеческая разметка или взаимная проверка с другими LLM. Авторы подчеркивают важность сбора более сложных задач для дальнейшего улучшения rStar-Math, указывая на потенциал для дальнейшего развития метода.
+The results obtained with rStar-Math are significant for the development of efficient and accessible artificial intelligence models. The method demonstrates that small language models, when using innovative training approaches, can master complex tasks traditionally considered the prerogative of large models. The use of MCTS and PPM allows for effective exploration of the solution space and selection of the most promising reasoning trajectories, simulating the process of deep human thinking. It is important to note that rStar-Math surpasses both single-step (System 1) and multi-step (System 2) approaches, including models based on knowledge distillation. The proposed method is general and potentially applicable to various domains requiring multi-step reasoning and verification, such as theorem proving, coding, and common sense reasoning. In particular, rStar-Math demonstrated potential for proving mathematical statements, successfully handling an Olympiad-level problem by applying Fermat's Little Theorem. Applying rStar-Math to coding and common sense reasoning domains appears promising, but requires developing an effective feedback mechanism for evaluating the quality of generated reasoning trajectories. For coding, this could be extensive test cases, and for general reasoning, human annotation or mutual verification with other LLMs. The authors emphasize the importance of collecting more complex tasks for further improvement of rStar-Math, pointing to the potential for further development of the method.
 
-### 5. Заключение
+### 5. Conclusion
 
-Метод rStar-Math представляет собой значительный прогресс в области математического рассуждения для малых языковых моделей. Благодаря инновационному сочетанию саморазвития, синтеза данных с расширением кода и обучения модели предпочтения процессов, rStar-Math позволяет SLM достигать и превосходить результаты современных LLM в сложных математических задачах. Использование поиска по дереву Монте-Карло для имитации глубокого мышления и пошаговой верификации рассуждений открывает новые перспективы для создания более эффективных и доступных моделей искусственного интеллекта. Предложенный подход имеет потенциал для применения в широком спектре задач, требующих сложных рассуждений, и стимулирует дальнейшие исследования в области обучения эффективных моделей на основе принципов глубокого мышления и самосовершенствования.
+The rStar-Math method represents a significant advancement in mathematical reasoning for small language models. Through an innovative combination of self-evolution, code-augmented CoT data synthesis, and training the Process Preference Model (PPM), rStar-Math enables SLMs to achieve and surpass the results of modern LLMs in complex mathematical problems. The use of Monte Carlo Tree Search (MCTS) to simulate deep thinking and step-by-step verification opens new perspectives for creating more efficient and accessible artificial intelligence models. The proposed approach has the potential for application in a wide range of tasks requiring complex reasoning and holds promise for stimulating further research in the field of training efficient models based on principles of deep thinking and self-improvement.
 
-## Глоссарий ключевых терминов
+## Glossary of Key Terms
 
-- **SLM (Small Language Model):** Небольшая языковая модель, требующая меньше вычислительных ресурсов, чем большие языковые модели (LLM).
-- **LLM (Large Language Model):** Большая языковая модель, требующая значительных вычислительных ресурсов и обычно обладающая большей способностью к рассуждению.
-- **MCTS (Monte Carlo Tree Search):** Поиск Монте-Карло – это алгоритм поиска, используемый для принятия решений, особенно в играх. В **rStar-Math**, **MCTS** используется для исследования возможных шагов решения математических задач.
-- **CoT (Chain-of-Thought):** Цепочка рассуждений – метод, при котором модель генерирует промежуточные шаги рассуждения перед получением окончательного ответа.
-- **PPM (Process Preference Model):** Модель предпочтений процесса – тип **reward** модели, которая оценивает качество каждого шага решения математической задачи на основе **Q-значений**.
-- **Q-value:** Оценка качества или вклада конкретного шага в решение задачи. В **rStar-Math**, **Q-значение** присваивается каждому шагу на основе его вклада в получение правильного ответа.
-- **Reward Model:** Модель, которая оценивает качество решений или отдельных шагов решения, предоставляя обратную связь для обучения **policy** модели.
-- **ORM (Outcome Reward Model):** Модель вознаграждения за результат, которая оценивает только конечный результат решения задачи (правильный/неправильный) и не учитывает промежуточные шаги.
-- **PRM (Process Reward Model):** Модель вознаграждения процесса, которая предоставляет обратную связь на уровне шагов решения задачи.
-- **Self-Evolution:** Самоэволюция - процесс, при котором **policy SLM** и **PPM** итеративно улучшаются, используя генерируемые данные более высокого качества в каждом раунде.
-- **System 1 Thinking:** Быстрое, интуитивное мышление, часто с ошибками.
-- **System 2 Thinking:** Медленное, обдуманное мышление, требующее больших вычислительных ресурсов.
-- **Pass@1 Accuracy:** Метрика, определяющая процент задач, которые модель решает правильно с первой попытки.
-- **Step-by-Step Verified Reasoning Trajectory:** Траектория рассуждения с пошаговой проверкой, где каждый шаг решения проверяется с помощью исполнения кода.
-- **Code-Augmented CoT:** Метод генерации траекторий решения, где каждый шаг сопровождается исполняемым кодом, что обеспечивает проверку шагов.
-- **Pairwise Ranking Loss:** Функция потерь, используемая для обучения **PPM** на основе пар предпочтений (позитивный шаг vs. негативный шаг).
-- **Terminal-guided Annotation:** Метод аннотирования **Q-значений**, который использует только конечный результат (верный или неверный) для оценки промежуточных шагов.
-- **PPM-augmented Annotation:** Метод аннотирования **Q-значений**, который использует **PPM** для оценки каждого шага, делая аннотации более точными.
+- **SLM (Small Language Model):** A small language model requiring fewer computational resources than large language models (LLM).
+- **LLM (Large Language Model):** A large language model requiring significant computational resources and typically possessing greater reasoning capabilities.
+- **MCTS (Monte Carlo Tree Search):** Monte Carlo Tree Search is a search algorithm used for decision-making, especially in games. In **rStar-Math**, **MCTS** is used to explore possible steps for solving mathematical problems.
+- **CoT (Chain-of-Thought):** Chain-of-Thought is a method where the model generates intermediate reasoning steps before arriving at the final answer.
+- **PPM (Process Preference Model):** Process Preference Model is a type of **reward** model that evaluates the quality of each step in solving a mathematical problem based on **Q-values**.
+- **Q-value:** A measure of the quality or contribution of a specific step to solving the problem. In **rStar-Math**, a **Q-value** is assigned to each step based on its contribution to obtaining the correct answer.
+- **Reward Model:** A model that evaluates the quality of solutions or individual solution steps, providing feedback for training the **policy** model.
+- **ORM (Outcome Reward Model):** Outcome Reward Model is a model that evaluates only the final result of a problem solution (correct or incorrect) and does not consider intermediate steps.
+- **PRM (Process Reward Model):** Process Reward Model provides feedback at the level of solution steps.
+- **Self-Evolution:** Self-evolution is the process where the **policy SLM** and **PPM** are iteratively improved using higher-quality generated data in each round.
+- **System 1 Thinking:** Fast, intuitive thinking, often error-prone.
+- **System 2 Thinking:** Slow, deliberate thinking requiring significant computational resources.
+- **Pass@1 Accuracy:** A metric defining the percentage of problems the model solves correctly on the first attempt.
+- **Step-by-Step Verified Reasoning Trajectory:** A reasoning trajectory with step-by-step verification, where each solution step is verified using code execution.
+- **Code-Augmented CoT:** A method of generating solution trajectories where each step is accompanied by executable code, ensuring step verification.
+- **Pairwise Ranking Loss:** A loss function used for training the **PPM** based on preference pairs (positive step vs. negative step).
+- **Terminal-guided Annotation:** A method of annotating **Q-values** that uses only the final result (correct or incorrect) to evaluate intermediate steps.
+- **PPM-augmented Annotation:** A method of annotating **Q-values** that uses the **PPM** to evaluate each step, making annotations more accurate.
 
-## Проверь себя: Краткий опрос (с ответами)
+## Test Yourself: Quick Quiz (with Answers)
 
-### В чём заключается основная идея rStar-Math?
-Основная идея rStar-Math заключается в применении "глубокого мышления" с использованием поиска Монте-Карло (MCTS). В этом процессе SLM (Small Language Model) выступает в роли модели политики, генерируя последовательность шагов решения, а другая SLM оценивает эти шаги, действуя как модель вознаграждения за процесс. Это позволяет SLM достигать результатов, сопоставимых с LLM (Large Language Models) в математическом рассуждении.
+### What is the main idea of rStar-Math?
+The main idea of rStar-Math is to apply "deep thinking" using Monte Carlo Tree Search (MCTS). In this process, an SLM acts as the policy model, generating a sequence of solution steps, while another SLM acts as the process reward model, evaluating these steps. This allows SLMs to achieve results comparable to LLMs in mathematical reasoning.
 
-### Какие три ключевые инновации лежат в основе rStar-Math?
-1. **Метод синтеза данных CoT с расширением кода**  
-2. **Новый подход к обучению модели предпочтения процессов (PPM)**  
-3. **Стратегия саморазвития**
+### What are the three key innovations underlying rStar-Math?
+1. **Code-augmented CoT data synthesis method**
+2. **New approach to training the Process Preference Model (PPM)**
+3. **Self-development strategy**
 
-### Что такое Code-augmented CoT и какую роль он играет в rStar-Math?
-**Code-augmented CoT** — это метод синтеза данных, при котором SLM генерирует как текстовое описание рассуждения, так и соответствующий код Python. Сохраняются только те узлы, где код успешно выполняется, что позволяет отфильтровать ошибочные шаги. Этот метод играет ключевую роль в повышении качества данных для обучения.
+### What is Code-augmented CoT and what role does it play in rStar-Math?
+**Code-augmented CoT** is a data synthesis method where the SLM generates both a textual description of the reasoning and the corresponding Python code. Only those nodes where the code executes successfully are retained, allowing filtering out erroneous steps. This method plays a key role in improving the quality of data for training.
 
-### Какова функция модели предпочтения процессов (PPM)?
-**PPM** оценивает каждый шаг рассуждения, основываясь на парах предпочтений, полученных на основе Q-значений. В отличие от моделей, оценивающих только конечный результат, PPM обеспечивает более точную обратную связь на каждом этапе, что способствует улучшению процесса рассуждения.
+### What is the function of the Process Preference Model (PPM)?
+The **PPM** evaluates each reasoning step based on preference pairs derived from Q-values. Unlike models that evaluate only the final result, the PPM provides more precise feedback at each stage, aiding the improvement of the reasoning process.
 
-### Как работает процесс саморазвития в rStar-Math?
-Процесс саморазвития заключается в итеративном улучшении модели политики (policy SLM) и модели предпочтения процессов (PPM). В каждом раунде модели обучаются на синтезированных решениях, что приводит к прогрессивному улучшению их способностей.
+### How does the self-development process work in rStar-Math?
+Self-development involves the iterative improvement of the policy SLM and the Process Preference Model (PPM). In each round, the models are trained on synthesized solutions, leading to progressive enhancement of their capabilities.
 
-### Как MCTS используется в rStar-Math?
-**MCTS** (Monte Carlo Tree Search) используется для разбиения сложных математических задач на простые одношаговые генерации. Он назначает Q-значения каждому шагу на основе его вклада в правильный ответ, направляя поиск решения и повышая точность рассуждений.
+### How is MCTS used in rStar-Math?
+**MCTS** (Monte Carlo Tree Search) is used to break down complex mathematical problems into simple single-step generation tasks. It assigns Q-values to each step based on its contribution to the correct answer, guiding the search process and improving the accuracy of reasoning.
 
-### Какой вывод можно сделать о роли PPM в System 2 мышлении?
-**PPM** является решающим фактором для повышения производительности **System 2** рассуждения. Хотя модель политики важна, её вклад не столь критичен, как у PPM при достижении наивысшего уровня производительности.
+### What conclusion can be drawn about the role of PPM in System 2 thinking?
+The **PPM** is a critical factor in enhancing the performance of **System 2** reasoning. While the policy model is important, its contribution is not as critical as the PPM's when achieving the highest level of performance.
 
-### Какая главная проблема при обучении моделей математическому рассуждению, которую решает rStar-Math?
-rStar-Math решает проблему **нехватки качественных данных** для обучения математическому рассуждению. Для этого используются:
-- **Self-evolution** (саморазвитие),
-- **Code-augmented CoT** (синтез данных с расширением кода),
-- **PPM** (модель предпочтения процессов) для синтеза и оценки данных.
+### What is the main problem in training models for mathematical reasoning that rStar-Math addresses?
+rStar-Math addresses the problem of **lack of quality data** for training mathematical reasoning. This is achieved through:
+- **Self-evolution** (self-development),
+- **Code-augmented CoT** (data synthesis with code expansion),
+- **PPM** (model for synthesizing and evaluating data).
 
-### Каким образом rStar-Math использует Q-значения?
-**Q-значения** используются для оценки вклада каждого шага в решение задачи. Они применяются:
-- При обучении **PPM**,
-- В процессе **MCTS** для выбора наиболее перспективных траекторий рассуждений.  
-Q-значения присваиваются автоматически, что исключает необходимость в ручной пошаговой аннотации.
+### How does rStar-Math use Q-values?
+**Q-values** are used to evaluate the contribution of each step to solving the problem. They are applied in:
+- Training the **PPM**,
+- The **MCTS** process for selecting the most promising reasoning trajectories.
+Q-values are assigned automatically, eliminating the need for manual step-by-step annotation.

@@ -1,120 +1,120 @@
-# Преемник BERT: ModernBERT 🚀
+# ModernBERT: The Successor to BERT 🚀
 
-**ModernBERT** — новое поколение двунаправленного кодировщика, сочетающее в себе обработку длинных последовательностей, понимание кода и эффективные вычисления. 🌟
+**ModernBERT** — a new generation of bidirectional encoder that combines long sequence processing, code understanding, and efficient computation. 🌟
 
-## Введение 📜
+## Introduction 📜
 
-BERT был выпущен в **2018 году**, но он до сих пор широко используется. Фактически, это вторая по популярности модель на **Hugging Face Hub** с ежемесячными загрузками более **68 миллионов раз**! 🚀 Это связано с тем, что его архитектура, предназначенная только для кодирования, делает его идеальным для множества реальных задач, таких как:
+BERT was released in **2018**, but it is still widely used. In fact, it is the second most popular model on the **Hugging Face Hub** with over **68 million monthly downloads**! 🚀 This is because its encoder-only architecture makes it ideal for many real-world tasks, such as:
 
-- **Поиск** (например, RAG)
-- **Классификация** (например, модерация контента)
-- **Извлечение объектов** (например, для обеспечения конфиденциальности и соответствия требованиям)
+- **Search** (e.g., RAG)
+- **Classification** (e.g., content moderation)
+- **Named Entity Recognition** (e.g., for privacy and compliance)
 
-Наконец, спустя **6 лет**, у нас есть замена! 🎉 **ModernBERT**. Это новое семейство моделей, которое превосходит BERT и его аналоги как по скорости, так и по точности. 🚀
+Finally, after **6 years**, we have a successor! 🎉 **ModernBERT**. This new family of models surpasses BERT and its analogs in both speed and accuracy. 🚀
 
-ModernBERT опирается на десятки достижений в области больших языковых моделей (LLM) последних лет и применяет их к моделям в стиле BERT, включая обновления архитектуры и процесса обучения. 🧠
+ModernBERT builds upon decades of advancements in large language models (LLMs) and applies them to BERT-style models, including architectural updates and training processes. 🧠
 
-Помимо того, что ModernBERT работает быстрее и точнее, он также увеличивает длину контекста до **8 тыс. токенов** (по сравнению с 512 для большинства кодировщиков) и является первой моделью, предназначенной только для кодировщиков, которая включает большое количество кодов в свои обучающие данные. 💻
+Beyond being faster and more accurate, ModernBERT also increases context length to **8,000 tokens** (compared to 512 for most encoders) and is the first encoder-only model designed to include a large amount of code in its training data. 💻
 
-Эти возможности открывают новые области приложений, ранее недоступные через открытую модель, такие как:
+These capabilities open new application areas previously inaccessible through open models, such as:
 
-- **Крупномасштабный поиск кода**
-- **Новые возможности IDE**
-- **Новые конвейеры поиска**, основанные на извлечении полнотекста, а не небольших фрагментов
+- **Large-scale code search**
+- **New IDE capabilities**
+- **New full-text search pipelines**, based on full-text extraction rather than small snippets
 
-Но чтобы объяснить, чем именно мы занимаемся, давайте сделаем шаг назад и посмотрим, откуда мы пришли. 🔍
+But to explain what we're doing, let's take a step back and look at where we came from. 🔍
 
-> Мы ожидаем, что ModernBERT станет новым стандартом во многих приложениях, где сейчас используются модели только для кодировщиков, например, в конвейерах **RAG** (генерация с расширенным поиском) и рекомендательных системах. 📊
+> We expect ModernBERT to become the new standard in many applications where encoder-only models are currently used, such as in **RAG** (Retrieval-Augmented Generation) pipelines and recommendation systems. 📊
 
-## Только модель декодера 🤖
+## Encoder-Only Model 🤖
 
-Недавние громкие разработки в области LLM были сосредоточены на таких моделях, как **GPT**, **Claude**, **Llama**, **Mistral** и **DeepSeek**. Это модели только для декодера или генеративные модели. Их способность генерировать контент, похожий на человеческий, привела к появлению новых удивительных областей применения **GenAI**, таких как генеративное искусство и интерактивный чат. 🎨💬
+Recent major developments in LLMs have focused on models like **GPT**, **Claude**, **Llama**, **Mistral**, and **DeepSeek**. These are decoder-only or generative models. Their ability to generate human-like content has led to new amazing application areas for **GenAI**, such as generative art and interactive chat. 🎨💬
 
-Эти привлекательные приложения привлекли значительные инвестиции, профинансировали бурные исследования и привели к быстрому технологическому прогрессу. По сути, мы перенесли эти достижения обратно на модель только для кодировщиков. 🚀
+These attractive applications have attracted significant investment, funded explosive research, and led to rapid technological progress. Essentially, we've brought these achievements back to encoder-only models. 🚀
 
-**Почему?** Потому что для многих практических приложений требуется оптимизированная и мощная модель! И это не обязательно должна быть генеративная модель. 💡
+**Why?** Because for many practical applications, you need an optimized and powerful model! And it doesn't have to be a generative model. 💡
 
-Грубо говоря, модели, основанные только на декодерах, слишком велики, слишком медленны, слишком запатентованы и слишком дороги для многих задач. Учтите, что исходный **GPT-1** представлял собой модель со **117 миллионами параметров**. Для сравнения, модель **Llama 3.1** имеет **405 миллиардов параметров**, а ее технический отчет описывает методы синтеза данных и управления, которые слишком сложны и дороги для воспроизведения большинством компаний. 💸
+Roughly speaking, decoder-only models are too large, too slow, too patented, and too expensive for many tasks. Consider that the original **GPT-1** was a model with **117 million parameters**. For comparison, the **Llama 3.1** model has **405 billion parameters**, and its technical report describes synthesis methods and control mechanisms that are too complex and expensive for most companies to reproduce. 💸
 
-Таким образом, чтобы использовать такую ​​модель, как **ChatGPT**, вам нужно заплатить комиссию и подождать несколько секунд, чтобы получить ответ API от тяжелого сервера, который вы не можете контролировать. ⏳
+Thus, to use a model like **ChatGPT**, you need to pay a fee and wait several seconds to get an API response from a heavy server you can't control. ⏳
 
-Конечно, неограниченные возможности этих огромных генеративных моделей означают, что вы можете с неохотой использовать их для негенеративных или дискриминативных задач, таких как классификация. Это потому, что вы можете описать задачу классификации простым языком, а затем… просто позволить модели выполнить классификацию. Но хотя этот рабочий процесс отлично подходит для прототипирования, как только вы приступите к серийному производству, вам не захочется платить цену прототипа. 💼
+Of course, the boundless capabilities of these massive generative models mean you can reluctantly use them for non-generative or discriminative tasks, such as classification. This is because you can describe the classification task in simple language and then... just let the model do the classification. But although this workflow is excellent for prototyping, you won't want to pay the prototyping price once you move to production. 💼
 
-Помешательство на популярности **GenAI** затмило возможности моделей, предназначенных только для кодеров. Это основа реальной языковой обработки, и эти модели фактически используются во многих научных и коммерческих приложениях для таких рабочих нагрузок. 🧑‍💻
+The obsession with the popularity of **GenAI** has overshadowed the capabilities of encoder-only models. These are the foundation of real-world language processing, and these models are actually used in many scientific and commercial applications for such workloads. 🧑‍💻
 
-## Только модель кодера 🛠️
+## Encoder-Only Model 🛠️
 
-Выходные данные модели только для кодировщика представляют собой список чисел (вектор внедрения). Можно сказать, что вместо ответа текстом модель кодировщика кодирует свой «ответ» в этой сжатой числовой форме. Этот вектор представляет собой сжатое представление входных данных модели, поэтому модели, предназначенные только для кодировщиков, иногда называют моделями представления. 📊
+The output of an encoder-only model is a list of numbers (embedding vectors). You can say that instead of generating a text answer, the encoder model encodes its "answer" into this compressed numerical form. This vector represents a compressed representation of the model's input data, so encoder-only models are sometimes called embedding models. 📊
 
-Хотя модели только для декодера (например, GPT) могут выполнять работу моделей только для кодировщиков (например, BERT), они ограничены ключевым ограничением: поскольку они являются генеративными моделями, им математически «не разрешено» «заглядывать» за токен. Они могут только смотреть назад. В этом отличие от моделей, предназначенных только для кодировщиков, которые обучены просматривать вперед и назад (в двунаправленном направлении) для каждого токена. Они созданы для этого, что делает их очень эффективными при выполнении работы. 🚀
+Although decoder-only models (e.g., GPT) can perform the work of encoder-only models (e.g., BERT), they are limited by a key constraint: since they are generative models, they are mathematically "not allowed" to "look ahead" beyond the token. They can only look backward. This is the difference from encoder-only models, which are trained to look forward and backward (in a bidirectional manner) for each token. They are designed for this, making them very efficient at the task. 🚀
 
-По сути, передовые модели, такие как **O1** от **OpenAI**, похожи на **Ferrari SF-23**. Это явно триумф инженерной мысли, созданный для победы в гонках, поэтому мы о нем и говорим. Но для замены шины нужна специальная ремонтная бригада, а купить ее самостоятельно не получится. Для сравнения модель **BERT** выглядит как **Honda Civic**. Это также триумф инженерной мысли, но более тонкий, поскольку он спроектирован так, чтобы быть доступным, экономичным, надежным и очень полезным. Поэтому они абсолютно везде. 🚗
+Essentially, advanced models like **O1** from **OpenAI** are like **Ferrari SF-23**. This is clearly a triumph of engineering designed to win races, so we talk about it. But to change a tire, you need a special repair crew, and you can't buy one yourself. In contrast, the **BERT** model looks like a **Honda Civic**. This is also a triumph of engineering, but more subtle, as it is designed to be accessible, economical, reliable, and very useful. That's why they are absolutely everywhere. 🚗
 
-# Будет очень душно, этот блок можно пропустить 😌
+# It will be very stuffy, this block can be skipped 😌
 
 <details>
-  <summary>Нажмите, чтобы раскрыть</summary>
+  <summary>Click to expand</summary>
 
-### Вспомним, как работаю кодер 🤖
+### Let's Recall How an Encoder Works 🤖
 
-> В этом блоке будет рассмотрена базовая математическая архитектура кодера и декодера. Так же будет проведена параллель между старой архитектурой BERT и новой Moder Bert, так как ModernBERT представляет собой модернизированную версию BERT с улучшенной архитектурой, включая RoPE, GeGLU, Flash Attention и другие оптимизации.
+> This block will cover the basic mathematical architecture of the encoder and decoder. We will also draw a parallel between the original BERT architecture and the new ModernBERT, as ModernBERT is a modernized version of BERT with improved architecture, including RoPE, GeGLU, Flash Attention, and other optimizations.
 
-В оригинальной модели Трансформера, описанной в статье «Внимание — это все, что вам нужно», архитектура разделена на две основные части: кодер и декодер. Обе части состоят из слоев, имеющих одинаковую общую структуру, но служащих разным целям.
+In the original Transformer model described in the paper "Attention Is All You Need," the architecture is divided into two main parts: the encoder and the decoder. Both parts consist of layers with the same general structure but serve different purposes.
 
-На рисунке ниже, изображена архитектура модели Transformer. Она состоит из двух основных частей: **кодера (encoder)** и **декодера (decoder)**.
+The figure below shows the architecture of the Transformer model. It consists of two main parts: the **encoder (encoder)** and the **decoder (decoder)**.
 
-![Figure_1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-04/assets/Figure_1.png)
+![Figure_1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-04/assets/Figure_1.png  )
 
-### Кодер (Encoder)
-Кодер обычно находится в левой части архитектуры. Он состоит из нескольких слоев, каждый из которых включает:
-1. **Multi-Head Attention** — механизм внимания, который позволяет модели фокусироваться на разных частях входных данных.
-2. **Add & Norm** — слой, который добавляет входные данные к результату внимания (residual connection) и применяет нормализацию.
-3. **Feed Forward** — полносвязный слой, который применяется к каждому элементу последовательности независимо.
-4. **Add & Norm** — снова добавляет входные данные к результату и нормализует.
+### Encoder (Encoder)
+The encoder is usually located on the left side of the architecture. It consists of several layers, each of which includes:
+1. **Multi-Head Attention** — an attention mechanism that allows the model to focus on different parts of the input data.
+2. **Add & Norm** — a layer that adds the input data to the attention result (residual connection) and applies normalization.
+3. **Feed Forward** — a fully connected layer that is applied to each sequence element independently.
+4. **Add & Norm** — again adds the input data to the result and normalizes.
 
-Эти слои повторяются несколько раз (обычно 6 или более) для создания глубокой модели.
+These layers are repeated several times (usually 6 or more) to create a deep model.
 
-### Декодер (Decoder)
-Декодер обычно находится в правой части архитектуры. Он также состоит из нескольких слоев, но имеет дополнительные компоненты:
-1. **Masked Multi-Head Attention** — механизм внимания, который маскирует будущие токены, чтобы предотвратить "подглядывание" вперед.
-2. **Add & Norm** — слой, который добавляет входные данные к результату внимания и нормализует.
-3. **Multi-Head Attention** — механизм внимания, который учитывает выход кодера.
-4. **Add & Norm** — снова добавляет входные данные к результату и нормализует.
-5. **Feed Forward** — полносвязный слой, аналогичный тому, что используется в кодировщике.
-6. **Add & Norm** — завершающий слой добавления и нормализации.
+### Decoder (Decoder)
+The decoder is usually located on the right side of the architecture. It also consists of several layers but has additional components:
+1. **Masked Multi-Head Attention** — an attention mechanism that masks future tokens to prevent "peeking" ahead.
+2. **Add & Norm** — a layer that adds the input data to the attention result and normalizes.
+3. **Multi-Head Attention** — an attention mechanism that considers the output of the encoder.
+4. **Add & Norm** — again adds the input data to the result and normalizes.
+5. **Feed Forward** — a fully connected layer, similar to that used in the encoder.
+6. **Add & Norm** — a final add and normalize layer.
 
-### Входы и выходы
-- **Input Embedding** и **Positional Encoding** относятся к входным данным, которые подаются в кодер.
-- **Output Embedding** и **Outputs (shifted right)** относятся к выходным данным, которые обрабатываются декодером.
+### Inputs and Outputs
+- **Input Embedding** and **Positional Encoding** relate to the input data fed into the encoder.
+- **Output Embedding** and **Outputs (shifted right)** relate to the output data processed by the decoder.
 
-### **Кодер**:
+### **Encoder**:
 
-#### Роли:
-Роль кодировщика заключается в обработке входных данных и создании представления, отражающего отношения между элементами (например, словами в предложении). Эта часть преобразователя не генерирует никакого нового контента, она просто преобразует входные данные в состояние, которое может использовать декодер.
+#### Roles:
+The role of the encoder is to process the input data and create a representation reflecting the relationships between elements (e.g., words in a sentence). This part of the transformer does not generate any new content; it simply transforms the input data into a state that the decoder can use.
 
-#### Функциональность системы:
-Каждый уровень кодера имеет механизмы самовнимания и нейронные сети прямой связи. Механизм самовнимания позволяет каждой позиции кодера обрабатывать все позиции предыдущего уровня кодера — таким образом, он может изучать контекст вокруг каждого слова.
+#### System Functionality:
+Each encoder layer has self-attention mechanisms and feed-forward neural networks. The self-attention mechanism allows each position in the encoder to process all positions in the previous encoder layer — thus, it can learn the context around each word.
 
-#### Контекстные встраивания:
-Выходные данные кодера представляют собой серию векторов, которые представляют входную последовательность в многомерном пространстве. Эти векторы часто называют контекстными вложениями, поскольку они кодируют не только отдельные слова, но и их контекст внутри предложения.
+#### Contextual Embeddings:
+The output of the encoder is a series of vectors that represent the input sequence in a multidimensional space. These vectors are often called contextual embeddings because they encode not only individual words but also their context within the sentence.
 
-#### Математическое описание:
+#### Mathematical Description:
 
-1. **Самовнимание (Self-Attention)**:
-   - **Входной вектор $X$**: Это матрица, представляющая входную последовательность (например, слова в предложении) в виде эмбеддингов.
-   - **Ключи $K$**, **запросы $Q$** и **значения $V$**: Эти матрицы получаются путем умножения входного вектора $X$ на весовые матрицы $W_K$, $W_Q$ и $W_V$ соответственно:
+1. **Self-Attention (Self-Attention)**:
+   - **Input Vector $X$**: This is a matrix representing the input sequence (e.g., words in a sentence) as embeddings.
+   - **Keys $K$**, **Queries $Q$**, and **Values $V$**: These matrices are obtained by multiplying the input vector $X$ by weight matrices $W_K$, $W_Q$, and $W_V$ respectively:
 
      $$
      Q = XW_Q, \quad K = XW_K, \quad V = XW_V
      $$
 
-   - **Внимание $A$**: Вычисляется путем скалярного произведения запросов и ключей, нормированного на размерность ключей $d_k$:
-   
+   - **Attention $A$**: Calculated by taking the dot product of queries and keys, normalized by the key dimension $d_k$:
+
      $$
      A = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)
      $$
 
-   - **Выход самовнимания $Z$**: Это результат умножения матрицы внимания на значения:
+   - **Self-Attention Output $Z$**: This is the result of multiplying the attention matrix by the values:
 
      $$
      Z = AV
@@ -126,297 +126,297 @@ import numpy as np
 def self_attention(X, d_k):
     """
     Description:
-      Реализует механизм Self-Attention.
+      Implements the Self-Attention mechanism.
 
     Args:
-        X (numpy.ndarray): Входной вектор (матрица эмбеддингов), размерностью (n_samples, embedding_dim).
-        d_k (int): Размерность ключей.
+        X (numpy.ndarray): Input vector (matrix of embeddings), shape (n_samples, embedding_dim).
+        d_k (int): Dimension of keys.
 
     Returns:
-        numpy.ndarray: Выход самовнимания Z.
+        numpy.ndarray: Self-attention output Z.
     """
-    # Инициализация весовых матриц случайными значениями
+    # Initialize weight matrices with random values
     embedding_dim = X.shape[1]
     W_Q = np.random.rand(embedding_dim, d_k)
     W_K = np.random.rand(embedding_dim, d_k)
     W_V = np.random.rand(embedding_dim, d_k)
 
-    # Вычисление матриц запросов, ключей и значений
+    # Calculate query, key, and value matrices
     Q = X @ W_Q
     K = X @ W_K
     V = X @ W_V
 
-    # Вычисление матрицы внимания
+    # Calculate attention matrix
     attention_scores = Q @ K.T
     scaled_attention_scores = attention_scores / np.sqrt(d_k)
 
-    # Применение функции softmax для получения весов внимания
+    # Apply softmax function to get attention weights
     attention_weights = np.exp(scaled_attention_scores) / np.sum(np.exp(scaled_attention_scores), axis=-1, keepdims=True)
 
-    # Вычисление выходного вектора
+    # Calculate output vector
     Z = attention_weights @ V
 
     return Z
 
-# Пример использования
-# Предположим, у нас есть последовательность из 3 слов, где каждое слово представлено вектором размерности 4
+# Example usage
+# Suppose we have a sequence of 3 words, each represented as a 4-dimensional vector
 X = np.array([[1.0, 0.5, 0.2, 0.8],
               [0.3, 0.9, 0.1, 0.4],
               [0.6, 0.2, 0.7, 0.5]])
 
-d_k = 2  # Пример размерности ключей
+d_k = 2  # Example key dimension
 
-# Получение выходного вектора самовнимания
+# Get the self-attention output
 output_Z = self_attention(X, d_k)
 
-print("Входной вектор X:\n", X)
-print("\nВыход самовнимания Z:\n", output_Z)
+print("Input vector X:\n", X)
+print("\nSelf-attention output Z:\n", output_Z)
 ```
 
-2. **Нейронная сеть прямой связи (Feedforward Neural Network)**:
-   - Выход самовнимания $Z$ проходит через два полносвязных слоя с функцией активации (например, ReLU) между ними:
+2. **Feedforward Neural Network (Feedforward Neural Network)**:
+   - The self-attention output $Z$ passes through two fully connected layers with an activation function (e.g., ReLU) between them:
 
      $$
      \text{FFN}(Z) = \max(0, ZW_1 + b_1)W_2 + b_2
      $$
 
-   - **$W_1$, $W_2$**: Весовые матрицы первого и второго полносвязного слоя.
-   - **$b_1$, $b_2$**: Смещения первого и второго полносвязного слоя.
+   - **$W_1$, $W_2$**: Weight matrices of the first and second fully connected layers.
+   - **$b_1$, $b_2$**: Biases of the first and second fully connected layers.
 
-#### **Весовые матрицы $W_K$, $W_Q$ и $W_V$ в контексте трансформеров**
+#### **Weight Matrices $W_K$, $W_Q$, and $W_V$ in the Context of Transformers**
 
-1. Общий контекст
+1. General Context
 
-  В архитектуре трансформера важнейшую роль играет механизм внимания, который позволяет модели учитывать контекст при обработке каждого элемента последовательности (например, слов в предложении). Для этого механизм внимания использует три ключевых компонента: **запросы (queries)**, **ключи (keys)** и **значения (values)**. Эти компоненты формируются с помощью весовых матриц $W_Q$, $W_K$ и $W_V$ соответственно.
+  In the Transformer architecture, the attention mechanism plays a crucial role, allowing the model to consider context when processing each element of the sequence (e.g., words in a sentence). For this, the attention mechanism uses three key components: **queries (queries)**, **keys (keys)**, and **values (values)**. These components are formed using weight matrices $W_Q$, $W_K$, and $W_V$ respectively.
 
-2. Формирование весовых матриц
+2. Formation of Weight Matrices
 
-  2.1 Входные данные.
+  2.1 Input Data.
   
-  Допустим, у нас есть входная последовательность $X$ размером $n \times d_{model}$, где:
-  - $n$ — количество токенов в последовательности (длина предложения).
-  - $d_{model}$ — размерность эмбеддингов (например, 512 или 1024).
+  Suppose we have an input sequence $X$ of size $n \times d_{model}$, where:
+  - $n$ — the number of tokens in the sequence (sentence length).
+  - $d_{model}$ — the dimension of embeddings (e.g., 512 or 1024).
 
-  Эта последовательность $X$ поступает на вход трансформеру, где сначала проходит через линейные слои, которые преобразуют её в запросы $Q$, ключи $K$ и значения $V$.
+  This sequence $X$ is fed into the Transformer, where it first undergoes linear transformations to form queries $Q$, keys $K$, and values $V$.
 
-  2.2 Линейные преобразования.
+  2.2 Linear Transformations.
 
-  Для создания запросов, ключей и значений, входная последовательность умножается на три разные весовые матрицы $W_Q$, $W_K$ и $W_V$:
+  To create queries, keys, and values, the input sequence is multiplied by three different weight matrices $W_Q$, $W_K$, and $W_V$:
 
   $$
   Q = XW_Q, \quad K = XW_K, \quad V = XW_V
   $$
 
-  где:
-  - $W_Q$ — весовая матрица для запросов размера $d_{model} \times d_k$.
-  - $W_K$ — весовая матрица для ключей размера $d_{model} \times d_k$.
-  - $W_V$ — весовая матрица для значений размера $d_{model} \times d_v$.
+  where:
+  - $W_Q$ — weight matrix for queries of size $d_{model} \times d_k$.
+  - $W_K$ — weight matrix for keys of size $d_{model} \times d_k$.
+  - $W_V$ — weight matrix for values of size $d_{model} \times d_v$.
 
-  Размерность $d_k$ и $d_v$ может быть выбрана по-разному, но обычно $d_k = d_v = d_{model}$. Эти весовые матрицы обучаются в процессе тренировки модели и их задача — найти такие представления запросов, ключей и значений, которые позволяют оптимально учитывать контекст.
+  The dimensions $d_k$ and $d_v$ can be chosen differently, but usually $d_k = d_v = d_{model}$. These weight matrices are trained during the model's training process, and their task is to find such representations of queries, keys, and values that allow for optimal context consideration.
 
-3. Почему используются разные матрицы?
+3. Why Different Matrices Are Used?
 
-  3.1 Запросы ($W_Q$)
+  3.1 Queries ($W_Q$)
 
-  Матрица $W_Q$ преобразует входные векторы в запросы, которые используются для оценки важности других элементов последовательности относительно данного. Это означает, что каждый запрос пытается "выяснить", на какие другие слова в предложении ему следует обратить внимание.
+  The matrix $W_Q$ transforms the input vectors into queries, which are used to evaluate the importance of other sequence elements relative to the current one. This means that each query tries to "figure out" which other words in the sentence it should pay attention to.
 
-  3.2 Ключи ($W_K$)
+  3.2 Keys ($W_K$)
 
-  Матрица $W_K$ преобразует входные векторы в ключи. Ключи используются для сопоставления с запросами. По сути, ключи содержат информацию о том, "насколько важен" каждый элемент последовательности при сопоставлении с запросом. Чем ближе запрос к ключу (по мере скалярного произведения), тем большее внимание будет уделено соответствующему элементу.
+  The matrix $W_K$ transforms the input vectors into keys. Keys are used to match with queries. Essentially, keys contain information about "how important" each sequence element is when matching with a query. The higher the similarity between a query and a key (measured by the dot product), the more attention will be paid to the corresponding element.
 
-  3.3 Значения ($W_V$)
+  3.3 Values ($W_V$)
 
-  Матрица $W_V$ преобразует входные векторы в значения. Значения передают фактическую информацию, которая будет использована при вычислении окончательного представления после применения механизма внимания. Итоговое значение для каждого токена будет взвешенной суммой значений всех токенов, где веса определяются степенью внимания (вычисленной через запросы и ключи).
+  The matrix $W_V$ transforms the input vectors into values. Values convey the actual information that will be used after applying the attention mechanism. The final value for each token will be a weighted sum of all token values, where the weights are determined by the degree of attention (calculated from queries and keys).
 
-4. Механизм внимания
+4. Attention Mechanism
 
-  4.1 Вычисление внимания
+  4.1 Calculating Attention
 
-  Запросы $Q$ и ключи $K$ используются для вычисления матрицы внимания. Для этого рассчитывается скалярное произведение запросов и ключей с последующей нормализацией по размерности $d_k$ и применением softmax:
+  Queries $Q$ and keys $K$ are used to calculate the attention matrix. For this, the dot product of queries and keys is calculated, normalized by the dimension $d_k$, and then the softmax function is applied:
 
   $$
   A = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)
   $$
 
-  Где $A$ — матрица внимания, показывающая, какие элементы последовательности оказывают наибольшее влияние друг на друга.
+  Where $A$ is the attention matrix, showing how much each element of the sequence influences others.
 
-  4.2 Применение внимания к значениям
+  4.2 Applying Attention to Values
 
-  После получения матрицы внимания, её умножают на матрицу значений $V$, чтобы получить финальное представление каждого токена, учитывающее контекст:
+  After obtaining the attention matrix, it is multiplied by the value matrix $V$ to obtain the final representation for each token:
 
   $$
   Z = AV
   $$
 
-5. Заключение
+5. Conclusion
 
-  Весовые матрицы $W_Q$, $W_K$ и $W_V$ служат для преобразования входных данных в запросы, ключи и значения, которые необходимы для работы механизма внимания. Эти матрицы обучаются в процессе тренировки модели и играют решающую роль в определении того, как модель интерпретирует контекст каждого слова в предложении.
+  The weight matrices $W_Q$, $W_K$, and $W_V$ serve to transform input data into queries, keys, and values necessary for the attention mechanism. These matrices are trained during the model's training process and play a crucial role in determining how the model interprets the context of each word in the sentence.
 
-  Такое внимание к контексту позволяет трансформерам эффективно решать задачи обработки естественного языка, обеспечивая высокую производительность в задачах перевода, понимания текста и многих других.
+  Such attention to context allows Transformers to efficiently solve natural language processing tasks, achieving high performance in translation, text understanding, and many others.
 
-## **От входа к выходу внутри кодера**
+## **From Input to Output Inside the Encoder**
 
-### 1. **Входные данные:**
+### 1. **Input Data:**
 
-  - **Входная последовательность $X$**: Матрица размерности $(N, L, D_{model})$, 
+  - **Input Sequence $X$**: A matrix of size $(N, L, D_{model})$, 
 
-  где:
+  where:
 
-  **Batch Size ($N$) - Размер пакета:**
+  **Batch Size ($N$) - Size of the Batch:**
 
-  * Batch Size определяет, сколько **независимых** последовательностей обрабатывается моделью **одновременно** за один полный проход обучения или инференса (предсказания).
+  * Batch Size defines how many **independent** sequences the model processes **simultaneously** in one full training or inference pass.
 
-  **Длина последовательности ($L$) - Length of the sequence:**
+  **Sequence Length ($L$) - Length of the Sequence:**
 
-  * Длина последовательности определяет количество **элементов** (токенов) в каждой **отдельной** последовательности внутри пакета.
+  * Sequence length defines the number of **elements** (tokens) in each **individual** sequence within the batch.
 
-  **Размерность эмбеддингов ($D_{model}$) - Dimension of the embeddings:**
+  **Embedding Dimension ($D_{model}$) - Dimension of the Embeddings:**
 
-  * Фиксированное векторное представление какого-либо объекта (например, слова, токена).
+  * Fixed vector representation of any object (e.g., a word, a token).
 
-  **Как получается матрица X:**
+  **How is the matrix X obtained:**
 
-  1. **Эмбеддинг элементов:**  Каждый элемент в последовательности (например, слово в предложении) преобразуется в эмбеддинг - вектор размерности $D_{model}$.
+  1. **Token Embedding:** Each element in the sequence (e.g., a word in a sentence) is converted into an embedding - a vector of size $D_{model}$.
 
-  2. **Формирование последовательности:** Для каждой последовательности в пакете мы получаем матрицу размерности $(L, D_{model})$. Каждая строка этой матрицы соответствует эмбеддингу одного элемента последовательности. Таким образом, у нас есть $L$ строк (по количеству элементов в последовательности) и $D_{model}$ столбцов (по размерности эмбеддинга).
+  2. **Forming a Sequence:** For each sequence in the batch, we obtain a matrix of size $(L, D_{model})$. Each row of this matrix corresponds to the embedding of one element of the sequence. Thus, we have $L$ rows (by the number of elements in the sequence) and $D_{model}$ columns (by the embedding dimension).
 
-  3. **Формирование пакета:**  Поскольку у нас есть $N$ независимых последовательностей в пакете, мы "складываем" эти матрицы $(L, D_{model})$ друг на друга. Это создает трехмерный тензор (или матрицу размерности 3) $X$ с размерами $(N, L, D_{model})$.
+  3. **Forming a Batch:** Since we have $N$ independent sequences in the batch, we "stack" these $(L, D_{model})$ matrices on top of each other. This creates a three-dimensional tensor (or matrix) $X$ of size $(N, L, D_{model})$.
 
-### **В итоге:**
+### **In Summary:**
 
-Матрица $X$ размерности $(N, L, D_{model})$ представляет собой трехмерный тензор. Если рассматривать его как набор двумерных матриц, то он состоит из $N$ матриц размерности $(L, D_{model})$, "наложенных" друг на друга. Каждая из этих внутренних матриц (соответствующая одной последовательности в пакете) имеет $L$ строк (по количеству элементов в последовательности) и $D_{model}$ столбцов (по размерности эмбеддингов).
+The matrix $X$ of size $(N, L, D_{model})$ represents a three-dimensional tensor. If viewed as a set of two-dimensional matrices, it consists of $N$ matrices of size $(L, D_{model})$, "stacked" on top of each other. Each of these internal matrices (corresponding to one sequence in the batch) has $L$ rows (by the number of elements in the sequence) and $D_{model}$ columns (by the embedding dimension).
 
-### **Пример:**
+### **Example:**
 
 ```Python
 import torch
 
-# Пример данных: 3 предложения в батче
+# Example data: 3 sentences in the batch
 sentences = [
-    "Всем привет! Я увлекаюсь искусственным интеллектом",  # 7 токенов
-    "Привет, как дела?",                                   # 4 токена
-    "ИИ — это интересно!"                                  # 5 токенов
+    "Hello everyone! I am interested in artificial intelligence",  # 7 tokens
+    "Hello, how are you?",                                   # 4 tokens
+    "AI is interesting!"                                  # 5 tokens
 ]
 
-# 1. Упрощенная токенизация для каждого предложения
+# 1. Simplified tokenization for each sentence
 batch_tokens = [
-    ["[CLS]", "Всем", "привет", "!", "Я", "увлекаюсь", "искусственным", "интеллектом", "[SEP]"],  # L=9
-    ["[CLS]", "Привет", ",", "как", "дела", "?", "[SEP]", "[PAD]", "[PAD]"],                      # L=9 (с паддингом)
-    ["[CLS]", "ИИ", "—", "это", "интересно", "!", "[SEP]", "[PAD]", "[PAD]"]                      # L=9 (с паддингом)
+    ["[CLS]", "Hello", "everyone", "!", "I", "am", "interested", "in", "artificial", "intelligence", "[SEP]"],  # L=11
+    ["[CLS]", "Hello", ",", "how", "are", "you", "?", "[SEP]", "[PAD]", "[PAD]"],                      # L=11 (with padding)
+    ["[CLS]", "AI", "—", "is", "interesting", "!", "[SEP]", "[PAD]", "[PAD]"]                      # L=11 (with padding)
 ]
 
-N = len(sentences)  # Размер батча = 3
-L = 9               # Максимальная длина последовательности (после паддинга)
-D_model = 512       # Размерность эмбеддингов
+N = len(sentences)  # Batch size = 3
+L = 11               # Maximum sequence length (after padding)
+D_model = 512       # Embedding dimension
 
-# 2. Создаем случайные эмбеддинги для всего батча
+# 2. Create random embeddings for the entire batch
 embeddings = torch.randn(N, L, D_model)
 
-# 3. Формируем входной тензор X
+# 3. Form the input tensor X
 X = embeddings
 
-print("Форма тензора X:", X.shape)  # (3, 9, 512)
-print("\nСтруктура данных:")
-print(f"• Количество батчей (N): {N}")
-print(f"• Длина последовательности (L): {L} (с учетом паддинга)")
-print(f"• Размерность эмбеддингов (D_model): {D_model}\n")
+print("Shape of tensor X:", X.shape)  # (3, 11, 512)
+print("\nStructure of data:")
+print(f"• Batch size (N): {N}")
+print(f"• Sequence length (L): {L} (with padding)")
+print(f"• Embedding dimension (D_model): {D_model}\n")
 
-# ================= Визуализация процесса =================
-# Визуализация содержимого
+# ================= Visualization of the process =================
+# Visualize the content
 for batch_idx in range(N):
-    print(f"Батч {batch_idx + 1} ({sentences[batch_idx][:20]}...):")
-    print(f"Токены: {batch_tokens[batch_idx]}")
+    print(f"Batch {batch_idx + 1} ({sentences[batch_idx][:20]}...):")
+    print(f"Tokens: {batch_tokens[batch_idx]}")
     
-    # Показываем первые 3 элемента эмбеддингов для ключевых позиций
-    print("\nПримеры эмбеддингов:")
-    print(f"• [CLS] токен: {X[batch_idx, 0, :3].detach().numpy().round(4)}...")
-    print(f"• 3-й токен:   {X[batch_idx, 2, :3].detach().numpy().round(4)}...")
-    print(f"• [SEP] токен: {X[batch_idx, -3, :3].detach().numpy().round(4)}...")
-    print(f"• [PAD] токен: {X[batch_idx, -1, :3].detach().numpy().round(4)}...")
+    # Show the first 3 elements of embeddings for key positions
+    print("\nExample embeddings:")
+    print(f"• [CLS] token: {X[batch_idx, 0, :3].detach().numpy().round(4)}...")
+    print(f"• 3rd token:   {X[batch_idx, 2, :3].detach().numpy().round(4)}...")
+    print(f"• [SEP] token: {X[batch_idx, -3, :3].detach().numpy().round(4)}...")
+    print(f"• [PAD] token: {X[batch_idx, -1, :3].detach().numpy().round(4)}...")
     print("-" * 60)
 ```
 
 ```Python
-# ================= Подробный вывод для первого батча =================
-# Визуализация содержимого тензора X
+# ================= Detailed output for the first batch =================
+# Visualize the content of tensor X
 for batch_idx in range(N):
-    print(f"Батч {batch_idx + 1} ({sentences[batch_idx][:20]}...):")
-    print(f"Токены: {batch_tokens[batch_idx]}")
+    print(f"Batch {batch_idx + 1} ({sentences[batch_idx][:20]}...):")
+    print(f"Tokens: {batch_tokens[batch_idx]}")
     
-    # Выводим все эмбеддинги для текущей последовательности
-    print("\nЭмбеддинги:")
+    # Output all embeddings for the current sequence
+    print("\nEmbeddings:")
     for token_idx in range(L):
-        print(f"• Токен {token_idx}: {X[batch_idx, token_idx].detach().numpy().round(4)}...")
+        print(f"• Token {token_idx}: {X[batch_idx, token_idx].detach().numpy().round(4)}...")
     print("-" * 60)
 ```
 
-### 2. **Позиционные кодирования (Positional Encodings):**
+### 2. **Positional Encodings (Positional Encodings):**
 
-  **Зачем вообще нужны позиционные кодирования?** Традиционные рекуррентные нейронные сети (RNN), такие как LSTM или GRU, обрабатывают последовательность токен за токеном, и порядок обработки естественным образом учитывает положение токена. Однако, архитектуры, основанные на механизме внимания, такие как Transformer, обрабатывают все токены последовательности параллельно. Из-за этого они теряют информацию о порядке следования токенов. Позиционные кодирования вводятся для того, чтобы "подсказать" модели, где находится каждый токен в последовательности.
+  **Why are positional encodings needed at all?** Traditional recurrent neural networks (RNNs), such as LSTM or GRU, process the sequence token by token, and the order of processing naturally accounts for the position of the token. However, attention-based architectures like Transformer process all tokens in the sequence in parallel. Because of this, they lose information about the order of tokens. Positional encodings are introduced to "tell" the model where each token is located in the sequence.
 
-  Когда обученная модель получает на вход предложение для анализа (например, для классификации или машинного перевода), кодер Transformer также обрабатывает все токены входной последовательности параллельно, формируя контекстуализированные представления для каждого токена.
+  When a trained model receives a sentence for analysis (e.g., for classification or machine translation), the encoder Transformer also processes all tokens in the sequence in parallel, forming contextualized representations for each token.
 
-  Так же важно отметить, что позиционные кодирования ($PE$) имеют ту же размерность, что и эмбеддинги слов ($D_{model}$). Это ключевой момент, поскольку позволяет складывать их вместе поэлементно.
+  It is also important to note that positional encodings ($PE$) have the same dimension as word embeddings ($D_{model}$). This is a key point, as it allows them to be added element-wise.
 
-  ![Figure_2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-04/assets/Figure_2.png)
+  ![Figure_2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-04/assets/Figure_2.png  )
 
-  - Для учета порядка слов в последовательности к входным эмбеддингам добавляются позиционные кодирования $PE$ той же размерности $D_{model}$.
-  - $PE$ вычисляются по следующим формулам:
+  - To account for the order of words in the sequence, positional encodings $PE$ of the same dimension $D_{model}$ are added to the word embeddings.
+  - $PE$ are calculated using the following formulas:
     $$
     PE_{(pos, 2i)} = \sin\left(\frac{pos}{10000^{2i/D_{model}}}\right) \\
     PE_{(pos, 2i+1)} = \cos\left(\frac{pos}{10000^{2i/D_{model}}}\right)
     $$
     
-    где:
+    where:
 
-  *   **$pos$ (позиция):**
-      *   Представляет собой целое число, указывающее на позицию токена в последовательности.
-      *   Нумерация начинается с 0. Первый токен имеет $pos = 0$, второй - $pos = 1$, и так далее.
-      *   Например, в предложении "Собака лает громко", "Собака" имеет $pos = 0$, "лает" - $pos = 1$, "громко" - $pos = 2$.
-  *   **$i$ (индекс измерения):**
-      *   Это индекс, который определяет конкретное измерение в векторе позиционного кодирования.
-      *   $i$ принимает значения от 0 до $D_{model}/2 - 1$.
-      *   Для каждого значения $i$ вычисляется пара значений: одно с синусом, другое с косинусом.
-      *   Например, если $D_{model} = 512$, то $i$ будет принимать значения от 0 до 255.
-  *   **$D_{model}$ (размерность модели):**
-      *   Это размерность эмбеддингов слов и позиционных кодирований.
-      *   Обычно это значение равно 512, но может быть и другим.
-      *   $D_{model}$ определяет длину вектора позиционного кодирования.
+  *   **$pos$ (position):**
+      *   Represents an integer indicating the position of the token in the sequence.
+      *   Numbering starts from 0. The first token has $pos = 0$, the second has $pos = 1$, and so on.
+      *   For example, in the sentence "The dog barks loudly", "The" has $pos = 0$, "barks" has $pos = 1$, "loudly" has $pos = 2$.
+  *   **$i$ (dimension index):**
+      *   This is an index that determines a specific dimension in the positional encoding vector.
+      *   $i$ takes values from 0 to $D_{model}/2 - 1$.
+      *   For each value of $i$, a pair of values is calculated: one with sine, the other with cosine.
+      *   For example, if $D_{model} = 512$, then $i$ will take values from 0 to 255.
+  *   **$D_{model}$ (model dimension):**
+      *   This is the dimension of word embeddings and positional encodings.
+      *   Usually this value is 512, but it can be different.
+      *   $D_{model}$ defines the length of the positional encoding vector.
 
-  **Почему используются синус и косинус?**
+  **Why use sine and cosine?**
 
-  *   **Уникальность:** Синус и косинус позволяют генерировать уникальные позиционные кодирования для каждой позиции.
-  *   **Периодичность:** Периодичность этих функций позволяет модели легко различать относительные позиции токенов.
-  *   **Экстраполяция:** Модель может экстраполировать на более длинные последовательности, чем те, на которых она была обучена.
-  *   **Относительные позиции:** Разница между позиционными кодированиями для соседних позиций остается относительно постоянной, что помогает модели понимать относительное положение токенов.
+  *   **Uniqueness:** Sine and cosine allow generating unique positional encodings for each position.
+  *   **Periodicity:** The periodicity of these functions allows the model to easily distinguish relative positions of tokens.
+  *   **Extrapolation:** The model can extrapolate to longer sequences than those on which it was trained.
+  *   **Relative positions:** The difference between positional encodings for adjacent positions remains relatively constant, helping the model understand the relative position of tokens.
 
-  **Генерация уникальных позиционных кодирований:**
+  **Generating unique positional encodings:**
 
-  Для каждой позиции $pos$ и каждого индекса измерения $i$ относительно трехмерного тензора $X$ размерности $(N, L, D_{model})$ вычисляется уникальное значение. Поскольку $i$ пробегает значения от 0 до $D_{model}/2 - 1$, для каждой позиции $pos$ получается вектор размерности $D_{model}$. Первые $D_{model}/2$ элементов этого вектора вычисляются с помощью синуса, а остальные $D_{model}/2$ - с помощью косинуса.
+  For each position $pos$ and each dimension index $i$ relative to the three-dimensional tensor $X$ of size $(N, L, D_{model})$, a unique value is calculated. Since $i$ ranges from 0 to $D_{model}/2 - 1$, for each position $pos$, a vector of size $D_{model}$ is obtained. The first $D_{model}/2$ elements of this vector are calculated using sine, and the remaining $D_{model}/2$ elements are calculated using cosine.
 
-  **Совместимость размерностей:**
+  **Size Compatibility:**
 
-  Позиционные кодирования имеют ту же размерность, что и эмбеддинги слов ($D_{model}$), чтобы их можно было поэлементно сложить. Это позволяет модели учитывать как семантическое значение слова (из эмбеддинга), так и его позицию в последовательности (из позиционного кодирования).
+  Positional encodings have the same dimension as word embeddings ($D_{model}$), allowing them to be added element-wise. This allows the model to consider both the semantic meaning of a word (from the embedding) and its position in the sequence (from the positional encoding).
 
-### **В итоге:**
+### **In Summary:**
 
-Итоговый вход для первого слоя кодера получается путем поэлементного сложения эмбеддингов слов $X$ и позиционных кодирований $PE$: $X_{embedded} = X + PE$.
+The final input for the first encoder layer is obtained by element-wise addition of word embeddings $X$ and positional encodings $PE$: $X_{embedded} = X + PE$.
 
-**Пример:**
+# Example:
 
-Предположим, что $D_{model} = 4$. Тогда для позиции $pos = 1$ и $i = 0$ мы получим:
+Suppose $D_{model} = 4$. Then for position $pos = 1$ and $i = 0$, we get:
 
 $$PE_{(1, 0)} = \sin\left(\frac{1}{10000^{0}}\right) = \sin(1) \approx 0.84$$
 $$PE_{(1, 1)} = \cos\left(\frac{1}{10000^{0}}\right) = \cos(1) \approx 0.54$$
 
-Для $i = 1$:
+For $i = 1$:
 
 $$PE_{(1, 2)} = \sin\left(\frac{1}{10000^{2/4}}\right) = \sin\left(\frac{1}{100}\right) \approx 0.01$$
 $$PE_{(1, 3)} = \cos\left(\frac{1}{10000^{2/4}}\right) = \cos\left(\frac{1}{100}\right) \approx 1$$
 
-Таким образом, вектор позиционного кодирования для позиции 1 будет примерно равен [0.84, 0.54, 0.01, 1].
+Thus, the positional encoding vector for position 1 will be approximately [0.84, 0.54, 0.01, 1].
 
-- Итоговый вход для первого слоя кодера: $X_{embedded} = X + PE$.
+- Final input for the first encoder layer: $X_{embedded} = X + PE$.
 
 ```Python
 import torch
@@ -425,14 +425,14 @@ import math
 def positional_encoding(max_len: int, d_model: int) -> torch.Tensor:
     """
     Description:
-        Генерация позиционных кодирований по формуле из оригинальной статьи Transformer.
+        Generation of positional encodings according to the formula from the original Transformer paper.
 
     Args:
-        max_len: Максимальная длина последовательности.
-        d_model: Размерность модели (количество признаков).
+        max_len: Maximum sequence length.
+        d_model: Model dimension (number of features).
 
     Returns:
-        Тензор позиционных кодирований формы (max_len, d_model).
+        Tensor of positional encodings with shape (max_len, d_model).
 
     Examples:
         >>> pe = positional_encoding(10, 512)
@@ -450,13 +450,13 @@ def positional_encoding(max_len: int, d_model: int) -> torch.Tensor:
 def print_embeddings(tensor: torch.Tensor, tokens: list, title: str, max_elements: int = 3) -> None:
     """
     Description:
-        Визуализация эмбеддингов с метками токенов.
+        Visualization of embeddings with token labels.
 
     Args:
-        tensor: Тензор эмбеддингов.
-        tokens: Список токенов для визуализации.
-        title: Заголовок для вывода.
-        max_elements: Максимальное количество элементов для отображения.
+        tensor: Tensor of embeddings.
+        tokens: List of tokens for visualization.
+        title: Title for output.
+        max_elements: Maximum number of elements to display.
 
     Returns:
         None
@@ -464,191 +464,191 @@ def print_embeddings(tensor: torch.Tensor, tokens: list, title: str, max_element
     Examples:
         >>> embeddings = torch.randn(5, 512)
         >>> tokens = ["token1", "token2", "token3", "token4", "token5"]
-        >>> print_embeddings(embeddings, tokens, "Пример эмбеддингов")
+        >>> print_embeddings(embeddings, tokens, "Example embeddings")
     """
     print(f"\n{title}:")
     for idx, (vec, token) in enumerate(zip(tensor, tokens)):
         elements = vec[:max_elements].detach().numpy().round(4)
         print(f"{idx:2d} {token:15}: [{', '.join(f'{x:7.4f}' for x in elements)}...]")
 
-# Пример данных
+# Example data
 sentences = [
-    "Всем привет! Я увлекаюсь искусственным интеллектом",
-    "Привет, как дела?",
-    "ИИ — это интересно!"
+    "Hello everyone! I am interested in artificial intelligence",
+    "Hello, how are you?",
+    "AI is interesting!"
 ]
 
-# Параметры модели
-N = len(sentences)  # Размер батча
-L = 9               # Максимальная длина последовательности
-D_model = 512       # Размерность эмбеддингов
+# Model parameters
+N = len(sentences)  # Batch size
+L = 9               # Maximum sequence length
+D_model = 512       # Embedding dimension
 
-# 1. Токенизация с паддингом
+# 1. Tokenization with padding
 batch_tokens = [
-    ["[CLS]", "Всем", "привет", "!", "Я", "увлекаюсь", "искусственным", "интеллектом", "[SEP]"],
-    ["[CLS]", "Привет", ",", "как", "дела", "?", "[SEP]", "[PAD]", "[PAD]"],
-    ["[CLS]", "ИИ", "—", "это", "интересно", "!", "[SEP]", "[PAD]", "[PAD]"]
+    ["[CLS]", "Hello", "everyone", "!", "I", "am", "interested", "in", "artificial", "intelligence", "[SEP]"],  # L=11
+    ["[CLS]", "Hello", ",", "how", "are", "you", "?", "[SEP]", "[PAD]", "[PAD]"],                      # L=11 (with padding)
+    ["[CLS]", "AI", "—", "is", "interesting", "!", "[SEP]", "[PAD]", "[PAD]"]                      # L=11 (with padding)
 ]
 
-# 2. Создаем эмбеддинги
+# 2. Create embeddings
 embeddings = torch.randn(N, L, D_model)
 
-# 3. Генерируем позиционные кодирования
+# 3. Generate positional encodings
 pe = positional_encoding(L, D_model)
 
-# 4. Комбинируем эмбеддинги с позиционными кодированиями
-X_embedded = embeddings + pe  # Broadcasting для батча
+# 4. Combine embeddings with positional encodings
+X_embedded = embeddings + pe  # Broadcasting for batch
 
-# ================= Визуализация процесса =================
+# ================= Visualization of the process =================
 print("="*60)
-print("Шаг 1: Исходные эмбеддинги токенов")
-print(f"Форма тензора: {embeddings.shape}")
+print("Step 1: Input embeddings")
+print(f"Shape of tensor: {embeddings.shape}")
 for batch_idx in range(N):
-    print(f"\nБатч {batch_idx+1}: '{sentences[batch_idx]}'")
-    print_embeddings(embeddings[batch_idx], batch_tokens[batch_idx], "Исходные эмбеддинги")
+    print(f"\nBatch {batch_idx + 1}: '{sentences[batch_idx]}'")
+    print_embeddings(embeddings[batch_idx], batch_tokens[batch_idx], "Input embeddings")
 
 print("\n" + "="*60)
-print("Шаг 2: Позиционные кодирования")
-print(f"Форма тензора: {pe.shape}")
-print_embeddings(pe, [f"Позиция {i}" for i in range(L)], "Примеры кодирований")
+print("Step 2: Positional encodings")
+print(f"Shape of tensor: {pe.shape}")
+print_embeddings(pe, [f"Position {i}" for i in range(L)], "Example encodings")
 
 print("\n" + "="*60)
-print("Шаг 3: Комбинированные эмбеддинги (X + PE)")
-print(f"Форма тензора: {X_embedded.shape}")
+print("Step 3: Combined embeddings (X + PE)")
+print(f"Shape of tensor: {X_embedded.shape}")
 for batch_idx in range(N):
-    print(f"\nБатч {batch_idx+1}: '{sentences[batch_idx]}'")
-    print_embeddings(X_embedded[batch_idx], batch_tokens[batch_idx], "Результат сложения")
+    print(f"\nBatch {batch_idx + 1}: '{sentences[batch_idx]}'")
+    print_embeddings(X_embedded[batch_idx], batch_tokens[batch_idx], "Result of addition")
 ```
 
 ```Python
-# ================= Подробный вывод для первого батча =================
+# ================= Detailed output for the first batch =================
 print("\n" + "="*60)
-print("Детальный анализ первого батча:")
+print("Detailed analysis of the first batch:")
 batch_idx = 0
 
-# Исходные данные
-print(f"\nТекст: '{sentences[batch_idx]}'")
-print(f"Токены: {batch_tokens[batch_idx]}")
+# Original data
+print(f"\nText: '{sentences[batch_idx]}'")
+print(f"Tokens: {batch_tokens[batch_idx]}")
 
-# Сравнение для ключевых позиций
+# Comparison for key positions
 for pos in [0, 2, 4, 6, 8]:
-    print(f"\nПозиция {pos} ({batch_tokens[batch_idx][pos]}):")
-    print(f"Исходный эмбеддинг:  {embeddings[batch_idx, pos, :3].detach().numpy().round(4)}")
-    print(f"Позиционное кодир:   {pe[pos, :3].detach().numpy().round(4)}")
-    print(f"Комбинированный:     {X_embedded[batch_idx, pos, :3].detach().numpy().round(4)}")
+    print(f"\nPosition {pos} ({batch_tokens[batch_idx][pos]}):")
+    print(f"Original embedding:  {embeddings[batch_idx, pos, :3].detach().numpy().round(4)}")
+    print(f"Positional encoding: {pe[pos, :3].detach().numpy().round(4)}")
+    print(f"Combined:           {X_embedded[batch_idx, pos, :3].detach().numpy().round(4)}")
 ```
 
-### 3. **Многоголовое самовнимание (Multi-Head Self-Attention):**
-   - На входе подслоя Multi-Head Attention находится $X_{embedded} = X + PE$.
-   - **Линейные проекции:** Входные данные $X_{embedded}$ линейно проецируются в запросы $Q$, ключи $K$ и значения $V$ для каждой головы:
+### 3. Multi-Head Self-Attention:
+   - The input to the Multi-Head Attention sublayer is $X_{embedded} = X + PE$.
+   - **Linear projections:** The input $X_{embedded}$ is linearly projected into queries $Q$, keys $K$, and values $V$ for each head:
      $$
      Q_i = X_{embedded} W_{Q_i}, \quad K_i = X_{embedded} W_{K_i}, \quad V_i = X_{embedded} W_{V_i}
      $$
      
-      где:
+      where:
       
       - $W_{Q_i} \in \mathbb{R}^{D_{model} \times D_k}$
       - $W_{K_i} \in \mathbb{R}^{D_{model} \times D_k}$
-      - $W_{V_i} \in \mathbb{R}^{D_{model} \times D_v}$ - весовые матрицы для $i$-й головы
-      - $D_k$ - размерность ключей и запросов
-      - $D_v$ - размерность значений
+      - $W_{V_i} \in \mathbb{R}^{D_{model} \times D_v}$ - weight matrices for the $i$-th attention head
+      - $D_k$ - dimension of keys and queries
+      - $D_v$ - dimension of values
       
-      Обычно $D_k = D_v = D_{model} / h$, где $h$ - количество голов.
+      Usually $D_k = D_v = D_{model} / h$, where $h$ is the number of heads.
 
-      С точки зрения линейной алгебры, линейная проекция — это линейное отображение, которое преобразует вектор из одного векторного пространства в другое. В контексте многоголового внимания, входной вектор $X_{embedded}$, принадлежащий $D_{model}$-мерному пространству, подвергается линейным проекциям для создания трех новых векторов: $Q_i$, $K_i$ и $V_i$. Эти векторы находятся в своих собственных подпространствах.
+      From a linear algebra perspective, linear projection is a linear transformation that maps a vector from one vector space to another. In the context of multi-head attention, the input vector $X_{embedded}$, belonging to a $D_{model}$-dimensional space, undergoes linear transformations to create three new vectors: $Q_i$, $K_i$, and $V_i$. These vectors reside in their own subspaces.
 
-      **Формальное описание:**
+      **Formal description:**
 
-      1. **$X_{embedded} \in \mathbb{R}^{D_{model}}$:** Входной вектор в $D_{model}$-мерном пространстве.
-      2. **$W_{Q_i} \in \mathbb{R}^{D_{model} \times D_k}$, $W_{K_i} \in \mathbb{R}^{D_{model} \times D_k}$, $W_{V_i} \in \mathbb{R}^{D_{model} \times D_v}$:** Матрицы весов, определяющие линейные отображения.
-      3. **Линейные отображения (проекции):**
-        - $Q_i = X_{embedded} W_{Q_i}$: Проекция $X_{embedded}$ в $D_k$-мерное подпространство запросов.
-        - $K_i = X_{embedded} W_{K_i}$: Проекция $X_{embedded}$ в $D_k$-мерное подпространство ключей.
-        - $V_i = X_{embedded} W_{V_i}$: Проекция $X_{embedded}$ в $D_v$-мерное подпространство значений.
+      1. **$X_{embedded} \in \mathbb{R}^{D_{model}}$:** Input vector in $D_{model}$-dimensional space.
+      2. **$W_{Q_i} \in \mathbb{R}^{D_{model} \times D_k}$, $W_{K_i} \in \mathbb{R}^{D_{model} \times D_k}$, $W_{V_i} \in \mathbb{R}^{D_{model} \times D_v}$:** Weight matrices defining linear mappings.
+      3. **Linear mappings (projections):**
+         - $Q_i = X_{embedded} W_{Q_i}$: Projection of $X_{embedded}$ into $D_k$-dimensional query subspace.
+         - $K_i = X_{embedded} W_{K_i}$: Projection of $X_{embedded}$ into $D_k$-dimensional key subspace.
+         - $V_i = X_{embedded} W_{V_i}$: Projection of $X_{embedded}$ into $D_v$-dimensional value subspace.
 
-      **Зачем это нужно?**
+      **Why is this needed?**
 
-      - **Разделение на подпространства:** Линейные проекции создают отдельные подпространства для запросов, ключей и значений. Это позволяет модели обрабатывать входные данные с разных точек зрения.
-      - **Специализация:** Каждое подпространство имеет свою роль: запросы ищут релевантные ключи, а значения используются для агрегации информации.
-      - **Обучаемость:** Матрицы весов $W_{Q_i}$, $W_{K_i}$ и $W_{V_i}$ являются обучаемыми параметрами, что позволяет модели адаптироваться к конкретной задаче.
-      - **Многоголовость:** Использование нескольких голов (разных наборов матриц) позволяет модели одновременно учитывать разные подпространства, что повышает ее эффективность.
+      - **Separation into subspaces:** Linear projections create separate subspaces for queries, keys, and values. This allows the model to process input data from different perspectives.
+      - **Specialization:** Each subspace has its own role: queries search for relevant keys, and values are used for information aggregation.
+      - **Trainability:** Weight matrices $W_{Q_i}$, $W_{K_i}$, and $W_{V_i}$ are trainable parameters, allowing the model to adapt to specific tasks.
+      - **Multi-head:** Using multiple heads (different sets of weight matrices) allows the model to simultaneously consider different subspaces, enhancing its effectiveness.
 
-      Таким образом, линейная проекция в механизме многоголового внимания — это способ преобразовать входные данные в различные подпространства, каждое из которых имеет свою роль в процессе обработки информации. Это достигается путем применения линейных отображений, определяемых обучаемыми матрицами весов.
+      Thus, linear projection in the multi-head attention mechanism is a way to transform input data into different subspaces, each with its own role in the information processing. This is achieved by applying linear mappings defined by trainable weight matrices.
 
-   - **Внимание для каждой головы:** Вычисляется взвешенная сумма значений, где веса определяются функцией softmax от скалярного произведения запросов и ключей:
+   - **Attention for each head:** Calculated as a weighted sum of values, where weights are determined by the softmax function of the dot product of queries and keys:
      $$
      Z_i = \text{Attention}(Q_i, K_i, V_i) = \text{softmax}\left(\frac{Q_i K_i^T}{\sqrt{D_k}}\right) V_i
      $$
 
-   - **Функция Softmax:**
+   - **Softmax function:**
 
-      **Определение:** Функция softmax — это функция, которая преобразует вектор вещественных чисел в вектор вероятностей. Она принимает на вход вектор $z = [z_1, z_2, ..., z_n]$ и возвращает вектор $\sigma(z) = [\sigma(z_1), \sigma(z_2), ..., \sigma(z_n)]$, где каждый элемент $\sigma(z_i)$ вычисляется по формуле:
+      **Definition:** The softmax function is a function that transforms a vector of real numbers into a vector of probabilities. It takes an input vector $z = [z_1, z_2, ..., z_n]$ and returns a vector $\sigma(z) = [\sigma(z_1), \sigma(z_2), ..., \sigma(z_n)]$, where each element $\sigma(z_i)$ is calculated by the formula:
 
       $$
       \sigma(z_i) = \frac{e^{z_i}}{\sum_{j=1}^{n} e^{z_j}}
       $$
 
-      где:
-      - $z_i$ — это $i$-й элемент входного вектора $z$.
-      - $e$ — это основание натурального логарифма (приблизительно 2.71828).
-      - $n$ — это размерность вектора $z$.
+      where:
+      - $z_i$ — this is the $i$-th element of the input vector $z$.
+      - $e$ — this is the base of the natural logarithm (approximately 2.71828).
+      - $n$ — this is the dimension of the vector $z$.
 
-      **Свойства Softmax:**
-      - **Нормализация:** Сумма всех элементов выходного вектора $\sigma(z)$ равна 1: $\sum_{i=1}^{n} \sigma(z_i) = 1$.
-      - **Вероятности:** Каждый элемент выходного вектора $\sigma(z_i)$ находится в диапазоне от 0 до 1: $0 \leq \sigma(z_i) \leq 1$.
-      - **Преобразование:** Softmax преобразует произвольные вещественные числа в вероятности, что делает ее полезной для задач классификации и внимания.
+      **Properties of Softmax:**
+      - **Normalization:** The sum of all elements in the output vector $\sigma(z)$ is 1: $\sum_{i=1}^{n} \sigma(z_i) = 1$.
+      - **Probabilities:** Each element of the output vector $\sigma(z_i)$ lies in the range from 0 to 1: $0 \leq \sigma(z_i) \leq 1$.
+      - **Transformation:** Softmax transforms arbitrary real numbers into probabilities, making it useful for classification and attention tasks.
 
-   - **Softmax в Механизме Внимания:**
+   - **Softmax in Attention Mechanism:**
 
-      В механизме внимания softmax используется для вычисления весов, которые показывают, насколько важен каждый токен при вычислении контекстуализированного представления. В выражении $\text{softmax}\left(\frac{Q_i K_i^T}{\sqrt{D_k}}\right) V_i$:
+      In the attention mechanism, softmax is used to calculate attention weights, which show how important each token is when calculating the contextualized representation. In the expression $\text{softmax}\left(\frac{Q_i K_i^T}{\sqrt{D_k}}\right) V_i$:
 
-      - $Q_i$ — это матрица запросов (queries) для $i$-й головы.
-      - $K_i$ — это матрица ключей (keys) для $i$-й головы.
-      - $V_i$ — это матрица значений (values) для $i$-й головы.
-      - $D_k$ — это размерность ключей и запросов.
+      - $Q_i$ — this is the matrix of queries for the $i$-th head.
+      - $K_i$ — this is the matrix of keys for the $i$-th head.
+      - $V_i$ — this is the matrix of values for the $i$-th head.
+      - $D_k$ — this is the dimension of keys and queries.
 
-      **Расчет весов внимания:**
-      1. **Скалярное произведение:** Вычисляется скалярное произведение матриц запросов и ключей: $Q_i K_i^T$. Это дает матрицу, где каждый элемент показывает, насколько "совпадает" запрос с ключом.
-      2. **Масштабирование:** Результат скалярного произведения делится на $\sqrt{D_k}$. Это масштабирование помогает стабилизировать обучение, предотвращая слишком большие значения, которые могут привести к проблемам с градиентами.
-      3. **Softmax:** Функция softmax применяется к результату масштабирования. Это преобразует значения в вероятности, которые представляют собой веса внимания.
+      **Calculation of attention weights:**
+      1. **Dot product:** The dot product of queries and keys is calculated: $Q_i K_i^T$. This gives a matrix where each element shows how "compatible" the query of one token is with the key of another.
+      2. **Scaling:** The result of the dot product is divided by $\sqrt{D_k}$. This scaling helps stabilize training, preventing very large values that could cause gradient problems.
+      3. **Softmax:** The softmax function is applied to the scaled result. This transforms the values into probabilities, which represent attention weights.
 
-   - **Конкатенация голов:** Выходы всех голов конкатенируются:
+   - **Concatenation of heads:** The outputs of all heads are concatenated:
       $$
       \text{Concat}(Z_1, Z_2, ..., Z_h)
       $$
-      где $Z_i = \text{Attention}(Q_i, K_i, V_i)$.
-   - **Линейная проекция выхода:** Результат конкатенации проецируется обратно в пространство размерности $D_{model}$:
+      where $Z_i = \text{Attention}(Q_i, K_i, V_i)$.
+   - **Linear projection of output:** The result of concatenation is projected back into the $D_{model}$ space:
       $$
       \text{MultiHead}(Q, K, V) = \text{Concat}(Z_1, Z_2, ..., Z_h) W^O
       $$
-      где $W^O \in \mathbb{R}^{h D_v \times D_{model}}$ - весовая матрица выходной проекции.
+      where $W^O \in \mathbb{R}^{h D_v \times D_{model}}$ - weight matrix for output projection.
 
-### **Давайте подробно разберем, как работает softmax внутри Multi-Head Attention на вашем примере программного кода ниже.**
+### Let's take a closer look at how softmax works inside Multi-Head Attention using the code example below.
 
-Теперь перейдем к самому интересному — Multi-Head Self-Attention, где и используется softmax.
+Now let's move on to the most interesting part — Multi-Head Self-Attention, where softmax is used.
 
-**1. Линейные проекции:**
+**1. Linear projections:**
 
-  - На вход Multi-Head Attention подаются комбинированные эмбеддинги (форма `torch.Size([3, 9, 512])`).
-  - Для каждой головы (в вашем примере их 8) входные данные линейно проецируются в три матрицы:
-    - **Q (запросы):** `torch.Size([3, 8, 9, 64])`
-    - **K (ключи):** `torch.Size([3, 8, 9, 64])`
-    - **V (значения):** `torch.Size([3, 8, 9, 64])`
-  - Эти проекции выполняются с помощью обучаемых матриц весов $W_Q$, $W_K$ и $W_V$.
-  - В вашем примере для первой позиции первого батча (токен `[CLS]`) вы видите примеры матриц Q, K и V.
+  - The input to Multi-Head Attention is the combined embeddings (shape `torch.Size([3, 9, 512])`).
+  - For each head (in your example, there are 8), the input data is linearly projected into three matrices:
+    - **Q (queries):** `torch.Size([3, 8, 9, 64])`
+    - **K (keys):** `torch.Size([3, 8, 9, 64])`
+    - **V (values):** `torch.Size([3, 8, 9, 64])`
+  - These projections are performed using trainable weight matrices $W_Q$, $W_K$, and $W_V$.
+  - In your example, for the first position of the first batch (token `[CLS]`), you see examples of matrices Q, K, and V.
 
-  **Обратите внимание!:**
+  **Note!**
 
 ```
-# Это до подслоя Multi-Head Attention!
+# This is before the Multi-Head Attention sublayer!
 
-Позиция 0 ([CLS]):
-Исходный эмбеддинг   X:  [ 0.9007 -2.1055  0.6784]
-Позиционное кодир   PE:  [0. 1. 0.]
-Комбинированный X + PE:  [ 0.9007 -1.1055  0.6784]
+Position 0 ([CLS]):
+Original embedding X:  [ 0.9007 -2.1055  0.6784]
+Positional encoding PE:  [0. 1. 0.]
+Combined X + PE:  [ 0.9007 -1.1055  0.6784]
 
-# Это после Multi-Head Attention! 
-  Позиция 0 ([CLS]):
+# This is after Multi-Head Attention!
+  Position 0 ([CLS]):
     Q: [[ 17.2809  14.7748 -11.5202]
 [ -7.0419 -29.7085  54.2687]
 [ 29.6011  11.744   -0.8485]
@@ -675,163 +675,253 @@ for pos in [0, 2, 4, 6, 8]:
 [ -9.4451 -38.6892  42.4362]]
 ```
 
-*   **"Q для токена CLS" - это набор векторов в виде матрицы.**
-*   **Количество векторов = количеству голов внимания** (в примере 8).
-*   **Каждый вектор соответствует отдельной голове внимания.**
-*   **Вектор получается линейной проекцией:**  Комбинированный эмбеддинг CLS токена  **умножается на матрицу  `W_q`**  конкретной головы внимания.
+*   **"Q for CLS token" - this is a set of vectors in the form of a matrix.**
+*   **The number of vectors equals the number of attention heads** (in your example, 8).
+*   **Each vector corresponds to a separate attention head.**
+*   **Each vector is obtained by linear projection:** The combined embedding of the CLS token **is multiplied by the weight matrix $W_q$** of the specific attention head.
 
-**2. Вычисление весов внимания:**
+**2. Calculation of attention weights:**
 
-  - Для каждой головы и для каждой позиции в последовательности вычисляются веса внимания.
-  - **Скалярное произведение:** Сначала вычисляется скалярное произведение запросов и ключей: $Q_i K_i^T$.
-    - В вашем примере, для первой головы и первой позиции (токен `[CLS]`), это будет скалярное произведение вектора Q (размерность 64) на транспонированный вектор K (размерность 64) для каждой позиции в последовательности.
-    - Результатом будет матрица размерности (9, 9), где каждый элемент показывает, насколько "совпадает" запрос токена `[CLS]` с ключом каждого из 9 токенов в последовательности.
+  - For each head and for each position in the sequence, attention weights are calculated.
+  - **Dot product:** First, the dot product of queries and keys is calculated: $Q_i K_i^T$.
+    - In your example, for the first head and the first position (token `[CLS]`), this will be the dot product of the query vector of `[CLS]` with the transpose of the key vector of each position in the sequence.
+    - The result will be a matrix of size (9, 9), where each element shows how "compatible" the query of `[CLS]` is with the key of each of the 9 tokens in the sequence.
 
     <div style="border: 1px solid #000; padding: 10px; margin: 10px;">
     
-    **Цель скалярного произведения:**
+    **Purpose of the dot product:**
 
-    Основная цель скалярного произведения на этом этапе — **определить, насколько "совместим" или "релевантен" запрос (Q) одного токена к ключам (K) всех остальных токенов в последовательности.**  В результате мы получаем "сырые" веса внимания, которые потом будут нормализованы Softmax.
+    The main purpose of the dot product at this stage is to **determine how "compatible" or "relevant" the query (Q) of one token is to the keys (K) of all other tokens in the sequence.** As a result, we get "raw" attention weights, which are then normalized by Softmax.
 
-    **Что происходит для токена `[CLS]` (первая позиция) и первой головы:**
+    **What happens for token `[CLS]` (first position) and the first head:**
 
-    1.  **Берем вектор запроса Q для `[CLS]` из первой головы:**
-        *   В вашем примере для позиции 0 ([CLS]) и первой головы (первая строка в блоке Q) указан вектор (показаны только первые 3 элемента): `[ 17.2809  14.7748 -11.5202 ...]`.  На самом деле это вектор размерности 64. Обозначим его как  `Q_cls_head1`.
+    1.  **Take the query vector Q for `[CLS]` from the first head:**
+        *   In your example for position 0 ([CLS]) and the first head (first row in the Q block) the vector is shown (only the first 3 elements are shown): `[ 17.2809  14.7748 -11.5202 ...]`. Actually, this is a vector of size 64. Let's denote it as `Q_cls_head1`.
 
-    2.  **Берем векторы ключей K для *всех* позиций (от 0 до 8) из первой головы:**
-        *   Для каждой позиции от 0 до 8 в последовательности (токены `[CLS]`, `Всем`, `привет`, `!`, `Я`, `увлекаюсь`, `искусственным`, `интеллектом`, `[SEP]`) есть свой вектор ключей K, полученный из первой головы.  В примере для позиции 0 ([CLS]) и первой головы (первая строка в блоке K) указан вектор: `[  6.637  -10.3847 -29.3882 ...]`.  Обозначим векторы ключей как `K_pos0_head1`, `K_pos1_head1`, `K_pos2_head1`, ..., `K_pos8_head1`. Каждый из них также имеет размерность 64.
+    2.  **Take the key vectors K for ALL positions (from 0 to 8) from the first head:**
+        *   For each position from 0 to 8 in the sequence (tokens `[CLS]`, `Всем`, `привет`, `!`, `Я`, `увлекаюсь`, `искусственным`, `интеллектом`, `[SEP]`) there is a corresponding key vector K from the first head. In your example for position 0 ([CLS]) and the first head (first row in the K block) the vector is shown: `[  6.637  -10.3847 -29.3882 ...]`. Let's denote these key vectors as `K_pos0_head1`, `K_pos1_head1`, `K_pos2_head1`, ..., `K_pos8_head1`. Each of these is also a vector of size 64.
 
-    3.  **Вычисляем скалярное произведение между `Q_cls_head1` и каждым вектором ключей `K_pos_j_head1`:**
-        *   Для каждой позиции `j` от 0 до 8 мы вычисляем скалярное произведение:
-            *   `score_0 = Q_cls_head1 * (K_pos0_head1)^T`  (внимание `[CLS]` на `[CLS]`)
-            *   `score_1 = Q_cls_head1 * (K_pos1_head1)^T`  (внимание `[CLS]` на `Всем`)
-            *   `score_2 = Q_cls_head1 * (K_pos2_head1)^T`  (внимание `[CLS]` на `привет`)
+    3.  **Calculate the dot product between `Q_cls_head1` and each key vector `K_pos_j_head1`:**
+        *   For each position `j` from 0 to 8 we calculate the dot product:
+            *   `score_0 = Q_cls_head1 * (K_pos0_head1)^T`  (attention `[CLS]` on `[CLS]`)
+            *   `score_1 = Q_cls_head1 * (K_pos1_head1)^T`  (attention `[CLS]` on `Всем`)
+            *   `score_2 = Q_cls_head1 * (K_pos2_head1)^T`  (attention `[CLS]` on `привет`)
             *   ...
-            *   `score_8 = Q_cls_head1 * (K_pos8_head1)^T`  (внимание `[CLS]` на `[SEP]`)
+            *   `score_8 = Q_cls_head1 * (K_pos8_head1)^T`  (attention `[CLS]` on `[SEP]`)
 
-        *   **Каждое скалярное произведение `score_j` — это одно число (скаляр).** Оно показывает, насколько "совместим" запрос токена `[CLS]` с ключом токена в позиции `j`. Чем больше значение `score_j`, тем больше внимания (пока еще "сырого")  токен `[CLS]` должен уделить токену в позиции `j`.
+        *   **Each dot product `score_j` — this is a single number (scalar).** It shows how "compatible" the query of `[CLS]` is with the key of the token at position `j`. The higher the value `score_j`, the more attention (yet "raw") the token `[CLS]` should pay to the token at position `j`.
 
-        В нашем примере для позиции [CLS]:
+        In our example for position [CLS]:
           ```python
-          Q: [[-22.9001 -31.6346  6.0742]    # вектор головы 0
-              [ 41.4631   5.2998  6.2346]    # вектор головы 1
-              [ 29.6049 -43.8211 -13.9067]   # вектор головы 2
-              [ -9.0778  17.0357  -0.9468]   # вектор головы 3
-              [ 19.0137  -6.5111 -15.9635]   # вектор головы 4
-              [-42.3292 -31.1711  -1.0993]   # вектор головы 5
-              [ 22.1916 -19.8376  24.6427]   # вектор головы 6
-              [-11.865  -57.7867 -35.5895]]  # вектор головы 7
+          Q: [[-22.9001 -31.6346  6.0742]    # vector of head 0
+              [ 41.4631   5.2998  6.2346]    # vector of head 1
+              [ 29.6049 -43.8211 -13.9067]   # vector of head 2
+              [ -9.0778  17.0357  -0.9468]   # vector of head 3
+              [ 19.0137  -6.5111 -15.9635]   # vector of head 4
+              [-42.3292 -31.1711  -1.0993]   # vector of head 5
+              [ 22.1916 -19.8376  24.6427]   # vector of head 6
+              [-11.865  -57.7867 -35.5895]]  # vector of head 7
           ```
 
-          Процесс вычисления:
+          Process of calculation:
           
-            - Для головы 0:
-              * Берем вектор Q головы 0: [-22.9001 -31.6346 6.0742]
-              * Умножаем его на все векторы K ТОЛЬКО головы 0
-            - Для головы 1:
-              * Берем вектор Q головы 1: [41.4631 5.2998 6.2346]
-              * Умножаем его на все векторы K ТОЛЬКО головы 1
-            - И так далее для каждой головы
+            - For head 0:
+              * Take the Q vector of head 0: [-22.9001 -31.6346 6.0742]
+              * Multiply it by all K vectors ONLY of head 0
+            - For head 1:
+              * Take the Q vector of head 1: [41.4631 5.2998 6.2346]
+              * Multiply it by all K vectors ONLY of head 1
+            - And so on for each head
 
-    4.  **Результат - ряд скалярных значений:**
-        *   В результате этих 9 скалярных произведений мы получаем ряд чисел: `[score_0, score_1, score_2, score_3, score_4, score_5, score_6, score_7, score_8]`.
-        *   **Именно этот ряд скалярных значений (после масштабирования и Softmax) станет весами внимания для токена `[CLS]` в первой голове.**  В вашем примере после Softmax эти веса стали `[1. 0. 0. 0. 0. 0. 0. 0. 0.]`.
+    4.  **Result - a series of scalar values:**
+        *   As a result of these 9 dot products, we get a series of numbers: `[score_0, score_1, score_2, score_3, score_4, score_5, score_6, score_7, score_8]`.
+        *   **This series of scalar values (after scaling and Softmax) will become the attention weights for token `[CLS]` in the first head.** In your example, after Softmax, these weights became `[1. 0. 0. 0. 0. 0. 0. 0. 0.]`.
       </div>
 
-  - **Масштабирование:** Результат скалярного произведения делится на $\sqrt{D_k}$, где $D_k$ — размерность ключей и запросов (в вашем примере $D_k = 64$). Это масштабирование помогает стабилизировать обучение.
-  - **Softmax:** Функция softmax применяется к результату масштабирования.
-    - Softmax преобразует значения в вероятности, которые представляют собой веса внимания.
-    - Softmax применяется к каждой строке матрицы (9, 9), то есть для каждого токена в последовательности вычисляются веса внимания относительно всех остальных токенов.
-    - **Важно:** Softmax нормализует веса так, что их сумма равна 1. Это означает, что веса внимания показывают, насколько важен каждый токен при вычислении контекстуализированного представления текущего токена.
-    - В вашем примере, для первой головы и первой позиции, вы видите, что веса внимания равны `[1. 0. 0. 0. 0. 0. 0. 0. 0.]`. Это означает, что при вычислении контекстуализированного представления токена `[CLS]` (первая позиция) наибольшее внимание уделяется самому токену `[CLS]`, а остальные токены не имеют значения.
+  - **Scaling:** The result of the dot product is divided by $\sqrt{D_k}$, where $D_k$ is the dimension of keys and queries (in your example $D_k = 64$). This scaling helps stabilize training, preventing very large values that could cause gradient problems.
+  - **Softmax:** The softmax function is applied to the scaled result.
+    - Softmax transforms the values into probabilities, which represent attention weights.
+    - Softmax is applied to each row of the matrix (9, 9), i.e., for each token in the sequence, the attention weights relative to all other tokens are calculated.
+    - **Important:** Softmax normalizes the weights so that their sum is 1. This means that the attention weights show how important each token is when calculating the contextualized representation of the current token.
+    - In your example, for the first head and the first position, you see that the attention weights are `[1. 0. 0. 0. 0. 0. 0. 0. 0.]`. This means that when calculating the contextualized representation of token `[CLS]` (first position), the maximum attention is paid to the token `[CLS]` itself, and the other tokens have no value.
 
-**3. Взвешивание значений:**
+**3. Weighted value summation:**
 
-  - После вычисления весов внимания, они используются для взвешивания значений (матрицы V).
-  - Веса внимания умножаются на соответствующие значения.
-  - Результатом является взвешенная сумма значений, которая представляет собой контекстуализированное представление токена.
-  - В вашем примере, для первой головы и первой позиции, вы видите матрицу Z, которая является результатом взвешивания значений.
+  - After calculating the attention weights, they are used to weight the values.
+  - The attention weights are multiplied by the corresponding values.
+  - The result is the weighted sum of values, which represents the contextualized representation of the token.
+  - In your example, for the first head and the first position, you see the matrix Z, which is the result of the weighted summation.
 
-**4. Конкатенация голов:**
+**4. Concatenation of heads:**
 
-  - Выходы всех голов (матрицы Z) конкатенируются по последней размерности.
-  - В вашем примере, каждая матрица Z имеет размерность `torch.Size([3, 8, 9, 64])`. После конкатенации получается матрица `torch.Size([3, 9, 512])`.
-  - Это означает, что векторы размерности 64 из каждой головы "склеиваются" в один вектор размерности 512.
+  - The outputs of all heads are concatenated:
+      $$
+      \text{Concat}(Z_1, Z_2, ..., Z_h)
+      $$
+      where $Z_i = \text{Attention}(Q_i, K_i, V_i)$.
+   - **Linear projection of output:** The result of concatenation is projected back into the $D_{model}$ space:
+      $$
+      \text{MultiHead}(Q, K, V) = \text{Concat}(Z_1, Z_2, ..., Z_h) W^O
+      $$
+      where $W^O \in \mathbb{R}^{h D_v \times D_{model}}$ - output projection weight matrix.
 
-**5. Линейная проекция выхода:**
+### Let's take a closer look at how softmax works inside Multi-Head Attention using the code example below.
 
-  - Результат конкатенации проецируется обратно в пространство размерности $D_{model}$ (512 в вашем примере) с помощью обучаемой матрицы весов $W^O$.
-  - Это дает окончательный выход Multi-Head Attention.
+Now let's move on to the most interesting part — Multi-Head Self-Attention, where softmax is used.
 
-    **Назначение матрицы $W^O$:**
+**1. Linear projections:**
 
-    Матрица $W^O$ ("W-output"") выполняет функцию **линейной проекции**, подобно матрицам $W^Q$, $W_K$ и $W_V$, но на этот раз она применяется к **конкатенированному выходу всех голов внимания**.
+  - The input to Multi-Head Attention is the combined embeddings (shape `torch.Size([3, 9, 512])`).
+  - For each head (in your example, there are 8), the input data is linearly projected into three matrices:
+    - **Q (queries):** `torch.Size([3, 8, 9, 64])`
+    - **K (keys):** `torch.Size([3, 8, 9, 64])`
+    - **V (values):** `torch.Size([3, 8, 9, 64])`
+  - These projections are performed using trainable weight matrices $W_Q$, $W_K$, and $W_V$.
+  - In your example, for the first position of the first batch (token `[CLS]`), you see examples of matrices Q, K, and V.
 
-    **Цель $W^O$**:
+  **Note!**
 
-    * **Свести размерность:**  После конкатенации выходов всех голов, мы получаем векторное представление, размерность которого увеличена (в вашем примере с 64 до 512, так как 8 голов * 64 размерность каждой головы = 512). Матрица $W^O$ используется для **проекции этого конкатенированного вектора обратно к исходной размерности модели** ($D_{model}$, в вашем примере 512).  Это нужно для того, чтобы выход Multi-Head Attention имел ту же размерность, что и вход, и мог быть интегрирован в остальную часть нейронной сети (например, в слои Feed-Forward Network или Residual Connections).
-    * **Смешать информацию от разных голов:**  Конкатенация просто "склеивает" выходы разных голов. Матрица $W^O$ позволяет **взаимодействовать и смешивать информацию, полученную от разных голов внимания**.  Каждая голова могла уловить разные аспекты взаимосвязей в данных, и $W^O$ помогает объединить эти разные "точки зрения" в единое, обобщенное представление.
+```
+# This is before the Multi-Head Attention sublayer!
 
-    **Размерности и перемножение матриц:**
+Position 0 ([CLS]):
+Original embedding X:  [ 0.9007 -2.1055  0.6784]
+Positional encoding PE:  [0. 1. 0.]
+Combined X + PE:  [ 0.9007 -1.1055  0.6784]
 
-    Давайте рассмотрим размерности матриц, чтобы понять, как происходит перемножение.
+# This is after Multi-Head Attention!
+  Position 0 ([CLS]):
+    Q: [[ 17.2809  14.7748 -11.5202]
+[ -7.0419 -29.7085  54.2687]
+[ 29.6011  11.744   -0.8485]
+[ -6.7934 -25.4389  67.2095]
+[ 28.5684 -16.4333 -13.8622]
+[ -4.5139 -61.0905  -0.8532]
+[-24.339   -9.4282  -5.367 ]
+[  7.8296 -14.4175  16.9908]]
+    K: [[  6.637  -10.3847 -29.3882]
+[-22.8757 -18.3149 -65.0343]
+[ 18.4063  29.4638 -34.1548]
+[  5.1229   5.5592  66.0818]
+[  9.9801 -20.4229  -7.4216]
+[-22.0776   4.2677 -32.6255]
+[-40.8423  19.4702   0.3407]
+[  8.7071  27.0544 -13.8258]]
+    V: [[ 25.8466  12.3776  -7.7585]
+[ 32.6146  -2.0634  32.7602]
+[ 25.009   11.0889  28.2676]
+[ 19.9813 -11.8157  22.7189]
+[ 12.4848   6.3136 -28.9884]
+[ -1.6635  15.4315 -23.0705]
+[ 14.6102  -1.6098 -15.4584]
+[ -9.4451 -38.6892  42.4362]]
+```
 
-    * **Выход каждой головы (Z):**  В вашем примере, после взвешивания значений, каждая голова производит матрицу $Z$ размерности `torch.Size([3, 8, 9, 64])`.  Если мы говорим об **одном батче, одной голове и всех позициях в последовательности**, то это будет матрица размерности `[9, 64]` (последовательность из 9 токенов, вектор размерности 64 для каждого токена).
-    * **Конкатенация голов:**  Выходы всех голов (в вашем примере 8 голов) конкатенируются **по последней размерности**.  Это означает, что векторы размерности 64 от каждой головы "складываются" рядом.  Таким образом, для **одного батча и всех позиций в последовательности**, конкатенированный выход будет иметь размерность `[9, 512]` (9 токенов, вектор размерности 512 для каждого токена, где 512 = 8 голов * 64 размерность головы).  Обозначим эту конкатенированную матрицу как $Z_{concat}$.
-    * **Матрица $W^O$:** Матрица $W^O$ имеет размерность  $(D_{model} \times D_{model})$, в вашем примере $(512 \times 512)$.  Она преобразует вектор размерности $D_{model}$ (512 после конкатенации) обратно в вектор размерности $D_{model}$ (512).
+*   **"Q for CLS token" - this is a set of vectors in the form of a matrix.**
+*   **The number of vectors equals the number of attention heads** (in your example, 8).
+*   **Each vector corresponds to a separate attention head.**
+*   **Each vector is obtained by linear projection:** The combined embedding of the CLS token **is multiplied by the weight matrix $W_q$** of the specific attention head.
 
-    **Матричное умножение:**
+**2. Calculation of attention weights:**
 
-    Финальный выход Multi-Head Attention получается путем **умножения конкатенированной матрицы $Z_{concat}$ на матрицу $W^O$**:
+  - For each head and for each position in the sequence, attention weights are calculated.
+  - **Dot product:** First, the dot product of queries and keys is calculated: $Q_i K_i^T$.
+    - In your example, for the first head and the first position (token `[CLS]`), this will be the dot product of the query vector of `[CLS]` with the transpose of the key vector of each position in the sequence.
+    - The result will be a matrix of size (9, 9), where each element shows how "compatible" the query of `[CLS]` is with the key of each of the 9 tokens in the sequence.
 
-    $Output_{MHA} = Z_{concat} \times W^O$
+    <div style="border: 1px solid #000; padding: 10px; margin: 10px;">
+    
+    **Purpose of the dot product:**
 
-    В терминах размерностей:
+    The main purpose of the dot product at this stage is to **determine how "compatible" or "relevant" the query (Q) of one token is to the keys (K) of all other tokens in the sequence.** As a result, we get "raw" attention weights, which are then normalized by Softmax.
 
-    `[batch_size, seq_len, num_heads * head_dim]`  умножается на  `[num_heads * head_dim,  D_{model}]`  =  `[batch_size, seq_len, D_{model}]`
+    **What happens for token `[CLS]` (first position) and the first head:**
 
-    В вашем примере:
+    1.  **Take the query vector Q for `[CLS]` from the first head:**
+        *   In your example for position 0 ([CLS]) and the first head (first row in the Q block) the vector is shown (only the first 3 elements are shown): `[ 17.2809  14.7748 -11.5202 ...]`. Actually, this is a vector of size 64. Let's denote it as `Q_cls_head1`.
 
-    `[3, 9, 512]`  умножается на  `[512, 512]`  =  `[3, 9, 512]`
+    2.  **Take the key vectors K for ALL positions (from 0 to 8) from the first head:**
+        *   For each position from 0 to 8 in the sequence (tokens `[CLS]`, `Всем`, `привет`, `!`, `Я`, `увлекаюсь`, `искусственным`, `интеллектом`, `[SEP]`) there is a corresponding key vector K from the first head. In your example for position 0 ([CLS]) and the first head (first row in the K block) the vector is shown: `[  6.637  -10.3847 -29.3882 ...]`. Let's denote these key vectors as `K_pos0_head1`, `K_pos1_head1`, `K_pos2_head1`, ..., `K_pos8_head1`. Each of these is also a vector of size 64.
 
-    > Извиняюсь, не самый удачный пример, так как размерность не изменилась. Вот краткий пример с другой размерностью
+    3.  **Calculate the dot product between `Q_cls_head1` and each key vector `K_pos_j_head1`:**
+        *   For each position `j` from 0 to 8 we calculate the dot product:
+            *   `score_0 = Q_cls_head1 * (K_pos0_head1)^T`  (attention `[CLS]` on `[CLS]`)
+            *   `score_1 = Q_cls_head1 * (K_pos1_head1)^T`  (attention `[CLS]` on `Всем`)
+            *   `score_2 = Q_cls_head1 * (K_pos2_head1)^T`  (attention `[CLS]` on `привет`)
+            *   ...
+            *   `score_8 = Q_cls_head1 * (K_pos8_head1)^T`  (attention `[CLS]` on `[SEP]`)
 
-    ```
-    Вход:  [3, 9, 256]  (D_model = 256)
-    |
-    |  Multi-Head Attention (num_heads=4, head_dim=128)
-    |
-    Конкатенация голов: [3, 9, 512]  (размерность увеличилась до 512 = 4 * 128)
-    |
-    |  Линейная проекция W^O (матрица 512x256)
-    |
-    Выход: [3, 9, 256]  (размерность вернулась к D_model = 256)
-    ```
+        *   **Each dot product `score_j` — this is a single number (scalar).** It shows how "compatible" the query of `[CLS]` is with the key of the token at position `j`. The higher the value `score_j`, the more attention (yet "raw") the token `[CLS]` should pay to the token at position `j`.
 
-    **4. Итог по $W^O$:**
+        In our example for position [CLS]:
+          ```python
+          Q: [[-22.9001 -31.6346  6.0742]    # vector of head 0
+              [ 41.4631   5.2998  6.2346]    # vector of head 1
+              [ 29.6049 -43.8211 -13.9067]   # vector of head 2
+              [ -9.0778  17.0357  -0.9468]   # vector of head 3
+              [ 19.0137  -6.5111 -15.9635]   # vector of head 4
+              [-42.3292 -31.1711  -1.0993]   # vector of head 5
+              [ 22.1916 -19.8376  24.6427]   # vector of head 6
+              [-11.865  -57.7867 -35.5895]]  # vector of head 7
+          ```
 
-    * **$W^O$ - это обучаемая матрица весов.** Она, как и $W^Q$, $W_K$, $W_V$, настраивается в процессе обучения нейронной сети.
-    * **$W^O$ применяется после конкатенации выходов всех голов внимания.**
-    * **$W^O$ выполняет линейную проекцию, которая:**
-        * **Возвращает размерность к исходной $D_{model}$.**
-        * **Смешивает информацию, полученную от разных голов внимания.**
-    * **Результат умножения на $W^O$ является окончательным выходом слоя Multi-Head Attention.**
+          Process of calculation:
+          
+            - For head 0:
+              * Take the Q vector of head 0: [-22.9001 -31.6346 6.0742]
+              * Multiply it by all K vectors ONLY of head 0
+            - For head 1:
+              * Take the Q vector of head 1: [41.4631 5.2998 6.2346]
+              * Multiply it by all K vectors ONLY of head 1
+            - And so on for each head
 
-**Влияние Softmax:**
+    4.  **Result - a series of scalar values:**
+        *   As a result of these 9 dot products, we get a series of numbers: `[score_0, score_1, score_2, score_3, score_4, score_5, score_6, score_7, score_8]`.
+        *   **This series of scalar values (after scaling and Softmax) will become the attention weights for token `[CLS]` in the first head.** In your example, after Softmax, these weights became `[1. 0. 0. 0. 0. 0. 0. 0. 0.]`.
+      </div>
 
-- Softmax играет ключевую роль в механизме внимания, преобразуя результаты скалярного произведения запросов и ключей в вероятности.
-- Эти вероятности (веса внимания) показывают, насколько важен каждый токен при вычислении контекстуализированного представления текущего токена.
-- Softmax обеспечивает, что сумма весов внимания равна 1, что позволяет модели эффективно распределять внимание между различными токенами.
+  - **Scaling:** The result of the dot product is divided by $\sqrt{D_k}$, where $D_k$ is the dimension of keys and queries (in your example $D_k = 64$). This scaling helps stabilize training, preventing very large values that could cause gradient problems.
+  - **Softmax:** The softmax function is applied to the scaled result.
+    - Softmax transforms the values into probabilities, which represent attention weights.
+    - Softmax is applied to each row of the matrix (9, 9), i.e., for each token in the sequence, the attention weights relative to all other tokens are calculated.
+    - **Important:** Softmax normalizes the weights so that their sum is 1. This means that the attention weights show how important each token is when calculating the contextualized representation of the current token.
+    - In your example, for the first head and the first position, you see that the attention weights are `[1. 0. 0. 0. 0. 0. 0. 0. 0.]`. This means that when calculating the contextualized representation of token `[CLS]` (first position), the maximum attention is paid to the token `[CLS]` itself, and the other tokens have no value.
 
-**В итоге:**
+**3. Weighted value summation:**
 
-Softmax внутри Multi-Head Attention позволяет модели динамически определять, на какие части входной последовательности следует обращать внимание при обработке каждого токена. Это делает модель более гибкой и способной улавливать сложные зависимости в данных.
+  - After calculating the attention weights, they are used to weight the values.
+  - The attention weights are multiplied by the corresponding values.
+  - The result is the weighted sum of values, which represents the contextualized representation of the token.
+  - In your example, for the first head and the first position, you see the matrix Z, which is the result of the weighted summation.
+
+**4. Concatenation of heads:**
+
+  - The outputs of all heads are concatenated:
+      $$
+      \text{Concat}(Z_1, Z_2, ..., Z_h)
+      $$
+      where $Z_i = \text{Attention}(Q_i, K_i, V_i)$.
+   - **Linear projection of output:** The result of concatenation is projected back into the $D_{model}$ space:
+      $$
+      \text{MultiHead}(Q, K, V) = \text{Concat}(Z_1, Z_2, ..., Z_h) W^O
+      $$
+      where $W^O \in \mathbb{R}^{h D_v \times D_{model}}$ - output projection weight matrix.
+
+**Influence of Softmax:**
+
+- Softmax plays a key role in the attention mechanism, transforming the results of the dot product of queries and keys into probabilities.
+- These probabilities (attention weights) show how important each token is when calculating the contextualized representation of the current token.
+- Softmax ensures that the sum of attention weights is 1, allowing the model to effectively distribute attention among different tokens.
+
+**In summary:**
+
+Softmax within Multi-Head Attention allows the model to dynamically determine which parts of the input sequence to focus on when processing each token. This makes the model more flexible and capable of capturing complex dependencies in the data.
 
 ```python
-# Стандартные библиотеки
+# Standard libraries
 import math
 
-# Сторонние библиотеки
+# Third-party libraries
 import numpy as np
 import torch
 
@@ -839,14 +929,14 @@ import torch
 def positional_encoding(max_len: int, d_model: int) -> torch.Tensor:
     """
     Description:
-        Генерация позиционных кодирований по формуле из оригинальной статьи Transformer.
+        Generation of positional encodings according to the formula from the original Transformer paper.
 
     Args:
-        max_len: Максимальная длина последовательности.
-        d_model: Размерность модели (количество признаков).
+        max_len: Maximum sequence length.
+        d_model: Model dimension (number of features).
 
     Returns:
-        Тензор позиционных кодирований формы (max_len, d_model).
+        Tensor of positional encodings with shape (max_len, d_model).
 
     Examples:
         >>> pe = positional_encoding(10, 512)
@@ -869,13 +959,13 @@ def print_embeddings(
 ) -> None:
     """
     Description:
-        Визуализация эмбеддингов с метками токенов.
+        Visualization of embeddings with token labels.
 
     Args:
-        tensor: Тензор эмбеддингов.
-        tokens: Список токенов для визуализации.
-        title: Заголовок для вывода.
-        max_elements: Максимальное количество элементов для отображения.
+        tensor: Tensor of embeddings.
+        tokens: List of tokens for visualization.
+        title: Title for output.
+        max_elements: Maximum number of elements to display.
 
     Returns:
         None
@@ -883,7 +973,7 @@ def print_embeddings(
     Examples:
         >>> embeddings = torch.randn(5, 512)
         >>> tokens = ["token1", "token2", "token3", "token4", "token5"]
-        >>> print_embeddings(embeddings, tokens, "Пример эмбеддингов")
+        >>> print_embeddings(embeddings, tokens, "Example embeddings")
     """
     print(f"\n{title}:")
     for idx, (vec, token) in enumerate(zip(tensor, tokens)):
@@ -904,40 +994,40 @@ def print_attention_details(
 ) -> None:
     """
     Description:
-        Выводит детальную информацию о процессе внимания для конкретной позиции.
+        Output detailed information about the attention process for a specific position.
 
     Args:
-        batch_idx: Индекс батча.
-        head_idx: Индекс головы внимания.
-        pos_idx: Позиция в последовательности.
-        Q: Тензор запросов.
-        K: Тензор ключей.
-        attention_scores: Тензор сырых оценок внимания.
-        attention_weights: Тензор весов внимания после softmax.
-        tokens: Список токенов.
-        num_elements: Количество элементов для вывода.
+        batch_idx: Batch index.
+        head_idx: Head index.
+        pos_idx: Position in the sequence.
+        Q: Query tensor.
+        K: Key tensor.
+        attention_scores: Tensor of raw attention scores.
+        attention_weights: Tensor of attention weights after softmax.
+        tokens: List of tokens.
+        num_elements: Number of elements to output.
 
     Returns:
         None
     """
     print("\n" + "=" * 60)
     print(
-        f"Детали внимания для батча {batch_idx}, головы {head_idx}, "
-        f"позиции {pos_idx} ({tokens[batch_idx][pos_idx]}):"
+        f"Attention details for batch {batch_idx}, head {head_idx}, "
+        f"position {pos_idx} ({tokens[batch_idx][pos_idx]}):"
     )
 
-    # Вывод Q вектора
+    # Output Q vector
     q_vec = Q[batch_idx, head_idx, pos_idx, :num_elements].detach().numpy()
-    print(f"Q вектор (первые {num_elements} элементов):")
+    print(f"Q vector (first {num_elements} elements):")
     print(f"{q_vec.round(4)}")
 
-    # Вывод K векторов
-    print(f"K вектора (первые {num_elements} элементов каждого):")
+    # Output K vectors
+    print(f"K vectors (first {num_elements} elements of each):")
     for i, token in enumerate(tokens[batch_idx]):
         k_vec = K[batch_idx, head_idx, i, :num_elements].detach().numpy()
         print(f"{i:2d} {token:15}: {k_vec.round(4)}")
 
-    # Ручной расчет скалярных произведений
+    # Manual calculation of dot products
     manual_scores = []
     q = Q[batch_idx, head_idx, pos_idx]
     for i in range(len(tokens[batch_idx])):
@@ -945,92 +1035,92 @@ def print_attention_details(
         score = torch.dot(q, k) / math.sqrt(D_k)
         manual_scores.append(score.item())
 
-    # Получение автоматически рассчитанных оценок
+    # Get automatically calculated scores
     auto_scores = attention_scores[batch_idx, head_idx, pos_idx].detach().numpy()
 
-    # Сравнение результатов
-    print("\nСырые оценки внимания:")
-    print(f"Ручной расчет:     {np.array(manual_scores).round(4)}")
-    print(f"Автоматический:    {auto_scores.round(4)}")
+    # Compare results
+    print("\nRaw attention scores:")
+    print(f"Manual calculation: {np.array(manual_scores).round(4)}")
+    print(f"Automatic:          {auto_scores.round(4)}")
 
-    # Вывод весов после softmax
+    # Output weights after softmax
     weights = attention_weights[batch_idx, head_idx, pos_idx].detach().numpy()
-    print(f"\nВеса внимания после Softmax:")
+    print(f"\nAttention weights after Softmax:")
     print(f"{weights.round(4)}")
 
 
-# Пример данных
+# Example data
 sentences = [
-    "Всем привет! Я увлекаюсь искусственным интеллектом",
-    "Привет, как дела?",
-    "ИИ — это интересно!",
+    "Hello everyone! I am interested in artificial intelligence",
+    "Hello, how are you?",
+    "AI is interesting!"
 ]
 
-# Параметры модели
-N = len(sentences)  # Размер батча
-L = 9  # Максимальная длина последовательности
-D_model = 512  # Размерность эмбеддингов
-h = 8  # Количество голов
-D_k = D_model // h  # Размерность ключей и запросов
-D_v = D_model // h  # Размерность значений
+# Model parameters
+N = len(sentences)  # Batch size
+L = 9               # Maximum sequence length
+D_model = 512       # Embedding dimension
+h = 8               # Number of heads
+D_k = D_model // h  # Dimension of keys and queries
+D_v = D_model // h  # Dimension of values
 
-# 1. Токенизация с паддингом
+# 1. Tokenization with padding
 batch_tokens = [
-    ["[CLS]", "Всем", "привет", "!", "Я", "увлекаюсь", "искусственным", "интеллектом", "[SEP]"],
-    ["[CLS]", "Привет", ",", "как", "дела", "?", "[SEP]", "[PAD]", "[PAD]"],
-    ["[CLS]", "ИИ", "—", "это", "интересно", "!", "[SEP]", "[PAD]", "[PAD]"],
+    ["[CLS]", "Hello", "everyone", "!", "I", "am", "interested", "in", "artificial", "intelligence", "[SEP]"],  # L=11
+    ["[CLS]", "Hello", ",", "how", "are", "you", "?", "[SEP]", "[PAD]", "[PAD]"],                      # L=11 (with padding)
+    ["[CLS]", "AI", "—", "is", "interesting", "!", "[SEP]", "[PAD]", "[PAD]"]                      # L=11 (with padding)
 ]
 
-# 2. Создаем эмбеддинги
+# 2. Create embeddings
 embeddings = torch.randn(N, L, D_model)
 
-# 3. Генерируем позиционные кодирования
+# 3. Generate positional encodings
 pe = positional_encoding(L, D_model)
 
-# 4. Комбинируем эмбеддинги с позиционными кодированиями
-X_embedded = embeddings + pe  # Broadcasting для батча
+# 4. Combine embeddings with positional encodings
+X_embedded = embeddings + pe  # Broadcasting for batch
 
-# ================= Визуализация процесса =================
+# ================= Visualization of the process =================
 print("=" * 60)
-print("Шаг 1: Исходные эмбеддинги токенов")
-print(f"Форма тензора: {embeddings.shape}")
+print("Step 1: Input embeddings")
+print(f"Shape of tensor: {embeddings.shape}")
 for batch_idx in range(N):
-    print(f"\nБатч {batch_idx + 1}: '{sentences[batch_idx]}'")
-    print_embeddings(embeddings[batch_idx], batch_tokens[batch_idx], "Исходные эмбеддинги")
+    print(f"\nBatch {batch_idx + 1}: '{sentences[batch_idx]}'")
+    print_embeddings(embeddings[batch_idx], batch_tokens[batch_idx], "Input embeddings")
 
 print("\n" + "=" * 60)
-print("Шаг 2: Позиционные кодирования")
-print(f"Форма тензора: {pe.shape}")
-print_embeddings(pe, [f"Позиция {i}" for i in range(L)], "Примеры кодирований")
+print("Step 2: Positional encodings")
+print(f"Shape of tensor: {pe.shape}")
+print_embeddings(pe, [f"Position {i}" for i in range(L)], "Example encodings")
 
 print("\n" + "=" * 60)
-print("Шаг 3: Комбинированные эмбеддинги (X + PE)")
-print(f"Форма тензора: {X_embedded.shape}")
+print("Step 3: Combined embeddings (X + PE)")
+print(f"Shape of tensor: {X_embedded.shape}")
 for batch_idx in range(N):
-    print(f"\nБатч {batch_idx + 1}: '{sentences[batch_idx]}'")
-    print_embeddings(X_embedded[batch_idx], batch_tokens[batch_idx], "Результат сложения")
+    print(f"\nBatch {batch_idx + 1}: '{sentences[batch_idx]}'")
+    print_embeddings(X_embedded[batch_idx], batch_tokens[batch_idx], "Result of addition")
 
-# ================= Подробный вывод для первого батча =================
+# ================= Detailed output for the first batch =================
 print("\n" + "=" * 60)
-print("Детальный анализ первого батча:")
+print("Detailed analysis of the first batch:")
 batch_idx = 0
 
-# Исходные данные
-print(f"\nТекст: '{sentences[batch_idx]}'")
-print(f"Токены: {batch_tokens[batch_idx]}")
+# Original data
+print(f"\nText: '{sentences[batch_idx]}'")
+print(f"Tokens: {batch_tokens[batch_idx]}")
 
-# Сравнение для ключевых позиций
+# Comparison for key positions
 for pos in [0, 2, 4, 6, 8]:
-    print(f"\nПозиция {pos} ({batch_tokens[batch_idx][pos]}):")
-    print(f"Исходный эмбеддинг:  {embeddings[batch_idx, pos, :3].detach().numpy().round(4)}")
-    print(f"Позиционное кодир:   {pe[pos, :3].detach().numpy().round(4)}")
-    print(f"Комбинированный:     {X_embedded[batch_idx, pos, :3].detach().numpy().round(4)}")
+    print(f"\nPosition {pos} ({batch_tokens[batch_idx][pos]}):")
+    print(f"Original embedding:  {embeddings[batch_idx, pos, :3].detach().numpy().round(4)}")
+    print(f"Positional encoding: {pe[pos, :3].detach().numpy().round(4)}")
+    print(f"Combined:           {X_embedded[batch_idx, pos, :3].detach().numpy().round(4)}")
 
 # ================= Multi-Head Self-Attention =================
 print("\n" + "=" * 60)
-print("Шаг 4: Multi-Head Self-Attention")
+print("Step 4: Multi-Head Self-Attention")
 
-# 1. Линейные проекции
+# 1. Linear projections
 W_Q = torch.randn(h, D_model, D_k)
 W_K = torch.randn(h, D_model, D_k)
 W_V = torch.randn(h, D_model, D_v)
@@ -1039,21 +1129,21 @@ Q = torch.einsum('nlk,hkd->nhld', X_embedded, W_Q)
 K = torch.einsum('nlk,hkd->nhld', X_embedded, W_K)
 V = torch.einsum('nlk,hkd->nhld', X_embedded, W_V)
 
-print("\nЛинейные проекции:")
-print(f"Форма Q: {Q.shape}")
-print(f"Форма K: {K.shape}")
-print(f"Форма V: {V.shape}")
+print("\nLinear projections:")
+print(f"Shape of Q: {Q.shape}")
+print(f"Shape of K: {K.shape}")
+print(f"Shape of V: {V.shape}")
 
-# Вывод первых 3 элементов для Q, K, V
+# Output first 3 elements for Q, K, V
 for batch_idx in range(N):
-    print(f"\nБатч {batch_idx + 1}: '{sentences[batch_idx]}'")
+    print(f"\nBatch {batch_idx + 1}: '{sentences[batch_idx]}'")
     for pos in [0, 2, 4]:
-        print(f"  Позиция {pos} ({batch_tokens[batch_idx][pos]}):")
+        print(f"  Position {pos} ({batch_tokens[batch_idx][pos]}):")
         print(f"    Q: {Q[batch_idx, :, pos, :3].detach().numpy().round(4)}")
         print(f"    K: {K[batch_idx, :, pos, :3].detach().numpy().round(4)}")
         print(f"    V: {V[batch_idx, :, pos, :3].detach().numpy().round(4)}")
 
-# После расчета attention_weights добавляем:
+# After calculating attention_weights add:
 print_attention_details(
     batch_idx=0,
     head_idx=0,
@@ -1065,10 +1155,10 @@ print_attention_details(
     tokens=batch_tokens,
 )
 
-# 2. Внимание для каждой головы
+# 2. Attention for each head
 attention_scores = torch.einsum('nhld,nhmd->nhlm', Q, K) / math.sqrt(D_k)
 
-# Маскирование паддинга
+# Masking padding
 mask = torch.ones(N, 1, L, L, dtype=torch.bool)
 for batch_idx, tokens in enumerate(batch_tokens):
     for i, token in enumerate(tokens):
@@ -1080,202 +1170,202 @@ attention_scores = attention_scores.masked_fill(~mask, float('-inf'))
 attention_weights = torch.softmax(attention_scores, dim=-1)
 Z = torch.einsum('nhlm,nhmd->nhld', attention_weights, V)
 
-print("\nВнимание для каждой головы:")
-print(f"Форма Z: {Z.shape}")
+print("\nAttention for each head:")
+print(f"Shape of Z: {Z.shape}")
 
-# Вывод первых 3 элементов для Z
+# Output first 3 elements for Z
 for batch_idx in range(N):
-    print(f"\nБатч {batch_idx + 1}: '{sentences[batch_idx]}'")
+    print(f"\nBatch {batch_idx + 1}: '{sentences[batch_idx]}'")
     for pos in [0, 2, 4]:
-        print(f"  Позиция {pos} ({batch_tokens[batch_idx][pos]}):")
+        print(f"  Position {pos} ({batch_tokens[batch_idx][pos]}):")
         print(f"    Z: {Z[batch_idx, :, pos, :3].detach().numpy().round(4)}")
 
-# Визуализация весов внимания для первой головы и первой позиции
-print("\nВизуализация весов внимания для первой головы и первой позиции:")
-print(f"Веса внимания (первая голова, первая позиция): {attention_weights[0, 0, 0, :].detach().numpy().round(4)}")
+# Visualization of attention weights for the first head and first position
+print("\nVisualization of attention weights for the first head and first position:")
+print(f"Attention weights (first head, first position): {attention_weights[0, 0, 0, :].detach().numpy().round(4)}")
 
-# 3. Конкатенация голов
+# 3. Concatenation of heads
 Z_concat = Z.transpose(1, 2).reshape(N, L, h * D_v)
 
-print("\nКонкатенация голов:")
-print(f"Форма Z_concat: {Z_concat.shape}")
+print("\nConcatenation of heads:")
+print(f"Shape of Z_concat: {Z_concat.shape}")
 
-# 4. Линейная проекция выхода
+# 4. Linear projection of output
 W_O = torch.randn(h * D_v, D_model)
 multi_head_output = torch.einsum('nlk,kd->nld', Z_concat, W_O)
 
-print("\nЛинейная проекция выхода:")
-print(f"Форма MultiHead Output: {multi_head_output.shape}")
+print("\nLinear projection of output:")
+print(f"Shape of MultiHead Output: {multi_head_output.shape}")
 
-# Вывод для первого батча
-print("\nДетальный анализ первого батча после Multi-Head Attention:")
+# Output for the first batch
+print("\nDetailed analysis of the first batch after Multi-Head Attention:")
 batch_idx = 0
 for pos in [0, 2, 4, 6, 8]:
-    print(f"\nПозиция {pos} ({batch_tokens[batch_idx][pos]}):")
-    print(f"Комбинированный:     {X_embedded[batch_idx, pos, :3].detach().numpy().round(4)}")
-    print(f"Multi-Head Output:  {multi_head_output[batch_idx, pos, :3].detach().numpy().round(4)}")
+    print(f"\nPosition {pos} ({batch_tokens[batch_idx][pos]}):")
+    print(f"Combined:     {X_embedded[batch_idx, pos, :3].detach().numpy().round(4)}")
+    print(f"Multi-Head Output: {multi_head_output[batch_idx, pos, :3].detach().numpy().round(4)}")
 ```
 
-4. **Слой Add & Norm (после Multi-Head Attention):**
-   - **Add (остаточное соединение):** 
+4. **Add & Norm layer (after Multi-Head Attention):**
+   - **Add (residual connection):**
 
-        *   **Суть остаточного соединения:**  Остаточное соединение, также известное как skip-connection или residual connection, заключается в том, что **выход слоя Multi-Head Attention добавляется к его исходному входу**.
+        *   **Essence of residual connection:** A residual connection, also known as a skip-connection or residual connection, involves **adding the output of the Multi-Head Attention layer to its original input**.
 
-            В формуле это выглядит так:
+            In formula, this looks like:
             $$
             \text{Output}_{Add1} = X_{embedded} + \text{MultiHead}(Q, K, V)
             $$
-            где:
-            *   $X_{embedded}$ - это **вход** подслоя Multi-Head Attention. В контексте Transformer, это могут быть эмбеддинги входных токенов, возможно, уже прошедшие через предыдущие слои Transformer.
-            *   $\text{MultiHead}(Q, K, V)$ - это **выход** слоя Multi-Head Attention.
-            *   $\text{Output}_{Add1}$ - это **результат сложения**, который становится входом для следующего шага - нормализации слоя.
+            where:
+            *   $X_{embedded}$ - this is the **input** to the Multi-Head Attention sub-layer. In the context of Transformer, this could be the embeddings of the input tokens, possibly having passed through previous Transformer layers.
+            *   $\text{MultiHead}(Q, K, V)$ - this is the **output** of the Multi-Head Attention layer.
+            *   $\text{Output}_{Add1}$ - this is the **result of addition**, which becomes the input for the next step - the layer normalization.
 
-            > То есть, по сути это просто обычное сложение из линейной алгебры двух матриц, а точнее двух тензоров одинаковой размерности.
+            > So, essentially, it's just a regular addition from linear algebra of two matrices, or more precisely, two tensors of the same dimension.
 
-        *   **Зачем нужны остаточные соединения?**
+        *   **Why are residual connections needed?**
 
-            *   **Борьба с проблемой затухания градиента:**  В глубоких нейронных сетях, таких как Transformer, градиенты (сигналы для обучения) могут затухать по мере распространения через множество слоев. Остаточные соединения помогают **"перепрыгивать" через слои**, обеспечивая более прямой путь для градиентов. Это облегчает обучение глубоких сетей и позволяет им эффективно учиться.
-            *   **Улучшение обучения глубоких сетей:**  Остаточные соединения позволяют обучать **более глубокие и сложные модели**. Без них, добавление новых слоев в глубокую сеть часто не приводит к улучшению производительности, а может даже ухудшить ее. Residual connections позволяют эффективно использовать преимущества глубоких архитектур.
-            *   **Сохранение информации о входе:**  Добавляя исходный вход к выходу слоя внимания, мы **сохраняем информацию об исходных эмбеддингах**.  Слой внимания фокусируется на *изменениях* и *уточнении* входных представлений, а остаточное соединение гарантирует, что исходная информация не будет полностью потеряна.
+            *   **Combatting the vanishing gradient problem:** In deep neural networks, such as Transformers, gradients (signals for training) can diminish as they propagate through many layers. Residual connections help **"jump over"** layers, providing a more direct path for gradients. This facilitates the training of deep networks and allows them to learn effectively.
+            *   **Improving training of deep networks:** Residual connections allow for the training of **deeper and more complex models**. Without them, adding new layers to a deep network often does not improve performance, and may even degrade it. Residual connections allow for the effective use of the advantages of deep architectures.
+            *   **Preserving input information:** By adding the original input to the output of the attention layer, we **preserve information about the original embeddings**. The attention layer focuses on *changes* and *refining* the input representations, and the residual connection ensures that the original information is not completely lost.
 
-   - **Norm (нормализация слоя):** 
+   - **Norm (layer normalization):**
 
-        *   **Суть нормализации слоя:**  Нормализация слоя - это техника нормализации, которая применяется **к выходам нейронного слоя внутри одного обучающего примера**. В отличие от Batch Normalization, которая нормализует по батчу, Layer Normalization нормализует **по признакам внутри одного примера**.
+        *   **Essence of layer normalization:** Layer normalization is a normalization technique applied **to the outputs of a neural network layer within a single training example**. Unlike Batch Normalization, which normalizes across a batch, Layer Normalization normalizes **across features within a single example**.
 
-            В Transformer используется именно Layer Normalization. Формула выглядит так:
+            Layer Normalization is used in Transformer. The formula looks like this:
             $$
             \text{Output}_{Norm1} = \text{LayerNorm}(\text{Output}_{Add1}) = \gamma \frac{\text{Output}_{Add1} - \mu}{\sigma} + \beta
             $$
-            где:
-            *   $\text{Output}_{Add1}$ - это **вход** для слоя нормализации, который является результатом остаточного соединения.
-            *   $\mu$ - это **среднее значение** элементов входа $\text{Output}_{Add1}$ **по размерности признаков** (для каждого примера в отдельности).
-            *   $\sigma$ - это **стандартное отклонение** элементов входа $\text{Output}_{Add1}$ **по размерности признаков** (для каждого примера в отдельности).
-            *   $\gamma$ (гамма) и $\beta$ (бета) - это **обучаемые параметры масштабирования и сдвига**. Они позволяют сети **настраивать** степень нормализации и восстанавливать оптимальный диапазон значений после нормализации. Изначально $\gamma$ обычно инициализируется единицами, а $\beta$ - нулями.
-            *   $\text{Output}_{Norm1}$ - это **выход** слоя нормализации, который становится входом для следующего подслоя (в данном случае, Feed Forward Network).
+            where:
+            *   $\text{Output}_{Add1}$ - this is the **input** to the normalization layer, which is the result of the residual connection.
+            *   $\mu$ - this is the **mean** of the elements of the input $\text{Output}_{Add1}$ **across the feature dimension** (for each example separately).
+            *   $\sigma$ - this is the **standard deviation** of the elements of the input $\text{Output}_{Add1}$ **across the feature dimension** (for each example separately).
+            *   $\gamma$ (gamma) and $\beta$ (beta) - these are **trainable scaling and shifting parameters**. They allow the network to **adjust** the degree of normalization and to restore the optimal value range after normalization. Initially, $\gamma$ is usually initialized to ones, and $\beta$ to zeros.
+            *   $\text{Output}_{Norm1}$ - this is the **output** of the normalization layer, which becomes the input for the next sub-layer (in this case, the Feed Forward Network).
 
-            > То есть, по сути нормализация слоя, а точнее всех весов выходной матрицы остатков очень похожа на Z-score нормализацию (также известную как стандартизация), которая в статистике используется для преобразования данных к стандартному нормальному распределению. Формула Layer Normalization, которую мы рассматривали:
+            > So, essentially, layer normalization, or more precisely, all the weights of the output matrix, is very similar to Z-score normalization (also known as standardization), which in statistics is used to transform data to a standard normal distribution. The formula for Layer Normalization we are considering:
 
             $$
             \text{LayerNorm}(x) = \gamma \frac{x - \mu}{\sigma} + \beta
             $$
 
-        *   **Зачем нужна нормализация слоя?**
+        *   **Why is layer normalization needed?**
 
-            *   **Стабилизация обучения:** Нормализация слоя **стабилизирует процесс обучения**, делая его более быстрым и устойчивым. Она помогает **уменьшить внутреннее ковариационное смещение (internal covariate shift)**, то есть изменение распределения входных данных для каждого слоя в процессе обучения. Это происходит потому, что нормализация приводит входные данные к более стандартному диапазону значений (близкому к нулевому среднему и единичному стандартному отклонению).
-            *   **Ускорение сходимости:**  Стабилизация обучения позволяет использовать **более высокие скорости обучения (learning rates)** и **ускоряет сходимость** модели к оптимальному решению.
-            *   **Улучшение обобщающей способности:**  Нормализация слоя может также способствовать **лучшей обобщающей способности** модели, то есть ее способности хорошо работать на новых, ранее не виденных данных.
-            *   **Меньшая зависимость от размера батча:**  В отличие от Batch Normalization, Layer Normalization **не зависит от размера батча**. Это делает ее особенно полезной в ситуациях, когда размер батча небольшой или когда используются рекуррентные нейронные сети, где длина последовательности может варьироваться.
+            *   **Stabilizing training:** Layer normalization **stabilizes the training process**, making it faster and more robust. It helps to **reduce internal covariate shift**, i.e., the change in the distribution of inputs to each layer during training. This happens because normalization brings the input data to a more standard range of values (close to zero mean and unit standard deviation).
+            *   **Accelerating convergence:** Stabilizing training allows for the use of **higher learning rates** and **accelerates the convergence** of the model to the optimal solution.
+            *   **Improving generalization:** Layer normalization can also contribute to **better generalization** of the model, i.e., its ability to perform well on new, previously unseen data.
+            *   **Less dependence on batch size:** Unlike Batch Normalization, Layer Normalization **does not depend on batch size**. This makes it particularly useful in situations where the batch size is small or when using recurrent neural networks, where sequence length can vary.
 
-            **Аналогия:** Представьте, что вы настраиваете громкость звука на разных устройствах.  У каждого устройства свой диапазон громкости. Нормализация слоя - это как **приведение громкости к единому стандарту** для всех устройств.  Это облегчает сравнение и обработку звука, делая систему более стабильной и предсказуемой. Параметры $\gamma$ и $\beta$ позволяют немного "подстроить" этот стандарт, чтобы учесть особенности каждого устройства.
+            **Analogy:** Imagine you are adjusting the volume on different devices. Each device has its own volume range. Layer normalization is like **standardizing the volume across all devices**. This makes it easier to compare and process the sound, making the system more stable and predictable. The parameters $\gamma$ and $\beta$ allow for a slight "tuning" of this standard to account for the specific characteristics of each device.
 
-5. **Нейронная сеть прямого распространения (Feed Forward Network):**
+5. **Feed Forward Network:**
 
-    **Назначение FFN:**
+    **Purpose of FFN:**
 
-    FFN - это ключевой компонент в каждом блоке Transformer, который отвечает за **нелинейное преобразование представлений токенов на уровне отдельных позиций**.  В то время как Multi-Head Attention позволяет токенам взаимодействовать друг с другом и учитывать контекст, FFN обрабатывает представление каждого токена **индивидуально**, но уже с учетом контекста, полученного от слоя внимания.
+    FFN is a key component in each Transformer block, responsible for **non-linear transformation of token representations at the level of individual positions**. While Multi-Head Attention allows tokens to interact with each other and consider context, FFN processes the representation of each token **individually**, but already with the context obtained from the attention layer.
 
-   - На вход подслоя FFN поступает $\text{Output}_{Norm1}$.
-   - FFN состоит из двух линейных слоев с функцией активации (например, ReLU, GeLU) между ними:
+   - The input to the FFN sub-layer is $\text{Output}_{Norm1}$.
+   - FFN consists of two linear layers with an activation function (e.g., ReLU, GeLU) between them:
      $$
      \text{FFN}(\text{Output}_{Norm1}) = \text{Activation}(\text{Output}_{Norm1} W_1 + b_1) W_2 + b_2
      $$
-     где:
+     where:
 
         - $W_1 \in \mathbb{R}^{D_{model} \times D_{ff}}$
-        - $W_2 \in \mathbb{R}^{D_{ff} \times D_{model}}$ - весовые матрицы
-        - $b_1 \in \mathbb{R}^{D_{ff}}$, $b_2 \in \mathbb{R}^{D_{model}}$ - векторы смещений
-        - $D_{ff}$ - внутренняя размерность FFN (обычно $4 \times D_{model}$).
+        - $W_2 \in \mathbb{R}^{D_{ff} \times D_{model}}$ - weight matrices
+        - $b_1 \in \mathbb{R}^{D_{ff}}$, $b_2 \in \mathbb{R}^{D_{model}}$ - bias vectors
+        - $D_{ff}$ - internal dimension of FFN (usually $4 \times D_{model}$).
 
-        **Выход:** FFN преобразует вход и выдает тензор **той же размерности** $(N, L, D_{model})$, где:
-            
-        - $N$ — размер батча (количество примеров в батче),  
-        - $L$ — длина последовательности (число токенов),  
-        - $D_{model}$ — скрытая размерность (размер эмбеддингов).  
-        
-        Этот выход затем передается в следующий слой Transformer или используется для решения задачи (например, классификации или генерации текста).
+        **Output:** FFN transforms the input and outputs a tensor of the **same dimensionality** $(N, L, D_{model})$, where:
 
-    **Структура FFN:**
+        - $N$ — batch size (number of examples in the batch),
+        - $L$ — sequence length (number of tokens),
+        - $D_{model}$ — hidden dimension (embedding dimension).
 
-    FFN состоит из **двух последовательных линейных слоев** с **функцией активации** между ними.  Это можно представить как двухслойную полносвязную нейронную сеть, применяемую к каждой позиции в последовательности.
+        This output is then passed to the next Transformer layer or used for the task (e.g., classification or text generation).
 
-    **Компоненты FFN и формула:**
+    **Structure of FFN:**
+
+    FFN consists of **two sequential linear layers** with an **activation function** between them. This can be represented as a two-layer fully connected neural network applied to each position in the sequence.
+
+    **Components of FFN and formula:**
 
     $$
     \text{FFN}(x) = \text{Activation}(x W_1 + b_1) W_2 + b_2
     $$
 
-    Разберем каждый компонент формулы:
+    Let's break down each component of the formula:
 
-    1.  **Первый линейный слой (Expansion Layer):**  `(x W_1 + b_1)`
-        *   **Вход:**  $x$ - это вход FFN, то есть $\text{Output}_{Norm1}$ размерности `[batch_size, sequence_length, hidden_size]` ($D_{model}$).
-        *   **Весовая матрица $W_1$**:  $W_1 \in \mathbb{R}^{D_{model} \times D_{ff}}$ - это **матрица весов первого линейного слоя**.  Она является **обучаемым параметром**.
-        *   **Вектор смещения $b_1$**: $b_1 \in \mathbb{R}^{D_{ff}}$ - это **вектор смещения первого линейного слоя**. Он также является **обучаемым параметром**.
-        *   **Внутренняя размерность $D_{ff}$**: $D_{ff}$ - это **внутренняя (промежуточная) размерность FFN**.  Обычно она **больше, чем $D_{model}$**, часто в 4 раза больше ($D_{ff} = 4 \times D_{model}$).  Например, если $D_{model} = 512$, то $D_{ff} = 2048$.  **Увеличение размерности** на этом этапе называется **"расширением" (expansion)**.
-        *   **Операция:**  Происходит **линейное преобразование** входа $x$ путем матричного умножения на $W_1$ и добавления смещения $b_1$.
-        *   **Выход первого линейного слоя:**  Результатом является тензор размерности `[batch_size, sequence_length, D_{ff}]`.  Размерность признакового пространства **увеличилась** с $D_{model}$ до $D_{ff}$.
+    1.  **First linear layer (Expansion Layer):**  `(x W_1 + b_1)`
+        *   **Input:**  $x$ - this is the input to FFN, i.e., $\text{Output}_{Norm1}$ of dimensionality `[batch_size, sequence_length, hidden_size]` ($D_{model}$).
+        *   **Weight matrix $W_1$**:  $W_1 \in \mathbb{R}^{D_{model} \times D_{ff}}$ - this is the **weight matrix of the first linear layer**. It is a **trainable parameter**.
+        *   **Bias vector $b_1$**: $b_1 \in \mathbb{R}^{D_{ff}}$ - this is the **bias vector of the first linear layer**. It is also a **trainable parameter**.
+        *   **Internal dimension $D_{ff}$**: $D_{ff}$ - this is the **internal (intermediate) dimension of FFN**. It is usually **larger than $D_{model}$**, often 4 times larger ($D_{ff} = 4 \times D_{model}$). For example, if $D_{model} = 512$, then $D_{ff} = 2048$. This increase in dimensionality at this stage is called **"expansion" (expansion)**.
+        *   **Operation:** A **linear transformation** of the input $x$ is performed by matrix multiplication with $W_1$ and adding the bias $b_1$.
+        *   **Output of the first linear layer:** The result is a tensor of dimensionality `[batch_size, sequence_length, D_{ff}]`. The feature space dimensionality **increases** from $D_{model}$ to $D_{ff}$.
 
-    2.  **Функция активации (Activation Function):**  `Activation(...)`
-        *   **Вход:**  Выход первого линейного слоя размерности `[batch_size, sequence_length, D_{ff}]`.
-        *   **Функция активации:**  $\text{Activation}$ - это **нелинейная функция активации**.  В Transformer обычно используются:
-            *   **ReLU (Rectified Linear Unit):**  $\text{ReLU}(z) = \max(0, z)$.  Простая и эффективная функция, обнуляющая отрицательные значения.
-            *   **GeLU (Gaussian Error Linear Unit):**  Более гладкая функция активации, которая в некоторых случаях показывает лучшие результаты, чем ReLU.  Формула GeLU немного сложнее, но суть в том, что она также вносит нелинейность.
-        *   **Назначение функции активации:**  Функция активации **вводит нелинейность** в преобразование.  Без нелинейности, FFN был бы просто еще одним линейным слоем, и Transformer в целом был бы эквивалентен линейной модели, что сильно ограничило бы его выразительность.  Нелинейность позволяет модели учить **сложные, нелинейные зависимости** в данных.
-        *   **Выход функции активации:**  Размерность тензора **не меняется** после применения функции активации.  Выход по-прежнему имеет размерность `[batch_size, sequence_length, D_{ff}]`.
+    2.  **Activation function (Activation Function):**  `Activation(...)`
+        *   **Input:**  The output of the first linear layer of dimensionality `[batch_size, sequence_length, D_{ff}]`.
+        *   **Activation function:**  $\text{Activation}$ - this is a **non-linear activation function**. In Transformer, the following are typically used:
+            *   **ReLU (Rectified Linear Unit):**  $\text{ReLU}(z) = \max(0, z)$. A simple and efficient function that sets negative values to zero.
+            *   **GeLU (Gaussian Error Linear Unit):** A smoother activation function that in some cases shows better results than ReLU. The formula for GeLU is slightly more complex, but the essence is that it introduces non-linearity.
+        *   **Purpose of the activation function:** The activation function **introduces non-linearity** into the transformation. Without it, FFN would be just another linear layer, and the Transformer as a whole would be equivalent to a linear model, which would severely limit its expressiveness. Non-linearity allows the model to learn **complex, non-linear dependencies** in the data.
+        *   **Output of the activation function:** The dimensionality of the tensor **does not change** after applying the activation function. The output still has dimensionality `[batch_size, sequence_length, D_{ff}]`.
 
-    3.  **Второй линейный слой (Contraction Layer):**  `(... ) W_2 + b_2`
-        *   **Вход:**  Выход функции активации размерности `[batch_size, sequence_length, D_{ff}]`.
-        *   **Весовая матрица $W_2$**:  $W_2 \in \mathbb{R}^{D_{ff} \times D_{model}}$ - это **матрица весов второго линейного слоя**.  Также является **обучаемым параметром**.
-        *   **Вектор смещения $b_2$**: $b_2 \in \mathbb{R}^{D_{model}}$ - это **вектор смещения второго линейного слоя**.  Также **обучаемый параметр**.
-        *   **Операция:**  Происходит **линейное преобразование** выхода функции активации путем матричного умножения на $W_2$ и добавления смещения $b_2$.
-        *   **Выход второго линейного слоя (и FFN в целом):**  Результатом является тензор размерности `[batch_size, sequence_length, D_{model}]`.  Размерность признакового пространства **возвращается** к исходной $D_{model}$.  Это **"сжатие" (contraction)** размерности.
+    3.  **Second linear layer (Contraction Layer):**  `(... ) W_2 + b_2`
+        *   **Input:**  The output of the activation function of dimensionality `[batch_size, sequence_length, D_{ff}]`.
+        *   **Weight matrix $W_2$**:  $W_2 \in \mathbb{R}^{D_{ff} \times D_{model}}$ - this is the **weight matrix of the second linear layer**. It is also a **trainable parameter**.
+        *   **Bias vector $b_2$**: $b_2 \in \mathbb{R}^{D_{model}}$ - this is the **bias vector of the second linear layer**. It is also a **trainable parameter**.
+        *   **Operation:** A **linear transformation** of the output of the activation function is performed by matrix multiplication with $W_2$ and adding the bias $b_2$.
+        *   **Output of the second linear layer (and FFN as a whole):** The result is a tensor of dimensionality `[batch_size, sequence_length, D_{model}]`. The feature space dimensionality **returns** to the original $D_{model}$. This is called **"contraction" (contraction)**.
 
-    **Размерности в FFN на примере:**
+    **Dimensions in FFN on an example:**
 
-    Предположим, $D_{model} = 512$ и $D_{ff} = 4 \times D_{model} = 2048$.
+    Suppose $D_{model} = 512$ and $D_{ff} = 4 \times D_{model} = 2048$.
 
-    1.  **Вход $x$**:  `[batch_size, sequence_length, 512]`
-    2.  **Первый линейный слой $(x W_1 + b_1)$**:
-        *   $W_1$ имеет размерность `[512, 2048]`
-        *   Выход: `[batch_size, sequence_length, 2048]` (размерность расширилась)
-    3.  **Функция активации $\text{Activation}$**:
-        *   Вход: `[batch_size, sequence_length, 2048]`
-        *   Выход: `[batch_size, sequence_length, 2048]` (размерность не меняется)
-    4.  **Второй линейный слой $(... ) W_2 + b_2)$**:
-        *   $W_2$ имеет размерность `[2048, 512]`
-        *   Выход: `[batch_size, sequence_length, 512]` (размерность сжалась обратно к исходной)
+    1.  **Input $x$**:  `[batch_size, sequence_length, 512]`
+    2.  **First linear layer $(x W_1 + b_1)$**:
+        *   $W_1$ has dimensionality `[512, 2048]`
+        *   Output: `[batch_size, sequence_length, 2048]` (dimensionality expanded)
+    3.  **Activation function $\text{Activation}$**:
+        *   Input: `[batch_size, sequence_length, 2048]`
+        *   Output: `[batch_size, sequence_length, 2048]` (dimensionality does not change)
+    4.  **Second linear layer $(... ) W_2 + b_2)$**:
+        *   $W_2$ has dimensionality `[2048, 512]`
+        *   Output: `[batch_size, sequence_length, 512]` (dimensionality contracted back to original)
 
-    **Назначение матрицы $W_1$ и $W_2$:**
+    **Purpose of matrices $W_1$ and $W_2$:**
 
-    *   **$W_1$ (матрица расширения):**  Матрица $W_1$ отвечает за **проекцию входного пространства размерности $D_{model}$ в более широкое пространство размерности $D_{ff}$**.  Это позволяет FFN **увеличить выразительность** и "запомнить" больше информации на промежуточном этапе.
-    *   **$W_2$ (матрица сжатия):**  Матрица $W_2$ отвечает за **проекцию обратно из пространства размерности $D_{ff}$ в исходное пространство размерности $D_{model}$**.  Это необходимо, чтобы выход FFN имел ту же размерность, что и вход, и мог быть интегрирован в остальную часть архитектуры Transformer.  Также, матрица $W_2$ позволяет **смешать и агрегировать информацию**, полученную на промежуточном этапе в пространстве большей размерности.
+    *   **$W_1$ (expansion matrix):** The matrix $W_1$ is responsible for **projecting the input space of dimensionality $D_{model}$ into a wider space of dimensionality $D_{ff}$**. This allows FFN to **increase its expressiveness** and "remember" more information on the intermediate stage.
+    *   **$W_2$ (contraction matrix):** The matrix $W_2$ is responsible for **projecting back from the space of dimensionality $D_{ff}$ to the original space of dimensionality $D_{model}$**. This is necessary so that the FFN output has the same dimensionality as the input, and can be integrated into the rest of the Transformer architecture. Also, the matrix $W_2$ allows for **mixing and aggregating information** obtained on the intermediate stage.
 
-    **Зачем нужен FFN в Transformer?**
+    **Why is FFN needed in Transformer?**
 
-    *   **Введение нелинейности:**  FFN вносит **нелинейность** в модель, что критически важно для обучения сложных зависимостей в данных.
-    *   **Обработка информации на уровне позиций:**  FFN применяется **независимо к каждой позиции** в последовательности.  Это позволяет модели выполнять **более сложное, нелинейное преобразование** представления каждого токена после того, как контекст был учтен слоем внимания.
-    *   **Увеличение выразительности модели:**  За счет расширения размерности до $D_{ff}$ и последующего сжатия обратно до $D_{model}$, FFN позволяет модели **увеличить свою выразительность** и способность к обучению более сложным закономерностям.  Промежуточное пространство большей размерности действует как своего рода "скрытое пространство", где модель может более гибко манипулировать представлениями данных.
+    *   **Introducing non-linearity:** FFN introduces **non-linearity** into the model, which is critical for learning complex dependencies in the data.
+    *   **Processing information at the level of positions:** FFN is applied **independently to each position** in the sequence. This allows the model to perform **more complex, non-linear transformation** of each token's representation after the context has been considered by the attention layer.
+    *   **Increasing model expressiveness:** By expanding the dimensionality to $D_{ff}$ and then contracting it back to $D_{model}$, FFN allows the model to **increase its expressiveness** and ability to learn more complex patterns. The intermediate space of larger dimensionality acts as a kind of "hidden space" where the model can more flexibly manipulate data representations.
 
 ```python
-# Стандартные библиотеки
+# Standard libraries
 import math
 
-# Сторонние библиотеки
+# Third-party libraries
 import numpy as np
 import torch
-import torch.nn as nn  # Импортируем модуль nn для LayerNorm
+import torch.nn as nn  # Import nn module for LayerNorm
 
 
 def positional_encoding(max_len: int, d_model: int) -> torch.Tensor:
     """
     Description:
-        Генерация позиционных кодирований по формуле из оригинальной статьи Transformer.
+        Generation of positional encodings according to the formula from the original Transformer paper.
 
     Args:
-        max_len: Максимальная длина последовательности.
-        d_model: Размерность модели (количество признаков).
+        max_len: Maximum sequence length.
+        d_model: Model dimension (number of features).
 
     Returns:
-        Тензор позиционных кодирований формы (max_len, d_model).
+        Tensor of positional encodings with shape (max_len, d_model).
 
     Examples:
         >>> pe = positional_encoding(10, 512)
@@ -1298,13 +1388,13 @@ def print_embeddings(
 ) -> None:
     """
     Description:
-        Визуализация эмбеддингов с метками токенов.
+        Visualization of embeddings with token labels.
 
     Args:
-        tensor: Тензор эмбеддингов.
-        tokens: Список токенов для визуализации.
-        title: Заголовок для вывода.
-        max_elements: Максимальное количество элементов для отображения.
+        tensor: Tensor of embeddings.
+        tokens: List of tokens for visualization.
+        title: Title for output.
+        max_elements: Maximum number of elements to display.
 
     Returns:
         None
@@ -1312,7 +1402,7 @@ def print_embeddings(
     Examples:
         >>> embeddings = torch.randn(5, 512)
         >>> tokens = ["token1", "token2", "token3", "token4", "token5"]
-        >>> print_embeddings(embeddings, tokens, "Пример эмбеддингов")
+        >>> print_embeddings(embeddings, tokens, "Example embeddings")
     """
     print(f"\n{title}:")
     for idx, (vec, token) in enumerate(zip(tensor, tokens)):
@@ -1333,40 +1423,40 @@ def print_attention_details(
 ) -> None:
     """
     Description:
-        Выводит детальную информацию о процессе внимания для конкретной позиции.
+        Outputs detailed information about the attention process for a specific position.
 
     Args:
-        batch_idx: Индекс батча.
-        head_idx: Индекс головы внимания.
-        pos_idx: Позиция в последовательности.
-        Q: Тензор запросов.
-        K: Тензор ключей.
-        attention_scores: Тензор сырых оценок внимания.
-        attention_weights: Тензор весов внимания после softmax.
-        tokens: Список токенов.
-        num_elements: Количество элементов для вывода.
+        batch_idx: Batch index.
+        head_idx: Attention head index.
+        pos_idx: Position in the sequence.
+        Q: Tensor of queries.
+        K: Tensor of keys.
+        attention_scores: Tensor of raw attention scores.
+        attention_weights: Tensor of attention weights after softmax.
+        tokens: List of tokens.
+        num_elements: Number of elements to output.
 
     Returns:
         None
     """
     print("\n" + "=" * 60)
     print(
-        f"Детали внимания для батча {batch_idx}, головы {head_idx}, "
-        f"позиции {pos_idx} ({tokens[batch_idx][pos_idx]}):"
+        f"Attention details for batch {batch_idx}, head {head_idx}, "
+        f"position {pos_idx} ({tokens[batch_idx][pos_idx]}):"
     )
 
-    # Вывод Q вектора
+    # Output Q vector
     q_vec = Q[batch_idx, head_idx, pos_idx, :num_elements].detach().numpy()
-    print(f"Q вектор (первые {num_elements} элементов):")
+    print(f"Q vector (first {num_elements} elements):")
     print(f"{q_vec.round(4)}")
 
-    # Вывод K векторов
-    print(f"K вектора (первые {num_elements} элементов каждого):")
+    # Output K vectors
+    print(f"K vectors (first {num_elements} elements of each):")
     for i, token in enumerate(tokens[batch_idx]):
         k_vec = K[batch_idx, head_idx, i, :num_elements].detach().numpy()
         print(f"{i:2d} {token:15}: {k_vec.round(4)}")
 
-    # Ручной расчет скалярных произведений
+    # Manual calculation of dot products
     manual_scores = []
     q = Q[batch_idx, head_idx, pos_idx]
     for i in range(len(tokens[batch_idx])):
@@ -1374,93 +1464,93 @@ def print_attention_details(
         score = torch.dot(q, k) / math.sqrt(D_k)
         manual_scores.append(score.item())
 
-    # Получение автоматически рассчитанных оценок
+    # Getting automatically calculated scores
     auto_scores = attention_scores[batch_idx, head_idx, pos_idx].detach().numpy()
 
-    # Сравнение результатов
-    print("\nСырые оценки внимания:")
-    print(f"Ручной расчет:     {np.array(manual_scores).round(4)}")
-    print(f"Автоматический:    {auto_scores.round(4)}")
+    # Comparing results
+    print("\nRaw attention scores:")
+    print(f"Manual calculation: {np.array(manual_scores).round(4)}")
+    print(f"Automatic:          {auto_scores.round(4)}")
 
-    # Вывод весов после softmax
+    # Output weights after softmax
     weights = attention_weights[batch_idx, head_idx, pos_idx].detach().numpy()
-    print(f"\nВеса внимания после Softmax:")
+    print(f"\nAttention weights after Softmax:")
     print(f"{weights.round(4)}")
 
 
-# Пример данных
+# Example data
 sentences = [
     "Всем привет! Я увлекаюсь искусственным интеллектом",
     "Привет, как дела?",
     "ИИ — это интересно!",
 ]
 
-# Параметры модели
-N = len(sentences)  # Размер батча
-L = 9               # Максимальная длина последовательности
-D_model = 512       # Размерность эмбеддингов
-h = 8               # Количество голов
-D_k = D_model // h  # Размерность ключей и запросов
-D_v = D_model // h  # Размерность значений
-D_ff = 4 * D_model  # Размерность Feed Forward Network
+# Model parameters
+N = len(sentences)  # Batch size
+L = 9               # Maximum sequence length
+D_model = 512       # Embedding dimension
+h = 8               # Number of heads
+D_k = D_model // h  # Key and query dimension
+D_v = D_model // h  # Value dimension
+D_ff = 4 * D_model  # Feed Forward Network dimension
 
-# 1. Токенизация с паддингом
+# 1. Tokenization with padding
 batch_tokens = [
     ["[CLS]", "Всем", "привет", "!", "Я", "увлекаюсь", "искусственным", "интеллектом", "[SEP]"],
     ["[CLS]", "Привет", ",", "как", "дела", "?", "[SEP]", "[PAD]", "[PAD]"],
     ["[CLS]", "ИИ", "—", "это", "интересно", "!", "[SEP]", "[PAD]", "[PAD]"],
 ]
 
-# 2. Создаем эмбеддинги
+# 2. Create embeddings
 embeddings = torch.randn(N, L, D_model)
 
-# 3. Генерируем позиционные кодирования
+# 3. Generate positional encodings
 pe = positional_encoding(L, D_model)
 
-# 4. Комбинируем эмбеддинги с позиционными кодированиями
-X_embedded = embeddings + pe  # Broadcasting для батча
+# 4. Combine embeddings with positional encodings
+X_embedded = embeddings + pe  # Broadcasting for batch
 
-# ================= Визуализация процесса =================
+# ================= Visualization of the process =================
 print("=" * 60)
-print("Шаг 1: Исходные эмбеддинги токенов")
-print(f"Форма тензора: {embeddings.shape}")
+print("Step 1: Initial token embeddings")
+print(f"Tensor shape: {embeddings.shape}")
 for batch_idx in range(N):
-    print(f"\nБатч {batch_idx + 1}: '{sentences[batch_idx]}'")
-    print_embeddings(embeddings[batch_idx], batch_tokens[batch_idx], "Исходные эмбеддинги")
+    print(f"\nBatch {batch_idx + 1}: '{sentences[batch_idx]}'")
+    print_embeddings(embeddings[batch_idx], batch_tokens[batch_idx], "Initial embeddings")
 
 print("\n" + "=" * 60)
-print("Шаг 2: Позиционные кодирования")
-print(f"Форма тензора: {pe.shape}")
-print_embeddings(pe, [f"Позиция {i}" for i in range(L)], "Примеры кодирований")
+print("Step 2: Positional encodings")
+print(f"Tensor shape: {pe.shape}")
+print_embeddings(pe, [f"Position {i}" for i in range(L)], "Example encodings")
 
 print("\n" + "=" * 60)
-print("Шаг 3: Комбинированные эмбеддинги (X + PE)")
-print(f"Форма тензора: {X_embedded.shape}")
+print("Step 3: Combined embeddings (X + PE)")
+print(f"Tensor shape: {X_embedded.shape}")
 for batch_idx in range(N):
-    print(f"\nБатч {batch_idx + 1}: '{sentences[batch_idx]}'")
-    print_embeddings(X_embedded[batch_idx], batch_tokens[batch_idx], "Результат сложения")
+    print(f"\nBatch {batch_idx + 1}: '{sentences[batch_idx]}'")
+    print_embeddings(X_embedded[batch_idx], batch_tokens[batch_idx], "Result of addition")
 
-# ================= Подробный вывод для первого батча =================
+# ================= Detailed analysis for the first batch =================
 print("\n" + "=" * 60)
-print("Детальный анализ первого батча:")
+print("Detailed analysis of the first batch:")
 batch_idx = 0
 
-# Исходные данные
-print(f"\nТекст: '{sentences[batch_idx]}'")
-print(f"Токены: {batch_tokens[batch_idx]}")
+# Initial data
+print(f"\nText: '{sentences[batch_idx]}'")
+print(f"Tokens: {batch_tokens[batch_idx]}")
 
-# Сравнение для ключевых позиций
+# Comparison for key positions
 for pos in [0, 2, 4, 6, 8]:
-    print(f"\nПозиция {pos} ({batch_tokens[batch_idx][pos]}):")
-    print(f"Исходный эмбеддинг:  {embeddings[batch_idx, pos, :3].detach().numpy().round(4)}")
-    print(f"Позиционное кодир:   {pe[pos, :3].detach().numpy().round(4)}")
-    print(f"Комбинированный:     {X_embedded[batch_idx, pos, :3].detach().numpy().round(4)}")
+    print(f"\nPosition {pos} ({batch_tokens[batch_idx][pos]}):")
+    print(f"Initial embedding:  {embeddings[batch_idx, pos, :3].detach().numpy().round(4)}")
+    print(f"Positional encoding: {pe[pos, :3].detach().numpy().round(4)}")
+    print(f"Combined:           {X_embedded[batch_idx, pos, :3].detach().numpy().round(4)}")
 
 # ================= Multi-Head Self-Attention =================
 print("\n" + "=" * 60)
-print("Шаг 4: Multi-Head Self-Attention")
+print("Step 4: Multi-Head Self-Attention")
 
-# 1. Линейные проекции
+# 1. Linear projections
 W_Q = torch.randn(h, D_model, D_k)
 W_K = torch.randn(h, D_model, D_k)
 W_V = torch.randn(h, D_model, D_v)
@@ -1469,24 +1559,24 @@ Q = torch.einsum('nlk,hkd->nhld', X_embedded, W_Q)
 K = torch.einsum('nlk,hkd->nhld', X_embedded, W_K)
 V = torch.einsum('nlk,hkd->nhld', X_embedded, W_V)
 
-print("\nЛинейные проекции:")
-print(f"Форма Q: {Q.shape}")
-print(f"Форма K: {K.shape}")
-print(f"Форма V: {V.shape}")
+print("\nLinear projections:")
+print(f"Q shape: {Q.shape}")
+print(f"K shape: {K.shape}")
+print(f"V shape: {V.shape}")
 
-# Вывод первых 3 элементов для Q, K, V
+# Output first 3 elements for Q, K, V
 for batch_idx in range(N):
-    print(f"\nБатч {batch_idx + 1}: '{sentences[batch_idx]}'")
+    print(f"\nBatch {batch_idx + 1}: '{sentences[batch_idx]}'")
     for pos in [0, 2, 4]:
-        print(f"  Позиция {pos} ({batch_tokens[batch_idx][pos]}):")
+        print(f"  Position {pos} ({batch_tokens[batch_idx][pos]}):")
         print(f"    Q: {Q[batch_idx, :, pos, :3].detach().numpy().round(4)}")
         print(f"    K: {K[batch_idx, :, pos, :3].detach().numpy().round(4)}")
         print(f"    V: {V[batch_idx, :, pos, :3].detach().numpy().round(4)}")
 
-# 2. Внимание для каждой головы
+# 2. Attention for each head
 attention_scores = torch.einsum('nhld,nhmd->nhlm', Q, K) / math.sqrt(D_k)
 
-# Маскирование паддинга
+# Masking padding
 mask = torch.ones(N, 1, L, L, dtype=torch.bool)
 for batch_idx, tokens in enumerate(batch_tokens):
     for i, token in enumerate(tokens):
@@ -1498,63 +1588,63 @@ attention_scores = attention_scores.masked_fill(~mask, float('-inf'))
 attention_weights = torch.softmax(attention_scores, dim=-1)
 Z = torch.einsum('nhlm,nhmd->nhld', attention_weights, V)
 
-print("\nВнимание для каждой головы:")
-print(f"Форма Z: {Z.shape}")
+print("\nAttention for each head:")
+print(f"Z shape: {Z.shape}")
 
-# Вывод первых 3 элементов для Z
+# Output first 3 elements for Z
 for batch_idx in range(N):
-    print(f"\nБатч {batch_idx + 1}: '{sentences[batch_idx]}'")
+    print(f"\nBatch {batch_idx + 1}: '{sentences[batch_idx]}'")
     for pos in [0, 2, 4]:
-        print(f"  Позиция {pos} ({batch_tokens[batch_idx][pos]}):")
+        print(f"  Position {pos} ({batch_tokens[batch_idx][pos]}):")
         print(f"    Z: {Z[batch_idx, :, pos, :3].detach().numpy().round(4)}")
 
-# Визуализация весов внимания для первой головы и первой позиции
-print("\nВизуализация весов внимания для первой головы и первой позиции:")
-print(f"Веса внимания (первая голова, первая позиция): {attention_weights[0, 0, 0, :].detach().numpy().round(4)}")
+# Visualization of attention weights for the first head and first position
+print("\nVisualization of attention weights for the first head and first position:")
+print(f"Attention weights (first head, first position): {attention_weights[0, 0, 0, :].detach().numpy().round(4)}")
 
-# 3. Конкатенация голов
+# 3. Concatenation of heads
 Z_concat = Z.transpose(1, 2).reshape(N, L, h * D_v)
 
-print("\nКонкатенация голов:")
-print(f"Форма Z_concat: {Z_concat.shape}")
+print("\nConcatenation of heads:")
+print(f"Z_concat shape: {Z_concat.shape}")
 
-# 4. Линейная проекция выхода
+# 4. Linear projection of output
 W_O = torch.randn(h * D_v, D_model)
 multi_head_output = torch.einsum('nlk,kd->nld', Z_concat, W_O)
 
-print("\nЛинейная проекция выхода:")
-print(f"Форма MultiHead Output: {multi_head_output.shape}")
+print("\nLinear projection of output:")
+print(f"MultiHead Output shape: {multi_head_output.shape}")
 
-# Вывод для первого батча
-print("\nДетальный анализ первого батча после Multi-Head Attention:")
+# Output for the first batch
+print("\nDetailed analysis of the first batch after Multi-Head Attention:")
 batch_idx = 0
 for pos in [0, 2, 4, 6, 8]:
-    print(f"\nПозиция {pos} ({batch_tokens[batch_idx][pos]}):")
-    print(f"Комбинированный:     {X_embedded[batch_idx, pos, :3].detach().numpy().round(4)}")
-    print(f"Multi-Head Output:  {multi_head_output[batch_idx, pos, :3].detach().numpy().round(4)}")
+    print(f"\nPosition {pos} ({batch_tokens[batch_idx][pos]}):")
+    print(f"Combined:             {X_embedded[batch_idx, pos, :3].detach().numpy().round(4)}")
+    print(f"Multi-Head Output:    {multi_head_output[batch_idx, pos, :3].detach().numpy().round(4)}")
 
-# ================= Add & Norm (после Multi-Head Attention) =================
+# ================= Add & Norm (after Multi-Head Attention) =================
 print("\n" + "=" * 60)
-print("Шаг 5: Add & Norm (после Multi-Head Attention)")
+print("Step 5: Add & Norm (after Multi-Head Attention)")
 
-# Add (остаточное соединение)
-# Выход слоя Multi-Head Attention (multi_head_output) добавляется к входу подслоя Multi-Head Attention (X_embedded)
+# Add (residual connection)
+# The output of the Multi-Head Attention layer (multi_head_output) is added to the input of the Multi-Head Attention sub-layer (X_embedded)
 output_add_norm_1_add = X_embedded + multi_head_output
-print("\nAdd (остаточное соединение):")
-print(f"Форма Output после Add: {output_add_norm_1_add.shape}")
+print("\nAdd (residual connection):")
+print(f"Output shape after Add: {output_add_norm_1_add.shape}")
 
-# Norm (нормализация слоя)
-# Применяем Layer Normalization к результату сложения
-layer_norm_1 = nn.LayerNorm(D_model) #  D_model - размерность, по которой нормализуем
+# Norm (layer normalization)
+# Apply Layer Normalization to the result of addition
+layer_norm_1 = nn.LayerNorm(D_model) #  D_model - dimensionality to normalize
 output_add_norm_1_norm = layer_norm_1(output_add_norm_1_add)
-print("\nNorm (нормализация слоя):")
-print(f"Форма Output после LayerNorm: {output_add_norm_1_norm.shape}")
+print("\nNorm (layer normalization):")
+print(f"Output shape after LayerNorm: {output_add_norm_1_norm.shape}")
 
-# Вывод для первого батча после Add & Norm
-print("\nДетальный анализ первого батча после Add & Norm:")
+# Output for the first batch after Add & Norm
+print("\nDetailed analysis of the first batch after Add & Norm:")
 batch_idx = 0
 for pos in [0, 2, 4, 6, 8]:
-    print(f"\nПозиция {pos} ({batch_tokens[batch_idx][pos]}):")
+    print(f"\nPosition {pos} ({batch_tokens[batch_idx][pos]}):")
     print(f"Multi-Head Output:      {multi_head_output[batch_idx, pos, :3].detach().numpy().round(4)}")
     print(f"Output Add:             {output_add_norm_1_add[batch_idx, pos, :3].detach().numpy().round(4)}")
     print(f"Output Add & Norm:      {output_add_norm_1_norm[batch_idx, pos, :3].detach().numpy().round(4)}")
@@ -1562,244 +1652,244 @@ for pos in [0, 2, 4, 6, 8]:
 
 # ================= Feed Forward Network =================
 print("\n" + "=" * 60)
-print("Шаг 6: Feed Forward Network")
+print("Step 6: Feed Forward Network")
 
-# 1. Первый линейный слой (Expansion Layer)
+# 1. First linear layer (Expansion Layer)
 W_ff_1 = torch.randn(D_model, D_ff)
 b_ff_1 = torch.randn(D_ff)
 output_ffn_layer_1 = torch.relu(torch.einsum('nlk,kd->nld', output_add_norm_1_norm, W_ff_1) + b_ff_1)
-print("\nПервый линейный слой (Expansion Layer):")
-print(f"Форма Output после первого линейного слоя: {output_ffn_layer_1.shape}")
+print("\nFirst linear layer (Expansion Layer):")
+print(f"Output shape after first linear layer: {output_ffn_layer_1.shape}")
 
-# 2. Второй линейный слой (Contraction Layer)
+# 2. Second linear layer (Contraction Layer)
 W_ff_2 = torch.randn(D_ff, D_model)
 b_ff_2 = torch.randn(D_model)
 output_ffn = torch.einsum('nlk,kd->nld', output_ffn_layer_1, W_ff_2) + b_ff_2
-print("\nВторой линейный слой (Contraction Layer):")
-print(f"Форма Output после второго линейного слоя (FFN Output): {output_ffn.shape}")
+print("\nSecond linear layer (Contraction Layer):")
+print(f"Output shape after second linear layer (FFN Output): {output_ffn.shape}")
 
-# Вывод для первого батча после Feed Forward Network
-print("\nДетальный анализ первого батча после Feed Forward Network:")
+# Output for the first batch after Feed Forward Network
+print("\nDetailed analysis of the first batch after Feed Forward Network:")
 batch_idx = 0
 for pos in [0, 2, 4, 6, 8]:
-    print(f"\nПозиция {pos} ({batch_tokens[batch_idx][pos]}):")
+    print(f"\nPosition {pos} ({batch_tokens[batch_idx][pos]}):")
     print(f"Output Add & Norm:      {output_add_norm_1_norm[batch_idx, pos, :3].detach().numpy().round(4)}")
     print(f"FFN Output:             {output_ffn[batch_idx, pos, :3].detach().numpy().round(4)}")
 
-# ================= Add & Norm (после Feed Forward Network) =================
+# ================= Add & Norm (after Feed Forward Network) =================
 print("\n" + "=" * 60)
-print("Шаг 7: Add & Norm (после Feed Forward Network)")
+print("Step 7: Add & Norm (after Feed Forward Network)")
 
-# Add (остаточное соединение)
-# Выход FFN (output_ffn) добавляется к входу подслоя FFN (output_add_norm_1_norm)
+# Add (residual connection)
+# The output of FFN (output_ffn) is added to the input of the FFN sub-layer (output_add_norm_1_norm)
 output_add_norm_2_add = output_add_norm_1_norm + output_ffn
-print("\nAdd (остаточное соединение после FFN):")
-print(f"Форма Output после Add: {output_add_norm_2_add.shape}")
+print("\nAdd (residual connection after FFN):")
+print(f"Output shape after Add: {output_add_norm_2_add.shape}")
 
-# Norm (нормализация слоя)
-# Применяем Layer Normalization к результату сложения
-layer_norm_2 = nn.LayerNorm(D_model) #  D_model - размерность, по которой нормализуем
+# Norm (layer normalization)
+# Apply Layer Normalization to the result of addition
+layer_norm_2 = nn.LayerNorm(D_model) #  D_model - dimensionality to normalize
 output_add_norm_2_norm = layer_norm_2(output_add_norm_2_add)
-print("\nNorm (нормализация слоя после FFN):")
-print(f"Форма Output после LayerNorm: {output_add_norm_2_norm.shape}")
+print("\nNorm (layer normalization after FFN):")
+print(f"Output shape after LayerNorm: {output_add_norm_2_norm.shape}")
 
-# Вывод для первого батча после Add & Norm (после FFN)
-print("\nДетальный анализ первого батча после Add & Norm (после FFN):")
+# Output for the first batch after Add & Norm (after FFN)
+print("\nDetailed analysis of the first batch after Add & Norm (after FFN):")
 batch_idx = 0
 for pos in [0, 2, 4, 6, 8]:
-    print(f"\nПозиция {pos} ({batch_tokens[batch_idx][pos]}):")
+    print(f"\nPosition {pos} ({batch_tokens[batch_idx][pos]}):")
     print(f"FFN Output:             {output_ffn[batch_idx, pos, :3].detach().numpy().round(4)}")
-    print(f"Output Add (после FFN):   {output_add_norm_2_add[batch_idx, pos, :3].detach().numpy().round(4)}")
-    print(f"Output Add & Norm (после FFN): {output_add_norm_2_norm[batch_idx, pos, :3].detach().numpy().round(4)}")
+    print(f"Output Add (after FFN):   {output_add_norm_2_add[batch_idx, pos, :3].detach().numpy().round(4)}")
+    print(f"Output Add & Norm (after FFN): {output_add_norm_2_norm[batch_idx, pos, :3].detach().numpy().round(4)}")
 ```
 
-6. **Слой Add & Norm (после Feed Forward):**
-   - **Add (остаточное соединение):** Выход FFN добавляется к входу подслоя:
+6. **Add & Norm layer (after Feed Forward):**
+   - **Add (residual connection):** The output of FFN (output_ffn) is added to the input of the FFN sub-layer (output_add_norm_1_norm):
      $$
      \text{Output}_{Add2} = \text{Output}_{Norm1} + \text{FFN}(\text{Output}_{Norm1})
      $$
-   - **Norm (нормализация слоя):** Применяется нормализация слоя:
+   - **Norm (layer normalization):** Layer normalization is applied:
      $$
      \text{Output}_{Norm2} = \text{LayerNorm}(\text{Output}_{Add2})
      $$
 
-7. **Выход кодера:**
-   - Выходом каждого слоя кодера является $\text{Output}_{Norm2}$ размерности $(N, L, D_{model})$.
-   - После прохождения всех $N_{layers}$ слоев кодера, финальный выход представляет собой матрицу контекстуализированных эмбеддингов размерности $(N, L, D_{model})$.
+7. **Encoder output:**
+   - The output of each encoder layer is $\text{Output}_{Norm2}$ of dimensionality $(N, L, D_{model})$.
+   - After passing through all $N_{layers}$ encoder layers, the final output represents a matrix of contextualized embeddings of dimensionality $(N, L, D_{model})$.
 
-Продолжаем обзор папиры...
+Continuing the paper review...
 
-</details> 
+</detail>
 
-## 🚀 Ускоряем ваш кодер
+# 🚀 Accelerating Your Encoder
 
-### Поддержка генеративных моделей 🤝
+### Supporting Generative Models 🤝
 
-Один из способов понять популярность моделей представления (только для кодировщиков) — это отметить, как их часто комбинируют с моделями, предназначенными только для декодеров, для создания безопасной и эффективной системы.
+One way to understand the popularity of encoder-only models is to note how often they are combined with decoder-only models to create safe and efficient systems.
 
-Очевидный пример – **RAG**. Вместо того, чтобы полагаться на знания, которые LLM обучила параметрам модели, система использует хранилище документов для предоставления LLM информации, соответствующей запросу. Но, конечно, это только откладывает проблему. Если LLM не знает, какие документы имеют отношение к запросу, то системе нужен какой-то другой процесс для выбора этих документов? Для этого требуется модель, которая была бы достаточно быстрой и дешевой, чтобы ее можно было использовать для кодирования больших объемов информации, необходимой для того, чтобы сделать LLM полезным. Обычно эта модель представляет собой модель только для кодера, например **BERT**. 📚
+A clear example is **RAG**. Instead of relying on the knowledge that the LLM learned from its model parameters, the system uses a document store to provide the LLM with information relevant to the query. But, of course, this only postpones the problem. If the LLM doesn't know which documents are relevant to the query, then the system needs some other process to select these documents? For this, a model is needed that is fast and cheap enough to be used for encoding large amounts of information necessary to make the LLM useful. Usually, this model is an encoder-only model, such as **BERT**. 📚
 
-Другим примером является контролируемая архитектура, в которой можно использовать дешевые классификаторы, чтобы гарантировать, что сгенерированный текст не нарушает требования безопасности контента. 🔒
+Another example is a controlled architecture where inexpensive classifiers can be used to ensure that the generated text does not violate content safety requirements. 🔒
 
-Короче говоря, всякий раз, когда вы видите в развертывании модель только для декодера, существует разумная вероятность того, что модель только для кодера также является частью системы. Но обратное неверно. 🔄
+In short, every time you see a decoder-only model in deployment, there is a reasonable probability that an encoder-only model is also part of the system. But the reverse is not true. 🔄
 
-### Системы на основе кодировщиков 🌐
+### Encoder-Based Systems 🌐
 
-До **GPT** рекомендации по контенту существовали в социальных сетях и на таких платформах, как **Netflix**. Таргетинг рекламы осуществляется на этих площадках, в поиске и других местах. Существуют также классификации контента, такие как обнаружение спама и обнаружение злоупотреблений. Эти системы построены не на генеративных моделях, а на репрезентативных моделях, таких как модели только для кодировщиков. Все эти системы до сих пор существуют и действуют в огромных масштабах. Представьте себе, сколько рекламы таргетируется каждую секунду по всему миру! 🌍
+Before **GPT**, content recommendations existed in social networks and on platforms like **Netflix**. Advertising targeting was done on these platforms, in search, and other places. There are also content classifications, such as spam detection and abuse detection. These systems are built not on generative models, but on representation models, such as encoder-only models. All these systems still exist and operate on a massive scale. Imagine how many ads are targeted every second around the world! 🌍
 
-**Загрузки:** на **HuggingFace** **RoBERTa**, ведущая модель на основе **BERT**, имеет больше загрузок, чем 10 самых популярных LLM на **HuggingFace** вместе взятых. Фактически, модель, использующая только кодировщик, в настоящее время обеспечивает более **1 миллиарда ежемесячных загрузок**, что почти в три раза превышает **397 миллионов ежемесячных загрузок** модели, использующей только декодер. Фактически, категория моделей с маской заполнения, состоящая из «базовых моделей» только для кодировщиков, таких как **ModernBERT**, готовых к тонкой настройке для других последующих приложений, является наиболее загружаемой категорией моделей из всех категорий моделей. 📥
+**Downloads:** on **HuggingFace** **RoBERTa**, the leading model based on **BERT**, has more downloads than the 10 most popular LLMs on **HuggingFace** combined. In fact, an encoder-only model currently provides more than **1 billion monthly downloads**, almost three times the **397 million monthly downloads** of a decoder-only model. In fact, the category of masked language models, consisting of "base" encoder-only models such as **ModernBERT**, ready for fine-tuning for other subsequent applications, is the most downloaded category of models of all model categories. 📥
 
-**Стоимость вывода:** вышеизложенное показывает, что в расчете на каждый вывод модели только для кодировщиков требуют гораздо больше выводов в год, чем модели только для декодера или генеративные модели. Интересным примером является **FineWeb-Edu**, где фильтрацию качества на основе модели необходимо выполнить для более чем **15 триллионов токенов**. Команда **FineWeb-Edu** решила использовать модель **Llama-3-70b-Instruct**, предназначенную только для декодера, для создания аннотаций и использовать точно настроенную модель на основе **BERT** для выполнения большей части фильтрации. Эта фильтрация заняла **6000 часов H100** на общую сумму **60 000 долларов США** при цене точки вывода **HuggingFace** **10 долларов США** в час. С другой стороны, даже при использовании самого дешевого варианта **Google Gemini Flash** и его низкой стоимости вывода в размере **0,075 доллара США** за миллион токенов передача **15 триллионов токенов** в популярную модель только для декодера обойдется более чем в **миллион долларов**! 💸
+**Inference Cost:** The above shows that in terms of each inference, encoder-only models require far more inferences per year than decoder-only models or generative models. An interesting example is **FineWeb-Edu**, where quality filtering based on a model must be performed for more than **15 trillion tokens**. The **FineWeb-Edu** team decided to use the decoder-only model **Llama-3-70b-Instruct** to create annotations and use a fine-tuned **BERT**-based model to perform most of the filtering. This filtering took **6000 H100 hours** at a total cost of **$60,000** at a HuggingFace inference point price of **$10 per hour**. In contrast, even using the cheapest option of **Google Gemini Flash** and its low inference cost of **$0.075 per million tokens**, transmitting **15 trillion tokens** to a popular decoder-only model would cost more than **a million dollars**! 💸
 
-## Производительность 🚀
+## Performance 🚀
 
-### Обзор 📊
+### Overview 📊
 
-На рисунке 1 представлены результаты точности модели **ModernBERT** и ряда других моделей при выполнении различных задач, измеренные с использованием стандартных академических тестов. 📈 Данные демонстрируют, что **ModernBERT** показывает превосходящие результаты в большинстве рассмотренных категорий, что делает ее универсальной моделью для задач, основанных на архитектуре кодировщика. 🏆
+Figure 1 shows the accuracy results of the **ModernBERT** model and several other models on various tasks, measured using standard academic benchmarks. 📈 The data demonstrates that **ModernBERT** achieves superior results in most categories considered, making it a universal model for encoder-based tasks. 🏆
 
 ![Table_1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-04/assets/Table_1.png)
 
-Модель **DeBERTaV3** долгое время являлась эталоном в соревнованиях по обработке естественного языка (NLP), в частности на платформе Kaggle. 🥇 Однако, **ModernBERT** не только стала первой моделью базового размера, превзошедшей **DeBERTaV3** в бенчмарке GLUE, но и демонстрирует значительно меньшее потребление памяти, составляющее менее 1/5 от объема, требуемого **DeBERTa**. 💾
+The **DeBERTaV3** model long served as the benchmark in natural language processing (NLP) competitions, particularly on the Kaggle platform. 🥇 However, **ModernBERT** not only became the first base-sized model to surpass **DeBERTaV3** on the GLUE benchmark, but also demonstrates significantly less memory consumption, less than 1/5 of the memory required by **DeBERTa**. 💾
 
-Модель **ModernBERT** характеризуется высокой скоростью работы. ⏩ В частности, она демонстрирует двукратное увеличение скорости по сравнению с **DeBERTa**, а в типичных сценариях использования с входными данными смешанной длины, ускорение может достигать четырехкратного. 🚀 Скорость обработки длинного контекста также существенно выше, почти в три раза, чем у других высокопроизводительных моделей, таких как **NomicBERT** и **GTE-en-MLM**. 🏎️
+**ModernBERT** is characterized by high speed. ⏩ In particular, it demonstrates twice the speed compared to **DeBERTa**, and in typical use cases with mixed-length inputs, the speedup can reach fourfold. 🚀 The processing speed of long contexts is also significantly higher, almost three times faster than other high-performance models such as **NomicBERT** and **GTE-en-MLM**. 🏎️
 
-Длина контекста модели **ModernBERT** достигает **8192 токенов**, что более чем в 16 раз превышает возможности большинства существующих моделей-кодировщиков. 📏 Это свойство играет ключевую роль в конвейерах Retrieval-Augmented Generation (RAG), где ограниченный контекст может приводить к фрагментации информации и затруднять семантическое понимание. 🧩 **ModernBERT** также эффективно интегрируется с методом извлечения длинного контекста ColBERT, демонстрируя превосходство над другими моделями длинного контекста на 9 процентных пунктов. 📊 Примечательно, что данная модель, обладающая высокой скоростью обучения и адаптированная для задач сравнения с другими базовыми моделями, превосходит даже широко используемые модели поиска в задачах, требующих обработки длинного контекста. 🎯
+The context length of the **ModernBERT** model reaches **8192 tokens**, more than 16 times greater than the capabilities of most existing encoder models. 📏 This property plays a key role in Retrieval-Augmented Generation (RAG) pipelines, where limited context can lead to information fragmentation and hinder semantic understanding. 🧩 **ModernBERT** also efficiently integrates with the ColBERT long-context extraction method, demonstrating a 9 percentage point advantage over other long-context models. 📊 Notably, this model, with its high training speed and adapted for tasks compared to other base models, surpasses even widely used search models in tasks requiring long-context processing. 🎯
 
-Модель **ModernBERT** демонстрирует уникальные возможности в задачах поиска кода. 💻 В настоящее время отсутствуют аналогичные модели-кодировщики, обученные на сопоставимом объеме данных, содержащих код. 📚 В качестве примера можно привести набор данных StackOverflow-QA (SQA), представляющий собой гибридный ресурс, сочетающий код и естественный язык. 🌐 В этом наборе данных, благодаря специализированному пониманию кода и способности обрабатывать длинный контекст, **ModernBERT** является одной из немногих моделей, достигших результата выше 80 баллов. 🎉
+**ModernBERT** demonstrates unique capabilities in code search tasks. 💻 Currently, there are no similar encoder models trained on a comparable volume of code-containing data. 📚 As an example, the StackOverflow-QA (SQA) dataset, a hybrid resource combining code and natural language. 🌐 In this dataset, due to specialized code understanding and the ability to process long contexts, **ModernBERT** is one of the few models to achieve a score above 80 points. 🎉
 
-Указанные функциональные возможности **ModernBERT** открывают перспективы для создания целого ряда новых приложений. 🌟 В качестве примера можно рассмотреть интеграцию с интеллектуальной интегрированной средой разработки (IDE), которая осуществляет индексацию всей кодовой базы предприятия, используя возможности **ModernBERT** для быстрого и точного извлечения релевантного кода с учетом длинного контекста из различных репозиториев. 🔍 Другим примером может служить сервис чат-бота для кода, способный предоставлять описание функциональности приложения, агрегируя информацию из множества отдельных проектов. 🤖
+These functional capabilities of **ModernBERT** open up prospects for creating a whole range of new applications. 🌟 As an example, consider integrating with an intelligent Integrated Development Environment (IDE) that indexes the entire enterprise codebase, using **ModernBERT**'s capabilities to quickly and accurately retrieve relevant code from various repositories, taking into account long contexts. 🔍 Another example could be a code chatbot service capable of providing application functionality descriptions by aggregating information from multiple separate projects. 🤖
 
-В сравнении с базовыми моделями, **ModernBERT** демонстрирует более высокую эффективность в трех ключевых категориях задач: поиск, понимание естественного языка и поиск кода. 🔎 В области понимания естественного языка модель несколько уступает **DeBERTaV3**, однако значительно превосходит ее по скорости. ⚡ Важно отметить, что **ModernBERT**, как и любая базовая модель, изначально предназначена для задачи маскированного языкового моделирования. 🎭 Для выполнения других задач требуется дополнительная тонкая настройка модели. 🛠️
+In comparison with base models, **ModernBERT** demonstrates higher efficiency in three key task categories: search, natural language understanding, and code search. 🔎 In the area of natural language understanding, the model slightly lags behind **DeBERTaV3**, but significantly outperforms it in speed. ⚡ It is important to note that **ModernBERT**, like any base model, is initially designed for the masked language modeling task. 🎭 Additional fine-tuning of the model is required for other tasks. 🛠️
 
-В сравнении с передовыми моделями, **ModernBERT** демонстрирует сопоставимые или превосходящие результаты в большинстве задач. 📈 Кроме того, **ModernBERT** превосходит большинство моделей по скорости обработки и способен обрабатывать входные последовательности длиной до 8192 токенов, что значительно превышает возможности базовых моделей. 🚀
+In comparison with advanced models, **ModernBERT** demonstrates comparable or superior results in most tasks. 📈 Moreover, **ModernBERT** surpasses most models in processing speed and can handle input sequences up to 8192 tokens, significantly exceeding the capabilities of base models. 🚀
 
-## Эффективность ⚡
+## Efficiency ⚡
 
-На рисунке 2 представлены данные об эффективности использования памяти (максимальный размер пакета, BS) и скорости вывода (тысячи токенов в секунду) для **ModernBERT** и ряда других моделей-декодеров, протестированных на графическом процессоре NVIDIA RTX 4090. 📊 В первую очередь следует отметить, что анализ эффективности проводился на широко доступных графических процессорах потребительского класса, а не на новейшем и труднодоступном оборудовании. 💻 Это обусловлено тем, что разработка **ModernBERT** ориентирована на практическую применимость и полезность, а не на создание исключительно рекламного продукта. 🎯
+Figure 2 shows the data on memory efficiency (maximum batch size, BS) and inference speed (thousands of tokens per second) for **ModernBERT** and several other decoder models tested on an NVIDIA RTX 4090 graphics card. 📊 First, it should be noted that the efficiency analysis was conducted on widely available consumer-class graphics cards, not on the latest and hard-to-obtain equipment. 💻 This is due to the fact that **ModernBERT** development is oriented towards practical applicability and usefulness, not just creating an exclusive advertising product. 🎯
 
 ![Table_2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-04/assets/Table_2.png)
 
-В соответствии с принципом практической направленности, разработчики **ModernBERT** стремились обеспечить ее применимость в реальных приложениях, а не только в условиях лабораторных тестов. 🧪 Традиционно, тестирование моделей часто проводится в оптимальных условиях, например, при максимальной длине контекста, что отражено в столбце «фиксированные» в таблице. 📏 Однако, в реальных сценариях размеры входных данных варьируются, поэтому особое внимание было уделено оптимизации производительности в условиях переменной длины входных данных, что отражено в столбце «переменная». 🔄 Данные показывают, что **ModernBERT** демонстрирует значительно более высокую скорость работы по сравнению с другими моделями при обработке входных данных переменной длины. 🚀
+According to the principle of practical orientation, the developers of **ModernBERT** aimed to ensure its applicability in real-world applications, not just in laboratory test conditions. 🧪 Traditionally, model testing is often conducted under optimal conditions, for example, at maximum context length, as reflected in the "fixed" column in the table. 📏 However, in real-world scenarios, input data sizes vary, so special attention was paid to optimizing performance under variable-length inputs, as reflected in the "variable" column. 🔄 The data shows that **ModernBERT** demonstrates significantly higher processing speed compared to other models when handling variable-length input data. 🚀
 
-**ModernBERT** демонстрирует скорость, в 2-3 раза превышающую скорость ближайшей конкурирующей модели при обработке длинных контекстных входных данных, которые, вероятно, будут играть ключевую роль в наиболее перспективных приложениях будущего. 🌟 С точки зрения практической реализации, **ModernBERT** не требует установки дополнительных сложных зависимостей, за исключением широко распространенной библиотеки Flash Attention. 📚
+**ModernBERT** demonstrates a speed 2-3 times higher than the nearest competing model when processing long contextual inputs, which are likely to play a key role in the most promising future applications. 🌟 From a practical implementation perspective, **ModernBERT** does not require installing additional complex dependencies, except for the widely used Flash Attention library. 📚
 
-Эффективность **ModernBERT** позволяет использовать увеличенный размер пакета данных по сравнению с большинством других моделей, что обеспечивает возможность эффективного применения на графических процессорах с меньшей вычислительной мощностью и стоимостью. 💰 В частности, высокая эффективность базовой версии модели открывает перспективы для разработки новых приложений, которые могут быть развернуты непосредственно в браузерах, на мобильных телефонах и других устройствах. 📱
+The efficiency of **ModernBERT** allows for using a larger batch size compared to most other models, which enables the effective use of graphics cards with lower computational power and cost. 💰 In particular, the high efficiency of the base version of the model opens up prospects for developing new applications that can be deployed directly in web browsers, on mobile phones, and other devices. 📱
 
-## Почему ModernBERT, ну, современный? 🤔
+## Why ModernBERT, well, modern? 🤔
 
-Представленные выше данные демонстрируют необходимость уделения большего внимания моделям-кодировщикам. 🧠 Несмотря на свою значимость, архитектура кодировщика развивалась менее интенсивно по сравнению с архитектурой декодировщика, особенно после появления модели BERT в 2018 году. 📅
+The data presented above demonstrates the need to pay more attention to encoder models. 🧠 Despite their significance, encoder architecture has evolved less intensively compared to decoder architecture, especially after the emergence of the BERT model in 2018. 📅
 
-Примечательно, что после появления модели RoBERTa, дальнейшее развитие кодировщиков не привело к общему улучшению (так называемому "улучшению по Парето") без каких-либо компромиссов. 📉 Например, модель DeBERTaV3 демонстрирует более высокую производительность в бенчмарке GLUE и задачах классификации, однако уступает в эффективности и задачах поиска. 🔍 Аналогично, другие модели, такие как AlBERT и GTE-en-MLM, улучшают отдельные аспекты исходных моделей BERT и RoBERTa, но проигрывают в других. 🎲
+Notably, after the emergence of the RoBERTa model, further development of encoders did not lead to overall improvement (so-called "Pareto improvement") without any trade-offs. 📉 For example, the DeBERTaV3 model demonstrates higher performance in the GLUE benchmark and classification tasks, but lags in efficiency and search tasks. 🔍 Similarly, other models, such as AlBERT and GTE-en-MLM, improve specific aspects of the original BERT and RoBERTa models but lose in others. 🎲
 
-Тем не менее, с момента появления первых моделей BERT и RoBERTa, в области разработки языковых моделей был достигнут значительный прогресс. 🚀 В частности, в сфере моделей-декодировщиков, в отличие от кодировщиков, наблюдается тенденция к "улучшению по Парето", когда новые модели превосходят предыдущие по всем ключевым параметрам. 📈 Совершенствование моделей является результатом как научных исследований, так и инженерных усилий. 🛠️
+Nevertheless, since the emergence of the first BERT and RoBERTa models, significant progress has been made in the field of language model development. 🚀 In particular, in the field of decoder models, unlike encoders, there is a trend towards "Pareto improvement," where new models surpass previous ones in all key parameters. 📈 Advancement in models is the result of both scientific research and engineering efforts. 🛠️
 
-Таким образом, основной целью проекта **ModernBERT** является интеграция современных инженерных подходов в разработку моделей-кодировщиков. 🎯 Это достигается за счет реализации следующих трех ключевых принципов:
+Thus, the main goal of the **ModernBERT** project is to integrate modern engineering approaches into the development of encoder models. 🎯 This is achieved by implementing the following three key principles:
 
-1. Использование современной архитектуры Transformer. 🤖
-2. Приоритетное внимание к эффективности. ⚡
-3. Применение современных методов масштабирования данных и расширение источников данных. 📊
+1. Use of modern Transformer architecture. 🤖
+2. Prioritizing efficiency. ⚡
+3. Applying modern data scaling methods and expanding data sources. 📊
 
-### Встречайте нового Трансформера, который ничем не отличается от старого Трансформера 🤖
+### Meet the new Transformer, which is no different from the old Transformer 🤖
 
-Архитектура Transformer стала доминирующей и в настоящее время используется в подавляющем большинстве современных моделей. 🌍 Важно отметить, что существует множество вариаций архитектуры Transformer. 🔄 Общим принципом для всех них является концепция, что механизм внимания играет ключевую роль, и дальнейшие улучшения строятся вокруг оптимизации этого механизма. 🎯
+The Transformer architecture has become dominant and is currently used in the vast majority of modern models. 🌍 It is important to note that there are many variations of the Transformer architecture. 🔄 A common principle for all of them is that the attention mechanism plays a key role, and further improvements are built around optimizing this mechanism. 🎯
 
-**ModernBERT** основан на архитектуре Transformer++ (разработанной Mamba), которая впервые была применена в серии моделей Llama2. 🦙 В частности, в **ModernBERT** произведена замена ряда компонентов архитектуры BERT на их усовершенствованные аналоги, а именно:
+**ModernBERT** is based on the Transformer++ architecture (developed by Mamba), which was first applied in the Llama2 series of models. 🦙 In particular, in **ModernBERT**, several components of the BERT architecture have been replaced with their improved counterparts, specifically:
 
-- Замена традиционной позиционной кодировки на ротационное позиционное встраивание (RoPE), что обеспечивает улучшенное понимание относительных позиций между токенами и возможность масштабирования на более длинные последовательности. 🔄
-- Замена слоя MLP на слой GeGLU и усовершенствование функции активации GeLU, используемой в исходной модели BERT. 🧠
-- Упрощение архитектуры за счет исключения избыточных параметров смещения, что позволяет более эффективно использовать вычислительные ресурсы. 💻
-- Добавление дополнительного слоя нормализации после встраивания, что способствует стабилизации процесса обучения. 📊
+- Replacing traditional positional encoding with rotary positional embedding (RoPE), which provides improved understanding of relative positions between tokens and allows scaling to longer sequences. 🔄
+- Replacing the MLP layer with a GeGLU layer and improving the GeLU activation function used in the original BERT model. 🧠
+- Simplifying the architecture by removing redundant bias parameters, allowing more efficient use of computational resources. 💻
+- Adding an additional normalization layer after embedding, which helps stabilize the training process. 📊
 
-### Повышение эффективности
+### Improving Efficiency
 
-Как отмечалось ранее, модели-кодировщики, включая **ModernBERT**, не обладают характеристиками, сопоставимыми с высокопроизводительными моделями. 🏎️ Однако это не означает, что они не способны демонстрировать высокую скорость работы. ⏩ В большинстве практических сценариев, аналогично тому, как обычный автомобиль используется для повседневных поездок по шоссе, ожидается, что надежная модель-кодировщик будет эффективно справляться с задачами обработки данных в рамках установленных требований к производительности. 🚗
+As noted earlier, encoder models, including **ModernBERT**, do not possess characteristics comparable to high-performance models. 🏎️ However, this does not mean they are not capable of demonstrating high speed. ⏩ In most practical scenarios, similar to how an ordinary car is used for daily highway driving, it is expected that a reliable encoder model will efficiently handle data processing tasks within established performance requirements. 🚗
 
-Действительно, в рассмотренных сценариях использования скорость обработки данных играет ключевую роль. ⏱️ Модели-кодировщики особенно востребованы в задачах, связанных с обработкой больших объемов информации, где даже незначительное увеличение скорости может привести к существенному повышению общей производительности. 📈 В ситуациях, когда модель-кодировщик работает на центральном процессоре (CPU), эффективность становится еще более важным фактором для обеспечения приемлемого времени выполнения. ⚙️
+Indeed, in the scenarios considered, data processing speed plays a key role. ⏱️ Encoder models are especially popular in cases where it is necessary to process large volumes of data, where even minor speed increases can quickly accumulate or where latency is very important, for example, **RAG**. In many cases, the encoder even operates on a central processing unit (CPU), and efficiency is even more important if we want to get results in a reasonable time. ⚙️
 
-В соответствии с общепринятой практикой научных исследований, в разработке **ModernBERT** использовались достижения предшествующих работ, в частности, преимущества, предоставляемые оптимизацией скорости Flash Attention 2. 🚀 Повышение эффективности **ModernBERT** достигается за счет реализации следующих трех ключевых компонентов:
+Consistent with common scientific research practice, the development of **ModernBERT** leverages the achievements of previous work, in particular, the advantages provided by the speed optimization of Flash Attention 2. 🚀 The efficiency of **ModernBERT** is achieved through the implementation of the following three key components:
 
-1. Применение механизма чередования внимания для повышения эффективности обработки. 🔄
-2. Использование методов отмены заполнения и упаковки последовательностей для снижения вычислительных затрат. 📦
-3. Разработка архитектуры модели с учетом аппаратных особенностей для оптимизации использования вычислительного оборудования. 💻
+1. Using the attention switching mechanism to improve processing efficiency. 🔄
+2. Using padding removal and sequence packing methods to reduce computational costs. 📦
+3. Designing the model architecture with hardware considerations for optimal use of computing equipment. 💻
 
-### Апгрейд вашего Honda Civic для трека 🏎️
+### Upgrading your Honda Civic for the track 🏎️
 
-Мы уже говорили об этом: кодировщики — это не **Ferrari**, и **ModernBERT** — не исключение. Однако это не значит, что он не может работать быстро. Когда вы выезжаете на шоссе, вы обычно не выходите и не меняете свою машину на гоночную, а скорее ожидаете, что ваша повседневная, надежная машина будет комфортно преодолевать предел скорости. 🚗
+We've already discussed this: encoders are not **Ferraris**, and **ModernBERT** is no exception. However, this does not mean it cannot work fast. When you go on the highway, you usually don't go out and change your car to a race car, but rather expect that your everyday, reliable car will comfortably handle the speed limit. 🚗
 
-Фактически, для всех случаев использования, которые мы упомянули выше, скорость имеет решающее значение. Кодеры очень популярны в тех случаях, когда необходимо обрабатывать большие объемы данных, где даже небольшие приращения скорости могут быстро накапливаться или где задержка очень важна, например, **RAG**. Во многих случаях кодер даже работает на процессоре, и эффективность еще более важна, если мы хотим получить результаты в разумные сроки. ⏱️
+Indeed, for all the use cases we mentioned above, speed is crucial. Coders are very popular in situations where it is necessary to process large amounts of data, where even small speed increases can quickly accumulate or where delay is very important, for example, **RAG**. In many cases, the encoder even runs on the CPU, and efficiency is even more important if we want to get results in a reasonable time. ⏱️
 
-Как и в большинстве других исследований, мы опираемся на плечи гигантов и извлекаем выгоду из улучшений скорости **Flash Attention 2**. Наше повышение эффективности основано на трех ключевых компонентах:
+As in most other research, we build on the shoulders of giants and benefit from the speed improvements of **Flash Attention 2**. Our efficiency improvement is based on the following three key components:
 
-1. **Чередование внимания** для повышения эффективности обработки
-2. **Отмена заполнения и упаковки последовательностей** для сокращения вычислительных затрат
-3. **Разработка моделей с учетом аппаратного обеспечения** для максимального использования оборудования
+1. **Attention switching** for improved processing efficiency
+2. **Padding removal and sequence packing** for reduced computational costs
+3. **Model design with hardware considerations** for maximum equipment utilization
 
-### Глобальное и местное внимание 🌍
+### Global and Local Attention 🌍
 
-Одной из наиболее эффективных особенностей **ModernBERT** является попеременное внимание, в отличие от исключительно глобального. Технически это означает, что механизм внимания модели обращает внимание на полный ввод только каждые **3 слоя** (глобальное внимание), в то время как остальные уровни используют скользящее окно, в котором каждый токен обращает внимание лишь на **128 ближайших к себе токенов** (локальное внимание).  Поскольку вычислительная сложность внимания резко возрастает с каждым дополнительным токеном, это позволяет **ModernBERT** обрабатывать длинные входные последовательности быстрее, чем любая другая модель. ⚡
+One of the most effective features of **ModernBERT** is its alternating attention, unlike exclusively global attention. Technically, this means that the model's attention mechanism pays attention to the full input only every **3 layers** (global attention), while the remaining layers use a sliding window where each token pays attention only to the **128 closest tokens** (local attention). Since the computational complexity of attention increases sharply with each additional token, this allows **ModernBERT** to process long input sequences faster than any other model. ⚡
 
-Концептуально причина такой эффективности весьма проста: представьте, что вы читаете книгу. Нужно ли вам полностью осознавать весь сюжет каждого предложения, чтобы понять большую часть (глобальное внимание)? Или достаточно осведомленности о текущей главе (локальное внимание), если вы периодически пересматриваете ее значение для основного сюжета (глобальное внимание)? В подавляющем большинстве случаев верно последнее. 📚
+Conceptually, the reason for this efficiency is quite simple: imagine you are reading a book. Do you need to fully understand the entire plot of each sentence to understand most of it (global attention)? Or is it enough to be aware of the current chapter (local attention), if you periodically review its meaning for the main plot (global attention)? In the vast majority of cases, the latter is true. 📚
 
-### Распаковка и упаковка последовательности 📦
+### Sequence Unpacking and Packing 📦
 
-Еще одним ключевым механизмом, повышающим эффективность **ModernBERT**, является использование методов удаления заполнения и упаковки последовательностей.
+Another key mechanism enhancing the efficiency of **ModernBERT** is the use of padding removal and sequence packing methods.
 
-Для обработки нескольких последовательностей в одном пакете модели-кодировщики требуют, чтобы все последовательности имели одинаковую длину для обеспечения параллельных вычислений. Традиционно для этого используется заполнение: определяется самая длинная последовательность, и к остальным последовательностям добавляются бессмысленные токены (токены заполнения) для выравнивания длины. 🧩
+To process multiple sequences in a single batch, encoder models require all sequences to have the same length to ensure parallel computation. Traditionally, for this, padding is used: the longest sequence is determined, and padding tokens (padding tokens) are added to the remaining sequences to align the length. 🧩
 
-Хотя заполнение позволяет решить проблему, это решение не является оптимальным: значительная часть вычислительных ресурсов тратится на обработку токенов заполнения, которые не несут семантической нагрузки. 💡
+Although padding solves the problem, this solution is not optimal: a significant portion of computational resources is spent on processing padding tokens, which carry no semantic load. 💡
 
-В отличие от заполнения, упаковка последовательностей («распаковка») позволяет избежать неэффективных вычислений на токенах заполнения, а количество значимых токенов становится более однородным в разных пакетах. При использовании маскирования можно обрабатывать образцы по отдельности. 🎯
+In contrast to padding, sequence packing (unpacking) allows avoiding unnecessary computations on padding tokens, and the number of meaningful tokens becomes more uniform across different batches. When using masking, samples can be processed individually. 🎯
 
-Удаление заполнения эффективно решает эту проблему: вместо хранения токенов заполнения они удаляются, и последовательности объединяются в мини-пакеты размером в **1**, что позволяет избежать ненужных вычислений.  При использовании **Flash Attention** реализация удаления заполнения выполняется еще быстрее, чем предыдущие подходы, которые в значительной степени полагались на распаковку и повторное заполнение последовательности при ее прохождении через модель. Это достигается за счет собственной реализации распаковки, основанной на последних достижениях в поддержке **RoPE Flash Attention**.  Такой подход позволяет **ModernBERT** удалить заполнение последовательности однократно и при необходимости повторно заполнить ее после обработки, что делает модель на **10–20 % быстрее** по сравнению с предыдущими методами. ⚡
+Padding removal effectively solves this problem: instead of storing padding tokens, they are removed, and sequences are combined into mini-batches of size **1**, which avoids unnecessary computations. When using **Flash Attention**, the implementation of padding removal is even faster than previous approaches, which largely relied on unpacking and repadding sequences as they passed through the model. This is achieved through a custom unpacking implementation based on the latest advancements in **RoPE Flash Attention** support. This approach allows **ModernBERT** to remove sequence padding once and, if necessary, repad it after processing, making the model **10–20% faster** compared to previous methods. ⚡
 
-Для дальнейшего ускорения предварительного обучения в модели эффективно используется удаление заполнения в сочетании с упаковкой последовательностей. Упаковка последовательностей является логичным следующим шагом: поскольку входные данные объединяются в последовательность, а графические процессоры эффективно выполняют распараллеливание, необходимо максимизировать вычислительную эффективность, получаемую от одного прямого прохода модели. Для этого применяется жадный алгоритм, который группирует отдельные последовательности в объединенные последовательности, длина которых максимально приближена к максимальной входной длине модели. 🧠
+For further acceleration during pre-training, padding removal is effectively used in combination with sequence packing. Sequence packing is a logical next step: since input data is combined into a sequence, and graphics processors efficiently perform parallelization, it is necessary to maximize the computational efficiency obtained from a single forward pass of the model. For this, a greedy algorithm is used, which groups individual sequences into combined sequences whose length is as close as possible to the model's maximum input length. 🧠
 
-### Обратите внимание на аппаратное обеспечение 💻
+### Pay Attention to Hardware 💻
 
-Наконец, третьим аспектом эффективности **ModernBERT** является учет аппаратного обеспечения.
+Finally, the third aspect of **ModernBERT**'s efficiency is hardware consideration.
 
-При разработке архитектуры модели учитывались два вывода из предыдущих исследований:
+When designing the model architecture, two insights from previous research were considered:
 
-1. **Глубина и ширина слоев.** Исследования показывают, что более глубокие модели с более узкими слоями, как правило, демонстрируют лучшую производительность, чем менее глубокие модели с более широкими слоями. Однако увеличение глубины модели имеет и обратную сторону: чем глубже модель, тем меньше возможностей для распараллеливания, и, следовательно, при том же количестве параметров она работает медленнее.
-2. **Аппаратная эффективность.** Для достижения максимальной производительности необходимо, чтобы размеры модели соответствовали возможностям и ограничениям целевого графического процессора, причем разные модели графических процессоров имеют различные ограничения.
+1. **Depth and width of layers.** Research shows that deeper models with narrower layers generally demonstrate better performance than shallower models with wider layers. However, increasing model depth has a downside: the deeper the model, the less opportunity for parallelization, and thus, with the same number of parameters, it runs slower.
+2. **Hardware efficiency.** To achieve maximum performance, the model dimensions must match the capabilities and limitations of the target graphics processor, and different graphics processor models have different limitations.
 
-Оптимального решения, которое обеспечивало бы одинаково высокую производительность модели на различных графических процессорах, не существует. Однако существуют полезные рекомендации, например, «Примеры совместного проектирования архитектуры модели с аппаратным обеспечением», в которых подробно описана оптимизация архитектуры модели для конкретных графических процессоров. В качестве эвристического подхода предлагается расширить эти рекомендации для различных групп графических процессоров, соблюдая при этом определенный набор ограничений.  Логично, что первым шагом является определение этих ограничений, которые в данном случае включают:
+There is no optimal solution that provides equally high model performance on different graphics processors. However, there are useful recommendations, for example, "Examples of joint model architecture design with hardware," which provides a detailed description of optimizing model architecture for specific graphics processors. As a heuristic approach, it is proposed to extend these recommendations for different groups of graphics processors, while adhering to a certain set of constraints. Logically, the first step is to define these constraints, which in this case include:
 
-- Определение целевых графических процессоров как распространенных моделей для вывода (**RTX 3090/4090**, **A10**, **T4**, **L4**).
-- Определение приблизительных размеров целевой модели: от **130 до 150 миллионов параметров** для **ModernBERT-Base** и от **350 до 420 параметров** для **ModernBERT-Large**.
-- Обеспечение соответствия окончательного размера встраивания размерам исходной модели **BERT** (**768** для базовой, **1024** для большой) для максимальной обратной совместимости.
-- Установление общих ограничений производительности для групп графических процессоров.
+- Defining target graphics processors as common inference models (**RTX 3090/4090**, **A10**, **T4**, **L4**).
+- Defining approximate target model sizes: **130 to 150 million parameters** for **ModernBERT-Base** and **350 to 420 million parameters** for **ModernBERT-Large**.
+- Ensuring the final embedding size matches the original **BERT** model sizes (**768** for base, **1024** for large) for maximum backward compatibility.
+- Establishing general performance constraints for graphics processor groups.
 
-Далее были протестированы различные архитектуры моделей с использованием ограниченного поиска по сетке, варьируя количество и ширину слоев.  После определения наиболее эффективных конфигураций было подтверждено соответствие эвристического подхода фактической производительности графических процессоров, и был выбран окончательный вариант архитектуры модели. 🛠️
+Then, various model architectures were tested using limited grid search, varying the number and width of layers. After determining the most efficient configurations, the heuristic approach was confirmed to match the actual performance of graphics processors, and the final architecture model was selected. 🛠️
 
-Еще одной важной областью, в которой кодировщики имеют потенциал для улучшения, являются обучающие данные. Часто под этим подразумевается только объем обучающих данных, но это не совсем так. Предыдущие модели-кодировщики, такие как **DeBERTaV3**, обучались достаточно долго и, возможно, даже превысили порог в триллион токенов! 📚
+Another important area where encoders have potential for improvement is training data. Often, this refers only to the volume of training data, but this is not entirely accurate. Previous encoder models, such as **DeBERTaV3**, were trained for a sufficiently long time and may have even exceeded the trillion-token threshold! 📚
 
-Проблема заключается в разнообразии обучающих данных: многие более ранние модели обучались на ограниченных наборах данных, часто состоящих из **Википедии** и **Викикниг**.  Эти наборы данных преимущественно представляют собой текстовую модальность и содержат только высококачественный естественный текст. 📖
+The problem lies in the diversity of training data: many earlier models were trained on limited datasets, often consisting of **Wikipedia** and **Wikibooks**. These datasets primarily represent textual modality and contain only high-quality natural text. 📖
 
-В отличие от них, **ModernBERT** обучается на данных из разнообразных англоязычных источников, включая веб-документы, код и научные статьи.  Общий объем обучающих данных составляет **2 триллиона токенов**, большинство из которых являются уникальными, а не повторяются **20–40 раз**, как в случае с предыдущими кодировщиками. 📊
+In contrast, **ModernBERT** is trained on data from diverse English sources, including web documents, code, and scientific articles. The total volume of training data is **2 trillion tokens**, most of which are unique, not repeated **20–40 times**, as in previous encoders. 📊
 
-Результат такого подхода очевиден: среди всех существующих программных кодировщиков с открытым исходным кодом **ModernBERT** выделяется в решении задач, связанных с программированием.  Особый интерес представляет потенциал использования этой модели для улучшения инструментов помощи в программировании. 💻
+The result of this approach is evident: among all existing open-source code encoders, **ModernBERT** stands out in solving programming-related tasks. Particular interest is the potential use of this model to improve programming assistance tools. 💻
 
-## Процесс 🛠️
+## Process 🛠️
 
-Мы придерживаемся методики обучения, использованной для исходной модели **BERT**, с некоторыми незначительными улучшениями, вдохновленными последующими исследованиями. В частности, мы отказались от цели прогнозирования следующего предложения, так как было установлено, что ее добавление создает излишнюю нагрузку без заметного улучшения результатов. Кроме того, мы изменили долю маскируемых токенов, увеличив ее с **15%** до **30%**. 📈
+We follow the training methodology used for the original **BERT** model, with some minor improvements inspired by subsequent research. In particular, we abandoned the goal of predicting the next sentence, as it was found that its addition creates unnecessary load without noticeable improvement in results. Moreover, we changed the masking token ratio, increasing it from **15%** to **30%**. 📈
 
-Обучение обеих моделей осуществляется в три этапа, обеспечивающих всестороннюю подготовку.  Первоначально модели обучаются на **1,7 триллиона токенов** при длине последовательности **1024**. Затем следует этап адаптации к длинному контексту, в ходе которого обучение продолжается на **250 миллиардах токенов** с длиной последовательности **8192**.  При этом, для сохранения вычислительной стабильности, общее количество токенов, обрабатываемых в каждом пакете, остается относительно постоянным за счет пропорционального уменьшения размера пакета.  На заключительном этапе проводится «отжиг» на **50 миллиардах токенов**, отобранных с применением различных стратегий, для достижения оптимального баланса преимуществ длинного контекста, как это подчеркнуто в исследовании **ProLong**. 🧠
+Both models are trained in three stages, ensuring comprehensive preparation. Initially, the models are trained on **1.7 trillion tokens** with a sequence length of **1024**. Then follows the long-context adaptation stage, during which training continues on **250 billion tokens** with a sequence length of **8192**. During this, to maintain computational stability, the total number of tokens processed in each batch remains relatively constant by proportionally reducing the batch size. On the final stage, "annealing" is performed on **50 billion tokens** selected using various strategies to achieve an optimal balance of long-context advantages, as highlighted in the **ProLong** study. 🧠
 
-Такой трехэтапный подход к обучению гарантирует высокую эффективность модели в разнообразных задачах, что подтверждается ее результатами:  **ModernBERT** демонстрирует конкурентоспособность в задачах, требующих обработки длинного контекста, и при этом не уступает в производительности при работе с короткими контекстами. 📊
+This three-stage training approach ensures high efficiency of the model in various tasks, which is confirmed by its results: **ModernBERT** demonstrates competitiveness in tasks requiring long-context processing and does not lag in performance when working with short contexts. 📊
 
-…но есть и еще одно важное преимущество: на первых двух этапах, после завершения фазы прогрева, обучение ведется с постоянной скоростью. Снижение скорости обучения применяется только на последних **50 миллиардах токенов**, в соответствии с трапециевидной схемой (или схемой «разминка-стабилизация-спад»).  Более того, вдохновляясь подходом **Pythia**, мы намеренно удаляем каждую промежуточную контрольную точку, созданную в стабильных фазах обучения.  Это решение продиктовано стремлением поддержать будущие исследования и практические применения:  любой исследователь или разработчик может возобновить обучение с любой из предоставленных контрольных точек перед фазой спада и выполнить дообучение на специализированных данных, соответствующих его конкретным задачам! 🚀
+… but there is another important advantage: on the first two stages, after completing the warm-up phase, training is conducted at a constant speed. The learning rate decay is applied only on the last **50 billion tokens**, according to a trapezoidal scheme (or "warm-up-stabilization-decay" scheme). Moreover, inspired by the **Pythia** approach, we deliberately remove each intermediate checkpoint created during the stable training phases. This decision is driven by the desire to support future research and practical applications: any researcher or developer can resume training from any of the provided checkpoints before the decay phase and perform further training on specialized data corresponding to their specific tasks! 🚀
 
-### Ноу-хау – ключ к успеху! 🧠
+### Know-how – the key to success! 🧠
 
-Если вы внимательно следите за ходом изложения, то, вероятно, уже предвидите: для дальнейшего ускорения процесса обучения мы, разумеется, применяем ряд эффективных техник.  В частности, в нашем арсенале имеются две ключевые методики.
+If you have been following the narrative closely, you probably already anticipated: to further accelerate the training process, we, of course, apply a number of effective techniques. In particular, we have two key methods in our arsenal.
 
-Начнем с первой, достаточно распространенной:  поскольку начальный этап обучения связан с тонкой настройкой случайных весов, мы используем стратегию постепенного увеличения размера пакета.  На начальном этапе мы работаем с малым размером пакета, чтобы обеспечить более частое обновление весов модели при обработке заданного объема данных. Затем, по мере обучения, мы плавно увеличиваем размер пакета до целевого значения.  Такой подход существенно ускоряет первоначальный этап обучения, когда модель активно усваивает фундаментальные языковые закономерности. 📚
+Let's start with the first, a fairly common one: since the initial training phase is associated with fine-tuning random weights, we use a gradual increase in batch size strategy. At the initial stage, we work with a small batch size to ensure more frequent model weight updates during the processing of a given amount of data. Then, as training progresses, we gradually increase the batch size to the target value. This approach significantly speeds up the initial training phase, when the model is actively learning fundamental language patterns. 📚
 
-Вторая техника, напротив, является менее тривиальной:  инициализация весов для моделей увеличенного размера посредством «мозаичного» подхода, вдохновленного серией моделей **Microsoft Phi**.  В основе этого метода лежит простая, но важная идея:  зачем инициализировать веса **ModernBERT-large** случайными значениями, если уже существует высококачественный (позволим себе такую оценку) набор весов **ModernBERT-base**? 🧩
+The second technique, conversely, is less trivial: initializing weights for larger models using a "mosaic" approach, inspired by the **Microsoft Phi** series of models. The basis of this method is a simple but important idea: why initialize **ModernBERT-large** weights randomly if there is already a high-quality (we allow ourselves such an assessment) set of **ModernBERT-base** weights? 🧩
 
-Практический опыт показывает, что использование весов базовой модели **ModernBERT** в качестве отправной точки для **ModernBERT-large** обеспечивает более эффективное обучение, чем случайная инициализация.  Кроме того, этот метод удачно сочетается со стратегией постепенного увеличения размера пакета, что в совокупности позволяет добиться значительного ускорения начального этапа обучения. ⚡
+Practical experience shows that using the base model weights **ModernBERT** as a starting point for **ModernBERT-large** provides more effective training than random initialization. Moreover, this method works well in conjunction with the gradual batch size increase strategy, which together allows for significant acceleration of the initial training phase. ⚡
 
-## В заключение 🎯
+## Conclusion 🎯
 
-В данной публикации мы представили **ModernBERT** – новое семейство современных, компактных и высокопроизводительных моделей, разработанных с архитектурой, ориентированной исключительно на кодирование.  **ModernBERT** представляет собой долгожданное обновление парадигмы **BERT**. 🚀
+In this publication, we present **ModernBERT** – a new family of modern, compact, and high-performance models developed with an architecture exclusively focused on encoding. **ModernBERT** represents a long-awaited update to the **BERT** paradigm. 🚀

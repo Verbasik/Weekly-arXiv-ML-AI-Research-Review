@@ -1,55 +1,52 @@
-# 🔬 Исследование «Супервесов» в больших языковых моделях (LLM) 
+# 🔬 Study of "Super Weights" in Large Language Models (LLMs)
 
 [![arXiv](https://img.shields.io/badge/arXiv-2411.07191-b31b1b.svg)](https://arxiv.org/abs/2411.07191)
-[![Habr](https://img.shields.io/badge/📰_Статья_на_Habr-65A3BE?style=flat)](https://habr.com/ru/articles/876620/)
-[![Telegram](https://img.shields.io/badge/📢_Telegram_Channel-2CA5E0?style=flat)](https://t.me/TheWeeklyBrief)
 
-> **«Один параметр может разрушить LLM: как сверхвеса управляют качеством генерации»**
+> **"One Parameter Can Break an LLM: How Super Weights Govern Generation Quality"**
 
-## 🧩 Основные открытия
+## 🧩 Key Findings
 
-- 🎯 **1 параметр > 7000 других** - Удаление одного сверхвеса разрушает качество модели
-- 🔍 **Data-free обнаружение** - Метод идентификации без обучающих данных
-- ⚡ **Практическое применение** - Улучшение квантования моделей на 42%
-- 📊 **Универсальность** - Результаты подтверждены для Llama, Mistral, Phi-3
+- 🎯 **1 parameter > 7000 others** – Removing a single super weight destroys model quality  
+- 🔍 **Data-free detection** – Method for identification without training data  
+- ⚡ **Practical application** – Improves model quantization by 42%  
+- 📊 **Universality** – Results validated across Llama, Mistral, and Phi-3  
 
-## 📋 Ключевые результаты
+## 📋 Key Results
 
-| Метрика                    | Без SW | С SW  | Delta |
-|---------------------------|--------|-------|-------|
-| Точность (Zero-Shot)       | 0%     | 54.2% | +54.2 |
-| Перплексия                 | 562.1  | 12.3  | -549.8|
-| Вероятность стоп-слов      | +850%  | Норма | -     |
+| Metric                     | Without SW | With SW | Delta   |
+|---------------------------|------------|---------|---------|
+| Accuracy (Zero-Shot)       | 0%         | 54.2%   | +54.2   |
+| Perplexity                 | 562.1      | 12.3    | -549.8  |
+| Stop-word probability      | +850%      | Normal  | -       |
 
-## 🛠️ Методология
+## 🛠️ Methodology
 
-### 3 этапа идентификации SW:
-1. **Анализ активаций**  
-   Поиск аномалий в распределениях `mlp.down_proj`
-2. **Кросс-валидация**  
-   Проверка на различных входных промптах
-3. **Верификация влияния**  
-   Тестирование эффекта удаления параметра
+### 3-stage SW identification:
+1. **Activation analysis**  
+   Outlier detection in `mlp.down_proj` distributions  
+2. **Cross-validation**  
+   Verification across diverse input prompts  
+3. **Impact verification**  
+   Testing the effect of parameter removal  
 
+## 💡 Practical Applications
 
-## 💡 Практические применения
+- 🧮 **Enhanced quantization**  
+  Preserving SW yields +42% quality  
+- 🔧 **Model optimization**  
+  Targeted intervention on critical parameters  
+- 🚀 **Efficient engineering**  
+  Data-free approach for rapid analysis  
 
-- 🧮 **Улучшенная квантизация**  
-  Сохранение SW дает +42% качества
-- 🔧 **Оптимизация моделей**  
-  Таргетное воздействие на критические параметры
-- 🚀 **Эффективный инжиниринг**  
-  Data-free подход для быстрого анализа
+## 📊 Experimental Results
 
-## 📊 Результаты экспериментов
+| Model                   | # of SW | Accuracy (INT4) |
+|-------------------------|---------|-----------------|
+| Llama-7B                | 1       | 82.3%           |
+| Mistral-7B              | 2       | 85.1%           |
+| Phi-3-mini-4k-instr     | 6       | 79.8%           |
 
-| Модель              | Кол-во SW | Точность (INT4) |
-|---------------------|-----------|-----------------|
-| Llama-7B            | 1         | 82.3%           |
-| Mistral-7B          | 2         | 85.1%           |
-| Phi-3-mini-4k-instr | 6         | 79.8%           |
-
-## 📜 Цитирование
+## 📜 Citation
 
 ```bibtex
 @article{superweights2024,

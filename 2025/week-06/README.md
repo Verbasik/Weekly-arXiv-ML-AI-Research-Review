@@ -1,64 +1,64 @@
-# 🤖 MoE: Mixture of Experts - Революция в Архитектуре AI 🚀
+# 🤖 MoE: Mixture of Experts - A Revolution in AI Architecture 🚀
 
-[![arXiv](https://img.shields.io/badge/arXiv-2305.14705-b31b1b.svg)](https://arxiv.org/abs/2201.05596)
-[![Telegram Channel](https://img.shields.io/badge/Telegram-TheWeeklyBrief-blue)](https://t.me/TheWeeklyBrief)
+[![arXiv](https://img.shields.io/badge/arXiv-2305.14705-b31b1b.svg  )](https://arxiv.org/abs/2201.05596  )
+[![Telegram Channel](https://img.shields.io/badge/Telegram-TheWeeklyBrief-blue  )](https://t.me/TheWeeklyBrief  )
 
-> «Разделяй и властвуй: как технология Mixture of Experts трансформирует будущее искусственного интеллекта»
+> "Divide and conquer: How Mixture of Experts technology is transforming the future of artificial intelligence"
 
-## 🎯 Обзор
+## 🎯 Overview
 
-Mixture of Experts (MoE) - это революционный подход в архитектуре нейронных сетей, который позволяет существенно повысить эффективность и производительность крупных языковых моделей. Технология использует специализированные "экспертные" подмодели и интеллектуальную систему маршрутизации для оптимальной обработки различных типов входных данных.
+Mixture of Experts (MoE) is a revolutionary approach in neural network architecture that significantly enhances the efficiency and performance of large language models. The technology employs specialized "expert" submodels and an intelligent routing system to optimally process diverse types of input data.
 
-## 💡 Ключевые особенности
+## 💡 Key Features
 
-- **Специализированные эксперты**: каждый эксперт фокусируется на определенных паттернах и типах данных;
-- **Интеллектуальная маршрутизация**: динамическое распределение задач между экспертами;
-- **Эффективное использование ресурсов**: активация только необходимых экспертов для конкретной задачи;
-- **Масштабируемость**: возможность увеличения количества параметров без пропорционального роста вычислительных затрат;
-- **Гибкость архитектуры**: адаптивность к различным типам задач и доменов.
+- **Specialized Experts**: Each expert focuses on specific patterns and data types;
+- **Intelligent Routing**: Dynamic distribution of tasks among experts;
+- **Efficient Resource Utilization**: Activation of only the necessary experts for a specific task;
+- **Scalability**: Ability to increase the number of parameters without proportional growth in computational cost;
+- **Architectural Flexibility**: Adaptability to various tasks and domains.
 
-## 🏗 Архитектура
+## 🏗 Architecture
 
-### Основные компоненты
+### Core Components
 
-1. **Эксперты**
-   - Специализированные нейронные сети
-   - Независимое обучение
-   - Фокус на конкретных паттернах
+1. **Experts**
+   - Specialized neural networks
+   - Independent training
+   - Focus on specific patterns
 
-2. **Маршрутизатор**
-   - Динамическое распределение входных данных
-   - Балансировка нагрузки
-   - Оптимизация использования ресурсов
+2. **Router**
+   - Dynamic distribution of input data
+   - Load balancing
+   - Resource utilization optimization
 
-3. **Механизмы балансировки**
+3. **Balancing Mechanisms**
    - Auxiliary Loss
    - Capacity Control
    - Load Balancing
 
-## 🚀 Применение
+## 🚀 Applications
 
-- Обработка естественного языка
-- Компьютерное зрение
-- Мультимодальные задачи
-- Генеративные модели
-- Специализированные домены
+- Natural language processing
+- Computer vision
+- Multimodal tasks
+- Generative models
+- Specialized domains
 
-## ⚖️ Преимущества и ограничения
+## ⚖️ Advantages and Limitations
 
-### Преимущества
-- Повышенная эффективность обучения
-- Лучшая масштабируемость
-- Оптимизация ресурсов
-- Специализация экспертов
+### Advantages
+- Increased training efficiency
+- Better scalability
+- Optimized resource usage
+- Expert specialization
 
-### Ограничения
-- Сложность реализации
-- Потребность в большей памяти
-- Необходимость тонкой настройки
-- Потенциальные проблемы с балансировкой
+### Limitations
+- Implementation complexity
+- Higher memory requirements
+- Need for fine-tuning
+- Potential balancing issues
 
-## 📝 Цитирование
+## 📝 Citation
 
 ```bibtex
 @article{MoE,
@@ -68,6 +68,13 @@ Mixture of Experts (MoE) - это революционный подход в а�
     year={2022}
 }
 ```
+
 ---
 
-Сделано с ❤️ для AI-сообщества
+<div align="center">
+
+**Explore with us 🚀**
+
+⭐ Star this repository if you found it helpful
+
+</div>

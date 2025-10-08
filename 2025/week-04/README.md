@@ -1,51 +1,49 @@
-# ModernBERT: Новое поколение моделей-кодировщиков для эффективного NLP 🚀
+# ModernBERT: A New Generation of Efficient NLP Encoders 🚀
 
 [![arXiv](https://img.shields.io/badge/arXiv-2406.XXXXX-b31b1b.svg)](https://arxiv.org/abs/2412.13663)
-[![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1g18LooJ32IIeeUc0cYuRqlcmOB4MiGoE?usp=sharing) 
 [![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Models-yellow)](https://huggingface.co/answerdotai/ModernBERT-base)
-[![Telegram](https://img.shields.io/badge/📢_Telegram_Channel-2CA5E0?style=flat)](https://t.me/TheWeeklyBrief)
 
-## **«Эволюция BERT наконец здесь — быстрее, умнее, с поддержкой длинного контекста»**
+## **"BERT evolution is finally here — faster, smarter, with long-context support"**
 
-## 📌 Основные особенности
+## 📌 Key Features
 
-- 🚀 **В 2-4 раза быстрее**, чем DeBERTaV3
-- 📏 **Длина контекста до 8k токенов** (в 16 раз больше, чем у BERT)
-- 💻 **Понимание кода**
-- ⚡ **Эффективное использование памяти** (<1/5 от DeBERTa)
-- 🧩 **Гибридное внимание** (локальное + глобальное)
+- 🚀 **2-4 times faster** than DeBERTaV3
+- 📏 **Up to 8k token context length** (16 times longer than BERT)
+- 💻 **Code understanding**
+- ⚡ **Efficient memory usage** (<1/5 of DeBERTa)
+- 🧩 **Hybrid attention** (local + global)
 
-## 📊 Сравнение производительности
+## 📊 Performance Comparison
 
-| Метрика               | BERT | RoBERTa | DeBERTaV3 | ModernBERT |
+| Metric               | BERT | RoBERTa | DeBERTaV3 | ModernBERT |
 |----------------------|------|---------|-----------|------------|
 | GLUE Score           | 78.3 | 88.5    | 91.2      | **92.1**   |
-| Скорость вывода (токен/с)| 1420 | 1630    | 980       | **2400**   |
-| Использование памяти (ГБ)| 1.2  | 1.5     | 5.8       | **1.1**    |
-| Длина контекста       | 512  | 512     | 512       | **8192**   |
+| Inference Speed (tokens/s)| 1420 | 1630    | 980       | **2400**   |
+| Memory Usage (GB)    | 1.2  | 1.5     | 5.8       | **1.1**    |
+| Context Length       | 512  | 512     | 512       | **8192**   |
 
-## 🧠 Инновации в архитектуре
+## 🧠 Architectural Innovations
 
-1. **Rotary Position Embedding (RoPE)**  
-   Обеспечивает лучшее понимание позиций для длинных контекстов.
+1. **Rotary Positional Embedding (RoPE)**  
+   Provides better positional understanding for long contexts.
 
 2. **GeGLU Activation**  
-   Улучшает нелинейные возможности модели.
+   Enhances the model's non-linear capabilities.
 
-3. **Гибридный механизм внимания**  
-   Чередование слоев глобального и локального внимания.
+3. **Hybrid Attention Mechanism**  
+   Alternating layers of global and local attention.
 
-4. **Обучение без заполнения**  
-   Упаковка последовательностей для повышения эффективности на 20%.
+4. **Fill-Free Training**  
+   Sequence packing for 20% higher efficiency.
 
-## 🌟 Основные применения
+## 🌟 Primary Applications
 
-- 🔍 **RAG-системы с длинным контекстом**
-- 💻 **Поиск и анализ кода**
-- 📰 **Понимание документов**
-- 📊 **Семантический поиск**
+- 🔍 **Long-context RAG systems**
+- 💻 **Code search and analysis**
+- 📰 **Document understanding**
+- 📊 **Semantic search**
 
-## 📜 Цитирование
+## 📜 Citation
 
 ```bibtex
 @misc{modernbert,
@@ -61,4 +59,10 @@
 
 ---
 
-<p align="center">⚡ Преобразите ваш NLP-пайплайн с ModernBERT уже сегодня!</p>
+<div align="center">
+
+**Explore with us 🚀**
+
+⭐ Star this repository if you found it helpful
+
+</div>
