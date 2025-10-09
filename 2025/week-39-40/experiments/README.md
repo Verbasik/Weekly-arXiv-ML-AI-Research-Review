@@ -4,8 +4,8 @@
 
 [![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-red.svg)](https://pytorch.org/)
-[![Tests](https://img.shields.io/badge/Tests-103%20passing-success.svg)]()
-[![Progress](https://img.shields.io/badge/Progress-90%25-brightgreen.svg)]()
+[![Tests](https://img.shields.io/badge/Tests-110%20passing-success.svg)]()
+[![Progress](https://img.shields.io/badge/Progress-92%25-brightgreen.svg)]()
 
 ---
 
@@ -16,10 +16,11 @@
 ### Ключевые особенности:
 
 - ✅ **Полная реализация с нуля** - все компоненты написаны вручную
-- ✅ **Детально протестировано** - 103 unit тестов (все проходят)
+- ✅ **Детально протестировано** - 110 unit тестов (все проходят)
 - ✅ **Подробная документация** - каждый компонент с примерами
 - ✅ **Учебная направленность** - TODO-шаблоны и вопросы для размышления
 - ✅ **DDD архитектура** - чистая организация кода
+- ✅ **Text-to-text интерфейс** - метод chat() с GPT-2 tokenizer
 - ✅ **Готова к обучению** - полная модель Qwen3MoEModel с генерацией текста
 
 ---
@@ -158,16 +159,34 @@ config = Qwen3Config(
     top_k=2
 )
 
-# Инициализация модели
+# Инициализация модели (GPT-2 tokenizer загружается автоматически)
 model = Qwen3MoEModel(config)
 
-# Forward pass (обучение)
+# ============================================
+# 1. Text-to-Text интерфейс (РЕКОМЕНДУЕТСЯ)
+# ============================================
+response = model.chat(
+    "Once upon a time",
+    max_length=50,
+    temperature=0.8,
+    top_k=40,
+    top_p=0.9,
+    do_sample=True
+)
+print(response)
+# Output: "Once upon a time there was a..."
+
+# ============================================
+# 2. Forward pass (для обучения)
+# ============================================
 input_ids = torch.randint(0, config.vocab_size, (2, 10))
 logits, balance_loss = model(input_ids)
 # logits: (batch=2, seq=10, vocab=50257)
 # balance_loss: scalar (для добавления к CE loss)
 
-# Генерация текста
+# ============================================
+# 3. Генерация с token IDs
+# ============================================
 generated_ids = model.generate(
     input_ids=torch.tensor([[1, 2, 3]]),  # prompt
     max_length=50,
@@ -263,9 +282,9 @@ experiments/
 ### Статистика тестов
 
 ```
-Всего тестов: 103
-Успешно:      103 (100%)
-Покрытие:     Все компоненты включая полную модель
+Всего тестов: 110
+Успешно:      110 (100%)
+Покрытие:     Все компоненты включая полную модель и chat()
 
 Breakdown:
 ├── RMSNorm:             ✅ Все тесты
@@ -277,7 +296,8 @@ Breakdown:
 ├── Expert Network:      ✅ 15/15
 ├── SimpleMoELayer:      ✅ 14/14
 ├── MoE TransformerBlock: ✅ 17/17
-└── Qwen3MoEModel:       ✅ 19/19
+├── Qwen3MoEModel (core): ✅ 19/19
+└── Qwen3MoEModel (chat): ✅ 7/7
 ```
 
 ### Типы тестов
@@ -458,12 +478,13 @@ python3 experiments/domain/moe/test_integration.py
 
 ### Прогресс проекта
 ```
-Общий прогресс:    90%
-Строк кода:        ~5000+ (реализация)
-Строк тестов:      ~4000+
+Общий прогресс:    92%
+Строк кода:        ~5200+ (реализация)
+Строк тестов:      ~4200+
 Документация:      ~6400+ строк в .md файлах
 Комментарии:       Подробные в каждом файле
 Компоненты:        10/10 реализовано (100%)
+Улучшения:         1/2 (Tokenizer ✅, Оптимизация MoE ⏳)
 ```
 
 ### Производительность
@@ -471,8 +492,9 @@ python3 experiments/domain/moe/test_integration.py
 Размер модели:     0.6B параметров
 Активных параметров: ~0.15B (25% за счёт MoE)
 Память:            Оптимизировано через GQA (4x KV cache saving)
-Тесты:             103 теста проходят за <6 секунд
+Тесты:             110 тестов проходят за ~35 секунд
 Генерация:         Поддержка temperature/top-k/top-p sampling
+Text Interface:    chat() метод с GPT-2 tokenizer ✅
 ```
 
 ---

@@ -6,6 +6,7 @@ Qwen3 MoE Language Model
 import torch
 import torch.nn as nn
 from typing import Optional, Tuple
+from transformers import GPT2Tokenizer
 
 from .config import Qwen3Config
 from ..normalization.rmsnorm import RMSNorm
@@ -46,6 +47,7 @@ class Qwen3MoEModel(nn.Module):
         layers: nn.ModuleList из N MoE Transformer блоков
         norm: Final RMSNorm перед LM head
         lm_head: Language modeling head (hidden_size → vocab_size)
+        tokenizer: GPT2Tokenizer для encode/decode текста
 
     Examples:
     ---------
@@ -62,9 +64,13 @@ class Qwen3MoEModel(nn.Module):
         >>> print(generated.shape)  # (2, 50)
     """
 
-    def __init__(self, config: Qwen3Config):
+    def __init__(self, config: Qwen3Config, tokenizer: Optional[GPT2Tokenizer] = None):
         super().__init__()
-        self.config = config
+        # TODO: Инициализируйте все компоненты модели
+        # Вопрос: Какие основные блоки нужны для полной модели?
+        # Подсказка: Используйте config для параметров
+        
+        # TODO: Инициализация tokenizer (если None, загрузите GPT-2)
 
         # TODO: Преобразование token IDs → continuous vectors
         # Вопрос: Какой PyTorch слой создаёт lookup table размера (vocab_size, hidden_size)?
@@ -86,6 +92,17 @@ class Qwen3MoEModel(nn.Module):
         # - Почему все четыре компонента должны быть атрибутами класса (self.*)?
         # - Что произойдёт, если использовать Python list вместо nn.ModuleList?
         # - Почему размерность embedding должна совпадать с hidden_size блоков?
+
+        self.config = config
+
+        # Инициализация tokenizer для text ↔ token_ids
+        # Используем GPT-2 tokenizer (vocab_size=50257), совместимый с config
+        if tokenizer is None:
+            self.tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+            # Важно: добавляем pad_token, т.к. GPT-2 изначально его не имеет
+            self.tokenizer.pad_token = self.tokenizer.eos_token
+        else:
+            self.tokenizer = tokenizer
 
         # Token Embedding Layer: преобразование token IDs → continuous vectors
         # Создаёт таблицу размера (y = vocab_size, x = hidden_size)
@@ -125,7 +142,9 @@ class Qwen3MoEModel(nn.Module):
 
     def _init_weights(self):
         """
-        Инициализация весов модели.
+        Description:
+        ---------------
+            Инициализация весов модели.
 
         Стратегия:
         ----------
@@ -133,6 +152,13 @@ class Qwen3MoEModel(nn.Module):
         - Linear layers: уже инициализированы в sub-модулях
         - LM Head: normal distribution N(0, initializer_range)
         """
+        # TODO: Инициализируйте веса эмбеддингов и LM head
+
+        # Вопросы для размышления:
+        # - Почему инициализация важна для стабильного обучения?
+        # - Как влияет stddev на обучение?
+        # - Почему линейные слои не требуют дополнительной инициализации?
+
         # Embedding initialization
         nn.init.normal_(self.embed_tokens.weight, mean=0.0, std=self.config.initializer_range)
 
@@ -145,7 +171,9 @@ class Qwen3MoEModel(nn.Module):
         attention_mask: Optional[torch.Tensor] = None,
     ) -> Tuple[torch.Tensor, torch.Tensor]:
         """
-        Forward pass модели.
+        Description:
+        ---------------
+            Forward pass модели.
 
         Pipeline:
         ---------
@@ -232,7 +260,9 @@ class Qwen3MoEModel(nn.Module):
         do_sample: bool = True,
     ) -> torch.Tensor:
         """
-        Автогрессивная генерация текста.
+        Description:
+        ---------------
+            Автогрессивная генерация текста.
 
         Стратегия:
         ----------
@@ -397,28 +427,97 @@ class Qwen3MoEModel(nn.Module):
         return generated_ids
 
 
-    def chat(self, prompt: str, max_length: int = 100, **generation_kwargs) -> str:
+    def chat(
+        self,
+        prompt: str,
+        max_length: int = 100,
+        temperature: float = 1.0,
+        top_k: Optional[int] = None,
+        top_p: Optional[float] = None,
+        do_sample: bool = True,
+    ) -> str:
         """
-        Высокоуровневый интерфейс text-to-text.
+        Description:
+        ---------------
+            Высокоуровневый интерфейс text-to-text.
+
+        Pipeline:
+        ---------
+        1. Encode: prompt (str) → token_ids (tensor)
+        2. Generate: token_ids → generated_ids (автогрессивная генерация)
+        3. Decode: generated_ids → response (str)
 
         Args:
         -----
             prompt: Входной текст от пользователя
-            max_length: Максимальная длина ответа
-            **generation_kwargs: Параметры для generate() (temperature, top_k, top_p)
+            max_length: Максимальная длина сгенерированного текста (в токенах)
+            temperature: Температура для сэмплирования (по умолчанию 1.0)
+            top_k: Количество токенов для top-k фильтрации (опционально)
+            top_p: Порог для nucleus sampling (опционально)
+            do_sample: True = стохастическое сэмплирование, False = greedy decoding
 
         Returns:
         --------
-            response: Сгенерированный текст
+            response: Сгенерированный текст (включая исходный prompt)
 
         Examples:
         ---------
-            >>> response = model.chat("Привет! Как дела?", temperature=0.7)
+            >>> # Greedy decoding (детерминированный)
+            >>> response = model.chat("Once upon a time", do_sample=False)
             >>> print(response)
-            "Привет! Всё отлично, спасибо! Как у тебя дела?"
+            "Once upon a time there was a kingdom..."
+
+            >>> # Nucleus sampling (более креативный)
+            >>> response = model.chat("Hello world", temperature=0.8, top_p=0.9)
+            >>> print(response)
+            "Hello world! How are you doing today?"
+
+            >>> # Top-k sampling
+            >>> response = model.chat("The quick brown", temperature=1.0, top_k=40)
+            >>> print(response)
+            "The quick brown fox jumps over the lazy dog"
         """
-        # NOTE: Этот метод будет реализован на последнем этапе
-        # Требует интеграции с tokenizer
-        raise NotImplementedError(
-            "Метод chat() будет реализован после завершения generate() и интеграции tokenizer."
+        # TODO: Реализуйте три шага: Encode → Generate → Decode
+        # TODO: Используйте self.tokenizer для encode/decode
+        # TODO: Используйте self.generate() для генерации
+        # TODO: Верните сгенерированный текст
+
+        # Вопросы для размышления:
+        # - Почему важно использовать тот же tokenizer, что и при обучении?
+        # - Как обработать специальные токены (BOS/EOS/PAD) при encode/decode?
+        # - Как гарантировать, что сгенерированный текст не превышает max_length?
+
+
+        # Шаг 1: Encode - преобразование текста в token IDs
+        # return_tensors="pt" возвращает PyTorch тензоры
+        # add_special_tokens=True добавляет специальные токены (BOS/EOS если есть)
+        input_ids = self.tokenizer.encode(
+            prompt,
+            return_tensors="pt",
+            add_special_tokens=True
         )
+
+        # Перемещаем на то же устройство, где находится модель
+        # Проверяем device через параметры модели (например, embed_tokens.weight)
+        device = next(self.parameters()).device
+        input_ids = input_ids.to(device)
+
+        # Шаг 2: Generate - автогрессивная генерация через self.generate()
+        generated_ids = self.generate(
+            input_ids=input_ids,
+            max_length=max_length,
+            temperature=temperature,
+            top_k=top_k,
+            top_p=top_p,
+            do_sample=do_sample
+        )
+
+        # Шаг 3: Decode - преобразование token IDs обратно в текст
+        # skip_special_tokens=True удаляет специальные токены (BOS/EOS/PAD)
+        # Берём первую (и единственную) последовательность из batch: generated_ids[0]
+        response = self.tokenizer.decode(
+            generated_ids[0],
+            skip_special_tokens=True
+        )
+
+        return response

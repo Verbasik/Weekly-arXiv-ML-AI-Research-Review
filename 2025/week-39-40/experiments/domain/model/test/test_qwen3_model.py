@@ -28,10 +28,33 @@ def small_config():
 
 
 @pytest.fixture
+def gpt2_config():
+    """Конфигурация совместимая с GPT-2 tokenizer для chat() тестов."""
+    return Qwen3Config(
+        vocab_size=50257,  # GPT-2 vocab size
+        hidden_size=128,
+        num_layers=2,
+        intermediate_size=256,
+        num_attention_heads=4,
+        num_key_value_heads=2,
+        num_experts=4,
+        top_k=2,
+        max_position_embeddings=128,
+    )
+
+
+@pytest.fixture
 def model(small_config):
     """Модель для тестирования."""
     torch.manual_seed(42)
     return Qwen3MoEModel(small_config)
+
+
+@pytest.fixture
+def chat_model(gpt2_config):
+    """Модель с GPT-2 tokenizer для chat() тестов."""
+    torch.manual_seed(42)
+    return Qwen3MoEModel(gpt2_config)
 
 
 # ================================
@@ -251,3 +274,67 @@ class TestEdgeCases:
         logits, balance_loss = model(input_ids)
 
         assert logits.shape == (1, 10, small_config.vocab_size)
+
+
+# ================================
+# Chat Interface Tests
+# ================================
+
+
+class TestChatInterface:
+    """Тесты текстового интерфейса chat()."""
+
+    def test_chat_returns_string(self, chat_model):
+        """Тест: chat() возвращает строку."""
+        chat_model.eval()
+        response = chat_model.chat("Hello", max_length=20, do_sample=False)
+        assert isinstance(response, str)
+        assert len(response) > 0
+
+    def test_chat_includes_prompt(self, chat_model):
+        """Тест: сгенерированный текст включает исходный prompt."""
+        chat_model.eval()
+        prompt = "Once upon a time"
+        response = chat_model.chat(prompt, max_length=30, do_sample=False)
+        # Ответ должен начинаться с prompt
+        assert response.startswith(prompt) or prompt in response
+
+    def test_chat_greedy_deterministic(self, chat_model):
+        """Тест: greedy decoding детерминистичен."""
+        chat_model.eval()
+        torch.manual_seed(42)
+        response1 = chat_model.chat("Test", max_length=15, do_sample=False)
+
+        torch.manual_seed(42)
+        response2 = chat_model.chat("Test", max_length=15, do_sample=False)
+
+        assert response1 == response2
+
+    def test_chat_with_temperature(self, chat_model):
+        """Тест: chat() работает с параметром temperature."""
+        chat_model.eval()
+        # Не должно выбрасывать исключение
+        response = chat_model.chat("Hello", max_length=20, temperature=0.7, do_sample=True)
+        assert isinstance(response, str)
+
+    def test_chat_with_top_k(self, chat_model):
+        """Тест: chat() работает с top-k sampling."""
+        chat_model.eval()
+        response = chat_model.chat("Hello", max_length=20, top_k=10, do_sample=True)
+        assert isinstance(response, str)
+
+    def test_chat_with_top_p(self, chat_model):
+        """Тест: chat() работает с nucleus sampling."""
+        chat_model.eval()
+        response = chat_model.chat("Hello", max_length=20, top_p=0.9, do_sample=True)
+        assert isinstance(response, str)
+
+    def test_chat_tokenizer_encode_decode(self, chat_model):
+        """Тест: tokenizer корректно encode/decode."""
+        text = "Hello world"
+        # Encode
+        token_ids = chat_model.tokenizer.encode(text, return_tensors="pt")
+        # Decode
+        decoded = chat_model.tokenizer.decode(token_ids[0], skip_special_tokens=True)
+        # Должно быть идентично (возможно с небольшими пробелами)
+        assert text.strip() in decoded or decoded in text
