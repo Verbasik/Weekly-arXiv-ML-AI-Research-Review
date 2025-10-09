@@ -206,9 +206,11 @@ class TestDeterminism:
         """Тест: одинаковый input → одинаковый output."""
         torch.manual_seed(42)
         model1 = Qwen3MoEModel(small_config)
+        model1.eval()
 
         torch.manual_seed(42)
         model2 = Qwen3MoEModel(small_config)
+        model2.eval()
 
         input_ids = torch.randint(0, small_config.vocab_size, (2, 10))
 

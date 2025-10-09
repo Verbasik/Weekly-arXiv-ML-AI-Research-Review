@@ -87,19 +87,41 @@ class Qwen3MoEModel(nn.Module):
         # - Что произойдёт, если использовать Python list вместо nn.ModuleList?
         # - Почему размерность embedding должна совпадать с hidden_size блоков?
 
-        # Инициализация весов
-        self._init_weights()
-
         # Token Embedding Layer: преобразование token IDs → continuous vectors
-        # Создаёт lookup table размера (vocab_size, hidden_size)
-        self.embed_tokens = nn.Embedding(config.vocab_size, config.hidden_size)
+        # Создаёт таблицу размера (y = vocab_size, x = hidden_size)
+        self.embed_tokens = nn.Embedding(
+            num_embeddings = config.vocab_size, 
+            embedding_dim  = config.hidden_size
+            )
 
         # Стек из N transformer блоков
         # Каждый блок содержит: RMSNorm → GQA → RMSNorm → SimpleMoELayer
         self.layers = nn.ModuleList([
-            MoETransformerBlock(config) for _ in range(config.num_layers)
+            MoETransformerBlock(
+                hidden_size=config.hidden_size,
+                num_query_groups=config.num_key_value_heads,
+                num_attention_heads=config.num_attention_heads,
+                num_experts=config.num_experts,
+                top_k=config.top_k,
+                intermediate_size=config.intermediate_size,
+                expert_dropout = config.dropout,
+                balance_loss_coef=config.balance_loss_coef
+            ) for _ in range(config.num_layers)
         ])
 
+        # Финальная нормализация скрытых состояний
+        self.norm = RMSNorm(normalized_shape = self.config.hidden_size)
+
+        # Проекция hidden_size → vocab_size для предсказания токенов
+        # y = x Aᵀ (без bias для LM head)
+        self.lm_head = nn.Linear(
+            in_features  = self.config.hidden_size,
+            out_features = self.config.vocab_size,
+            bias         = False
+        )
+
+        # Инициализация весов
+        self._init_weights()
 
     def _init_weights(self):
         """
@@ -161,7 +183,7 @@ class Qwen3MoEModel(nn.Module):
             >>> print(f"Logits: {logits.shape}, Loss: {loss.item():.4f}")
             Logits: torch.Size([4, 32, 50257]), Loss: 0.0234
         """
-        # TODO: Преобразуйте input_ids → embeddings через self.embed_tokens
+        # TODO: Преобразуйте input_ids → embeddings через эмбендинг слой
         # TODO: Инициализируйте total_balance_loss нулевым тензором на device embeddings
         # TODO: Пройдите циклом по self.layers, накапливая balance_loss
         # TODO: Примените финальную нормализацию self.norm
@@ -172,7 +194,33 @@ class Qwen3MoEModel(nn.Module):
         # - Почему важно указать device при создании total_balance_loss?
         # - Что возвращает каждый MoE блок?
         # - Чем logits отличаются от вероятностей?
-        pass
+        # pass
+
+        # Преобразование token IDs в embeddings через lookup table
+        embeddings = self.embed_tokens(input_ids)
+        
+        # Инициализация тензора для накопления balance loss из всех MoE блоков
+        # Важно: используем device от embeddings для совместимости с GPU/CPU
+        total_balance_loss = torch.tensor(
+            data=0.0,
+            device=embeddings.device
+        )
+        
+        # Проход через все transformer блоки с накоплением balance loss
+        # Каждый layer - это экземпляр MoETransformerBlock, который возвращает:
+        # 1. Обработанные embeddings (RMSNorm → GQA → RMSNorm → SimpleMoELayer)
+        # 2. Balance loss для load balancing экспертов
+        for layer in self.layers:
+            embeddings, balance_loss = layer(embeddings, attention_mask)
+            total_balance_loss += balance_loss
+
+        # Финальная нормализация скрытых состояний перед LM head
+        final_norm = self.norm(embeddings)
+        
+        # Проекция в пространство словаря для предсказания следующего токена
+        logits = self.lm_head(final_norm)
+
+        return logits, total_balance_loss
 
     def generate(
         self,
@@ -220,12 +268,134 @@ class Qwen3MoEModel(nn.Module):
             >>> # Top-k sampling
             >>> output = model.generate(input_ids, temperature=1.0, top_k=50)
         """
-        # NOTE: Этот метод будет реализован на следующем этапе
-        # После того, как forward() заработает и пройдут тесты
-        raise NotImplementedError(
-            "Метод generate() будет реализован после завершения forward(). "
-            "Текущий приоритет: базовая модель и тесты."
-        )
+        # TODO: Инициализация переменных для генерации
+        # - Скопировать input_ids для безопасного изменения
+        # - Инициализировать key-value cache (если используется)
+        # - Вычислить начальную длину последовательности
+        # - Подготовить attention mask для начальной последовательности
+        
+        # TODO: Основной цикл автогрессивной генерации
+        # - while current_length < max_length:
+        #   a. Forward pass: получить logits для последнего токена
+        #   b. Извлечь logits только для последней позиции (shape: [batch, vocab_size])
+        #   c. Применить temperature scaling: logits = logits / temperature
+        #   d. Применить top-k фильтрацию (если задан top_k)
+        #   e. Применить top-p (nucleus) фильтрацию (если задан top_p)
+        #   f. Вычислить вероятности через softmax
+        #   g. Сэмплировать следующий токен (greedy или sampling)
+        #   h. Добавить токен к последовательности
+        #   i. Обновить attention mask для новой длины
+        #   j. Обновить key-value cache (если используется)
+        
+        # TODO: Обработка критериев остановки
+        # - Проверить специальные токены окончания (если есть)
+        # - Обрезать до максимальной длины
+        # - Вернуть финальную последовательность
+        
+        # TODO: Вопросы для размышления:
+        # - Как эффективно обновлять attention mask при росте последовательности?
+        # - Какой формат должен иметь key-value cache для MoE блоков?
+        # - Как обрабатывать batch с разными длинами последовательностей?
+        # - Как оптимизировать memory usage для длинных последовательностей?
+        
+        # pass
+
+        # Инициализация переменных для генерации
+        generated_ids  = input_ids.clone()
+        current_length = input_ids.shape[1]
+        # Создаем тензор такой же размерности как input_ids, но заполненный единицами
+        attention_mask = torch.ones_like(input_ids)
+
+        while current_length < max_length:
+            # a. Forward pass: получить logits для всей последовательности
+            logits, _ = self.forward(generated_ids, attention_mask)
+
+            # b. Извлечь logits только для последней позиции (shape: [batch, vocab_size])
+            logits = logits[:, -1, :]
+
+            # c. Применить temperature scaling
+            # -------------------------------------------------------------
+            # Это стандартная формула в LLM!
+            # Математика: temperature "сжимает" или "растягивает" logits
+
+            # Temperature > 1: "разогревает" распределение
+            # - Более равномерные вероятности
+            # - Больше случайности в генерации
+
+            # Temperature < 1: "охлаждает" распределение
+            # - Более острые пики вероятностей
+            # - Более детерминированная генерация
+
+            # Temperature = 1: без изменений (стандартный softmax)
+            probabilities = torch.softmax(logits / temperature, dim=-1)
+            # -------------------------------------------------------------
+
+            # d. Применить top-k фильтрацию (если задан)
+            # e. Применить top-p фильтрацию (если задан)
+            # -------------------------------------------------------------
+            # TOP-K алгоритм:
+            # 1. Найти k самых вероятных токенов
+            # 2. Обнулить ВСЕ остальные вероятности
+            # 3. Оставить только top-k токенов
+
+            # TOP-P (nucleus) алгоритм:
+            # 1. Отсортировать токены по убыванию вероятности
+            # 2. Накапливать вероятности до достижения порога p
+            # 3. Обнулить все токены после этого порога
+
+            # Пример:
+            # probabilities = [0.4, 0.3, 0.2, 0.1]
+            # top_k=2:   [0.4, 0.3, 0.0, 0.0]  # только 2 лучших
+            # top_p=0.6: [0.4, 0.3, 0.0, 0.0]  # накопили до 0.7 > 0.6
+            if top_k is not None:
+                top_k_values, top_k_indices = torch.topk(probabilities, top_k)
+                probabilities_filtered = torch.zeros_like(probabilities)
+                probabilities_filtered.scatter_(dim=-1, index=top_k_indices, src=top_k_values)
+                probabilities = probabilities_filtered
+
+            if top_p is not None:
+                # Сортируем вероятности по убыванию
+                sorted_probs, sorted_indices = torch.sort(probabilities, descending=True, dim=-1)
+                # Вычисляем накопленную сумму
+                cumulative_probs = torch.cumsum(sorted_probs, dim=-1)
+                # Находим токены, которые нужно удалить (cumsum > top_p)
+                # Сдвигаем на 1 вправо, чтобы сохранить хотя бы первый токен
+                sorted_indices_to_remove = cumulative_probs > top_p
+                sorted_indices_to_remove[..., 1:] = sorted_indices_to_remove[..., :-1].clone()
+                sorted_indices_to_remove[..., 0] = False
+                # Обнуляем вероятности для удаляемых токенов
+                sorted_probs[sorted_indices_to_remove] = 0.0
+                # Возвращаем вероятности в исходный порядок
+                probabilities = torch.zeros_like(probabilities)
+                probabilities.scatter_(dim=-1, index=sorted_indices, src=sorted_probs)
+            # -------------------------------------------------------------
+
+            # Ре-нормализуем вероятности после фильтрации
+            probabilities = probabilities / probabilities.sum(dim=-1, keepdim=True)
+
+            # g. Сэмплировать следующий токен (greedy или sampling)
+            if do_sample:
+                # Стохастическое сэмплирование из распределения
+                next_token = torch.multinomial(probabilities, num_samples=1)
+            else:
+                # Greedy decoding: выбираем токен с максимальной вероятностью
+                next_token = torch.argmax(probabilities, dim=-1, keepdim=True)
+
+            # h. Добавить токен к последовательности
+            generated_ids = torch.cat([generated_ids, next_token], dim=-1)
+
+            # i. Обновить attention mask для новой длины
+            attention_mask = torch.cat(
+                [attention_mask, torch.ones_like(next_token)],
+                dim=-1
+            )
+
+            # j. Обновить длину последовательности
+            current_length += 1
+
+        # Обработка критериев остановки и возврат результата
+        return generated_ids
+
 
     def chat(self, prompt: str, max_length: int = 100, **generation_kwargs) -> str:
         """
