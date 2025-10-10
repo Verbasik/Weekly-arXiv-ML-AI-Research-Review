@@ -1,145 +1,134 @@
 # **Mamba 2 + Transformer = Nemotron H**
 
----
+## **Introduction**
 
-### **TWRB_FM 📻**
+Transformers today are the gold standard of neural networks, especially large language models. They became the first truly scalable architecture, meaning that for the first time, it became possible to reliably improve model performance by increasing the amount of data and parameters without hitting hardware performance or neural network memory ceilings.
 
-<audio controls>
-  <source src="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/raw/refs/heads/develop/2025/week-17_&_18/TWRB_FM.wav" type="audio/mpeg">
-  Ваш браузер не поддерживает аудиоэлемент.
-</audio>
+It was the transformer that transformed the artificial intelligence industry into the powerful force we see today. Before 2017, when researchers at Google Brain invented this architecture, the cornerstone of the AI industry was finding the right model structure. Now, scientists face entirely different challenges, and companies and researchers barely think about architecture anymore—because the transformer exists!
 
----
+This is how renowned Andrej Karpathy, former ML director at Tesla and co-founder and former chief scientist at OpenAI, describes this architecture: "The transformer is not just another method—it’s an approach that completely changed our view of AI. We were incredibly lucky to stumble upon it in the vast space of algorithms. I believe the transformer is superior to the human brain in many ways."
 
-## **Введение**
+However, despite all its strengths, the transformer has its shortcomings. Therefore, some research groups continue searching for a better algorithm that could surpass the transformer or at least match its performance. In this article, we will explore why this task is so non-trivial and what exactly in the transformer still leaves room for improvement.
 
-Трансформеры сегодня – золотой стандарт нейросетей, и, особенно, больших языковых моделей. Они стали первой по-настоящему масштабируемой архитектурой, то есть с ними впервые стало возможно гарантировано наращивать перформанс моделей за счет увеличения количества данных и параметров, не упираясь в потолок производительности железа или запоминающей способности нейросети. 
+## **Why Transformers Are So Hard to Replace**
 
-Именно трансформер изменил индустрию искусственного интеллекта и сделал ее такой мощной, какой мы видим ее сейчас. До 2017 года, пока исследователи из Google Brain не изобрели эту архитектуру, краеугольным камнем ИИ-индустрии был поиск подходящего строения модели. Теперь же перед учеными стоят, в основном, другие задачи, а вот об архитектуре компании и ресерчеры почти не думают: ведь есть трансформер! 
+To understand this, let’s dive deeper into this architecture. What exactly is a transformer?
 
-Вот так говорит об этой архитектуре знаменитый Андрей Карпаты – бывший ML-директор Tesla, сооснователь и бывший главный ученый OpenAI: "Трансформер - не просто очередной метод, а подход, который полностью изменил наш взгляд на ИИ. Нам очень повезло, что мы наткнулись именно на него в огромном пространстве алгоритмов. Я верю, что трансформер лучше человеческого мозга во многих отношениях."
+The transformer’s origins lie in the now-iconic paper "Attention Is All You Need," published in 2017 by eight researchers from Google. Notably, all eight authors are listed as equal contributors—an unusual rarity in scientific papers. Interestingly, none of these eight researchers now work at Google. Almost all of them became founders of well-known AI startups, including Cohere, Character.ai, Adept, Inceptive, Essential AI, and Sakana AI.
 
-Однако, несмотря на все свои достоинства, у трансформера есть и недостатки. Поэтому некоторые группы исследователей продолжают искать лучший алгоритм, который мог бы превзойти трансформер или хотя бы достичь его уровня. В этой статье мы разберемся, почему эта задача так нетривиальна, что именно в трансформере оставляет желать лучшего.
+Historically, before transformers, the dominant LLM architecture was recurrent neural networks (RNNs). RNNs, along with their advanced variants like LSTM and GRU, processed information sequentially, like a person reading left to right. Yet, this algorithm is a significant simplification of human reading. At the core of these architectures is a hidden state that is recursively updated at each step (hence the name). However, as we know, relationships between words can be more complex: they don't always manifest sequentially. Therefore, processing words (or rather, tokens) strictly one after another causes us to lose the ability to capture relationships between words that are not adjacent. The model may simply "forget" something important before it gets the chance to recognize its relevance to later text.
 
-## **Почему трансформеры так сложно заменить**
-
-Чтобы разобраться в этом вопросе, давайте нырнем в эту архитектуру глубже. Что вообще представляет из себя трансформер? 
-
-Начало трансформерам положила ставшая культовой статья "Attention Is All You Need", выпущенная в 2017 году восемью исследователями Google. При этом все восемь авторов указаны как равноправные участники: это редкость для научных статей. Кстати, ныне никто из этой восьмерки больше не работает в Google. Почти все они стали основателями известных ИИ-стартапов, таких как Cohere, Character.ai, Adept, Inceptive, Essential AI и Sakana AI.
-
-Исторически, до трансформеров главной LLM-архитектурой были рекурретные нейросети (RNN). RNN, а также их продвинутые аналоги LSTM и GRU, обрабатывали информацию последовательно, как человек, который читает слева направо. Тем не менее, относительно манеры человеческого чтения этот алгоритм сильно упрощен. Дело в том, что в основе этих архитектур – скрытое состояние, которое на каждом шаге рекуррентно (отсюда и название механизма) обновляется. Однако, как мы понимаем, связи между словами могут быть и более сложными: например, проявляться не только последовательно. Поэтому обрабатывая слова (а точнее токены) строго один за одним, мы теряем возможность улавливать связи между словами, стоящими не рядом. Ведь модель может просто-напросто успеть "забыть" что-то важное, прежде чем ей выпадет шанс понять, что для дальнейшего текста это было важно. 
-
-Поэтому следующей значимой вехой в развитии NLP стал механизм внимания. Традиционно считается, что его изобрел в 2014 году один из отцов глубокого обучения Йошуа Бенджио. Суть механизма заключается в том, что мы "взвешиваем" релевантность всех токенов последовательности относительно друг друга: каждый с каждым. На практике это реализуется как перемножение трех тензоров: Query, Key и Value. Каждая из этих матриц получается в результате умножения входных эмбеддингов X на некоторые обучаемые веса W. Воспринимать Query, Key и Value можно как составляющие, необходимые для "умного поиска" по последовательности: запросы, ключи и значения. При последовательном перемножении этих матриц (как показано на картинке ниже) мы и получаем тот самый attention, который показывает значимость связей между словами. Таким образом, с помощью внимания мы можем учитывать связи между словами в отрывке независимо от того, насколько далеко они находятся друг от друга.
+Thus, the next major milestone in NLP development was the attention mechanism. Traditionally, it is believed that this mechanism was invented in 2014 by one of the fathers of deep learning, Yoshua Bengio. The essence of the mechanism lies in "weighting" the relevance of all tokens in a sequence relative to each other: each token with every other. In practice, this is implemented as the multiplication of three tensors: Query, Key, and Value. Each of these matrices is obtained by multiplying the input embeddings X by learnable weights W. Query, Key, and Value can be thought of as components necessary for "intelligent search" across the sequence: queries, keys, and values. Through sequential multiplication of these matrices (as shown in the image below), we obtain the attention mechanism, which reveals the significance of relationships between words. Thus, with attention, we can account for relationships between words in a passage regardless of how far apart they are.
 
 ![Figure_03](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_03.png)
 
-Однако появление механизма внимание самого по себе не произвело революцию в искусственном интеллекте. До статьи о трансформере исследователи использовали attention только как дополнение к архитектуре RNN. Достижение команды Google состояло именно в том, что они изобрели архитектуру, в которой абсолютно отказались от концепции RNN и полностью положились на механизм внимания. Отсюда и название статьи: "Attention Is All You Need" (конечно, и без отсылки к известной песне The Beatles не обошлось). Кстати, устоявшиеся термины Query, Key и Value тоже были введены в этом исследовании. Так родился трансформер, фундаментальным новшеством которого стала возможность обрабатывать последовательности параллельно, а не последовательно. Это дает модели способность не только глобально понимать тексты, которые она читает и пишет, но и эффективно обучаться и масштабироваться. Трансформер может "съесть" тонны информации и разрастаться до огромного количества параметров. При этом его перформанс не выходит на плато, а продолжает расти. Это – еще одна важная отличительная черта этой архитектуры.
+However, the mere appearance of the attention mechanism did not revolutionize artificial intelligence. Before the transformer paper, researchers used attention only as an addition to RNN architectures. The breakthrough achieved by Google’s team was precisely that they invented an architecture that completely abandoned the RNN concept and relied entirely on the attention mechanism. Hence the paper’s title: "Attention Is All You Need" (of course, without a nod to the famous Beatles song, it wouldn’t have been complete). Incidentally, the established terms Query, Key, and Value were also introduced in this research. Thus, the transformer was born, whose fundamental innovation was the ability to process sequences in parallel rather than sequentially. This gives the model the capacity not only to globally understand the texts it reads and writes but also to train and scale efficiently. The transformer can "digest" massive amounts of information and grow to enormous parameter counts. Meanwhile, its performance does not plateau—it continues to improve. This is another crucial distinguishing feature of this architecture.
 
 ![Figure_04](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_04.webp)
 
-На сегодняшний день трансформеры уже окончательно захватили ИИ-индустрию и ресерч. Все популярные сегодня чатботы — ChatGPT от OpenAI, Gemini от Google, Claude от Anthropic, Grok от xAI — основаны на трансформере. То же самое касается и инструментов для генерации изображений: Midjourney, Stable Diffusion, Runway и так далее. Такие сети построены на основе моделей диффузии, которые внутри себя, в свою очередь, используют трансформеры. Кроме того, архитектуру применяют в моделях предсказания структур молекул, робототехнике и беспилотных автомобилях. Соавтор статьи про трансформер, Ашиш Васвани, удачно высказался про эту модель так: "Трансформер — это способ очень быстро одновременно зафиксировать все связи между различными частями любого ввода. Это могут быть части предложения, ноты, пиксели или молекулы белка. Он подходит для любой задачи." Однако, трансформеры не лишены некоторых недостатков. Сегодня мы разберём архитектуру под названием Mamba, которая претендует на то, чтобы стать соперником трансформеров и решить их уязвимости, а так же рассмотрим семейство моделей Nemotron-H от Nvidia, которые представляют собой гибридную архитектуру, сочетающую в себе сильные стороны Transformer с эффективностью слоев Mamba.
+Today, transformers have fully captured the AI industry and research. All popular chatbots today—ChatGPT from OpenAI, Gemini from Google, Claude from Anthropic, Grok from xAI—are based on transformers. The same applies to image generation tools: Midjourney, Stable Diffusion, Runway, and others. These networks are built on diffusion models, which internally, in turn, use transformers. Additionally, the architecture is applied in molecular structure prediction models, robotics, and self-driving cars. Co-author of the transformer paper, Ashish Vaswani, aptly described this model: "The transformer is a way to very quickly simultaneously capture all relationships between different parts of any input. These can be parts of a sentence, musical notes, pixels, or protein molecules. It’s suitable for any task." However, transformers are not without drawbacks. Today we will examine the Mamba architecture, which aspires to become a competitor to transformers and address their vulnerabilities, as well as the Nemotron-H family of models from NVIDIA, which represent a hybrid architecture combining the strengths of the transformer with the efficiency of Mamba layers.
 
-Разработанные NVIDIA модели Nemotron-H стратегически заменяют большую часть слоев самовнимания в Transformer слоями Mamba, которые основаны на моделях пространства состояний (SSM). В отличие от самовнимания, вычислительная и объемная сложность которого масштабируются квадратично с длиной последовательности, слои Mamba предлагают постоянную вычислительную и объемную сложность на токен, что делает их особенно эффективными для генерации длинных последовательностей.
+NVIDIA’s Nemotron-H models strategically replace the majority of self-attention layers in transformers with Mamba layers, which are based on State Space Models (SSM). Unlike self-attention, whose computational and memory complexity scales quadratically with sequence length, Mamba layers offer constant computational and memory complexity per token, making them especially efficient for generating long sequences.
 
 ![Figure_01](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_01.jpeg)
 
-*Сравнение пропускной способности и точностиРисунок 1: Сравнение моделей Nemotron-H с другими современными LLM с точки зрения пропускной способности (токенов/с/GPU) и точности на эталонном тесте MMLU. Nemotron-H-56B предлагает в 2,4 раза более высокую пропускную способность, чем Llama-3.1-70B, при более высоких уровнях точности.*
+*Comparison of Throughput and Accuracy  
+Figure 1: Comparison of Nemotron-H models against other modern LLMs in terms of throughput (tokens/s/GPU) and accuracy on the MMLU benchmark. Nemotron-H-56B offers 2.4x higher throughput than Llama-3.1-70B while achieving higher accuracy levels.*
 
-Ключевое новшество Nemotron-H заключается в тщательном балансировании этих двух архитектурных парадигм для поддержания или улучшения точности при значительном увеличении скорости логического вывода. Этот подход отвечает критической потребности в сообществе LLM в моделях, которые могут эффективно обрабатывать длинные контексты без ущерба для производительности.
+The key innovation of Nemotron-H lies in carefully balancing these two architectural paradigms to maintain or improve accuracy while significantly increasing inference speed. This approach addresses the critical community need for LLMs capable of efficiently handling long contexts without sacrificing performance.
 
-## **Обзор архитектуры Mamba**
+## **Mamba Architecture Overview**
 
-Mamba — это инновационная архитектура, основанная на структурированных моделях последовательностей в пространстве состояний (SSM). Она разработана для эффективного выявления сложных зависимостей в данных последовательностей и позиционируется как серьезный конкурент Transformer. Архитектура сочетает в себе преимущества рекуррентных нейронных сетей (RNN) и сверточных нейронных сетей (CNN), достигая линейного или почти линейного масштабирования вычислительных затрат относительно длины последовательности.
+Mamba is an innovative architecture based on Structured State Space Models (SSM). It was designed for efficient identification of complex dependencies in sequential data and is positioned as a serious transformer competitor. The architecture combines advantages of recurrent neural networks (RNNs) and convolutional neural networks (CNNs), achieving linear or nearly linear computational scaling with respect to sequence length.
 
-### **Основные преимущества Mamba**
+### **Key Advantages of Mamba**
 
-1. **Механизм выбора**  
-   - Введен простой и эффективный механизм фильтрации нерелевантной информации.  
-   - Позволяет сохранять необходимые данные за счет параметризованных параметров SSM.
+1. **Selective Mechanism**  
+   - A simple and efficient mechanism for filtering out irrelevant information has been introduced.  
+   - Allows retention of necessary data through parameterized SSM parameters.
 
-2. **Аппаратно-ориентированный алгоритм**  
-   - Использует рекурсивное сканирование вместо традиционных сверточных вычислений.  
-   - Оптимизирован для графических процессоров, обеспечивая ускорение до 3 раз на GPU A100.
+2. **Hardware-Oriented Algorithm**  
+   - Uses recursive scanning instead of traditional convolutional computations.  
+   - Optimized for GPUs, delivering up to 3x speedup on A100 GPUs.
 
-3. **Возможности моделирования**  
-   - Сохраняет производительность, сопоставимую с Transformer.  
-   - Характеризуется почти линейной масштабируемостью, что делает её пригодной для работы с длинными и сложными последовательностями данных.
+3. **Modeling Capabilities**  
+   - Maintains performance comparable to transformers.  
+   - Exhibits nearly linear scalability, making it suitable for handling long and complex data sequences.
 
-### **Применение Mamba**
+### **Applications of Mamba**
 
-Mamba демонстрирует выдающуюся производительность в различных областях:  
-- **Компьютерное зрение**:  
-  Модель Vim, основанная на Mamba, в 2,8 раза быстрее DeiT при извлечении признаков изображений с высоким разрешением и экономит 86,8% памяти GPU.  
-- **Обработка естественного языка (NLP)**:  
-  Улучшенная селективная архитектура SSM обеспечивает ускорение в 2–8 раз.
-- **Кодогенерация (Text-to-Code)**:  
-  Mistral сделали на основе SSM модель Codestral, которая на метриках разбила почти все другие открытые модели.
+Mamba demonstrates outstanding performance across various domains:  
+- **Computer Vision**:  
+  The Vim model, based on Mamba, is 2.8x faster than DeiT at extracting features from high-resolution images and saves 86.8% GPU memory.  
+- **Natural Language Processing (NLP)**:  
+  Enhanced selective SSM architecture provides 2–8x speedups.  
+- **Code Generation (Text-to-Code)**:  
+  Mistral developed Codestral, an SSM-based model that outperforms nearly all other open models on benchmarks.
 
-Перед тем как погрузится в глубокий обзор архитектурных особеннойстей Mamba, давайте разберемся, что такое RNN, LSTM, GRU, SSM 👇
+Before diving into a deep review of Mamba’s architectural specifics, let’s clarify what RNNs, LSTMs, GRUs, and SSMs are 👇
 
 <details> 
-    <summary><em><strong> 🔥 Рекуррентная нейронная сеть (RNN)</strong></em></summary>
+    <summary><em><strong> 🔥 Recurrent Neural Network (RNN)</strong></em></summary>
 
-## **1. Введение и мотивация**
+## **1. Introduction and Motivation**
 
-### **1.1 Почему нужны рекуррентные сети**
-- **Последовательные данные**: язык, временные ряды, аудио, ДНК‑последовательности.  
-- **Зависимости во времени**: полносвязные сети считают входы независимыми; RNN хранят контекст в скрытом состоянии $h_t$.
+### **1.1 Why Recurrent Networks Are Needed**
+- **Sequential data**: language, time series, audio, DNA sequences.  
+- **Temporal dependencies**: Fully connected networks treat inputs as independent; RNNs store context in a hidden state $h_t$.
 
-### **1.2 История**   
+### **1.2 History**
 
-- **1982 г. — Hopfield‑сеть.**  
-  Показала, что нейронная сеть с симметричными весами может работать как энергетическая модель памяти‑ассоциаций. Работа Дж. Хопфилда стала первой демонстрацией тренируемых рекуррентных связей в нейро‑вычислениях.
+- **1982 — Hopfield Network.**  
+  Demonstrated that a neural network with symmetric weights can function as an energy-based associative memory model. John Hopfield’s work was the first demonstration of trainable recurrent connections in neuro-computation.
 
-- **1986 г. — алгоритм BPTT (Rumelhart & McClelland).**  
-  Авторы обобщили классический back‑propagation на временно развёрнутые графы, что открыло путь к градиентному обучению длинных последовательностей. Книга *Parallel Distributed Processing* закрепила идею распределённых репрезентаций.
+- **1986 — BPTT Algorithm (Rumelhart & McClelland).**  
+  The authors generalized classical back-propagation to temporally unfolded graphs, opening the path to gradient-based learning of long sequences. The book *Parallel Distributed Processing* cemented the idea of distributed representations.
 
-- **1990 г. — «Simple RNN» (Elman).**  
-  Д. Элман показал, что рекуррентный «контекстный» слой способен захватывать грамматические зависимости в синтетическом языке. Так появилась базовая архитектура Elman‑net, ставшая учебным эталоном RNN.
+- **1990 — "Simple RNN" (Elman).**  
+  D. Elman showed that a recurrent "context" layer could capture grammatical dependencies in a synthetic language. Thus, the basic Elman-net architecture emerged, becoming a textbook RNN benchmark.
 
-- **1997 г. — LSTM (Hochreiter & Schmidhuber).**  
-  Введение ячейки памяти и вентилирования решило проблему затухающих градиентов, позволив моделировать зависимости на сотни шагов назад. LSTM вскоре стал стандартом для речи и машинного перевода.
+- **1997 — LSTM (Hochreiter & Schmidhuber).**  
+  Introduction of a memory cell and gating mechanisms solved the vanishing gradient problem, enabling modeling of dependencies hundreds of steps back. LSTM soon became the standard for speech recognition and machine translation.
 
-- **2014 г. — GRU (Cho и др.).**  
-  Сократив число вентилей до двух, GRU предложил более лёгкую альтернативу LSTM при сопоставимой точности. Публикация совпала с бумом seq2seq‑моделей в переводе и диалоговых системах.
+- **2014 — GRU (Cho et al.).**  
+  Reducing the number of gates to two, GRU offered a lighter alternative to LSTM with comparable accuracy. The publication coincided with the boom in seq2seq models for translation and dialogue systems.
 
-- **2020‑е — гибриды RNN + Attention (RWKV, S4, Mamba).**  
-  Современные работы объединяют линейные рекуррентные операторы со слоем внимания, достигая масштабируемости трансформеров при памяти $O(1)$. Такие модели успешно конкурируют на задачах длинного контекста и стриминга.
+- **2020s — RNN + Attention Hybrids (RWKV, S4, Mamba).**  
+  Modern works combine linear recurrent operators with attention layers, achieving transformer-like scalability with $O(1)$ memory. Such models successfully compete on long-context and streaming tasks.
 
+## **2. Simple RNN (Elman Cell): How Does It Work?**
 
-## **2. Simple RNN (Ячейка Элмана): Как это работает?**
+### **2.1 Intuition**
 
-### **2.1 Интуиция**
+Imagine you are reading a sentence word by word. To understand the meaning of the current word, you rely not only on the word itself but also on the context accumulated from previous words. The Simple RNN works similarly:
 
-Представьте, что вы читаете предложение слово за словом. Чтобы понять смысл текущего слова, вы используете не только само слово, но и контекст, накопленный из предыдущих слов. Simple RNN работает похожим образом:
+*   At each time step $t$, it takes:
+    1.  **A new input** $x_t$ (e.g., a vector representation of a word).
+    2.  **The state from the previous step** $h_{t-1}$ (context, "memory").
+*   Based on these two inputs, it computes:
+    1.  **A new state** $h_t$, which will be passed to the next step.
+    2.  **An output** $y_t$ (e.g., prediction of the next word or label for the current element).
 
-*   На каждом временном шаге $t$ она принимает:
-    1.  **Новый вход** $x_t$ (например, векторное представление слова).
-    2.  **Состояние из предыдущего шага** $h_{t-1}$ (контекст, "память").
-*   На основе этих двух входов она вычисляет:
-    1.  **Новое состояние** $h_t$, которое будет передано на следующий шаг.
-    2.  **Выход** $y_t$ (например, предсказание следующего слова или метка для текущего элемента).
+### **2.2 Formalization and Notation**
 
-### **2.2 Формализация и Обозначения**
+Let’s describe this mathematically. First, define the tensor (vector/matrix) dimensions:
 
-Давайте опишем это математически. Сначала определимся с обозначениями и размерами тензоров (векторов/матриц):
+| **Object** | **Dimension**        | **Meaning**                                    |
+| :--------- | :------------------- | :--------------------------------------------- |
+| $x_t$      | $\mathbb{R}^{d_x}$   | Input vector at time $t$                       |
+| $h_t$      | $\mathbb{R}^{d_h}$   | Hidden state vector at time $t$                |
+| $y_t$      | $\mathbb{R}^{d_y}$   | Model output vector at time $t$                |
+| $W_{xh}$   | $\mathbb{R}^{d_x \times d_h}$ | Input → hidden state weight matrix         |
+| $W_{hh}$   | $\mathbb{R}^{d_h \times d_h}$ | Previous state → current state weight matrix (recurrent connection) |
+| $W_{hy}$   | $\mathbb{R}^{d_h \times d_y}$ | Hidden state → output weight matrix        |
+| $b_h$      | $\mathbb{R}^{d_h}$   | Hidden layer bias vector                       |
+| $b_y$      | $\mathbb{R}^{d_y}$   | Output layer bias vector                       |
 
-| **Объект** | **Размерность**        | **Смысл**                                    |
-| :--------- | :--------------------- | :------------------------------------------- |
-| $x_t$      | $\mathbb{R}^{d_x}$     | Вектор входа в момент времени $t$            |
-| $h_t$      | $\mathbb{R}^{d_h}$     | Вектор скрытого состояния в момент $t$       |
-| $y_t$      | $\mathbb{R}^{d_y}$     | Вектор выхода модели в момент $t$            |
-| $W_{xh}$   | $\mathbb{R}^{d_x \times d_h}$ | Матрица весов "вход → скрытое состояние"   |
-| $W_{hh}$   | $\mathbb{R}^{d_h \times d_h}$ | Матрица весов "предыдущее состояние → текущее состояние" (рекуррентная связь) |
-| $W_{hy}$   | $\mathbb{R}^{d_h \times d_y}$ | Матрица весов "скрытое состояние → выход" |
-| $b_h$      | $\mathbb{R}^{d_h}$     | Вектор смещения для скрытого слоя            |
-| $b_y$      | $\mathbb{R}^{d_y}$     | Вектор смещения для выходного слоя           |
+> **Why track dimensions?** This helps avoid errors in matrix operations and when writing code (especially with broadcasting in libraries like NumPy/PyTorch).
 
-> **Зачем следить за размерностями?** Это помогает избежать ошибок при матричных операциях и при написании кода (особенно с broadcast'ингом в библиотеках типа NumPy/PyTorch).
+### **2.3 Dynamics of One Step**
 
-### **2.3 Динамика одного шага**
-
-Теперь запишем формулы, описывающие переход от шага $t-1$ к шагу $t$:
+Now write the formulas describing the transition from step $t-1$ to step $t$:
 
 {% raw %}
 
@@ -153,34 +142,35 @@ $$
 
 {% endraw %}
 
-**Пояснения:**
+**Explanations:**
 
-1.  **Вычисление скрытого состояния $h_t$:**
-    *   $W_{xh}x_t$: Влияние текущего входа $x_t$ на новое состояние.
-    *   $W_{hh}h_{t-1}$: Влияние предыдущего состояния $h_{t-1}$ (памяти) на новое состояние. Это **ключевая рекуррентная связь**.
-    *   $b_h$: Смещение (bias).
-    *   $\sigma_h$: Функция активации скрытого слоя. Часто используют **tanh** или **сигмоиду**, так как они "сжимают" значения в ограниченный диапазон ([-1, 1] для tanh, [0, 1] для сигмоиды), что может помочь стабилизировать градиенты при обучении.
-    *   $h_0 = \mathbf{0}$: Начинаем с нулевого вектора состояния перед обработкой первого элемента последовательности.
+1.  **Computing hidden state $h_t$:**
+    *   $W_{xh}x_t$: Influence of current input $x_t$ on the new state.
+    *   $W_{hh}h_{t-1}$: Influence of previous state $h_{t-1}$ (memory) on the new state. This is the **key recurrent connection**.
+    *   $b_h$: Bias.
+    *   $\sigma_h$: Hidden layer activation function. Often **tanh** or **sigmoid** is used, as they "compress" values into bounded ranges ([-1, 1] for tanh, [0, 1] for sigmoid), which can help stabilize gradients during training.
+    *   $h_0 = \mathbf{0}$: Start with a zero hidden state vector before processing the first sequence element.
 
-2.  **Вычисление выхода $y_t$:**
-    *   $W_{hy}h_t$: Преобразование текущего скрытого состояния $h_t$ в выходное представление.
-    *   $b_y$: Смещение выходного слоя.
-    *   $\sigma_y$: Функция активации выходного слоя. Её выбор **зависит от задачи**:
-        *   `softmax`: для задач классификации (например, предсказание следующего символа/слова из словаря).
-        *   `sigmoid`: для бинарной классификации (например, анализ тональности: положительный/отрицательный).
-        *   `id` (линейная активация, т.е. её отсутствие): для задач регрессии (предсказание числового значения).
+2.  **Computing output $y_t$:**
+    *   $W_{hy}h_t$: Transformation of current hidden state $h_t$ into output representation.
+    *   $b_y$: Output layer bias.
+    *   $\sigma_y$: Output layer activation function. Its choice **depends on the task**:
+        *   `softmax`: for classification tasks (e.g., predicting the next symbol/word from a vocabulary).
+        *   `sigmoid`: for binary classification (e.g., sentiment analysis: positive/negative).
+        *   `id` (linear activation, i.e., none): for regression tasks (predicting a numerical value).
 
 ![Image_01](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/RNN/Image_01.webp)
 
 ```python
 """
-Этот программный код представляет собой реализацию простой рекуррентной нейронной сети (RNN) для обработки последовательностей слов. 
-Код включает в себя инициализацию параметров модели, функции для вычисления softmax, а также основной цикл RNN, который обрабатывает 
-входную последовательность слов и выводит прогнозы для каждого слова в последовательности.
+This code implements a simple recurrent neural network (RNN) for processing word sequences.
+It includes model parameter initialization, a softmax function, and the main RNN loop that processes
+an input word sequence and outputs predictions for each word in the sequence.
 
-Функциональное назначение:
-Код демонстрирует работу RNN на примере обработки текстовой последовательности. Он инициализирует веса и смещения, выполняет встроенные 
-операции (one-hot encoding, embedding, вычисление скрытого состояния, softmax), и выводит топ-2 прогноза для каждого слова в последовательности.
+Functional Purpose:
+The code demonstrates RNN operation on a text sequence example. It initializes weights and biases,
+performs embedded operations (one-hot encoding, embedding, hidden state computation, softmax),
+and outputs the top-2 predictions for each word in the sequence.
 """
 
 import numpy as np
@@ -190,19 +180,19 @@ def softmax(x: np.ndarray) -> np.ndarray:
     """
     Description:
     ---------------
-        Вычисляет softmax для входного массива.
+        Computes softmax for the input array.
 
     Args:
     ---------------
-        x: Входной массив, для которого нужно вычислить softmax.
+        x: Input array for which to compute softmax.
 
     Returns:
     ---------------
-        Массив с примененной функцией softmax.
+        Array with softmax applied.
 
     Raises:
     ---------------
-        ValueError: Если входной массив пуст.
+        ValueError: If input array is empty.
 
     Examples:
     ---------------
@@ -210,29 +200,29 @@ def softmax(x: np.ndarray) -> np.ndarray:
         array([0.09003057, 0.24472847, 0.66524096])
     """
     if x.size == 0:
-        raise ValueError("Входной массив не может быть пустым")
+        raise ValueError("Input array cannot be empty")
 
     e = np.exp(x - np.max(x, axis=0, keepdims=True))
     return e / e.sum(axis=0, keepdims=True)
 
-# ---------------- Параметры модели ----------------
+# ---------------- Model Parameters ----------------
 vocab = ["the", "students", "opened", "their", "books", "laptops", "zoo"]
 V = len(vocab)
-d_e, d_h = 8, 16  # размеры embedding и скрытого состояния
+d_e, d_h = 8, 16  # embedding and hidden state dimensions
 
-# Словарь: слово → индекс
+# Dictionary: word → index
 word2idx = {w: i for i, w in enumerate(vocab)}
 
-# Инициализация весов
+# Initialize weights
 np.random.seed(0)
-E = np.random.randn(d_e, V) * 0.1      # эмбеддинги
-W_e = np.random.randn(d_h, d_e) * 0.1  # скрытое ← эмбеддинг
-W_h = np.random.randn(d_h, d_h) * 0.1  # скрытое ← скрытое
-b1 = np.zeros((d_h, 1))                # смещение для скрытого слоя
-U = np.random.randn(V, d_h) * 0.1      # проекция скрытого → логиты
-b2 = np.zeros((V, 1))                  # смещение для выходного слоя
+E = np.random.randn(d_e, V) * 0.1      # embeddings
+W_e = np.random.randn(d_h, d_e) * 0.1  # hidden ← embedding
+W_h = np.random.randn(d_h, d_h) * 0.1  # hidden ← hidden
+b1 = np.zeros((d_h, 1))                # hidden layer bias
+U = np.random.randn(V, d_h) * 0.1      # hidden → logits projection
+b2 = np.zeros((V, 1))                  # output layer bias
 
-# --------------- Визуализация матриц ----------------
+# --------------- Matrix Visualization ----------------
 df_E = pd.DataFrame(
     E, index=[f"e{i}" for i in range(d_e)], columns=vocab
 )
@@ -246,28 +236,28 @@ df_U = pd.DataFrame(
     U, index=vocab, columns=[f"h{j}" for j in range(d_h)]
 )
 
-print("\nМатрица E (эмбеддинги):")
+print("\nMatrix E (embeddings):")
 print(df_E)
-print("\nМатрица W_e (скрытое ← эмбеддинг):")
+print("\nMatrix W_e (hidden ← embedding):")
 print(df_We)
-print("\nМатрица W_h (скрытое ← скрытое):")
+print("\nMatrix W_h (hidden ← hidden):")
 print(df_Wh)
-print("\nМатрица U (проекция на выход):")
+print("\nMatrix U (projection to output):")
 print(df_U)
 
-# --------------- Основной цикл RNN ----------------
+# --------------- Main RNN Loop ----------------
 sequence = ["the", "students", "opened", "their"]
 h_prev = np.zeros((d_h, 1))
 
-print("\nШаг  t    Слово      Топ‑2 (слово, вер‑ть)")
+print("\nStep  t    Word       Top-2 (word, prob)")
 print("-" * 60)
 for t, word in enumerate(sequence, 1):
-    print(f"\n## Пошаговый разбор для t={t}, слово = '{word}'")
+    print(f"\n## Step-by-step breakdown for t={t}, word = '{word}'")
 
-    # 1) One‑hot
+    # 1) One-hot
     x = np.zeros((V, 1))
     x[word2idx[word], 0] = 1.0
-    print("1) One‑hot вектор x:")
+    print("1) One-hot vector x:")
     print(x.T)
 
     # 2) Embedding
@@ -275,259 +265,259 @@ for t, word in enumerate(sequence, 1):
     print("\n2) Embedding e = E @ x:")
     print(e.T)
 
-    # 3) Скрытое состояние
+    # 3) Hidden state
     h = np.tanh(W_h @ h_prev + W_e @ e + b1)
-    print("\n3) Скрытое состояние h:")
+    print("\n3) Hidden state h:")
     print(h.T)
 
-    # 4) Логиты и softmax
+    # 4) Logits and softmax
     o = U @ h + b2
     y = softmax(o)
-    print("\n4) Логиты o = U @ h + b2:")
+    print("\n4) Logits o = U @ h + b2:")
     print(o.T)
     print("   Softmax y:")
     print(y.T)
 
-    # Топ‑2 кандидата
+    # Top-2 candidates
     top2 = np.argsort(-y.flatten())[:2]
     probs = [(vocab[i], float(y[i])) for i in top2]
-    print(f"\nТоп‑2 кандидата: {probs}")
+    print(f"\nTop-2 candidates: {probs}")
 
-    # Обновление скрытого состояния
+    # Update hidden state
     h_prev = h
 ```
 
-### **Пояснения к схеме «Простая RNN‑языковая модель» (step by step)**
+### **Explanation of the "Simple RNN Language Model" Diagram (step by step)**
 
-1. **Подача входа**  
-   - На каждом шаге $t$ мы имеем слово в виде one‑hot вектора  
+1. **Input Feeding**  
+   - At each step $t$, we have a word as a one-hot vector  
      $$x^{(t)} \in \mathbb{R}^{|V|}$$  
-     где $|V|$ — размер словаря.
+     where $|V|$ is the vocabulary size.
      
-   - Пример: для словаря $\{\text{the}, \text{students}, \text{opened}, \dots\}$ слово «students» кодируется вектором, где на позиции «students» стоит 1, а в остальных — 0.
+   - Example: For vocabulary $\{\text{the}, \text{students}, \text{opened}, \dots\}$, the word "students" is encoded as a vector with 1 at the "students" position and 0 elsewhere.
 
-2. **Преобразование в embedding**  
-   - Умножаем one‑hot $x^{(t)}$ на матрицу вложений  
+2. **Embedding Transformation**  
+   - Multiply one-hot $x^{(t)}$ by the embedding matrix  
      $$E \in \mathbb{R}^{d_e \times |V|}$$  
-     чтобы получить плотный вектор  
+     to obtain a dense vector  
      $$e^{(t)} = E \, x^{(t)} \in \mathbb{R}^{d_e}$$
 
-3. **Обновление скрытого состояния**  
-   - Рекуррентная формула:  
+3. **Hidden State Update**  
+   - Recurrent formula:  
 
     $$
       h^{(t)} = \sigma\bigl(W_h \, h^{(t-1)} + W_e \, e^{(t)} + b_1\bigr)
     $$  
      
-     где  
-     - $h^{(t)} \in \mathbb{R}^{d_h}$ — скрытое состояние на шаге $t$,  
-     - $W_h \in \mathbb{R}^{d_h \times d_h}$ — матрица перехода по скрытому состоянию,  
-     - $W_e \in \mathbb{R}^{d_h \times d_e}$ — матрица для входного embedding,  
-     - $b_1 \in \mathbb{R}^{d_h}$ — вектор смещений,  
-     - $\sigma$ — нелинейность (обычно $\tanh$ или ReLU).
+     where  
+     - $h^{(t)} \in \mathbb{R}^{d_h}$ — hidden state at step $t$,  
+     - $W_h \in \mathbb{R}^{d_h \times d_h}$ — hidden state transition matrix,  
+     - $W_e \in \mathbb{R}^{d_h \times d_e}$ — input embedding matrix,  
+     - $b_1 \in \mathbb{R}^{d_h}$ — bias vector,  
+     - $\sigma$ — nonlinearity (usually $\tanh$ or ReLU).
 
-   Инициализация:  
+   Initialization:  
 
-     $$h^{(0)} = \mathbf{0}\quad(\text{или случайный вектор}).$$  
-   - При расчёте выхода к $W_h\,h^{(t-1)} + W_e\,e^{(t)}$ прибавляется смещение $b_1$, а к $U\,h^{(t)}$ — смещение $b_2$, после чего по логитам вычисляется softmax.
+     $$h^{(0)} = \mathbf{0}\quad(\text{or random vector}).$$  
+   - When computing output, bias $b_1$ is added to $W_h\,h^{(t-1)} + W_e\,e^{(t)}$, and bias $b_2$ is added to $U\,h^{(t)}$, followed by softmax on logits.
 
-4. **Вычисление выхода**  
-   - Строим логиты для распределения по словарю:  
+4. **Output Computation**  
+   - Construct logits for vocabulary distribution:  
      $$
        o^{(t)} = U \, h^{(t)} + b_2,\qquad U\in\mathbb{R}^{|V|\times d_h},\;b_2\in\mathbb{R}^{|V|}.
      $$  
-   - Применяем softmax, чтобы получить вероятностное распределение:  
+   - Apply softmax to obtain probability distribution:  
      $$
        \hat y^{(t)} = \mathrm{softmax}\bigl(o^{(t)}\bigr)\in[0,1]^{|V|},\quad\sum_i \hat y^{(t)}_i = 1.
      $$  
-   - Вектор $\hat y^{(t)}$ показывает, какое слово модель считает наиболее вероятным следующим на позиции $t+1$.
+   - Vector $\hat y^{(t)}$ indicates which word the model considers most likely to follow at position $t+1$.
 
-5. **Повторяем во времени**  
-   - Матрицы весов ($W_{xh}, W_{hh}, W_{hy}$) и векторы смещений ($b_h, b_y$) **одни и те же на всех временных шагах $t$**. Сеть использует один и тот же набор параметров для обработки каждого элемента последовательности. Это делает RNN компактными по количеству параметров, независимо от длины последовательности $T$.
+5. **Repeat Over Time**  
+   - Weight matrices ($W_{xh}, W_{hh}, W_{hy}$) and bias vectors ($b_h, b_y$) are **identical across all time steps $t$**. The network uses the same set of parameters to process each sequence element. This makes RNNs compact in parameter count, independent of sequence length $T$.
 
-## **3. Обучение RNN: Backpropagation Through Time (BPTT)**
+## **3. Training RNN: Backpropagation Through Time (BPTT)**
 
-Мы определили, как RNN делает предсказания (прямой проход). Но как настроить её веса $W_{xh}, W_{hh}, W_{hy}, b_h, b_y$, чтобы предсказания были точными? Для этого нужен алгоритм обратного распространения ошибки, адаптированный для рекуррентной структуры — **Backpropagation Through Time (BPTT)**.
+We have defined how an RNN makes predictions (forward pass). But how do we adjust its weights $W_{xh}, W_{hh}, W_{hy}, b_h, b_y$ to make predictions accurate? For this, we need an error backpropagation algorithm adapted for recurrent structure — **Backpropagation Through Time (BPTT)**.
 
-### **3.1 Идея: Разворачивание во времени**
+### **3.1 Idea: Temporal Unrolling**
 
-Чтобы применить градиентный спуск, нам нужно вычислить градиенты функции потерь $L$ по всем параметрам модели. Сложность в том, что выход $y_t$ зависит от $h_t$, который зависит от $h_{t-1}$, который зависит от $h_{t-2}$, и так далее, вплоть до $h_0$. Кроме того, все $h_k$ (для $k < t$) зависят от одних и тех же весов $W_{hh}$ и $W_{xh}$.
+To apply gradient descent, we need to compute gradients of the loss function $L$ with respect to all model parameters. The challenge is that output $y_t$ depends on $h_t$, which depends on $h_{t-1}$, which depends on $h_{t-2}$, and so on, all the way back to $h_0$. Moreover, all $h_k$ (for $k < t$) depend on the same weights $W_{hh}$ and $W_{xh}$.
 
-Идея BPTT заключается в том, чтобы **мысленно "развернуть" RNN во времени** для последовательности длиной $T$. Представьте, что у вас есть $T$ копий одной и той же ячейки RNN, соединенных последовательно. Вход $x_t$ и предыдущее состояние $h_{t-1}$ подаются в $t$-ю копию, она выдает $h_t$ и $y_t$, и $h_t$ передается в $(t+1)$-ю копию.
+The idea of BPTT is to **mentally "unroll" the RNN in time** for a sequence of length $T$. Imagine you have $T$ copies of the same RNN cell connected in sequence. Input $x_t$ and previous state $h_{t-1}$ are fed into the $t$-th copy, which produces $h_t$ and $y_t$, and $h_t$ is passed to the $(t+1)$-th copy.
 
 ![Image_02](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/RNN/Image_02.png)
 
-### **Пояснения к схеме «Простая RNN‑языковая модель» (step by step)**
+### **Explanation of the "Simple RNN Language Model" Diagram (step by step)**
 
-Ниже показано, как на примере фразы «the students opened their» происходит прямой и обратный проходы (BPTT) в развёрнутой RNN-модели.
+Below is illustrated how forward and backward passes (BPTT) occur in an unrolled RNN model for the phrase "the students opened their".
 
-#### **1. Развёртывание по времени (Unrolling)**
+#### **1. Temporal Unrolling**
 
-- Каждый прямоугольник на схеме соответствует одному временному шагу $t=0,1,2,3$.  
-- Входы: $x_0,x_1,x_2,x_3$ — one‑hot векторы слов «the», «students», «opened», «their».  
-- Начальное скрытое состояние $h_{-1}$ инициализируется нулями.  
-- Скрытые состояния $h_0\ldots h_3$ последовательно передаются по ребру $W_{hh}$.  
-- На каждом шаге из $h_t$ через $W_{hy}$ вычисляется выход $\hat y_t$.
+- Each rectangle on the diagram corresponds to one time step $t=0,1,2,3$.  
+- Inputs: $x_0,x_1,x_2,x_3$ — one-hot vectors for words "the", "students", "opened", "their".  
+- Initial hidden state $h_{-1}$ is initialized to zeros.  
+- Hidden states $h_0\ldots h_3$ are sequentially passed along the edge $W_{hh}$.  
+- At each step, output $\hat y_t$ is computed from $h_t$ via $W_{hy}$.
 
-#### **2. Прямой проход (Forward pass)**
+#### **2. Forward Pass**
 
-#### **Шаг 0 ($t=0$), слово «the»**
+#### **Step 0 ($t=0$), word "the"**
 
-1. **One-hot представление**:  
-   $ x_0 $ — единичный вектор, где единица находится в позиции слова «the».
+1. **One-hot representation**:  
+   $ x_0 $ — a unit vector with 1 at the position corresponding to the word "the".
 
-2. **Embedding (векторное представление)**:  
+2. **Embedding (vector representation)**:  
    $ e_0 = E\,x_0 $,  
-   где $ E $ — матрица эмбеддингов.
+   where $ E $ is the embedding matrix.
 
-3. **Скрытое состояние (hidden state)**:  
+3. **Hidden state**:  
    $$
    h_0 = \tanh\bigl(W_{xh} e_0 + W_{hh} h_{-1} + b_1\bigr),
    $$  
-   где:
-   - $ W_{xh}, W_{hh} $ — весовые матрицы,
-   - $ b_1 $ — смещение,
-   - $ h_{-1} $ — начальное скрытое состояние (обычно нулевой вектор).
+   where:
+   - $ W_{xh}, W_{hh} $ — weight matrices,
+   - $ b_1 $ — bias,
+   - $ h_{-1} $ — initial hidden state (usually a zero vector).
 
-4. **Выход модели и softmax**:  
+4. **Model output and softmax**:  
    $$
    o_0 = W_{hy}h_0 + b_2,\quad \hat{y}_0 = \mathrm{softmax}(o_0),
    $$  
-   где:
-   - $ W_{hy} $ — матрица для преобразования скрытого состояния в логиты,
-   - $ b_2 $ — смещение,
-   - $ \hat{y}_0 $ — вероятностное распределение по словарю.
+   where:
+   - $ W_{hy} $ — matrix transforming hidden state to logits,
+   - $ b_2 $ — bias,
+   - $ \hat{y}_0 $ — probability distribution over the vocabulary.
 
-5. **Функция потерь (Loss)**:  
-   Целевое слово — «students». Потеря вычисляется как:  
+5. **Loss function**:  
+   Target word — "students". Loss is computed as:  
    $$
    L_0 = -\log\hat{y}_0[\text{students}].
    $$
 
-#### **Подробнее о функции потерь**
+#### **Detailed Explanation of the Loss Function**
 
-Модель использует **кросс-энтропийную функцию потерь** для многоклассовой задачи. Рассмотрим её этапы:
+The model uses the **cross-entropy loss function** for multiclass classification. Consider its steps:
 
-1. **Логиты и вероятности**:  
-   Модель выдаёт вектор логитов:  
+1. **Logits and probabilities**:  
+   The model outputs a vector of logits:  
    $$
    o_0 = W_{hy}h_0 + b_2,
    $$  
-   который затем преобразуется в вероятности через softmax:  
+   which is then converted to probabilities via softmax:  
    $$
    \hat{y}_0 = \mathrm{softmax}(o_0) \in [0, 1]^{|V|}, \quad \sum_i \hat{y}_0[i] = 1.
    $$
 
-2. **Целевая метка**:  
-   Целевая метка $ y^{(0)} $ — one-hot вектор, где единица стоит в позиции целевого слова «students»:  
+2. **Target label**:  
+   Target label $ y^{(0)} $ is a one-hot vector with 1 at the position of the target word "students":  
    $$
    y^{(0)}_{\text{students}} = 1.
    $$
 
-3. **Кросс-энтропия**:  
-   Формула кросс-энтропии:  
+3. **Cross-entropy**:  
+   Cross-entropy formula:  
    $$
    L_0 = -\sum_{i=1}^{|V|} y^{(0)}_i \log\hat{y}_0[i] = -\log\hat{y}_0[\text{students}].
    $$
 
-4. **Интуиция**:  
-   Чем меньше вероятность предсказанного слова $ \hat{y}_0[\text{students}] $, тем выше штраф (значение потери).
+4. **Intuition**:  
+   The lower the predicted probability $ \hat{y}_0[\text{students}] $, the higher the penalty (loss value).
 
-#### **Шаг 1 ($t=1$), слово «students»**
-- Аналогично: $x_1$ → $e_1$ →  
+#### **Step 1 ($t=1$), word "students"**
+- Similarly: $x_1$ → $e_1$ →  
   $$h_1 = \tanh(W_{xh}e_1 + W_{hh}h_0 + b_1).$$  
-- Выход $\hat y_1 = \mathrm{softmax}(W_{hy}h_1+b_2)$,  
-  целевое слово «opened», $L_1=-\log\hat y_1[opened]$.
+- Output $\hat y_1 = \mathrm{softmax}(W_{hy}h_1+b_2)$,  
+  target word "opened", $L_1=-\log\hat y_1[opened]$.
 
-#### **Шаг 2 ($t=2$), слово «opened»**
+#### **Step 2 ($t=2$), word "opened"**
 - $x_2$ → $e_2$ →  
   $$h_2 = \tanh(W_{xh}e_2 + W_{hh}h_1 + b_1).$$  
-- $\hat y_2$, целевой «their», $L_2=-\log\hat y_2[their]$.
+- $\hat y_2$, target "their", $L_2=-\log\hat y_2[their]$.
 
-#### **Шаг 3 ($t=3$), слово «their»**
+#### **Step 3 ($t=3$), word "their"**
 - $x_3$ → $e_3$ →  
   $$h_3 = \tanh(W_{xh}e_3 + W_{hh}h_2 + b_1).$$  
-- $\hat y_3$, целевой «books», $L_3=-\log\hat y_3[books]$.
+- $\hat y_3$, target "books", $L_3=-\log\hat y_3[books]$.
 
-- **Суммарная потеря**:  
+- **Total loss**:  
   $$L = L_0 + L_1 + L_2 + L_3.$$  
 
-#### **3. Обратный проход (Backward pass — BPTT)**
+#### **3. Backward Pass (Backward pass — BPTT)**
 
-- Градиенты от каждой $L_t$ (красные стрелки) прокатываются через:
-  - выходной слой $W_{hy}$ к скрытым состояниям,
-  - рекуррентные связи $W_{hh}$ к предыдущим $h_{t-1}$.
-- На каждом шаге аккумулируются $
+- Gradients from each $L_t$ (red arrows) flow through:
+  - Output layer $W_{hy}$ to hidden states,
+  - Recurrent connections $W_{hh}$ to previous $h_{t-1}$.
+- At each step, accumulate $
   \frac{\partial L}{\partial W_{xh}},
   \frac{\partial L}{\partial W_{hh}},
   \frac{\partial L}{\partial W_{hy}},
   \frac{\partial L}{\partial b_1},
   \frac{\partial L}{\partial b_2}$.
-- В итоге веса обновляются с учётом вклада ошибок со всех временных шагов.
+- Finally, weights are updated considering the contribution of errors from all time steps.
 
-**Вывод:** BPTT разворачивает RNN во времени, вычисляет локальные потери на каждом шаге и распространяет ошибки сквозь все временные соединения, обеспечивая обучение с учётом контекстов предыдущих токенов.
+**Conclusion:** BPTT unrolls the RNN in time, computes local losses at each step, and propagates errors through all temporal connections, enabling training that accounts for context from previous tokens.
 
-Хотя мы создаем $T$ копий для вычислений, важно помнить: **веса $W_{xh}, W_{hh}, W_{hy}$ общие для всех этих копий**.
+Although we create $T$ copies for computation, remember: **weights $W_{xh}, W_{hh}, W_{hy}$ are shared across all these copies**.
 
-#### **3.2 Общая функция потерь**
+#### **3.2 Overall Loss Function**
 
-Обычно общая потеря $L$ для всей последовательности — это сумма или среднее локальных потерь $\ell$ на каждом шаге:
+Typically, the total loss $L$ for the entire sequence is the sum or average of local losses $\ell$ at each step:
 
 $$
 L \;=\;\sum_{t=1}^{T}\,\ell\bigl(y_t,\widehat y_t\bigr),
 $$
 
-где $y_t$ — предсказание модели на шаге $t$, а $\widehat y_t$ — истинное значение (цель) на шаге $t$. Функция $\ell$ может быть, например, кросс-энтропией для классификации или среднеквадратичной ошибкой (MSE) для регрессии.
+where $y_t$ is the model's prediction at step $t$, and $\widehat y_t$ is the true value (target) at step $t$. Function $\ell$ can be, for example, cross-entropy for classification or mean squared error (MSE) for regression.
 
-#### **3.3 Вычисление градиентов (Пример для $W_{hh}$)**
+#### **3.3 Gradient Computation (Example for $W_{hh}$)**
 
-Рассмотрим, как вычислить градиент общей потери $L$ по одному элементу $w$ из матрицы $W_{hh}$. Используя цепное правило, градиент $L$ по $w$ складывается из вкладов от каждого временного шага $t$:
+Consider how to compute the gradient of the total loss $L$ with respect to one element $w$ from matrix $W_{hh}$. Using the chain rule, the gradient of $L$ with respect to $w$ is the sum of contributions from each time step $t$:
 
 $$
 \frac{\partial L}{\partial w}\;=\; \sum_{t=1}^{T}\,\frac{\partial \ell(y_t, \widehat y_t)}{\partial w}
 $$
 
-Чтобы найти $\frac{\partial \ell(y_t, \widehat y_t)}{\partial w}$, нам нужно учесть, как $w$ влияет на $y_t$. Это влияние происходит через скрытое состояние $h_t$:
+To find $\frac{\partial \ell(y_t, \widehat y_t)}{\partial w}$, we must account for how $w$ affects $y_t$. This influence occurs through the hidden state $h_t$:
 
 $$
 \frac{\partial \ell(y_t, \widehat y_t)}{\partial w} = \frac{\partial \ell}{\partial y_t} \frac{\partial y_t}{\partial h_t} \frac{\partial h_t}{\partial w}
 $$
 
-Самая сложная часть — это $\frac{\partial h_t}{\partial w}$. Состояние $h_t$ зависит от $w$ напрямую (через член $W_{hh}h_{t-1}$ в формуле для $h_t$) и косвенно, через все предыдущие состояния $h_{t-1}, h_{t-2}, \dots, h_1$, так как они тоже зависят от $w$.
+The most complex part is $\frac{\partial h_t}{\partial w}$. State $h_t$ depends on $w$ directly (via the term $W_{hh}h_{t-1}$ in the formula for $h_t$) and indirectly, through all previous states $h_{t-1}, h_{t-2}, \dots, h_1$, since they too depend on $w$.
 
 $$
-\frac{\partial h_t}{\partial w} = \underbrace{\frac{\partial h_t}{\partial h_{t-1}}\frac{\partial h_{t-1}}{\partial w}}_{\text{через } h_{t-1}} + \underbrace{\frac{\partial h_t}{\partial w}}_{\text{прямое влияние}}
+\frac{\partial h_t}{\partial w} = \underbrace{\frac{\partial h_t}{\partial h_{t-1}}\frac{\partial h_{t-1}}{\partial w}}_{\text{via } h_{t-1}} + \underbrace{\frac{\partial h_t}{\partial w}}_{\text{direct influence}}
 $$
 
-Раскрывая эту рекурсию дальше, мы увидим, что градиент включает в себя **сумму путей** разной длины из прошлого в настоящее. Каждый такой путь включает произведения Якобианов $\frac{\partial h_k}{\partial h_{k-1}}$.
+Expanding this recursion further, we see that the gradient includes a **sum of paths** of varying lengths from the past to the present. Each such path includes products of Jacobians $\frac{\partial h_k}{\partial h_{k-1}}$.
 
 $$
 \frac{\partial h_k}{\partial h_{k-1}} = \frac{\partial}{\partial h_{k-1}} \sigma_h(W_{xh}x_k + W_{hh}h_{k-1} + b_h) = \operatorname{diag}\!\bigl[\sigma_h'(a_k)\bigr]\,W_{hh}
 $$
-где $a_k = W_{xh}x_k + W_{hh}h_{k-1} + b_h$ — аргумент функции активации $\sigma_h$ на шаге $k$. Обозначим этот Якобиан как $J_k$.
+where $a_k = W_{xh}x_k + W_{hh}h_{k-1} + b_h$ is the argument of activation function $\sigma_h$ at step $k$. Denote this Jacobian as $J_k$.
 
-Тогда вклад в градиент от пути длиной $k$ (от $h_{t-k}$ к $h_t$) будет включать произведение $k$ таких Якобианов: $J_t J_{t-1} \dots J_{t-k+1}$.
+Then the contribution to the gradient from a path of length $k$ (from $h_{t-k}$ to $h_t$) includes the product of $k$ such Jacobians: $J_t J_{t-1} \dots J_{t-k+1}$.
 
-#### **3.4 Проблемы: Затухание и Взрыв Градиентов**
+#### **3.4 Problems: Vanishing and Exploding Gradients**
 
-Именно эти **длинные произведения Якобианов** $J_k = \operatorname{diag}[\sigma_h'(a_k)] W_{hh}$ являются источником проблем при обучении RNN:
+It is precisely these **long products of Jacobians** $J_k = \operatorname{diag}[\sigma_h'(a_k)] W_{hh}$ that cause problems in training RNNs:
 
-1.  **Затухание градиента (Vanishing Gradient):** Если собственные значения матрицы $W_{hh}$ (или нормы Якобианов $J_k$) по модулю **меньше 1**, то при умножении многих таких матриц результат будет стремиться к нулю экспоненциально быстро с ростом $k$. Это означает, что градиенты от далеких прошлых шагов ($t-k$ для больших $k$) почти не доходят до параметров $W_{hh}$, и сеть не может научиться **долговременным зависимостям**. Simple RNN особенно подвержены этой проблеме.
-2.  **Взрыв градиента (Exploding Gradient):** Если собственные значения $W_{hh}$ (или нормы $J_k$) по модулю **больше 1**, то произведение Якобианов будет расти экспоненциально. Это приводит к огромным значениям градиентов, что делает шаги градиентного спуска нестабильными и может привести к расхождению обучения (NaN/Inf в потерях или весах).
+1.  **Vanishing Gradient**: If the eigenvalues of matrix $W_{hh}$ (or norms of Jacobians $J_k$) are **less than 1** in magnitude, multiplying many such matrices causes the result to decay exponentially toward zero as $k$ increases. This means gradients from distant past steps ($t-k$ for large $k$) barely reach parameters $W_{hh}$, and the network cannot learn **long-term dependencies**. Simple RNNs are especially susceptible to this problem.
+2.  **Exploding Gradient**: If the eigenvalues of $W_{hh}$ (or norms of $J_k$) are **greater than 1** in magnitude, the product of Jacobians grows exponentially. This leads to enormous gradient values, making gradient descent steps unstable and potentially causing training divergence (NaN/Inf in losses or weights).
 
-#### **3.5 Классические Решения**
+#### **3.5 Classical Solutions**
 
-*   **Gradient Clipping:** Искусственное ограничение нормы градиента. Если $\|\nabla\theta\| > \tau$ (некоторый порог), то градиент масштабируется: $\nabla\theta \leftarrow \frac{\tau}{\|\nabla\theta\|} \nabla\theta$. Это помогает бороться со *взрывом*, но не с *затуханием*.
-*   **Правильная инициализация весов:** Например, ортогональная инициализация для $W_{hh}$ может помочь держать собственные значения близкими к 1.
-*   **Использование более сложных ячеек:** **LSTM (Long Short-Term Memory)** и **GRU (Gated Recurrent Unit)** были разработаны специально для борьбы с затуханием градиентов. Они вводят "вентили" (gates), которые контролируют поток информации и градиентов через ячейку, позволяя сохранять информацию на долгие периоды.
-*   **Функции активации:** Использование ReLU может усугубить взрыв градиента, но менее подвержено затуханию, чем сигмоида/tanh (если активация не нулевая). Однако в рекуррентной части часто предпочитают tanh.
+*   **Gradient Clipping**: Artificially constraining the gradient norm. If $\|\nabla\theta\| > \tau$ (some threshold), scale the gradient: $\nabla\theta \leftarrow \frac{\tau}{\|\nabla\theta\|} \nabla\theta$. This helps combat *exploding*, but not *vanishing*.
+*   **Proper Weight Initialization**: For example, orthogonal initialization for $W_{hh}$ can help keep eigenvalues close to 1.
+*   **Use of More Complex Cells**: **LSTM (Long Short-Term Memory)** and **GRU (Gated Recurrent Unit)** were specifically designed to combat vanishing gradients. They introduce "gates" that control the flow of information and gradients through the cell, allowing information to be retained over long periods.
+*   **Activation Functions**: Using ReLU may exacerbate exploding gradients but is less prone to vanishing than sigmoid/tanh (if activation is non-zero). However, in recurrent parts, tanh is often preferred.
 
 
-## **4. BPTT на Практике: Квази-код и PyTorch**
+## **4. BPTT in Practice: Pseudo-code and PyTorch**
 
-Современные фреймворки глубокого обучения (PyTorch, TensorFlow/Keras) реализуют BPTT автоматически. Вам нужно лишь определить архитектуру RNN и запустить обратный проход (`loss.backward()` в PyTorch).
+Modern deep learning frameworks (PyTorch, TensorFlow/Keras) implement BPTT automatically. You only need to define the RNN architecture and run the backward pass (`loss.backward()` in PyTorch).
 
-Вот как выглядит типичный цикл обучения с использованием BPTT в PyTorch (с использованием `tanh` как $\sigma_h$ и линейной $\sigma_y$):
+Here is a typical training loop using BPTT in PyTorch (using `tanh` as $\sigma_h$ and linear $\sigma_y$):
 
 ```python
 import torch
@@ -535,14 +525,14 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 
-# --- Гиперпараметры и данные (примерные) ---
-T = 10      # Длина последовательности
+# --- Hyperparameters and data (example values) ---
+T = 10      # Sequence length
 batch_size = 32
-d_x = 20    # Размерность входа
-d_h = 50    # Размерность скрытого состояния
-d_y = 5     # Размерность выхода
+d_x = 20    # Input dimension
+d_h = 50    # Hidden state dimension
+d_y = 5     # Output dimension
 
-# --- Модель (определяем параметры) ---
+# --- Model (define parameters) ---
 W_xh = torch.randn(d_x, d_h, requires_grad=True)
 W_hh = torch.randn(d_h, d_h, requires_grad=True)
 W_hy = torch.randn(d_h, d_y, requires_grad=True)
@@ -550,290 +540,290 @@ b_h  = torch.zeros(d_h, requires_grad=True)
 b_y  = torch.zeros(d_y, requires_grad=True)
 params = [W_xh, W_hh, W_hy, b_h, b_y]
 
-# --- Пример данных ---
-x_sequence = torch.randn(T, batch_size, d_x) # [Время, Батч, Признаки]
+# --- Example data ---
+x_sequence = torch.randn(T, batch_size, d_x) # [Time, Batch, Features]
 y_true_sequence = torch.randn(T, batch_size, d_y)
 
-# --- Оптимизатор ---
+# --- Optimizer ---
 optimizer = optim.Adam(params, lr=0.001)
 
-# --- Цикл обучения (одна итерация) ---
+# --- Training loop (one iteration) ---
 optimizer.zero_grad()
 
-# == Forward pass (разворачивание цикла вручную для ясности) ==
-h_t = torch.zeros(batch_size, d_h) # Начальное скрытое состояние h_0
+# == Forward pass (manual unrolling for clarity) ==
+h_t = torch.zeros(batch_size, d_h) # Initial hidden state h_0
 outputs = []
 for t in range(T):
-    # Формула Simple RNN
+    # Simple RNN formula
     h_t = torch.tanh(x_sequence[t] @ W_xh + h_t @ W_hh + b_h)
-    y_t = h_t @ W_hy + b_y # Линейный выходной слой
+    y_t = h_t @ W_hy + b_y # Linear output layer
     outputs.append(y_t)
 
-# Собираем выходы в один тензор [T, Batch, d_y]
+# Stack outputs into one tensor [T, Batch, d_y]
 y_pred_sequence = torch.stack(outputs)
 
-# == Вычисление потерь ==
-# Пример: MSE на каждом шаге, затем усредняем по времени и батчу
+# == Compute loss ==
+# Example: MSE at each step, then average over time and batch
 loss = F.mse_loss(y_pred_sequence, y_true_sequence)
 
 # == Backward pass (BPTT) ==
-loss.backward() # PyTorch автоматически вычисляет градиенты ∂L/∂params через BPTT
+loss.backward() # PyTorch automatically computes gradients ∂L/∂params via BPTT
 
-# == Опционально: Gradient Clipping ==
-torch.nn.utils.clip_grad_norm_(params, max_norm=1.0) # Ограничиваем норму градиента
+# == Optional: Gradient Clipping ==
+torch.nn.utils.clip_grad_norm_(params, max_norm=1.0) # Clamp gradient norm
 
-# == Шаг оптимизатора ==
+# == Optimizer step ==
 optimizer.step()
 
 print(f"Loss: {loss.item()}")
-# print(f"Gradient norm for W_hh: {W_hh.grad.norm().item()}") # Можно посмотреть на норму градиента
+# print(f"Gradient norm for W_hh: {W_hh.grad.norm().item()}") # Can inspect gradient norm
 ```
 
-**Ключевые моменты:**
+**Key Points:**
 
-*   PyTorch строит динамический вычислительный граф во время forward pass.
-*   Когда вызывается `loss.backward()`, PyTorch проходит по этому графу в обратном порядке, применяя цепное правило (реализуя BPTT) для вычисления градиентов всех параметров (`requires_grad=True`), от которых зависит `loss`.
-*   `torch.nn.utils.clip_grad_norm_` — стандартная практика для предотвращения взрыва градиентов.
+*   PyTorch builds a dynamic computational graph during the forward pass.
+*   When `loss.backward()` is called, PyTorch traverses this graph in reverse order, applying the chain rule (implementing BPTT) to compute gradients for all parameters (`requires_grad=True`) that affect `loss`.
+*   `torch.nn.utils.clip_grad_norm_` is standard practice to prevent gradient explosion.
 
-## **5. Проблема долговременных зависимостей**
+## **5. The Problem of Long-Term Dependencies**
 
-Одна из привлекательных идей RNN состоит в том, что они потенциально умеют связывать предыдущую информацию с текущей задачей, так, например, знания о предыдущем кадре видео могут помочь в понимании текущего кадра. Если бы RNN обладали такой способностью, они были бы чрезвычайно полезны. Но действительно ли RNN предоставляют нам такую возможность? Это зависит от некоторых обстоятельств.
+One of the appealing ideas behind RNNs is their potential to link prior information with the current task—for example, knowledge of a previous video frame can aid in understanding the current frame. If RNNs possessed this capability, they would be extremely useful. But do RNNs truly provide us with this ability? It depends on certain circumstances.
 
-Иногда для выполнения текущей задачи нам необходима только недавняя информация. Рассмотрим, например, языковую модель, пытающуюся предсказать следующее слово на основании предыдущих. Если мы хотим предсказать последнее слово в предложении “облака плывут по небу”, нам не нужен более широкий контекст; в этом случае довольно очевидно, что последним словом будет “небу”. В этом случае, когда дистанция между актуальной информацией и местом, где она понадобилась, невелика, RNN могут обучиться использованию информации из прошлого.
+Sometimes, only recent information is needed to perform the current task. Consider, for instance, a language model attempting to predict the next word based on preceding ones. If we want to predict the final word in the sentence “Облака плывут по небу,” we don’t need broader context; it’s obvious that the last word will be “небу.” In such cases, where the distance between relevant information and the point where it is needed is small, RNNs can learn to utilize past information.
 
-Но бывают случаи, когда нам необходимо больше контекста. Допустим, мы хотим предсказать последнее слово в тексте “Я вырос во Франции… Я бегло говорю по-французски”. Ближайший контекст предполагает, что последним словом будет называние языка, но чтобы установить, какого именно языка, нам нужен контекст Франции из более отдаленного прошлого. Таким образом, разрыв между актуальной информацией и точкой ее применения может стать очень большим.
+But there are cases where more context is required. Suppose we wish to predict the final word in the text: “Я вырос во Франции… Я бегло говорю по-французски.” The immediate context suggests the last word is the name of a language, but to determine which one, we need the distant context of “Франции.” Thus, the gap between relevant information and its point of application can become very large.
 
-К сожалению, по мере роста этого расстояния, RNN теряют способность связывать информацию.
+Unfortunately, as this distance grows, RNNs lose their ability to link information.
 
 ![Image_03](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/RNN/Image_03.png)
 
-К счастью, LSTM не знает таких проблем!
+Fortunately, LSTM does not suffer from these problems!
 
-## **Заключение**
+## **Conclusion**
 
-Рекуррентные нейронные сети, обладая компактной памятью и естественной каузальностью, продолжают оставаться незаменимыми для потоковых задач и ситуаций с ограниченными ресурсами. Глубокое понимание их математической базы, инженерных приёмов и современных вариаций даёт исследователю инструмент, который гармонично дополняет «семейство» Transformer‑подобных моделей.
+Recurrent neural networks, with their compact memory and natural causality, remain indispensable for streaming tasks and resource-constrained scenarios. A deep understanding of their mathematical foundations, engineering techniques, and modern variations equips researchers with a tool that harmoniously complements the family of Transformer-like models.
 
 </details>
 
 <details> 
-    <summary><em><strong> 🔥🔥 Долгая краткосрочная память (LSTM)</strong></em></summary>
+    <summary><em><strong> 🔥🔥 Long Short-Term Memory (LSTM)</strong></em></summary>
 
-## 1. Введение и мотивация
+## 1. Introduction and Motivation
 
-### 1.1 История создания LSTM: ключевые работы Хохрайтера и Шмидхубера, развитие идеи
+### 1.1 History of LSTM: Key Works by Hochreiter and Schmidhuber, Evolution of the Idea
 
-**Зарождение идеи (1991-1997)**
+**Origins (1991–1997)**
 
-Проблема затухающего градиента была формально идентифицирована в начале 1990-х годов Сеппом Хохрайтером в его диссертационной работе. Хохрайтер и Юрген Шмидхубер начали искать архитектуру, которая могла бы преодолеть эту проблему.
+The vanishing gradient problem was formally identified in the early 1990s by Sepp Hochreiter in his doctoral thesis. Hochreiter and Jürgen Schmidhuber began searching for an architecture capable of overcoming this issue.
 
-**Ключевые этапы:**
+**Key Milestones:**
 
-- **1991-1995**: Первые эксперименты и теоретические разработки. Хохрайтер и Шмидхубер исследовали различные способы позволить градиентам течь через длинные последовательности без затухания.
+- **1991–1995**: Early experiments and theoretical developments. Hochreiter and Schmidhuber explored various ways to allow gradients to flow through long sequences without vanishing.
 
-- **1997**: Публикация оригинальной статьи "Long Short-Term Memory" в журнале Neural Computation. В этой фундаментальной работе была представлена архитектура LSTM с механизмом вентилей (gates) и постоянным потоком ошибки (Constant Error Carousel, CEC).
+- **1997**: Publication of the original paper "Long Short-Term Memory" in Neural Computation. This foundational work introduced the LSTM architecture with gating mechanisms and the Constant Error Carousel (CEC).
 
-**Эволюция LSTM:**
+**Evolution of LSTM:**
 
-- **1999-2000**: Феликс Герс и его коллеги представили "peephole connections" — модификацию, которая позволяет вентилям "заглядывать" в ячейку памяти.
+- **1999–2000**: Felix Gers and colleagues introduced "peephole connections"—a modification allowing gates to "peek" into the cell state.
 
-- **2000**: Герс и Шмидхубер вводят "forget gate" (вентиль забывания) — критическое улучшение, позволяющее LSTM сбрасывать своё состояние и обучаться на последовательностях неограниченной длины.
+- **2000**: Gers and Schmidhuber introduced the "forget gate"—a critical improvement enabling LSTMs to reset their state and learn on sequences of arbitrary length.
 
-- **2005**: Грейвс и Шмидхубер представили двунаправленный LSTM (BiLSTM), который обрабатывает последовательность в обоих направлениях.
+- **2005**: Graves and Schmidhuber presented bidirectional LSTM (BiLSTM), which processes sequences in both directions.
 
-- **2013-2014**: Эпоха широкого применения LSTM в промышленности, особенно в области распознавания речи и машинного перевода.
+- **2013–2014**: Era of widespread industrial adoption of LSTM, especially in speech recognition and machine translation.
 
-- **2014**: Разработка GRU (Gated Recurrent Unit) командой Чо как более простой альтернативы LSTM, сохраняющей большинство преимуществ.
+- **2014**: Development of GRU (Gated Recurrent Unit) by Cho et al. as a simpler alternative to LSTM, preserving most advantages.
 
-**Цитата Шмидхубера о создании LSTM (2015):**
+**Schmidhuber’s Quote on LSTM’s Creation (2015):**
 
-> "Проблема заключалась в том, что градиенты либо затухали, либо взрывались, и нам нужно было создать архитектуру, которая позволила бы информации и градиентам течь через много временных шагов."
+> "The problem was that gradients either vanished or exploded, and we needed to create an architecture that allowed information and gradients to flow across many time steps."
 
-### 1.2 Ключевые преимущества: почему LSTM стали стандартом в индустрии
+### 1.2 Key Advantages: Why LSTM Became the Industry Standard
 
-**1. Решение проблемы затухающего градиента**
+**1. Solving the Vanishing Gradient Problem**
 
-LSTM эффективно решает проблему затухающего градиента благодаря своему уникальному механизму ячейки памяти с контролируемыми вентилями. Ключевой компонент — **константный поток ошибки** (Constant Error Carousel, CEC), который обеспечивает неизменный градиент через состояние ячейки.
+LSTM effectively solves the vanishing gradient problem through its unique cell memory mechanism with controlled gates. The key component is the **Constant Error Carousel (CEC)**, which ensures a constant gradient flow through the cell state.
 
-**2. Долговременная память**
+**2. Long-Term Memory**
 
-LSTM способны запоминать информацию на сотни и даже тысячи временных шагов:
-- Демонстрируют превосходную способность улавливать зависимости на больших расстояниях (long-range dependencies)
-- Могут избирательно сохранять важную информацию и забывать неважную
-- Позволяют моделировать контекст на различных временных масштабах одновременно
+LSTMs can retain information over hundreds or even thousands of time steps:
+- Demonstrate superior ability to capture long-range dependencies
+- Can selectively preserve important information and discard irrelevant details
+- Enable modeling of context across multiple temporal scales simultaneously
 
-**3. Адаптивность к различным типам данных**
+**3. Adaptability to Diverse Data Types**
 
-LSTM эффективно работают с разнообразными типами последовательных данных:
-- Текст и речь (машинный перевод, распознавание речи)
-- Временные ряды (финансовые прогнозы, данные сенсоров)
-- Биологические последовательности (анализ ДНК, белков)
-- Мультимодальные данные (подписи к изображениям, видеоаналитика)
+LSTMs operate effectively on various types of sequential data:
+- Text and speech (machine translation, speech recognition)
+- Time series (financial forecasting, sensor data)
+- Biological sequences (DNA, protein analysis)
+- Multimodal data (image captions, video analytics)
 
-**4. Масштабируемость и гибкость**
+**4. Scalability and Flexibility**
 
-- Возможность создания глубоких архитектур путем штабелирования LSTM слоев
-- Комбинируемость с другими типами нейронных сетей (CNN, Attention)
-- Эффективная параллелизация обучения на современном оборудовании
+- Ability to build deep architectures by stacking LSTM layers
+- Compatibility with other neural network types (CNNs, Attention)
+- Efficient parallelization of training on modern hardware
 
-**5. Промышленные результаты**
+**5. Industrial Impact**
 
-До появления трансформеров (2017-2018), LSTM были абсолютным стандартом в индустрии и научных исследованиях:
+Before the emergence of transformers (2017–2018), LSTM was the absolute industry and research standard:
 
-- **Google** (2015-2016): использовал LSTM в системах распознавания речи, сократив ошибки на 30%
-- **Apple**: внедрил LSTM в Siri для улучшения понимания контекста
-- **Facebook**: применял LSTM для автоматического перевода сообщений
-- **Amazon**: использовал LSTM в рекомендательных системах и прогнозировании спроса
+- **Google** (2015–2016): Used LSTM in speech recognition systems, reducing error rates by 30%
+- **Apple**: Integrated LSTM into Siri to improve contextual understanding
+- **Facebook**: Applied LSTM for automated message translation
+- **Amazon**: Utilized LSTM in recommendation systems and demand forecasting
 
-Даже после появления трансформеров, LSTM остаются востребованными в ряде областей:
-- Обработка потоковых данных в реальном времени
-- Задачи с ограниченными вычислительными ресурсами
-- Приложения, требующие интерпретируемости модели
+Even after the advent of transformers, LSTM remains relevant in several domains:
+- Processing streaming data in real time
+- Tasks with limited computational resources
+- Applications requiring model interpretability
 
-**Эволюция популярности LSTM** показывает их значимость: от академических исследований в конце 1990-х до промышленного доминирования в середине 2010-х, и последующую интеграцию с архитектурами на основе внимания (attention).
+**The Evolution of LSTM Popularity** reflects their significance: from academic research in the late 1990s, to industrial dominance in the mid-2010s, and subsequent integration with attention-based architectures.
 
-## 2. Архитектура LSTM: Как это работает?
+## 2. LSTM Architecture: How It Works
 
-### 2.1 Интуиция: Метафора конвейера с контролируемыми воротами
+### 2.1 Intuition: Metaphor of a Conveyor Belt with Controlled Gates
 
-Чтобы понять принцип работы LSTM, представим его как умную производственную линию с системой конвейеров и ворот:
+To understand how LSTM operates, imagine it as a smart production line with conveyor belts and gates:
 
-**1. Основной конвейер — ячейка памяти (cell state)**
+**1. Main Conveyor — Cell State**
 
-Ключевой компонент LSTM – это **состояние ячейки (cell state)** – горизонтальная линия, проходящая через всю цепочку. Представьте длинный конвейер (или конвейерную ленту), который тянется через всю фабрику (последовательность). На этом конвейере перемещается "контейнер с информацией" (cell state, $C_t$).
+The core component of LSTM is the **cell state**—a horizontal line running through the entire chain. Think of a long conveyor belt stretching through the entire factory (sequence). On this belt moves a "container of information" (cell state, $C_t$).
 
 ![Image_01.png](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/LSTM/Image_01.png)
 
-**Особенности состояния ячейки:**  
-- Она проходит напрямую через всю цепочку, участвуя лишь в нескольких линейных преобразованиях.  
-- Информация может легко течь по ней, не подвергаясь изменениям.  
-- Этот контейнер может сохранять информацию практически неизменной на протяжении долгого времени — в этом главный секрет LSTM.  
+**Characteristics of the Cell State:**
+- It passes directly through the entire chain, undergoing only a few linear transformations.
+- Information can flow easily along it without alteration.
+- This container can preserve information nearly unchanged over long periods—this is the core secret of LSTM.
 
-Тем не менее, LSTM может **удалять информацию** из состояния ячейки; этот процесс регулируется структурами, называемыми **фильтрами (gates)**.  
+However, LSTM can **remove information** from the cell state; this process is regulated by structures called **gates**.
 
-**2. Система управляемых ворот (gates)**
+**2. Controlled Gate System**
 
-На каждом шаге (временной точке) наш конвейер проходит через три контрольных пункта:
+At each step (time point), our conveyor passes through three checkpoints:
 
-- **Вентиль забывания (Forget Gate)**: действует как фильтр, решающий, какую информацию удалить из контейнера. Представьте рабочего, который смотрит на содержимое контейнера и текущий вход, а затем решает, что выбросить. "Нам всё ещё нужно помнить пол субъекта, чтобы правильно согласовывать местоимения? Да, сохраняем. А информация о цвете его машины? Нет, выбрасываем."
+- **Forget Gate**: Acts as a filter deciding what information to discard from the container. Imagine a worker examining the container’s contents and the current input, then deciding what to throw out: "Do we still need to remember the subject’s gender to correctly align pronouns? Yes, keep it. But the color of their car? No, discard it."
 
-- **Вентиль входа (Input Gate)**: определяет, какую новую информацию добавить в контейнер. Представьте другого рабочего, который, посмотрев на текущий вход и предыдущий выход, решает, какие новые факты достаточно важны, чтобы их запомнить. "Мы только что узнали имя нового персонажа в рассказе? Это важно, добавляем в контейнер."
+- **Input Gate**: Determines what new information to add to the container. Imagine another worker, looking at the current input and previous output, deciding which new facts are important enough to remember: "We just learned the name of a new character in the story? That’s important—add it to the container."
 
-- **Вентиль выхода (Output Gate)**: контролирует, какую часть содержимого контейнера передать внешнему миру (в виде скрытого состояния). Представьте третьего рабочего, который решает, какие части накопленной информации наиболее актуальны прямо сейчас. "Нам нужно предсказать следующее слово — важно знать, что подлежащее в единственном числе, но не важно знать, о какой стране шла речь ранее."
+- **Output Gate**: Controls which part of the container’s contents to pass to the outside world (as the hidden state). Imagine a third worker deciding which accumulated information is most relevant right now: "We need to predict the next word—important to know the subject is singular, but irrelevant to recall which country was mentioned earlier."
 
-**3. Двойная система состояний**
+**3. Dual State System**
 
-В отличие от ванильной RNN, у LSTM есть две линии передачи информации:
+Unlike vanilla RNNs, LSTM has two information pathways:
 
-- **Ячейка памяти (Cell State)** $C_t$: основной конвейер, предназначенный для долговременного хранения информации.
-- **Скрытое состояние (Hidden State)** $h_t$: фильтрованная версия ячейки памяти, содержащая только ту информацию, которую сеть считает актуальной в текущий момент.
+- **Cell State** $C_t$: The main conveyor, designed for long-term information storage.
+- **Hidden State** $h_t$: A filtered version of the cell state, containing only the information the network deems relevant at the current moment.
 
-**Метафора с записной книжкой:**
+**Notebook Metaphor:**
 
-Другой способ представить LSTM — это человек с записной книжкой (cell state), который постоянно решает:
-- Какие старые заметки стереть (forget gate)
-- Какие новые заметки записать (input gate)
-- Какую информацию из книжки использовать при ответе на вопрос (output gate)
+Another way to visualize LSTM is as a person with a notebook (cell state) who constantly decides:
+- Which old notes to erase (forget gate)
+- Which new notes to write (input gate)
+- Which information from the notebook to use when answering a question (output gate)
 
-Эта система позволяет LSTM действовать как умный накопитель информации, избирательно запоминающий важные факты и игнорирующий неважные детали — именно то, что нужно для обработки длинных последовательностей.
+This system allows LSTM to function as a smart information accumulator, selectively remembering important facts and ignoring irrelevant details—exactly what is needed for processing long sequences.
 
-### 2.2 Формализация и обозначения: определение размерностей и переменных
+### 2.2 Formalization and Notation: Defining Dimensions and Variables
 
-Давайте формализуем архитектуру LSTM, четко определив все компоненты и их размерности. Это поможет как в понимании структуры, так и при последующей реализации.
+Let us formalize the LSTM architecture, clearly defining all components and their dimensions. This aids both in understanding the structure and subsequent implementation.
 
-**Основные обозначения:**
+**Main Notations:**
 
-| **Символ** | **Размерность** | **Описание** |
-|------------|-----------------|--------------|
-| $x_t$ | $\mathbb{R}^{d_x}$ | Входной вектор на шаге $t$ |
-| $h_t$ | $\mathbb{R}^{d_h}$ | Скрытое состояние на шаге $t$ |
-| $C_t$ | $\mathbb{R}^{d_h}$ | Состояние ячейки на шаге $t$ |
-| $f_t$ | $\mathbb{R}^{d_h}$ | Активация вентиля забывания на шаге $t$ |
-| $i_t$ | $\mathbb{R}^{d_h}$ | Активация вентиля входа на шаге $t$ |
-| $o_t$ | $\mathbb{R}^{d_h}$ | Активация вентиля выхода на шаге $t$ |
-| $\tilde{C}_t$ | $\mathbb{R}^{d_h}$ | Кандидат-вектор новых значений ячейки |
+| **Symbol** | **Dimension** | **Description** |
+|------------|---------------|-----------------|
+| $x_t$ | $\mathbb{R}^{d_x}$ | Input vector at step $t$ |
+| $h_t$ | $\mathbb{R}^{d_h}$ | Hidden state at step $t$ |
+| $C_t$ | $\mathbb{R}^{d_h}$ | Cell state at step $t$ |
+| $f_t$ | $\mathbb{R}^{d_h}$ | Forget gate activation at step $t$ |
+| $i_t$ | $\mathbb{R}^{d_h}$ | Input gate activation at step $t$ |
+| $o_t$ | $\mathbb{R}^{d_h}$ | Output gate activation at step $t$ |
+| $\tilde{C}_t$ | $\mathbb{R}^{d_h}$ | Candidate vector for new cell values |
 
-**Весовые матрицы и векторы смещения:**
+**Weight Matrices and Bias Vectors:**
 
-| **Символ** | **Размерность** | **Описание** |
-|------------|-----------------|--------------|
-| $W_f$ | $\mathbb{R}^{d_h \times (d_x + d_h)}$ | Веса для вентиля забывания |
-| $W_i$ | $\mathbb{R}^{d_h \times (d_x + d_h)}$ | Веса для вентиля входа |
-| $W_C$ | $\mathbb{R}^{d_h \times (d_x + d_h)}$ | Веса для кандидат-вектора |
-| $W_o$ | $\mathbb{R}^{d_h \times (d_x + d_h)}$ | Веса для вентиля выхода |
-| $b_f$ | $\mathbb{R}^{d_h}$ | Смещение для вентиля забывания |
-| $b_i$ | $\mathbb{R}^{d_h}$ | Смещение для вентиля входа |
-| $b_C$ | $\mathbb{R}^{d_h}$ | Смещение для кандидат-вектора |
-| $b_o$ | $\mathbb{R}^{d_h}$ | Смещение для вентиля выхода |
+| **Symbol** | **Dimension** | **Description** |
+|------------|---------------|-----------------|
+| $W_f$ | $\mathbb{R}^{d_h \times (d_x + d_h)}$ | Weights for forget gate |
+| $W_i$ | $\mathbb{R}^{d_h \times (d_x + d_h)}$ | Weights for input gate |
+| $W_C$ | $\mathbb{R}^{d_h \times (d_x + d_h)}$ | Weights for candidate vector |
+| $W_o$ | $\mathbb{R}^{d_h \times (d_x + d_h)}$ | Weights for output gate |
+| $b_f$ | $\mathbb{R}^{d_h}$ | Bias for forget gate |
+| $b_i$ | $\mathbb{R}^{d_h}$ | Bias for input gate |
+| $b_C$ | $\mathbb{R}^{d_h}$ | Bias for candidate vector |
+| $b_o$ | $\mathbb{R}^{d_h}$ | Bias for output gate |
 
-**Функции активации:**
-- $\sigma$: сигмоидальная функция, отображает входы в диапазон [0, 1]
-- $\tanh$: гиперболический тангенс, отображает входы в диапазон [-1, 1]
+**Activation Functions:**
+- $\sigma$: Sigmoid function, maps inputs to range [0, 1]
+- $\tanh$: Hyperbolic tangent, maps inputs to range [-1, 1]
 
-**Размерности входных и выходных данных:**
-- $d_x$: размерность входного вектора $x_t$
-- $d_h$: размерность скрытого состояния и состояния ячейки
+**Input and Output Data Dimensions:**
+- $d_x$: Dimension of input vector $x_t$
+- $d_h$: Dimension of hidden state and cell state
 
-**Конкатенация входа и предыдущего состояния:**
+**Concatenation of Input and Previous State:**
 
-Для упрощения записи мы часто используем конкатенацию входного вектора $x_t$ и предыдущего скрытого состояния $h_{t-1}$:
+For simplified notation, we often concatenate the input vector $x_t$ and previous hidden state $h_{t-1}$:
 
 $$[x_t, h_{t-1}] \in \mathbb{R}^{d_x + d_h}$$
 
-Это позволяет нам определить веса как одну матрицу для каждого вентиля, вместо разделения на отдельные матрицы для $x_t$ и $h_{t-1}$.
+This allows us to define weights as a single matrix per gate, rather than separate matrices for $x_t$ and $h_{t-1}$.
 
-**Примечания по размерностям:**
+**Notes on Dimensions:**
 
-1. В стандартной архитектуре LSTM размерность состояния ячейки $C_t$ равна размерности скрытого состояния $h_t$. В некоторых вариациях они могут различаться.
+1. In standard LSTM architecture, cell state dimension $C_t$ equals hidden state dimension $h_t$. In some variants, they may differ.
 
-2. Все вентили ($f_t$, $i_t$, $o_t$) имеют одинаковую размерность $d_h$, что позволяет им поэлементно контролировать состояние ячейки.
+2. All gates ($f_t$, $i_t$, $o_t$) have the same dimension $d_h$, enabling element-wise control over the cell state.
 
-3. Общее количество параметров в стандартном LSTM:
-   - Веса: $4 \times d_h \times (d_x + d_h)$
-   - Смещения: $4 \times d_h$
-   - Итого: $4 \times d_h \times (d_x + d_h + 1)$
+3. Total parameters in standard LSTM:
+   - Weights: $4 \times d_h \times (d_x + d_h)$
+   - Biases: $4 \times d_h$
+   - Total: $4 \times d_h \times (d_x + d_h + 1)$
 
-Эти обозначения мы будем использовать в следующих разделах для описания математических формул и динамики LSTM.
+We will use these notations in subsequent sections to describe LSTM’s mathematical formulas and dynamics.
 
-### 2.3 Динамика одного шага
+### 2.3 Dynamics of One Step
 
-Теперь рассмотрим, как точно вычисляются все компоненты LSTM на одном временном шаге $t$. Разберем каждый элемент архитектуры подробно.
+Now we examine how all LSTM components are computed precisely at a single time step $t$. We will detail each architectural element.
 
-### Вентиль забывания (forget gate)
+### Forget Gate
 
-Вентиль забывания $f_t$ определяет, какую информацию из предыдущего состояния ячейки $C_{t-1}$ следует сохранить, а какую — стереть:
+The forget gate $f_t$ determines which information from the previous cell state $C_{t-1}$ should be retained and which discarded:
 
 $$
 f_t = \sigma\big(W_f \cdot [x_t, h_{t-1}] + b_f\big)
 $$
 
-Здесь:
-- $[x_t, h_{t-1}]$ — конкатенация текущего входа и предыдущего скрытого состояния
-- $W_f$ — весовая матрица для вентиля забывания
-- $b_f$ — вектор смещения
-- $\sigma$ — сигмоидальная функция, возвращающая значения в интервале [0, 1]
+Here:
+- $[x_t, h_{t-1}]$ — concatenation of current input and previous hidden state
+- $W_f$ — weight matrix for forget gate
+- $b_f$ — bias vector
+- $\sigma$ — sigmoid function returning values in [0, 1]
 
-Результат $f_t$ представляет собой вектор значений между 0 и 1, где:
-- **1** означает "полностью сохранить эту информацию"
-- **0** означает "полностью забыть эту информацию"
+Result $f_t$ is a vector of values between 0 and 1, where:
+- **1** means "retain this information fully"
+- **0** means "discard this information entirely"
 
-### **Пример:** 
+#### **Example:**
 
-Если модель работает с текстом и в какой-то момент понимает, что начинается новое предложение, вентиль забывания может "обнулить" часть информации о предыдущем предложении.
+If the model processes text and at some point recognizes a new sentence has begun, the forget gate may "zero out" part of the information from the previous sentence.
 
 ![Image_02.png](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/LSTM/Image_02.png)
 
-**Контекст:** Обработка последовательности "Я люблю море. На небе светит солнце."
+**Context:** Processing sequence "Я люблю море. На небе светит солнце."
 
-1. **Состояние после первого предложения:**
-   - $C_{t-1}$ (состояние ячейки) кодирует информацию о первом предложении: [0.8, 0.6, -0.2]
-     - 0.8 → факт "море" (существительное)
-     - 0.6 → эмоция "любовь"
-     - -0.2 → местоимение "я"
+1. **State after first sentence:**
+   - $C_{t-1}$ (cell state) encodes information from first sentence: [0.8, 0.6, -0.2]
+     - 0.8 → fact "sea" (noun)
+     - 0.6 → emotion "love"
+     - -0.2 → pronoun "I"
 
-2. **Обработка слова "На" (начало нового предложения):**
-   - Вход $x_t$ = embedding слова "На" [0.1, -0.3, 0.5]
-   - $h_{t-1}$ = предыдущее скрытое состояние [0.7, 0.5, -0.1]
-   - Вентиль забывания вычисляет:
+2. **Processing word "На" (start of new sentence):**
+   - Input $x_t$ = embedding of "На" [0.1, -0.3, 0.5]
+   - $h_{t-1}$ = previous hidden state [0.7, 0.5, -0.1]
+   - Forget gate computes:
      $$
      f_t = \sigma\left(
      \begin{bmatrix}
@@ -851,86 +841,86 @@ $$
      \end{bmatrix}
      \right) = [0.1, 0.9, 0.8]
      $$
-     - Первый нейрон (0.1) → забыть информацию о местоимении (уже не нужно)
-     - Второй нейрон (0.9) → сохранить эмоциональный контекст
-     - Третий нейрон (0.8) → сохранить информацию о существительном
+     - First neuron (0.1) → forget pronoun information (no longer needed)
+     - Second neuron (0.9) → retain emotional context
+     - Third neuron (0.8) → retain noun information
 
-3. **Обновленное состояние ячейки:**
+3. **Updated cell state:**
    - $C_t = f_t \odot C_{t-1} = [0.1, 0.9, 0.8] \odot [0.8, 0.6, -0.2] = [0.08, 0.54, -0.16]$
-     - Значение 0.8 (море) уменьшилось до 0.08 → забыто
-     - Эмоция 0.6 сохранилась как 0.54
-     - Местоимение -0.2 стало -0.016 → почти забыто
+     - Value 0.8 ("sea") reduced to 0.08 → forgotten
+     - Emotion 0.6 preserved as 0.54
+     - Pronoun -0.2 became -0.016 → nearly forgotten
 
-**Интерпретация:** Модель решила:
-- Сохранить эмоциональный контекст (может пригодиться для анализа тональности)
-- Забыть конкретные существительные из предыдущего предложения
-- Подготовиться к новой синтаксической структуре (новое предложение)
+**Interpretation:** The model decided:
+- Preserve emotional context (may be useful for sentiment analysis)
+- Discard specific nouns from previous sentence
+- Prepare for new syntactic structure (new sentence)
 
-**Визуализация векторов:**
+**Vector Visualization:**
 ```
-До forget gate:    [ 0.80  0.60  -0.20 ]
-After forget gate: [ 0.08  0.54  -0.02 ]
-                   │      │      └── Почти забыто ("я")
-                   │      └────────── Сохранено ("любовь")
-                   └───────────────── Забыто ("море")
+Before forget gate:    [ 0.80  0.60  -0.20 ]
+After forget gate:     [ 0.08  0.54  -0.02 ]
+                       │      │      └── Nearly forgotten ("I")
+                       │      └────────── Preserved ("love")
+                       └───────────────── Forgotten ("sea")
 ```
 
 ---
 
-### Вентиль входа (input gate)
+### Input Gate
 
-Вентиль входа $i_t$ решает, какую новую информацию добавить в состояние ячейки:
+The input gate $i_t$ determines what new information to add to the cell state:
 
 $$
 i_t = \sigma\big(W_i \cdot [x_t, h_{t-1}] + b_i\big)
 $$
 
-Как и в случае с вентилем забывания, результатом является вектор значений в интервале [0, 1], где:
-- **1** означает "полностью добавить эту новую информацию"
-- **0** означает "не добавлять эту информацию"
+As with the forget gate, the result is a vector of values in [0, 1], where:
+- **1** means "add this new information fully"
+- **0** means "do not add this information"
 
-#### Кандидат-вектор состояния ячейки
+#### Candidate Cell State Vector
 
 ![Image_03.png](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/LSTM/Image_03.png)
 
-Параллельно с вентилем входа, создается кандидат-вектор $\tilde{C}_t$ — "черновик" новой информации, которую потенциально можно добавить в состояние ячейки:
+Parallel to the input gate, a candidate vector $\tilde{C}_t$ is created—a "draft" of new information that may potentially be added to the cell state:
 
 $$
 \tilde{C}_t = \tanh\big(W_C \cdot [x_t, h_{t-1}] + b_C\big)
 $$
 
-Здесь используется функция $\tanh$, чтобы значения были нормализованы в диапазоне [-1, 1].
+Here, the $\tanh$ function normalizes values to the range [-1, 1].
 
-#### Обновление состояния ячейки
+#### Updating the Cell State
 
 ![Image_04.png](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/LSTM/Image_04.png)
 
-Теперь мы готовы обновить состояние ячейки $C_t$, используя вентиль забывания, вентиль входа и кандидат-вектор:
+Now we are ready to update the cell state $C_t$, using the forget gate, input gate, and candidate vector:
 
 $$
 C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t
 $$
 
-где $\odot$ обозначает поэлементное умножение (умножение Адамара).
+where $\odot$ denotes element-wise multiplication (Hadamard product).
 
-Это уравнение описывает ключевой механизм LSTM:
-1. $f_t \odot C_{t-1}$ — старая информация, которую мы решили сохранить
-2. $i_t \odot \tilde{C}_t$ — новая информация, которую мы решили добавить
+This equation describes LSTM’s key mechanism:
+1. $f_t \odot C_{t-1}$ — old information we chose to retain
+2. $i_t \odot \tilde{C}_t$ — new information we chose to add
 
-**Важно!** Состояние ячейки $C_t$ обновляется с помощью только линейных операций (умножение и сложение). Это гарантирует, что градиент может течь через ячейку без затухания, решая проблему ванильных RNN.
+**Crucially!** The cell state $C_t$ is updated using only linear operations (multiplication and addition). This ensures gradients can flow through the cell without vanishing, solving the vanilla RNN problem.
 
-### **Пример:**
+### **Example:**
 
-Продолжим обработку последовательности "Я люблю море. На небе светит солнце." после применения вентиля забывания.
+Continue processing the sequence "Я люблю море. На небе светит солнце." after applying the forget gate.
 
-1. **Текущее состояние после вентиля забывания:**
-   - $f_t \odot C_{t-1} = [0.08, 0.54, -0.16]$ — часть информации о предыдущем предложении сохранена
+1. **Current state after forget gate:**
+   - $f_t \odot C_{t-1} = [0.08, 0.54, -0.16]$ — part of the previous sentence’s information preserved
 
-2. **Обработка слова "На" (начало нового предложения):**
-   - Вход $x_t$ = embedding слова "На" [0.1, -0.3, 0.5]
-   - $h_{t-1}$ = предыдущее скрытое состояние [0.7, 0.5, -0.1]
+2. **Processing word "На" (start of new sentence):**
+   - Input $x_t$ = embedding of "На" [0.1, -0.3, 0.5]
+   - $h_{t-1}$ = previous hidden state [0.7, 0.5, -0.1]
    
-   - Вентиль входа вычисляет:
+   - Input gate computes:
      $$
      i_t = \sigma\left(
      \begin{bmatrix}
@@ -949,7 +939,7 @@ $$
      \right) = [0.7, 0.6, 0.9]
      $$
      
-   - Кандидат-вектор нового состояния:
+   - Candidate vector of new state:
      $$
      \tilde{C}_t = \tanh\left(
      \begin{bmatrix}
@@ -967,64 +957,64 @@ $$
      \end{bmatrix}
      \right) = [0.6, -0.3, 0.7]
      $$
-     - Первый нейрон (0.6) → информация о месте "небо" (существительное)
-     - Второй нейрон (-0.3) → нейтральная эмоциональная тональность
-     - Третий нейрон (0.7) → предлог "на" (указывает на местоположение)
+     - First neuron (0.6) → information about place "sky" (noun)
+     - Second neuron (-0.3) → neutral emotional tone
+     - Third neuron (0.7) → preposition "on" (indicates location)
 
-3. **Обновленное состояние ячейки с новой информацией:**
+3. **Updated cell state with new information:**
    - $i_t \odot \tilde{C}_t = [0.7, 0.6, 0.9] \odot [0.6, -0.3, 0.7] = [0.42, -0.18, 0.63]$
    
-   - Итоговое состояние ячейки:
+   - Final cell state:
      $C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t = [0.08, 0.54, -0.16] + [0.42, -0.18, 0.63] = [0.50, 0.36, 0.47]$
-     - Значение 0.08 (забытое "море") + 0.42 (новое "небо") = 0.50 → новая информация о месте
-     - Эмоция 0.54 (сохраненная "любовь") + (-0.18) (нейтральность) = 0.36 → снижение эмоциональной окраски
-     - Значение -0.16 (почти забытое "я") + 0.63 (новое "на") = 0.47 → переход от субъекта к локации
+     - Value 0.08 (forgotten "sea") + 0.42 (new "sky") = 0.50 → new location information
+     - Emotion 0.54 (preserved "love") + (-0.18) (neutrality) = 0.36 → reduced emotional tone
+     - Value -0.16 (nearly forgotten "I") + 0.63 (new "on") = 0.47 → shift from subject to location
 
-**Интерпретация:** Модель:
-- Добавила новую информацию о небе, которое становится новым существительным
-- Снизила эмоциональную окраску, переходя к более нейтральному описанию
-- Переключила фокус с субъекта ("я") на пространственное отношение ("на")
+**Interpretation:** The model:
+- Added new information about the sky, which becomes the new noun
+- Reduced emotional tone, transitioning to a more neutral description
+- Shifted focus from the subject ("I") to spatial relation ("on")
 
-**Визуализация векторов:**
+**Vector Visualization:**
 ```
-После forget gate:  [ 0.08  0.54  -0.16 ]
-Новая информация:   [ 0.42  -0.18  0.63 ]
-Итоговое состояние: [ 0.50  0.36  0.47 ]
-                     │      │      └── Новый фокус (пространство "на")
-                     │      └───────── Снижение эмоциональности
-                     └──────────────── Новое существительное ("небо")
+After forget gate:   [ 0.08  0.54  -0.16 ]
+New information:     [ 0.42  -0.18  0.63 ]
+Final state:         [ 0.50  0.36  0.47 ]
+                      │      │      └── New focus (location "on")
+                      │      └───────── Reduced emotionality
+                      └──────────────── New noun ("sky")
 ```
 ---
 
-#### Вентиль выхода (output gate)
+#### Output Gate
 
 ![Image_05.png](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/LSTM/Image_05.png)
 
-Вентиль выхода $o_t$ определяет, какую часть обновленного состояния ячейки передать в выходное скрытое состояние:
+The output gate $o_t$ determines which portion of the updated cell state to pass to the output hidden state:
 
 $$
 o_t = \sigma\big(W_o \cdot [x_t, h_{t-1}] + b_o\big)
 $$
 
-Как и другие вентили, $o_t$ содержит значения в интервале [0, 1].
+Like the other gates, $o_t$ contains values in the range [0, 1].
 
-#### Скрытое состояние
+#### Hidden State
 
-Наконец, вычисляем новое скрытое состояние $h_t$, применяя вентиль выхода к нормализованному состоянию ячейки:
+Finally, compute the new hidden state $h_t$ by applying the output gate to the normalized cell state:
 
 $$
 h_t = o_t \odot \tanh(C_t)
 $$
 
-Здесь:
-- $\tanh(C_t)$ нормализует значения состояния ячейки до диапазона [-1, 1]
-- $o_t$ определяет, какие компоненты этого нормализованного состояния передать дальше
+Here:
+- $\tanh(C_t)$ normalizes cell state values to the range [-1, 1]
+- $o_t$ determines which components of this normalized state to pass forward
 
-Скрытое состояние $h_t$ используется как для предсказания выхода на текущем шаге, так и как вход для следующего шага сети.
+The hidden state $h_t$ is used both for predicting the current step’s output and as input for the next step of the network.
 
-**Итог: полный набор формул LSTM**
+**Summary: Full Set of LSTM Equations**
 
-Для удобства, вот полный набор формул, описывающих один шаг LSTM:
+For convenience, here is the complete set of equations describing one LSTM step:
 
 $$
 \begin{align}
@@ -1037,200 +1027,200 @@ h_t &= o_t \odot \tanh(C_t)
 \end{align}
 $$
 
-Эти шесть уравнений полностью описывают динамику LSTM ячейки на одном временном шаге.
+These six equations fully describe the dynamics of an LSTM cell at a single time step.
 
-## 3. Математические основы и функционирование LSTM
+## 3. Mathematical Foundations and Functioning of LSTM
 
-### 3.1 Роль сигмоидальных функций: Почему именно сигмоида для вентилей
+### 3.1 Role of Sigmoid Functions: Why Sigmoid for Gates
 
-Сигмоидальная функция играет ключевую роль в архитектуре LSTM, особенно в механизме вентилей. Разберем, почему именно эта функция активации используется для всех трех вентилей (забывания, входа и выхода).
+The sigmoid function plays a pivotal role in the LSTM architecture, especially in the gate mechanism. Let us examine why this specific activation function is used for all three gates (forget, input, and output).
 
 ![Image_06.png](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/LSTM/Image_06.jpg)
 
-**Математическое определение сигмоидальной функции:**
+**Mathematical definition of the sigmoid function:**
 
 $\sigma(x) = \frac{1}{1 + e^{-x}}$
 
-**Ключевые свойства сигмоиды, делающие её идеальной для вентилей:**
+**Key properties of the sigmoid that make it ideal for gates:**
 
-1. **Ограниченный диапазон выходных значений [0, 1]**
-   - Это свойство критически важно для вентилей, так как они должны выполнять функцию "фильтра"
-   - Значение 0 означает "полностью блокировать информацию"
-   - Значение 1 означает "полностью пропустить информацию"
-   - Промежуточные значения позволяют частично пропускать информацию
+1. **Bounded output range [0, 1]**
+   - This property is critical for gates, as they must function as filters
+   - Value 0 means "completely block information"
+   - Value 1 means "completely pass information"
+   - Intermediate values allow partial passage of information
 
-2. **Гладкость и дифференцируемость**
-   - Сигмоида непрерывна и дифференцируема на всей области определения
-   - Её производная имеет простую форму: $\sigma'(x) = \sigma(x) \cdot (1 - \sigma(x))$
-   - Это свойство важно для обратного распространения градиента при обучении
+2. **Smoothness and differentiability**
+   - The sigmoid is continuous and differentiable everywhere
+   - Its derivative has a simple form: $\sigma'(x) = \sigma(x) \cdot (1 - \sigma(x))$
+   - This is essential for backpropagation during training
 
-3. **Нелинейность и насыщение**
-   - При больших положительных значениях $x$ функция стремится к 1
-   - При больших отрицательных значениях $x$ функция стремится к 0
-   - Это создает эффект "насыщения", который стабилизирует динамику сети
+3. **Nonlinearity and saturation**
+   - For large positive $x$, the function approaches 1
+   - For large negative $x$, it approaches 0
+   - This creates a "saturation" effect that stabilizes network dynamics
 
-**Практическое применение в вентилях LSTM:**
+**Practical application in LSTM gates:**
 
-- **Вентиль забывания ($f_t$)**: сигмоида определяет, какой процент каждого элемента в состоянии ячейки сохранить. Значение 0 означает "забыть полностью", 1 — "сохранить полностью".
+- **Forget gate ($f_t$)**: Sigmoid determines what percentage of each cell state element to retain. Value 0 means "forget completely," 1 means "retain completely."
 
-- **Вентиль входа ($i_t$)**: сигмоида контролирует, какую часть новой информации ($\tilde{C}_t$) добавить в состояние ячейки. Значение 0 означает "не добавлять ничего", 1 — "добавить полностью".
+- **Input gate ($i_t$)**: Sigmoid controls how much of the new information ($\tilde{C}_t$) to add to the cell state. Value 0 means "add nothing," 1 means "add fully."
 
-- **Вентиль выхода ($o_t$)**: сигмоида регулирует, какую часть информации из состояния ячейки передать в скрытое состояние $h_t$. Значение 0 означает "ничего не передавать", 1 — "передать всё".
+- **Output gate ($o_t$)**: Sigmoid regulates how much information from the cell state to pass to the hidden state $h_t$. Value 0 means "pass nothing," 1 means "pass everything."
 
-**Примечание по инициализации смещений:**
+**Note on bias initialization:**
 
-Важно отметить, что смещения (bias) вентилей часто инициализируются специальным образом:
-- Смещение вентиля забывания ($b_f$) часто инициализируется положительными значениями (например, 1 или 2), чтобы в начале обучения сеть была склонна "помнить" информацию
-- Смещения других вентилей обычно инициализируются нулями или небольшими случайными значениями
+It is important to note that gate biases are often initialized specially:
+- The forget gate bias ($b_f$) is frequently initialized to positive values (e.g., 1 or 2), so that early in training the network tends to "remember" information
+- Biases of other gates are typically initialized to zero or small random values
 
-Такая инициализация помогает LSTM быстрее обучаться работе с долговременными зависимостями.
+Such initialization helps LSTM learn long-term dependencies more quickly.
 
-### 3.2 Функция активации tanh: Её роль в кандидат-векторе и выходе
+### 3.2 Role of the tanh Activation Function: In Candidate Vector and Output
 
-Гиперболический тангенс (tanh) — вторая ключевая функция активации в архитектуре LSTM. Она используется в двух важных местах: при создании кандидат-вектора и при формировании выходного скрытого состояния.
+The hyperbolic tangent (tanh) is the second key activation function in the LSTM architecture. It is used in two critical places: generating the candidate vector and forming the output hidden state.
 
 ![Image_07.png](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_%26_18/assets/LSTM/Image_07.JPG)
 
-**Математическое определение функции tanh:**
+**Mathematical definition of tanh:**
 
 $\tanh(x) = \frac{e^x - e^{-x}}{e^x + e^{-x}}$
 
-**Ключевые свойства tanh, важные для LSTM:**
+**Key properties of tanh important for LSTM:**
 
-1. **Ограниченный диапазон выходных значений [-1, 1]**
-   - В отличие от сигмоиды, tanh симметрична относительно начала координат
-   - Диапазон [-1, 1] позволяет представлять как положительные, так и отрицательные активации с равной амплитудой
+1. **Bounded output range [-1, 1]**
+   - Unlike the sigmoid, tanh is symmetric about the origin
+   - The [-1, 1] range allows representation of both positive and negative activations with equal amplitude
 
-2. **Крутизна градиента**
-   - Производная tanh в нуле равна 1, что больше, чем у сигмоиды (0.25)
-   - Это обеспечивает более сильный градиент при обратном распространении
+2. **Steep gradient**
+   - The derivative of tanh at zero is 1, which is higher than that of sigmoid (0.25)
+   - This provides stronger gradients during backpropagation
 
-3. **Нулевое среднее значение**
-   - Выходы функции tanh имеют приблизительно нулевое среднее значение
-   - Это помогает бороться с проблемой смещения при обучении (covariate shift)
+3. **Zero mean output**
+   - Tanh outputs have approximately zero mean
+   - This helps mitigate the problem of covariate shift during training
 
-**Роль tanh в кандидат-векторе $\tilde{C}_t$:**
+**Role of tanh in the candidate vector $\tilde{C}_t$:**
 
 $\tilde{C}_t = \tanh(W_C \cdot [x_t, h_{t-1}] + b_C)$
 
-1. **Нормализация значений**
-   - tanh приводит все значения к диапазону [-1, 1], что создает стабильную динамику в ячейке
-   - Это предотвращает неконтролируемый рост значений в состоянии ячейки
+1. **Value normalization**
+   - Tanh scales all values to [-1, 1], creating stable dynamics in the cell
+   - This prevents uncontrolled growth of cell state values
 
-2. **Биполярность представления**
-   - Отрицательные значения могут представлять "ингибирующие" сигналы
-   - Положительные значения могут представлять "возбуждающие" сигналы
-   - Это важно для создания богатого внутреннего представления данных
+2. **Bipolar representation**
+   - Negative values can represent "inhibitory" signals
+   - Positive values can represent "excitatory" signals
+   - This enables rich internal data representation
 
-3. **Баланс с сигмоидой вентиля входа**
-   - tanh создает кандидат-значения в диапазоне [-1, 1]
-   - Сигмоида вентиля входа определяет, какую часть этих значений добавить
-   - Это позволяет как добавлять, так и вычитать информацию из состояния ячейки
+3. **Balance with input gate sigmoid**
+   - Tanh generates candidate values in [-1, 1]
+   - The input gate sigmoid determines how much of these values to add
+   - This allows both addition and subtraction of information from the cell state
 
-**Роль tanh при формировании скрытого состояния $h_t$:**
+**Role of tanh in forming the hidden state $h_t$:**
 
 $h_t = o_t \odot \tanh(C_t)$
 
-1. **Нормализация выходных значений**
-   - Состояние ячейки $C_t$ может содержать значения с большой амплитудой
-   - tanh нормализует эти значения перед выходом, что важно для стабильности последующих слоев
+1. **Output normalization**
+   - Cell state $C_t$ may contain large-amplitude values
+   - Tanh normalizes these before output, ensuring stability for subsequent layers
 
-2. **Балансировка активаций**
-   - tanh обеспечивает симметричный выход для положительных и отрицательных значений в $C_t$
-   - Это полезно для последующих слоев, которые часто лучше работают с центрированными входами
+2. **Activation balancing**
+   - Tanh provides symmetric output for positive and negative values in $C_t$
+   - This benefits downstream layers that often perform better with centered inputs
 
-3. **Интерпретируемость выхода**
-   - Скрытое состояние $h_t$ используется для предсказаний и как входной сигнал для следующего шага
-   - Нормализованный диапазон [-1, 1] обеспечивает согласованное масштабирование этих сигналов
+3. **Interpretability of output**
+   - Hidden state $h_t$ is used for predictions and as input to the next step
+   - The normalized [-1, 1] range ensures consistent scaling of these signals
 
-**Сравнение с другими функциями активации:**
+**Comparison with Other Activation Functions:**
 
-Почему именно tanh, а не другие функции активации, такие как ReLU?
+Why tanh, and not other functions such as ReLU?
 
-- **ReLU** не ограничивает верхний предел выходных значений, что может привести к неконтролируемому росту активаций
-- **Leaky ReLU** имеет неограниченный диапазон и асимметричный отклик, что менее подходит для состояния ячейки
-- **Sigmoid** ограничивает выход только положительными значениями, что уменьшает выразительность модели
+- **ReLU** does not bound upper output limits, potentially leading to uncontrolled activation growth
+- **Leaky ReLU** has an unbounded range and asymmetric response, less suitable for cell state
+- **Sigmoid** restricts outputs to positive values only, reducing model expressiveness
 
-**Практический аспект:**
+**Practical Aspect:**
 
-В некоторых современных вариациях LSTM функция tanh может заменяться на другие активации для кандидат-вектора, но в классической архитектуре и большинстве практических реализаций tanh остается стандартным выбором, благодаря её математическим свойствам, которые хорошо согласуются с природой задачи обработки последовательностей.
+In some modern LSTM variants, tanh may be replaced with other activations for the candidate vector, but in the classical architecture and most practical implementations, tanh remains the standard choice due to its mathematical properties aligning well with the nature of sequential data processing.
 
-### 3.3 Поток градиентов в LSTM: как архитектура решает проблему затухающего градиента
+### 3.3 Gradient Flow in LSTM: How the Architecture Solves the Vanishing Gradient Problem
 
-Ключевое преимущество LSTM перед обычными RNN — способность эффективно обрабатывать длинные последовательности без проблемы затухающего градиента. Рассмотрим, как именно LSTM решает эту фундаментальную проблему на уровне потока градиентов.
+The key advantage of LSTM over vanilla RNNs is its ability to effectively handle long sequences without the vanishing gradient problem. Let us examine precisely how LSTM resolves this fundamental issue at the level of gradient flow.
 
-**Напомним проблему в ванильных RNN:**
+**Recall the problem in vanilla RNNs:**
 
-В обычной RNN градиент потери по скрытому состоянию $h_{t-k}$ включает произведение множества якобианов:
+In a vanilla RNN, the gradient of the loss with respect to hidden state $h_{t-k}$ involves a product of many Jacobians:
 
 $$\frac{\partial h_t}{\partial h_{t-k}} = \prod_{i=t-k+1}^{t} \frac{\partial h_i}{\partial h_{i-1}} = \prod_{i=t-k+1}^{t} \text{diag}(\tanh'(a_i)) \cdot W_{hh}$$
 
-Эти якобианы обычно имеют собственные значения меньше 1, что приводит к экспоненциальному затуханию градиента при увеличении $k$.
+These Jacobians typically have eigenvalues less than 1, causing exponential gradient decay as $k$ increases.
 
-**Ключевая инновация LSTM: Константный поток ошибки**
+**Key LSTM Innovation: Constant Error Carousel**
 
-Главная особенность LSTM — **Константный поток ошибки (Constant Error Carousel, CEC)**, который обеспечивается прямым линейным соединением через состояние ячейки $C_t$.
+LSTM’s defining feature is the **Constant Error Carousel (CEC)**, enabled by the direct linear connection through the cell state $C_t$.
 
-Рассмотрим поток градиента через состояние ячейки от момента $t$ к моменту $t-1$:
+Consider the gradient flow through the cell state from time $t$ to $t-1$:
 
 $$\frac{\partial C_t}{\partial C_{t-1}} = \frac{\partial (f_t \odot C_{t-1} + i_t \odot \tilde{C}_t)}{\partial C_{t-1}} = f_t$$
 
-Это выражение показывает критическое свойство LSTM: **градиент от $C_t$ к $C_{t-1}$ проходит через простое поэлементное умножение на вентиль забывания $f_t$**. Не используются ни нелинейные функции активации, ни матричные умножения — только прямое поэлементное умножение.
+This expression reveals LSTM’s critical property: **the gradient from $C_t$ to $C_{t-1}$ flows via simple element-wise multiplication by the forget gate $f_t$**. No nonlinear activation functions or matrix multiplications are involved—only direct element-wise multiplication.
 
-**Рекуррентное распространение градиента через несколько шагов:**
+**Recurrent gradient propagation across multiple steps:**
 
-При распространении градиента через $k$ шагов назад имеем:
+When propagating the gradient backward over $k$ steps, we have:
 
 $$\frac{\partial C_t}{\partial C_{t-k}} = \prod_{i=t-k+1}^{t} \frac{\partial C_i}{\partial C_{i-1}} = \prod_{i=t-k+1}^{t} f_i$$
 
-Это произведение векторов вентилей забывания (применяемое поэлементно).
+This is a (element-wise) product of forget gate vectors.
 
-**Как это решает проблему затухающего градиента:**
+**How this solves the vanishing gradient problem:**
 
-1. **Контроль потока градиентов через $f_t$**
-   - Если компоненты $f_t$ близки к 1, градиент протекает почти без затухания
-   - LSTM обучается устанавливать $f_t \approx 1$ для важной информации
+1. **Controlled gradient flow via $f_t$**
+   - If components of $f_t$ are close to 1, the gradient flows with minimal decay
+   - LSTM learns to set $f_t \approx 1$ for important information
 
-2. **Аддитивное обновление состояния ячейки**
-   - В отличие от мультипликативных рекуррентных соединений в ванильных RNN, LSTM использует аддитивное обновление:
+2. **Additive cell state update**
+   - Unlike multiplicative recurrent connections in vanilla RNNs, LSTM uses additive updates:
      $C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t$
-   - Это позволяет градиентам течь без обязательного умножения на вес рекуррентной связи
+   - This allows gradients to flow without mandatory multiplication by recurrent weights
 
-3. **Механизм обучаемого "забывания"**
-   - Вместо фиксированного затухания, LSTM обучается тому, что необходимо помнить, а что можно забыть
-   - Это как избирательный "шлюз", который пропускает важные градиенты и блокирует неважные
+3. **Learnable "forgetting" mechanism**
+   - Instead of fixed decay, LSTM learns what to remember and what to discard
+   - This acts as a selective "gate" that passes important gradients and blocks irrelevant ones
 
-**Математическое моделирование потока градиентов:**
+**Mathematical Modeling of Gradient Flow:**
 
-Полный градиент потери $L$ по состоянию ячейки $C_{t-k}$ можно разложить:
+The full gradient of loss $L$ with respect to cell state $C_{t-k}$ can be decomposed:
 
 $$\frac{\partial L}{\partial C_{t-k}} = \sum_{j=t-k+1}^{T} \frac{\partial L}{\partial C_j} \frac{\partial C_j}{\partial C_{t-k}}$$
 
-Здесь первый член $\frac{\partial L}{\partial C_j}$ — это обратное распространение от потери к состоянию ячейки в момент $j$, а второй член $\frac{\partial C_j}{\partial C_{t-k}}$ — это произведение вентилей забывания по пути от $t-k$ до $j$.
+Here, the first term $\frac{\partial L}{\partial C_j}$ is the backpropagation from loss to cell state at time $j$, and the second term $\frac{\partial C_j}{\partial C_{t-k}}$ is the product of forget gates along the path from $t-k$ to $j$.
 
-**Практические следствия:**
+**Practical Consequences:**
 
-1. **Длинные зависимости**
-   - LSTM может обучаться зависимостям на сотни и даже тысячи шагов, что невозможно для ванильных RNN
-   - Например, LSTM может связать "Франция" в начале текста с "французский" в конце, даже если между ними большой промежуток
+1. **Long-range dependencies**
+   - LSTM can learn dependencies over hundreds or even thousands of steps, impossible for vanilla RNNs
+   - For example, LSTM can link "Франция" at the start of text to "французский" at the end, even with a large gap
 
-2. **Выборочная чувствительность**
-   - LSTM обучается быть чувствительной только к важным долговременным зависимостям
-   - Это более эффективно, чем попытка запоминать всё подряд
+2. **Selective sensitivity**
+   - LSTM learns to be sensitive only to important long-term dependencies
+   - This is more efficient than attempting to memorize everything
 
-3. **Стабильность обучения**
-   - Контролируемый поток градиентов делает обучение LSTM более стабильным
-   - Реже требуется gradient clipping или специальная инициализация весов
+3. **Training stability**
+   - Controlled gradient flow makes LSTM training more stable
+   - Less frequent need for gradient clipping or specialized weight initialization
 
-Таким образом, уникальная архитектура LSTM с константным потоком ошибки через состояние ячейки и обучаемыми вентилями эффективно решает проблему затухающего градиента, что позволяет моделировать долговременные зависимости в последовательных данных.
+Thus, LSTM’s unique architecture—with its constant error carousel through the cell state and learnable gates—effectively resolves the vanishing gradient problem, enabling modeling of long-term dependencies in sequential data.
 
-### 3.4 Сравнение с ванильной RNN: Математический взгляд на преимущества
+### 3.4 Comparison with Vanilla RNN: A Mathematical Perspective on Advantages
 
-Давайте проведем строгое математическое сравнение LSTM и ванильной RNN, чтобы лучше понять, почему LSTM справляется с задачей обработки последовательностей значительно лучше.
+Let us conduct a rigorous mathematical comparison between LSTM and vanilla RNN to better understand why LSTM handles sequential processing significantly better.
 
-**1. Архитектурное сравнение основных уравнений**
+**1. Architectural Comparison of Core Equations**
 
-**Ванильная RNN:**
+**Vanilla RNN:**
 $h_t = \tanh(W_{xh}x_t + W_{hh}h_{t-1} + b_h)$
 
 **LSTM:**
@@ -1245,415 +1235,415 @@ h_t &= o_t \odot \tanh(C_t)
 \end{align}
 $
 
-**Ключевые различия:**
+**Key Differences:**
 
-- **Одно vs несколько уравнений**: RNN использует одно уравнение, в то время как LSTM разделяет обновление на несколько специализированных компонентов.
-- **Одно vs два состояния**: RNN имеет только скрытое состояние $h_t$, тогда как LSTM разделяет информацию между скрытым состоянием $h_t$ и состоянием ячейки $C_t$.
-- **Простое vs адаптивное обновление**: RNN всегда обновляет всё скрытое состояние целиком, а LSTM избирательно обновляет компоненты состояния ячейки.
+- **One vs. multiple equations**: RNN uses a single equation, whereas LSTM decomposes the update into several specialized components.
+- **One vs. two states**: RNN has only a hidden state $h_t$, whereas LSTM separates information between the hidden state $h_t$ and the cell state $C_t$.
+- **Simple vs. adaptive update**: RNN always updates the entire hidden state at once, while LSTM selectively updates components of the cell state.
 
-**2. Поток информации во времени**
+**2. Information Flow Over Time**
 
-**Ванильная RNN:**
+**Vanilla RNN:**
 
-Информация от входа $x_{t-k}$ к текущему скрытому состоянию $h_t$ проходит через цепочку нелинейных преобразований:
+Information from input $x_{t-k}$ to the current hidden state $h_t$ passes through a chain of nonlinear transformations:
 
 $h_t = F(h_{t-1}, x_t) = F(F(h_{t-2}, x_{t-1}), x_t) = ... = F(F(...F(h_{t-k-1}, x_{t-k})...), x_t)$
 
-Здесь $F(h, x) = \tanh(W_{xh}x + W_{hh}h + b_h)$. Каждое применение нелинейности $\tanh$ может приводить к потере информации.
+Here $F(h, x) = \tanh(W_{xh}x + W_{hh}h + b_h)$. Each application of the nonlinearity $\tanh$ may lead to information loss.
 
 **LSTM:**
 
-Информация может течь через состояние ячейки $C_t$ с контролируемым забыванием:
+Information can flow through the cell state $C_t$ with controlled forgetting:
 
 $C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t = f_t \odot (f_{t-1} \odot C_{t-2} + i_{t-1} \odot \tilde{C}_{t-1}) + i_t \odot \tilde{C}_t = ...$
 
-Раскрывая это выражение дальше, получаем:
+Expanding this expression further yields:
 
 $C_t = \left( \prod_{j=t-k+1}^{t} f_j \right) \odot C_{t-k} + \sum_{j=t-k+1}^{t} \left( i_j \odot \tilde{C}_j \odot \prod_{l=j+1}^{t} f_l \right)$
 
-Это показывает, что состояние ячейки $C_t$ является взвешенной суммой всех предыдущих входов, где веса определяются произведениями вентилей $f_j$. Если все $f_j \approx 1$, информация может протекать почти без искажений.
+This shows that the cell state $C_t$ is a weighted sum of all previous inputs, where weights are determined by products of forget gates $f_j$. If all $f_j \approx 1$, information flows with minimal distortion.
 
-**3. Математический анализ потока градиентов**
+**3. Mathematical Analysis of Gradient Flow**
 
-**Ванильная RNN:**
+**Vanilla RNN:**
 
-Градиент потери $L$ по весам $W_{hh}$ вычисляется с помощью цепного правила:
+The gradient of loss $L$ with respect to weights $W_{hh}$ is computed via the chain rule:
 
 $\frac{\partial L}{\partial W_{hh}} = \sum_{k=1}^{t} \frac{\partial L}{\partial h_t} \frac{\partial h_t}{\partial h_{t-k}} \frac{\partial h_{t-k}}{\partial W_{hh}}$
 
-Где вторая производная содержит произведение якобианов:
+Where the second derivative contains a product of Jacobians:
 
 $\frac{\partial h_t}{\partial h_{t-k}} = \prod_{j=t-k+1}^{t} \frac{\partial h_j}{\partial h_{j-1}} = \prod_{j=t-k+1}^{t} \text{diag}(\tanh'(W_{xh}x_j + W_{hh}h_{j-1} + b_h)) \cdot W_{hh}$
 
-Собственные значения этого произведения обычно меньше 1, что приводит к затуханию градиента.
+The eigenvalues of this product are typically less than 1, leading to gradient vanishing.
 
 **LSTM:**
 
-У LSTM градиент от $C_t$ к $C_{t-k}$ вычисляется как:
+For LSTM, the gradient from $C_t$ to $C_{t-k}$ is computed as:
 
 $\frac{\partial C_t}{\partial C_{t-k}} = \prod_{j=t-k+1}^{t} \frac{\partial C_j}{\partial C_{j-1}} = \prod_{j=t-k+1}^{t} f_j$
 
-Поскольку $f_j$ — это результат сигмоидальной функции, обученной специально для контроля потока информации, LSTM может поддерживать значения $f_j \approx 1$ для важных компонентов, что предотвращает затухание градиента.
+Since $f_j$ is the output of a sigmoid function trained specifically to control information flow, LSTM can maintain values $f_j \approx 1$ for important components, preventing gradient vanishing.
 
-**4. Количественное сравнение параметров и вычислительной сложности**
+**4. Quantitative Comparison of Parameters and Computational Complexity**
 
-**Ванильная RNN:**
-- Количество параметров: $d_h \times (d_x + d_h + 1)$
-- Вычислительная сложность на шаг: $O(d_h \times (d_x + d_h))$
+**Vanilla RNN:**
+- Number of parameters: $d_h \times (d_x + d_h + 1)$
+- Computational complexity per step: $O(d_h \times (d_x + d_h))$
 
 **LSTM:**
-- Количество параметров: $4 \times d_h \times (d_x + d_h + 1)$
-- Вычислительная сложность на шаг: $O(4 \times d_h \times (d_x + d_h))$
+- Number of parameters: $4 \times d_h \times (d_x + d_h + 1)$
+- Computational complexity per step: $O(4 \times d_h \times (d_x + d_h))$
 
-LSTM требует примерно в 4 раза больше параметров и вычислений, но это компенсируется значительным улучшением производительности на задачах с долговременными зависимостями.
+LSTM requires approximately 4 times more parameters and computations, but this is compensated by significant performance improvements on tasks with long-term dependencies.
 
-**5. Эмпирическое сравнение возможностей**
+**5. Empirical Comparison of Capabilities**
 
-| **Свойство** | **Ванильная RNN** | **LSTM** |
-|--------------|-------------------|----------|
-| Максимальная длина зависимостей | 5-10 шагов | Сотни или тысячи шагов |
-| Устойчивость к шуму | Низкая | Высокая |
-| Способность забывать неважную информацию | Ограниченная | Высокая |
-| Адаптивность к различным временным масштабам | Низкая | Высокая |
+| **Property** | **Vanilla RNN** | **LSTM** |
+|--------------|-----------------|----------|
+| Maximum dependency length | 5–10 steps | Hundreds or thousands of steps |
+| Noise robustness | Low | High |
+| Ability to forget irrelevant information | Limited | High |
+| Adaptability to different time scales | Low | High |
 
-**6. Геометрическая интерпретация**
+**6. Geometric Interpretation**
 
-Если представить пространство скрытых состояний как многомерное пространство, то:
+If we represent the space of hidden states as a multidimensional space:
 
-- **Ванильная RNN** создает сложную нелинейную динамику, в которой траектории могут быстро сходиться к аттракторам, что приводит к потере информации о прошлых состояниях.
+- **Vanilla RNN** creates complex nonlinear dynamics where trajectories rapidly converge to attractors, leading to loss of information about past states.
 
-- **LSTM** создает управляемую динамику, где важные направления в пространстве состояний могут сохраняться почти без изменений, позволяя информации течь на большие расстояния, в то время как неважные направления могут быстро затухать.
+- **LSTM** creates controlled dynamics where important directions in the state space can be preserved nearly unchanged, allowing information to flow over long distances, while unimportant directions decay rapidly.
 
-В целом, LSTM представляет собой глубоко продуманное расширение архитектуры RNN, которое целенаправленно устраняет ключевые математические ограничения ванильных RNN, особенно проблему затухающего градиента, что делает LSTM значительно более мощным инструментом для моделирования последовательностей с долговременными зависимостями.
+Overall, LSTM is a deeply thought-out extension of the RNN architecture that deliberately eliminates key mathematical limitations of vanilla RNNs—particularly the vanishing gradient problem—making LSTM a significantly more powerful tool for modeling sequences with long-term dependencies.
 
 </details>
 
 <details> 
-    <summary><em><strong> 🔥🔥🔥 Управляемый рекуррентный блок (GRU)</strong></em></summary>
+    <summary><em><strong> 🔥🔥🔥 Gated Recurrent Unit (GRU)</strong></em></summary>
 
-## 1. Введение и мотивация
+## 1. Introduction and Motivation
 
-### 1.1 Контекст появления GRU: история создания как упрощения LSTM
+### 1.1 Context of GRU's Emergence: History as an LSTM Simplification
 
-Gated Recurrent Unit (GRU) — это разновидность рекуррентной нейронной сети, которая была представлена миру в 2014 году. GRU возникла в контексте активных исследований в области нейронного машинного перевода и обработки естественного языка, в период, когда LSTM (Long Short-Term Memory) уже зарекомендовали себя как эффективные модели для работы с последовательными данными.
+Gated Recurrent Unit (GRU) is a variant of recurrent neural network introduced to the world in 2014. GRU emerged during active research in neural machine translation and natural language processing, when LSTM (Long Short-Term Memory) had already proven themselves as effective models for sequential data.
 
-**Хронология появления GRU:**
+**Chronology of GRU's emergence:**
 
-- **2013-2014**: в рамках развития архитектур нейронного машинного перевода исследователи из Монреаля начали экспериментировать с вариациями рекуррентных сетей.
+- **2013–2014**: As part of neural machine translation architecture development, researchers from Montreal began experimenting with variations of recurrent networks.
   
-- **Июнь 2014**: Кюнхён Чо и соавторы публикуют статью ["Learning Phrase Representations using RNN Encoder-Decoder for Statistical Machine Translation"](https://arxiv.org/abs/1406.1078), в которой впервые представлена архитектура GRU.
+- **June 2014**: KyungHyun Cho and colleagues published the paper ["Learning Phrase Representations using RNN Encoder-Decoder for Statistical Machine Translation"](https://arxiv.org/abs/1406.1078), introducing the GRU architecture for the first time.
 
-- **Сентябрь 2014**: в статье ["Empirical Evaluation of Gated Recurrent Neural Networks on Sequence Modeling"](https://arxiv.org/abs/1412.3555) Юаша Чунг и др. проводят первое систематическое сравнение LSTM и GRU.
+- **September 2014**: In the paper ["Empirical Evaluation of Gated Recurrent Neural Networks on Sequence Modeling"](https://arxiv.org/abs/1412.3555), Junyoung Chung and others conducted the first systematic comparison of LSTM and GRU.
 
-GRU возникла из потребности в более простой, но при этом не менее эффективной альтернативе LSTM. Исследователи искали архитектуру, которая могла бы:
+GRU arose from the need for a simpler yet equally effective alternative to LSTM. Researchers sought an architecture that could:
 
-- Обрабатывать долговременные зависимости в последовательностях
-- Быть вычислительно более эффективной и проще для обучения
-- Требовать меньше параметров при сохранении выразительной способности
+- Handle long-term dependencies in sequences
+- Be computationally more efficient and easier to train
+- Require fewer parameters while preserving expressive power
 
-Ключевым наблюдением было то, что не все компоненты сложной архитектуры LSTM необходимы для достижения хороших результатов. Это привело к созданию GRU, которая объединяет функциональность нескольких вентилей LSTM и упрощает общий механизм обновления состояния.
+The key insight was that not all components of the complex LSTM architecture were necessary to achieve strong performance. This led to the creation of GRU, which merges the functionality of several LSTM gates and simplifies the overall state update mechanism.
 
-### 1.2 Авторы и ключевые публикации: Работы Чо и коллег, связь с машинным переводом
+### 1.2 Authors and Key Publications: Cho and Colleagues' Work, Connection to Machine Translation
 
-GRU неразрывно связана с именем **Кюнхёна Чо** (Kyunghyun Cho) и его коллегами из Монреальского университета. Исследовательская группа, работавшая над созданием GRU, включала таких учёных как Йошуа Бенджио (Yoshua Bengio), Дмитрий Бахданау (Dzmitry Bahdanau) и другие видные исследователи в области глубокого обучения.
+GRU is inextricably linked to the name of **Kyunghyun Cho** and his colleagues from the University of Montreal. The research group developing GRU included prominent deep learning researchers such as Yoshua Bengio and Dzmitry Bahdanau.
 
-**Основополагающие публикации:**
+**Foundational Publications:**
 
-1. **"Learning Phrase Representations using RNN Encoder-Decoder for Statistical Machine Translation" (Чо и др., 2014)**
-   - Первое представление GRU в контексте архитектуры энкодер-декодер для машинного перевода
-   - Демонстрация возможности обучения представлений фраз на уровне предложений
-   - Сравнение с базовой RNN и показ преимуществ механизма вентилей
+1. **"Learning Phrase Representations using RNN Encoder-Decoder for Statistical Machine Translation" (Cho et al., 2014)**
+   - First presentation of GRU in the context of an encoder-decoder architecture for machine translation
+   - Demonstration of the ability to learn phrase representations at the sentence level
+   - Comparison with baseline RNN and demonstration of advantages of gating mechanisms
 
-2. **"Empirical Evaluation of Gated Recurrent Neural Networks on Sequence Modeling" (Чунг и др., 2014)**
-   - Систематическое сравнение LSTM и GRU на задачах моделирования полифонической музыки и обработки речевых сигналов
-   - Вывод о сопоставимой производительности GRU с LSTM при меньшей вычислительной сложности
+2. **"Empirical Evaluation of Gated Recurrent Neural Networks on Sequence Modeling" (Chung et al., 2014)**
+   - Systematic comparison of LSTM and GRU on polyphonic music modeling and speech signal processing tasks
+   - Conclusion: GRU achieves performance comparable to LSTM with lower computational complexity
 
-3. **"Neural Machine Translation by Jointly Learning to Align and Translate" (Бахданау, Чо и Бенджио, 2014)**
-   - Применение GRU в архитектуре с механизмом внимания для машинного перевода
-   - Демонстрация возможностей GRU в комбинации с механизмом внимания
+3. **"Neural Machine Translation by Jointly Learning to Align and Translate" (Bahdanau, Cho, and Bengio, 2014)**
+   - Application of GRU in an attention-based architecture for machine translation
+   - Demonstration of GRU's capabilities in combination with attention mechanisms
 
-**Связь с машинным переводом:**
+**Connection to Machine Translation:**
 
-Появление GRU тесно связано с развитием нейронного машинного перевода (NMT). В 2014 году исследователи активно искали альтернативы статистическим методам машинного перевода, и рекуррентные нейронные сети показывали многообещающие результаты.
+The emergence of GRU is closely tied to the advancement of neural machine translation (NMT). In 2014, researchers actively sought alternatives to statistical machine translation methods, and recurrent neural networks showed promising results.
 
-GRU была разработана специально в контексте модели энкодер-декодер для NMT, где:
-- **Энкодер** кодирует входное предложение в фиксированный вектор
-- **Декодер** генерирует перевод на основе этого вектора
+GRU was specifically developed within the context of an encoder-decoder model for NMT, where:
+- The **encoder** encodes the input sentence into a fixed vector
+- The **decoder** generates the translation based on this vector
 
-Работа Чо и соавторов показала, что GRU может эффективно кодировать семантическую и синтаксическую информацию предложений, что критически важно для качественного перевода. Более того, упрощенная структура GRU позволяла обучать более глубокие модели и масштабировать их на большие объемы данных, что было важно для практических приложений машинного перевода.
+Cho and colleagues' work showed that GRU could effectively encode semantic and syntactic information of sentences, which is critical for high-quality translation. Moreover, GRU's simplified structure enabled training of deeper models and scaling to larger datasets, which was essential for practical machine translation applications.
 
-Цитата Кюнхёна Чо о создании GRU:
-> "Мы стремились создать более простую альтернативу LSTM, которая могла бы быть легче в обучении и более эффективной вычислительно, сохраняя при этом способность моделировать долговременные зависимости в последовательных данных."
+Quote from KyungHyun Cho on GRU's creation:
+> "We aimed to create a simpler alternative to LSTM that could be easier to train and more computationally efficient, while retaining the ability to model long-term dependencies in sequential data."
 
-### 1.3 Баланс сложности и эффективности: Почему возникла потребность в более компактных моделях
+### 1.3 Balance of Complexity and Efficiency: Why There Was a Need for More Compact Models
 
-В начале 2010-х годов LSTM стали стандартом де-факто для задач обработки последовательностей, но они имели несколько ограничений, которые стимулировали поиск более компактных альтернатив:
+In the early 2010s, LSTM became the de facto standard for sequential processing tasks, but they had several limitations that stimulated the search for more compact alternatives:
 
-**Проблемы, связанные со сложностью LSTM:**
+**Problems Associated with LSTM Complexity:**
 
-1. **Вычислительные требования**
-   - LSTM имеет четыре набора весов и смещений (для вентилей забывания, входа, выхода и кандидат-вектора)
-   - Обучение больших LSTM моделей требовало значительных вычислительных ресурсов
-   - Время обработки одного элемента последовательности было критично для приложений реального времени
+1. **Computational Requirements**
+   - LSTM has four sets of weights and biases (for forget, input, output gates, and candidate vector)
+   - Training large LSTM models required substantial computational resources
+   - Processing time per sequence element was critical for real-time applications
 
-2. **Сложность обучения**
-   - Большее количество параметров означало большее пространство поиска при оптимизации
-   - LSTM часто требовали более тщательной настройки гиперпараметров
-   - Сложнее добиться сходимости на ограниченных наборах данных
+2. **Training Complexity**
+   - More parameters meant a larger search space during optimization
+   - LSTM often required meticulous hyperparameter tuning
+   - Convergence was harder to achieve on limited datasets
 
-3. **Память и энергопотребление**
-   - Модели с LSTM занимали больше памяти при развертывании
-   - Это ограничивало их применение на мобильных и встраиваемых устройствах
-   - Высокое энергопотребление при вычислениях
+3. **Memory and Power Consumption**
+   - LSTM models consumed more memory during deployment
+   - This limited their use on mobile and embedded devices
+   - High computational energy consumption
 
-4. **Теоретическое понимание**
-   - Сложная архитектура LSTM затрудняла анализ её поведения
-   - Не всегда было ясно, какие компоненты вносят наибольший вклад в эффективность
+4. **Theoretical Understanding**
+   - The complex LSTM architecture made behavior analysis difficult
+   - It was not always clear which components contributed most to effectiveness
 
-**Почему потребовались более компактные модели:**
+**Why More Compact Models Were Needed:**
 
-1. **Развитие мобильных и встраиваемых систем**
-   - Рост потребности в моделях, способных работать на устройствах с ограниченными ресурсами
-   - Необходимость баланса между точностью и энергоэффективностью
+1. **Growth of Mobile and Embedded Systems**
+   - Rising demand for models capable of operating on resource-constrained devices
+   - Need to balance accuracy with energy efficiency
 
-2. **Масштабирование к большим объемам данных**
-   - Увеличение доступных наборов данных требовало более эффективных моделей
-   - Более простые модели могли обрабатывать больше данных при тех же ресурсах
+2. **Scaling to Large Datasets**
+   - Increasing availability of data required more efficient models
+   - Simpler models could process more data with the same resources
 
-3. **Эксперименты по упрощению архитектуры**
-   - Исследователи начали систематически изучать, какие компоненты LSTM действительно необходимы
-   - Эксперименты показали, что некоторые элементы LSTM можно объединить без потери производительности
+3. **Experiments in Architecture Simplification**
+   - Researchers began systematically studying which LSTM components were truly necessary
+   - Experiments showed that some LSTM elements could be merged without performance loss
 
-4. **Стремление к элегантности в дизайне**
-   - Принцип Оккама: если две модели показывают одинаковую производительность, предпочтительнее более простая
-   - Более простые модели часто лучше обобщаются на новые данные
+4. **Pursuit of Design Elegance**
+   - Occam's Razor: if two models show equal performance, the simpler one is preferable
+   - Simpler models often generalize better to new data
 
-**Как GRU решает эти проблемы:**
+**How GRU Solves These Problems:**
 
-1. **Меньше параметров**
-   - GRU имеет только два вентиля вместо трех в LSTM
-   - Объединение функциональности вентилей входа и забывания в один вентиль обновления
-   - Отсутствие отдельного состояния ячейки (используется только скрытое состояние)
+1. **Fewer Parameters**
+   - GRU has only two gates instead of three in LSTM
+   - Merges input and forget gate functionalities into a single update gate
+   - No separate cell state (uses only the hidden state)
 
-2. **Сохранение ключевой функциональности**
-   - Несмотря на упрощения, GRU сохраняет способность моделировать долговременные зависимости
-   - Механизм вентилей всё ещё позволяет контролировать поток информации через сеть
+2. **Preservation of Key Functionality**
+   - Despite simplifications, GRU retains the ability to model long-term dependencies
+   - The gating mechanism still allows control over information flow through the network
 
-3. **Эмпирические результаты**
-   - На многих задачах GRU показала результаты, сопоставимые с LSTM
-   - В некоторых случаях даже превосходила LSTM, особенно при ограниченных наборах данных
+3. **Empirical Results**
+   - On many tasks, GRU showed results comparable to LSTM
+   - In some cases, it even outperformed LSTM, especially on limited datasets
 
-GRU представляет собой изящное балансирование между сложностью и эффективностью, которое позволило сделать рекуррентные модели более доступными и применимыми в широком спектре задач.
+GRU represents an elegant balance between complexity and efficiency, making recurrent models more accessible and applicable across a wide range of tasks.
 
-## 2. Архитектура GRU: ключевые компоненты
+## 2. GRU Architecture: Key Components
 
-### 2.1 Интуиция: метафора "экономной памяти" с двумя контрольными точками
+### 2.1 Intuition: Metaphor of "Economical Memory" with Two Control Points
 
-Для понимания принципа работы GRU давайте представим её как систему "экономной памяти" с двумя основными контрольными точками. Эта метафора поможет интуитивно понять, как GRU управляет информацией.
+To understand how GRU works, imagine it as a system of "economical memory" with two primary control points. This metaphor helps intuitively grasp how GRU manages information.
 
-**Представьте библиотекаря, работающего с одной большой книгой (скрытое состояние):**
+**Imagine a librarian working with one large book (hidden state):**
 
-В отличие от LSTM, где есть отдельная книга для долговременного хранения (ячейка памяти) и рабочая тетрадь для текущих заметок (скрытое состояние), библиотекарь GRU работает только с одной книгой. В этой книге он постоянно обновляет информацию, следуя двум простым правилам:
+Unlike LSTM, which has a separate long-term storage (cell state) and a notebook for current notes (hidden state), the GRU librarian works with only one book. In this book, they continuously update information following two simple rules:
 
-**1. Вентиль сброса (Reset Gate) — "Что стоит перечитать?"**
+**1. Reset Gate — "What Should Be Re-read?"**
 
-Представьте, что библиотекарь решает, какие части его текущих знаний (хранящихся в книге) актуальны для понимания новой информации:
+Imagine the librarian deciding which parts of their current knowledge (stored in the book) are relevant for understanding new information:
 
-- Когда вентиль сброса близок к 1: "Эта часть моих текущих знаний важна для понимания новой информации"
-- Когда вентиль сброса близок к 0: "Эта часть моих знаний не имеет отношения к новой информации, я её временно игнорирую"
+- When the reset gate is close to 1: "This part of my current knowledge is important for understanding the new information"
+- When the reset gate is close to 0: "This part of my knowledge is irrelevant to the new information; I temporarily ignore it"
 
-Например, если вы читаете предложение "Погода в Париже...", и далее текст переключается на "...столице Франции", вентиль сброса может решить, что информация о "Париже" остаётся актуальной, а информация о "погоде" уже не важна для понимания продолжения предложения.
+For example, if you read the sentence "The weather in Paris..." and the text continues with "...the capital of France," the reset gate might decide that knowledge about "Paris" remains relevant, while information about "weather" is no longer needed to understand the continuation.
 
-**2. Вентиль обновления (Update Gate) — "Насколько сильно обновить книгу?"**
+**2. Update Gate — "How Strongly Should the Book Be Updated?"**
 
-После того, как библиотекарь определил, какая часть текущих знаний актуальна, он должен решить, в какой степени обновить содержимое книги:
+After determining which parts of current knowledge are relevant, the librarian must decide to what extent to update the book's content:
 
-- Когда вентиль обновления близок к 1: "Я полностью заменю эту часть книги новой информацией"
-- Когда вентиль обновления близок к 0: "Я сохраню существующую информацию без изменений"
+- When the update gate is close to 1: "I will fully replace this part of the book with new information"
+- When the update gate is close to 0: "I will preserve the existing information unchanged"
 
-На примере текста: если до этого в книге была информация о Риме, а новое предложение говорит о Париже, вентиль обновления может установить высокое значение, чтобы заменить информацию о Риме на информацию о Париже.
+In the text example: if the book previously contained information about Rome, and the new sentence discusses Paris, the update gate might set a high value to replace information about Rome with information about Paris.
 
-**Процесс работы GRU в метафоре:**
+**GRU Process in Metaphor:**
 
-1. **Получение новой информации**: библиотекарь получает новую порцию информации (входной вектор $x_t$)
+1. **Receiving new information**: The librarian receives a new information chunk (input vector $x_t$)
 
-2. **Определение релевантности старых знаний**: библиотекарь использует вентиль сброса, чтобы определить, какие части существующей книги (скрытого состояния $h_{t-1}$) важны для обработки новой информации
+2. **Determining relevance of old knowledge**: The librarian uses the reset gate to determine which parts of the existing book (hidden state $h_{t-1}$) are relevant for processing new information
 
-3. **Создание чернового обновления**: на основе релевантных частей старых знаний и новой информации библиотекарь создает черновик обновления (кандидат-вектор $\tilde{h}_t$)
+3. **Creating a draft update**: Based on relevant parts of old knowledge and new information, the librarian creates a draft update (candidate vector $\tilde{h}_t$)
 
-4. **Решение о степени обновления**: используя вентиль обновления, библиотекарь решает, насколько сильно обновить каждую часть книги
+4. **Deciding update intensity**: Using the update gate, the librarian decides how strongly to update each part of the book
 
-5. **Обновление книги**: книга обновляется с учетом решений вентиля обновления, создавая новое состояние книги ($h_t$)
+5. **Updating the book**: The book is updated according to the update gate decisions, creating a new book state ($h_t$)
 
-**Ключевое отличие от LSTM:**
+**Key Difference from LSTM:**
 
-LSTM можно сравнить с более сложной системой, где есть:
-- Склад долговременного хранения (ячейка памяти)
-- Рабочий стол (скрытое состояние)
-- Три сотрудника, принимающих решения (три вентиля)
+LSTM can be compared to a more complex system with:
+- A long-term storage warehouse (cell state)
+- A workbench (hidden state)
+- Three workers making decisions (three gates)
 
-GRU упрощает эту систему, объединяя "склад" и "рабочий стол" в одно хранилище, и сокращая число "сотрудников" до двух, что делает систему более экономичной, сохраняя при этом её основную функциональность.
+GRU simplifies this system by merging the "warehouse" and "workbench" into one storage and reducing the number of "workers" to two, making the system more economical while preserving its core functionality.
 
-Эта экономичность — главное преимущество GRU, позволяющее достичь сопоставимых результатов с LSTM при меньших вычислительных затратах.
+This economy—GRU’s main advantage—enables achieving comparable results to LSTM with lower computational costs.
 
-### 2.2 Формализация и обозначения: определение переменных и размерностей
+### 2.2 Formalization and Notation: Defining Variables and Dimensions
 
-Давайте формализуем архитектуру GRU, определив все её компоненты и их размерности. Это поможет как в понимании структуры, так и при последующей реализации.
+Let us formalize the GRU architecture by defining all its components and their dimensions. This aids both in understanding the structure and in subsequent implementation.
 
-**Основные обозначения:**
+**Main Notations:**
 
-| **Символ** | **Размерность** | **Описание** |
-|------------|-----------------|--------------|
-| $x_t$ | $\mathbb{R}^{d_x}$ | Входной вектор на шаге $t$ |
-| $h_t$ | $\mathbb{R}^{d_h}$ | Скрытое состояние на шаге $t$ |
-| $z_t$ | $\mathbb{R}^{d_h}$ | Активация вентиля обновления (update gate) на шаге $t$ |
-| $r_t$ | $\mathbb{R}^{d_h}$ | Активация вентиля сброса (reset gate) на шаге $t$ |
-| $\tilde{h}_t$ | $\mathbb{R}^{d_h}$ | Кандидат-вектор нового скрытого состояния |
+| **Symbol** | **Dimension** | **Description** |
+|------------|---------------|-----------------|
+| $x_t$ | $\mathbb{R}^{d_x}$ | Input vector at step $t$ |
+| $h_t$ | $\mathbb{R}^{d_h}$ | Hidden state at step $t$ |
+| $z_t$ | $\mathbb{R}^{d_h}$ | Update gate activation at step $t$ |
+| $r_t$ | $\mathbb{R}^{d_h}$ | Reset gate activation at step $t$ |
+| $\tilde{h}_t$ | $\mathbb{R}^{d_h}$ | Candidate vector for new hidden state |
 
-**Весовые матрицы и векторы смещения:**
+**Weight Matrices and Bias Vectors:**
 
-| **Символ** | **Размерность** | **Описание** |
-|------------|-----------------|--------------|
-| $W_z$ | $\mathbb{R}^{d_h \times (d_x + d_h)}$ | Веса для вентиля обновления |
-| $W_r$ | $\mathbb{R}^{d_h \times (d_x + d_h)}$ | Веса для вентиля сброса |
-| $W_h$ | $\mathbb{R}^{d_h \times (d_x + d_h)}$ | Веса для кандидат-вектора |
-| $b_z$ | $\mathbb{R}^{d_h}$ | Смещение для вентиля обновления |
-| $b_r$ | $\mathbb{R}^{d_h}$ | Смещение для вентиля сброса |
-| $b_h$ | $\mathbb{R}^{d_h}$ | Смещение для кандидат-вектора |
+| **Symbol** | **Dimension** | **Description** |
+|------------|---------------|-----------------|
+| $W_z$ | $\mathbb{R}^{d_h \times (d_x + d_h)}$ | Weights for update gate |
+| $W_r$ | $\mathbb{R}^{d_h \times (d_x + d_h)}$ | Weights for reset gate |
+| $W_h$ | $\mathbb{R}^{d_h \times (d_x + d_h)}$ | Weights for candidate vector |
+| $b_z$ | $\mathbb{R}^{d_h}$ | Bias for update gate |
+| $b_r$ | $\mathbb{R}^{d_h}$ | Bias for reset gate |
+| $b_h$ | $\mathbb{R}^{d_h}$ | Bias for candidate vector |
 
-В альтернативной форме записи, можно разделить веса для входа и скрытого состояния:
+In an alternative formulation, weights for input and hidden state can be separated:
 
-| **Символ** | **Размерность** | **Описание** |
-|------------|-----------------|--------------|
-| $W_{xz}$ | $\mathbb{R}^{d_h \times d_x}$ | Веса для входа в вентиле обновления |
-| $W_{hz}$ | $\mathbb{R}^{d_h \times d_h}$ | Веса для скрытого состояния в вентиле обновления |
-| $W_{xr}$ | $\mathbb{R}^{d_h \times d_x}$ | Веса для входа в вентиле сброса |
-| $W_{hr}$ | $\mathbb{R}^{d_h \times d_h}$ | Веса для скрытого состояния в вентиле сброса |
-| $W_{xh}$ | $\mathbb{R}^{d_h \times d_x}$ | Веса для входа в кандидат-векторе |
-| $W_{hh}$ | $\mathbb{R}^{d_h \times d_h}$ | Веса для скрытого состояния в кандидат-векторе |
+| **Symbol** | **Dimension** | **Description** |
+|------------|---------------|-----------------|
+| $W_{xz}$ | $\mathbb{R}^{d_h \times d_x}$ | Weights for input in update gate |
+| $W_{hz}$ | $\mathbb{R}^{d_h \times d_h}$ | Weights for hidden state in update gate |
+| $W_{xr}$ | $\mathbb{R}^{d_h \times d_x}$ | Weights for input in reset gate |
+| $W_{hr}$ | $\mathbb{R}^{d_h \times d_h}$ | Weights for hidden state in reset gate |
+| $W_{xh}$ | $\mathbb{R}^{d_h \times d_x}$ | Weights for input in candidate vector |
+| $W_{hh}$ | $\mathbb{R}^{d_h \times d_h}$ | Weights for hidden state in candidate vector |
 
-Обе формы записи эквивалентны, но иногда удобнее использовать одну из них в зависимости от контекста.
+Both formulations are equivalent, but one may be more convenient depending on context.
 
-**Функции активации:**
+**Activation Functions:**
 
-- $\sigma$: сигмоидальная функция, отображает входы в диапазон [0, 1]
-- $\tanh$: гиперболический тангенс, отображает входы в диапазон [-1, 1]
+- $\sigma$: Sigmoid function, maps inputs to range [0, 1]
+- $\tanh$: Hyperbolic tangent, maps inputs to range [-1, 1]
 
-**Размерности входных и выходных данных:**
+**Input and Output Data Dimensions:**
 
-- $d_x$: размерность входного вектора $x_t$
-- $d_h$: размерность скрытого состояния
+- $d_x$: Dimension of input vector $x_t$
+- $d_h$: Dimension of hidden state
 
-**Конкатенация входа и предыдущего состояния:**
+**Concatenation of Input and Previous State:**
 
-Для упрощения записи мы часто используем конкатенацию входного вектора $x_t$ и предыдущего скрытого состояния $h_{t-1}$:
+For simplified notation, we often concatenate the input vector $x_t$ and previous hidden state $h_{t-1}$:
 
 $$[x_t, h_{t-1}] \in \mathbb{R}^{d_x + d_h}$$
 
-**Примечания по размерностям:**
+**Notes on Dimensions:**
 
-1. В GRU используется только скрытое состояние $h_t$, в отличие от LSTM, где есть дополнительное состояние ячейки $C_t$.
+1. GRU uses only the hidden state $h_t$, unlike LSTM, which has an additional cell state $C_t$.
 
-2. Оба вентиля ($z_t$, $r_t$) имеют одинаковую размерность $d_h$, что позволяет им поэлементно контролировать обновление скрытого состояния.
+2. Both gates ($z_t$, $r_t$) have the same dimension $d_h$, enabling element-wise control over hidden state updates.
 
-3. Общее количество параметров в стандартном GRU:
-   - Веса: $3 \times d_h \times (d_x + d_h)$
-   - Смещения: $3 \times d_h$
-   - Итого: $3 \times d_h \times (d_x + d_h + 1)$
+3. Total parameters in standard GRU:
+   - Weights: $3 \times d_h \times (d_x + d_h)$
+   - Biases: $3 \times d_h$
+   - Total: $3 \times d_h \times (d_x + d_h + 1)$
 
-Обратите внимание, что GRU имеет только 3/4 числа параметров LSTM, что является одним из ключевых преимуществ этой архитектуры.
+Note that GRU has only 3/4 the number of parameters of LSTM, which is one of this architecture’s key advantages.
 
-### 2.3 Динамика одного шага
+### 2.3 Dynamics of One Step
 
-Теперь рассмотрим, как точно вычисляются все компоненты GRU на одном временном шаге $t$. Разберем каждый элемент архитектуры подробно.
+Now we examine how all GRU components are computed precisely at a single time step $t$. We will detail each architectural element.
 
 ![Image_01.png](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/GRU/Image_01.jpg)
 
-#### Вентиль сброса (reset gate)
+#### Reset Gate
 
-Вентиль сброса $r_t$ определяет, какие элементы предыдущего состояния $h_{t-1}$ стоит учитывать при вычислении нового кандидат-вектора:
+The reset gate $r_t$ determines which elements of the previous state $h_{t-1}$ should be considered when computing the new candidate vector:
 
 $$
 r_t = \sigma\big(W_r \cdot [x_t, h_{t-1}] + b_r\big)
 $$
 
-или, в развернутой форме:
+or, in expanded form:
 
 $$
 r_t = \sigma\big(W_{xr} \cdot x_t + W_{hr} \cdot h_{t-1} + b_r\big)
 $$
 
-Здесь:
-- $[x_t, h_{t-1}]$ — конкатенация текущего входа и предыдущего скрытого состояния
-- $W_r$ (или $W_{xr}$ и $W_{hr}$) — весовые матрицы для вентиля сброса
-- $b_r$ — вектор смещения
-- $\sigma$ — сигмоидальная функция, возвращающая значения в интервале [0, 1]
+Here:
+- $[x_t, h_{t-1}]$ — concatenation of current input and previous hidden state
+- $W_r$ (or $W_{xr}$ and $W_{hr}$) — weight matrices for reset gate
+- $b_r$ — bias vector
+- $\sigma$ — sigmoid function returning values in [0, 1]
 
-Результат $r_t$ представляет собой вектор значений между 0 и 1, где:
-- **1** означает "полностью учитывать эту информацию из предыдущего состояния"
-- **0** означает "полностью игнорировать эту информацию из предыдущего состояния"
+Result $r_t$ is a vector of values between 0 and 1, where:
+- **1** means "fully consider this information from the previous state"
+- **0** means "fully ignore this information from the previous state"
 
-**Пример:** При обработке текста, если предложение меняет тему, вентиль сброса может установить низкие значения, чтобы "забыть" контекст предыдущей темы при формировании нового кандидат-вектора.
+**Example:** When processing text, if a sentence changes topic, the reset gate may set low values to "forget" the context of the previous topic when forming the new candidate vector.
 
-#### Вентиль обновления (update gate)
+#### Update Gate
 
 ![Image_02.png](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/GRU/Image_02.jpg)
 
-Вентиль обновления $z_t$ определяет, насколько сильно каждый элемент скрытого состояния должен быть обновлен:
+The update gate $z_t$ determines how strongly each element of the hidden state should be updated:
 
 $$
 z_t = \sigma\big(W_z \cdot [x_t, h_{t-1}] + b_z\big)
 $$
 
-или:
+or:
 
 $$
 z_t = \sigma\big(W_{xz} \cdot x_t + W_{hz} \cdot h_{t-1} + b_z\big)
 $$
 
-Как и в случае с вентилем сброса, результатом является вектор значений в интервале [0, 1], где:
-- **1** означает "полностью заменить старую информацию новой"
-- **0** означает "полностью сохранить старую информацию без изменений"
+As with the reset gate, the result is a vector of values in [0, 1], where:
+- **1** means "fully replace old information with new"
+- **0** means "fully preserve old information unchanged"
 
-**Важное наблюдение:** вентиль обновления в GRU играет роль, аналогичную комбинации вентилей забывания и входа в LSTM. Высокое значение $z_t$ означает "забыть" старую информацию и "запомнить" новую.
+**Important Observation:** The update gate in GRU plays a role analogous to the combined forget and input gates in LSTM. A high value of $z_t$ means "forget" old information and "remember" new information.
 
-#### Кандидат-вектор скрытого состояния
+#### Candidate Hidden State Vector
 
-Кандидат-вектор $\tilde{h}_t$ представляет собой "предложение" для нового скрытого состояния, но с учетом только той части предыдущего состояния, которую определил вентиль сброса:
+The candidate vector $\tilde{h}_t$ represents a "proposal" for the new hidden state, but considering only the part of the previous state determined by the reset gate:
 
 $$
 \tilde{h}_t = \tanh\big(W_h \cdot [x_t, r_t \odot h_{t-1}] + b_h\big)
 $$
 
-или:
+or:
 
 $$
 \tilde{h}_t = \tanh\big(W_{xh} \cdot x_t + W_{hh} \cdot (r_t \odot h_{t-1}) + b_h\big)
 $$
 
-Здесь:
-- $r_t \odot h_{t-1}$ — поэлементное умножение вентиля сброса на предыдущее скрытое состояние
-- $\tanh$ — гиперболический тангенс, нормализующий значения в диапазон [-1, 1]
+Here:
+- $r_t \odot h_{t-1}$ — element-wise multiplication of reset gate with previous hidden state
+- $\tanh$ — hyperbolic tangent normalizing values to range [-1, 1]
 
-**Ключевой момент:** вентиль сброса применяется к $h_{t-1}$ перед его использованием в вычислении кандидат-вектора, а не к полному скрытому состоянию. Это позволяет сети "забыть" часть прошлого состояния при вычислении новой информации, но не обязательно при обновлении полного состояния.
+**Key Point:** The reset gate is applied to $h_{t-1}$ before its use in computing the candidate vector, not to the full hidden state. This allows the network to "forget" part of the past state when computing new information, without necessarily altering the full state update.
 
-#### Финальное обновление скрытого состояния
+#### Final Hidden State Update
 
-Наконец, вычисляем новое скрытое состояние $h_t$, как взвешенную комбинацию предыдущего состояния и кандидат-вектора, где вес определяется вентилем обновления:
+Finally, compute the new hidden state $h_t$ as a weighted combination of the previous state and the candidate vector, where the weight is determined by the update gate:
 
 $$
 h_t = (1 - z_t) \odot h_{t-1} + z_t \odot \tilde{h}_t
 $$
 
-Здесь:
-- $(1 - z_t) \odot h_{t-1}$ — часть старой информации, которую мы решили сохранить
-- $z_t \odot \tilde{h}_t$ — часть новой информации, которую мы решили добавить
+Here:
+- $(1 - z_t) \odot h_{t-1}$ — part of old information we chose to retain
+- $z_t \odot \tilde{h}_t$ — part of new information we chose to add
 
-**Важное наблюдение:** эта формула эквивалентна интерполяции между старым состоянием $h_{t-1}$ и новым кандидат-состоянием $\tilde{h}_t$, где $z_t$ определяет точку интерполяции для каждого элемента вектора.
+**Important Observation:** This formula is equivalent to interpolating between the old state $h_{t-1}$ and the new candidate state $\tilde{h}_t$, where $z_t$ determines the interpolation point for each vector element.
 
-**Итог: полный набор формул GRU**
+**Summary: Full Set of GRU Equations**
 
-Для удобства, вот полный набор формул, описывающих один шаг GRU:
+For convenience, here is the complete set of equations describing one GRU step:
 
 $$
 \begin{align}
@@ -1664,65 +1654,65 @@ h_t &= (1 - z_t) \odot h_{t-1} + z_t \odot \tilde{h}_t
 \end{align}
 $$
 
-Эти четыре уравнения полностью описывают динамику GRU ячейки на одном временном шаге.
+These four equations fully describe the dynamics of a GRU cell at a single time step.
 
-## 3. Математическое сравнение GRU с LSTM
+## 3. Mathematical Comparison of GRU with LSTM
 
-### 3.1 Упрощения в архитектуре: какие элементы LSTM были объединены или удалены
+### 3.1 Architectural Simplifications: Which LSTM Components Were Merged or Removed
 
-GRU можно рассматривать как упрощенную версию LSTM, где некоторые компоненты были объединены или полностью исключены. Давайте систематически рассмотрим эти упрощения.
+GRU can be viewed as a simplified version of LSTM, where certain components were merged or entirely removed. Let us systematically examine these simplifications.
 
-**1. Объединение состояний: устранение отдельной ячейки памяти**
+**1. Merging States: Elimination of Separate Cell State**
 
-В LSTM существуют два вида состояний:
-- Состояние ячейки (cell state) $C_t$ — долговременная память
-- Скрытое состояние (hidden state) $h_t$ — краткосрочная память и выход
+LSTM has two types of states:
+- Cell state ($C_t$) — long-term memory
+- Hidden state ($h_t$) — short-term memory and output
 
-В GRU эти два состояния объединены в одно — скрытое состояние $h_t$, которое выполняет обе функции.
+In GRU, these two states are merged into one — the hidden state $h_t$, which performs both functions.
 
-Математическое последствие:
-- LSTM: $C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t$, затем $h_t = o_t \odot \tanh(C_t)$
+Mathematical consequence:
+- LSTM: $C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t$, then $h_t = o_t \odot \tanh(C_t)$
 - GRU: $h_t = (1 - z_t) \odot h_{t-1} + z_t \odot \tilde{h}_t$
 
-**2. Слияние вентилей входа и забывания**
+**2. Merging Input and Forget Gates**
 
-В LSTM вентиль забывания $f_t$ определяет, какую часть старой информации сохранить, а вентиль входа $i_t$ — какую часть новой информации добавить. Эти решения принимаются независимо.
+In LSTM, the forget gate $f_t$ determines how much old information to retain, and the input gate $i_t$ determines how much new information to add. These decisions are made independently.
 
-В GRU вентиль обновления $z_t$ определяет одновременно, какую часть старой информации заменить новой. Это создает жесткую связь: если вы добавляете X% новой информации, то обязательно забываете X% старой.
+In GRU, the update gate $z_t$ simultaneously determines how much old information to replace with new. This creates a rigid coupling: if you add X% new information, you must forget X% old information.
 
-Математическое последствие:
-- LSTM: $C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t$ (где $f_t$ и $i_t$ независимы)
-- GRU: $h_t = (1 - z_t) \odot h_{t-1} + z_t \odot \tilde{h}_t$ (где $z_t$ и $(1-z_t)$ комплементарны)
+Mathematical consequence:
+- LSTM: $C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t$ (where $f_t$ and $i_t$ are independent)
+- GRU: $h_t = (1 - z_t) \odot h_{t-1} + z_t \odot \tilde{h}_t$ (where $z_t$ and $(1-z_t)$ are complementary)
 
-**3. Изменение применения вентиля сброса**
+**3. Modification of Reset Gate Application**
 
-В LSTM вентиль выхода $o_t$ применяется после вычисления всех других компонентов, чтобы определить, какую часть информации из ячейки передать в выходное скрытое состояние.
+In LSTM, the output gate $o_t$ is applied after computing all other components to determine which information from the cell state to pass to the output hidden state.
 
-В GRU вентиль сброса $r_t$ применяется перед вычислением кандидат-вектора, определяя, какую часть предыдущего состояния учитывать при создании нового состояния.
+In GRU, the reset gate $r_t$ is applied before computing the candidate vector, determining which part of the previous state to consider when creating the new state.
 
-Математическое последствие:
-- LSTM: $h_t = o_t \odot \tanh(C_t)$ (вентиль выхода контролирует финальный выход)
-- GRU: $\tilde{h}_t = \tanh(W_h \cdot [x_t, r_t \odot h_{t-1}] + b_h)$ (вентиль сброса влияет на создание кандидат-вектора)
+Mathematical consequence:
+- LSTM: $h_t = o_t \odot \tanh(C_t)$ (output gate controls final output)
+- GRU: $\tilde{h}_t = \tanh(W_h \cdot [x_t, r_t \odot h_{t-1}] + b_h)$ (reset gate influences candidate vector creation)
 
-**4. Устранение выходного вентиля**
+**4. Elimination of Output Gate**
 
-LSTM имеет отдельный выходной вентиль $o_t$, который контролирует, какая информация из ячейки памяти должна быть видна во внешнем скрытом состоянии.
+LSTM has a separate output gate $o_t$ controlling which information from the cell memory should be visible in the external hidden state.
 
-GRU не имеет такого вентиля — всё скрытое состояние всегда полностью доступно.
+GRU has no such gate — the entire hidden state is always fully accessible.
 
-**5. Сравнительная таблица компонентов**
+**5. Comparative Table of Components**
 
-| **Компонент LSTM** | **Аналог в GRU** | **Примечание** |
-|--------------------|------------------|----------------|
-| Состояние ячейки $C_t$ | Отсутствует (объединено с $h_t$) | В GRU единое состояние |
-| Скрытое состояние $h_t$ | Скрытое состояние $h_t$ | Аналогично в обеих архитектурах |
-| Вентиль забывания $f_t$ | Часть вентиля обновления $(1-z_t)$ | В GRU комплементарно вентилю входа |
-| Вентиль входа $i_t$ | Вентиль обновления $z_t$ | В GRU комплементарно вентилю забывания |
-| Вентиль выхода $o_t$ | Отсутствует | В GRU нет фильтрации выхода |
-| Кандидат-вектор $\tilde{C}_t$ | Кандидат-вектор $\tilde{h}_t$ | Аналогично, но в GRU влияет вентиль сброса |
-| - | Вентиль сброса $r_t$ | Уникален для GRU |
+| **LSTM Component** | **GRU Equivalent** | **Notes** |
+|--------------------|------------------|-----------|
+| Cell state $C_t$ | Absent (merged into $h_t$) | GRU has single state |
+| Hidden state $h_t$ | Hidden state $h_t$ | Analogous in both architectures |
+| Forget gate $f_t$ | Part of update gate $(1-z_t)$ | In GRU complementary to input gate |
+| Input gate $i_t$ | Update gate $z_t$ | In GRU complementary to forget gate |
+| Output gate $o_t$ | Absent | GRU has no output filtering |
+| Candidate vector $\tilde{C}_t$ | Candidate vector $\tilde{h}_t$ | Analogous, but in GRU influenced by reset gate |
+| — | Reset gate $r_t$ | Unique to GRU |
 
-**6. Сравнение уравнений**
+**6. Equation Comparison**
 
 **LSTM**:
 $$
@@ -1758,332 +1748,332 @@ $$
 h_t = (1 - z_t) \odot h_{t-1} + z_t \odot \tilde{h}_t
 $$
 
-**Ключевое наблюдение**: GRU имеет меньше уравнений и параметров, обеспечивая более компактную архитектуру, которая тем не менее сохраняет ключевую функциональность управления потоком информации.
+**Key Observation**: GRU has fewer equations and parameters, providing a more compact architecture that nonetheless preserves the core functionality of controlling information flow.
 
-### 3.2 Поток градиентов в GRU: анализ решения проблемы затухающего градиента
+### 3.2 Gradient Flow in GRU: Analysis of Solving the Vanishing Gradient Problem
 
-GRU, как и LSTM, успешно решает проблему затухающего градиента, но делает это немного иначе. Давайте проанализируем, как именно в GRU организован поток градиентов.
+GRU, like LSTM, successfully addresses the vanishing gradient problem, but does so slightly differently. Let us analyze precisely how gradient flow is organized in GRU.
 
-**Напомним проблему в ванильных RNN:**
+**Recall the problem in vanilla RNNs:**
 
-В обычных RNN градиент затухает из-за многократного умножения на якобианы с собственными значениями меньше 1:
+In vanilla RNNs, gradients vanish due to repeated multiplication by Jacobians with eigenvalues less than 1:
 
 $$\frac{\partial h_t}{\partial h_{t-k}} = \prod_{i=t-k+1}^{t} \frac{\partial h_i}{\partial h_{i-1}} = \prod_{i=t-k+1}^{t} \text{diag}(\tanh'(a_i)) \cdot W_{hh}$$
 
-**Анализ потока градиентов в GRU:**
+**Analysis of Gradient Flow in GRU:**
 
-В GRU скрытое состояние обновляется по формуле:
+In GRU, the hidden state is updated by:
 
 $$h_t = (1 - z_t) \odot h_{t-1} + z_t \odot \tilde{h}_t$$
 
-Вычислим градиент $\frac{\partial h_t}{\partial h_{t-1}}$, используя цепное правило:
+Compute the gradient $\frac{\partial h_t}{\partial h_{t-1}}$ using the chain rule:
 
 $$\frac{\partial h_t}{\partial h_{t-1}} = \frac{\partial}{\partial h_{t-1}} [(1 - z_t) \odot h_{t-1} + z_t \odot \tilde{h}_t]$$
 
-Раскрывая это выражение:
+Expanding this expression:
 
-$$\frac{\partial h_t}{\partial h_{t-1}} = \underbrace{(1 - z_t)}_{\text{прямой путь}} + \underbrace{\frac{\partial z_t}{\partial h_{t-1}} \odot (\tilde{h}_t - h_{t-1})}_{\text{через } z_t} + \underbrace{z_t \odot \frac{\partial \tilde{h}_t}{\partial h_{t-1}}}_{\text{через } \tilde{h}_t}$$
+$$\frac{\partial h_t}{\partial h_{t-1}} = \underbrace{(1 - z_t)}_{\text{direct path}} + \underbrace{\frac{\partial z_t}{\partial h_{t-1}} \odot (\tilde{h}_t - h_{t-1})}_{\text{via } z_t} + \underbrace{z_t \odot \frac{\partial \tilde{h}_t}{\partial h_{t-1}}}_{\text{via } \tilde{h}_t}$$
 
-**Ключевое наблюдение 1: прямой путь градиента**
+**Key Observation 1: Direct Gradient Path**
 
-Первый член $(1 - z_t)$ представляет собой прямой путь градиента. Если $z_t$ близко к 0 (т.е. решение сохранить большую часть старой информации), то градиент может течь почти без изменений через этот путь.
+The first term $(1 - z_t)$ represents the direct gradient path. If $z_t$ is close to 0 (i.e., the decision to retain most old information), the gradient can flow almost unchanged through this path.
 
-Сравнение с LSTM:
-- В LSTM прямой путь идет через состояние ячейки: $\frac{\partial C_t}{\partial C_{t-1}} = f_t$
-- В GRU прямой путь идет через скрытое состояние: $(1 - z_t)$
+Comparison with LSTM:
+- In LSTM, the direct path goes through the cell state: $\frac{\partial C_t}{\partial C_{t-1}} = f_t$
+- In GRU, the direct path goes through the hidden state: $(1 - z_t)$
 
-**Ключевое наблюдение 2: адаптивное обновление**
+**Key Observation 2: Adaptive Update**
 
-GRU не просто предотвращает затухание градиентов — она делает это адаптивно. Сеть обучается устанавливать $z_t$ близким к 0 для тех элементов, где важно сохранить долговременные зависимости.
+GRU does not merely prevent gradient vanishing—it does so adaptively. The network learns to set $z_t$ close to 0 for elements where long-term dependencies are important.
 
-**Поток градиентов через несколько шагов:**
+**Gradient Flow Across Multiple Steps:**
 
-Для $k$ шагов назад, градиент можно выразить как:
+For $k$ steps back, the gradient can be expressed as:
 
 $$\frac{\partial h_t}{\partial h_{t-k}} = \prod_{i=t-k+1}^{t} \frac{\partial h_i}{\partial h_{i-1}}$$
 
-Если для каждого шага $i$ значения $(1 - z_i)$ близки к 1 для некоторых элементов, то градиент может течь через эти элементы без существенного затухания. Это создает "информационные магистрали" для обратного распространения.
+If for each step $i$, the values $(1 - z_i)$ are close to 1 for certain elements, the gradient can flow through these elements with minimal vanishing. This creates "information highways" for backpropagation.
 
-**Вентиль сброса и градиенты:**
+**Reset Gate and Gradients:**
 
-Вентиль сброса $r_t$ влияет на градиенты через второй путь:
+The reset gate $r_t$ influences gradients through the second path:
 
 $$\frac{\partial \tilde{h}_t}{\partial h_{t-1}} = \frac{\partial}{\partial h_{t-1}} \tanh(W_h \cdot [x_t, r_t \odot h_{t-1}] + b_h)$$
 
-Это включает:
-- Прямое влияние $r_t \odot \frac{\partial}{\partial h_{t-1}} \tanh(...)$
-- Косвенное влияние через $\frac{\partial r_t}{\partial h_{t-1}}$
+This includes:
+- Direct influence: $r_t \odot \frac{\partial}{\partial h_{t-1}} \tanh(...)$
+- Indirect influence via $\frac{\partial r_t}{\partial h_{t-1}}$
 
-Вентиль сброса позволяет GRU "забывать" определенные компоненты предыдущего состояния при вычислении кандидат-вектора, но это не препятствует потоку градиентов через основной путь $(1 - z_t)$.
+The reset gate allows GRU to "forget" certain components of the previous state when computing the candidate vector, but this does not impede gradient flow through the main path $(1 - z_t)$.
 
-**Сравнение с LSTM:**
+**Comparison with LSTM:**
 
-| **Аспект** | **LSTM** | **GRU** |
+| **Aspect** | **LSTM** | **GRU** |
 |------------|----------|---------|
-| Основной путь градиента | Через состояние ячейки: $\frac{\partial C_t}{\partial C_{t-1}} = f_t$ | Через скрытое состояние: $(1 - z_t)$ |
-| Контроль потока | Три независимых вентиля | Два вентиля, один из которых с комплементарным эффектом |
-| Количество путей градиента | Множество путей через $C_t$ и $h_t$ | Меньше путей, но с прямой магистралью |
+| Primary gradient path | Through cell state: $\frac{\partial C_t}{\partial C_{t-1}} = f_t$ | Through hidden state: $(1 - z_t)$ |
+| Flow control | Three independent gates | Two gates, one with a complementary effect |
+| Number of gradient paths | Multiple paths through $C_t$ and $h_t$ | Fewer paths, but with a direct mainline |
 
-Таким образом, GRU решает проблему затухающего градиента через адаптивный механизм, который создает прямые пути для потока градиента, аналогично LSTM, но с использованием меньшего количества компонентов.
+Thus, GRU addresses the vanishing gradient problem through an adaptive mechanism that creates direct paths for gradient flow, similar to LSTM, but using fewer components.
 
-**3. Потребление памяти**
-
-**LSTM**:
-- Хранение состояний: $O(2d_h)$ для $h_t$ и $C_t$
-- Хранение промежуточных результатов для обратного прохода: $O(4d_h T)$ для последовательности длины $T$
-
-**GRU**:
-- Хранение состояний: $O(d_h)$ только для $h_t$
-- Хранение промежуточных результатов: $O(3d_h T)$
-
-Экономия памяти GRU по сравнению с LSTM значительна при длинных последовательностях.
-
-**4. Параллелизация и аппаратное ускорение**
+**3. Memory Consumption**
 
 **LSTM**:
-- 4 матричных умножения могут быть распараллелены или объединены в одно большое умножение
-- Более сложные зависимости между компонентами могут снизить эффективность конвейеризации
+- State storage: $O(2d_h)$ for $h_t$ and $C_t$
+- Intermediate results storage for backpropagation: $O(4d_h T)$ for a sequence of length $T$
 
 **GRU**:
-- 3 матричных умножения также поддаются параллелизации
-- Меньше зависимостей между компонентами, что потенциально лучше для конвейеризации
-- Вычисление $r_t \odot h_{t-1}$ создает дополнительную зависимость
+- State storage: $O(d_h)$ for $h_t$ only
+- Intermediate results storage: $O(3d_h T)$
 
-**Практический эффект**:
-на современных GPU и специализированных аппаратных ускорителях (TPU, NPU) преимущество GRU в скорости часто составляет 20-30% по сравнению с LSTM при одинаковом размере скрытого состояния.
+GRU achieves significant memory savings compared to LSTM for long sequences.
 
-**5. Масштабирование к большим моделям**
+**4. Parallelization and Hardware Acceleration**
 
-При увеличении размерности скрытого состояния $d_h$ разница в вычислительной эффективности становится более значительной:
+**LSTM**:
+- Four matrix multiplications can be parallelized or fused into a single large multiplication
+- More complex dependencies between components may reduce pipelining efficiency
 
-- Для $d_h = 1024$, разница в количестве параметров: ~1.7 миллиона
-- Для $d_h = 2048$, разница уже превышает 6 миллионов параметров
+**GRU**:
+- Three matrix multiplications are also amenable to parallelization
+- Fewer dependencies between components potentially better for pipelining
+- Computation of $r_t \odot h_{t-1}$ introduces an additional dependency
 
-Это особенно важно для глубоких моделей с несколькими слоями, где экономия умножается на количество слоев.
+**Practical effect**:
+On modern GPUs and specialized hardware accelerators (TPUs, NPUs), GRU’s speed advantage over LSTM often amounts to 20–30% for the same hidden state size.
 
-**Таблица сравнения эффективности для различных размерностей**
+**5. Scaling to Large Models**
 
-| **Размерность** | **Параметры LSTM** | **Параметры GRU** | **Экономия** | **Экономия (%)** |
-|-----------------|--------------------|--------------------|--------------|-------------------|
+As the hidden state dimension $d_h$ increases, the difference in computational efficiency becomes more pronounced:
+
+- For $d_h = 1024$, the parameter difference: ~1.7 million
+- For $d_h = 2048$, the parameter difference exceeds 6 million
+
+This is especially important for deep models with multiple layers, where the savings multiply by the number of layers.
+
+**Table of Efficiency Comparison for Various Dimensions**
+
+| **Dimension** | **LSTM Parameters** | **GRU Parameters** | **Savings** | **Savings (%)** |
+|---------------|---------------------|--------------------|-------------|-----------------|
 | $d_h = 128$ | 0.22M | 0.16M | 0.06M | 25% |
 | $d_h = 256$ | 0.57M | 0.43M | 0.14M | 25% |
 | $d_h = 512$ | 1.67M | 1.25M | 0.42M | 25% |
 | $d_h = 1024$ | 6.03M | 4.52M | 1.51M | 25% |
 | $d_h = 2048$ | 23.14M | 17.35M | 5.79M | 25% |
 
-Эта вычислительная эффективность делает GRU особенно привлекательным выбором для задач с ограниченными ресурсами и для моделей, которые работают в режиме реального времени.
+This computational efficiency makes GRU an especially attractive choice for resource-constrained tasks and models requiring real-time operation.
 
-## Вывод
+## Conclusion
 
-Gated Recurrent Unit (GRU) представляет собой важное усовершенствование в архитектуре рекуррентных нейронных сетей, которое успешно балансирует между эффективностью и вычислительной сложностью. Будучи разработанной как упрощенная альтернатива LSTM в 2014 году, GRU сохранила ключевую способность моделировать долговременные зависимости в последовательностях, при этом значительно сократив количество параметров и вычислительных затрат.
+Gated Recurrent Unit (GRU) represents an important advancement in recurrent neural network architectures, successfully balancing efficiency and computational complexity. Developed in 2014 as a simplified alternative to LSTM, GRU retains the key ability to model long-term dependencies in sequences while significantly reducing the number of parameters and computational costs.
 
-Основные преимущества GRU заключаются в:
-1. Упрощенной архитектуре с двумя вентилями вместо трех у LSTM
-2. Объединении скрытого состояния и ячейки памяти в одно состояние
-3. Сопоставимой производительности с LSTM при меньших вычислительных ресурсах
-4. Лучшей масштабируемости для больших моделей и длинных последовательностей
+The main advantages of GRU are:
+1. Simplified architecture with two gates instead of three in LSTM
+2. Merging of hidden state and memory cell into a single state
+3. Comparable performance to LSTM with fewer computational resources
+4. Better scalability for large models and long sequences
 
-Математический анализ показывает, что GRU эффективно решает проблему затухающего градиента благодаря адаптивному механизму управления потоком информации. При этом архитектура GRU демонстрирует значительную экономию в потреблении памяти и вычислительных ресурсов по сравнению с LSTM, особенно при увеличении размерности скрытого состояния.
+Mathematical analysis shows that GRU effectively addresses the vanishing gradient problem through an adaptive information flow mechanism. Furthermore, the GRU architecture demonstrates substantial savings in memory and computational resources compared to LSTM, particularly as the hidden state dimension increases.
 
-Таким образом, GRU представляет собой оптимальный выбор для задач обработки последовательностей, где требуется баланс между эффективностью и вычислительной эффективностью, особенно в условиях ограниченных ресурсов или необходимости работы в реальном времени.
+Thus, GRU represents an optimal choice for sequence processing tasks requiring a balance between efficiency and computational performance, especially under resource constraints or real-time operation requirements.
 
 </details>
 
 <details> 
-    <summary><em><strong> 🔥🔥🔥🔥 Модели пространства состояний  (SSM)</strong></em></summary>
+    <summary><em><strong> 🔥🔥🔥🔥 State Space Models (SSM)</strong></em></summary>
 
-## 1. Введение в модели пространства состояний (State Space Models)
+## 1. Introduction to State Space Models (SSM)
 
-### 1.1 Контекст появления SSM: эволюция архитектур для моделирования последовательностей
+### 1.1 Context of SSM Emergence: Evolution of Architectures for Sequence Modeling
 
-State Space Models (SSM) представляют собой класс динамических систем, которые пришли в глубокое обучение из теории управления и обработки сигналов. Их появление в качестве архитектуры для нейронных сетей можно рассматривать как часть более широкой эволюции моделей для обработки последовательностей.
+State Space Models (SSM) are a class of dynamical systems that entered deep learning from control theory and signal processing. Their emergence as neural network architectures can be viewed as part of a broader evolution in sequence modeling.
 
-**Хронология эволюции моделей последовательностей:**
+**Chronology of sequence model evolution:**
 
-- **1980-е - 1990-е годы**: Появление классических рекуррентных нейронных сетей (RNN) для обработки последовательностей данных.
+- **1980s–1990s**: Emergence of classical recurrent neural networks (RNNs) for processing sequential data.
   
-- **1997**: Представление LSTM (Hochreiter & Schmidhuber) как решения проблемы затухающего градиента.
+- **1997**: Introduction of LSTM (Hochreiter & Schmidhuber) as a solution to the vanishing gradient problem.
   
-- **2014**: Появление GRU (Cho et al.) как упрощенной версии LSTM.
+- **2014**: Appearance of GRU (Cho et al.) as a simplified version of LSTM.
   
-- **2017**: Архитектура Transformer (Vaswani et al.) с механизмом внимания произвела революцию в NLP.
+- **2017**: Transformer architecture (Vaswani et al.) with attention mechanisms revolutionized NLP.
   
-- **2019-2020**: Первые эксперименты с адаптацией классических SSM для глубокого обучения (Gu et al.).
+- **2019–2020**: First experiments adapting classical SSM for deep learning (Gu et al.).
   
-- **2021-2022**: Появление первых эффективных реализаций SSM — S4 (Structured State Space Sequence Model) и S4D (Diagonal State Space).
+- **2021–2022**: Emergence of the first efficient SSM implementations — S4 (Structured State Space Sequence Model) and S4D (Diagonal State Space).
   
-- **2023**: Представление селективной SSM архитектуры Mamba (Gu & Dao).
+- **2023**: Introduction of the selective SSM architecture Mamba (Gu & Dao).
 
-SSM возникли как попытка объединить преимущества рекуррентных сетей (линейная сложность) и трансформеров (обработка длинных зависимостей) при устранении их недостатков. Ключевым наблюдением было то, что классическая теория систем уже предлагала формализм для моделирования динамических процессов с долговременными зависимостями в виде линейных систем пространства состояний.
+SSMs arose as an attempt to combine the advantages of recurrent networks (linear complexity) and transformers (long-range dependency modeling) while overcoming their drawbacks. The key insight was that classical system theory already provided a formalism for modeling dynamic processes with long-term dependencies in the form of linear state-space systems.
 
-Основная мотивация для разработки SSM для глубокого обучения включала:
+The primary motivations for developing SSMs for deep learning included:
 
-- **Масштабируемость**: Необходимость в архитектурах, способных эффективно обрабатывать очень длинные последовательности (тысячи или миллионы токенов).
+- **Scalability**: Need for architectures capable of efficiently processing very long sequences (thousands or millions of tokens).
   
-- **Вычислительная эффективность**: Потребность в моделях с линейным масштабированием относительно длины последовательности, в отличие от квадратичной сложности трансформеров.
+- **Computational efficiency**: Requirement for models with linear scaling relative to sequence length, unlike the quadratic complexity of transformers.
   
-- **Продолжительные зависимости**: Необходимость моделировать зависимости на очень больших расстояниях без проблем затухающего градиента.
+- **Long-range dependencies**: Need to model dependencies over very large distances without vanishing gradient issues.
   
-- **Теоретическая обоснованность**: Желание использовать хорошо изученный математический аппарат из области теории управления и обработки сигналов.
+- **Theoretical grounding**: Desire to leverage well-established mathematical tools from control theory and signal processing.
 
-Переход от классических RNN к SSM можно рассматривать как естественную эволюцию, где SSM предлагают более формальный и мощный аппарат для моделирования динамических систем, сохраняя при этом вычислительную эффективность.
+The transition from classical RNNs to SSMs can be viewed as a natural evolution, where SSMs offer a more formal and powerful framework for modeling dynamical systems while preserving computational efficiency.
 
-### 1.2 Авторы и ключевые публикации в области SSM
+### 1.2 Authors and Key Publications in SSM
 
-Развитие SSM для глубокого обучения связано с работами нескольких исследовательских групп, которые постепенно развивали и улучшали эту парадигму.
+The development of SSMs for deep learning is associated with several research groups that gradually advanced and refined this paradigm.
 
-**Ключевые исследователи и публикации:**
+**Key researchers and publications:**
 
-1. **Альберт Гу и соавторы (2021-2023)**
-   - "Efficiently Modeling Long Sequences with Structured State Spaces" — первая работа, представившая модель S4
-   - "Mamba: Linear-Time Sequence Modeling with Selective State Spaces" — революционная работа, представляющая селективные SSM
-   - Гу и его коллеги из Стэнфордского университета, а позже из Университета Карнеги-Меллона разработали базовую структуру современных SSM для глубокого обучения
+1. **Albert Gu and colleagues (2021–2023)**
+   - "Efficiently Modeling Long Sequences with Structured State Spaces" — the first work introducing model S4
+   - "Mamba: Linear-Time Sequence Modeling with Selective State Spaces" — a revolutionary paper introducing selective SSMs
+   - Gu and his colleagues from Stanford University, later from Carnegie Mellon University, developed the foundational structure of modern SSMs for deep learning
 
-2. **Три Дао и коллеги (2022-2023)**
-   - Соавтор архитектуры Mamba
-   - Значительный вклад в оптимизацию SSM для современных аппаратных платформ
+2. **Tri Dao and colleagues (2022–2023)**
+   - Co-author of the Mamba architecture
+   - Significant contributions to optimizing SSMs for modern hardware platforms
 
-3. **Авив Шмсони, Кришнан Прасад, Ноам Рот (2022)**
-   - "On the Parameterization and Initialization of Diagonal State Space Models" — представление S4D, диагональной версии SSM
-   - Ключевые оптимизации, сделавшие SSM более практичными для обучения и вывода
+3. **Aviv Regev, Krishnan Prasad, Noam Rot (2022)**
+   - "On the Parameterization and Initialization of Diagonal State Space Models" — introduced S4D, a diagonal variant of SSM
+   - Key optimizations making SSMs more practical for training and inference
 
-4. **Сирена Дэна и Яаков Кэрэр (2023)**
-   - "Simplified State Space Layers for Sequence Modeling" — представление S5, упрощенной и улучшенной версии SSM
-   - Упрощения, которые сделали SSM более доступными для широкого использования
+4. **Sirena Dan and Yakov Kerner (2023)**
+   - "Simplified State Space Layers for Sequence Modeling" — introduced S5, a simplified and improved version of SSM
+   - Simplifications making SSMs more accessible for widespread use
 
-**Связь с обработкой сигналов и теорией управления:**
+**Connection to signal processing and control theory:**
 
-Что примечательно, SSM в нейронных сетях демонстрируют сильную связь с классическими методами обработки сигналов. Исследователи адаптировали методы, известные десятилетиями в технической литературе:
+Notably, SSMs in neural networks demonstrate strong ties to classical signal processing methods. Researchers adapted techniques known for decades in technical literature:
 
-> "SSM объединяют методы рекуррентных сетей с классической теорией линейных систем, создавая мост между глубоким обучением и традиционной обработкой сигналов. Это позволяет нам использовать богатый математический аппарат теории управления для современных нейронных архитектур." — Альберт Гу
+> "SSMs unify recurrent network methods with classical linear systems theory, creating a bridge between deep learning and traditional signal processing. This allows us to leverage the rich mathematical apparatus of control theory for modern neural architectures." — Albert Gu
 
-**Ключевые статьи, повлиявшие на развитие SSM:**
+**Key papers influencing SSM development:**
 
 1. **"HiPPO: Recurrent Memory with Optimal Polynomial Projections" (Gu et al., 2020)**
-   - Предшественник SSM, представивший теоретические основы для моделирования долговременных зависимостей
-   - Заложил математические основы для последующего развития S4 и других SSM
+   - Precursor to SSMs, establishing theoretical foundations for modeling long-range dependencies
+   - Laid the mathematical groundwork for subsequent developments of S4 and other SSMs
 
 2. **"Efficiently Modeling Long Sequences with Structured State Spaces" (Gu et al., 2021)**
-   - Первое представление S4, структурированной модели пространства состояний
-   - Демонстрация превосходной производительности на задачах с длинными зависимостями
+   - First presentation of S4, a structured state space model
+   - Demonstrated superior performance on tasks with long-range dependencies
 
 3. **"Diagonal State Spaces are as Effective as Structured State Spaces" (Gupta et al., 2022)**
-   - Показала, что более простые диагональные SSM могут быть столь же эффективными, как и полные SSM
-   - Значительно упростила вычислительную сложность и реализацию SSM
+   - Showed that simpler diagonal SSMs can be as effective as full SSMs
+   - Significantly simplified SSM computational complexity and implementation
 
 4. **"Mamba: Linear-Time Sequence Modeling with Selective State Spaces" (Gu & Dao, 2023)**
-   - Представление селективных SSM, которые динамически адаптируют параметры в зависимости от входных данных
-   - Прорыв, сделавший SSM конкурентоспособными с трансформерами даже в задачах языкового моделирования
+   - Introduced selective SSMs that dynamically adapt parameters based on input data
+   - A breakthrough making SSMs competitive with transformers even in language modeling tasks
 
-Эволюция SSM представляет собой пример эффективного обмена идеями между различными областями науки, где классическая теория систем успешно адаптируется для решения современных проблем в глубоком обучении.
+The evolution of SSMs exemplifies effective cross-disciplinary idea exchange, where classical system theory has been successfully adapted to solve modern challenges in deep learning.
 
-### 1.3 Баланс компромиссов: почему возникла потребность в SSM между RNN и трансформерами
+### 1.3 Trade-off Balance: Why SSMs Emerged Between RNNs and Transformers
 
-Модели пространства состояний возникли в ответ на фундаментальные ограничения существующих архитектур для моделирования последовательностей: рекуррентных нейронных сетей (включая LSTM и GRU) и трансформеров. SSM стремятся найти "золотую середину", сочетающую лучшие свойства обоих подходов.
+State Space Models emerged in response to fundamental limitations of existing architectures for sequence modeling: recurrent neural networks (including LSTM and GRU) and transformers. SSMs aim to find a "golden middle ground" that combines the best properties of both approaches.
 
-**Проблемы, связанные с существующими архитектурами:**
+**Problems with existing architectures:**
 
-1. **Ограничения RNN/LSTM/GRU:**
-   - **Последовательная обработка:** необходимость обрабатывать элементы последовательности один за другим, что ограничивает параллелизм
-   - **Трудности с долговременными зависимостями:** хотя LSTM и GRU частично решают проблему затухающего градиента, они все еще ограничены в способности захватывать зависимости на очень больших расстояниях
-   - **Трудности в обучении:** нестабильность градиентов, особенно при глубоких архитектурах
-   - **Ограниченная масштабируемость:** трудности в масштабировании до очень глубоких моделей
+1. **Limitations of RNN/LSTM/GRU:**
+   - **Sequential processing**: Requirement to process sequence elements one after another, limiting parallelism
+   - **Difficulty with long-range dependencies**: Although LSTM and GRU partially mitigate vanishing gradients, they remain limited in capturing dependencies over very large distances
+   - **Training difficulties**: Gradient instability, especially in deep architectures
+   - **Limited scalability**: Challenges in scaling to very deep models
 
-2. **Ограничения трансформеров:**
-   - **Квадратичная сложность:** механизм самовнимания имеет сложность O(n²) по длине последовательности, что делает обработку длинных последовательностей вычислительно затратной
-   - **Ограничения памяти:** высокое потребление памяти для длинных последовательностей
-   - **Фиксированное контекстное окно:** практические ограничения на длину контекста, который может обрабатывать модель
+2. **Limitations of transformers:**
+   - **Quadratic complexity**: Self-attention mechanism has O(n²) complexity relative to sequence length, making long-sequence processing computationally expensive
+   - **Memory constraints**: High memory consumption for long sequences
+   - **Fixed context window**: Practical limits on the context length a model can process
 
-**Почему потребовались SSM:**
+**Why SSMs were needed:**
 
-1. **Теоретическая элегантность:**
-   - SSM основаны на хорошо изученном математическом аппарате из теории управления
-   - Предоставляют формальный способ моделирования динамических систем с непрерывным временем
-   - Позволяют использовать аналитические методы для анализа поведения модели
+1. **Theoretical elegance:**
+   - SSMs are grounded in well-established mathematics from control theory
+   - Provide a formal framework for modeling dynamical systems with continuous time
+   - Enable analytical methods for model behavior analysis
 
-2. **Масштабирование к большим объемам данных:**
-   - Линейная сложность O(n) по длине последовательности
-   - Способность эффективно обрабатывать очень длинные последовательности (тысячи или миллионы элементов)
-   - Меньшее потребление памяти по сравнению с трансформерами
+2. **Scaling to large datasets:**
+   - Linear O(n) complexity with respect to sequence length
+   - Ability to efficiently process very long sequences (thousands or millions of elements)
+   - Lower memory consumption compared to transformers
 
-3. **Баланс между эффективностью и выразительностью:**
-   - Сохранение способности моделировать долговременные зависимости (как в трансформерах)
-   - Эффективность вычислений, сравнимая с RNN
-   - Возможность параллельной обработки, в отличие от RNN
+3. **Balance between efficiency and expressiveness:**
+   - Retain ability to model long-range dependencies (like transformers)
+   - Computational efficiency comparable to RNNs
+   - Enable parallel processing, unlike RNNs
 
-4. **Потребность в обработке разнообразных модальностей:**
-   - Необходимость в унифицированном подходе к моделированию аудио, видео, текста и других последовательных данных
-   - SSM хорошо подходят для непрерывных сигналов и могут работать с данными различной природы
+4. **Need for processing diverse modalities:**
+   - Need for a unified approach to modeling audio, video, text, and other sequential data
+   - SSMs are well-suited for continuous signals and can handle data of varying nature
 
-**Сравнительная таблица архитектур:**
+**Comparative architecture table:**
 
-| **Характеристика** | **RNN/LSTM/GRU** | **Трансформеры** | **SSM** |
+| **Characteristic** | **RNN/LSTM/GRU** | **Transformers** | **SSM** |
 |-------------------|-------------------|-------------------|---------|
-| Вычислительная сложность | O(n) | O(n²) | O(n) |
-| Параллелизм | Ограниченный | Высокий | Высокий |
-| Долговременные зависимости | Ограниченная способность | Отличная способность | Отличная способность |
-| Масштабируемость к длинным последовательностям | Хорошая | Ограниченная | Превосходная |
-| Использование памяти | Низкое | Высокое | Низкое |
-| Теоретическая обоснованность | Эмпирическая | Эмпирическая | Формальная из теории управления |
-| Интерпретируемость | Ограниченная | Через внимание | Через системную теорию |
+| Computational complexity | O(n) | O(n²) | O(n) |
+| Parallelism | Limited | High | High |
+| Long-range dependencies | Limited capacity | Excellent capacity | Excellent capacity |
+| Scalability to long sequences | Good | Limited | Superior |
+| Memory usage | Low | High | Low |
+| Theoretical grounding | Empirical | Empirical | Formal, from control theory |
+| Interpretability | Limited | Via attention | Via system theory |
 
-Цитата Альберта Гу о мотивации создания SSM:
+Quote from Albert Gu on the motivation for creating SSM:
 
-> "Мы стремились создать архитектуру, которая могла бы масштабироваться линейно с длиной последовательности, сохраняя при этом способность моделировать долговременные зависимости, присущую трансформерам. SSM предлагают теоретически обоснованный подход к этой проблеме, опираясь на десятилетия исследований в области теории управления и обработки сигналов."
+> "We aimed to create an architecture that could scale linearly with sequence length while retaining the ability to model long-range dependencies characteristic of transformers. SSMs offer a theoretically grounded approach to this problem, building on decades of research in control theory and signal processing."
 
-Таким образом, SSM представляют собой не просто еще одну архитектуру, а фундаментально новый подход к моделированию последовательностей, который стремится преодолеть принципиальные ограничения существующих методов.
+Thus, SSMs represent not merely another architecture, but a fundamentally new approach to sequence modeling, striving to overcome the principled limitations of existing methods.
 
-## 2. Математические основы и архитектура SSM
+## 2. Mathematical Foundations and SSM Architecture
 
-### 2.1 Интуиция: метафора "динамической системы с памятью"
+### 2.1 Intuition: Metaphor of a "Dynamic System with Memory"
 
-Для понимания интуитивной сути State Space Models, полезно представить их как динамические системы с внутренней памятью, которые обрабатывают входящие сигналы и генерируют выходные. Метафора "динамической системы с памятью" поможет нам понять ключевые компоненты и принципы работы SSM.
+To understand the intuitive essence of State Space Models, it is helpful to think of them as dynamical systems with internal memory that process incoming signals and generate outputs. The metaphor of a "dynamic system with memory" helps clarify the key components and operational principles of SSM.
 
-**Представьте физическую динамическую систему:**
+**Imagine a physical dynamical system:**
 
-Вообразите резервуар с жидкостью, в который подается входной поток (вход $x(t)$). Состояние резервуара (уровень, температура, давление — скрытое состояние $h(t)$) меняется под воздействием входного потока по определенным физическим законам. В то же время, мы измеряем некоторые параметры на выходе (выход $y(t)$), которые зависят от текущего состояния резервуара.
+Picture a reservoir with liquid into which an input flow ($x(t)$) is fed. The reservoir’s state (level, temperature, pressure — the hidden state $h(t)$) changes under the influence of the input flow according to physical laws. Meanwhile, we measure certain parameters at the output ($y(t)$), which depend on the reservoir’s current state.
 
-**Ключевое отличие от RNN:**
+**Key distinction from RNNs:**
 
-В отличие от RNN, SSM формулируются в непрерывном времени, а затем дискретизируются для вычислений. Это можно представить так: в то время как RNN (включая LSTM и GRU) работают с дискретными шагами времени (например, от слова к слову в тексте), SSM моделируют непрерывный процесс, который затем "просматривается" в дискретные моменты.
+Unlike RNNs, SSMs are formulated in continuous time and then discretized for computation. This can be visualized as follows: while RNNs (including LSTM and GRU) operate on discrete time steps (e.g., word to word in text), SSMs model a continuous process that is then sampled at discrete intervals.
 
-Эта непрерывная природа даёт SSM несколько теоретических преимуществ:
-- Возможность применять богатый аппарат дифференциальных уравнений
-- Более естественное моделирование процессов, происходящих в непрерывном времени
-- Лучшая способность адаптироваться к данным с различным временным разрешением
+This continuous nature gives SSMs several theoretical advantages:
+- Ability to apply the rich apparatus of differential equations
+- More natural modeling of processes occurring in continuous time
+- Better adaptability to data with varying temporal resolutions
 
-**Интуитивный пример: моделирование языка**
+**Intuitive example: Language modeling**
 
-![Схема работы SSM](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/SSM/Image_01.png)
+![SSM workflow diagram](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/SSM/Image_01.png    )
 
-При моделировании языка, можно представить SSM следующим образом:
-- Входная последовательность $x(t)$ — это поток слов или токенов
-- Скрытое состояние $h(t)$ — это "понимание" текста, которое обновляется с каждым новым словом
-- Матрица $A$ определяет, как быстро "забывается" контекст со временем
-- Матрица $B$ определяет, как сильно каждое новое слово влияет на понимание
-- Матрица $C$ определяет, как из текущего понимания генерируются прогнозы следующих слов
+In language modeling, SSM can be intuitively understood as follows:
+- Input sequence $x(t)$: a stream of words or tokens
+- Hidden state $h(t)$: the "understanding" of the text, updated with each new word
+- Matrix $A$: determines how quickly context is forgotten over time
+- Matrix $B$: determines how strongly each new word influences understanding
+- Matrix $C$: determines how current understanding generates predictions for the next words
 
-Таким образом, SSM можно интуитивно понимать как систему, которая непрерывно обрабатывает поток информации, сохраняя при этом память о прошлых событиях и генерируя выходы на основе своего текущего внутреннего состояния.
+Thus, SSM can be intuitively understood as a system that continuously processes an information stream while preserving memory of past events and generating outputs based on its current internal state.
 
-### 2.2 Формализация и обозначения: определение переменных и размерностей
+### 2.2 Formalization and Notation: Defining Variables and Dimensions
 
-Давайте формализуем архитектуру SSM, определив все её компоненты и соответствующие размерности. Это поможет лучше понять структуру модели и будет полезно при последующей реализации.
+Let us formalize the SSM architecture by defining all its components and corresponding dimensions. This will help better understand the model structure and aid in subsequent implementation.
 
-**Основные обозначения линейного SSM:**
+**Basic notation for linear SSM:**
 
-| **Символ** | **Размерность** | **Описание** |
-|------------|-----------------|--------------|
-| $x(t)$ | $\mathbb{R}^{d_x}$ | Входной сигнал в непрерывном времени |
-| $h(t)$ | $\mathbb{R}^{d_h}$ | Скрытое состояние в непрерывном времени |
-| $y(t)$ | $\mathbb{R}^{d_y}$ | Выходной сигнал в непрерывном времени |
-| $A$ | $\mathbb{R}^{d_h \times d_h}$ | Матрица динамики состояния |
-| $B$ | $\mathbb{R}^{d_h \times d_x}$ | Матрица входного преобразования |
-| $C$ | $\mathbb{R}^{d_y \times d_h}$ | Матрица выходного преобразования |
-| $D$ | $\mathbb{R}^{d_y \times d_x}$ | Матрица прямого прохода (опционально) |
+| **Symbol** | **Dimension** | **Description** |
+|------------|---------------|----------------|
+| $x(t)$ | $\mathbb{R}^{d_x}$ | Continuous-time input signal |
+| $h(t)$ | $\mathbb{R}^{d_h}$ | Continuous-time hidden state |
+| $y(t)$ | $\mathbb{R}^{d_y}$ | Continuous-time output signal |
+| $A$ | $\mathbb{R}^{d_h \times d_h}$ | State dynamics matrix |
+| $B$ | $\mathbb{R}^{d_h \times d_x}$ | Input transformation matrix |
+| $C$ | $\mathbb{R}^{d_y \times d_h}$ | Output transformation matrix |
+| $D$ | $\mathbb{R}^{d_y \times d_x}$ | Direct feedthrough matrix (optional) |
 
-**Непрерывная модель пространства состояний:**
+**Continuous-time State Space Model:**
 
-Линейная непрерывная SSM описывается следующими дифференциальными уравнениями:
+A linear continuous-time SSM is described by the following differential equations:
 
 $$
 \begin{align}
@@ -2092,29 +2082,29 @@ y(t) &= Ch(t) + Dx(t)
 \end{align}
 $$
 
-Где:
-- $h'(t)$ — производная скрытого состояния по времени
-- $x(t)$ — входной сигнал в момент времени $t$
-- $h(t)$ — скрытое состояние в момент времени $t$
-- $y(t)$ — выходной сигнал в момент времени $t$
+Where:
+- $h'(t)$ is the derivative of the hidden state with respect to time
+- $x(t)$ is the input signal at time $t$
+- $h(t)$ is the hidden state at time $t$
+- $y(t)$ is the output signal at time $t$
 
-Уравнение состояния с помощью матриц A и B описывает, как состояние изменяется под влиянием входных данных.
+The state equation, via matrices $A$ and $B$, describes how the state evolves under the influence of inputs.
 
-![Визуализация уравнения состояния](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/SSM/Image_02.png)
+![State equation visualization](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/SSM/Image_02.png    )
 
-Уравнение выхода описывает, как состояние переводится в выход (через матрицу C) и как вход влияет на выход (через матрицу D).
+The output equation describes how the state is translated into output (via matrix $C$) and how the input directly affects the output (via matrix $D$).
 
-![Визуализация уравнения выхода](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/SSM/Image_03.png)
+![Output equation visualization](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/SSM/Image_03.png    )
 
-> Примечание: Матрицы A, B, C и D являются обучаемыми параметрами.
+> Note: Matrices $A$, $B$, $C$, and $D$ are trainable parameters.
 
-**Дискретизация для практических вычислений:**
+**Discretization for Practical Computation:**
 
-Исходные уравнения состояний представлены в непрерывной форме, что требует их преобразования для обработки дискретных входных данных. Для этого применяется метод экстраполяции нулевого порядка (Zero-Order Hold, ZOH). Его принцип заключается в удержании значения дискретного входного сигнала до поступления следующего отсчёта.
+The original state equations are presented in continuous form and must be transformed for processing discrete inputs. This is achieved using the Zero-Order Hold (ZOH) method, which holds the value of a discrete input signal until the next sample arrives.
 
-![Визуальное пояснение работы экстраполятора нулевого порядка при переходе от дискретного вида к непрерывному](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/SSM/Image_04.png)
+![Visual explanation of Zero-Order Hold in transitioning from discrete to continuous](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/SSM/Image_04.png    )
 
-В контексте нейронных сетей дискретизация выполняется с обучаемым шагом $\Delta$. Метод ZOH обеспечивает аппроксимацию входного сигнала путём его квантования. Формально, для системы с параметрами $(A, B, C)$ преобразование описывается следующими соотношениями:
+In neural networks, discretization is performed with a trainable step $\Delta$. The ZOH method approximates the input signal by quantization. Formally, for a system with parameters $(A, B, C)$, the transformation is described by:
 
 $$
 \begin{align}
@@ -2123,42 +2113,41 @@ y_t &= Ch_t + Dx_t
 \end{align}
 $$
 
-Где:
-- $h_t$ — дискретное скрытое состояние в момент времени $t$
-- $x_t$ — дискретный входной сигнал в момент времени $t$
-- $y_t$ — дискретный выходной сигнал в момент времени $t$
-- $\bar{A} = \exp(\Delta A)$ — дискретизированная матрица динамики состояния
-- $\bar{B} = (\Delta A)^{-1}(\exp(\Delta A) - I)\Delta B$ — дискретизированная матрица входного преобразования
+Where:
+- $h_t$ is the discrete hidden state at time $t$
+- $x_t$ is the discrete input signal at time $t$
+- $y_t$ is the discrete output signal at time $t$
+- $\bar{A} = \exp(\Delta A)$ — discretized state dynamics matrix
+- $\bar{B} = (\Delta A)^{-1}(\exp(\Delta A) - I)\Delta B$ — discretized input transformation matrix
 
 ```python
 """
-Модуль для преобразования непрерывных систем в дискретные и их анализа.
+Module for converting continuous systems to discrete form and analyzing them.
 
-Функциональное назначение:
+Functional Purpose:
 -----------------------------
-Данный программный код предоставляет инструменты для:
-1. Преобразования непрерывных систем, заданных в пространстве состояний,
-   в дискретные с использованием метода Zero-Order Hold (ZOH)
-2. Моделирования поведения дискретных систем
-3. Визуализации результатов дискретизации и анализа влияния шага дискретизации
-4. Демонстрации принципа работы экстраполятора нулевого порядка
+This code provides tools for:
+1. Converting continuous systems defined in state-space into discrete systems using the Zero-Order Hold (ZOH) method
+2. Simulating the behavior of discrete systems
+3. Visualizing discretization results and analyzing the impact of discretization step size
+4. Demonstrating the principle of operation of the Zero-Order Hold interpolator
 
-Основные функции:
-- continuous_to_discrete: преобразует непрерывную систему в дискретную
-- simulate_discrete_system: моделирует поведение дискретной системы
-- visualize_zoh: визуализирует принцип работы ZOH
-- plot_system_response: отображает входные/выходные сигналы и состояния системы
-- example_discretization_effect: демонстрирует влияние шага дискретизации
+Main Functions:
+- continuous_to_discrete: converts a continuous system to discrete form
+- simulate_discrete_system: simulates the behavior of a discrete system
+- visualize_zoh: visualizes the ZOH principle of operation
+- plot_system_response: displays input/output signals and system states
+- example_discretization_effect: demonstrates the effect of discretization step size
 """
 
-# Стандартные библиотеки
+# Standard libraries
 from typing import Tuple, Optional, List, Any
 
-# Сторонние библиотеки
+# Third-party libraries
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Научные вычисления
+# Scientific computing
 from scipy.linalg import expm
 
 
@@ -2170,33 +2159,32 @@ def continuous_to_discrete(
     delta: float = 1.0
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
-    Преобразует непрерывную систему в дискретную с использованием ZOH (Zero-Order Hold).
+    Converts a continuous system to discrete form using Zero-Order Hold (ZOH).
 
     Description:
     ---------------
-        Выполняет дискретизацию системы, заданной в пространстве состояний,
-        используя метод Zero-Order Hold. Метод предполагает, что входной сигнал
-        постоянен между моментами дискретизации.
+        Discretizes a state-space system using the Zero-Order Hold method.
+        This method assumes the input signal remains constant between sampling instants.
 
     Args:
     ---------------
-        A: Матрица динамики состояния непрерывной системы (n x n)
-        B: Матрица входного преобразования непрерывной системы (n x m)
-        C: Матрица выходного преобразования (p x n)
-        D: Матрица прямой связи (p x m), по умолчанию нулевая матрица
-        delta: Шаг дискретизации (по умолчанию 1.0)
+        A: Continuous system state dynamics matrix (n x n)
+        B: Continuous system input transformation matrix (n x m)
+        C: Output transformation matrix (p x n)
+        D: Direct feedthrough matrix (p x m), defaults to zero matrix
+        delta: Discretization step size (default: 1.0)
 
     Returns:
     ---------------
         Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-            A_d: Дискретизированная матрица динамики (n x n)
-            B_d: Дискретизированная матрица входного преобразования (n x m)
-            C_d: Матрица выходного преобразования (p x n)
-            D_d: Матрица прямой связи (p x m)
+            A_d: Discretized state dynamics matrix (n x n)
+            B_d: Discretized input transformation matrix (n x m)
+            C_d: Output transformation matrix (p x n)
+            D_d: Direct feedthrough matrix (p x m)
 
     Raises:
     ---------------
-        ValueError: Если размерности матриц не согласованы
+        ValueError: If matrix dimensions are inconsistent
 
     Examples:
     ---------------
@@ -2205,43 +2193,42 @@ def continuous_to_discrete(
         >>> C = np.array([[1, 0]])
         >>> A_d, B_d, C_d, D_d = continuous_to_discrete(A, B, C)
     """
-    # Проверка размерностей матриц
+    # Validate matrix dimensions
     if A.shape[0] != A.shape[1]:
-        raise ValueError("Матрица A должна быть квадратной")
+        raise ValueError("Matrix A must be square")
     if A.shape[0] != B.shape[0]:
-        raise ValueError("Количество строк в матрицах A и B должно совпадать")
+        raise ValueError("Number of rows in matrices A and B must match")
     if C.shape[1] != A.shape[0]:
         raise ValueError(
-            "Количество столбцов в матрице C должно равняться количеству строк в матрице A"
+            "Number of columns in matrix C must equal number of rows in matrix A"
         )
 
-    n = A.shape[0]  # Размерность состояния
-    m = B.shape[1]  # Размерность входа
-    p = C.shape[0]  # Размерность выхода
+    n = A.shape[0]  # State dimension
+    m = B.shape[1]  # Input dimension
+    p = C.shape[0]  # Output dimension
 
-    # Вычисление дискретизированной матрицы динамики: A_d = exp(delta * A)
+    # Compute discretized state dynamics matrix: A_d = exp(delta * A)
     A_d = expm(delta * A)
 
-    # Вычисление дискретизированной матрицы входа
-    # Для случаев, когда A близка к сингулярной матрице,
-    # используем альтернативный подход
+    # Compute discretized input matrix
+    # For cases where A is close to singular, use an alternative approach
     if np.linalg.cond(A) > 1e12:
-        # Аппроксимация для плохо обусловленных матриц
+        # Approximation for ill-conditioned matrices
         B_d = delta * B
     else:
-        # Расширяем матрицу для вычисления через матричную экспоненту
+        # Extend matrix for computation via matrix exponential
         n_aug = n + m
         M = np.zeros((n_aug, n_aug))
         M[:n, :n] = delta * A
         M[:n, n:] = delta * B
 
-        # Вычисляем exp(M)
+        # Compute exp(M)
         EM = expm(M)
 
-        # Извлекаем B_d из результата
+        # Extract B_d from result
         B_d = EM[:n, n:]
 
-    # C и D не изменяются при дискретизации
+    # C and D remain unchanged during discretization
     C_d = C
     D_d = D if D is not None else np.zeros((p, m))
 
@@ -2257,33 +2244,32 @@ def simulate_discrete_system(
     h0: Optional[np.ndarray] = None
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
-    Моделирует дискретную систему состояний.
+    Simulates a discrete state-space system.
 
     Description:
     ---------------
-        Моделирует поведение дискретной системы, заданной в пространстве состояний,
-        по уравнениям:
+        Simulates the behavior of a discrete state-space system governed by:
         h_t = A * h_{t-1} + B * x_t
         y_t = C * h_t + D * x_t
 
     Args:
     ---------------
-        A: Дискретизированная матрица динамики (n x n)
-        B: Дискретизированная матрица входного преобразования (n x m)
-        C: Матрица выходного преобразования (p x n)
-        D: Матрица прямой связи (p x m)
-        x: Входной сигнал (T x m) или (T,) для одномерного входа
-        h0: Начальное состояние системы (n,), по умолчанию нулевой вектор
+        A: Discretized state dynamics matrix (n x n)
+        B: Discretized input transformation matrix (n x m)
+        C: Output transformation matrix (p x n)
+        D: Direct feedthrough matrix (p x m)
+        x: Input signal (T x m) or (T,) for single-input
+        h0: Initial system state (n,), defaults to zero vector
 
     Returns:
     ---------------
         Tuple[np.ndarray, np.ndarray]:
-            h: Состояния системы на каждом временном шаге (T x n)
-            y: Выходы системы на каждом временном шаге (T x p)
+            h: System states at each time step (T x n)
+            y: System outputs at each time step (T x p)
 
     Raises:
     ---------------
-        ValueError: Если размерности входных данных не согласованы
+        ValueError: If input data dimensions are inconsistent
 
     Examples:
     ---------------
@@ -2294,38 +2280,38 @@ def simulate_discrete_system(
         >>> x = np.ones((100, 1))
         >>> h, y = simulate_discrete_system(A, B, C, D, x)
     """
-    # Проверка размерностей матриц
-    n = A.shape[0]  # Размерность состояния
-    m = B.shape[1]  # Размерность входа
-    p = C.shape[0]  # Размерность выхода
+    # Validate matrix dimensions
+    n = A.shape[0]  # State dimension
+    m = B.shape[1]  # Input dimension
+    p = C.shape[0]  # Output dimension
 
-    # Преобразование x в 2D массив, если он 1D
+    # Convert x to 2D array if 1D
     if x.ndim == 1:
         x = x.reshape(-1, 1)
 
-    # Проверка размерности входного сигнала
-    T = x.shape[0]  # Количество временных шагов
+    # Validate input signal dimension
+    T = x.shape[0]  # Number of time steps
     if x.shape[1] != m:
         raise ValueError(
-            f"Размерность входного сигнала ({x.shape[1]}) не совпадает с ожидаемой ({m})"
+            f"Input signal dimension ({x.shape[1]}) does not match expected ({m})"
         )
 
-    # Инициализация массивов для состояний и выходов
+    # Initialize arrays for states and outputs
     h = np.zeros((T, n))
     y = np.zeros((T, p))
 
-    # Установка начального состояния
+    # Set initial state
     if h0 is not None:
         if len(h0) != n:
             raise ValueError(
-                f"Размерность начального состояния ({len(h0)}) не совпадает с ожидаемой ({n})"
+                f"Initial state dimension ({len(h0)}) does not match expected ({n})"
             )
         h[0] = h0
 
-    # Вычисление выхода для начального момента времени
+    # Compute output at initial time
     y[0] = C @ h[0] + D @ x[0]
 
-    # Моделирование системы для каждого временного шага
+    # Simulate system for each time step
     for t in range(1, T):
         h[t] = A @ h[t-1] + B @ x[t]
         y[t] = C @ h[t] + D @ x[t]
@@ -2337,27 +2323,27 @@ def visualize_zoh(
     continuous_time: np.ndarray,
     discrete_time: np.ndarray,
     signal: np.ndarray,
-    title: str = "Экстраполяция нулевого порядка (ZOH)"
+    title: str = "Zero-Order Hold (ZOH) Interpolation"
 ) -> plt.Figure:
     """
-    Визуализирует принцип работы экстраполятора нулевого порядка (ZOH).
+    Visualizes the principle of Zero-Order Hold (ZOH) interpolation.
 
     Description:
     ---------------
-        Демонстрирует, как дискретный сигнал преобразуется в непрерывный
-        с помощью метода Zero-Order Hold, который сохраняет значение сигнала
-        постоянным между моментами дискретизации.
+        Demonstrates how a discrete signal is converted to continuous form
+        using Zero-Order Hold, which holds the signal value constant between
+        sampling instants.
 
     Args:
     ---------------
-        continuous_time: Массив непрерывного времени для отображения
-        discrete_time: Массив дискретных временных отсчетов
-        signal: Дискретный сигнал, соответствующий discrete_time
-        title: Заголовок графика (по умолчанию "Экстраполяция нулевого порядка (ZOH)")
+        continuous_time: Array of continuous time for plotting
+        discrete_time: Array of discrete sampling times
+        signal: Discrete signal corresponding to discrete_time
+        title: Plot title (default: "Zero-Order Hold (ZOH) Interpolation")
 
     Returns:
     ---------------
-        plt.Figure: Объект фигуры matplotlib с графиком
+        plt.Figure: Matplotlib figure object with the plot
 
     Examples:
     ---------------
@@ -2366,11 +2352,11 @@ def visualize_zoh(
         >>> signal = np.sin(2 * np.pi * 0.5 * discrete_time)
         >>> fig = visualize_zoh(continuous_time, discrete_time, signal)
     """
-    # Преобразуем сигнал в одномерный, если он 2D
+    # Flatten signal to 1D if 2D
     if signal.ndim > 1:
         signal = signal.flatten()
 
-    # Создание интерполированного сигнала с помощью ZOH
+    # Create ZOH-interpolated signal
     zoh_signal = np.zeros_like(continuous_time)
     for i, t in enumerate(continuous_time):
         idx = np.searchsorted(discrete_time, t, side='right') - 1
@@ -2379,24 +2365,24 @@ def visualize_zoh(
 
     fig, ax = plt.subplots(figsize=(12, 6))
 
-    # Построение дискретных точек
+    # Plot discrete samples
     ax.scatter(
-        discrete_time, signal, color='red', s=80, zorder=3, label='Дискретные отсчеты'
+        discrete_time, signal, color='red', s=80, zorder=3, label='Discrete samples'
     )
 
-    # Построение интерполированного сигнала ZOH
+    # Plot ZOH-interpolated signal
     ax.step(
         continuous_time, zoh_signal, where='post', color='blue',
-        linestyle='-', linewidth=2, alpha=0.7, label='ZOH интерполяция'
+        linestyle='-', linewidth=2, alpha=0.7, label='ZOH interpolation'
     )
 
-    # Добавление вертикальных линий для дискретных моментов времени
+    # Add vertical lines at discrete time points
     for t in discrete_time:
         ax.axvline(x=t, color='gray', linestyle='--', linewidth=1, alpha=0.5)
 
     ax.set_title(title, fontsize=14)
-    ax.set_xlabel('Время', fontsize=12)
-    ax.set_ylabel('Амплитуда', fontsize=12)
+    ax.set_xlabel('Time', fontsize=12)
+    ax.set_ylabel('Amplitude', fontsize=12)
     ax.grid(True, alpha=0.3)
     ax.legend(fontsize=10)
 
@@ -2408,29 +2394,29 @@ def plot_system_response(
     x: np.ndarray,
     h: np.ndarray,
     y: np.ndarray,
-    title: str = "Отклик системы"
+    title: str = "System Response"
 ) -> plt.Figure:
     """
-    Визуализирует входные данные, состояния и выходные данные системы.
+    Visualizes system inputs, states, and outputs.
 
     Description:
     ---------------
-        Создает три графика, отображающие:
-        1. Входной сигнал системы
-        2. Состояния системы
-        3. Выходной сигнал системы
+        Creates three plots showing:
+        1. System input signal
+        2. System states
+        3. System output signal
 
     Args:
     ---------------
-        time: Массив временных отсчетов
-        x: Входной сигнал системы (T x m)
-        h: Состояния системы (T x n)
-        y: Выходы системы (T x p)
-        title: Заголовок графика (по умолчанию "Отклик системы")
+        time: Array of time samples
+        x: System input signal (T x m)
+        h: System states (T x n)
+        y: System outputs (T x p)
+        title: Plot title (default: "System Response")
 
     Returns:
     ---------------
-        plt.Figure: Объект фигуры matplotlib с графиками
+        plt.Figure: Matplotlib figure object with plots
 
     Examples:
     ---------------
@@ -2440,7 +2426,7 @@ def plot_system_response(
         >>> y = np.cos(time).reshape(-1, 1)
         >>> fig = plot_system_response(time, x, h, y)
     """
-    # Преобразование в 2D массивы, если они 1D
+    # Convert to 2D arrays if 1D
     if x.ndim == 1:
         x = x.reshape(-1, 1)
     if y.ndim == 1:
@@ -2448,34 +2434,34 @@ def plot_system_response(
 
     fig, axs = plt.subplots(3, 1, figsize=(12, 10), sharex=True)
 
-    # Построение входного сигнала
+    # Plot input signal
     for i in range(x.shape[1]):
         axs[0].plot(
             time, x[:, i], linewidth=2, label=f'x_{i+1}' if x.shape[1] > 1 else 'x'
         )
         axs[0].step(time, x[:, i], linewidth=1, linestyle='--', alpha=0.7, where='post')
-    axs[0].set_title('Входной сигнал', fontsize=14)
-    axs[0].set_ylabel('Амплитуда', fontsize=12)
+    axs[0].set_title('Input Signal', fontsize=14)
+    axs[0].set_ylabel('Amplitude', fontsize=12)
     axs[0].grid(True, alpha=0.3)
     if x.shape[1] > 1:
         axs[0].legend()
 
-    # Построение состояний системы
+    # Plot system states
     for i in range(h.shape[1]):
         axs[1].plot(time, h[:, i], linewidth=2, label=f'h_{i+1}')
-    axs[1].set_title('Состояния системы', fontsize=14)
-    axs[1].set_ylabel('Амплитуда', fontsize=12)
+    axs[1].set_title('System States', fontsize=14)
+    axs[1].set_ylabel('Amplitude', fontsize=12)
     axs[1].grid(True, alpha=0.3)
     axs[1].legend()
 
-    # Построение выходного сигнала
+    # Plot output signal
     for i in range(y.shape[1]):
         axs[2].plot(
             time, y[:, i], linewidth=2, label=f'y_{i+1}' if y.shape[1] > 1 else 'y'
         )
-    axs[2].set_title('Выходной сигнал', fontsize=14)
-    axs[2].set_xlabel('Время', fontsize=12)
-    axs[2].set_ylabel('Амплитуда', fontsize=12)
+    axs[2].set_title('Output Signal', fontsize=14)
+    axs[2].set_xlabel('Time', fontsize=12)
+    axs[2].set_ylabel('Amplitude', fontsize=12)
     axs[2].grid(True, alpha=0.3)
     if y.shape[1] > 1:
         axs[2].legend()
@@ -2496,25 +2482,25 @@ def example_discretization_effect(
     T_sim: float = 10
 ) -> plt.Figure:
     """
-    Демонстрирует влияние шага дискретизации на отклик системы.
+    Demonstrates the effect of discretization step size on system response.
 
     Description:
     ---------------
-        Сравнивает отклики системы при разных шагах дискретизации,
-        демонстрируя, как выбор delta влияет на точность моделирования.
+        Compares system responses under different discretization step sizes,
+        illustrating how the choice of delta affects modeling accuracy.
 
     Args:
     ---------------
-        A: Матрица динамики состояния непрерывной системы (n x n)
-        B: Матрица входного преобразования непрерывной системы (n x m)
-        C: Матрица выходного преобразования (p x n)
-        D: Матрица прямой связи (p x m)
-        delta_values: Список значений шага дискретизации для сравнения
-        T_sim: Время симуляции в секундах (по умолчанию 10)
+        A: Continuous system state dynamics matrix (n x n)
+        B: Continuous system input transformation matrix (n x m)
+        C: Output transformation matrix (p x n)
+        D: Direct feedthrough matrix (p x m)
+        delta_values: List of discretization step sizes to compare
+        T_sim: Simulation time in seconds (default: 10)
 
     Returns:
     ---------------
-        plt.Figure: Объект фигуры matplotlib с графиком сравнения
+        plt.Figure: Matplotlib figure object with comparison plot
 
     Examples:
     ---------------
@@ -2525,34 +2511,34 @@ def example_discretization_effect(
         >>> delta_values = [0.01, 0.05, 0.1, 0.2, 0.5]
         >>> fig = example_discretization_effect(A, B, C, D, delta_values)
     """
-    # Создаем фигуру для сравнения
+    # Create figure for comparison
     plt.figure(figsize=(14, 8))
 
-    # Цветовая схема для разных значений delta
+    # Color scheme for different delta values
     colors = plt.cm.viridis(np.linspace(0, 1, len(delta_values)))
 
     for i, delta in enumerate(delta_values):
-        # Создаем входной сигнал с текущим delta
+        # Generate input signal with current delta
         T = int(T_sim / delta) + 1
         t = np.arange(0, T) * delta
 
-        # Ступенчатый сигнал с синусоидой
+        # Step input followed by sine wave
         x = np.zeros((T, 1))
-        # Ступенчатый вход с 0.5 сек
+        # Step input starting at 0.5 seconds
         x[int(0.5/delta):] = 1.0
 
-        # Дискретизация системы
+        # Discretize system
         A_d, B_d, C_d, D_d = continuous_to_discrete(A, B, C, D, delta)
 
-        # Моделирование системы
+        # Simulate system
         h, y = simulate_discrete_system(A_d, B_d, C_d, D_d, x)
 
-        # Отображаем выходной сигнал
+        # Plot output signal
         plt.plot(t, y, color=colors[i], label=f'delta = {delta}', linewidth=2)
 
-    plt.title('Влияние шага дискретизации на отклик системы', fontsize=14)
-    plt.xlabel('Время (сек)', fontsize=12)
-    plt.ylabel('Выход системы', fontsize=12)
+    plt.title('Effect of Discretization Step Size on System Response', fontsize=14)
+    plt.xlabel('Time (s)', fontsize=12)
+    plt.ylabel('System Output', fontsize=12)
     plt.grid(True, alpha=0.3)
     plt.legend()
     plt.tight_layout()
@@ -2562,21 +2548,21 @@ def example_discretization_effect(
 
 def run_example() -> None:
     """
-    Запускает демонстрационный пример работы модуля.
+    Runs a demonstration of the module functionality.
 
     Description:
     ---------------
-        Демонстрирует:
-        1. Процесс дискретизации системы
-        2. Моделирование дискретной системы
-        3. Визуализацию принципа ZOH
-        4. Влияние шага дискретизации на отклик системы
+        Demonstrates:
+        1. The discretization process of state-space equations
+        2. Simulation of a discrete system
+        3. Visualization of the ZOH principle
+        4. The effect of discretization step size on system response
     """
-    print("Демонстрация дискретизации уравнений состояния методом ZOH")
+    print("Demonstration of state-space discretization using ZOH")
     print("=" * 60)
 
-    # Определение параметров непрерывной системы
-    # Пример: демпфированный осциллятор
+    # Define parameters of continuous system
+    # Example: damped oscillator
     A = np.array([
         [0, 1],
         [-1, -0.5]  # ω² = 1, ζ = 0.25
@@ -2585,52 +2571,52 @@ def run_example() -> None:
     C = np.array([[1, 0]])
     D = np.array([[0]])
 
-    print("Непрерывная система:")
+    print("Continuous system:")
     print("A =\n", A)
     print("B =\n", B)
     print("C =\n", C)
     print("D =\n", D)
 
-    # Шаг дискретизации
+    # Discretization step
     delta = 0.1
 
-    # Дискретизация системы
+    # Discretize system
     A_d, B_d, C_d, D_d = continuous_to_discrete(A, B, C, D, delta)
 
-    print("\nДискретизированная система (delta =", delta, "):")
+    print("\nDiscretized system (delta =", delta, "):")
     print("A_d =\n", A_d)
     print("B_d =\n", B_d)
     print("C_d =\n", C_d)
     print("D_d =\n", D_d)
 
-    # Создание входного сигнала
-    T = 100  # Количество временных шагов
+    # Generate input signal
+    T = 100  # Number of time steps
     time = np.arange(0, T) * delta
 
-    # Ступенчатый сигнал с последующей синусоидой
+    # Step input followed by sine wave
     x = np.zeros((T, 1))
-    # Ступенчатый вход с 10-го по 50-й шаг
+    # Step input from step 10 to 50
     x[10:50] = 1.0
-    # Синусоида
+    # Sine wave
     x[50:] = np.sin(2 * np.pi * 0.1 * (np.arange(50, T))).reshape(-1, 1)
 
-    # Моделирование системы
+    # Simulate system
     h, y = simulate_discrete_system(A_d, B_d, C_d, D_d, x)
 
-    # Визуализация результатов
-    fig1 = plot_system_response(time, x, h, y, title="Отклик дискретизированной системы")
+    # Visualize results
+    fig1 = plot_system_response(time, x, h, y, title="Response of Discretized System")
 
-    # Демонстрация экстраполяции нулевого порядка
+    # Demonstrate Zero-Order Hold interpolation
     continuous_time = np.linspace(0, 2, 1000)
     discrete_time = np.arange(0, 2.1, delta)
     discrete_signal = np.sin(2 * np.pi * 0.5 * discrete_time)
 
     fig2 = visualize_zoh(
         continuous_time, discrete_time, discrete_signal,
-        title=f"Экстраполяция нулевого порядка (ZOH) с delta = {delta}"
+        title=f"Zero-Order Hold (ZOH) with delta = {delta}"
     )
 
-    # Показать влияние разных шагов дискретизации
+    # Show effect of different discretization steps
     delta_values = [0.01, 0.05, 0.1, 0.2, 0.5]
     fig3 = example_discretization_effect(A, B, C, D, delta_values)
 
@@ -2643,65 +2629,65 @@ if __name__ == "__main__":
 
 ---
 
-## Разрешение противоречия между непрерывностью SSM и дискретностью текста
+## Resolving the contradiction between the continuity of SSM and the discreteness of the text
 
-1. **Теоретическая основа и практическая реализация**
-   
-   SSM действительно изначально формулируются в непрерывном времени через дифференциальные уравнения. Это их теоретическая основа, которая берет свое начало в теории управления и обработке сигналов. Однако для практического применения эти непрерывные модели дискретизируются.
+1. **Theoretical Foundation and Practical Implementation**
 
-2. **Абстрактное представление дискретных данных**
-   
-   Когда мы говорим о применении SSM к тексту, происходит следующее: дискретные токены текста (слова или подслова) преобразуются в непрерывные векторные представления (эмбеддинги). Эти непрерывные представления и используются как входные сигналы для SSM.
+   SSMs are originally formulated in continuous time through differential equations. This is their theoretical foundation, rooted in control theory and signal processing. However, for practical application, these continuous models are discretized.
 
-3. **Концептуальный мостик через эмбеддинги**
-   
-   Токены текста → Эмбеддинги (непрерывные векторы) → Обработка через SSM → Выходные непрерывные представления → Преобразование обратно в дискретные предсказания
+2. **Abstract Representation of Discrete Data**
 
-4. **Дискретизация для вычислений**
-   
-   Даже работая с непрерывными представлениями, для практических вычислений модель все равно дискретизируется, как описано в тексте через метод экстраполяции нулевого порядка (ZOH).
+   When applying SSMs to text, the following occurs: discrete text tokens (words or subwords) are transformed into continuous vector representations (embeddings). These continuous representations are then used as input signals for the SSM.
 
-### Более глубокое понимание процесса:
+3. **Conceptual Bridge via Embeddings**
 
-Когда SSM применяется к тексту, каждый шаг обработки соответствует одному токену (например, слову или части слова). При этом:
+   Text tokens → Embeddings (continuous vectors) → Processing via SSM → Output continuous representations → Conversion back to discrete predictions
 
-- **$x(t)$ становится $x_t$** — вектор эмбеддинга текущего токена
-- **$h(t)$ становится $h_t$** — скрытое состояние модели после обработки текущего токена
-- **$y(t)$ становится $y_t$** — выходной вектор, который можно использовать для предсказания следующего токена
+4. **Discretization for Computation**
 
-Таким образом, хотя модель разработана на основе дифференциальных уравнений в непрерывном времени, на практике мы используем ее дискретизированную версию, обрабатывая текст токен за токеном, как если бы это были дискретные временные шаги.
+   Even when working with continuous representations, the model is still discretized for practical computation, as described earlier via the Zero-Order Hold (ZOH) method.
+
+### Deeper Understanding of the Process:
+
+When SSMs are applied to text, each processing step corresponds to one token (e.g., a word or subword). In this context:
+
+- **$x(t)$ becomes $x_t$** — the embedding vector of the current token
+- **$h(t)$ becomes $h_t$** — the model’s hidden state after processing the current token
+- **$y(t)$ becomes $y_t$** — the output vector used to predict the next token
+
+Thus, although the model is designed based on differential equations in continuous time, in practice we use its discretized version, processing text token by token as if these were discrete time steps.
 
 ---
 
-**Параметризация в SSM для глубокого обучения:**
+**Parameterization in SSM for Deep Learning:**
 
-В моделях типа S4 и Mamba используются специальные параметризации матриц $A$, $B$ и $C$, которые улучшают обучаемость и вычислительную эффективность:
+In models such as S4 and Mamba, specialized parameterizations of matrices $A$, $B$, and $C$ are employed to improve trainability and computational efficiency:
 
-1. **Структурированная матрица $A$**:
-   - В S4 используется специальная параметризация, основанная на HiPPO (Hierarchical Polynomial Projections)
-   - В более поздних вариантах (S4D) часто используется диагональная матрица $A = \text{diag}(a_1, a_2, ..., a_{d_h})$
+1. **Structured Matrix $A$**:
+   - In S4: A specialized parameterization based on HiPPO (Hierarchical Polynomial Projections) is used.
+   - In later variants (S4D): A diagonal matrix $A = \text{diag}(a_1, a_2, ..., a_{d_h})$ is often used.
 
-2. **Параметризация $B$**:
-   - В S4: $B$ может быть низкоранговой или специально структурированной
-   - В простейшем случае: $B$ может быть вектором-столбцом
+2. **Parameterization of $B$**:
+   - In S4: $B$ may be low-rank or specially structured.
+   - In the simplest case: $B$ may be a column vector.
 
-3. **Параметризация $C$**:
-   - Обычно матрица $C$ параметризуется напрямую
-   - В некоторых вариантах SSM используются ограничения на $C$ для улучшения стабильности
+3. **Parameterization of $C$**:
+   - Typically, matrix $C$ is parameterized directly.
+   - In some SSM variants, constraints on $C$ are applied to improve stability.
 
-**Размерности в многослойной SSM:**
+**Dimensions in Multi-Layer SSM:**
 
-| **Параметр** | **Размерность** | **Описание** |
-|--------------|-----------------|--------------|
-| $d_x$ | Скаляр | Размерность входного вектора |
-| $d_h$ | Скаляр | Размерность скрытого состояния (обычно от 64 до 1024) |
-| $d_y$ | Скаляр | Размерность выходного вектора (обычно равна $d_x$) |
-| $L$ | Скаляр | Количество слоев SSM |
-| $N$ | Скаляр | Длина входной последовательности |
+| **Parameter** | **Dimension** | **Description** |
+|---------------|---------------|----------------|
+| $d_x$ | Scalar | Dimension of input vector |
+| $d_h$ | Scalar | Dimension of hidden state (typically 64 to 1024) |
+| $d_y$ | Scalar | Dimension of output vector (usually equal to $d_x$) |
+| $L$ | Scalar | Number of SSM layers |
+| $N$ | Scalar | Length of input sequence |
 
-**Селективные SSM (Mamba):**
+**Selective SSM (Mamba):**
 
-В селективных SSM, таких как Mamba, параметры модели становятся функциями входных данных:
+In selective SSMs such as Mamba, model parameters become functions of the input data:
 
 $$
 \begin{align}
@@ -2710,24 +2696,24 @@ y(t) &= C(x)h(t) + D(x)x(t)
 \end{align}
 $$
 
-Где $A(x)$, $B(x)$, $C(x)$ и $D(x)$ — функции от входа $x(t)$, обычно реализуемые через нейронные сети.
+Where $A(x)$, $B(x)$, $C(x)$, and $D(x)$ are functions of the input $x(t)$, typically implemented via neural networks.
 
-**Общее количество параметров в стандартном SSM слое:**
-- Матрица $A$: $d_h \times d_h$ (или $d_h$ для диагональной параметризации)
-- Матрица $B$: $d_h \times d_x$
-- Матрица $C$: $d_y \times d_h$
-- Матрица $D$ (если используется): $d_y \times d_x$
-- Итого: $d_h \times d_h + d_h \times d_x + d_y \times d_h + d_y \times d_x$ параметров
+**Total Parameters in a Standard SSM Layer:**
+- Matrix $A$: $d_h \times d_h$ (or $d_h$ for diagonal parameterization)
+- Matrix $B$: $d_h \times d_x$
+- Matrix $C$: $d_y \times d_h$
+- Matrix $D$ (if used): $d_y \times d_x$
+- Total: $d_h \times d_h + d_h \times d_x + d_y \times d_h + d_y \times d_x$ parameters
 
-В селективных SSM количество параметров увеличивается за счет дополнительных проекционных слоев, которые генерируют параметры в зависимости от входных данных.
+In selective SSMs, the number of parameters increases due to additional projection layers that generate parameters depending on the input data.
 
-### 2.3 Динамика работы SSM: от непрерывного времени к дискретному
+### 2.3 Dynamics of SSM: From Continuous to Discrete Time
 
-Теперь рассмотрим подробно, как именно функционирует модель пространства состояний во времени, начиная с непрерывной формулировки и заканчивая дискретной реализацией, используемой в нейронных сетях.
+Now, let us examine in detail how the State Space Model operates over time, beginning with its continuous formulation and concluding with its discrete implementation used in neural networks.
 
-#### Непрерывное время: формулировка через дифференциальные уравнения
+#### Continuous Time: Formulation via Differential Equations
 
-SSM в непрерывном времени описывается системой линейных дифференциальных уравнений первого порядка:
+SSMs in continuous time are described by a system of first-order linear differential equations:
 
 $$
 \begin{align}
@@ -2736,36 +2722,36 @@ y(t) &= Ch(t) + Dx(t)
 \end{align}
 $$
 
-Первое уравнение описывает, как меняется скрытое состояние во времени, а второе — как скрытое состояние преобразуется в выходной сигнал.
+The first equation describes how the hidden state evolves over time; the second describes how the hidden state is transformed into the output signal.
 
-**Интерпретация компонентов:**
+**Interpretation of Components:**
 
-- **Матрица $A$** определяет собственную динамику системы. Её собственные значения указывают на устойчивость системы:
-  - Отрицательные действительные части собственных значений → устойчивая система
-  - Положительные действительные части → неустойчивая система
-  - Мнимые части → колебательное поведение
+- **Matrix $A$** determines the system’s intrinsic dynamics. Its eigenvalues indicate system stability:
+  - Negative real parts of eigenvalues → stable system
+  - Positive real parts → unstable system
+  - Imaginary parts → oscillatory behavior
 
-- **Матрица $B$** определяет, как входной сигнал влияет на изменение скрытого состояния.
+- **Matrix $B$** determines how the input signal influences changes in the hidden state.
 
-- **Матрица $C$** определяет, как скрытое состояние влияет на выходной сигнал.
+- **Matrix $C$** determines how the hidden state influences the output signal.
 
-- **Матрица $D$** (если используется) позволяет входному сигналу напрямую влиять на выходной сигнал.
+- **Matrix $D$** (if used) allows the input signal to directly affect the output signal.
 
-![Итоговая схема работы SSM](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/SSM/Image_05.png)
+![Final SSM workflow diagram](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/SSM/Image_05.png  )
 
-Таким образом, вся система работает так:
+Thus, the entire system operates as follows:
 
-- Входной сигнал сначала умножается на матрицу B, которая описывает, как входные сигналы влияют на систему;
+- The input signal is first multiplied by matrix $B$, which describes how inputs influence the system;
 
-- Происходит обновление скрытого состояния. Мы умножаем состояние на матрицу A, которая описывает, как связаны все внутренние состояния. Матрица A применяется перед созданием представлений состояний и обновляется после того, как представление было обновлено;
+- The hidden state is updated. We multiply the state by matrix $A$, which describes how all internal states are interconnected. Matrix $A$ is applied before generating state representations and is updated after representation updates;
 
-- Затем, мы используем матрицу C, чтобы описать перевод в выходной сигнал;
+- Then, we use matrix $C$ to describe the transformation into the output signal;
 
-- Матрица D — это Skip Connection, который используется, для борьбы с затуханием градиентов внутри сети.
+- Matrix $D$ is a skip connection used to mitigate gradient vanishing within the network.
 
-#### Аналитическое решение в непрерывном времени
+#### Analytical Solution in Continuous Time
 
-Для линейной системы можно получить аналитическое решение:
+For a linear system, an analytical solution exists:
 
 $$
 \begin{align}
@@ -2774,22 +2760,22 @@ y(t) &= Ch(t) + Dx(t)
 \end{align}
 $$
 
-Где $e^{At}$ — матричная экспонента, являющаяся решением однородного уравнения $h'(t) = Ah(t)$.
+Where $e^{At}$ is the matrix exponential, the solution to the homogeneous equation $h'(t) = Ah(t)$.
 
-Это решение показывает, что текущее состояние системы зависит от:
-1. Начального состояния, преобразованного через матричную экспоненту
-2. Свертки входного сигнала с ядром $e^{A(t-\tau)}B$
+This solution reveals that the current system state depends on:
+1. The initial state, transformed via the matrix exponential
+2. The convolution of the input signal with the kernel $e^{A(t-\tau)}B$
 
-#### Переход к дискретному времени
+#### Transition to Discrete Time
 
-Для практической реализации необходимо дискретизировать непрерывную модель. Существует несколько методов дискретизации:
+For practical implementation, the continuous model must be discretized. Several discretization methods exist:
 
-1. **Метод Эйлера (простейший)**:
+1. **Euler Method (simplest)**:
    $$h_{t} = h_{t-1} + \Delta \cdot (Ah_{t-1} + Bx_t)$$
    
-   Где $\Delta$ — шаг дискретизации. Этот метод прост, но не очень точен для быстро меняющихся систем.
+   Where $\Delta$ is the discretization step. This method is simple but inaccurate for rapidly changing systems.
 
-2. **Метод нулевого порядка (ZOH)**, который предполагает, что вход остается постоянным в течение шага дискретизации:
+2. **Zero-Order Hold (ZOH) Method**, which assumes the input remains constant during each discretization step:
 
 $$
 \begin{align}
@@ -2799,72 +2785,72 @@ h_t &= \bar{A}h_{t-1} + \bar{B}x_t \\
 \end{align}
 $$
 
-Этот метод дает точное решение для случая, когда входной сигнал константен между шагами дискретизации.
+This method provides an exact solution when the input signal is constant between discretization steps.
 
-3. **Метод билинейного преобразования (Tustin)**, который обеспечивает лучшую аппроксимацию для систем с колебательной динамикой.
+3. **Bilinear Transformation (Tustin)**, which provides better approximation for systems with oscillatory dynamics.
 
-#### Вычислительные аспекты дискретизации
+#### Computational Aspects of Discretization
 
-Ключевой вычислительной проблемой является эффективный расчет матричной экспоненты $e^{A\Delta}$. В моделях типа S4 используются специальные техники для эффективного вычисления:
+The key computational challenge is the efficient computation of the matrix exponential $e^{A\Delta}$. Models such as S4 employ specialized techniques for efficient computation:
 
-- **Для диагональной матрицы $A$** (как в S4D): экспонента вычисляется поэлементно $e^{A\Delta} = \text{diag}(e^{a_1\Delta}, e^{a_2\Delta}, ..., e^{a_n\Delta})$
+- **For diagonal matrix $A$** (as in S4D): The exponential is computed element-wise: $e^{A\Delta} = \text{diag}(e^{a_1\Delta}, e^{a_2\Delta}, ..., e^{a_n\Delta})$
 
-- **Для общей матрицы $A$**: используются методы на основе разложения Шура или аппроксимации через ряды.
+- **For general matrix $A$**: Techniques based on Schur decomposition or series approximations are used.
 
-#### Свёрточная интерпретация SSM
+#### Convolutional Interpretation of SSM
 
-Одно из ключевых наблюдений: дискретизированный SSM можно представить в форме одномерной свертки:
+One key insight: a discretized SSM can be represented as a one-dimensional convolution:
 
 $$y_t = \sum_{i=0}^{t-1} K_{t-i} x_i + Dx_t$$
 
-где $K_i = C\bar{A}^{i-1}\bar{B}$ — импульсная характеристика системы.
+where $K_i = C\bar{A}^{i-1}\bar{B}$ is the system’s impulse response.
 
-Эта свёрточная интерпретация позволяет эффективно реализовать SSM через быстрое преобразование Фурье (FFT), что особенно полезно для длинных последовательностей:
+This convolutional interpretation enables efficient implementation of SSMs via Fast Fourier Transform (FFT), especially beneficial for long sequences:
 
-1. Вычисляем импульсную характеристику $K = [K_1, K_2, ..., K_L]$
-2. Используем свойство свертки в частотной области: FFT(x ∗ K) = FFT(x) ⊙ FFT(K)
-3. Вычисляем свертку через:
+1. Compute the impulse response $K = [K_1, K_2, ..., K_L]$
+2. Use the convolution property in the frequency domain: FFT(x ∗ K) = FFT(x) ⊙ FFT(K)
+3. Compute convolution via:
    - $X = \text{FFT}(x)$
    - $K' = \text{FFT}(K)$
    - $Y = \text{IFFT}(X \odot K')$
 
-Это сокращает сложность с $O(N^2)$ до $O(N \log N)$.
+This reduces complexity from $O(N^2)$ to $O(N \log N)$.
 
-#### Параллельный рекуррентный алгоритм
+#### Parallel Recurrent Algorithm
 
-Для селективных SSM (как в Mamba), свёрточный подход неприменим, так как параметры зависят от входных данных. Вместо этого используется специализированный рекуррентный алгоритм:
+For selective SSMs (such as Mamba), the convolutional approach is inapplicable because parameters depend on input data. Instead, a specialized recurrent algorithm is used:
 
 ```
 h_0 = 0
 for t = 1 to N:
-    Вычислить A_t, B_t, C_t в зависимости от x_t
+    Compute A_t, B_t, C_t based on x_t
     h_t = Ā_t * h_{t-1} + B̄_t * x_t
     y_t = C_t * h_t
 ```
 
-Хотя алгоритм выглядит последовательным, в Mamba используется специализированная параллельная реализация, которая эффективно использует архитектуру GPU.
+Although the algorithm appears sequential, Mamba employs a specialized parallel implementation that efficiently leverages GPU architecture.
 
-#### Ключевые отличия от RNN
+#### Key Differences from RNN
 
-| **Аспект** | **RNN/LSTM/GRU** | **SSM** |
+| **Aspect** | **RNN/LSTM/GRU** | **SSM** |
 |------------|-------------------|---------|
-| Теоретическая основа | Дискретные рекуррентные уравнения | Непрерывные дифференциальные уравнения |
-| Формулировка | Изначально дискретная | Непрерывная, затем дискретизированная |
-| Параметризация | Свободные матрицы весов | Структурированные матрицы с теоретическими ограничениями |
-| Вычисление | Строго последовательное | Может быть оптимизировано через FFT или параллельное сканирование |
-| Устойчивость | Эмпирические методы (вентили) | Теоретические гарантии через ограничения на матрицу A |
+| Theoretical Foundation | Discrete recurrent equations | Continuous differential equations |
+| Formulation | Initially discrete | Continuous, then discretized |
+| Parameterization | Free weight matrices | Structured matrices with theoretical constraints |
+| Computation | Strictly sequential | Can be optimized via FFT or parallel scanning |
+| Stability | Empirical methods (gates) | Theoretical guarantees via constraints on matrix A |
 
-Таким образом, SSM предлагают теоретически обоснованную альтернативу традиционным RNN, с прямыми связями с теорией управления и обработки сигналов, что дает им ряд теоретических и практических преимуществ.
+Thus, SSMs offer a theoretically grounded alternative to traditional RNNs, with direct connections to control theory and signal processing, granting them several theoretical and practical advantages.
 
-## 3. Математическое сравнение SSM с другими архитектурами
+## 3. Mathematical Comparison of SSM with Other Architectures
 
-### 3.1 SSM и классические RNN: формальное сопоставление и различия
+### 3.1 SSM and Classical RNNs: Formal Comparison and Differences
 
-Чтобы лучше понять, как SSM соотносятся с классическими рекуррентными нейронными сетями (включая LSTM и GRU), проведем их формальное математическое сопоставление, выявляя ключевые различия в формулировке, параметризации и поведении.
+To better understand how SSMs relate to classical recurrent neural networks (including LSTM and GRU), we perform a formal mathematical comparison, highlighting key differences in formulation, parameterization, and behavior.
 
-**Базовые формулировки:**
+**Basic Formulations:**
 
-**Стандартная RNN:**
+**Standard RNN:**
 $$h_t = \tanh(W_h h_{t-1} + W_x x_t + b)$$
 $$y_t = W_o h_t + b_o$$
 
@@ -2890,7 +2876,7 @@ h_t &= (1 - z_t) \odot h_{t-1} + z_t \odot \tilde{h}_t
 \end{align}
 $$
 
-**Дискретизированная SSM:**
+**Discretized SSM:**
 $$
 \begin{align}
 h_t &= \bar{A}h_{t-1} + \bar{B}x_t \\
@@ -2898,194 +2884,156 @@ y_t &= Ch_t + Dx_t
 \end{align}
 $$
 
-**Ключевые различия:**
+**Key Differences:**
 
-**1. Происхождение и теоретические основы:**
+**1. Origin and Theoretical Foundations:**
 
-- **RNN/LSTM/GRU**: Разработаны эмпирически как нейронные сети с обратной связью для последовательной обработки данных. Вентильные механизмы в LSTM и GRU были введены для решения конкретных проблем обучения.
+- **RNN/LSTM/GRU**: Developed empirically as recurrent neural networks for sequential data processing. Gating mechanisms in LSTM and GRU were introduced to address specific learning challenges.
 
-- **SSM**: Основаны на хорошо развитой теории линейных систем и управления. Модель изначально формулируется в непрерывном времени и затем дискретизируется для вычислений.
+- **SSM**: Based on well-developed theory of linear systems and control. The model is originally formulated in continuous time and then discretized for computation.
 
-**2. Нелинейность:**
+**2. Nonlinearity:**
 
-- **RNN/LSTM/GRU**: Явные нелинейные функции активации (tanh, sigmoid) применяются на каждом шаге.
+- **RNN/LSTM/GRU**: Explicit nonlinear activation functions (tanh, sigmoid) are applied at each step.
 
-- **SSM (базовые)**: Линейная система в своей основе. Нелинейность обычно вводится через внешние слои или более сложные архитектуры.
+- **SSM (basic)**: Linear system at its core. Nonlinearity is typically introduced via external layers or more complex architectures.
 
-**3. Обновление состояния:**
+**3. State Update:**
 
-- **RNN**: Простое рекуррентное обновление с полной заменой предыдущего состояния.
+- **RNN**: Simple recurrent update with full replacement of the previous state.
 
-- **LSTM/GRU**: Сложные вентильные механизмы для избирательного обновления компонентов состояния.
+- **LSTM/GRU**: Complex gating mechanisms for selective updating of state components.
 
-- **SSM**: Линейная динамика, где влияние предыдущего состояния контролируется матрицей $\bar{A}$, а влияние входа — матрицей $\bar{B}$.
+- **SSM**: Linear dynamics where influence of the previous state is controlled by matrix $\bar{A}$, and influence of the input by matrix $\bar{B}$.
 
-**4. Параметризация:**
+**4. Parameterization:**
 
-- **RNN/LSTM/GRU**: Произвольные матрицы весов без специальной структуры.
+- **RNN/LSTM/GRU**: Arbitrary weight matrices without special structure.
 
-- **SSM**: Структурированные матрицы с особой параметризацией (диагональная, HiPPO-подобная и т.д.), которая обеспечивает теоретические гарантии стабильности и эффективности.
+- **SSM**: Structured matrices with specialized parameterization (diagonal, HiPPO-like, etc.) ensuring theoretical guarantees of stability and efficiency.
 
-**5. Математическая интерпретация:**
+**5. Mathematical Interpretation:**
 
-- **RNN/LSTM/GRU**: Дискретное отображение от входа и предыдущего состояния к новому состоянию.
+- **RNN/LSTM/GRU**: Discrete mapping from input and previous state to new state.
 
-- **SSM**: Аппроксимация интегрирования непрерывного дифференциального уравнения. Состояние представляет собой аккумулированный "отпечаток" всей предыдущей истории, модулированный экспоненциальным затуханием.
+- **SSM**: Approximation of integrating a continuous differential equation. The state represents an accumulated "imprint" of the entire history, modulated by exponential decay.
 
-**6. Связь с LSTM через линеаризацию:**
+**6. Connection to LSTM via Linearization:**
 
-Интересно, что можно показать связь между LSTM и линейными SSM через линеаризацию. Если линеаризовать LSTM вокруг равновесной точки, получим:
+Interestingly, a connection between LSTM and linear SSMs can be shown via linearization. If LSTM is linearized around an equilibrium point, we obtain:
 
 $$h_t \approx Ah_{t-1} + Bx_t$$
 
-Где $A$ и $B$ — матрицы якобиана, соответствующие частным производным по $h_{t-1}$ и $x_t$. Эта форма напоминает дискретизированный SSM.
+Where $A$ and $B$ are Jacobian matrices corresponding to partial derivatives with respect to $h_{t-1}$ and $x_t$. This form resembles a discretized SSM.
 
-**7. Поток градиентов и устойчивость:**
+**7. Gradient Flow and Stability:**
 
-- **RNN**: Подвержены проблеме затухающего/взрывного градиента из-за многократного умножения на одну и ту же матрицу.
+- **RNN**: Susceptible to vanishing/exploding gradients due to repeated multiplication by the same matrix.
 
-- **LSTM/GRU**: Решают проблему через вентильные механизмы, создающие "магистрали градиентов".
+- **LSTM/GRU**: Mitigate this issue via gating mechanisms that create "gradient highways".
 
-- **SSM**: Устойчивость контролируется через собственные значения матрицы $A$. Теоретически обоснованная параметризация гарантирует стабильность при обучении.
+- **SSM**: Stability is controlled via eigenvalues of matrix $A$. Theoretically grounded parameterization ensures training stability.
 
-**Формальное сравнение потока градиентов:**
+**Formal Comparison of Gradient Flow:**
 
-Для базовой RNN градиент при обратном распространении:
+For a basic RNN, the gradient during backpropagation is:
 $$\frac{\partial \mathcal{L}}{\partial h_t} = \sum_{k=t+1}^{T} \frac{\partial \mathcal{L}}{\partial h_k} \prod_{j=t+1}^{k} \text{diag}(\tanh'(W_h h_{j-1} + W_x x_j + b)) W_h$$
 
-Для SSM:
+For SSM:
 $$\frac{\partial \mathcal{L}}{\partial h_t} = \sum_{k=t+1}^{T} \frac{\partial \mathcal{L}}{\partial h_k} \prod_{j=t+1}^{k} \bar{A}_j$$
 
-В SSM с диагональной матрицей $\bar{A}$ каждый элемент состояния обновляется независимо, что делает поток градиентов более контролируемым.
+In SSM with diagonal matrix $\bar{A}$, each state component is updated independently, making gradient flow more controllable.
 
-**8. Масштабирование вычислений:**
+**8. Computational Scaling:**
 
-- **RNN/LSTM/GRU**: Строго последовательное вычисление, что ограничивает параллелизм.
+- **RNN/LSTM/GRU**: Strictly sequential computation, limiting parallelism.
 
-- **SSM** (стандартные): Могут быть вычислены через свертку с использованием FFT, что дает сложность $O(N \log N)$ для последовательности длины $N$.
+- **SSM** (standard): Can be computed via convolution with FFT, achieving $O(N \log N)$ complexity for a sequence of length $N$.
 
-- **Селективные SSM** (Mamba): Требуют специализированных алгоритмов параллельного сканирования, но все равно обеспечивают линейную сложность $O(N)$.
+- **Selective SSM** (Mamba): Require specialized parallel scanning algorithms but still maintain linear $O(N)$ complexity.
 
-Таким образом, SSM представляют собой фундаментально иной подход к моделированию последовательностей по сравнению с классическими RNN, с более сильными теоретическими основами и потенциально лучшими свойствами обучения и масштабирования.
+Thus, SSMs represent a fundamentally different approach to sequence modeling compared to classical RNNs, with stronger theoretical foundations and potentially superior learning and scaling properties.
 
-### 3.2 SSM и трансформеры: механизмы моделирования долговременных зависимостей
+### 3.2 SSM and Transformers: Mechanisms for Modeling Long-Range Dependencies
 
-Модели пространства состояний (SSM) и трансформеры представляют два разных подхода к моделированию долговременных зависимостей в последовательностях. Они достигают похожих целей, но используют фундаментально различные механизмы. Проведем их сравнительный анализ.
+State Space Models (SSM) and transformers represent two distinct approaches to modeling long-range dependencies in sequences. They achieve similar goals but use fundamentally different mechanisms. We now conduct a comparative analysis.
 
-**Механизм внимания в трансформерах:**
+**  
+- **Трансформеры**:  
+  Влияние позиции $j$ на позицию $i$ выражается как:  
+  $$z_i = \sum_{j=1}^{N} \alpha_{ij} \cdot (W_V x_j)$$  
+  где $\alpha_{ij}$ — весовые коэффициенты внимания между позициями $i$ и $j$.  
 
-В трансформерах долговременные зависимости моделируются через механизм самовнимания:
+- **SSM**:  
+  Влияние всех предыдущих позиций на текущую позицию $t$ выражается как:  
+  $$h_t = \bar{A}h_{t-1} + \bar{B}x_t = \sum_{i=0}^{t-1} \bar{A}^{t-1-i}\bar{B}x_i$$  
+  $$y_t = Ch_t = C\sum_{i=0}^{t-1} \bar{A}^{t-1-i}\bar{B}x_i = \sum_{i=0}^{t-1} K_{t-i}x_i$$  
+  где $K_j = C\bar{A}^{j-1}\bar{B}$ — импульсная характеристика системы.  
 
-$$
-\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V
-$$
+2. **Затухание влияния с расстоянием**:  
 
-Где $Q$, $K$ и $V$ — матрицы запросов, ключей и значений, полученные линейным преобразованием входов.
+- **Трансформеры**:  
+  В принципе, нет ограничений на затухание — вес внимания для дальних зависимостей может быть таким же высоким, как и для ближних.  
 
-Ключевые особенности:
-- **Прямые связи**: Каждая позиция напрямую "видит" все другие позиции
-- **Содержательное внимание**: Распределение внимания определяется содержанием запросов и ключей
-- **Квадратичная сложность**: $O(N^2)$ с длиной последовательности
+- **Стандартные SSM**:  
+  Затухание определяется собственными значениями матрицы $\bar{A}$. Для устойчивой системы влияние затухает экспоненциально:  
+  $$K_j \sim e^{\lambda j}$$  
+  где $\lambda < 0$ — доминирующее собственное значение матрицы $A$.  
 
-**Механизм обработки долговременных зависимостей в SSM:**
+- **Селективные SSM (Mamba)**:  
+  Затухание становится зависимым от содержания, так как параметры матрицы $\bar{A}$ меняются в зависимости от входа:  
+  $$K_j(x) \sim e^{\lambda(x) j}$$  
 
-SSM моделируют долговременные зависимости через эволюцию скрытого состояния:
+3. **Теоретическая ёмкость памяти**:  
 
-$$
-h(t) = e^{A(t-t_0)}h(t_0) + \int_{t_0}^{t}e^{A(t-\tau)}Bx(\tau)d\tau
-$$
+- **Трансформеры**:  
+  Определяется размером контекстного окна. Каждая позиция имеет прямой доступ ко всем позициям в окне.  
 
-Ключевые особенности:
-- **Рекуррентная передача**: Информация передается через скрытое состояние
-- **Экспоненциальное ядро**: Влияние прошлых входов затухает экспоненциально
-- **Линейная сложность**: $O(N)$ с длиной последовательности
+- **SSM**:  
+  Определяется размерностью скрытого состояния $d_h$ и спектральными свойствами матрицы $A$. Чем ближе собственные значения к мнимой оси, тем дольше сохраняется информация.  
 
-**Формальное сравнение моделирования долговременных зависимостей:**
+4. **Содержательная селективность**:  
 
-1. **Математическая формулировка зависимости:**
+- **Трансформеры**:  
+  Высокая селективность через механизм внимания, который явно вычисляет отношения между всеми парами позиций.  
 
-   **Трансформеры**:
-   Влияние позиции $j$ на позицию $i$ выражается как:
-   $$z_i = \sum_{j=1}^{N} \alpha_{ij} \cdot (W_V x_j)$$
-   
-   где $\alpha_{ij}$ — весовые коэффициенты внимания между позициями $i$ и $j$.
+- **Стандартные SSM**:  
+  Низкая содержательная селективность — параметры фиксированы и не зависят от содержания.  
 
-   **SSM**:
-   Влияние всех предыдущих позиций на текущую позицию $t$ выражается как:
-   $$h_t = \bar{A}h_{t-1} + \bar{B}x_t = \sum_{i=0}^{t-1} \bar{A}^{t-1-i}\bar{B}x_i$$
-   
-   $$y_t = Ch_t = C\sum_{i=0}^{t-1} \bar{A}^{t-1-i}\bar{B}x_i = \sum_{i=0}^{t-1} K_{t-i}x_i$$
-   
-   где $K_j = C\bar{A}^{j-1}\bar{B}$ — импульсная характеристика системы.
+- **Селективные SSM (Mamba)**:  
+  Высокая селективность через параметризацию, зависящую от входа, которая позволяет модели динамически адаптировать память.  
 
-2. **Затухание влияния с расстоянием:**
+5. **Аналитическое сравнение для конкретных задач**:  
 
-   **Трансформеры**:
-   В принципе, нет ограничений на затухание — вес внимания для дальних зависимостей может быть таким же высоким, как и для ближних.
+**Задача: копирование на дальнюю дистанцию**  
+Задача копирования требует "запоминания" информации с определенной позиции и её воспроизведения позже.  
 
-   **Стандартные SSM**:
-   Затухание определяется собственными значениями матрицы $\bar{A}$. Для устойчивой системы влияние затухает экспоненциально:
-   $$K_j \sim e^{\lambda j}$$
-   
-   где $\lambda < 0$ — доминирующее собственное значение матрицы $A$.
+- **Трансформеры**:  
+  Решают задачу через прямое внимание к нужной позиции с высоким весом $\alpha_{ij}$.  
 
-   **Селективные SSM (Mamba)**:
-   Затухание становится зависимым от содержания, так как параметры матрицы $\bar{A}$ меняются в зависимости от входа:
-   $$K_j(x) \sim e^{\lambda(x) j}$$
+- **SSM**:  
+  Стандартные SSM затрудняются с точным копированием из-за экспоненциального затухания.  
+  Mamba решает проблему, адаптируя скорость затухания в зависимости от содержания.  
 
-3. **Теоретическая ёмкость памяти:**
+**Задача: индукционные головки**  
+Индукционные головки требуют определения закономерностей и их экстраполяции.  
 
-   **Трансформеры**:
-   Определяется размером контекстного окна. Каждая позиция имеет прямой доступ ко всем позициям в окне.
+- **Трансформеры**:  
+  Формируют индукционные головки через механизм внимания, явно моделируя отношения между текущей позицией и предыдущими вхождениями шаблона.  
 
-   **SSM**:
-   Определяется размерностью скрытого состояния $d_h$ и спектральными свойствами матрицы $A$. Чем ближе собственные значения к мнимой оси, тем дольше сохраняется информация.
+- **SSM**:  
+  Mamba формирует аналог индукционных головок через селективное сохранение информации в скрытом состоянии, регулируя параметры $\bar{A}$ и $\bar{B}$ в зависимости от входа.  
 
-4. **Содержательная селективность:**
+**Визуализация механизмов моделирования долговременных зависимостей**:  
+Для наглядности, можно представить обработку последовательности "a b c a d e a f":  
 
-   **Трансформеры**:
-   Высокая селективность через механизм внимания, который явно вычисляет отношения между всеми парами позиций.
+- **Трансформеры**:  
+  При предсказании токена после последнего "a", модель может напрямую обратить внимание на предыдущие вхождения "a" и извлечь следующие за ними токены ("b", "d"), что способствует прогнозированию "f".  
 
-   **Стандартные SSM**:
-   Низкая содержательная селективность — параметры фиксированы и не зависят от содержания.
+- **SSM (Mamba)**:  
+  При обработке последнего "a", модель адаптирует параметры так, чтобы сохранить информацию о контексте после предыдущих "a". Эта информация накапливается в скрытом состоянии и используется для прогнозирования "f".  
 
-   **Селективные SSM (Mamba)**:
-   Высокая селективность через параметризацию, зависящую от входа, которая позволяет модели динамически адаптировать память.
-
-5. **Аналитическое сравнение для конкретных задач:**
-
-   **Задача: копирование на дальнюю дистанцию**
-   
-   Задача копирования требует "запоминания" информации с определенной позиции и её воспроизведения позже.
-   
-   **Трансформеры**:
-   Решают задачу через прямое внимание к нужной позиции с высоким весом $\alpha_{ij}$.
-   
-   **SSM**:
-   Стандартные SSM затрудняются с точным копированием из-за экспоненциального затухания.
-   Mamba решает проблему, адаптируя скорость затухания в зависимости от содержания.
-
-   **Задача: индукционные головки**
-   
-   Индукционные головки требуют определения закономерностей и их экстраполяции.
-   
-   **Трансформеры**:
-   Формируют индукционные головки через механизм внимания, явно моделируя отношения между текущей позицией и предыдущими вхождениями шаблона.
-   
-   **SSM**:
-   Mamba формирует аналог индукционных головок через селективное сохранение информации в скрытом состоянии, регулируя параметры $\bar{A}$ и $\bar{B}$ в зависимости от входа.
-
-**Визуализация механизмов моделирования долговременных зависимостей:**
-
-Для наглядности, можно представить обработку последовательности "a b c a d e a f":
-
-**Трансформеры**:
-При предсказании токена после последнего "a", модель может напрямую обратить внимание на предыдущие вхождения "a" и извлечь следующие за ними токены ("b", "d"), что способствует прогнозированию "f".
-
-**SSM (Mamba)**:
-При обработке последнего "a", модель адаптирует параметры так, чтобы сохранить информацию о контексте после предыдущих "a". Эта информация накапливается в скрытом состоянии и используется для прогнозирования "f".
-
-**Сравнительная таблица механизмов:**
+**Сравнительная таблица механизмов**:  
 
 | **Аспект** | **Трансформеры** | **Стандартные SSM** | **Селективные SSM (Mamba)** |
 |------------|------------------|--------------------|------------------------------|
@@ -3102,7 +3050,7 @@ $$
 
 Одним из ключевых преимуществ моделей пространства состояний (SSM) является их вычислительная эффективность по сравнению с трансформерами, особенно при работе с длинными последовательностями. Рассмотрим подробно аспекты вычислительной эффективности SSM и специальные оптимизации, применяемые в их реализациях.
 
-**Сравнение асимптотической сложности:**
+**Сравнение асимптотической сложности**:  
 
 | **Архитектура** | **Временная сложность** | **Пространственная сложность** |
 |-----------------|-------------------------|--------------------------------|
@@ -3112,85 +3060,84 @@ $$
 | Стандартные SSM | O(N log N) через FFT | O(N) |
 | Селективные SSM (Mamba) | O(N) | O(N) |
 
-**Анализ вычислительных паттернов:**
+**Анализ вычислительных паттернов**:  
 
-1. **Трансформеры:**
-   - Доминирующая операция: матричное умножение для расчета внимания $\text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$
-   - Узкое место: вычисление матрицы внимания $QK^T$ размера $N \times N$
-   - Проблема: квадратичный рост с длиной последовательности
+1. **Трансформеры**:  
+   - Доминирующая операция: матричное умножение для расчета внимания $\text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$  
+   - Узкое место: вычисление матрицы внимания $QK^T$ размера $N \times N$  
+   - Проблема: квадратичный рост с длиной последовательности  
 
-2. **Стандартные SSM:**
-   - Доминирующая операция: свертка через FFT
-   - Операции: 
-     - Вычисление импульсной характеристики $K = [C\bar{A}^{0}\bar{B}, C\bar{A}^{1}\bar{B}, ..., C\bar{A}^{L-1}\bar{B}]$
-     - FFT преобразование: $X = \text{FFT}(x)$, $K' = \text{FFT}(K)$
-     - Поэлементное умножение: $Y = X \odot K'$
-     - Обратное FFT: $y = \text{IFFT}(Y)$
-   - Преимущество: сложность O(N log N) вместо O(N²)
+2. **Стандартные SSM**:  
+   - Доминирующая операция: свертка через FFT  
+   - Операции:   
+     - Вычисление импульсной характеристики $K = [C\bar{A}^{0}\bar{B}, C\bar{A}^{1}\bar{B}, ..., C\bar{A}^{L-1}\bar{B}]$  
+     - FFT преобразование: $X = \text{FFT}(x)$, $K' = \text{FFT}(K)$  
+     - Поэлементное умножение: $Y = X \odot K'$  
+     - Обратное FFT: $y = \text{IFFT}(Y)$  
+   - Преимущество: сложность O(N log N) вместо O(N²)  
 
-3. **Селективные SSM (Mamba):**
-   - Невозможность использования FFT из-за параметров, зависящих от входа
-   - Доминирующая операция: параллельное рекуррентное сканирование
-   - Специальные оптимизации для параллельного выполнения на GPU
+3. **Селективные SSM (Mamba)**:  
+   - Невозможность использования FFT из-за параметров, зависящих от входа  
+   - Доминирующая операция: параллельное рекуррентное сканирование  
+   - Специальные оптимизации для параллельного выполнения на GPU  
 
-**Конкретные оптимизации в реализациях SSM:**
+**Конкретные оптимизации в реализациях SSM**:  
 
-1. **Параллельное рекуррентное сканирование в Mamba:**
+1. **Параллельное рекуррентное сканирование в Mamba**:  
    
-   Основной алгоритм выглядит последовательным:
+   Основной алгоритм выглядит последовательным:  
    ```
    h_0 = 0
    for t = 1 to N:
        Вычислить A_t, B_t, C_t на основе x_t
        h_t = A_t * h_{t-1} + B_t * x_t
        y_t = C_t * h_t
-   ```
+   ```  
    
-   Однако в Mamba применяется специальная техника параллельного сканирования:
-   - Разделение последовательности на блоки, которые могут обрабатываться параллельно
-   - Использование алгоритма с несколькими проходами для объединения результатов
-   - Оптимизация использования GPU-памяти путем хранения промежуточных состояний в быстрой SRAM
+   Однако в Mamba применяется специальная техника параллельного сканирования:  
+   - Разделение последовательности на блоки, которые могут обрабатываться параллельно  
+   - Использование алгоритма с несколькими проходами для объединения результатов  
+   - Оптимизация использования GPU-памяти путем хранения промежуточных состояний в быстрой SRAM  
 
-2. **Оптимизация расчета матричной экспоненты:**
+2. **Оптимизация расчета матричной экспоненты**:  
    
-   Для диагональной параметризации (как в S4D):
-   - Замена вычисления полной матричной экспоненты на поэлементную экспоненту диагональных элементов
-   - Снижение сложности с O(d_h³) до O(d_h)
+   Для диагональной параметризации (как в S4D):  
+   - Замена вычисления полной матричной экспоненты на поэлементную экспоненту диагональных элементов  
+   - Снижение сложности с O(d_h³) до O(d_h)  
 
-3. **Кэширование и повторное использование:**
+3. **Кэширование и повторное использование**:  
    
-   В стандартных SSM с фиксированными параметрами:
-   - Предварительное вычисление импульсной характеристики $K$ для повторного использования
-   - Кэширование дискретизированных матриц $\bar{A}$ и $\bar{B}$
+   В стандартных SSM с фиксированными параметрами:  
+   - Предварительное вычисление импульсной характеристики $K$ для повторного использования  
+   - Кэширование дискретизированных матриц $\bar{A}$ и $\bar{B}$  
 
-4. **Оптимизации размера ядра свертки:**
+4. **Оптимизации размера ядра свертки**:  
    
-   - Ограничение длины импульсной характеристики определенным "окном" L << N
-   - Применение усечения для коэффициентов с малым влиянием
-   - Использование разреженных представлений для импульсной характеристики
+   - Ограничение длины импульсной характеристики определенным "окном" L << N  
+   - Применение усечения для коэффициентов с малым влиянием  
+   - Использование разреженных представлений для импульсной характеристики  
 
-**Специализированные реализации для аппаратного ускорения:**
+**Специализированные реализации для аппаратного ускорения**:  
 
-1. **CUDA-реализации для Mamba:**
+1. **CUDA-реализации для Mamba**:  
    
-   - Использование регистровой памяти GPU для хранения расширенного состояния
-   - Разработка специализированных CUDA-ядер для параллельного сканирования
-   - Оптимизации для специфических особенностей архитектуры NVIDIA (тензорные ядра, разделяемая память)
+   - Использование регистровой памяти GPU для хранения расширенного состояния  
+   - Разработка специализированных CUDA-ядер для параллельного сканирования  
+   - Оптимизации для специфических особенностей архитектуры NVIDIA (тензорные ядра, разделяемая память)  
 
-2. **Оптимизации для инференса:**
+2. **Оптимизации для инференса**:  
    
-   - Квантизация параметров модели (int8, float16)
-   - Слияние операций для снижения накладных расходов
-   - Специализированные реализации для edge-устройств
+   - Квантизация параметров модели (int8, float16)  
+   - Слияние операций для снижения накладных расходов  
+   - Специализированные реализации для edge-устройств  
 
-3. **Применение TensorCore и специализированных акселераторов:**
+3. **Применение TensorCore и специализированных акселераторов**:  
    
-   - Использование тензорных ядер для ускорения матричных операций
-   - Оптимизации под специализированные NPU/TPU
+   - Использование тензорных ядер для ускорения матричных операций  
+   - Оптимизации под специализированные NPU/TPU  
 
-**Сравнение времени выполнения в реальных условиях:**
-
-Для последовательности длиной 2048 токенов (данные из статьи о Mamba):
+**Сравнение времени выполнения в реальных условиях**:  
+Для последовательности длиной 2048 токенов (данные из статьи о Mamba):  
 
 | **Модель** | **Время прямого прохода (мс)** | **Время обратного прохода (мс)** | **Использование памяти (МБ)** |
 |------------|--------------------------------|----------------------------------|-------------------------------|
@@ -3199,7 +3146,7 @@ $$
 | Стандартный SSM (S4) | 7.3 | 16.2 | 180 |
 | Mamba | 7.9 | 17.1 | 210 |
 
-Для последовательности длиной 8192 токенов:
+Для последовательности длиной 8192 токенов:  
 
 | **Модель** | **Время прямого прохода (мс)** | **Время обратного прохода (мс)** | **Использование памяти (МБ)** |
 |------------|--------------------------------|----------------------------------|-------------------------------|
@@ -3208,150 +3155,146 @@ $$
 | Стандартный SSM (S4) | 28.6 | 62.1 | 720 |
 | Mamba | 31.4 | 67.8 | 830 |
 
-Масштабирование к очень длинным последовательностям (64K токенов) показывает еще более значительное преимущество SSM-архитектур, особенно в использовании памяти, что критично для обработки длинного контекста.
+Масштабирование к очень длинным последовательностям (64K токенов) показывает еще более значительное преимущество SSM-архитектур, особенно в использовании памяти, что критично для обработки длинного контекста.  
 
-**Практические выводы:**
+**Практические выводы**:  
 
-1. **Для последовательностей средней длины** (до 2K токенов), оптимизированные реализации трансформеров и SSM показывают сопоставимую производительность.
+1. **Для последовательностей средней длины** (до 2K токенов), оптимизированные реализации трансформеров и SSM показывают сопоставимую производительность.  
+2. **Для длинных последовательностей** (4K-16K токенов), SSM начинают демонстрировать существенное преимущество в эффективности.  
+3. **Для очень длинных последовательностей** (>16K токенов), преимущество SSM становится определяющим фактором, позволяя эффективно обрабатывать контексты, недоступные стандартным трансформерам.  
+4. **С точки зрения энергоэффективности**, SSM-архитектуры требуют значительно меньше энергии для обработки сопоставимого объема данных, что особенно важно для масштабных моделей и мобильных приложений.  
 
-2. **Для длинных последовательностей** (4K-16K токенов), SSM начинают демонстрировать существенное преимущество в эффективности.
+Таким образом, вычислительная эффективность SSM-архитектур делает их особенно привлекательными для задач с длинным контекстом и для приложений с ограниченными вычислительными ресурсами. Линейное масштабирование по длине последовательности позволяет преодолеть фундаментальное ограничение трансформеров, открывая новые возможности для моделирования последовательностей.  
 
-3. **Для очень длинных последовательностей** (>16K токенов), преимущество SSM становится определяющим фактором, позволяя эффективно обрабатывать контексты, недоступные стандартным трансформерам.
+## **Вывод**  
 
-4. **С точки зрения энергоэффективности**, SSM-архитектуры требуют значительно меньше энергии для обработки сопоставимого объема данных, что особенно важно для масштабных моделей и мобильных приложений.
+Модели пространств состояний (SSM) являются не просто альтернативой трансформерам или RNN, а новой парадигмой, объединяющей строгую математику, эффективность и гибкость. Их развитие открывает путь к более интерпретируемым, масштабируемым и вычислительно доступным архитектурам, способным обрабатывать контексты длиной в десятки тысяч токенов и далее. В условиях, когда модели становятся всё более громоздкими, SSM возвращают внимание к эффективности, устойчивости и фундаментальности.  
 
-Таким образом, вычислительная эффективность SSM-архитектур делает их особенно привлекательными для задач с длинным контекстом и для приложений с ограниченными вычислительными ресурсами. Линейное масштабирование по длине последовательности позволяет преодолеть фундаментальное ограничение трансформеров, открывая новые возможности для моделирования последовательностей.
+</details>  
 
-## **Вывод**
+---  
 
-Модели пространств состояний (SSM) являются не просто альтернативой трансформерам или RNN, а новой парадигмой, объединяющей строгую математику, эффективность и гибкость. Их развитие открывает путь к более интерпретируемым, масштабируемым и вычислительно доступным архитектурам, способным обрабатывать контексты длиной в десятки тысяч токенов и далее. В условиях, когда модели становятся всё более громоздкими, SSM возвращают внимание к эффективности, устойчивости и фундаментальности.
+В статье «**Mamba: Linear-Time Sequence Modeling with Selective State Spaces**» авторы **Albert Gu** (Carnegie Mellon University) и **Tri Dao** (Princeton University) представляют новую архитектуру, которая устраняет это ограничение, сохраняя при этом мощные возможности моделирования **Transformers**.  
 
-</details>
+![Selective State Space Model with Hardware-Aware State Expansion](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Image_01.png  )  
+*Figure 1: Architecture of the selective state space model with hardware-aware state expansion. Input data influences model parameters through a selection mechanism, enabling content-aware reasoning.*  
 
----
+**Mamba** represents a fundamental shift in sequence modeling, combining the linear scaling properties of State Space Models (**SSM**) with a novel selection mechanism that enables content-aware reasoning — a capability previously exclusive to attention mechanisms. This development has profound implications for the efficiency and capabilities of AI systems processing sequential data.  
 
-В статье «**Мамба: моделирование линейно-временной последовательности с использованием пространств выборочных состояний**» авторы **Альберт Гу** (Университет Карнеги-Меллона) и **Три Дао** (Принстонский университет) представляют новую архитектуру, которая устраняет это ограничение, сохраняя при этом мощные возможности моделирования **Transformers**.
+## **Understanding Traditional Sequence Modeling**  
 
-![Модель селективного пространства состояний с аппаратно-зависимым расширением состояний](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Image_01.png)  
-*Рисунок 1: Архитектура модели пространства селективных состояний с расширением состояния, учитывающим аппаратные средства. Входные данные влияют на параметры модели через механизм выбора, что позволяет делать обоснованные рассуждения на основе содержания.*
+To appreciate the innovation of **Mamba**, it is essential to understand the evolution of sequence modeling approaches and their limitations.  
 
-**Mamba** представляет собой фундаментальный сдвиг в моделировании последовательностей, объединяя свойства линейного масштабирования моделей пространства состояний (**SSM**) с новым механизмом выбора, который позволяет делать обоснованные рассуждения на основе содержания — способность, ранее присущую только механизмам внимания. Эта разработка имеет глубокие последствия для эффективности и возможностей систем ИИ, обрабатывающих последовательные данные.
+**Transformers** revolutionized sequence modeling with their self-attention mechanism, which creates direct connections between all positions in a sequence. This provides exceptional modeling power, but at the cost of quadratic computational complexity relative to sequence length — a problem known as the "attention bottleneck."  
 
-## **Понимание традиционного моделирования последовательностей**
+Several approaches have been developed to alleviate this bottleneck:  
 
-Чтобы оценить новаторство **Mamba**, важно понимать эволюцию подходов моделирования последовательностей и их ограничения.
+- **Linear attention**: Approximations of inner attention with linear complexity.  
+- **Convolutional algorithms**: Extended convolutional models with strobing mechanisms.  
+- **Recurrent Neural Networks (RNN)**: Sequential processing with hidden state updates.  
+- **Structured State Space Models (SSM)**: Continuous systems discretized for sequence modeling.  
 
-**Трансформеры** произвели революцию в моделировании последовательностей с их механизмом самовнимания, который создает прямые связи между всеми позициями в последовательности. Это обеспечивает превосходную мощность моделирования, но достигается ценой квадратичной вычислительной сложности относительно длины последовательности — проблемы, известной как «узкое место внимания».
+While these alternatives achieve linear scaling with sequence length, they typically lack the content-aware reasoning capabilities of attention, significantly limiting their effectiveness in language modeling tasks.  
 
-Для устранения этого узкого места было разработано несколько подходов:
+**State Space Models (SSM)**, in particular, have shown promising results in efficiently modeling long-range dependencies, but traditional **SSM** use fixed parameters independent of input content. This time-invariance restricts their ability to perform tasks such as selective copying and induction heads — fundamental operations for language understanding.  
 
-- **Линейное внимание**: приближения внутреннего внимания с линейной сложностью.
-- **Сверточные алгоритмы**: расширенные сверточные модели с механизмами стробирования.
-- **Рекуррентные нейронные сети (RNN)**: последовательная обработка со скрытыми обновлениями состояния.
-- **Модели структурированного пространства состояний (SSM)**: непрерывные системы, дискретизированные для моделирования последовательностей.
+![Comparison of Copying Tasks](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Image_02.png  )  
+*Figure 2: Comparison of copying tasks. Left: Standard copying task solvable by time-invariant models. Right: Selective copying and induction heads require content-aware reasoning.*  
 
-Хотя эти альтернативы обеспечивают линейное масштабирование с длиной последовательности, им, как правило, не хватает возможностей содержательного рассуждения, присущих вниманию, что существенно влияет на их эффективность в задачах языкового моделирования.
+**Mamba** introduces the concept of "selective state space models" (selective SSM), which allow model parameters to be functions of input data. This enables the model to dynamically decide what information to store and propagate based on the content of current inputs.  
 
-**State Space Models (SSM)** в частности показали многообещающие результаты, эффективно моделируя долгосрочные зависимости, но традиционные **SSM** используют фиксированные параметры независимо от входного содержимого. Эта инвариантность во времени ограничивает их способность выполнять такие задачи, как выборочное копирование и индукционные головки — фундаментальные операции для понимания языка.
+The core innovation is that SSM parameters (**A**, **B**, **C**, and **D**) become functions of the input data, rather than fixed values. This is achieved through a selection mechanism that projects inputs to determine parameter values at each step.  
 
-![Сравнение задач копирования](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Image_02.png)
-*Рисунок 2: Сравнение задач копирования. Слева: Стандартная задача копирования, решаемая с помощью моделей, не зависящих от времени. Справа: Выборочное копирование и индукционные головки требуют содержательного обоснования.*
+### **Continuous-Time SSM**  
 
-
-**Mamba** вводит концепцию «выборочных моделей пространства состояний» (выборочных SSM), которые позволяют параметрам модели быть функциями входных данных. Это позволяет модели динамически решать, какую информацию хранить и распространять на основе содержимого текущих входных данных.
-
-Основная инновация заключается в том, что параметры SSM (**A**, **B**, **C** и **D**) становятся функциями, зависящими от входных данных, а не фиксированными значениями. Это достигается с помощью механизма выбора, который проецирует входные данные для определения значений параметров на каждом шаге.
-
-### **Непрерывный во времени SSM**
-
-Линейная непрерывная SSM описывается следующими дифференциальными уравнениями:
+A linear continuous-time SSM is described by the following differential equations:  
 
 $$
 \begin{align}
 h'(t) &= Ah(t) + Bx(t) \\
 y(t) &= Ch(t) + Dx(t)
 \end{align}
-$$
+$$  
 
-Где:
-- $h'(t)$ — производная скрытого состояния по времени
-- $x(t)$ — входной сигнал в момент времени $t$
-- $h(t)$ — скрытое состояние в момент времени $t$
-- $y(t)$ — выходной сигнал в момент времени $t$
+Where:  
+- $h'(t)$ is the derivative of the hidden state with respect to time  
+- $x(t)$ is the input signal at time $t$  
+- $h(t)$ is the hidden state at time $t$  
+- $y(t)$ is the output signal at time $t$  
 
-Уравнение состояния с помощью матриц A и B описывает, как состояние изменяется под влиянием входных данных.
+The state equation, via matrices $A$ and $B$, describes how the state evolves under the influence of inputs.  
 
-<div align="center">
-  <img src="https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/SSM/Image_02.png" alt="Визуализация уравнения состояния">
-</div>
+<div align="center">  
+  <img src="https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/SSM/Image_02.png  " alt="Visualization of state equation">  
+</div>  
 
-Уравнение выхода описывает, как состояние переводится в выход (через матрицу C) и как вход влияет на выход (через матрицу D).
+The output equation describes how the state is translated into output (via matrix $C$) and how the input directly affects the output (via matrix $D$).  
 
-<div align="center">
-  <img src="https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/SSM/Image_03.png" alt="Визуализация уравнения выхода">
-</div>
+<div align="center">  
+  <img src="https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/SSM/Image_03.png  " alt="Visualization of output equation">  
+</div>  
 
-> Примечание: Матрицы A, B, C и D являются обучаемыми параметрами.
+> Note: Matrices $A$, $B$, $C$, and $D$ are trainable parameters.  
 
-**Интерпретация компонентов:**
+**Interpretation of components**:  
 
-- **Матрица $A$** определяет собственную динамику системы. Её собственные значения указывают на устойчивость системы:
-  - Отрицательные действительные части собственных значений → устойчивая система
-  - Положительные действительные части → неустойчивая система
-  - Мнимые части → колебательное поведение
+- **Matrix $A$** determines the system’s intrinsic dynamics. Its eigenvalues indicate system stability:  
+  - Negative real parts of eigenvalues → stable system  
+  - Positive real parts → unstable system  
+  - Imaginary parts → oscillatory behavior  
 
-- **Матрица $B$** определяет, как входной сигнал влияет на изменение скрытого состояния.
+- **Matrix $B$** determines how the input signal influences changes in the hidden state.  
 
-- **Матрица $C$** определяет, как скрытое состояние влияет на выходной сигнал.
+- **Matrix $C$** determines how the hidden state influences the output signal.  
 
-- **Матрица $D$** (если используется) позволяет входному сигналу напрямую влиять на выходной сигнал.
+- **Matrix $D$** (if used) allows the input signal to directly affect the output signal.  
 
-<div align="center">
-  <img src="https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/SSM/Image_05.png" alt="Итоговая схема работы SSM">
-</div>
+<div align="center">  
+  <img src="https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/SSM/Image_05.png  " alt="Final SSM workflow diagram">  
+</div>  
 
-Таким образом, вся система работает так:
+Thus, the entire system operates as follows:  
 
-- Входной сигнал сначала умножается на матрицу B, которая описывает, как входные сигналы влияют на систему;
+- The input signal is first multiplied by matrix $B$, which describes how inputs influence the system;  
 
-- Происходит обновление скрытого состояния. Мы умножаем состояние на матрицу A, которая описывает, как связаны все внутренние состояния. Матрица A применяется перед созданием представлений состояний и обновляется после того, как представление было обновлено;
+- The hidden state is updated. We multiply the state by matrix $A$, which describes how all internal states are interconnected. Matrix $A$ is applied before generating state representations and is updated after representation updates;  
 
-- Затем, мы используем матрицу C, чтобы описать перевод в выходной сигнал;
+- Then, we use matrix $C$ to describe the transformation into the output signal;  
 
-- Матрица D — это Skip Connection, который используется, для борьбы с затуханием градиентов внутри сети.
+- Matrix $D$ is a skip connection used to mitigate gradient vanishing within the network.  
 
-**В селективной формулировке SSM эти параметры становятся зависимыми от входных данных:**
+**In the selective formulation of SSM, these parameters become dependent on input data**:  
 
 $$
 \begin{align}
 h'(t) &= A(x)h(t) + B(x)x(t) \\
 y(t) &= C(x)h(t) + D(x)x(t)
 \end{align}
-$$
+$$  
 
-Где $A(x)$, $B(x)$, $C(x)$ и $D(x)$ — функции от входа $x(t)$, обычно реализуемые через нейронные сети.
+Where $A(x)$, $B(x)$, $C(x)$, and $D(x)$ are functions of the input $x(t)$, typically implemented via neural networks.  
 
-**Общее количество параметров в стандартном SSM слое:**
-- Матрица $A$: $d_h \times d_h$ (или $d_h$ для диагональной параметризации)
-- Матрица $B$: $d_h \times d_x$
-- Матрица $C$: $d_y \times d_h$
-- Матрица $D$ (если используется): $d_y \times d_x$
-- Итого: $d_h \times d_h + d_h \times d_x + d_y \times d_h + d_y \times d_x$ параметров
+**Total parameters in a standard SSM layer**:  
+- Matrix $A$: $d_h \times d_h$ (or $d_h$ for diagonal parameterization)  
+- Matrix $B$: $d_h \times d_x$  
+- Matrix $C$: $d_y \times d_h$  
+- Matrix $D$ (if used): $d_y \times d_x$  
+- Total: $d_h \times d_h + d_h \times d_x + d_y \times d_h + d_y \times d_x$ parameters  
 
-В селективных SSM количество параметров увеличивается за счет дополнительных проекционных слоев, которые генерируют параметры в зависимости от входных данных.
+In selective SSMs, the number of parameters increases due to additional projection layers that generate parameters depending on the input data.
 
-### **Проекционные слои для динамической генерации параметров**
+### **Projection Layers for Dynamic Parameter Generation**
 
-Чтобы параметры SSM-слоя (матрицы $A$, $B$, $C$ и $D$) стали функциями от входных данных $x(t)$, используют **проекционные слои**. По сути, это небольшие нейронные сети (иногда их называют гиперсетями или hypernetworks), которые на каждом шаге «смотрят» на текущий вход и выдают новые значения параметров.  
+To make the parameters of an SSM layer (matrices $A$, $B$, $C$, and $D$) functions of the input data $x(t)$, **projection layers** are employed. These are essentially small neural networks (sometimes called hypernetworks) that, at each step, "look at" the current input and generate new parameter values.
 
-1. **Идея проекционного слоя**  
-   Вместо того чтобы хранить фиксированную матрицу $A$, мы учим дополнительную сеть $f_A$, которая по входному вектору $x$ выдаёт «развёрнутый» (flattened) вектор параметров $\theta_A$. Затем этот вектор приводят к форме матрицы того же размера, что и $A$. Аналогично действуют сети $f_B$, $f_C$, $f_D$.  
+1. **Concept of the Projection Layer**  
+   Instead of storing a fixed matrix $A$, we learn an additional network $f_A$ that, given an input vector $x$, outputs a "flattened" parameter vector $\theta_A$. This vector is then reshaped into a matrix of the same dimensions as $A$. Similarly, networks $f_B$, $f_C$, and $f_D$ are used.  
    $$
      \theta_A = f_A(x), \quad A(x) = \mathrm{reshape}(\theta_A)
    $$
 
-2. **Структура одного проекционного слоя**  
-   Чаще всего $f_A$ — это одно- или двухслойный MLP (полносвязная сеть):  
+2. **Structure of a Single Projection Layer**  
+   Typically, $f_A$ is a one- or two-layer MLP (fully connected network):  
    $$
    \begin{aligned}
    z_1 &= W_1 x + b_1,\\
@@ -3359,38 +3302,38 @@ $$
    \theta_A &= W_2 a_1 + b_2,
    \end{aligned}
    $$
-   где  
-   - $W_1, b_1$ — параметры первого слоя (размерности $d_{\text{прок}}\times d_x$ и $d_{\text{прок}}$),  
-   - $W_2, b_2$ — параметры выходного слоя ($d_h^2\times d_{\text{прок}}$ и $d_h^2$),  
-   - $\sigma$ — нелинейность (ReLU, GELU и т.д.),  
-   - $d_{\text{прок}}$ — «скрытая» размерность проекционного слоя.  
+   where  
+   - $W_1, b_1$ are parameters of the first layer (dimensions $d_{\text{proj}}\times d_x$ and $d_{\text{proj}}$),  
+   - $W_2, b_2$ are parameters of the output layer ($d_h^2\times d_{\text{proj}}$ and $d_h^2$),  
+   - $\sigma$ is a nonlinearity (ReLU, GELU, etc.),  
+   - $d_{\text{proj}}$ is the "hidden" dimension of the projection layer.  
 
-   После этого вектор $\theta_A\in\mathbb{R}^{d_h^2}$ растягивают до матрицы $A(x)\in\mathbb{R}^{d_h\times d_h}$.
+   The vector $\theta_A\in\mathbb{R}^{d_h^2}$ is then reshaped into a matrix $A(x)\in\mathbb{R}^{d_h\times d_h}$.
 
-3. **Преимущества и накладные расходы**  
-   - **Гибкость.** Сеть $f_A$ «учится» выдавать разные динамики системы в зависимости от содержания $x$.  
-   - **Локальная адаптация.** Модель может сразу реагировать на новые события в входе, изменяя свою внутреннюю механику.  
-   - **Накладные расходы.** Вместо одного набора параметров мы храним параметры гиперсети:  
+3. **Advantages and Overhead**  
+   - **Flexibility.** Network $f_A$ "learns" to produce different system dynamics depending on the content of $x$.  
+   - **Local Adaptation.** The model can immediately respond to new events in the input by changing its internal mechanics.  
+   - **Overhead.** Instead of one set of parameters, we store parameters of the hypernetwork:  
      $$
-       \underbrace{d_{\text{прок}}\cdot d_x + d_{\text{прок}}}_{\text{первый слой}}
+       \underbrace{d_{\text{proj}}\cdot d_x + d_{\text{proj}}}_{\text{first layer}}
        \;+\;
-       \underbrace{d_h^2\cdot d_{\text{прок}} + d_h^2}_{\text{второй слой}}
+       \underbrace{d_h^2\cdot d_{\text{proj}} + d_h^2}_{\text{second layer}}
      $$
-     Но зачастую $d_{\text{прок}}\ll d_h^2$, так что рост числа параметров остаётся умеренным.
+     But since $d_{\text{proj}}\ll d_h^2$, the increase in parameter count remains moderate.
 
-4. **Пример на практике**  
-   Пусть $d_x = 128$, $d_h = 64$, а мы выбрали $d_{\text{прок}} = 32$.  
-   - Первый слой гиперсети: $32\times128 + 32 = 4128$ параметров.  
-   - Второй слой: $64^2\times32 + 64^2 = 131\,072 + 4096 = 135\,168$.  
-   - Всего ≈139 296 параметров вместо фиксированного $A$ размером $64^2 = 4096$.
+4. **Practical Example**  
+   Let $d_x = 128$, $d_h = 64$, and choose $d_{\text{proj}} = 32$.  
+   - First layer of hypernetwork: $32\times128 + 32 = 4128$ parameters.  
+   - Second layer: $64^2\times32 + 64^2 = 131\,072 + 4096 = 135\,168$.  
+   - Total ≈139,296 parameters instead of a fixed $A$ of size $64^2 = 4096$.
 
-<u>Таким образом, проекционные слои (гиперсети) превращают входной сигнал $x(t)$ в настройки внутренних параметров SSM-слоя, обеспечивая динамическую, содержательно-зависимую обработку последовательностей. Это и есть ключ к объединению линейного масштабирования SSM с «разумным» рассуждением, присущим attention-механизмам.</u>
+<u>Thus, projection layers (hypernetworks) transform the input signal $x(t)$ into settings for the internal parameters of the SSM layer, enabling dynamic, content-dependent sequence processing. This is the key to combining the linear scaling of SSM with the "intelligent" reasoning characteristic of attention mechanisms.</u>
 
-### **Дискретизированная версия**
+### **Discretized Version**
 
-Дискретизированная версия, используемая в **Mamba**, выражается следующим образом:
+The discretized version used in **Mamba** is expressed as follows:
 
-![Переход от непрерывной SSM к дискретной. Теперь мы подаём на вход дискретные значения и получаем дискретный выход.](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/SSM/Image_06.png)
+![Transition from continuous SSM to discrete. Now we feed discrete values as input and obtain discrete output.](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/SSM/Image_06.png  )
 
 $$
 h_t = \bar A_t\,h_{t-1} + \bar B_t\,x_t
@@ -3400,242 +3343,242 @@ $$
 y_t = C_t\,h_t + D_t\,x_t
 $$
 
-Где параметры $\bar A_t$, $\bar B_t$, $C_t$ и $D_t$ на каждом шаге вычисляются проекционными слоями (гиперсетями) на основе текущего входного сигнала $x_t$.
+Where parameters $\bar A_t$, $\bar B_t$, $C_t$, and $D_t$ at each step are computed by projection layers (hypernetworks) based on the current input signal $x_t$.
 
-### Интеграция в модель
+### Integration into the Model
 
-Архитектура **Mamba** интегрирует эти селективные SSM в оптимизированную модельную структуру, которая является удивительно простой по сравнению с **Transformers**. Модель состоит из чередующихся слоев селективных SSM и простых проекций, не требуя отдельного внимания или блоков MLP.
+The architecture of **Mamba** integrates these selective SSMs into an optimized model structure that is remarkably simple compared to **Transformers**. The model consists of alternating layers of selective SSM and simple projections, requiring no separate attention or MLP blocks.
 
-![Архитектурная эволюция до Мамбы](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Image_03.png)
+![Architectural Evolution to Mamba](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Image_03.png  )
 
-*Рисунок 3: Сравнение архитектур, показывающее эволюцию от H3 (вариант SSM) до Mamba через закрытые блоки MLP.*
+*Figure 3: Comparison of architectures showing evolution from H3 (an SSM variant) to Mamba via closed MLP blocks.*
 
-# **Знакомьтесь: Nemotron-H**
+# **Introducing: Nemotron-H**
 
-## **Гибридная архитектура Mamba-Transformer**
+## **Hybrid Mamba-Transformer Architecture**
 
-**Nemotron-H** реализует *гибридную архитектуру Mamba-Transformer*, где большая часть слоёв – это слои SSM (Structured State-Space Model) **Mamba-2**, а небольшая доля – классические слои *самовнимания* (self-attention) трансформера, перемежаемые с полносвязными слоями (FFN). Структура модели продумана таким образом, чтобы использовать сильные стороны обоих подходов: SSM-слои обеспечивают эффективную работу с длинными последовательностями за счёт линейной (или даже постоянной) сложности по длине последовательности, а несколько слоёв самовнимания добавляют модели способность точного "склеивания" глобального контекста и превосходные навыки **in-context learning**.
+**Nemotron-H** implements a *hybrid Mamba-Transformer architecture*, where the majority of layers are **Mamba-2** Structured State-Space Model (SSM) layers, and a small fraction are classical Transformer *self-attention* layers, interleaved with Feed-Forward Network (FFN) layers. The model structure is carefully designed to leverage the strengths of both approaches: SSM layers provide efficient processing of long sequences with linear (or even constant) complexity relative to sequence length, while a few self-attention layers add the model’s ability for precise "gluing" of global context and superior **in-context learning** capabilities.
 
-В архитектуре **Nemotron-H** лишь около **8% слоёв** составляют слои самовнимания – они *равномерно распределены* по всей глубине сети. Остальные слои чередуются: примерно половина – это слои Mamba-2, а половина – FFN-слои. Например, модель Nemotron-H с ~8 млрд параметров содержит *52 слоя*: из них **4 слоя самовнимания** (≈7,7% от всех слоёв), и по 24 слоя Mamba-2 и FFN соответственно. В более крупной версии (~56 млрд параметров) всего **118 слоёв**, из которых **10 – самовнимание**, а оставшиеся 108 поделены поровну между Mamba-2 и FFN (по 54 каждого вида).
+In the **Nemotron-H** architecture, only about **8% of layers** are self-attention layers — they are *uniformly distributed* across the entire depth of the network. The remaining layers alternate: approximately half are Mamba-2 layers and half are FFN layers. For example, the Nemotron-H model with ~8 billion parameters contains *52 layers*: of these, **4 self-attention layers** (~7.7% of all layers), and 24 Mamba-2 and 24 FFN layers respectively. In the larger version (~56 billion parameters), there are a total of **118 layers**, of which **10 are self-attention**, and the remaining 108 are evenly split between Mamba-2 and FFN (54 of each type).
 
-![Архитектуры моделей Nemotron-H-8B/56B](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_02.png)
+![Architectures of Nemotron-H-8B/56B models](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_02.png  )
 
-*Архитектуры моделей Nemotron-H-8B/56B. Примерно 8% от общего числа слоев в модели составляют слои самовнимания (self-attention); эти слои равномерно распределены по всей модели. Остальная часть модели состоит из чередующихся слоев Mamba-2 и FFN.*
+*Architectures of Nemotron-H-8B/56B models. Approximately 8% of the total number of layers in the model are self-attention layers; these layers are uniformly distributed across the entire model. The rest of the model consists of alternating Mamba-2 and FFN layers.*
 
-При этом предусмотрены особые правила расположения слоёв в стеке: **первым слоем всегда идёт Mamba-2**, а **последним – FFN**. Каждый слой самовнимания ставится *перед* соответствующим FFN (как в стандартном Transformer-блоке). Такая раскладка позволяет воспользоваться тем, что **первый SSM-слой может самостоятельно выучивать позиционные зависимости**, поэтому явные позиционные эмбеддинги не требуются. Действительно, в Nemotron-H **не используются какие-либо внешние позиционные кодировки** – модель ориентируется во входной последовательности благодаря самому характеру вычислений в Mamba-слоях и глобальному охвату внимания, что к тому же позволяет обобщать модель на последовательности длиннее, чем были при обучении.
+Special placement rules are enforced in the layer stack: **the first layer is always Mamba-2**, and **the last layer is FFN**. Each self-attention layer is placed *before* its corresponding FFN (as in a standard Transformer block). This arrangement allows leveraging the fact that **the first SSM layer can independently learn positional dependencies**, eliminating the need for explicit positional embeddings. Indeed, Nemotron-H **uses no external positional encodings whatsoever** — the model orients itself within the input sequence through the inherent computation of Mamba layers and global attention coverage, which further enables generalization to sequences longer than those seen during training.
 
-Гибридная Mamba-Transformer архитектура доказала свою эффективность. В проведённых NVIDIA исследованиях 8-миллиардная гибридная модель **Mamba-2-Hybrid** превзошла чисто трансформерную модель того же размера по среднему результату на 12 стандартных NLP-задачах, а при инференсе прогнозируется до **8-кратного ускорения** генерации токенов. На очень длинных вводах (до 128k токенов) гибрид также сохраняет качество на уровне или лучше трансформера, демонстрируя успешное объединение преимуществ обеих архитектур.
+The hybrid Mamba-Transformer architecture has proven highly effective. In NVIDIA’s experiments, the 8-billion-parameter hybrid model **Mamba-2-Hybrid** outperformed a pure Transformer model of the same size by an average of 12 points across 12 standard NLP tasks, and is predicted to achieve up to **8x faster token generation** during inference. On very long inputs (up to 128k tokens), the hybrid also maintains quality at or above Transformer levels, demonstrating successful integration of both architectures’ advantages.
 
-## **Принципы обучения: FP8-тренинг и дистилляция**
+## **Training Principles: FP8 Training and Distillation**
 
-**Обучение Nemotron-H** осуществлялось с использованием специальных методик для ускорения и оптимизации процесса: во-первых, применялся **низкоразрядный формат FP8** для вычислений при тренировке, а во-вторых – специальные приёмы *дистилляции* и сжатия моделей для получения более компактных версий без значимой потери качества.
+**Training Nemotron-H** employed specialized techniques to accelerate and optimize the process: first, **low-precision FP8 format** was used for computations during training; second, specialized *distillation* and model compression techniques were applied to obtain more compact versions without significant quality loss.
 
-### **FP8-тренинг** 
+### **FP8 Training**
 
-Крупнейшая модель Nemotron-H-56B стала первой моделью NVIDIA, обученной с нуля с использованием **FP8 (8-битный float)** чисел во всех основных матричных операциях. Это позволяет значительно ускорить обучение и снизить потребление памяти по сравнению с традиционным BF16/FP16, однако требует осторожного подхода, чтобы избежать деградации качества из-за уменьшенной точности. В работе применена *гибридная FP8 схема*: все линейные слои (включая проекции QKV вAttention и feed-forward слои) вычисляются в 8-битах, **кроме первых 4 и последних 4 слоёв** модели – эти крайние слои оставлены в более высокоточной BF16 для сохранения стабильности. В FP8-режиме используются два формата чисел: **E4M3** (4 бита на порядок, 3 на мантиссу) для *весов и активаций*, и более широкий **E5M2** (5 бит порядок, 2 мантисса) для *градиентов*. Такой выбор обусловлен тем, что градиенты имеют больший динамический диапазон (но могут быть более грубо квантованы по мантиссе), а веса/активации можно хранить с меньшим динамическим диапазоном, но более высокой относительной точностью.
+The largest model, Nemotron-H-56B, became NVIDIA’s first model trained from scratch using **FP8 (8-bit float)** numbers in all major matrix operations. This significantly accelerates training and reduces memory consumption compared to traditional BF16/FP16, but requires careful handling to avoid quality degradation due to reduced precision. A *hybrid FP8 scheme* was applied: all linear layers (including QKV projections in attention and feed-forward layers) are computed in 8-bit, **except the first 4 and last 4 layers** of the model — these extreme layers are retained in higher-precision BF16 to preserve stability. In FP8 mode, two number formats are used: **E4M3** (4 bits exponent, 3 bits mantissa) for *weights and activations*, and the wider **E5M2** (5 bits exponent, 2 bits mantissa) for *gradients*. This choice is motivated by the fact that gradients have a larger dynamic range (but can be coarsely quantized in mantissa), while weights/activations can be stored with a smaller dynamic range but higher relative precision.
 
-![Относительная разница в потерях при обучении между FP8 и BF16](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_06.jpeg)
+![Relative loss difference between FP8 and BF16 during training](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_06.jpeg  )
 
-*Относительная разница в потерях при обучении между FP8 и BF16, показывающая сходимость по мере прогресса обучения.*
+*Relative loss difference between FP8 and BF16 during training, showing convergence over training progress.*
 
-Чтобы эффективно воспользоваться FP8, применяется **построчная (per-tensor) динамическая квантизация** активаций. Конкретно, для каждого тензора вычисляется масштаб (scale) квантования как отношение максимального представимого FP8-значения к максимальному по абсолютному значению элементу тензора. Затем все элементы умножаются на этот масштаб и приводятся (с округлением) к формату FP8. Такая нормировка позволяет максимально использовать доступный диапазон 8-бит float и минимизировать ошибки округления. Важно и то, какую схему округления применять при квантовании: эксперименты показали, что **округление в сторону нуля** (truncate) даёт лучшие результаты при последующем тонком обучении моделей – видимо, оно меньше искажает распределение градиентов, особенно на поздних этапах тренировки.
+To effectively leverage FP8, **per-tensor dynamic quantization** of activations is applied. Specifically, for each tensor, a quantization scale is computed as the ratio of the maximum representable FP8 value to the maximum absolute value in the tensor. All elements are then multiplied by this scale and rounded to FP8 format. This normalization maximizes the use of the available 8-bit float range and minimizes rounding errors. Equally important is the choice of rounding scheme during quantization: experiments showed that **truncation (rounding toward zero)** yields better results during subsequent fine-tuning — likely because it distorts gradient distributions less, especially on later training stages.
 
-![Сравнение обучения FP8 и BF16](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_07.jpeg)
+![Comparison of FP8 and BF16 training](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_07.jpeg  )
 
-*Сравнение обучения FP8 и BF16 по различным тестам, показывающее сопоставимую или лучшую производительность при обучении FP8.*
+*Comparison of FP8 and BF16 training across various benchmarks, showing comparable or superior performance with FP8 training.*
 
-Невзирая на столь агрессивное сокращение разрядности, качество моделей практически не пострадало. Логарифмическая потеря (log-loss) при обучении в FP8 была лишь на доли процента выше, чем при BF16, и хотя разница немного возрастала ближе к концу обучения (возможно, из-за накопления очень малых градиентов, зануляемых в E5M2), итоговая способность модели решать задачи оказалась не хуже, а по некоторым тестам даже лучше, чем у аналогичной модели, обученной в BF16. Графики показали, что FP8-модель достигает таких же или более высоких accuracy на downstream-задачах, несмотря на слегка выше тренировочную потерю. Таким образом, **FP8-рецепт** подтвердил свою состоятельность, позволив обучить 56-миллиардную Nemotron-H без удлинения цикла разработки и без деградации качества относительно привычного полупрецизионного тренинга.
+Despite this aggressive reduction in bit-width, model quality suffered almost no degradation. The log-loss during FP8 training was only a fraction of a percent higher than with BF16, and although the gap slightly increased near the end of training (possibly due to accumulation of very small gradients being zeroed out in E5M2), the final model’s ability to solve tasks was no worse — and in some tests even better — than an equivalent BF16-trained model. Graphs showed that the FP8 model achieved the same or higher accuracy on downstream tasks despite a slightly higher training loss. Thus, the **FP8 recipe** proved its viability, enabling the training of a 56-billion-parameter Nemotron-H without extending the development cycle or degrading quality relative to conventional half-precision training.
 
-### **Дистилляция и сжатие моделей** 
+### **Model Distillation and Compression**
 
-Для адаптации больших моделей к различным сценариям развертывания NVIDIA применила методы *компрессии с минимальными потерями качества*. В частности, из топовой модели Nemotron-H-56B была получена более компактная **Nemotron-H-47B** с помощью комбинации **прюннинга и дистилляции**, названной ***MiniPuzzle***. Цель – сократить количество параметров (~на 16%) и требуемую память/латентность, при этом практически не уронить точность. MiniPuzzle объединяет идеи из подходов *Minitron* и *Puzzle*. 
+To adapt large models for diverse deployment scenarios, NVIDIA applied *compression techniques with minimal quality loss*. In particular, a more compact **Nemotron-H-47B** model was derived from the top-tier Nemotron-H-56B using a combination of **pruning and distillation**, named ***MiniPuzzle***. The goal was to reduce the number of parameters (~16%) and required memory/latency while preserving nearly identical accuracy. MiniPuzzle combines ideas from *Minitron* and *Puzzle* approaches.
 
-Общий алгоритм выглядит так: 
+The overall algorithm proceeds as follows:
 
-- a. Cначала оценивается *важность* различных компонентов большой модели (каждого слоя, нейронов FFN и пр.) по влиянию на итоговую ошибку:
+- a. First, the *importance* of various components of the large model (each layer, FFN neurons, etc.) is evaluated based on their impact on final error:
 
-![Оценки важности для каждого слоя](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_09.jpeg)
+![Layer importance scores](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_09.jpeg  )
 
-*Оценки важности для каждого слоя, показывающие различные вклады различных типов слоев модели.*
+*Layer importance scores, showing the varying contributions of different layer types.*
 
-- b. Затем выполняется *поиск архитектуры* – какие слои можно убрать целиком и насколько сократить ширину FFN-слоёв, чтобы модель уложилась в заданные ресурсы, сохраняя максимально важные компоненты:
+- b. Then, an *architecture search* is performed — which layers can be entirely removed and how much to reduce the width of FFN layers — to fit within resource constraints while preserving the most important components:
 
-![Шаблоны выбора слоев для различных кандидатов](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_10.jpeg)
+![Layer selection patterns for candidate architectures](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_10.jpeg  )
 
-*Шаблоны выбора слоев для различных кандидатов на архитектуру, показывающие, какие слои сохраняются в каждой потенциальной сжатой модели.*
+*Layer selection patterns for candidate architectures, showing which layers are preserved in each potential compressed model.*
 
-- c. На основе этих решений из большой модели **выбрасываются наименее важные слои** (полностью удаляются некоторые слои Mamba/Attention/FFN) и уменьшается размер некоторых слоёв (например, укорачиваются внутренние размерности FFN). Так получают сжатую архитектуру – в случае 56B→47B было отброшено несколько слоёв (в частности, половина слоёв самовнимания – 5 из 10, и часть других) и урезана ширина отдельных FFN-слоёв, чтобы сократить ~9 млрд параметров.
+- c. Based on these decisions, the least important layers are **removed** (entire Mamba/Attention/FFN layers are deleted) and the sizes of certain layers are reduced (e.g., internal FFN dimensions are shortened). This yields a compressed architecture: in the 56B→47B case, several layers were discarded (in particular, half of the self-attention layers — 5 out of 10, and parts of others) and widths of some FFN layers were reduced to remove ~9 billion parameters.
 
-![Рабочий процесс структуры сжатия MiniPuzzle](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_08.jpeg)
+![MiniPuzzle compression workflow](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_08.jpeg  )
 
-*Рабочий процесс структуры сжатия MiniPuzzle, показывающий переход от предварительно обученной модели к сжатой модели посредством оценки важности, поиска нейронной архитектуры и дистилляции.*
+*MiniPuzzle compression workflow, showing transition from a pre-trained model to a compressed model via importance evaluation, neural architecture search, and distillation.*
 
-После архитектурного сжатия **необходимо обучить получившуюся модель (студента)**, чтобы она приблизилась по качеству к оригиналу (учителю). Для этого используется *knowledge distillation* – обучение на выходах большой модели. В процессе дистилляции **постепенное размораживание** (progressive unfreezing) слоёв помогает более плавно перенести знания учителя. Сначала можно заморозить основные веса студента и обучать только новые или изменённые параметры. 
+After architectural compression, the resulting model (student) must be trained to approximate the quality of the original (teacher). This is achieved via *knowledge distillation* — training on outputs of the large model. In the distillation process, **progressive unfreezing** of layers helps transfer knowledge more smoothly. Initially, the student’s main weights can be frozen, and only new or modified parameters trained. 
 
-Для языковой модели MiniPuzzle подход был таким:
+For the language model, MiniPuzzle proceeded as follows:
 
-1. Инициализировать веса студента уцелевшими весами от учителя (те слои, что остались, копируются), новые параметры – случайно; 
-2. Сначала обучать только выходной слой и наиболее верхние слои, добиваясь, чтобы распределение логитов студента приближалось к учительскому (минимизируя, например, **Kullback–Leibler дивергенцию** $D_\text{KL}(p_\text{teacher} \parallel p_\text{student})$ между распределениями вероятностей следующего токена) – это обеспечивает правильную "настройку" выхода под учителя;
-3. Затем **разморозить следующие слои** и продолжить обучение, и так далее, продвигаясь к началу сети. Такая *поэтапная разблокировка* позволяет избежать резких скачков в пространствах признаков: модель-студент постепенно перенимает знание, сначала на высокоуровневом представлении, затем всё глубже. Одновременно, помимо потерь на совпадение с выходами учителя, может использоваться и стандартная языковая потеря (кросс-энтропия на правильные токены) – это комбинация **soft-distillation** (с использованием «мягких» вероятностных меток учителя) и обучения на истинных данных. Формально, функция потерь при дистилляции часто берётся в виде: 
+1. Initialize student weights using surviving weights from the teacher (copied unchanged); new parameters are randomly initialized;  
+2. First, train only the output layer and topmost layers, ensuring the student’s logits distribution approaches the teacher’s (minimizing, for example, **Kullback–Leibler divergence** $D_\text{KL}(p_\text{teacher} \parallel p_\text{student})$ between next-token probability distributions) — this ensures correct "calibration" of the output to the teacher;  
+3. Then **unfreeze the next layers** and continue training, progressing toward the network’s beginning. This *stepwise unblocking* avoids abrupt feature-space jumps: the student model gradually inherits knowledge, starting from high-level representations and proceeding deeper. Simultaneously, alongside distillation loss, standard language modeling loss (cross-entropy on ground-truth tokens) may also be used — this combines **soft-distillation** (using teacher’s "soft" probability labels) with supervised learning on true data. Formally, the distillation loss is often taken as:
 
 $$\mathcal{L} = (1-\lambda)\,\mathcal{L}_{\text{CE}}(y^\text{true}, p_\text{student}) + \lambda\, T^2\, D_{\text{KL}}\!\big(p_\text{teacher}^{(T)} \parallel p_\text{student}^{(T)}\big),$$ 
 
-где 
+where 
 
-- $\mathcal{L}_{\text{CE}}$ – обычная кросс-энтропия по истинному следующему слову;
-- $D_{\text{KL}}$ – дивергенция Кульбака–Лейблера между распределениями учителя и студента, приведёнными к общей температуре $T$ (повышенная температура сглаживает распределения учителя/студента для более стабильного обучения);
-- $\lambda$ – коэффициент, определяющий вклад дистилляции. Выбор $\lambda$ и расписание разморозки слоёв подбираются экспериментально. 
+- $\mathcal{L}_{\text{CE}}$ is standard cross-entropy on the true next token;
+- $D_{\text{KL}}$ is Kullback–Leibler divergence between teacher and student distributions, both scaled by a common temperature $T$ (higher temperature smooths distributions for more stable training);
+- $\lambda$ is a coefficient determining the distillation contribution. $\lambda$ and the unfreezing schedule are chosen experimentally.
 
-В итоге, после нескольких этапов дообучения с учителем, модель Nemotron-H-47B сумела **достичь практически той же точности**, что и 56B, выигрывая ~20% в скорости и ресурсах инференса.
+Ultimately, after several fine-tuning stages with the teacher, the Nemotron-H-47B model achieved **nearly identical accuracy** to the 56B model, gaining ~20% in inference speed and resource efficiency.
 
 <details> 
-    <summary><em><strong>Формализация дивергенции Кульбака-Лейблера</strong></em></summary>
+    <summary><em><strong>Formalization of Kullback–Leibler Divergence</strong></em></summary>
 
 ---
 
-**Дивергенция Кульбака-Лейблера** (KL-дивергенция) является мерой расхождения между двумя вероятностными распределениями. В контексте дистилляции знаний она измеряет, насколько распределение вероятностей модели-студента отличается от распределения модели-учителя. Математически для дискретных распределений KL-дивергенция определяется как:
+The **Kullback–Leibler divergence** (KL divergence) is a measure of the difference between two probability distributions. In knowledge distillation, it quantifies how much the student model’s probability distribution deviates from the teacher’s. Mathematically, for discrete distributions, KL divergence is defined as:
 
 $$D_\text{KL}(p_\text{teacher} \parallel p_\text{student}) = \sum_{i=1}^{|V|} p_\text{teacher}(i) \log \frac{p_\text{teacher}(i)}{p_\text{student}(i)}$$
 
-где:
-- $|V|$ — размер словаря (количество всех возможных токенов)
-- $p_\text{teacher}(i)$ — вероятность $i$-го токена согласно модели-учителю
-- $p_\text{student}(i)$ — вероятность $i$-го токена согласно модели-студенту
+where:
+- $|V|$ — vocabulary size (number of all possible tokens)
+- $p_\text{teacher}(i)$ — probability of token $i$ according to the teacher model
+- $p_\text{student}(i)$ — probability of token $i$ according to the student model
 
-Интуитивно, KL-дивергенция показывает "удивление" от использования распределения $p_\text{student}$ вместо $p_\text{teacher}$. Чем меньше это значение, тем лучше студент воспроизводит знания учителя. Важно отметить, что KL-дивергенция асимметрична: $D_\text{KL}(p_\text{teacher} \parallel p_\text{student}) \neq D_\text{KL}(p_\text{student} \parallel p_\text{teacher})$. В дистилляции используется именно направление $p_\text{teacher} \to p_\text{student}$, что заставляет студента уделять особое внимание токенам, которым учитель присваивает высокую вероятность.
+Intuitively, KL divergence measures the "surprise" of using $p_\text{student}$ instead of $p_\text{teacher}$. The smaller this value, the better the student reproduces the teacher’s knowledge. Importantly, KL divergence is asymmetric: $D_\text{KL}(p_\text{teacher} \parallel p_\text{student}) \neq D_\text{KL}(p_\text{student} \parallel p_\text{teacher})$. In distillation, the direction $p_\text{teacher} \to p_\text{student}$ is used, forcing the student to pay special attention to tokens the teacher assigns high probability to.
 
-При использовании температуры $T$, распределения модифицируются следующим образом:
+When using temperature $T$, distributions are modified as follows:
 
 $$p_\text{model}^{(T)}(i) = \frac{\exp(z_i/T)}{\sum_{j=1}^{|V|} \exp(z_j/T)}$$
 
-где $z_i$ — исходные логиты модели для токена $i$. Повышенная температура $(T > 1)$ делает распределение более гладким, снижая разрыв между вероятностями разных токенов, что помогает студенту улавливать тонкие предпочтения учителя между различными вариантами продолжения текста.
+where $z_i$ are the original logits for token $i$. Higher temperature $(T > 1)$ makes distributions smoother, reducing the gap between probabilities of different tokens, helping the student capture subtle preferences of the teacher among alternative continuations.
 
 </details>
 
 <details> 
-    <summary><em><strong>Формализация кросс-энтропии</strong></em></summary>
+    <summary><em><strong>Formalization of Cross-Entropy</strong></em></summary>
 
 ---
 
-**Кросс-энтропия** между истинным распределением и распределением модели-студента используется для обучения на реальных данных. Если $y^{\text{true}}$ представляет собой истинный следующий токен, то кросс-энтропия определяется как:
+**Cross-entropy** between the true distribution and the student model’s distribution is used for training on real data. If $y^{\text{true}}$ represents the true next token, then cross-entropy is defined as:
 
 $$\mathcal{L}_{\text{CE}}(y^{\text{true}}, p_\text{student}) = -\sum_{i=1}^{|V|} \mathbb{1}[i = y^{\text{true}}] \log p_\text{student}(i) = -\log p_\text{student}(y^{\text{true}})$$
 
-где $\mathbb{1}[i = y^{\text{true}}]$ — индикаторная функция, равная 1, когда $i$ является истинным следующим токеном, и 0 во всех остальных случаях.
+where $\mathbb{1}[i = y^{\text{true}}]$ is an indicator function equal to 1 if $i$ is the true next token, and 0 otherwise.
 
-Фактически, при стандартном обучении языковой модели минимизируется именно эта величина, что эквивалентно максимизации правдоподобия на обучающих данных. Однако при таком подходе модель учится только на "жестких" метках (hard labels), игнорируя информацию о других вероятных продолжениях, которые могут быть почти так же хороши, как истинный токен.
+In standard language model training, this quantity is minimized, equivalent to maximizing likelihood on training data. However, this approach teaches the model only on "hard" labels, ignoring information about other plausible continuations that may be nearly as good as the true token.
 
-Математически существует интересная связь между KL-дивергенцией и кросс-энтропией:
+Mathematically, there is an interesting relationship between KL divergence and cross-entropy:
 
 $$D_\text{KL}(p_\text{teacher} \parallel p_\text{student}) = H(p_\text{teacher}, p_\text{student}) - H(p_\text{teacher})$$
 
-где $H(p_\text{teacher}, p_\text{student})$ — кросс-энтропия между распределениями, а $H(p_\text{teacher})$ — энтропия распределения учителя. Поскольку энтропия $H(p_\text{teacher})$ не зависит от параметров студента, минимизация KL-дивергенции эквивалентна минимизации кросс-энтропии между распределениями учителя и студента.
+where $H(p_\text{teacher}, p_\text{student})$ is the cross-entropy between distributions, and $H(p_\text{teacher})$ is the entropy of the teacher’s distribution. Since $H(p_\text{teacher})$ does not depend on student parameters, minimizing KL divergence is equivalent to minimizing cross-entropy between teacher and student distributions.
 
 </details>
 
 ---
 
-**Отличия оптимизации по KL-дивергенции и по кросс-энтропии Шеннона**
+**Differences Between Optimizing KL Divergence and Shannon Cross-Entropy**
 
-**Цель оптимизации**  
-   - **KL-дивергенция** ($D_\text{KL}(p_\text{teacher}\parallel p_\text{student})$) напрямую измеряет «расстояние» между двумя мягкими (soft) распределениями — учителя и студента. При оптимизации студент учится воспроизводить полную форму распределения учителя, учитывая вероятности всех токенов.  
-   - **Кросс-энтропия** ($\mathcal{L}_\text{CE}(y^\text{true}, p_\text{student})$) работает с «жёсткими» (hard) метками: только правильный токен получает ненулевой вклад в функцию потерь. Студент стремится максимизировать вероятность единственного истинного токена, игнорируя альтернативные варианты.
+**Optimization Goal**  
+   - **KL divergence** ($D_\text{KL}(p_\text{teacher}\parallel p_\text{student})$) directly measures the "distance" between two soft distributions — teacher and student. During optimization, the student learns to reproduce the full shape of the teacher’s distribution, considering probabilities of all tokens.  
+   - **Cross-entropy** ($\mathcal{L}_\text{CE}(y^\text{true}, p_\text{student})$) works with "hard" labels: only the correct token contributes non-zero loss. The student seeks to maximize the probability of a single true token, ignoring alternatives.
 
-## **Оптимизации для длинного контекста**
+## **Optimizations for Long Context**
 
-Одной из главных целей Nemotron-H является эффективная работа с *длинными контекстами* (десятки тысяч и более токенов). Для этого в процессе обучения и инференса применены специальные оптимизации:
+A primary goal of Nemotron-H is efficient operation with *long contexts* (tens of thousands or more tokens). To this end, specialized optimizations were applied during training and inference:
 
-### **Динамическая упаковка последовательностей**
+### **Dynamic Sequence Packing**
 
-**Динамическая упаковка (dynamic sequence packing)** – приём, используемый при обучении моделей с большим контекстным окном. Идея состоит в том, чтобы эффективнее заполнить каждую обучающую последовательность (вплоть до максимальной длины) несколькими исходными образцами, минимизируя потери на паддинге. В отличие от простого случайного формирования батчей, динамическая упаковка анализирует длины отдельных текстов в обучающем корпусе и складывает несколько коротких текстов последовательно в один длинный пример, разделяя их специальными токенами-разграничителями. **Таким образом, модель видит контексты, содержащие несколько несвязанных или слабо связанных частей**, что учит её быть устойчивой к смене темы и не зависеть от позиционной привязки конца обучающего примера.
+**Dynamic sequence packing** — a technique used during training of models with large context windows. The idea is to more efficiently fill each training sequence (up to maximum length) with multiple original samples, minimizing padding losses. Unlike simple random batching, dynamic packing analyzes the lengths of individual texts in the training corpus and concatenates several short texts sequentially into one long example, separating them with special delimiter tokens. **Thus, the model sees contexts containing multiple unrelated or weakly related parts**, teaching it to be robust to topic shifts and not rely on positional anchoring at the end of training examples.
 
-Фактически, для заданного максимального контекста $L_{\max}$, алгоритм упаковки может работать как жадный: брать самые длинные тексты и дополнять их более короткими, чтобы суммарно получить близкую к $L_{\max}$ длину, без переполнения. Такие *сборные последовательности* подаются модели как единый вход. Модель при этом обучается игнорировать специальные разделители и предсказывать **следующее слово, учитывая также возможность смены контекста внутри последовательности**. Это особенно полезно для длинноконтекстных моделей: они учатся *эффективно распределять внимание между релевантными частями большого ввода*. В результате, **ни один промежуток контекста не простаивает впустую** – даже если реально в данных мало очень длинных документов, упаковка синтезирует длинные последовательности из нескольких штук.
+Practically, for a given maximum context $L_{\max}$, the packing algorithm can operate greedily: take the longest texts and pad them with shorter ones to achieve a total length close to $L_{\max}$ without overflow. These *composite sequences* are fed to the model as a single input. The model is trained to ignore special separators and predict the **next word while also accounting for the possibility of context switches within the sequence**. This is especially useful for long-context models: they learn to *efficiently distribute attention between relevant parts of a large input*. As a result, **no context interval is wasted** — even if real data contains few very long documents, packing synthesizes long sequences from multiple fragments.
 
-### **Пример динамической упаковки (dynamic sequence packing)**
+### **Example of Dynamic Sequence Packing**
 
-Рассмотрим практический пример использования динамической упаковки при обучении языковой модели с максимальным контекстным окном в 4096 токенов.
+Consider a practical example of dynamic sequence packing when training a language model with a maximum context window of 4096 tokens.
 
-**Исходные тексты в обучающем корпусе:**
+**Original texts in the training corpus:**
 
-1. **Новостная статья о климате:** 850 токенов
-2. **Научная статья об искусственном интеллекте:** 1200 токенов
-3. **Рецепт итальянской пасты:** 300 токенов
-4. **Обзор смартфона:** 560 токенов
-5. **Стихотворение:** 180 токенов
-6. **Отрывок из технической документации:** 920 токенов
+1. **Climate news article:** 850 tokens  
+2. **AI research paper:** 1200 tokens  
+3. **Italian pasta recipe:** 300 tokens  
+4. **Smartphone review:** 560 tokens  
+5. **Poem:** 180 tokens  
+6. **Technical documentation excerpt:** 920 tokens  
 
-**Стандартный подход (без динамической упаковки):**
-
-```
-Батч 1: [Статья о климате + паддинг до 4096 токенов]
-Батч 2: [Научная статья об ИИ + паддинг до 4096 токенов]
-Батч 3: [Рецепт пасты + паддинг до 4096 токенов]
-Батч 4: [Обзор смартфона + паддинг до 4096 токенов]
-Батч 5: [Стихотворение + паддинг до 4096 токенов]
-Батч 6: [Техническая документация + паддинг до 4096 токенов]
-```
-
-**Подход с динамической упаковкой:**
+**Standard approach (without dynamic packing):**
 
 ```
-Батч 1: [Статья о климате (850) + <SEP> + Рецепт пасты (300) + <SEP> + Стихотворение (180) + <SEP> + Техническая документация (920) + паддинг]
-        = 2253 токена + паддинг до 4096
+Batch 1: [Climate article + padding to 4096 tokens]
+Batch 2: [AI paper + padding to 4096 tokens]
+Batch 3: [Recipe + padding to 4096 tokens]
+Batch 4: [Smartphone review + padding to 4096 tokens]
+Batch 5: [Poem + padding to 4096 tokens]
+Batch 6: [Technical doc + padding to 4096 tokens]
+```
+
+**Approach with dynamic packing:**
+
+```
+Batch 1: [Climate article (850) + <SEP> + Recipe (300) + <SEP> + Poem (180) + <SEP> + Technical doc (920) + padding]
+        = 2253 tokens + padding to 4096
         
-Батч 2: [Научная статья об ИИ (1200) + <SEP> + Обзор смартфона (560) + <SEP> + (возможно другие тексты) + паддинг]
-        = 1763 токена + паддинг до 4096
+Batch 2: [AI paper (1200) + <SEP> + Smartphone review (560) + <SEP> + (other texts) + padding]
+        = 1763 tokens + padding to 4096
 ```
 
-Кроме того, динамическая упаковка позволяет проводить *кумулятивное обучение* навыку длинного контекста: например, можно постепенно увеличивать максимальную длину пакуемых последовательностей в ходе тренировки (curriculum learning по длине контекста). Сначала модель обучается на относительно коротких последовательностях (но разнообразных по содержанию), затем окно увеличивается – вплоть до целевых 32k или 100k токенов. Такой подход обеспечивает **фазированное обучение** по длине: модель не сразу сталкивается с чрезвычайно длинными зависимостями, а привыкает к ним постепенно. В отчёте о Nemotron-H упоминается именно *phased approach* в обучении: разбивка обучения на фазы с разными смесями данных. Это касалось разнообразия данных, но аналогично можно разбить и по длине. В сумме, динамическая упаковка позволяет максимально использовать память и время на каждой итерации обучения, *имитируя длинные диалоги или документы* из отдельных фрагментов, что улучшает способности модели на длинных контекстах.
+Moreover, dynamic packing enables *cumulative long-context skill training*: for example, the maximum length of packed sequences can be gradually increased during training (curriculum learning by context length). Initially, the model is trained on relatively short sequences (but diverse in content), then the window expands — up to target lengths of 32k or 100k tokens. This approach ensures **phased learning** by length: the model does not immediately face extremely long dependencies but gradually adapts to them. The Nemotron-H report mentions a *phased approach* in training: dividing training into phases with different data mixtures. This applied to data diversity, but similarly can be applied to length. Altogether, dynamic packing maximizes memory and time usage per training iteration, *simulating long dialogues or documents* from fragments, improving the model’s capabilities on long contexts.
 
-### Расширенные позиционные кодировки RoPE (с параметром θ)
+### Extended RoPE Positional Encodings (with θ Parameter)
 
-Для поддержки длинных последовательностей также важно корректно сообщать модели позиционную информацию на диапазоне, превышающем тренировочный. Одним из эффективных решений стали **ротариальные позиционные кодировки (RoPE)** с модификацией параметра вращения (θ) для экстраполяции на бóльшие контексты. RoPE вводит в само внимание *мультипликативное позиционное смещение*: элементы $q_i, k_i$ для каждого положения $i$ представляются как комплексные вращения векторов в плоскостях, зависящие от позиции $i$. Формально, если разбить $d$-мерный пространственный вектор на пары координат $(u, v)$, то RoPE применяет трансформацию: $(u, v)$ на позиции $i$ заменяется на $(u\cos \theta_i + v\sin \theta_i,\; -u\sin \theta_i + v\cos \theta_i)$, где $\theta_i$ – задаётся, например, как $\theta_i = i \cdot \theta_{\text{base}}^{2j/d}$ для $j$-й пары координат (здесь $\theta_{\text{base}}$ – некоторый базовый коэффициент, обычно связанный с максимальной длиной). В итоге скалярные произведения $q_i \cdot k_j$ получают встроенный косинусный фактор $\cos(\theta_i - \theta_j)$, зависящий от разности позиций $i$ и $j$. Это эквивалентно относительным позиционным эмбеддингам, позволяющим модели генерировать за пределами виденных позиций без фиксированного окна.
+To support long sequences, it is crucial to correctly convey positional information beyond the training range. One effective solution is **Rotary Positional Embeddings (RoPE)** with a modified rotation parameter (θ) for extrapolation to longer contexts. RoPE introduces a *multiplicative positional shift* into attention: elements $q_i, k_i$ for each position $i$ are represented as complex rotations of vectors in planes dependent on position $i$. Formally, if a $d$-dimensional vector is split into pairs of coordinates $(u, v)$, RoPE applies the transformation: $(u, v)$ at position $i$ becomes $(u\cos \theta_i + v\sin \theta_i,\; -u\sin \theta_i + v\cos \theta_i)$, where $\theta_i$ is defined, for example, as $\theta_i = i \cdot \theta_{\text{base}}^{2j/d}$ for the $j$-th coordinate pair (here $\theta_{\text{base}}$ is a base coefficient usually tied to maximum length). The resulting dot products $q_i \cdot k_j$ then obtain an intrinsic cosine factor $\cos(\theta_i - \theta_j)$, depending on the positional difference $i$ and $j$. This is equivalent to relative positional embeddings, allowing the model to generate beyond seen positions without a fixed window.
 
-**Расширение RoPE с параметром θ** означает адаптацию базового шага вращения для более длинного диапазона. Например, если модель обучалась с максимальной длиной $N$, то базовый масштаб θ обычно выбран так, что повороты на позицию $N$ дают некоторый полный охват фазы. Чтобы увеличить предел до $k \cdot N$, можно **уменьшить шаг поворота**: фактически взять $\theta_{\text{base,new}} = \theta_{\text{base}} / c$ для некоторого коэффициента $c > 1$. Тогда для прежнего максимума $N$ поворот будет лишь на $1/c$ полного цикла, а полный цикл растянется до $c \cdot N$. По сути, это *сжимает спектр частот* позиционных вращений, позволяя достичь больших позиций, прежде чем фазы начнут повторяться. Такой трюк часто называют *NTK-сохранение* (Neural Tangent Kernel projection) для длинного контекста: он старается сохранить отношение между позициями в новом диапазоне подобным тому, что было в диапазоне обучения. 
+**Extending RoPE with θ** means adapting the base rotation step for a longer range. For example, if a model was trained with maximum length $N$, the base scale θ is typically chosen so that rotations at position $N$ cover a full phase. To extend the limit to $k \cdot N$, we can **reduce the rotation step**: effectively take $\theta_{\text{base,new}} = \theta_{\text{base}} / c$ for some coefficient $c > 1$. Then, for the original maximum $N$, the rotation becomes only $1/c$ of a full cycle, and the full cycle stretches to $c \cdot N$. Essentially, this *compresses the frequency spectrum* of positional rotations, enabling larger positions before phases begin to repeat. This trick is often called *NTK preservation* (Neural Tangent Kernel projection) for long contexts: it attempts to preserve the relative positioning ratios in the new range as they were in the training range.
 
-Например, разработчики LLaMA 2 при расширении контекста до 32k применяли **RoPE Scaling**: домножали индексы позиций на фактор <1 перед вычислением ротариальных фаз, эффективно растягивая позиционное пространство. В контексте Nemotron модели *со слоями самовнимания* тоже могут задействовать такую схему. Хотя в Nemotron-H базовые модели не используют явных позиционных эмбеддингов, при адаптации чисто трансформерных моделей (например, Nemotron-T) до 128k длины применяли подходы масштабирования RoPE. Эксперименты показывают, что *без переобучения* можно увеличить окно внимания, корректно выбрав $\theta$ для ротариальных кодировок: модель продолжает понимать порядок токенов, не столкнувшись с неизвестными паттернами позиций. 
+For instance, LLaMA 2 developers, when extending context to 32k, applied **RoPE Scaling**: multiplying position indices by a factor <1 before computing rotational phases, effectively stretching the positional space. In the context of Nemotron models with self-attention layers, such schemes can also be applied. Although Nemotron-H base models do not use explicit positional embeddings, when adapting purely Transformer-based models (e.g., Nemotron-T) to 128k length, RoPE scaling approaches were employed. Experiments show that *without retraining*, the attention window can be extended by correctly selecting θ for rotary encodings: the model continues to understand token order without encountering unknown positional patterns.
 
-**Вывод:** *RoPE с расширением θ* – это способ сообщить трансформерному вниманию о позициях >> исходного максимума, *экстраполируя* период ротариальных положений. Эта техника, совместимая с гибридной архитектурой (для тех немногих слоёв внимания в Nemotron-H), помогает безопасно работать на контексте 100k+ токенов без заметной просадки качества или дорогостоящего дообучения на таких длинах.
+**Conclusion:** *RoPE with θ extension* is a way to inform Transformer attention about positions >> the original maximum, *extrapolating* the rotational period. This technique, compatible with the hybrid architecture (for the few attention layers in Nemotron-H), enables safe operation on 100k+ token contexts without noticeable quality drop or costly retraining on such lengths.
 
 <details> 
-    <summary><em><strong>Формализация Вращательно-Позиционного Встраивания (RoPE)</strong></em></summary>
+    <summary><em><strong>Formalization of Rotary Positional Embedding (RoPE)</strong></em></summary>
 
-### **1. Зачем нужны позиционные встраивания?**
-- **Проблема**: в классическом механизме самовнимания (self-attention) трансформера порядок токенов теряется, потому что все токены обрабатываются параллельно.
-- **Цель**: дать модели знать, где находится каждый токен, сохраняя при этом гибкость в работе с относительными расстояниями между ними.
+### **1. Why are positional embeddings needed?**
+- **Problem**: In the classical Transformer self-attention mechanism, token order is lost because all tokens are processed in parallel.
+- **Goal**: Give the model knowledge of each token’s position while preserving flexibility in handling relative distances.
 
-### **2. Основная идея RoPE: поворот вместо сложения**
-- Вместо того чтобы **прибавлять** к вектору токена отдельный позиционный вектор (как в абсолютных встраиваниях), RoPE **поворачивает** сам вектор признаков.
-- Каждые два подряд идущих числа в векторе (пара координат) рассматриваются как точка на 2D-плоскости.  
-- Для токена на позиции *m* мы поворачиваем каждую такую пару на угол, пропорциональный *m*.
+### **2. Core idea of RoPE: rotation instead of addition**
+- Instead of **adding** a separate positional vector to the token vector (as in absolute embeddings), RoPE **rotates** the feature vector itself.
+- Each two consecutive numbers in the vector (a coordinate pair) are treated as a point on a 2D plane.  
+- For a token at position *m*, each such pair is rotated by an angle proportional to *m*.
 
-![RoPE](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_15.webp)
+![RoPE](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_15.webp  )
 
-> **Аналогия.** Представьте, что у вас есть стрелка (вектор признаков) на круге, и вы поворачиваете её на угол, зависящий от позиции слова. Чем дальше слово, тем сильнее поворот.
+> **Analogy.** Imagine you have an arrow (feature vector) on a circle, and you rotate it by an angle depending on the word’s position. The farther the word, the greater the rotation.
 
-### **3. Как это работает «по-простому»**
+### **3. How it works simply**
 
-**Разбиение вектора размерности 1024 на пары**
+**Splitting a 1024-dimensional vector into pairs**
 
-1. **Количество пар:**  
+1. **Number of pairs:**  
    $$
-     \frac{1024}{2} = 512\text{ пары}
+     \frac{1024}{2} = 512\text{ pairs}
    $$
 
-2. **Индексная формула:**  
-   Для каждой $(i\in\{1,2,\dots,512\})$ определяем пару как  
+2. **Indexing formula:**  
+   For each $(i\in\{1,2,\dots,512\})$, define the pair as  
    
    $$
-     \text{пара}_i = \bigl[x_{2i-1},\;x_{2i}\bigr]
+     \text{pair}_i = \bigl[x_{2i-1},\;x_{2i}\bigr]
    $$
 
-3. **Примеры:**  
-   - **Пара 1:** $([x_1,\,x_2])$ 
-   - **Пара 2:** $([x_3,\,x_4])$  
+3. **Examples:**  
+   - **Pair 1:** $([x_1,\,x_2])$ 
+   - **Pair 2:** $([x_3,\,x_4])$  
    - …  
-   - **Пара 512:** $([x_{1023},\,x_{1024}])$
+   - **Pair 512:** $([x_{1023},\,x_{1024}])$
 
-4. **Далее:** к каждой паре применяется матрица вращения  
+4. **Next:** apply a rotation matrix to each pair  
    
    $$
      R(m,\theta_i)=
@@ -3645,40 +3588,40 @@ $$D_\text{KL}(p_\text{teacher} \parallel p_\text{student}) = H(p_\text{teacher},
      \end{pmatrix}
    $$
 
-   где  
+   where  
    
    $$
-     \theta_i = 10000^{-2i/1024},\qquad m = \text{позиция токена}
+     \theta_i = 10000^{-2i/1024},\qquad m = \text{token position}
    $$
 
-Таким образом, для embedding-вектора длиной 1024 вы:
-- Формируете 512 двухмерных векторов.
-- Каждому двухмерному вектору применяете своё вращение, кодирующее позицию токена.
-- Получаете итоговый вектор той же размерности, но уже «пронумерованный» через повороты.
+Thus, for a 1024-dimensional embedding vector, you:
+- Form 512 two-dimensional vectors.
+- Apply a unique rotation to each, encoding the token’s position.
+- Obtain a final vector of the same dimension, now "numbered" via rotations.
 
-**Итог:** RoPE просто «прокручивает» каждый маленький вектор на угол, зависящий от позиции, и благодаря этому одновременно сохраняет абсолютную и относительную информацию о порядке токенов.
+**Result:** RoPE simply "rotates" each small vector by an angle dependent on position, thereby simultaneously preserving absolute and relative positional information.
 
 </details> 
 
-## **Точность по результатам тестов**
+## **Accuracy Across Benchmark Tests**
 
-Несмотря на архитектурные изменения, модели Nemotron-H сохраняют высокую производительность в широком диапазоне тестов:
+Despite architectural changes, Nemotron-H models maintain high performance across a wide range of tests:
 
-- Nemotron-H-56B превосходит Llama-3.1-70B в 16 из 17 оцененных задач
-- Модели демонстрируют особенно высокую производительность в задачах математического мышления
+- Nemotron-H-56B outperforms Llama-3.1-70B in 16 of 17 evaluated tasks
+- Models demonstrate particularly high performance in mathematical reasoning tasks
 
-![Сравнение Nemotron-H и других моделей в тесте MMLU](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_13.jpeg)
+![Comparison of Nemotron-H and other models on MMLU](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_13.jpeg  )
 
-*Сравнение Nemotron-H и других моделей в тесте MMLU, показывающее конкурентоспособную производительность.*
+*Comparison of Nemotron-H and other models on MMLU, showing competitive performance.*
 
-Модели были оценены с помощью комплексного набора тестов, включая MMLU, GSM8K, MATH, HumanEval и различные задачи на рассуждение, неизменно демонстрируя конкурентоспособную или превосходящую производительность по сравнению с моделями Transformer аналогичного размера.
+Models were evaluated using a comprehensive benchmark suite including MMLU, GSM8K, MATH, HumanEval, and various reasoning tasks, consistently demonstrating competitive or superior performance compared to Transformer models of similar size.
 
-## **Вывод**
+## **Conclusion**
 
-В этом разборе мы проследили эволюцию моделей для работы с последовательностями: от классических RNN и их усовершенствований (LSTM, GRU) до революционного механизма внимания и гибридных подходов на основе выборочных моделей пространства состояний (SSM). Рекуррентные сети показали свою ценность в задачах с потоковыми данными и ограниченными ресурсами благодаря компактной памяти и естественной каузальности . Однако их ограниченная способность моделировать очень длинные зависимости подтолкнула развитие более сложных архитектур.
+In this analysis, we traced the evolution of sequence modeling architectures: from classical RNNs and their improvements (LSTM, GRU) to the revolutionary attention mechanism and hybrid approaches based on selective State Space Models (SSM). Recurrent networks demonstrated their value in streaming data and resource-constrained settings thanks to compact memory and natural causality. However, their limited ability to model very long dependencies spurred the development of more sophisticated architectures.
 
-Появление трансформера с механизмом self-attention позволило эффективно обрабатывать глобальные связи между токенами, но столкнулось с квадратичной по длине последовательности сложностью. Модели семейства SSM (S4, S5) предложили линейное (а зачастую и константное) масштабирование, однако им недоставало выборочного внимания к содержимому. Архитектура Mamba объединила преимущества SSM и механизмов выбора, позволяя адаптировать параметры состояния к входным данным и добиваться высокой производительности на длинных контекстах .
+The emergence of the Transformer with self-attention enabled efficient handling of global token relationships, but faced quadratic complexity with sequence length. SSM family models (S4, S5) proposed linear (and often constant) scaling, yet lacked content-aware selectivity. The Mamba architecture unified SSM advantages with selective mechanisms, allowing state parameters to adapt to input data and achieving high performance on long contexts.
 
-Наконец, гибридная модель Nemotron-H стратегически сочетает SSM-слои Mamba-2 с небольшой долей self-attention-слоёв трансформера, что обеспечивает линейную сложность при генерации длинных последовательностей и сохраняет силу глобального контекста для in-context learning . Такой сбалансированный подход свидетельствует о новом этапе в развитии языковых и мультимодальных моделей, где эффективная обработка длинных зависимостей сочетается с глубоким пониманием содержимого.
+Finally, the hybrid model Nemotron-H strategically combines Mamba-2 SSM layers with a small fraction of Transformer self-attention layers, ensuring linear complexity during long-sequence generation while preserving global context strength for in-context learning. This balanced approach signals a new stage in the evolution of language and multimodal models, where efficient long-dependency processing is combined with deep content understanding.
 
-Таким образом, дальнейшее развитие гибридных архитектур, объединяющих лучшие свойства RNN, SSM и трансформеров, обещает значительные прорывы в задачах NLP, компьютерного зрения и моделирования биологических сигналов, позволяя создавать более быстрые, масштабируемые и точные системы искусственного интеллекта.
+Thus, further development of hybrid architectures that combine the best properties of RNNs, SSMs, and Transformers promises significant breakthroughs in NLP, computer vision, and biological signal modeling, enabling the creation of faster, more scalable, and more accurate artificial intelligence systems.

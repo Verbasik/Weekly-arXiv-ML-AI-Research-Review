@@ -1,61 +1,62 @@
 [![arXiv](https://img.shields.io/badge/arXiv-2505.05522-b31b1b.svg)](https://arxiv.org/abs/2505.05522)
 [![SakanaAI](https://img.shields.io/badge/SakanaAI-purple)](https://pub.sakana.ai/ctm/)
 [![GitHub](https://img.shields.io/badge/GitHub-black)](https://github.com/SakanaAI/continuous-thought-machines/)
-[![Telegram Channel](https://img.shields.io/badge/Telegram-TWRB-blue)](https://t.me/TheWeeklyBrief)
 
-# Машины непрерывного мышления (CTM) — революционная нейросетевая архитектура с биологическим вдохновением
+# Continuous Thought Machines (CTM) — A Revolutionary Neural Architecture with Biological Inspiration
 
-> **Нейронная синхронизация → мощный фундамент для ИИ**  
-> CTM доказывает, что включение временной динамики и синхронизации нейронов в архитектуру ИИ позволяет создать систему с превосходными возможностями рассуждения, обобщения и интерпретируемости.
+> **Neural Synchronization → A Powerful Foundation for AI**  
+> CTM demonstrates that incorporating neural temporal dynamics and synchronization into AI architecture enables a system with superior reasoning, generalization, and interpretability.
 
-## 🚀 Кратко о достижениях
+## 🚀 Key Achievements
 
-* 🧠 **Революция архитектуры** — явное включение нейронной синхронизации как фундаментального компонента ИИ, вдохновленного биологическими принципами.
-* 🌐 **Впечатляющая универсальность** — одна и та же архитектура демонстрирует высокую производительность в задачах от классификации изображений до навигации по лабиринту и решения математических проблем.
-* 🔍 **Повышенная интерпретируемость** — богатые визуализации внутренних представлений и процессов рассуждения.
-* ⚡ **Адаптивные вычисления** — естественная способность модели динамически регулировать вычислительный бюджет в зависимости от сложности задачи.
-* 🧩 **Сильная генерализация** — модель успешно решает лабиринты 99×99 после обучения только на лабиринтах 39×39.
+* 🧠 **Architectural Revolution** — Explicit incorporation of neural synchronization as a fundamental AI component, inspired by biological principles.
+* 🌐 **Impressive Versatility** — The same architecture achieves high performance across tasks ranging from image classification to maze navigation and mathematical problem solving.
+* 🔍 **Enhanced Interpretability** — Rich visualizations of internal representations and reasoning processes.
+* ⚡ **Adaptive Computation** — Natural ability for the model to dynamically regulate its computational budget based on task complexity.
+* 🧩 **Strong Generalization** — The model successfully solves 99×99 mazes after training only on 39×39 mazes.
 
-## Почему CTM важен?
+## Why CTM Matters?
 
-| Боль | Решение от CTM |
+| Problem | CTM's Solution |
 | --------------------------------------------- | ----------------------------------------------- |
-| Стандартные нейросети ограничены в рассуждениях здравого смысла | Временная динамика позволяет выполнять сложные последовательные рассуждения |
-| Непрозрачность внутренних процессов ИИ | Визуализируемые паттерны нейронной активности |
-| Фиксированные вычислительные бюджеты для всех задач | Адаптивные вычисления: больше ресурсов для сложных задач |
-| Ограниченное обобщение за пределы обучающих данных | Надежная генерализация на невиданные сценарии |
-| Разрыв между ИИ и биологическим познанием | Архитектура, вдохновленная принципами работы мозга |
+| Standard neural networks are limited in commonsense reasoning | Temporal dynamics enable complex sequential reasoning |
+| Lack of transparency in AI internal processes | Visualizable patterns of neural activity |
+| Fixed computational budgets for all tasks | Adaptive computation: more resources allocated to complex tasks |
+| Limited generalization beyond training data | Robust generalization to unseen scenarios |
+| Gap between AI and biological cognition | Architecture inspired by principles of brain function |
 
-## ⚙️ Ключевые компоненты архитектуры
+## ⚙️ Key Architectural Components
 
-1. **Временная обработка на уровне нейронов:**
-   - Каждый нейрон использует уникальные весовые параметры для обработки истории входящих сигналов
-   - Вместо одномоментных активаций — развитие во времени
+1. **Neuron-Level Temporal Processing:**
+   - Each neuron uses unique weight parameters to process the history of incoming signals
+   - Replaces instantaneous activations with temporal evolution
 
-2. **Нейронная синхронизация как скрытое представление:**
-   - Информация кодируется в паттернах синхронизации активности нейронов во времени
-   - Богатое пространство представлений для сложной информации
+2. **Neural Synchronization as a Hidden Representation:**
+   - Information is encoded in patterns of synchronized neural activity over time
+   - Rich representational space for complex information
 
-3. **Разделенное внутреннее измерение времени:**
-   - Мыслительный процесс разворачивается независимо от входной последовательности
-   - Обеспечивает итеративную обработку сложных задач
+3. **Separated Internal Time Dimension:**
+   - Thought processes unfold independently of the input sequence
+   - Enables iterative processing of complex tasks
 
-4. **Адаптивное принятие решений:**
-   - Модель принимает решения только при достижении порога уверенности
-   - Сложные примеры получают расширенную обработку автоматически
+4. **Adaptive Decision Making:**
+   - The model makes decisions only upon reaching a confidence threshold
+   - Complex examples automatically receive extended processing
 
-## 🔬 Результаты
+## 🔬 Results
 
-- **Классификация изображений:** 86.03% на CIFAR-10, превосходя как прямоточные сети (84.44%), так и LSTM (85.54%)
-- **Навигация по лабиринту:** решение кратчайшего пути в лабиринтах 99×99 после обучения только на 39×39
-- **Калибровка уверенности:** поразительное сходство с калибровкой уверенности человека
-- **Обучение с подкреплением:** конкурентоспособная производительность в CartPole, Acrobot и MiniGrid
-- **Математические задачи:** разработка алгоритмических решений для вычисления четности и сортировки
-
-## 🌟 Поддержите проект
-
-- Понравилось? Поставьте звезду и присоединяйтесь к обсуждению!
+- **Image Classification:** 86.03% accuracy on CIFAR-10, outperforming both feedforward networks (84.44%) and LSTMs (85.54%)
+- **Maze Navigation:** Solving shortest-path navigation in 99×99 mazes after training only on 39×39 mazes
+- **Confidence Calibration:** Remarkable similarity to human confidence calibration
+- **Reinforcement Learning:** Competitive performance on CartPole, Acrobot, and MiniGrid
+- **Mathematical Tasks:** Development of algorithmic solutions for parity computation and sorting
 
 ---
 
-<p align="center">Исследуйте вместе с нами 🚀</p>
+<div align="center">
+
+**Explore with us 🚀**
+
+⭐ Star this repository if you found it helpful
+
+</div>

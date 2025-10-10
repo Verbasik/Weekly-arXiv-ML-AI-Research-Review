@@ -1,93 +1,94 @@
 [![Google](https://img.shields.io/badge/Google-A2A_Protocol-blue)](https://github.com/google/a2a)
-[![Telegram Channel](https://img.shields.io/badge/Telegram-TheWeeklyBrief-blue)](https://t.me/TheWeeklyBrief)
 
-# Эра мультиагентов? Как LangChain, только на стероидах: протокол Agent2Agent (A2A) от Google + MCP
+# The Age of Multi-Agents? LangChain, but on Steroids: Google’s Agent2Agent (A2A) Protocol + MCP
 
 ![Figure 0](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-16/assets/Figure_0.png)
 
-## 📝 Описание
+## 📝 Description
 
-Данный репозиторий содержит подробный обзор нового открытого протокола **Agent2Agent (A2A)**, представленного Google на конференции Google Cloud Next '25 (9 апреля 2025 года). A2A — это стандартизированный протокол, разработанный для обеспечения безопасного взаимодействия между агентами искусственного интеллекта на разных платформах, фреймворках и от разных поставщиков. В отличие от существующих решений для работы с ИИ-агентами, A2A фокусируется именно на межагентном взаимодействии, дополняя другие протоколы, такие как Model Context Protocol (MCP) от Anthropic.
+This repository contains a detailed overview of the new open protocol **Agent2Agent (A2A)**, unveiled by Google at the Google Cloud Next '25 conference (April 9, 2025). A2A is a standardized protocol designed to enable secure interaction between artificial intelligence agents across different platforms, frameworks, and vendors. Unlike existing solutions for AI agent workflows, A2A specifically focuses on inter-agent communication, complementing other protocols such as Anthropic’s Model Context Protocol (MCP).
 
-## 🔍 Ключевые особенности протокола A2A
+## 🔍 Key Features of the A2A Protocol
 
-- **Использование возможностей агентов**: поддержка естественного взаимодействия между агентами без необходимости общей внутренней памяти или контекста;
-- **Основан на существующих стандартах**: использует HTTP, Server-Sent Events (SSE) и JSON-RPC для простой интеграции;
-- **Безопасность по умолчанию**: встроенная поддержка механизмов аутентификации и авторизации на уровне предприятия;
-- **Поддержка длительных задач**: способность обрабатывать как быстрые задачи, так и длительные процессы с обратной связью в реальном времени;
-- **Независимость от модальности**: поддержка различных форматов данных, включая текст, аудио, видео и другие типы контента.
+- **Leverage Agent Capabilities**: Supports natural interaction between agents without requiring shared internal memory or context;
+- **Built on Existing Standards**: Uses HTTP, Server-Sent Events (SSE), and JSON-RPC for seamless integration;
+- **Security by Default**: Built-in support for enterprise-grade authentication and authorization mechanisms;
+- **Support for Long-Running Tasks**: Capable of handling both rapid-response tasks and extended processes with real-time feedback;
+- **Modality Independence**: Supports diverse data formats, including text, audio, video, and other content types.
 
-## 📊 Техническая архитектура и основные компоненты
+## 📊 Technical Architecture and Core Components
 
 ![Figure 1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-16/assets/Figure_01.png)
 
-### Механизм коммуникации
+### Communication Mechanism
 
-- **HTTP**: базовый протокол запроса/ответа для взаимодействий;
-- **SSE (Server-Sent Events)**: обеспечивает одностороннюю потоковую передачу данных в реальном времени;
-- **JSON-RPC**: стандартизирует структурированные вызовы методов между агентами;
-- **Модель клиент-сервер**: четкое разделение ролей клиентских и серверных агентов.
+- **HTTP**: Fundamental request/response protocol for interactions;
+- **SSE (Server-Sent Events)**: Enables one-way real-time data streaming;
+- **JSON-RPC**: Standardizes structured method calls between agents;
+- **Client-Server Model**: Clear separation of roles between client and server agents.
 
-### Ключевые структуры данных
+### Key Data Structures
 
-- **Карточка агента (Agent Card)**: описывает возможности, аутентификацию и поддерживаемые типы контента агента;
-- **Задача (Task)**: центральный объект, представляющий запрос на работу между агентами;
-- **Сообщение (Message)**: представляет коммуникационные обороты между агентами;
-- **Артефакт (Artifact)**: результаты и выходные данные выполнения задачи;
-- **Часть (Part)**: автономные блоки контента различных типов (текст, файлы, данные).
+- **Agent Card**: Describes an agent’s capabilities, authentication requirements, and supported content types;
+- **Task**: Central object representing a work request between agents;
+- **Message**: Represents conversational exchanges between agents;
+- **Artifact**: Outputs and results generated from task execution;
+- **Part**: Autonomous blocks of content in various types (text, files, data).
 
-### Основные функции протокола
+### Core Protocol Functions
 
-1. **Обнаружение возможностей**: механизм для агентов находить друг друга и определять возможности;
-2. **Управление задачами**: стандартизированный жизненный цикл задачи от создания до завершения;
-3. **Сотрудничество**: структурированный обмен информацией между агентами;
-4. **Согласование пользовательского опыта**: адаптация форматов данных на основе возможностей агентов.
+1. **Capability Discovery**: Mechanism for agents to discover each other and determine available capabilities;
+2. **Task Management**: Standardized lifecycle for tasks from creation to completion;
+3. **Collaboration**: Structured information exchange between agents;
+4. **User Experience Negotiation**: Adaptation of data formats based on agent capabilities.
 
-## 📈 Сравнение A2A и MCP
+## 📈 A2A vs. MCP Comparison
 
 ![Figure 2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-16/assets/Figure_02.png)
 
-| Особенности | A2A (Agent2Agent) | MCP (Model Context Protocol) |
-|-------------|-------------------|------------------------------|
-| **Главные цели** | Взаимодействие и сотрудничество между агентами | Подключение агентов к внешним инструментам и ресурсам |
-| **Тип взаимодействия** | Агент-агент | Агент-инструмент/ресурс |
-| **Ключевые сущности** | Клиентский агент, удаленный агент | Агент, MCP-сервер, инструмент |
-| **Стиль общения** | Динамичный, консультативный, поддерживающий неструктурированные взаимодействия | Структурированный, запрос-ответ, ориентированный на вызов инструмента |
-| **Фокус на структуре данных** | Карточка агента, задача, артефакт, часть | Определение инструмента, вызов/ответ функции, схема ресурсов |
-| **Типичные варианты использования** | Многоагентная декомпозиция задач, автоматизация межсистемных процессов | Агенты используют внешние API и базы данных |
+| Features | A2A (Agent2Agent) | MCP (Model Context Protocol) |
+|----------|-------------------|------------------------------|
+| **Primary Goals** | Interaction and collaboration between agents | Connecting agents to external tools and resources |
+| **Type of Interaction** | Agent-to-agent | Agent-to-tool/resource |
+| **Key Entities** | Client agent, remote agent | Agent, MCP server, tool |
+| **Communication Style** | Dynamic, consultative, supporting unstructured interactions | Structured, request-response, tool-calling oriented |
+| **Data Structure Focus** | Agent Card, Task, Artifact, Part | Tool definition, function call/response, resource schema |
+| **Typical Use Cases** | Multi-agent task decomposition, cross-system workflow automation | Agents using external APIs and databases |
 
-## 🌐 Перспективы и проблемы взаимодействия
+## 🌐 Future Prospects and Interaction Challenges
 
 ![Figure 3](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-16/assets/Figure_03.png)
 
-### Преимущества A2A
+### Advantages of A2A
 
-- Обеспечение кроссплатформенной коммуникации между агентами;
-- Содействие совместной работе в многоагентных системах;
-- Разработка специально для предприятий с учетом корпоративных требований безопасности;
-- Использование стандартных веб-форматов для упрощения интеграции;
-- Мощная поддержка партнеров и экосистемы Google Cloud.
+- Enables cross-platform communication between agents;
+- Facilitates collaboration within multi-agent systems;
+- Designed specifically for enterprises with enterprise-grade security requirements;
+- Uses standard web formats to simplify integration;
+- Strong support from Google Cloud’s partner ecosystem.
 
-### Потенциальные проблемы и ограничения
+### Potential Issues and Limitations
 
-- Вопросы безопасности, особенно связанные с атаками быстрого внедрения;
-- Возможная избыточность по сравнению с существующими стандартами REST;
-- Зависимость от широкого принятия в отрасли для максимальной эффективности;
-- Необходимость дальнейшего развития механизмов безопасности для многоагентных систем.
+- Security concerns, particularly regarding rapid injection attacks;
+- Potential redundancy compared to existing REST standards;
+- Dependence on broad industry adoption for maximum effectiveness;
+- Need for further development of security mechanisms for multi-agent systems.
 
-## 🛠️ Практические последствия
+## 🛠️ Practical Implications
 
-Протокол A2A открывает новые возможности для создания более автономных, взаимодействующих и продуктивных систем ИИ-агентов, которые могут:
+The A2A protocol unlocks new possibilities for creating more autonomous, interactive, and productive AI agent systems capable of:
 
-- Автоматизировать сложные бизнес-процессы между разными системами;
-- Объединять специализированных агентов для решения комплексных задач;
-- Создавать масштабируемые многоагентные архитектуры с поддержкой долгосрочных задач;
-- Интегрировать агентов от разных поставщиков в единую экосистему.
-
-## 🌟 Поддержите проект
-
-Если этот обзор оказался полезным, не забудьте поставить звезду репозиторию!
+- Automating complex business processes across disparate systems;
+- Combining specialized agents to solve intricate tasks;
+- Building scalable multi-agent architectures with support for long-running operations;
+- Integrating agents from multiple vendors into a unified ecosystem.
 
 ---
 
-<p align="center">Исследуйте вместе с нами 🚀</p>
+<div align="center">
+
+**Explore with us 🚀**
+
+⭐ Star this repository if you found it helpful
+
+</div>

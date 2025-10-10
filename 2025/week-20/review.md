@@ -1,111 +1,100 @@
-# Машины непрерывного мышления (Continuous Thought Machines)
+# Continuous Thought Machines
 
-## Оглавление  
-1. [Введение и мотивация](#введение-и-мотивация)
-2. [Архитектура Continuous Thought Machine](#архитектура-continuous-thought-machine)
-3. [Разбор мат.аппарата под капотом CTM](#разбор-мат.аппарата-под-капотом-ctm)
-4. [Внутреннее рекуррентное время и синапсы](#внутреннее-рекуррентное-время-и-синапсы)
-5. [Модели уровня нейрона и нейронный тайминг](#модели-уровня-нейрона-и-нейронный-тайминг)
-6. [Представление синхронизации нейронов](#представление-синхронизации-нейронов)
-7. [Формализация функции потерь](#формализация-функции-потерь)
-8. [Адаптивная глубина рассуждения](#адаптивная-глубина-рассуждения)
-9. [Заключение](#заключение)
+## Table of Contents  
+1. [Introduction and Motivation](#introduction-and-motivation)
+2. [Continuous Thought Machine Architecture](#continuous-thought-machine-architecture)
+3. [Dissecting the Mathematical Apparatus Under the Hood of CTM](#dissecting-the-mathematical-apparatus-under-the-hood-of-ctm)
+4. [Internal Recurrent Time and Synapses](#internal-recurrent-time-and-synapses)
+5. [Neuron-Level Models and Neural Timing](#neuron-level-models-and-neural-timing)
+6. [Representation of Neuron Synchronization](#representation-of-neuron-synchronization)
+7. [Formalization of the Loss Function](#formalization-of-the-loss-function)
+8. [Adaptive Reasoning Depth](#adaptive-reasoning-depth)
+9. [Conclusion](#conclusion)
 
----
+## **1. Introduction and Motivation**
 
-### **TWRB_FM 📻**
+Modern neural networks have achieved remarkable success, yet remain simplified compared to the biological brain. In particular, they typically do not account for **neuronal temporal dynamics**—the precise timing of spikes and synchronization of activity, which play a critical role in biological neural networks. Artificial neurons usually output only a single static activation value, ignoring *when* a neuron fires relative to others. Biological principles such as spike-timing-dependent plasticity (STDP) indicate that timing is essential for learning and information processing in the brain. The gap between flexible human thought and current AI suggests that certain fundamental components related to **temporal signal processing** are missing from existing models.
 
-<audio controls>
-  <source src="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/raw/refs/heads/develop/2025/week-20/TWRB_FM.wav" type="audio/mpeg">
-  Ваш браузер не поддерживает аудиоэлемент.
-</audio>
+**Continuous Thought Machine (CTM)** is a novel neural network architecture proposed by Sakana AI that *restores time to the foundation of neural computation*. The CTM model is explicitly designed to use neuron synchronization as a mechanism for reasoning. Unlike traditional networks, CTM equips each neuron with information about its past activations, enabling it to adapt its current behavior based on temporal patterns. This allows CTM to "think" through a task step-by-step, coordinating neurons over time and making its decision process interpretable to humans. Research demonstrates that this approach enhances performance on complex tasks and improves model efficiency across diverse benchmarks. CTM represents a significant step toward bridging artificial and biological neural networks, unlocking new possibilities for AI.
 
----
+## **2. Continuous Thought Machine Architecture**
 
-## **1. Введение и мотивация**
+**Continuous Thought Machine** introduces three key innovations to neural network architecture:
 
-Современные нейросети добились больших успехов, но остаются упрощёнными по сравнению с биологическим мозгом. В частности, они обычно не учитывают **временную динамику нейронов** – **точное время спайков и синхронизацию активности**, которые играют ключевую роль в биологических нейросетях. Как правило, искусственные нейроны выдают лишь одно статическое значение активации, игнорируя *когда* нейрон активируется относительно других. Биологические принципы вроде зависимой от времени спайков пластичности (STDP) указывают, что тайминг важен для обучения и обработки информации мозгом. Разрыв между гибким человеческим мышлением и текущим ИИ позволяет предположить, что в моделях отсутствуют некоторые фундаментальные компоненты, связанные с **временной обработкой** сигналов.
+1. *Internal recurrent time dimension* (separate from input data time), upon which the model's "thinking" dynamics unfold;
+2. *Neuron-Level Models (NLMs)*—individual parameters per neuron that process the temporal history of input signals;
+3. *Representation of neuron synchronization*—using **synchronization in activations** directly as the latent feature space for decision-making. Below, we detail CTM components and their mathematical formalization.
 
-**Continuous Thought Machine (CTM)** – это новая архитектура нейросети, предложенная Sakana AI, которая *возвращает время в основу вычислений нейросети*. Модель CTM специально разработана, чтобы использовать синхронизацию активности нейронов как механизм рассуждения. В отличие от традиционных сетей, CTM снабжает каждый нейрон информацией о его прошлых активациях, позволяя ему адаптировать текущее поведение на основе паттернов во времени. Благодаря этому CTM может «размышлять» над задачей пошагово, координируя нейроны во времени и делая ход решения интерпретируемым для человека. Исследования показывают, что такой подход улучшает способности к решению сложных задач и повышает эффективность модели на ряде разнообразных задач. CTM является существенным шагом к сближению искусственных и биологических нейросетей, раскрывая новые возможности для ИИ.
+![Figure 1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-20/assets/Image_01.jpeg  )
 
-## **2. Архитектура Continuous Thought Machine**
+**Fig. 1:** Architecture of the Continuous Thought Machine (CTM), labeling key components.
 
-**Continuous Thought Machine** вводит три ключевых нововведения в архитектуру нейросети: 
+1. **Synapse model** — Synaptic model (blue connections) computes *pre-activations* $a^\tau$ for each neuron, modeling inter-neuronal connections;
+2. **History (pre-activations)** — Buffer of $M$ most recent pre-activations for each neuron $A^\tau$ (shown as waves);
+3. **Neuron-Level Models** — Individual neuron models (red) $g_{\theta_d}$ process history $A^\tau_d$ and output *post-activations* $z^{\tau+1}_d$;
+4. **Post-activations** — Output activation vector $z^{\tau+1}$ of all $D$ neurons at current step;
+5. **History (post-activations)** — Cumulative history of post-activations $Z^\tau$ since initialization;
+6. **Synchronization matrix $S^\tau$** — Synchronization matrix computed as dot products between temporal activation series of neurons;
+7. **Selected neuron pairs** — Selection of a subset of elements from $S^\tau$ (neuron pairs) corresponding to latent synchronization features;
+8. **Latent representation** — Synchronization vector (green) derived from selected $S^\tau$ elements, split into two parts: for output and attention;
+9. **OUT/ATTN projections** — Linear layers: $W_{\text{out}}$ projects the latent vector to output (e.g., classes), $W_{\text{in}}$ to attention query vector *q*;
+10. **Data modulation (Attention output)** — Using *q*, the model extracts relevant information from inputs (via attention mechanism *ATTN*, yellow block $o^\tau$); this modulated information is combined with current post-activations, closing the loop for the next internal tick.
 
-1. *внутреннее рекуррентное измерение времени* (отделённое от времени входных данных), на котором могут разворачиваться динамики «мышления» модели; 
-2. *модели уровня нейрона* (Neuron-Level Models, NLMs) – отдельные параметры для каждого нейрона, обрабатывающие историю входных сигналов во времени; 
-3. *представление синхронизации нейронов* – использование **синхронности в активациях** непосредственно в качестве латентного признакового пространства для принятия решений. Ниже мы подробно рассмотрим компоненты CTM и их математическую формализацию.
+## **3. Dissecting the Mathematical Apparatus Under the Hood of CTM**
 
-![Рисунок 1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-20/assets/Image_01.jpeg)
+**Applying CTM to an NLP Task: Next-Token Prediction**
 
-**Рис. 1:** Архитектура Continuous Thought Machine (CTM) с обозначением основных компонентов.  
-
-1. **Synapse model** – модель синапсов (синие связи) вычисляет *пре-активации* $a^t$ для каждого нейрона, моделируя межнейронные связи;
-2. **History (pre-activations)** – буфер из $M$ последних пре-активаций каждого нейрона $A^t$ (отображён волнами);
-3. **Neuron-Level Models** – персональные модели нейронов (красным) $g_{\theta_d}$ обрабатывают историю $A^t_d$ и выдают *пост-активации* $z^{t+1}_d$;
-4. **Post-activations** – вектор выходных активаций $z^{t+1}$ всех $D$ нейронов на текущем шаге;
-5. **History (post-activations)** – накопленная с начала работы история пост-активаций $Z^t$;
-6. **Synchronization matrix $S^t$** – матрица синхронности, вычисленная как скалярные произведения между временными рядами активаций нейронов;
-7. **Selected neuron pairs** – выбор подмножества элементов из $S^t$ (пары нейронов), соответствующих латентным признакам синхронизации;
-8. **Latent representation** – вектор синхронизации (зелёный) из выбранных элементов $S^t$, разделённый на две части: для вывода и для внимания;
-9. **OUT/ATTN projections** – линейные слои: $W_{\text{out}}$ проецирует латентный вектор в выход (например, классы), $W_{\text{in}}$ – в вектор запроса внимания *q*;
-10. **Data modulation (Attention output)** – с помощью *q* модель извлекает из данных релевантную информацию (через механизм внимания *ATTN*, жёлтый блок $o^t$), и эта модифицированная информация объединяется с текущими пост-активациями, замыкая цикл на следующий внутренний тик.
-
-## **3. Разбор мат.аппарата под капотом CTM**
-
-**Пример применения CTM к задаче NLP: предсказание следующего токена**
-
-Рассмотрим типичную задачу из области обработки естественного языка: **предсказание следующего токена** в последовательности. Пусть входом модели является токенизированная последовательность текста:
+Consider a typical natural language processing task: **predicting the next token** in a sequence. Let the model's input be a tokenized text sequence:
 
 $$
 \text{Input: } \quad x = (x_1, x_2, \dots, x_{t})
 $$
 
-Задача модели — предсказать токен $x_{t+1}$. Для этого CTM будет **итеративно размышлять над входной последовательностью** на множестве внутренних шагов $\tau = 1, 2, \dots, T$, постепенно формируя предсказание и уточняя его по мере синхронизации нейронов.
+The model's task is to predict token $x_{t+1}$. To do so, CTM will **iteratively reason over the input sequence** across internal steps $\tau = 1, 2, \dots, T$, gradually forming and refining its prediction as neurons synchronize.
 
-### Применение компонентов архитектуры CTM:
+### Applying CTM Architecture Components:
 
 <details> 
     <summary><em><strong>1. Synapse model</strong></em></summary>
 
 ### **1. Synapse model**
 
-На каждом внутреннем шаге $\tau$, модель синтезирует вектор *пре-активаций* $a^\tau \in \mathbb{R}^D$ через синаптическую модель:
+At each internal step $\tau$, the synapse model computes a vector of *pre-activations* $a^\tau \in \mathbb{R}^D$ via the synaptic model:
 
 $$
 a^\tau = f_{\theta_{\text{syn}}}([z^\tau, o^\tau])
 $$
 
-где:
+where:
 
-* $z^\tau \in \mathbb{R}^D$ — пост-активации всех нейронов на предыдущем шаге;
-* $o^\tau \in \mathbb{R}^{d_{\text{attn}}}$ — вектор внимания (модифицированная информация из входа);
-* $f_{\theta_{\text{syn}}}$ — MLP с архитектурой типа U-Net.
+* $z^\tau \in \mathbb{R}^D$ — post-activations of all neurons from the previous step;
+* $o^\tau \in \mathbb{R}^{d_{\text{attn}}}$ — attention vector (modulated information from input);
+* $f_{\theta_{\text{syn}}}$ — MLP with U-Net-like architecture.
 
-В NLP-задаче:
+In NLP tasks:
 
-* вход $o^\tau$ формируется из токенов $x = (x_1, ..., x_t)$, представленных как эмбеддинги через энкодер $F(x) \in \mathbb{R}^{t \times d_{\text{attn}}}$.
-* выход $a^\tau$ можно интерпретировать как «оценку нейронов» по состоянию внимания и собственного контекста.
+* Input $o^\tau$ is formed from tokens $x = (x_1, ..., x_t)$ encoded as embeddings via encoder $F(x) \in \mathbb{R}^{t \times d_{\text{attn}}}$.
+* Output $a^\tau$ can be interpreted as a "neuron evaluation" based on attention state and self-context.
 
 <details> 
-    <summary><em><strong>🧠 MLP с архитектурой типа U-Net</strong></em></summary>
+    <summary><em><strong>🧠 MLP with U-Net-like Architecture</strong></em></summary>
 
-### **MLP с архитектурой типа U-Net для синаптической модели**
+### **MLP with U-Net-like Architecture for Synapse Model**
 
-В контексте CTM под **U-Net-подобным MLP** понимается полносвязная сеть, организованная по принципу «контракции – расширения» с *пропусками* (skip connections), аналогично классическому U-Net в компьютерном зрении, но применённая к одномерному вектору входных признаков.
+In the context of CTM, a **U-Net-like MLP** refers to a fully connected network organized with a "contracting–expanding" structure and *skip connections*, analogous to the classical U-Net in computer vision, but applied to a one-dimensional input feature vector.
 
-Ниже поэтапно разберём, как именно может быть устроен такой модуль $f_{\theta_{\text{syn}}}$.
+Below, we step-by-step dissect how such a module $f_{\theta_{\text{syn}}}$ may be constructed.
 
 ---
 
-### 1. Входной вектор и его размеры
+### 1. Input Vector and Its Dimensions
 
-На шаге $\tau$ мы имеем два вектора:
+At step $\tau$, we have two vectors:
 
-* $z^\tau \in \mathbb{R}^D$ — пост-активации всех $D$ нейронов с прошлого шага.
-* $o^\tau \in \mathbb{R}^{d_{\text{attn}}}$ — выход внимания, извлечённый из входных данных.
+* $z^\tau \in \mathbb{R}^D$ — post-activations of all $D$ neurons from the prior step.
+* $o^\tau \in \mathbb{R}^{d_{\text{attn}}}$ — attention output, extracted from input data.
 
-Объединяем их в единый вектор:
+We concatenate them into a single vector:
 
 $$
 v^\tau = 
@@ -117,11 +106,11 @@ o^\tau
 \mathbb{R}^{\,D + d_{\text{attn}}}\
 $$
 
-#### **Пример:**
+#### **Example:**
 
-1. Задаём размерности: $D=3$, $d_{\text{attn}}=2$
+1. Set dimensions: $D=3$, $d_{\text{attn}}=2$
 
-2. Выбираем конкретные векторы:
+2. Choose concrete vectors:
 
    $$
    z^τ = (0.1,\;-0.4,\;0.7)
@@ -131,7 +120,7 @@ $$
    o^τ = (0.5,\;-0.2)
    $$
 
-3. Объединяем:
+3. Concatenate:
 
    $$
    v^τ = 
@@ -145,34 +134,34 @@ $$
    \in \mathbb R^5
    $$
 
-**Python-псевдокод:**
+**Python pseudocode:**
 
 ```python
 import numpy as np
 
-# Размерности
+# Dimensions
 D = 3
 d_attn = 2
 
-# Примерные данные
-z = np.array([0.1, -0.4, 0.7])       # форма (3,)
-o = np.array([0.5, -0.2])            # форма (2,)
+# Sample data
+z = np.array([0.1, -0.4, 0.7])       # shape (3,)
+o = np.array([0.5, -0.2])            # shape (2,)
 
-# Конкатенация
-v = np.concatenate([z, o])           # форма (5,)
+# Concatenation
+v = np.concatenate([z, o])           # shape (5,)
 print("v =", v)                      # [ 0.1 -0.4  0.7  0.5 -0.2]
 print("Shape of v:", v.shape)        # (5,)
 ```
 
-Таким образом, вектор $v^τ$ размерности $D + d\_{\text{attn}}$ содержит в себе как информацию о предыдущих пост-активациях нейронов, так и сведения из механизма внимания.
+Thus, vector $v^τ$ of dimension $D + d\_{\text{attn}}$ contains both information from previous neuron post-activations and details from the attention mechanism.
 
 ---
 
-### 2. Контрактивный (сжатый) путь
+### 2. Contracting Path
 
-Цель контрактивного пути — постепенно уменьшить размерность признакового пространства, извлекая высокоуровневые представления. Пусть у нас задано $L$ уровней сжатия. На каждом уровне $\ell = 1,2,\dots,L$ выполняются две операции:
+The goal of the contracting path is to progressively reduce the dimensionality of the feature space, extracting high-level representations. Suppose we have $L$ contraction levels. At each level $\ell = 1,2,\dots,L$, two operations are performed:
 
-1. **Полносвязный слой** (Linear) с понижением размерности:
+1. **Fully connected layer** (Linear) with dimensionality reduction:
 
    $$
      e^\ell = \sigma\bigl(W_e^\ell\,e^{\ell-1} + b_e^\ell\bigr),
@@ -180,44 +169,44 @@ print("Shape of v:", v.shape)        # (5,)
      e^0 \equiv v^\tau,
    $$
 
-   где:
+   where:
 
-   - $\sigma(\cdot)$ — нелинейность (ReLU, GELU и т.п.);
-   - $W_e^\ell$ имеет размер $\;d_{\ell}\times d_{\ell-1}$;
+   - $\sigma(\cdot)$ — nonlinearity (ReLU, GELU, etc.);
+   - $W_e^\ell$ has dimensions $\;d_{\ell}\times d_{\ell-1}$;
    - $d_0 = D + d_{\text{attn}}$;
    - $d_\ell < d_{\ell-1}$.
 
-2. **Дополнительный сжатий** (по желанию) — например, второй Linear или BatchNorm+ReLU, но ключевое — фиксируем результат как «контрактивный» выход уровня:
+2. **Additional contraction** (optional)—e.g., a second Linear or BatchNorm+ReLU, but key is to record the result as the "contracting" output of the level:
 
    $$
      \tilde e^\ell = \sigma\bigl(W_{\tilde e}^\ell\,e^\ell + b_{\tilde e}^\ell\bigr).
    $$
 
-Таким образом, после $L$-го уровня имеем «бутылочное горлышко»:
+Thus, after $L$ levels, we obtain a "bottleneck":
 
 $$
 b = \tilde e^L \in \mathbb{R}^{d_L},
 $$
 
-где $d_L$ — минимальная размерность.
+where $d_L$ is the minimum dimension.
 
-#### **Пример:**
+#### **Example:**
 
-Возьмём:
+Take:
 
 - $d_0 = D + d_{\mathrm{attn}} = 5$;  
-- число уровней $L = 2$;  
-- на первом уровне $d_1 = 4$, на втором $d_2 = 2$.
+- Number of levels $L = 2$;  
+- At first level $d_1 = 4$, at second $d_2 = 2$.
 
-Пусть вектор на входе:
+Let input vector be:
 
 $$
 e^0 = v^\tau = \begin{pmatrix}0.1\\ -0.4\\ 0.7\\ 0.5\\ -0.2\end{pmatrix}
 $$
 
-Зададим простые матрицы и смещения:
+Define simple matrices and biases:
 
-1. **Уровень $\ell=1$:**
+1. **Level $\ell=1$:**
 
    $$
    W_e^1 = 
@@ -230,7 +219,7 @@ $$
    b_e^1 = \begin{pmatrix}0\\0\\0\\0\end{pmatrix}
    $$
 
-   Тогда:
+   Then:
 
    $$
    e^1 = \mathrm{ReLU}(W_e^1 e^0 + b_e^1)
@@ -238,14 +227,14 @@ $$
        = [0.1,\,0,\,0.7,\,0.5]^\top
    $$
 
-   Дополнительное сжатие:
+   Additional contraction:
 
    $$
    W_{\tilde e}^1 = I_{4},\quad b_{\tilde e}^1=0,\qquad
    \tilde e^1 = \mathrm{ReLU}(e^1) = [0.1,\,0,\,0.7,\,0.5]^\top
    $$
 
-2. **Уровень $\ell=2$:**
+2. **Level $\ell=2$:**
 
    $$
    W_e^2 = 
@@ -256,7 +245,7 @@ $$
    b_e^2 = \begin{pmatrix}0\\0\end{pmatrix}
    $$
 
-   Тогда:
+   Then:
 
    $$
    e^2 = \mathrm{ReLU}(W_e^2 \tilde e^1 + b_e^2)
@@ -264,14 +253,14 @@ $$
        = [0,\,0.7]^\top
    $$
 
-   И дополнительное:
+   And additional:
 
    $$
    W_{\tilde e}^2 = I_{2},\quad b_{\tilde e}^2=0,\qquad
    \tilde e^2 = \mathrm{ReLU}(e^2) = [0,\,0.7]^\top
    $$
 
-В итоге «бутылочное горлышко»:
+Final "bottleneck":
 
 $$
 b = \tilde e^2 = \begin{pmatrix}0\\0.7\end{pmatrix}
@@ -279,9 +268,9 @@ b = \tilde e^2 = \begin{pmatrix}0\\0.7\end{pmatrix}
 $$
 
 
-#### **Вывод:**
+#### **Conclusion:**
 
-1. Конкатенация:
+1. Concatenation:
 
    $$
    v^\tau = 
@@ -293,11 +282,11 @@ $$
    \mathbb{R}^{D + d_{\text{attn}}}
    $$
 
-   где сверху идут компоненты $z^\tau\in\mathbb R^D$, а снизу $o^\tau\in\mathbb R^{d\_{\text{attn}}}$
+   where upper components are $z^\tau\in\mathbb R^D$, lower are $o^\tau\in\mathbb R^{d\_{\text{attn}}}$
 
-2. «Бутылочное горлышко»:
+2. "Bottleneck":
 
-   После двух уровней сжатия $L=2$ мы получили:
+   After two contraction levels $L=2$, we obtain:
 
    $$
    b = \tilde e^2 = 
@@ -310,17 +299,17 @@ $$
    \quad d_2 = 2
    $$
 
-Это именно то, к чему стремится контрактивный путь: из входного вектора размерности $d\_0=D+d\_{\mathrm{attn}}$ поэтапно сжать представление до $d\_L$, здесь до 2.
+This is precisely the goal of the contracting path: progressively compress the input vector of dimension $d\_0=D+d\_{\mathrm{attn}}$ down to $d\_L$, here to 2.
 
 ---
 
-### 3. Расширительный путь с пропусками
+### 3. Expanding Path with Skip Connections
 
-Теперь начинаем **расширять** представление обратно к размерности $D$. При этом на каждом уровне используется **пропуск** (skip connection) из контрактивного пути того же уровня:
+Now we begin to **expand** the representation back to dimensionality $D$. At each level, a **skip connection** from the contracting path at the same level is used:
 
-Для $\ell = L, L-1, \dots, 1$:
+For $\ell = L, L-1, \dots, 1$:
 
-1. **Конкатенация** текущего декодерного актива и соответствующего контрактивного:
+1. **Concatenate** current decoder activation with corresponding contracting activation:
 
    $$
      c^\ell = 
@@ -332,42 +321,42 @@ $$
      d^{L+1} \equiv b.
    $$
 
-   Здесь $c^\ell \in \mathbb{R}^{\,d_\ell + d_\ell}$.
+   Here $c^\ell \in \mathbb{R}^{\,d_\ell + d_\ell}$.
 
-2. **Полносвязный слой расширения**:
+2. **Expanding fully connected layer**:
 
    $$
      d^\ell = \sigma\bigl(W_d^\ell\,c^\ell + b_d^\ell\bigr),
    $$
 
-   где $W_d^\ell\colon \mathbb{R}^{d_\ell + d_\ell} \to \mathbb{R}^{d_{\ell-1}}$.
+   where $W_d^\ell\colon \mathbb{R}^{d_\ell + d_\ell} \to \mathbb{R}^{d_{\ell-1}}$.
 
-Итогом после уровня $\ell=1$ будет вектор:
+The result after level $\ell=1$ is a vector:
 
 $$
 d^1 \in \mathbb{R}^{d_0} = \mathbb{R}^{\,D + d_{\text{attn}}}.
 $$
 
-#### **Пример:**
+#### **Example:**
 
-При раскодировании мы восстанавливаем представление обратно к размерности $d_0 = D + d_{\mathrm{attn}}$, используя пропуски (skip connections) из контрактивного пути.
+During decoding, we reconstruct the representation back to dimensionality $d_0 = D + d_{\mathrm{attn}}$, using skip connections from the contracting path.
 
-> **Обозначения для примера:**
+> **Notation for this example:**
 >
 > * $D = 3$, $d_{\mathrm{attn}} = 2$ → $d_0 = 5$
-> * Число уровней $L = 2$
-> * Размерности уровней сжатия: $d_1 = 4$, $d_2 = 2$
-> * «Бутылочное горлышко» $b = \tilde e^2 = [0,\;0.7]^\top$
+> * Number of levels $L = 2$
+> * Contracting level dimensions: $d_1 = 4$, $d_2 = 2$
+> * Bottleneck $b = \tilde e^2 = [0,\;0.7]^\top$
 
-#### Шаг ℓ = 2 (уровень $L$)
+#### Step ℓ = 2 (Level $L$)
 
-1. **Пропуск из контрактивного пути:**
+1. **Skip from contracting path:**
    $\tilde e^2 = [0,\;0.7]^\top$
 
-2. **Предыдущее декодерное состояние:**
+2. **Previous decoder state:**
    $d^3 \equiv b = [0,\;0.7]^\top$
 
-3. **Конкатенация:**
+3. **Concatenation:**
 
    $$
      c^2 =
@@ -385,8 +374,8 @@ $$
      \;\in\;\mathbb R^{\,d_2 + d_2} = \mathbb R^4
    $$
 
-4. **Линейный слой расширения:**
-   Выбираем для простоты:
+4. **Expanding linear layer:**
+   For simplicity, choose:
 
    $$
    W_d^2 =
@@ -400,7 +389,7 @@ $$
    b_d^2 = \mathbf{0}_{5}.
    $$
 
-   Тогда:
+   Then:
 
    $$
    d^2 = \mathrm{ReLU}(W_d^2\,c^2 + b_d^2)
@@ -409,15 +398,15 @@ $$
    \;\in\;\mathbb R^5.
    $$
 
-#### Шаг ℓ = 1
+#### Step ℓ = 1
 
-1. **Пропуск из контрактивного пути:**
+1. **Skip from contracting path:**
    $\tilde e^1 = [0.1,\;0,\;0.7,\;0.5]^\top$
 
-2. **Предыдущее декодерное состояние:**
+2. **Previous decoder state:**
    $d^2 = [0,\;0.7,\;0,\;0.7,\;0]^\top$
 
-3. **Конкатенация:**
+3. **Concatenation:**
 
    $$
      c^1 =
@@ -441,8 +430,8 @@ $$
      \;\in\;\mathbb R^{\,d_1 + d_1} = \mathbb R^8
    $$
 
-4. **Линейный слой расширения:**
-   Пусть:
+4. **Expanding linear layer:**
+   Let:
 
    $$
    W_d^1 \colon \mathbb R^8 \to \mathbb R^5,\quad
@@ -453,7 +442,7 @@ $$
    \quad b_d^1 = \mathbf{0}_5.
    $$
 
-   Тогда:
+   Then:
 
    $$
    d^1 = \mathrm{ReLU}(W_d^1\,c^1 + b_d^1)
@@ -462,30 +451,30 @@ $$
    = v^\tau.
    $$
 
-В итоге после уровня ℓ=1 мы восстановили вектор $d^1\in\mathbb R^5$, совпадающий с исходным $v^\tau$, что и требовалось.
+Finally, after level ℓ=1, we recover the vector $d^1\in\mathbb R^5$, identical to the original $v^\tau$, as required.
 
 ```python
 import numpy as np
 
-# Пример раскодирования L=2, D=3, d_attn=2
+# Example decoding for L=2, D=3, d_attn=2
 tilde_e2 = np.array([0, 0.7])
 d3 = tilde_e2.copy()  # bottleneck
 
-# Шаг ℓ=2
-c2 = np.concatenate([tilde_e2, d3])       # форма (4,)
+# Step ℓ=2
+c2 = np.concatenate([tilde_e2, d3])       # shape (4,)
 d2 = np.maximum(np.dot(np.vstack([np.eye(4), np.zeros((1,4))]), c2), 0)
 
-# Шаг ℓ=1
+# Step ℓ=1
 tilde_e1 = np.array([0.1, 0, 0.7, 0.5])
-c1 = np.concatenate([tilde_e1, d2])      # форма (8,)
+c1 = np.concatenate([tilde_e1, d2])      # shape (8,)
 d1 = np.maximum(np.dot(np.hstack([np.eye(5), np.zeros((5,3))]), c1), 0)
 
-print("d1 =", d1)  # восстанавливает исходный v = [0.1, 0, 0.7, 0.5, 0]
+print("d1 =", d1)  # restores original v = [0.1, 0, 0.7, 0.5, 0]
 ```
 
-#### **Вывод:**
+#### **Conclusion:**
 
-1. **Конкатенация**
+1. **Concatenation**
 
    $$
    v^\tau = 
@@ -497,11 +486,11 @@ print("d1 =", d1)  # восстанавливает исходный v = [0.1, 0
    \mathbb{R}^{D + d_{\text{attn}}}
    $$
 
-   где сверху идут компоненты $z^\tau\in\mathbb R^D$, а снизу $o^\tau\in\mathbb R^{d\_{\text{attn}}}$.
+   where upper components are $z^\tau\in\mathbb R^D$, lower are $o^\tau\in\mathbb R^{d\_{\text{attn}}}$.
 
-2. **«Бутылочное горлышко»**
+2. **"Bottleneck"**
 
-   После двух уровней сжатия $L=2$ мы получили:
+   After two contraction levels $L=2$, we obtained:
 
    $$
    b = \tilde e^2 = 
@@ -514,9 +503,9 @@ print("d1 =", d1)  # восстанавливает исходный v = [0.1, 0
    \quad d_2 = 2.
    $$
 
-3. **Расширение с пропусками (skip connections)**
+3. **Expanding with skip connections**
 
-   После раскодирования на уровнях $\ell=2$ и $\ell=1$ с объединением скрытых представлений из контрактивного пути и применения линейных слоёв расширения получаем:
+   After decoding at levels $\ell=2$ and $\ell=1$, combining hidden representations from the contracting path and applying expanding linear layers, we obtain:
 
    $$
    d^1 = 
@@ -526,13 +515,13 @@ print("d1 =", d1)  # восстанавливает исходный v = [0.1, 0
    \mathbb{R}^{D + d_{\text{attn}}}.
    $$
 
-   То есть на выходе расширительного пути мы **восстанавливаем исходный вектор** $v^\tau$, что завершает цикл «сжатие–расширение» с сохранением информации через пропуски.
+   Thus, at the output of the expanding path, we **reconstruct the original vector** $v^\tau$, completing the "compression–expansion" cycle with information preserved via skip connections.
 
 ---
 
-### 4. Выходной слой
+### 4. Output Layer
 
-Чтобы получить **пре-активации** $a^\tau \in \mathbb{R}^D$, извлекаем из расширенного вектора первые $D$ компонент (или применяем отдельный Linear-слой):
+To obtain the **pre-activations** $a^\tau \in \mathbb{R}^D$, extract the first $D$ components from the expanded vector (or apply a separate linear layer):
 
 $$
 a^\tau = W_{\text{out}}^{\text{syn}}\;d^1 + b_{\text{out}}^{\text{syn}},
@@ -540,10 +529,10 @@ a^\tau = W_{\text{out}}^{\text{syn}}\;d^1 + b_{\text{out}}^{\text{syn}},
 W_{\text{out}}^{\text{syn}}\colon \mathbb{R}^{D + d_{\text{attn}}}\to\mathbb{R}^D.
 $$
 
-#### **Пример:**
+#### **Example:**
 
-* Размерности: $D=3$, $d_{\mathrm{attn}}=2$;$\Rightarrow$; $D + d_{\mathrm{attn}} = 5$.
-* Пусть после расширительного пути мы получили:
+* Dimensions: $D=3$, $d_{\mathrm{attn}}=2$ → $D + d_{\mathrm{attn}} = 5$.
+* Suppose after the expanding path we obtain:
 
   $$
     d^1 = 
@@ -556,7 +545,7 @@ $$
     \end{pmatrix}
     \in\mathbb R^5.
   $$
-* Задаём параметры выходного слоя:
+* Define output layer parameters:
 
   $$
     W_{\text{out}}^{\text{syn}}
@@ -576,7 +565,7 @@ $$
         0.10
       \end{pmatrix}.
   $$
-* Тогда:
+* Then:
 
   $$
     a^\tau
@@ -608,49 +597,49 @@ $$
     \end{pmatrix}.
   $$
 
-Таким образом, выходной блок восстанавливает вектор пре-активаций $a^\tau$ размерности $D$, готовый для передачи в следующий внутренний шаг CTM.
+Thus, the output block reconstructs the pre-activation vector $a^\tau$ of dimension $D$, ready for transmission to the next internal CTM step.
 
 ---
 
-### 5. Схематичный псевдокод
+### 5. Schematic Pseudocode
 
 ```python
 def f_syn(v: Tensor) -> Tensor:
     # v.shape = (batch_size, D + d_attn)
     
-    # Контрактивный путь
+    # Contracting path
     e = v
     enc_skips = []
     for ℓ in range(1, L+1):
         e = ReLU(Linear_e[ℓ](e))        # d_{ℓ} <-- d_{ℓ-1}
-        enc_skips.append(e)             # сохраняем для skip
+        enc_skips.append(e)             # save for skip
         e = ReLU(Linear_e_tilde[ℓ](e))  
 
     b = e  # bottleneck vector, shape=(batch, d_L)
 
-    # Расширительный путь
+    # Expanding path
     d = b
     for ℓ in reversed(range(1, L+1)):
-        skip = enc_skips[ℓ-1]          # соответствующий уровень
+        skip = enc_skips[ℓ-1]          # corresponding level
         d = torch.cat([skip, d], dim=-1)
         d = ReLU(Linear_d[ℓ](d))       # d_{ℓ-1} <-- 2*d_{ℓ}
 
-    # Выход
+    # Output
     a = Linear_out(d)                  # (batch, D)
     return a
 ```
 
 ---
 
-### 6. Зачем столько уровней и пропусков?
+### 6. Why So Many Levels and Skip Connections?
 
-* **Контракция** позволяет $f_{\theta_{\text{syn}}}$ улавливать глобальные, многомерные зависимости между разными частями вектора $[z^\tau, o^\tau]$, сжимая информацию в узкое «бутылочное горлышко».
-* **Пропуски (skip connections)** гарантируют, что точная локальная (низкоуровневая) информация не потеряется при сжатии: она напрямую передаётся на этап восстановления, обеспечивая устойчивость обучения и сохранение мелких деталей.
-* **Расширение** восстанавливает окончательный размер признакового вектора, обогащённый результатами глобальной агрегации.
+* **Contraction** enables $f_{\theta_{\text{syn}}}$ to capture global, multidimensional dependencies between different parts of the vector $[z^\tau, o^\tau]$, compressing information into a narrow "bottleneck".
+* **Skip connections** ensure that precise local (low-level) information is not lost during compression: it is directly transmitted to the reconstruction stage, ensuring training stability and preservation of fine details.
+* **Expansion** restores the final feature vector dimension, enriched by the results of global aggregation.
 
-#### Итоговая формула
+#### Final Formula
 
-Суммарно:
+Collectively:
 
 $$
 \begin{aligned}
@@ -664,36 +653,36 @@ a^\tau &= W_{\text{out}}^{\text{syn}}\,d^1 + b_{\text{out}}^{\text{syn}}.
 \end{aligned}
 $$
 
-### 7. Концептуальный вывод
+### 7. Conceptual Conclusion
 
-MLP с архитектурой «контракция–расширение» и skip-связями в CTM предназначен не просто для выявления зависимости между векторами $z^\tau$ и $o^\tau$, а для **многомасштабной, гибкой и устойчивой** обработки их совместного представления. Он формирует из них богатый, иерархический маппинг, служащий источником пре-активаций $a^\tau$, с учётом как глобальных, так и локальных паттернов, и одновременно обеспечивая стабильное обучение внутри многократной рекурсии:
+The U-Net-style MLP with contracting-expanding architecture and skip connections in CTM is designed not merely to detect dependencies between vectors $z^\tau$ and $o^\tau$, but to perform **multiscale, flexible, and robust** processing of their joint representation. It forms a rich, hierarchical mapping that serves as the source of pre-activations $a^\tau$, accounting for both global and local patterns while ensuring stable learning within the recurrent loop:
 
-#### 1. Извлечение многомасштабных взаимодействий
+#### 1. Extraction of Multiscale Interactions
 
-* **Глобальные зависимости:** контрактивный путь «сжимает» объединённый вектор $\bigl[z^\tau; o^\tau\bigr]$ в узкое «бутылочное горлышко» $b$, где сеть вычленяет обобщённые, высокоуровневые паттерны взаимодействия.
-* **Локальные детали:** благодаря skip-связям соответствующих уровней, на этап расширения попадает «сырой» сигнал сжатия, что сохраняет точные, низкоуровневые зависимости в каждой компоненте исходного вектора.
+* **Global dependencies:** The contracting path compresses the combined vector $\bigl[z^\tau; o^\tau\bigr]$ into a narrow "bottleneck" $b$, where the network extracts generalized, high-level interaction patterns.
+* **Local details:** Thanks to skip connections from corresponding levels, raw compression signals are passed directly to the expansion stage, preserving precise, low-level dependencies within each component of the original vector.
 
-#### 2. Иерархическое объединение
-   
-Расширительный путь «разворачивает» представление обратно к размерности $D + d_{\text{attn}}$, на каждом уровне смешивая в себе и глобальное обобщение из узла $b$, и локальные признаки из skip-связей. В итоге каждый элемент выходного вектора $a^\tau$ учитывает и «широкую картину», и тонкие нюансы синхронизации нейронов.
+#### 2. Hierarchical Integration
 
-#### 3. Стабильность и эффективность обучения
-   
-Skip-connections обеспечивают прямой путь для градиентов от глубоких слоёв обратно к входу, что устраняет проблему затухающего градиента при многократном применении модуля в рекуррентной петле CTM. Это критично для надёжного обучения «мыслительных» итераций модели.
+The expanding path "unfolds" the representation back to dimensionality $D + d_{\text{attn}}$, at each level blending the global generalization from the bottleneck $b$ with local features from skip connections. Consequently, each element of the output vector $a^\tau$ incorporates both the "big picture" and fine-grained nuances of neuron synchronization.
 
-#### 4. Гибкость масштабирования
-   
-Количество уровней $L$ и размерности $d_\ell$ могут увеличиваться для сложных задач или уменьшаться для простых, сохраняя при этом богатую выражающую способность. Такая адаптивность позволяет применять синоптическую U-Net-конструкцию к самым разным объёмам и типам входных сигналов.
+#### 3. Training Stability and Efficiency
 
-#### 5. Баланс обобщения и детализации
-   
-«Бутылочное горлышко» даёт возможность учить обобщённые соотношения между нейронами, а skip-связи — сохранять критичные мелкие детали. Этот баланс предотвращает как чрезмерную примитивность, так и переобучение, что важно для формирования корректных пре-активаций $a^\tau$ и всего последующего процесса рассуждения CTM.
+Skip connections provide a direct path for gradients from deep layers back to the input, eliminating the vanishing gradient problem when the module is applied repeatedly within CTM's recurrent loop. This is critical for reliable learning of the model's "thought" iterations.
+
+#### 4. Scalability Flexibility
+
+The number of levels $L$ and dimensions $d_\ell$ can be increased for complex tasks or reduced for simpler ones, while preserving rich representational capacity. This adaptability allows the synaptic U-Net architecture to be applied across diverse volumes and types of input signals.
+
+#### 5. Balance of Generalization and Detail
+
+The "bottleneck" enables learning generalized relationships between neurons, while skip connections preserve critical fine details. This balance prevents both excessive simplification and overfitting, which is essential for forming accurate pre-activations $a^\tau$ and the entire subsequent reasoning process in CTM.
 
 ---
 
-### 8. Заключение
+### 8. Conclusion
 
-Таким образом, **MLP типа U-Net** в CTM — это компактный, но мощный механизм «синаптической» обработки, который многомасштабно интегрирует и глобальные, и локальные связи в объединённом пространстве $[z^\tau, o^\tau]$, обеспечивает устойчивый градиентный поток и гибко адаптируется к сложности задач, формируя выразительные пре-активации для дальнейших этапов внутреннего рассуждения.
+Thus, the **U-Net-type MLP** in CTM is a compact yet powerful mechanism for "synaptic" processing that multiscale integrates both global and local connections within the combined space $[z^\tau, o^\tau]$, ensures stable gradient flow, and flexibly adapts to task complexity, generating expressive pre-activations for subsequent stages of internal reasoning.
 
 </details>
 
@@ -701,30 +690,30 @@ Skip-connections обеспечивают прямой путь для град�
 <div style="border: 2px solid #3498db; border-radius: 8px; padding: 12px; background-color: #f8f9fa; margin: 10px 0;">
   <p style="margin: 0; font-weight: bold; color: #2c3e50;">Checkpoint — 🧠 U-Net-MLP:</p>
   <p style="margin: 8px 0 0 0; color: #2c3e50;">
-    Контрактивный путь учится глобальным зависимостям, «бутылочное горлышко» даёт обобщение, а расширительный путь с skip-связями возвращает локальные детали; такая топология стабилизирует градиенты и обеспечивает богатое иерархическое представление для расчёта <em>a<sup>τ</sup></em>.
+    The contracting path learns global dependencies, the "bottleneck" provides generalization, and the expanding path with skip connections restores local details; this topology stabilizes gradients and ensures a rich hierarchical representation for computing <em>a<sup>τ</sup></em>.
   </p>
 </div>
 
 </details>
 
-На каждом внутреннем тике τ блок **Synapse model**
+On each internal tick $\tau$, the **Synapse model**:
 
-1. **Принимает** связку текущего внутреннего состояния нейронов $z^{\tau}$ и «отфильтрованного» входа внимания $o^{\tau}$;
-2. **Пропускает** её через U-Net-MLP c контрактивно-расширительной топологией и skip-связями;
-3. **Выдаёт** вектор пре-активаций $a^{\tau}\in\mathbb{R}^{D}$.
+1. **Accepts** the combined state of current internal neuron activations $z^{\tau}$ and the filtered attention output $o^{\tau}$;
+2. **Processes** it through a U-Net-MLP with contracting-expanding topology and skip connections;
+3. **Outputs** the vector of pre-activations $a^{\tau}\in\mathbb{R}^{D}$.
 
-Этот $a^{\tau}$:
+This $a^{\tau}$:
 
-* кодирует *синаптические взаимодействия* между нейронами на шаге τ (учитывая как глобальные, так и локальные зависимости, собранные в «бутылочном горлышке»);
-* становится **опорной точкой внутренней шкалы времени**: последовательность $\{a^{1},a^{2},\dots\}$ образует дискретный «внутренний хронотакт» модели, независимый от количества входных токенов или их реального времени.
+* encodes *synaptic interactions* between neurons at step $\tau$ (accounting for both global and local dependencies aggregated in the "bottleneck");
+* becomes the **anchor point of the internal time scale**: the sequence $\{a^{1},a^{2},\dots\}$ forms a discrete "internal chronotick" of the model, independent of the number of input tokens or their real-world timing.
 
-То есть сам **вектор $a^{\tau}$ — это «срез» синаптического состояния на текущем тике**; а *временную ось* формирует именно рекуррентное применение Synapse model (τ → τ+1) в сочетании с буферами History и последующей обработкой в Neuron-Level Models.
+Thus, the **vector $a^{\tau}$ itself — is a "snapshot" of the synaptic state at the current tick**; the *temporal axis* is formed precisely by the recurrent application of the Synapse model ($\tau \to \tau+1$) in conjunction with the History buffers and subsequent processing in Neuron-Level Models.
 
 <!-- Checkpoint: Synapse model -->
 <div style="border: 2px solid #3498db; border-radius: 8px; padding: 12px; background-color: #f8f9fa; margin: 10px 0;">
   <p style="margin: 0; font-weight: bold; color: #2c3e50;">Checkpoint — Synapse model:</p>
   <p style="margin: 8px 0 0 0; color: #2c3e50;">
-    U-Net-подобный MLP принимает связку прошлых пост-активаций <em>z<sup>τ</sup></em> и выхода внимания <em>o<sup>τ</sup></em>, многомасштабно сжимает-расширяет их через skip-связи и выдаёт пре-активации <em>a<sup>τ</sup></em>; именно здесь формируются «синаптические» взаимодействия и внутренняя шкала времени модели.
+    A U-Net-like MLP takes the combined past post-activations <em>z<sup>τ</sup></em> and attention output <em>o<sup>τ</sup></em>, multiscale compresses and expands them via skip connections, and outputs pre-activations <em>a<sup>τ</sup></em>; it is here that "synaptic" interactions and the model's internal time scale are formed.
   </p>
 </div>
 
@@ -733,28 +722,28 @@ Skip-connections обеспечивают прямой путь для град�
 
 ### **2. History (pre-activations)**
 
-Для каждого нейрона $d = 1, \dots, D$, поддерживается **история последних $M$** пре-активаций:
+For each neuron $d = 1, \dots, D$, a **history of the last $M$** pre-activations is maintained:
 
 $$
 A^\tau_d = [\, a^{\tau - M + 1}_d,\; \dots,\; a^{\tau}_d \,] \in \mathbb{R}^M
 $$
 
-а вся история для всех нейронов:
+and the full history for all neurons:
 
 $$
 A^\tau \in \mathbb{R}^{D \times M}
 $$
 
-Этот буфер позволяет каждому нейрону анализировать динамику своего активационного сигнала во времени (внутренние шаги).
+This buffer enables each neuron to analyze the temporal dynamics of its activation signal (internal steps).
 
-**Что такое «History (pre-activations)»?**  
-1. **Определение**  
-   - Для каждого нейрона $d$ (где $d=1,\dots,D$) хранится буфер из $M$ последних значений его пре-активаций $a_d^\tau$ на внутренних шагах модели.  
-   - Этот буфер обозначается вектором  
+**What is "History (pre-activations)"?**  
+1. **Definition**  
+   - For each neuron $d$ (where $d=1,\dots,D$), a buffer stores the $M$ most recent values of its pre-activations $a_d^\tau$ across the model's internal steps.  
+   - This buffer is denoted as the vector  
      $$
        A_d^\tau = [\,a_d^{\tau-M+1},\,a_d^{\tau-M+2},\,\dots,\,a_d^\tau] \in \mathbb{R}^M.
      $$  
-   - Для всех $D$ нейронов вместе получается матрица  
+   - For all $D$ neurons together, we obtain the matrix  
      $$
        A^\tau = 
        \begin{pmatrix}
@@ -766,27 +755,27 @@ $$
        \in \mathbb{R}^{D\times M}.
      $$
 
-2. **Числовой пример**
-   Пусть $D=2$ (два нейрона), $M=3$ (три последних шага). На внутренних шагах $\tau=5$ у нас могли быть следующие пре-активации:
+2. **Numerical Example**  
+   Let $D=2$ (two neurons), $M=3$ (three latest steps). At internal steps $\tau=5$, the pre-activations might be:
 
-   * Нейрон 1: 
+   * Neuron 1: 
    - $a\_1^3=0.2$
    - $a\_1^4=-0.1$
    - $a\_1^5=0.5$
 
-   * Нейрон 2: 
+   * Neuron 2: 
    - $a\_2^3=1.0$
    - $a\_2^4=0.8$
    - $a\_2^5=0.9$
 
-   Тогда
+   Then
 
    $$
      A_1^5 = [\,0.2,\,-0.1,\,0.5\,],\quad
      A_2^5 = [\,1.0,\,0.8,\,0.9\,],
    $$
 
-   и
+   and
 
    $$
      A^5 = 
@@ -796,56 +785,55 @@ $$
      \end{pmatrix}.
    $$
 
-3. **Зачем это нужно?**
+3. **Why is this needed?**
 
-   * Модель уровня нейрона $g_{\theta_d}$ получает на вход не только текущее $a_d^\tau$, но весь вектор $A_d^\tau$.
-   * Это позволяет учитывать **временную динамику**: паттерны изменения активации за последние $M$ шагов влияют на следующую активацию $z_d^{,\tau+1}$.
-   * Такая история необходима для формирования **внутреннего временного контекста** и синхронизации нейронов в CTM.
+   * The Neuron-Level Model $g_{\theta_d}$ receives as input not only the current $a_d^\tau$, but the entire vector $A_d^\tau$.
+   * This enables accounting for **temporal dynamics**: patterns of activation change over the last $M$ steps influence the next activation $z_d^{,\tau+1}$.
+   * Such history is essential for forming an **internal temporal context** and neuron synchronization in CTM.
 
-Таким образом, блок «History (pre-activations)» описывает механизм хранения и представления временной последовательности пре-активаций каждого нейрона, что является ключом к реализации шагового «размыслительного» процесса в архитектуре Continuous Thought Machine.
+Thus, the "History (pre-activations)" block describes the mechanism for storing and representing the temporal sequence of each neuron's pre-activations, which is key to implementing the stepwise "reasoning" process in the Continuous Thought Machine architecture.
 
 ```python
 """
-Реализация нейронной сети с архитектурой encoder-decoder для моделирования синаптической 
-передачи сигналов. Код включает две основные компоненты:
-1. SynapseModel - класс нейронной сети с подробным выводом промежуточных результатов
-2. PreActivationHistory - класс для отслеживания истории предактивации
+Implementation of a neural network architecture for modeling synaptic 
+signal transmission. The code includes two main components:
+1. SynapseModel - a neural network class with detailed intermediate output
+2. PreActivationHistory - a class for tracking pre-activation history
 
-Функциональное назначение: моделирование и отладка синаптической нейронной сети с 
-визуализацией промежуточных состояний нейронов для анализа обработки сигналов.
+Functional purpose: Modeling and debugging a synaptic neural network with 
+visualization of intermediate neuron states for signal processing analysis.
 """
 
-# Стандартные библиотеки
+# Standard libraries
 from typing import List, Tuple
 
-# Библиотеки для работы с нейронными сетями
+# Neural network libraries
 import torch
 import torch.nn as nn
 
 
-# Модель нейронной сети для отладки синаптических связей
+# Neural network model for debugging synaptic connections
 class SynapseModel(nn.Module):
     """
     Description:
     ---------------
-        Модель нейронной сети с архитектурой encoder-decoder с подробным выводом
-        промежуточных результатов для отладки. Модель принимает входные данные,
-        обрабатывает их через слои кодировщика и декодировщика с использованием
-        skip-соединений.
+        A neural network model with an encoder-decoder architecture and detailed 
+        intermediate output for debugging. The model accepts input data, 
+        processes it through encoder and decoder layers using skip connections.
 
     Args:
     ---------------
-        d_model: Размерность входных векторов модели
-        d_attn: Размерность векторов внимания
-        hidden_dims: Список размерностей скрытых слоев кодировщика
+        d_model: Dimensionality of input vectors
+        d_attn: Dimensionality of attention vectors
+        hidden_dims: List of hidden layer dimensions in the encoder
 
     Returns:
     ---------------
-        Объект модели нейронной сети
+        A neural network model object
 
     Raises:
     ---------------
-        ValueError: Если размерности hidden_dims не соответствуют архитектуре модели
+        ValueError: If hidden_dims dimensions are incompatible with model architecture
 
     Examples:
     ---------------
@@ -865,7 +853,7 @@ class SynapseModel(nn.Module):
         in_dim = d_model + d_attn
         self.d_model = d_model
 
-        # Создание слоев кодировщика (encoder)
+        # Create encoder layers
         enc_layers = []
         prev = in_dim
         for i, h in enumerate(hidden_dims, 1):
@@ -877,22 +865,22 @@ class SynapseModel(nn.Module):
             prev = h
         self.encoder = nn.ModuleList(enc_layers)
 
-        # Создание слоев декодировщика (decoder)
-        rev = hidden_dims[::-1]  # Обратный порядок для декодировщика
+        # Create decoder layers
+        rev = hidden_dims[::-1]  # Reverse order for decoder
         dec_layers = []
-        prev = rev[0] * 2        # Размер после первой конкатенации
+        prev = rev[0] * 2        # Size after first concatenation
         for i, h in enumerate(rev[1:], 1):
             dec_layers += [
                 nn.Linear(prev, h),
                 nn.LayerNorm(h),
                 nn.ReLU(inplace=True)
             ]
-            # Конкатенация с соответствующим skip-соединением
+            # Concatenate with corresponding skip connection
             prev = h + rev[i]
         dec_layers.append(nn.Linear(prev, d_model))
         self.decoder = nn.ModuleList(dec_layers)
 
-    # Прямой проход через нейронную сеть
+    # Forward pass through the neural network
     def forward(
         self,
         z: torch.Tensor,
@@ -901,18 +889,18 @@ class SynapseModel(nn.Module):
         """
         Description:
         ---------------
-            Выполняет прямой проход через нейронную сеть, объединяя входные
-            тензоры z и o, и выводит подробную отладочную информацию о промежуточных
-            результатах на каждом слое.
+            Performs a forward pass through the neural network, combining input
+            tensors z and o, and outputs detailed debugging information for 
+            intermediate results at each layer.
 
         Args:
         ---------------
-            z: Входной тензор данных модели
-            o: Входной тензор векторов внимания
+            z: Input tensor of model data
+            o: Input tensor of attention vectors
 
         Returns:
         ---------------
-            Тензор предактиваций на выходе сети
+            Tensor of pre-activations at the network output
 
         Examples:
         ---------------
@@ -921,14 +909,14 @@ class SynapseModel(nn.Module):
             >>> o = torch.ones(1, 2)
             >>> a = model(z, o)
         """
-        # Объединение входных тензоров по последней размерности
+        # Concatenate input tensors along the last dimension
         x = torch.cat([z, o], dim=-1)
         print(f"\n=== Step τ ===")
         print(f">>> Input x (z||o): {x.tolist()}")
 
-        # Проход через слои кодировщика
-        skips = []  # Список для хранения skip-соединений
-        cur = x     # Текущий тензор
+        # Pass through encoder layers
+        skips = []  # List to store skip connections
+        cur = x     # Current tensor
         layer_idx = 0
         for layer in self.encoder:
             cur = layer(cur)
@@ -941,15 +929,15 @@ class SynapseModel(nn.Module):
                 print(f"  Enc LayerNorm {layer_idx:02d}: → {cur.tolist()}")
             elif isinstance(layer, nn.ReLU):
                 print(f"  Enc ReLU      {layer_idx:02d}: → {cur.tolist()}")
-                skips.append(cur)  # Сохраняем выход после ReLU для skip-соединений
+                skips.append(cur)  # Save output after ReLU for skip connections
             layer_idx += 1
 
-        # Проход через слои декодировщика
-        # Начинаем с конкатенации с последним skip-соединением
+        # Pass through decoder layers
+        # Start by concatenating with the last skip connection
         cur = torch.cat([cur, skips[-1]], dim=-1)
         print(f"  Dec Input (with skip[-1]): → {cur.tolist()}")
 
-        skip_idx = -2  # Индекс предыдущего skip-соединения
+        skip_idx = -2  # Index of previous skip connection
         layer_idx = 0
         for layer in self.decoder:
             cur = layer(cur)
@@ -959,35 +947,35 @@ class SynapseModel(nn.Module):
                 print(f"  Dec LayerNorm {layer_idx:02d}: → {cur.tolist()}")
             elif isinstance(layer, nn.ReLU):
                 print(f"  Dec ReLU      {layer_idx:02d}: → {cur.tolist()}")
-                # Добавляем skip-соединение, если оно доступно
+                # Add skip connection if available
                 if skip_idx >= -len(skips):
                     cur = torch.cat([cur, skips[skip_idx]], dim=-1)
                     print(f"    + skip[{skip_idx}]: → {cur.tolist()}")
                     skip_idx -= 1
             layer_idx += 1
 
-        a = cur  # Выходные предактивации
+        a = cur  # Output pre-activations
         print(f"<<< Output pre-activations a: {a.tolist()}")
         return a
 
 
-# Класс для отслеживания истории предактиваций
+# Class for tracking pre-activation history
 class PreActivationHistory(nn.Module):
     """
     Description:
     ---------------
-        Модуль для отслеживания истории предактиваций нейронной сети.
-        Сохраняет последние M значений предактиваций для каждого нейрона
-        и предоставляет методы для сброса и обновления буфера истории.
+        Module for tracking the history of neural network pre-activations.
+        Stores the last M pre-activation values for each neuron and provides
+        methods to reset and update the history buffer.
 
     Args:
     ---------------
-        d_model: Размерность вектора предактиваций
-        M: Количество временных шагов для хранения в истории
+        d_model: Dimensionality of pre-activation vector
+        M: Number of time steps to store in history
 
     Returns:
     ---------------
-        Объект для отслеживания истории предактиваций
+        Object for tracking pre-activation history
 
     Examples:
     ---------------
@@ -1000,21 +988,21 @@ class PreActivationHistory(nn.Module):
     def __init__(self, d_model: int, M: int) -> None:
         super().__init__()
         self.M = M
-        # Инициализация буфера истории
+        # Initialize history buffer
         buf = torch.zeros(1, d_model, M)
         self.register_buffer('history', buf)
 
-    # Сброс буфера истории
+    # Reset the history buffer
     def reset(self, B: int) -> None:
         """
         Description:
         ---------------
-            Сбрасывает буфер истории предактиваций, инициализируя его
-            нулевыми значениями для заданного размера батча.
+            Resets the pre-activation history buffer, initializing it to zeros
+            for the specified batch size.
 
         Args:
         ---------------
-            B: Размер батча
+            B: Batch size
 
         Returns:
         ---------------
@@ -1030,21 +1018,21 @@ class PreActivationHistory(nn.Module):
         )
         print(f"\n*** History reset → shape {tuple(self.history.shape)}")
 
-    # Обновление буфера истории
+    # Update the history buffer
     def update(self, a: torch.Tensor) -> torch.Tensor:
         """
         Description:
         ---------------
-            Обновляет буфер истории предактиваций, добавляя новые значения
-            и удаляя самые старые. Выводит текущее состояние буфера.
+            Updates the pre-activation history buffer by adding new values 
+            and discarding the oldest ones. Outputs the current buffer state.
 
         Args:
         ---------------
-            a: Тензор новых предактиваций для добавления в историю
+            a: Tensor of new pre-activations to add to history
 
         Returns:
         ---------------
-            Обновленный буфер истории предактиваций
+            Updated pre-activation history buffer
 
         Examples:
         ---------------
@@ -1053,31 +1041,31 @@ class PreActivationHistory(nn.Module):
             >>> a = torch.tensor([[0.1, 0.2]])
             >>> updated_history = history.update(a)
         """
-        # Если размер батча изменился, сбрасываем историю
+        # If batch size changed, reset history
         if self.history.size(0) != a.size(0):
             self.reset(a.size(0))
         
-        # Обновляем буфер, добавляя новые значения и удаляя самые старые
+        # Update buffer by appending new values and removing oldest
         self.history = torch.cat(
             [self.history[:, :, 1:], a.unsqueeze(-1)], dim=2
         )
         
-        # Вывод текущего состояния буфера в виде матрицы
+        # Output current buffer state as a matrix
         mat = self.history[0].tolist()
-        print(f"*** History buffer (последние {self.M} шагов):")
+        print(f"*** History buffer (last {self.M} steps):")
         for d, row in enumerate(mat, 1):
             print(f"    Neuron {d}: {row}")
         
         return self.history
 
 
-# Инициализация и запуск модели
+# Initialization and execution
 def main() -> None:
     """
     Description:
     ---------------
-        Основная функция для инициализации и запуска модели SynapseModel
-        и отслеживания истории предактиваций.
+        Main function to initialize and run the SynapseModel and track 
+        pre-activation history.
 
     Args:
     ---------------
@@ -1091,27 +1079,27 @@ def main() -> None:
     ---------------
         >>> main()
     """
-    # Устанавливаем начальное значение для генератора случайных чисел
+    # Set initial random seed
     torch.manual_seed(0)
 
-    # Инициализация параметров модели
+    # Initialize model parameters
     d_model, d_attn, M = 2, 2, 3
     model = SynapseModel(d_model, d_attn, hidden_dims=[3, 2])
     history = PreActivationHistory(d_model, M)
 
-    # Размер батча
+    # Batch size
     B = 1
     history.reset(B)
     
-    # Запуск модели на несколько временных шагов
+    # Run model over several time steps
     for tau in range(1, 4):
         print(f"\n>>> Internal Step τ = {tau}")
-        # Создание входных данных для текущего шага
+        # Create input data for current step
         z = torch.full((B, d_model), tau, dtype=torch.float32)
         o = torch.full((B, d_attn), tau * 0.1, dtype=torch.float32)
-        # Прямой проход через модель
+        # Forward pass through model
         a = model(z, o)
-        # Обновление истории предактиваций
+        # Update pre-activation history
         history.update(a)
 
 main()
@@ -1119,27 +1107,27 @@ main()
 
 </details>
 
-На этом шаге формируется «куб памяти» из последних $M$ векторов пре-активаций. Формально
+At each step, a "memory cube" of the last $M$ pre-activation vectors is formed. Formally,
 
 $$
 A^{\tau}\;=\;\bigl[a^{\tau-M+1},\,a^{\tau-M+2},\,\dots,\,a^{\tau}\bigr]\;\in\;\mathbb R^{D\times M},
 \qquad a^{t}\in\mathbb R^{D}.
 $$
 
-* **Столбцы** — это сами «срезы» синоптического состояния: каждый столбец $a^{t}$ собирает все $D$ нейронов на момент внутреннего тика $t$.
-* **Строки** — это индивидуальные временные траектории одного нейрона $d$ длиной $M$ шагов:
+* **Columns** are the individual "slices" of synaptic state: each column $a^{t}$ aggregates all $D$ neurons at internal tick $t$.
+* **Rows** are individual temporal trajectories of a single neuron $d$ over $M$ steps:
 
   $$
   A^{\tau}_{d,\: :}\;=\;\bigl[a^{\tau-M+1}_{d},\,\dots,\,a^{\tau}_{d}\bigr].
   $$
 
-Именно этот набор $M$ последних столбцов (соответственно, $M$ «срезов» $a^{t}$) подаётся далее в **Neuron-Level Models**, позволяя каждому нейрону анализировать собственную динамику и участвовать в расчёте последующей синхронизации.
+It is precisely this set of $M$ latest columns (i.e., $M$ "slices" $a^{t}$) that is fed into the **Neuron-Level Models**, allowing each neuron to analyze its own dynamics and participate in computing subsequent synchronization.
 
 <!-- Checkpoint: History (pre-activations) -->
 <div style="border: 2px solid #3498db; border-radius: 8px; padding: 12px; background-color: #f8f9fa; margin: 10px 0;">
   <p style="margin: 0; font-weight: bold; color: #2c3e50;">Checkpoint — History (pre-activations):</p>
   <p style="margin: 8px 0 0 0; color: #2c3e50;">
-    Каждому нейрону хранится скользящее окно из <em>M</em> последних пре-активаций <a href="https://example.com">(A<sup>τ</sup>)</a>, обеспечивая модели информацию о собственной временной динамике и создавая основу для синхронизации и последующей обработки в Neuron-Level Models.
+    Each neuron maintains a sliding window of its last <em>M</em> pre-activations <a href="https://example.com  ">(A<sup>τ</sup>)</a>, providing the model with information about its own temporal dynamics and forming the basis for synchronization and subsequent processing in Neuron-Level Models.
   </p>
 </div>
 
@@ -1148,33 +1136,33 @@ $$
 
 ### **3. Neuron-Level Models**
 
-Каждый нейрон $d$ имеет собственную функцию $g_{\theta_d}$, которая преобразует его историю $A^\tau_d$ в пост-активацию:
+Each neuron $d$ has its own function $g_{\theta_d}$ that transforms its history $A^\tau_d$ into a post-activation:
 
 $$
 z^{\tau+1}_d = g_{\theta_d}(A^\tau_d)
 $$
 
-Здесь $g_{\theta_d}$ — это индивидуальный MLP нейрона, обрабатывающий $M$-длину временного окна. Например, он может выучить шаблон: «если нейрон был активен 3 раза подряд → активируйся снова». Это приближает поведение к **спайковой активности** биологических нейронов.
+Here, $g_{\theta_d}$ is an individual neuron MLP processing an $M$-length temporal window. For example, it may learn a pattern: "if the neuron was active three times consecutively → activate again." This approximates the **spiking activity** of biological neurons.
 
-#### **Пример**
+#### **Example**
 
-Чтобы проиллюстрировать работу функции $g_{\theta_d}$, рассмотрим упрощённый случай с одним «Neuron-Level Model» – однослойным MLP, обрабатывающим историю длины $M=3$.
+To illustrate the operation of $g_{\theta_d}$, consider a simplified case with one "Neuron-Level Model" — a single-layer MLP processing a history of length $M=3$.
 
-Для конкретного нейрона $d$ модель
+For a specific neuron $d$, the model
 
 $$
 z_d^{\tau+1} = g_{\theta_d}\bigl(A_d^\tau\bigr),
 $$
 
-где
+where
 
 $$
 A_d^\tau = \bigl[a_d^{\tau-2},\,a_d^{\tau-1},\,a_d^{\tau}\bigr]^\top\in\mathbb R^3.
 $$
 
-#### Параметры MLP
+#### MLP Parameters
 
-Пусть $g_{\theta_d}$ — двухслойный MLP с одной скрытой единицей и активацией ReLU:
+Let $g_{\theta_d}$ be a two-layer MLP with one hidden unit and ReLU activation:
 
 $$
 \begin{aligned}
@@ -1185,7 +1173,7 @@ W^{(2)}\in\mathbb R^{1\times1},\;b^{(2)}\in\mathbb R.
 \end{aligned}
 $$
 
-Возьмём конкретные численные значения:
+Use concrete numerical values:
 
 $$
 W^{(1)} = \begin{pmatrix}0.4 & -0.3 & 0.5\end{pmatrix},\quad
@@ -1194,9 +1182,9 @@ W^{(2)}=1.2,\quad
 b^{(2)}=-0.05.
 $$
 
-#### История пре-активаций
+#### Pre-activation History
 
-Предположим, что на трёх последних внутренних шагах $\tau$ пре-активации нейрона $d$ были:
+Assume that on the three most recent internal steps $\tau$, the pre-activations of neuron $d$ were:
 
 $$
 a_d^{\tau-2} = 0.2,\quad
@@ -1204,15 +1192,15 @@ a_d^{\tau-1} = -0.1,\quad
 a_d^{\tau}   = 0.5.
 $$
 
-Тогда
+Then
 
 $$
 A_d^\tau = \begin{pmatrix}0.2\\-0.1\\0.5\end{pmatrix}.
 $$
 
-#### Поэтапный расчёт
+#### Step-by-step Calculation
 
-1. **Линейное преобразование + смещение (первый слой):**
+1. **Linear transformation + bias (first layer):**
 
    $$
    u = W^{(1)}\,A_d^\tau + b^{(1)}
@@ -1222,13 +1210,13 @@ $$
      = 0.46.
    $$
 
-2. **ReLU-активация:**
+2. **ReLU activation:**
 
    $$
    h = \mathrm{ReLU}(u) = \max(0,\,0.46) = 0.46.
    $$
 
-3. **Выход второго слоя:**
+3. **Second layer output:**
 
    $$
    z_d^{\tau+1} = W^{(2)}\,h + b^{(2)}
@@ -1237,23 +1225,23 @@ $$
                 = 0.502.
    $$
 
-#### Пояснение
+#### Explanation
 
-* **Первый слой** «свёртывает» трёхшаговую историю $A_d^\tau$ в одно число $u$, взвешивая прошлые активации по значимости (веса $W^{(1)}$) и прибавляя смещение $b^{(1)}$.
-* **ReLU** отбрасывает отрицательные «шумихи» и сохраняет только полезные паттерны (здесь $u>0$).
-* **Второй слой** масштабирует полученный признак $h$ и добавляет окончательное смещение $b^{(2)}$, выдавая новую пост-активацию $z_d^{\tau+1}$.
+* **First layer** "convolves" the three-step history $A_d^\tau$ into a single number $u$, weighting past activations by their significance (weights $W^{(1)}$) and adding bias $b^{(1)}$.
+* **ReLU** discards negative "noise" and retains only useful patterns (here $u>0$).
+* **Second layer** scales the extracted feature $h$ and adds final bias $b^{(2)}$, outputting the new post-activation $z_d^{\tau+1}$.
 
-Таким образом, даже в таком простом примере MLP на уровне нейрона умеет реагировать на последовательности прошлых активаций и формировать выход с учётом выученных временных шаблонов.
+Thus, even in this simple example, the neuron-level MLP learns to respond to sequences of past activations and form an output based on learned temporal patterns.
 
 </details>
 
-На каждом внутреннем тике $\tau$ блок **Neuron-Level Models (NLM)**
+On each internal tick $\tau$, the **Neuron-Level Models (NLM)** block:
 
-1. **Получает** для каждого нейрона $d$ собственную строку истории
+1. **Receives** for each neuron $d$ its individual history row
    $A^{\tau}_{d}=[\,a^{\tau-M+1}_{d},\dots ,a^{\tau}_{d}] \in\mathbb R^{M}$.
-2. **Пропускает** этот $M$-мерный вектор через крошечный MLP
-   $g_{\theta_d}\!=\!\text{(Linear → Act → Linear)}$ — параметры могут быть уникальны для каждого нейрона.
-3. **Возвращает** новую пост-активацию
+2. **Processes** this $M$-dimensional vector through a tiny MLP
+   $g_{\theta_d}\!=\!\text{(Linear → Act → Linear)}$ — parameters may be unique per neuron.
+3. **Returns** the new post-activation
 
    $$
      z^{\tau+1}_{d}=g_{\theta_d}\bigl(A^{\tau}_{d}\bigr)\in\mathbb R,
@@ -1261,165 +1249,165 @@ $$
      z^{\tau+1}=[z^{\tau+1}_{1},\dots ,z^{\tau+1}_{D}]\in\mathbb R^{D}.
    $$
 
-Эти $z^{\tau+1}_{d}$:
+These $z^{\tau+1}_{d}$:
 
-* реализуют **временную фильтрацию**: каждый нейрон решает, «спайкнуть» ли сейчас, глядя на собственный недавний паттерн пре-активаций (аналог STDP);
-* превращают «куб памяти» $A^{\tau}$ в очередной **срез динамики** $z^{\tau+1}$, который затем участвует
-  – в накоплении глобальной истории $Z^{\tau+1}=[z^{1},\dots ,z^{\tau+1}]$ и
-  – в вычислении матрицы синхронности $S^{\tau+1}=Z^{\tau+1}(Z^{\tau+1})^{\!\top}$.
+* implement **temporal filtering**: each neuron decides whether to "spike" now, looking at its own recent pre-activation pattern (analogous to STDP);
+* transform the "memory cube" $A^{\tau}$ into the next **dynamics slice** $z^{\tau+1}$, which then participates in
+  – accumulating the global history $Z^{\tau+1}=[z^{1},\dots ,z^{\tau+1}]$ and
+  – computing the synchronization matrix $S^{\tau+1}=Z^{\tau+1}(Z^{\tau+1})^{\!\top}$.
 
-Таким образом, **NLM-блок действует как индивидуальный «временной детектор»**: он кодирует кратковременную память каждого нейрона в новое состояние, позволяя сети шаг за шагом выстраивать коллективную синхронизацию и продвигаться по внутренней шкале времени.
+Thus, the **NLM block acts as an individual "temporal detector"**: it encodes each neuron’s short-term memory into a new state, enabling the network to step-by-step build collective synchronization and progress along the internal time scale.
 
 <!-- Checkpoint: Neuron-Level Models -->
 <div style="border: 2px solid #3498db; border-radius: 8px; padding: 12px; background-color: #f8f9fa; margin: 10px 0;">
   <p style="margin: 0; font-weight: bold; color: #2c3e50;">Checkpoint — Neuron-Level Models:</p>
   <p style="margin: 8px 0 0 0; color: #2c3e50;">
-    Индивидуальный MLP <em>g<sub>θd</sub></em> читает историю <A<sub>d</sub><sup>τ</sup></A> каждого нейрона и генерирует его новую пост-активацию <em>z<sub>d</sub><sup>τ+1</sup></em>, обучаясь выявлять временные паттерны (аналог STDP) и превращая «сырые» сигналы в динамику, пригодную для синхронизации.
+    An individual MLP <em>g<sub>θd</sub></em> reads each neuron's history <A<sub>d</sub><sup>τ</sup></A> and generates its new post-activation <em>z<sub>d</sub><sup>τ+1</sup></em>, learning to detect temporal patterns (analogous to STDP) and transforming "raw" signals into dynamics suitable for synchronization.
   </p>
 </div>
 
 ### **4. Post-activations**
 
-На каждом внутреннем тике $\tau{+}1$ блок **Post-activations**
+On each internal tick $\tau{+}1$, the **Post-activations** block:
 
-1. **Собирает** выходы Neuron-Level Models в единый вектор
+1. **Gathers** outputs from Neuron-Level Models into a single vector
 
    $$
      z^{\tau+1}=\bigl[z^{\tau+1}_{1},\dots ,z^{\tau+1}_{D}\bigr]\in\mathbb R^{D}.
    $$
-2. **Фиксирует** этот вектор как «моментальный снимок» *нейронного состояния* сети: он отражает, какие нейроны активировались после учёта своей кратковременной памяти.
-3. **Передаёт** $z^{\tau+1}$ дальше по конвейеру:
+2. **Records** this vector as a "snapshot" of the network's *neuronal state*: it reflects which neurons activated after accounting for their short-term memory.
+3. **Passes** $z^{\tau+1}$ further down the pipeline:
 
-   * в матрицу долгосрочной памяти $Z$ (см. рисунок);
-   * в расчёт матрицы синхронности $S^{\tau+1}=Z^{\tau+1}(Z^{\tau+1})^{\!\top}$;
-   * обратно в **Synapse model** вместе с новым вектором внимания $o^{\tau+1}$, замыкая рекурсивный цикл.
+   * to the long-term memory matrix $Z$ (see figure);
+   * to the computation of the synchronization matrix $S^{\tau+1}=Z^{\tau+1}(Z^{\tau+1})^{\!\top}$;
+   * back to the **Synapse model** along with the new attention vector $o^{\tau+1}$, closing the recursive cycle.
 
-Таким образом **$z^{\tau+1}$ — это «срез» коллективной активности** всего набора нейронов, служащий строительным блоком для дальнейшей синхронизации и выводов модели.
+Thus, **$z^{\tau+1}$ is a "slice" of collective activity** across all neurons, serving as a building block for further synchronization and model reasoning.
 
-Полученные выходы всех нейронов на шаге $\tau+1$ формируют:
+The outputs of all neurons at step $\tau+1$ form:
 
 $$
 z^{\tau+1} = [z^{\tau+1}_1, z^{\tau+1}_2, \dots, z^{\tau+1}_D] \in \mathbb{R}^D
 $$
 
-Этот вектор — **внутреннее нейронное состояние модели**, эволюционирующее во времени.
+This vector — the **internal neuronal state of the model** — evolves over time.
 
 <!-- Checkpoint: Post-activations -->
 <div style="border: 2px solid #3498db; border-radius: 8px; padding: 12px; background-color: #f8f9fa; margin: 10px 0;">
   <p style="margin: 0; font-weight: bold; color: #2c3e50;">Checkpoint — Post-activations:</p>
   <p style="margin: 8px 0 0 0; color: #2c3e50;">
-    Вектор <em>z<sup>τ+1</sup></em> собирает новые выходы всех нейронов после их «временной фильтрации»; Это мгновенный снимок внутреннего состояния сети, который идёт в память <em>Z</em> и участвует в расчёте синхронности.
+    The vector <em>z<sup>τ+1</sup></em> aggregates the new outputs of all neurons after their "temporal filtering"; it is an instantaneous snapshot of the network's internal state, forwarded to memory <em>Z</em> and used in synchronization computation.
   </p>
 </div>
 
 ### **5. History (post-activations)**
 
-На шаге **History (post-activations)**
+At the **History (post-activations)** step:
 
-1. **Расширяет** долговременную матрицу памяти, дописывая новый столбец:
+1. **Extends** the long-term memory matrix by appending a new column:
 
    $$
      Z^{\tau+1}= \bigl[\,z^{1},\,z^{2},\,\dots ,\,z^{\tau+1}\bigr]\in\mathbb R^{D\times(\tau+1)}.
    $$
-2. **Хранит** полную траекторию поведения сети: каждая строка — история конкретного нейрона, каждый столбец — «кадр» всей сети.
-3. **Используется** двумя основными блоками:
+2. **Stores** the full trajectory of network behavior: each row is the history of a specific neuron, each column is a "frame" of the entire network.
+3. **Used** by two primary blocks:
 
-   * для вычисления обновлённой матрицы синхронности $S^{\tau+1}$;
-   * для оценки критериев остановки (достаточная уверенность вывода / достигнут ли лимит тиков).
+   * for computing the updated synchronization matrix $S^{\tau+1}$;
+   * for evaluating stopping criteria (sufficient output confidence / tick limit reached).
 
-Именно матрица $Z$ превращает последовательность дискретных «срезов» $z^{t}$ в **непрерывную ленту активности**, по которой модель учится выявлять долговременные ко-паттерны.
+It is precisely the matrix $Z$ that transforms the sequence of discrete "slices" $z^{t}$ into a **continuous activity ribbon**, upon which the model learns to identify long-term co-patterns.
 
 <!-- Checkpoint: History (post-activations) -->
 <div style="border: 2px solid #3498db; border-radius: 8px; padding: 12px; background-color: #f8f9fa; margin: 10px 0;">
   <p style="margin: 0; font-weight: bold; color: #2c3e50;">Checkpoint — History (post-activations):</p>
   <p style="margin: 8px 0 0 0; color: #2c3e50;">
-    Матрица <em>Z<sup>τ+1</sup></em> накапливает все векторы <em>z</em> с начала рассуждения, формируя «ленту активности» сети; именно она питает вычисление матрицы синхронности <em>S</em> и служит базой для остановки или продолжения внутренних тиков.
+    The matrix <em>Z<sup>τ+1</sup></em> accumulates all <em>z</em> vectors since the start of reasoning, forming the network's "activity ribbon"; it feeds the computation of the synchronization matrix <em>S</em> and serves as the basis for stopping or continuing internal ticks.
   </p>
 </div>
 
 ### **6. Synchronization matrix $S^{\tau+1}$**
 
-На каждом внутреннем тике $\tau{+}1$ блок **Synchronization matrix**
+On each internal tick $\tau{+}1$, the **Synchronization matrix** block:
 
-1. **Берёт** накопленную ленту активности $Z^{\tau+1}\in\mathbb R^{D\times(\tau+1)}$.
-2. **Умножает** её на собственную транспонированную копию
+1. **Takes** the accumulated activity ribbon $Z^{\tau+1}\in\mathbb R^{D\times(\tau+1)}$.
+2. **Multiplies** it by its own transpose:
 
    $$
      S^{\tau+1}=Z^{\tau+1}(Z^{\tau+1})^{\!\top}\in\mathbb R^{D\times D},
    $$
 
-   получая симметричную матрицу попарных скалярных произведений.
-3. **Интерпретирует** элемент $S^{\tau+1}_{ij}$ как меру сходства временных траекторий нейронов $i$ и $j$:
+   yielding a symmetric matrix of pairwise scalar products.
+3. **Interprets** element $S^{\tau+1}_{ij}$ as a measure of similarity between the temporal trajectories of neurons $i$ and $j$:
 
-   * величина $\kern0.1em\uparrow$ — нейроны активировались синхронно;
-   * величина $\kern0.1em\downarrow$ — их паттерны рассогласованы.
-4. **Подаёт** $S^{\tau+1}$ в механизм выбора пар, а также (при обучении) подвергает экспоненциальному затуханию или нормировке, чтобы недавние «кадры» весили больше далёких.
+   * magnitude $\kern0.1em\uparrow$ — neurons activated synchronously;
+   * magnitude $\kern0.1em\downarrow$ — their patterns are desynchronized.
+4. **Feeds** $S^{\tau+1}$ into the pair selection mechanism, and (during training) applies exponential decay or normalization so that recent "frames" weigh more than distant ones.
 
-Таким образом **$S^{\tau+1}$ конденсирует коллективную динамику** в компактное представление связей, на котором далее строятся вывод и управляющие сигналы внимания.
+Thus, **$S^{\tau+1}$ condenses collective dynamics** into a compact representation of connections, upon which reasoning and attention signals are subsequently built.
 
 <!-- Checkpoint: Synchronization matrix -->
 <div style="border: 2px solid #3498db; border-radius: 8px; padding: 12px; background-color: #f8f9fa; margin: 10px 0;">
   <p style="margin: 0; font-weight: bold; color: #2c3e50;">Checkpoint — Synchronization matrix:</p>
   <p style="margin: 8px 0 0 0; color: #2c3e50;">
-    Матрица <em>S<sup>τ+1</sup></em> = <em>Z</em><sup>τ+1</sup>(<em>Z</em><sup>τ+1</sup>)<sup>T</sup> фиксирует, насколько похожи временные траектории нейронов. Высокий элемент — сильная синхронность, низкий — рассогласование. Это базовое представление «коллективного разума» сети.
+    The matrix <em>S<sup>τ+1</sup></em> = <em>Z</em><sup>τ+1</sup>(<em>Z</em><sup>τ+1</sup>)<sup>T</sup> records how similar the temporal trajectories of neurons are. A high element indicates strong synchronization; a low one indicates desynchronization. This is the fundamental representation of the network's "collective mind."
   </p>
 </div>
 
 ### **7. Selected neuron pairs**
 
-На шаге **Selected neuron pairs**
+At the **Selected neuron pairs** step:
 
-1. **Выбирает** два фиксированных поднабора индексов
+1. **Selects** two fixed subsets of indices
 
    $$
      \mathcal I_{\text{out}},\,\mathcal I_{\text{action}}\subset\bigl\{(i,j)\,|\,0\!\le i\!<\!j\!<\!D\bigr\},
    $$
 
-   заданных один раз при инициализации (случайный или top-k режим).
-2. **Извлекает** по этим индексам соответствующие элементы матрицы синхронности, формируя два вектора:
+   defined once at initialization (random or top-k mode).
+2. **Extracts** corresponding elements from the synchronization matrix, forming two vectors:
 
    $$
      S^{\tau+1}_{\text{out}}\in\mathbb R^{D_{\text{out}}},\qquad
      S^{\tau+1}_{\text{action}}\in\mathbb R^{D_{\text{action}}}.
    $$
-3. **Передаёт**
+3. **Passes**
 
-   * $S^{\tau+1}_{\text{out}}$ → линейный проектор $W_{\text{out}}$ для предсказания (логиты классов / следующего токена);
-   * $S^{\tau+1}_{\text{action}}$ → проектор $W_{\text{in}}$ для генерации запроса внимания $q^{\tau+1}$.
-4. **Обеспечивает** разделение ролей: одна подвыборка учит «что сказать», другая — «куда смотреть» в данных, не перегружая модель полным $D^2$ количеством связей.
+   * $S^{\tau+1}_{\text{out}}$ → linear projector $W_{\text{out}}$ for prediction (class logits / next token);
+   * $S^{\tau+1}_{\text{action}}$ → projector $W_{\text{in}}$ for generating attention query $q^{\tau+1}$.
+4. **Ensures** role separation: one subset learns "what to say," the other "where to look" in the data, avoiding model overload from the full $D^2$ number of connections.
 
-Иначе говоря, **произвольная многомерная матрица $S$ свершается в два управляемых латентных вектора**, которые питают вывод и внимание, делая вычисления масштабируемыми.
+In other words, **the high-dimensional matrix $S$ is compressed into two controlled latent vectors**, which feed prediction and attention, making computations scalable.
 
 <!-- Checkpoint: Selected neuron pairs -->
 <div style="border: 2px solid #3498db; border-radius: 8px; padding: 12px; background-color: #f8f9fa; margin: 10px 0;">
   <p style="margin: 0; font-weight: bold; color: #2c3e50;">Checkpoint — Selected neuron pairs:</p>
   <p style="margin: 8px 0 0 0; color: #2c3e50;">
-    Из <em>S</em> выбираются два постоянных поднабора пар нейронов: один (<em>I</em><sub>out</sub>) идёт в вывод, второй (<em>I</em><sub>action</sub>) — в запрос внимания. Итоговые векторы <em>S<sub>out</sub></em> и <em>S<sub>action</sub></em> компактно кодируют ключевые связи, отчего модель масштабируется линейно, а не квадратично по числу нейронов.
+    From <em>S</em>, two constant subsets of neuron pairs are selected: one (<em>I</em><sub>out</sub>) feeds the output, the other (<em>I</em><sub>action</sub>) feeds the attention query. The resulting vectors <em>S<sub>out</sub></em> and <em>S<sub>action</sub></em> compactly encode key connections, enabling linear (not quadratic) scaling with neuron count.
   </p>
 </div>
 
 ### **8. Latent representation**
 
-На основе выбранных пар:
+Based on the selected pairs:
 
-* $S^{\tau+1}_{\text{out}}$ служит как **вектор признаков** для предсказания;
-* $S^{\tau+1}_{\text{action}}$ — как **вектор запроса внимания**.
+* $S^{\tau+1}_{\text{out}}$ serves as a **feature vector** for prediction;
+* $S^{\tau+1}_{\text{action}}$ — as an **attention query vector**.
 
-Оба вектора являются низкоразмерными сжатыми представлениями **внутренней динамики** сети.
+Both vectors are low-dimensional compressed representations of the network's **internal dynamics**.
 
 ### **9. OUT/ATTN projections**
 
-Два линейных слоя:
+Two linear layers:
 
-* Для предсказания следующего токена:
+* For predicting the next token:
 
   $$
   y^{\tau+1} = W_{\text{out}} \cdot S^{\tau+1}_{\text{out}} \in \mathbb{R}^{V}
   $$
 
-  где $V$ — размер словаря токенов;
+  where $V$ is the token vocabulary size;
 
-* Для формирования запроса к вниманию:
+* For generating the attention query:
 
   $$
   q^{\tau+1} = W_{\text{in}} \cdot S^{\tau+1}_{\text{action}} \in \mathbb{R}^{d_{\text{attn}}}
@@ -1427,266 +1415,261 @@ $$
 
 ### **10. Data modulation (Attention output)**
 
-Вычисляется **внимание** к эмбеддингам входных токенов $F(x) \in \mathbb{R}^{t \times d_{\text{attn}}}$ с использованием $q^{\tau+1}$ как запроса:
+**Attention** is computed over the input token embeddings $F(x) \in \mathbb{R}^{t \times d_{\text{attn}}}$ using $q^{\tau+1}$ as the query:
 
 $$
 o^{\tau+1} = \text{Attention}(q^{\tau+1}, K = F(x), V = F(x)) \in \mathbb{R}^{d_{\text{attn}}}
 $$
 
-Здесь используется dot-product attention:
+Here, dot-product attention is used:
 
 $$
 \text{Attention}(q, K, V) = \text{softmax}\left( \frac{qK^\top}{\sqrt{d}} \right) V
 $$
 
-Вектор $o^{\tau+1}$ объединяется с $z^{\tau+1}$ и подаётся на следующий внутренний тик $\tau+2$, формируя вход в синаптическую модель:
+The vector $o^{\tau+1}$ is combined with $z^{\tau+1}$ and fed to the next internal tick $\tau+2$, forming the input to the synapse model:
 
 $$
 [z^{\tau+1}, o^{\tau+1}] \longrightarrow f_{\theta_{\text{syn}}}
 $$
 
-### **Общий процесс на шаге $\tau$:**
+### **Overall Process at Step $\tau$:**
 
-1. $z^\tau, o^\tau \rightarrow a^\tau$ через синапс
-2. Обновление истории $A^\tau$
-3. $A^\tau_d \rightarrow z_d^{\tau+1}$ через NLM
-4. Обновление $Z^{\tau+1}$
+1. $z^\tau, o^\tau \rightarrow a^\tau$ via synapse
+2. Update history $A^\tau$
+3. $A^\tau_d \rightarrow z_d^{\tau+1}$ via NLM
+4. Update $Z^{\tau+1}$
 5. $Z^{\tau+1} \rightarrow S^{\tau+1}$
 6. $S^{\tau+1} \rightarrow S_{\text{out}}, S_{\text{action}}$
 7. $S_{\text{out}} \rightarrow y^{\tau+1}$, $S_{\text{action}} \rightarrow q^{\tau+1}$
 8. $q^{\tau+1} \rightarrow o^{\tau+1}$
-9. Подаём $[z^{\tau+1}, o^{\tau+1}]$ на следующий тик.
+9. Feed $[z^{\tau+1}, o^{\tau+1}]$ to next tick.
 
-#### **Пример:**
+#### **Example:**
 
-Допустим, CTM работает над текстом:
+Suppose CTM works on the text:
 
 ```
 "Albert Einstein was a ..."
 ```
 
-#### Этапы:
+#### Steps:
 
 * $x = (\text{“Albert”}, \text{“Einstein”}, \text{“was”}, \text{“a”})$
-* Задача: предсказать следующий токен $x_5$ (ожидается “physicist”)
-* На каждом внутреннем шаге $\tau$, CTM обновляет свои активации, накапливает синхронизацию нейронов.
-* Например, на $\tau=1$: $z^1$ – случайны, $S^1$ – почти нулевая.
-* К $\tau=5$: активность стабилизируется, пары нейронов, чувствительные к шаблонам “персона → профессия”, синхронизируются.
-* $y^5 = \text{softmax}(W_{\text{out}} \cdot S^5_{\text{out}})$ — уже с высокой вероятностью указывает на “physicist”.
-* Если $C^5 = 0.95$, а порог уверенности $\tau = 0.9$, модель завершает цикл.
+* Task: predict next token $x_5$ (expected: “physicist”)
+* On each internal step $\tau$, CTM updates its activations and accumulates neuron synchronization.
+* For example, at $\tau=1$: $z^1$ is random, $S^1$ is nearly zero.
+* By $\tau=5$: activity stabilizes; pairs of neurons sensitive to patterns like "person → profession" synchronize.
+* $y^5 = \text{softmax}(W_{\text{out}} \cdot S^5_{\text{out}})$ — already assigns high probability to “physicist”.
+* If $C^5 = 0.95$ and confidence threshold $\tau = 0.9$, the model terminates the cycle.
 
 ---
 
-### **4. Внутреннее рекуррентное время и синапсы**
+### **4. Internal Recurrent Time and Synapses**
 
-CTM вводит отдельное внутреннее время, дискретизированное на шаги, называемые **внутренними тиками** (*internal ticks*). Внутренний тик – это шаг «мысли» модели, на котором она может обновить свои нейронные состояния, даже если внешние данные статичны. Таким образом, **CTM умеет итеративно улучшать свое представление о статических входных данных во времени**, приближая процесс мышления, когда мозг обдумывает задачу. Если входные данные последовательны (например, текст), внутренние тики могут отличаться от реальных временных шагов данных, позволяя модели рассуждать дольше, чем длина входной последовательности.
+CTM introduces a separate internal time, discretized into steps called **internal ticks** (*internal ticks*). An internal tick is a step of "thinking" by the model, during which it can update its neuronal states even if external data is static. Thus, **CTM can iteratively refine its representation of static input data over time**, approximating the process of thought, where the brain contemplates a task. If input data is sequential (e.g., text), internal ticks may differ from real data time steps, allowing the model to reason longer than the input sequence length.
 
-На каждом внутреннем шаге $t$ все нейроны обновляют свои состояния через общий **синаптический модуль**. Синаптическая модель – это рекуррентный многослойный персептрон (MLP), структурированный по типу U-Net (с пропусками между слоями). Он вычисляет **пре-активации** ($a^t$) всех $D$ нейронов на следующем шаге, исходя из текущих активаций нейронов и информации из внешних данных. Формально, синаптическая модель $f_{\theta_{\text{syn}}}$ принимает на вход конкатенацию вектора текущих пост-активаций $z^t \in \mathbb{R}^D$ и некоторого внешнего сигнала $o^t$ (результата внимания на данные, подробнее ниже), и выдаёт новый вектор пре-активаций:
+On each internal step $t$, all neurons update their states through a common **synaptic module**. The synaptic model is a recurrent multi-layer perceptron (MLP) structured as a U-Net (with skip connections between layers). It computes the **pre-activations** ($a^t$) of all $D$ neurons for the next step, based on current neuron activations and external data information. Formally, the synaptic model $f_{\theta_{\text{syn}}}$ takes as input the concatenation of the current post-activation vector $z^t \in \mathbb{R}^D$ and some external signal $o^t$ (attention result on data, detailed below), and outputs a new pre-activation vector:
 
 $$
 a^t \;=\; f_{\theta_{\text{syn}}}\!\Big(\big[z^t,\, o^t\big]\Big)\;\in\;\mathbb{R}^D\,,
 $$
 
-где $[z^t, o^t]$ означает конкатенацию двух векторов. Вектор $a^t = (a^t_1, \dots, a^t_D)$ содержит по компоненте для каждого из $D$ нейронов. Этот шаг аналогичен распространению сигналов через синапсы от всех нейронов друг к другу: $f_{\theta_{\text{syn}}}$ моделирует межнейронные связи одновременно для всего слоя нейронов (его параметры $\theta_{\text{syn}}$ общие для всех нейронов слоя). Благодаря U-Net архитектуре, синаптический MLP сочетает глубокую обработку сигналов с сохранением низкоуровневой информации через пропуски, обеспечивая устойчивость градиентов и охват разных масштабов взаимодействий между нейронами.
+where $[z^t, o^t]$ denotes concatenation of the two vectors. The vector $a^t = (a^t_1, \dots, a^t_D)$ contains one component for each of the $D$ neurons. This step is analogous to signal propagation through synapses from all neurons to each other: $f_{\theta_{\text{syn}}}$ models inter-neuronal connections simultaneously for the entire neuron layer (its parameters $\theta_{\text{syn}}$ are shared across all layer neurons). Thanks to the U-Net architecture, the synaptic MLP combines deep signal processing with preservation of low-level information via skips, ensuring gradient stability and capturing interactions across multiple scales.
 
-Полученные пре-активации $a^t$ сразу используются для формирования временной **истории входов каждого нейрона**. Для каждого нейрона $d$ поддерживается окно из последних $M$ значений его пре-активаций:
+The obtained pre-activations $a^t$ are immediately used to form the **temporal history of each neuron's inputs**. For each neuron $d$, a window of its last $M$ pre-activation values is maintained:
 
 $$
 A^t_d \;=\; [\,a^{t-M+1}_d,\; a^{t-M+2}_d,\; \dots,\; a^t_d\,] \;\in\; \mathbb{R}^{M}\,
 $$
 
-а совокупность таких окон для всех нейронов образует матрицу $A^t \in \mathbb{R}^{D\times M}$. Здесь предполагается, что для первых шагов, когда истории ещё недостаточно, используется заполнение нулями или начало истории неполное (в реализации это может быть организовано как кольцевой буфер длины $M$ для каждой компоненты). Эта история $A^t$ служит входом для индивидуальных моделей нейронов, описанных далее. Параметр $M$ определяет, насколько далеко в прошлое “помнит” каждый нейрон – длину временного контекста, влияющего на его текущую активацию.
+and the collective set of such windows for all neurons forms the matrix $A^t \in \mathbb{R}^{D\times M}$. It is assumed that for initial steps, when histories are insufficient, zero-padding or incomplete history initiation is used (in implementation, this may be organized as a circular buffer of length $M$ for each component). This history $A^t$ serves as input to the individual neuron models described below. Parameter $M$ determines how far into the past each neuron "remembers" — the length of the temporal context influencing its current activation.
 
-### **5. Модели уровня нейрона и нейронный тайминг**
+### **5. Neuron-Level Models and Neural Timing**
 
-Главное отличие CTM – у каждого нейрона есть собственная **нейронная модель (NLM)**, которая определяет его выход на основе истории его входных сигналов. В стандартных сетях роль такой модели выполняет простая функция активации (ReLU, сигмоида и т.п.), зависящая лишь от текущей пре-активации. В CTM вместо фиксированной функции используется обучаемый *персональный MLP для каждого нейрона*.
+The key distinction of CTM is that each neuron has its own **neuron model (NLM)**, which determines its output based on the history of its input signals. In standard networks, this role is played by a simple activation function (ReLU, sigmoid, etc.), depending only on the current pre-activation. In CTM, instead of a fixed function, a *personalized MLP is used for each neuron*.
 
-Для $d$-го нейрона обозначим параметры его модели как $\theta_d$. На каждом шаге $t$ модель $d$-го нейрона $g_{\theta_d}$ берёт свой вектор истории входов $A^t_d \in \mathbb{R}^M$ и вычисляет **пост-активацию** (т.е. итоговую активацию нейрона) на следующем шаге $t+1$:
+For neuron $d$, denote its model parameters as $\theta_d$. At each step $t$, the model $g_{\theta_d}$ of neuron $d$ takes its input history vector $A^t_d \in \mathbb{R}^M$ and computes the **post-activation** (i.e., final neuron activation) for the next step $t+1$:
 
 $$
 z_d^{t+1} \;=\; g_{\theta_d}\!\big(A^t_d\big)\,,
 $$
 
-где $z_d^{t+1}$ – скаляр (активация нейрона $d$ на выходе). Вектор всех пост-активаций на шаге $t+1$ есть $z^{t+1} = (z_1^{t+1}, \dots, z_D^{t+1}) \in \mathbb{R}^D$ (соответствует блоку **4** на рис. 1).
+where $z_d^{t+1}$ is a scalar (activation of neuron $d$ at output). The vector of all post-activations at step $t+1$ is $z^{t+1} = (z_1^{t+1}, \dots, z_D^{t+1}) \in \mathbb{R}^D$ (corresponds to block **4** in Figure 1).
 
-Каждая такая модель нейрона – небольшой MLP, имеющий уникальный набор весов $\theta_d$ (не разделяемых с другими нейронами). **Нейронный тайминг** и динамика достигаются тем, что $g_{\theta_d}$ может выучивать различные реакции на паттерны в последовательности своих входов $A^t_d$. Например, нейрон может научиться активироваться только если его входы показывают определённый временной шаблон (всплеск, затухание, осцилляцию и т.д.), чего не способен сделать простой ReLU, игнорирующий прошлое.
+Each such neuron model is a small MLP with a unique set of weights $\theta_d$ (not shared with other neurons). **Neural timing and dynamics** are achieved because $g_{\theta_d}$ can learn different responses to patterns in its input sequence $A^t_d$. For example, a neuron may learn to activate only if its inputs show a specific temporal pattern (spike, decay, oscillation, etc.), which a simple ReLU, ignoring the past, cannot do.
 
-Таким образом, каждый нейрон в CTM – это небольшой *автономный вычислитель во времени*, подобно упрощённому аналогу биологического нейрона с временной суммой и задержкой. Вместе с тем, уровень абстракции остаётся достаточно высок для эффективного обучения градиентными методами, т.к. $M$ обычно невелик, и NLM – это небольшой параметрический модуль. В реализации NLM могут быть устроены, например, как одномерные сверточные фильтры или маленькие полностью связанные сети, действующие независимо на каждый нейрон.
+Thus, each neuron in CTM is a small *autonomous temporal processor*, analogous to a simplified biological neuron with temporal summation and delay. At the same time, the level of abstraction remains sufficiently high for efficient gradient-based training, as $M$ is typically small, and NLM is a small parametric module. In implementation, NLMs may be constructed as, for example, one-dimensional convolutional filters or small fully connected networks operating independently on each neuron.
 
-После вычисления $z^{t+1}$ все пост-активации конкатенируются с (внешним) выходом внимания $o^t$ и подаются обратно в синаптическую модель на следующем такте, замыкая рекуррентный цикл. Эта рекуррентная петля позволяет **итеративно эволюционировать состояние сети**, то есть осуществлять многошаговое рассуждение над входом.
+After computing $z^{t+1}$, all post-activations are concatenated with the (external) attention output $o^t$ and fed back into the synaptic model on the next tick, closing the recurrent loop. This recurrent cycle enables **iterative evolution of the network's state**, i.e., performing multi-step reasoning over the input.
 
-### **6. Представление синхронизации нейронов**
+### **6. Representation of Neuron Synchronization**
 
-После каждого внутреннего тика $t$ CTM обновляет не только состояния нейронов, но и *своё представление о внешнем мире* с учётом **динамики нейронной активности во времени**. Ключевая идея – использовать *синхронизацию* между нейронами как признак для принятия решений.
+After each internal tick $t$, CTM updates not only neuron states but also its *representation of the external world* based on **neuronal activation dynamics over time**. The key idea is to use *synchronization* between neurons as a feature for decision-making.
 
-**Синхронизация** здесь означает степень одновременности или совпадения колебаний в активациях разных нейронов. Для её вычисления CTM хранит историю всех пост-активаций *за весь прошедший внутренний процесс*:
+**Synchronization** here means the degree of simultaneity or alignment of oscillations in activations of different neurons. To compute it, CTM stores the history of all post-activations *throughout the entire internal reasoning process*:
 
 $$
 Z^t \;=\; [\,z^1,\; z^2,\; \dots,\; z^t\,] \;\in\; \mathbb{R}^{D\times t}\,,
 $$
 
-где столбцы матрицы — это векторы активаций на каждом шаге от $1$ до $t$. Эта история $Z^t$ постоянно растёт по мере размышления модели (размер второго измерения равен текущему $t$).
+where the columns of the matrix are the activation vectors at each step from $1$ to $t$. This history $Z^t$ grows continuously as the model reasons (the size of the second dimension equals current $t$).
 
-**Матрица синхронизации** $S^t \in \mathbb{R}^{D\times D}$ определяется как матрица скалярных произведений всех пар временных рядов активаций нейронов:
+The **synchronization matrix** $S^t \in \mathbb{R}^{D\times D}$ is defined as the matrix of scalar products of all pairs of neuronal activation time series:
 
 $$
 S^t \;=\; Z^t \cdot (Z^t)^\top \,.
 $$
 
-Элемент $S^t_{ij}$ равен $\langle Z^t_{i,\cdot},\, Z^t_{j,\cdot}\rangle$, то есть скалярному произведению между временными рядами активаций нейрона $i$ и нейрона $j$ (от шага 1 до $t$). Эта величина будет высокой, если два нейрона проявляли сходную динамику (синхронно активировались и затухали), и низкой — если их паттерны мало коррелируют или сдвинуты во времени.
+Element $S^t_{ij}$ equals $\langle Z^t_{i,\cdot},\, Z^t_{j,\cdot}\rangle$, i.e., the scalar product between the activation time series of neuron $i$ and neuron $j$ (from step 1 to $t$). This value will be high if two neurons exhibited similar dynamics (synchronized activation and decay), and low if their patterns are poorly correlated or temporally shifted.
 
-Таким образом, $S^t$ кодирует **синхронность каждой пары нейронов** как признак.
+Thus, $S^t$ encodes **synchronization between each neuron pair** as a feature.
 
-Однако полная матрица $S^t$ имеет размер $D \times D$ (симметричная, без учёта диагонали — $\frac{D(D-1)}{2}$ уникальных пар), что при большом количестве нейронов может быть очень большим пространством признаков. Например, если $D = 512$, число пар составляет около 130 тысяч.
+However, the full matrix $S^t$ has size $D \times D$ (symmetric, excluding diagonal — $\frac{D(D-1)}{2}$ unique pairs), which can be very large when the number of neurons is large. For instance, if $D = 512$, the number of pairs is about 130 thousand.
 
-Чтобы сделать представление компактным, авторы предлагают взять случайное подмножество элементов $S^t$ фиксированного размера. Они выбирают два набора пар индексов $(i,j)$ заранее, размером $D_{\text{out}}$ и $D_{\text{action}}$ каждый. Первый набор соответствует признакам для **выхода модели**, второй — для **взаимодействия с входом**.
+To make the representation compact, the authors propose taking a random subset of $S^t$ elements of fixed size. They select two sets of index pairs $(i,j)$ in advance, of sizes $D_{\text{out}}$ and $D_{\text{action}}$ each. The first set corresponds to features for **model output**, the second for **interaction with input**.
 
-То есть, из всей матрицы $S^t$ выбираются $D_{\text{out}} + D_{\text{action}}$ значений, образующих два вектора:
+That is, from the full matrix $S^t$, $D_{\text{out}} + D_{\text{action}}$ values are selected, forming two vectors:
 
-- $S_{\text{out}}^t \in \mathbb{R}^{D_{\text{out}}}$ — латентный вектор синхронизации для выхода,
-- $S_{\text{action}}^t \in \mathbb{R}^{D_{\text{action}}}$ — для формирования действия (например, запроса внимания).
+- $S_{\text{out}}^t \in \mathbb{R}^{D_{\text{out}}}$ — latent synchronization vector for output,
+- $S_{\text{action}}^t \in \mathbb{R}^{D_{\text{action}}}$ — for generating action (e.g., attention query).
 
-Эти векторы представляют собой **сжатое представление динамики нейронов**, используемое далее вместо полного $S^t$. В выборе пар нет семантического смысла — они задаются случайно и фиксируются при инициализации модели, а обучение само найдёт, как использовать эти элементы.
+These vectors represent a **compressed representation of neuronal dynamics**, used later instead of the full $S^t$. The selection of pairs carries no semantic meaning — they are randomly assigned and fixed at model initialization, and learning discovers how to use these elements.
 
-Заметьте: размерность синхронизационного пространства растёт квадратично относительно числа нейронов ($\sim D^2/2$), что даёт потенциал для обогащения представления без увеличения числа параметров модели (ведь весовые матрицы $W_{\text{out}}, W_{\text{in}}$ проецируют в это пространство фиксированной размерности). Авторы отмечают, что это открывает путь к более выразительным представлениям по мере роста ширины модели.
+Note: the dimensionality of the synchronization space grows quadratically with the number of neurons ($\sim D^2/2$), providing potential for richer representation without increasing model parameters (since weight matrices $W_{\text{out}}, W_{\text{in}}$ project into a fixed-dimensional space). The authors note this opens a path to more expressive representations as model width increases.
 
-Два латентных вектора синхронизации преобразуются в финальные выходы модели через обучаемые **линейные слои** (матрицы весов): $W_{\text{out}}$ и $W_{\text{in}}$. Проекция синхро-вектора на выход осуществляется как:
+The two latent synchronization vectors are transformed into final model outputs via trainable **linear layers** (weight matrices): $W_{\text{out}}$ and $W_{\text{in}}$. Projection of the sync-vector to output is performed as:
 
 $$
 y^t \;=\; W_{\text{out}} \, S_{\text{out}}^t\,,
 $$
 
-где $y^t$ — выходной вектор модели на шаге $t$ (например, логиты классов для задачи классификации или параметры распределения действий для обучения с подкреплением).
+where $y^t$ is the model output vector at step $t$ (e.g., class logits for classification or action distribution parameters for reinforcement learning).
 
-Аналогично, другой проекцией получают вектор для *взаимодействия с данными*. Его можно интерпретировать как внутреннее «намерение» модели по отношению к входу. В CTM он используется как **запрос внимания** (*attention query*) к внешним данным:
+Similarly, the other projection yields a vector for *interaction with data*. It can be interpreted as the model's internal "intention" toward the input. In CTM, it is used as an **attention query** (*attention query*) to external data:
 
 $$
 q^t \;=\; W_{\text{in}} \, S_{\text{action}}^t\,.
 $$
 
-Этот запрос $q^t$ служит для извлечения актуальной информации из входных данных с помощью механизма **кросс-внимания**. То есть CTM решает, на что обратить внимание, *на основе синхронизированной активности своих нейронов*.
+This query $q^t$ is used to extract relevant information from input data via a **cross-attention** mechanism. That is, CTM decides what to attend to, *based on synchronized neuronal activity*.
 
-В реализации обычно используется стандартный модуль внимания: $q^t$ — запрос, а *ключи* $K$ и *значения* $V$ получаются путём пропускания исходных данных через сетевой экстрактор признаков (например, ResNet для изображений). Так формируется **выход внимания** $o^t$:
+In implementation, a standard attention module is used: $q^t$ is the query, while *keys* $K$ and *values* $V$ are obtained by passing the input data through a feature extractor network (e.g., ResNet for images). This forms the **attention output** $o^t$:
 
 $$
 o^t \;=\; \text{Attention}\!\big(Q = q^t,\; K=F(x),\; V=F(x)\big)\,,
 $$
 
-где $F(x)$ — признаки входных данных $x$ (например, набор признаков каждого пиксельного участка изображения).
+where $F(x)$ are features of input data $x$ (e.g., a set of features for each image patch).
 
-Выход внимания $o^t$ — это вектор фиксированной длины (обычно равной размерности $z^t$), содержащий “врезанную” из данных информацию, релевантную текущему запросу $q^t$. В простейшем случае можно представить $o^t$ как взвешенную сумму признаков входа, где веса — коэффициенты внимания, зависящие от $q^t$.
+The attention output $o^t$ is a fixed-length vector (usually equal to $z^t$'s dimension) containing "extracted" information from the input relevant to the current query $q^t$. In the simplest case, $o^t$ can be viewed as a weighted sum of input features, where weights are attention coefficients depending on $q^t$.
 
-Этот вектор $o^t$ затем, как описано выше, **подаётся обратно в синаптический модуль на следующем шаге** (конкатенируясь с $z^t$).
+This vector $o^t$ is then, as described above, **fed back into the synaptic module on the next step** (concatenated with $z^t$).
 
-Тем самым, CTM на каждом тике обновляет своё внутреннее состояние ($z$) *и* адаптирует своё восприятие входных данных ($o$) под это состояние, аналогично тому, как мозг может активно выбирать, на что смотреть или думать дальше.
+Thus, CTM on each tick updates its internal state ($z$) *and* adapts its perception of input data ($o$) to this state, analogous to how the brain can actively choose what to look at or think about next.
 
-В совокупности, описанный цикл определяет **динамику модели CTM**. На практике CTM может не всегда использовать все $T$ шагов для каждой задачи — подробнее об этом см. в разделе о механизме адаптивного останова.
+Collectively, the described cycle defines the **dynamics of the CTM model**. In practice, CTM may not always use all $T$ steps for each task — see the section on the adaptive stopping mechanism for details.
 
-Обратим внимание: **CTM можно рассматривать как особый вид рекуррентной нейросети**. Вектор $z^t$ играет роль скрытого состояния, которое эволюционирует во времени, а через $y^t$ модель может выдавать промежуточные результаты. Однако, в отличие от стандартных RNN, здесь скрытое состояние обновляется сложным образом: с участием индивидуальных нейронных динамик (NLM) и механизма cross-attention к внешним данным.
+Note: **CTM can be viewed as a special type of recurrent neural network**. Vector $z^t$ plays the role of a hidden state evolving over time, and through $y^t$, the model can emit intermediate results. However, unlike standard RNNs, here the hidden state is updated in a complex way: involving individual neuronal dynamics (NLM) and a cross-attention mechanism to external data.
 
-**"Мыслительный процесс" CTM** — это чередование внутреннего моделирования нейронных взаимодействий (через $f_{\text{syn}}$ и синхронизацию) и активного считывания данных (через $q^t$ и $o^t$). Такая архитектура приводит к богатому пространству внутренних состояний и, как показали эксперименты, к появлению интерпретируемых стратегий решения задач. Например, при решении лабиринтов CTM внутренне "рисует" путь в лабиринте во время рассуждения.
+**CTM's "thinking process"** is an alternation of internal modeling of neuronal interactions (via $f_{\text{syn}}$ and synchronization) and active data reading (via $q^t$ and $o^t$). This architecture leads to a rich space of internal states and, as experiments show, to interpretable problem-solving strategies. For example, when solving mazes, CTM internally "draws" the path during reasoning.
 
-### **7. Формализация функции потерь**
+### **7. Formalization of the Loss Function**
 
-**Обучение CTM** осложняется тем, что модель выдаёт предсказания на каждом внутреннем шаге. Возникает вопрос: как вычислить ошибку и обновлять веса, учитывая всю временную динамику?
+Training CTM is complicated by the fact that the model produces predictions at each internal step. This raises the question: how to compute error and update weights while accounting for the full temporal dynamics?
 
-Авторы вводят специальную схему оптимизации, стимулирующую модель учиться решать задачи как можно быстрее (за меньшее число тиков), но при этом не жертвовать точностью на сложных случаях.
+The authors introduce a specialized optimization scheme that encourages the model to learn to solve tasks as quickly as possible (in fewer ticks), without sacrificing accuracy on complex cases.
 
-Пусть $y^t$ — предсказание модели на внутреннем шаге $t$ (например, распределение вероятностей по классам), а $y_{\text{true}}$ — правильный ответ. Для каждого тика можно вычислить стандартную функцию потерь $L^t$, например, кросс-энтропию для классификации:
+Let $y^t$ be the model’s prediction at internal step $t$ (e.g., a probability distribution over classes), and $y_{\text{true}}$ be the ground truth. For each tick, a standard loss function $L^t$ can be computed, such as cross-entropy for classification:
 
 $$
 L^t = \text{CrossEntropy}(y^t,\; y_{\text{true}})\,.
 $$
 
-Кроме того, определяется **мера уверенности** модели на шаге $t$. Авторы используют простую метрику уверенности $C^t = 1 - H^t$, где $H^t$ — нормированная энтропия выходного распределения $y^t$. Значение $C^t$ близко к 1, когда модель уверена (распределение $y^t$ сосредоточено на одном варианте), и близко к 0, когда распределение плоское (неуверенность).
+Additionally, a **confidence measure** at step $t$ is defined. The authors use a simple confidence metric $C^t = 1 - H^t$, where $H^t$ is the normalized entropy of the output distribution $y^t$. The value $C^t$ is close to 1 when the model is confident (the distribution $y^t$ is concentrated on one option), and close to 0 when the distribution is flat (high uncertainty).
 
-Таким образом, для каждого $t$ имеем пару $(L^t, C^t)$.
+Thus, for each $t$, we have a pair $(L^t, C^t)$.
 
-Чтобы свести эти значения к единому скалярному лоссу для обучения, выбираются два особых момента во внутренней динамике:
+To reduce these values to a single scalar loss for training, two special moments in the internal dynamics are selected:
 
-- $t_1$ — шаг минимальной ошибки:  
+- $t_1$ — the step of minimum error:  
   $$
   t_1 = \arg\min_{t} L^t
   $$  
-  Это внутренний тик, на котором модель наиболее близко подошла к правильному ответу (возможно, впервые угадала правильно).
+  This is the internal tick at which the model most closely approached the correct answer (perhaps for the first time guessing correctly).
 
-- $t_2$ — шаг максимальной уверенности:  
+- $t_2$ — the step of maximum confidence:  
   $$
   t_2 = \arg\max_{t} C^t
   $$  
-  Этот тик характеризует момент, когда модель наиболее уверена в своём предсказании.
+  This tick captures the moment when the model is most confident in its prediction.
 
-Итоговая функция потерь складывает ошибки на этих двух шагах, причём шаг минимальной ошибки учитывается с удвоенным коэффициентом:
+The final loss function sums the errors at these two steps, with the minimum-error step weighted double:
 
 $$
 L_{\text{final}} = 2 \cdot L^{t_1} + L^{t_2}\,.
 $$
 
-Такой подход заставляет градиенты одновременно:
+This approach simultaneously directs gradients to:
 
-- Улучшать качество ответа в тот момент, когда модель *впервые* получает хороший результат ($L^{t_1}$),
-- Повышать уверенность, когда она уже считает ответ правильным ($L^{t_2}$).
+- Improve the quality of the answer at the moment the model *first* achieves a good result ($L^{t_1}$),
+- Increase confidence when the model already considers the answer correct ($L^{t_2}$).
 
-Эта схема обладает рядом преимуществ:
+This scheme offers several advantages:
 
-1. Модель не полагается только на последний внутренний шаг $T$: ей выгодно решать задачу раньше, если может (иначе $L^{t_1}$ будет велик и даст значительный вклад).
-2. Если на каком-то шаге модель уже уверенно права, ошибка на этом шаге очень мала, и финальный лосс тоже снижается — то есть модель вознаграждается за *раннее уверенное решение*.
-3. Если задача сложная и требует всех $T$ шагов размышления, модель всё равно может постепенно снижать ошибку к концу и повышать уверенность. Тогда оба термина $t_1$ и $t_2$ совпадут с $T$, и штраф будет равен $2L^T + L^T = 3L^T$. Это стимулирует модель улучшать точность на последнем шаге, но при первой же возможности переносить успех на более ранние шаги, чтобы избежать утроения ошибки на конце.
+1. The model does not rely solely on the final internal step $T$: it is incentivized to solve the task earlier if possible (otherwise $L^{t_1}$ will be large and contribute significantly).
+2. If on some step the model is already confidently correct, the error on that step is very small, reducing the final loss — thus rewarding the model for an *early confident solution*.
+3. If the task is complex and requires all $T$ reasoning steps, the model can still gradually reduce error toward the end and increase confidence. Then both terms $t_1$ and $t_2$ coincide with $T$, and the penalty becomes $2L^T + L^T = 3L^T$. This encourages the model to improve accuracy on the final step, but also to shift success to earlier steps whenever possible, to avoid tripling the final error.
 
-### **8. Адаптивная глубина рассуждения**
+### **8. Adaptive Reasoning Depth**
 
-Эта стратегия обучения фактически создаёт **внутренний механизм адаптивной сложности вычислений**:
+This training strategy effectively creates an **internal mechanism for adaptive computational complexity**:
 
-- Простые примеры модель научается решать за малое число тиков, ведь можно получить низкий $L^t$ и высокий $C^t$ задолго до $T$.
-- Сложные примеры требуют больше внутренних шагов, и модель вынужденно «думает дольше».
+- Simple examples are learned by the model in few ticks, since low $L^t$ and high $C^t$ can be achieved long before $T$.
+- Complex examples require more internal steps, forcing the model to “think longer.”
 
-В результате CTM демонстрирует способность **Adaptive Compute**: она сама регулирует, сколько внутренних итераций задействовать для разных входов.
+As a result, CTM demonstrates **Adaptive Compute** capability: it autonomously regulates how many internal iterations to employ for different inputs.
 
-На практике при использовании CTM можно задать порог по уверенности и останавливать внутренний цикл, как только $C^t$ превысил, например, 0.8 или 0.9. Исследования показывают:
+In practice, when using CTM, one can set a confidence threshold and terminate the internal loop as soon as $C^t$ exceeds, for example, 0.8 or 0.9. Research shows:
 
-- При высоком пороге (требуется очень высокая уверенность) модель зачастую использует максимальное число шагов.
-- При низком пороге — останавливается раньше.
-- И в обоих случаях достигается высокая точность.
+- With a high threshold (requiring very high confidence), the model often uses the maximum number of steps.
+- With a low threshold, it stops earlier.
+- In both cases, high accuracy is achieved.
 
-Таким образом, **механизм принятия решения об останове** у CTM основан на её собственной уверенности в предсказании. Это похоже на то, как человек может прекратить обдумывание задачи, когда уверен в решении.
+Thus, the **mechanism for deciding when to stop** in CTM is based on its own confidence in the prediction. This resembles how a human may cease contemplating a problem once confident in the solution.
 
-В экспериментах на ImageNet авторы демонстрируют, что CTM при пороге уверенности 0.9 достигает почти той же точности, что и при использовании фиксированного максимального числа шагов, но в среднем выполняет меньше итераций на простых классах изображений. Это подтверждает, что CTM эффективно учится не тратить "мыслительные ресурсы" там, где это не нужно, и напротив, задействует больше внутренних вычислений для трудных случаев.
+In experiments on ImageNet, the authors demonstrate that CTM, at a confidence threshold of 0.9, achieves nearly the same accuracy as with a fixed maximum number of steps, but on average performs fewer iterations on simpler image classes. This confirms that CTM efficiently learns not to waste “thinking resources” where unnecessary, and conversely, to deploy more internal computation for difficult cases.
 
-### Сравнение со стандартными подходами
+### Comparison with Standard Approaches
 
-Стоит подчеркнуть, что вышеописанный подход — лишь один из возможных. Теоретически, можно было бы обучать модель только на финальном выходе $y^T$, либо суммировать ошибки всех шагов. Однако:
+It is worth emphasizing that the above approach is merely one possibility. Theoretically, one could train the model solely on the final output $y^T$, or sum errors across all steps. However:
 
-- Первый вариант привёл бы к тому, что промежуточные шаги остаются неучеными (модель могла бы просто "ждать" до последнего шага, чтобы выдать ответ).
-- Второй вариант (усреднение по всем $t$) мог бы мешать модели специализировать ранние vs поздние шаги.
+- The first variant would leave intermediate steps untrained (the model could simply “wait” until the final step to output an answer).
+- The second variant (averaging over all $t$) might hinder the model from specializing early vs. late steps.
 
-Выбранная же схема с $t_1$ и $t_2$ даёт своеобразный **self-curriculum**:
+The chosen scheme with $t_1$ and $t_2$ provides a kind of **self-curriculum**:
 
-- Модель сначала учится хотя бы к концу серии тиков решать задачу,
-- Затем старается достичь этого раньше, повышая уверенность и уменьшая лосс промежуточных шагов.
-- Это постепенно движет решение «влево» по времени, но не строгим принуждением, а мягко — когда модель готова.
+- The model first learns to solve the task at least by the end of the tick sequence,
+- Then strives to achieve this earlier, increasing confidence and reducing intermediate loss.
+- This gradually shifts the solution “leftward” in time—not by rigid enforcement, but gently, as the model becomes ready.
 
-Таким образом, внутреннее время CTM становится осмысленным:
+Thus, CTM’s internal time becomes meaningful:
 
-> *Ранние тики учатся решать простые аспекты задачи, поздние — более сложные, либо доводить уверенность до нужного уровня.*
+> *Early ticks learn to solve simple aspects of the task; later ticks handle more complex aspects or elevate confidence to the required level.*
 
 ---
 
-### Заключение
+### Conclusion
 
-Continuous Thought Machine представляет собой интересную и инновационную архитектуру нейросети, которая делает важный шаг к сближению искусственных и биологических нейросетей. Ее способность к внутреннему мышлению, основанному на синхронизации нейронов и явном моделировании времени, открывает новые возможности для развития ИИ. Однако, для полноценной оценки ее потенциала и практической применимости, требуется проведение дополнительных исследований и экспериментов, направленных на устранение текущих ограничений и проверку эффективности в различных сценариях использования.
+Continuous Thought Machine is an intriguing and innovative neural network architecture that takes a significant step toward bridging artificial and biological neural networks. Its capacity for internal reasoning, grounded in neuron synchronization and explicit modeling of time, opens new avenues for AI development. However, for a full assessment of its potential and practical applicability, additional research and experiments are required to address current limitations and validate effectiveness across diverse use cases.
 
+**What worked well:**
 
-**Что понравилось:**
+- **Biological plausibility** — CTM explicitly models key biological mechanisms such as spike-timing-dependent plasticity (STDP) and neuronal synchronization, making it more akin to the biological brain.
+- **Novelty of approach** — Introducing an internal recurrent time dimension and using neuron synchronization as the primary decision-making mechanism represents an original and innovative contribution to deep learning.
 
-- **Биологическая правдоподобность** - CTM явно моделирует важные биологические механизмы, такие как зависимая от времени спайковая пластичность (STDP) и синхронизация нейронной активности, что делает ее более похожей на биологический мозг.
+**What raises concerns:**
 
-- **Новизна подхода** - введение внутреннего рекуррентного измерения времени и использование синхронизации нейронов как основного механизма принятия решений представляет собой оригинальный и инновационный подход в области глубокого обучения.
-
-
-**Что вызывает сомнения:**
-
-- **Отсутствие сравнительного анализа** - отсутствие подробного сравнения с другими современными архитектурами, было бы интересно посмотреть сравнительный анализ разных архитектур на разных кейсах.
-
-- **Необоснованный выбор случайных пар нейронов** - метод выбора случайных подмножеств пар нейронов для представления синхронизации. Святой ранодом...
-
-- **Ограниченные данные о масштабируемости** - нет информации о том, как модель будет масштабироваться при увеличении количества нейронов или сложности задач.
+- **Lack of comparative analysis** — Absence of detailed comparison with other modern architectures; a comparative analysis across different benchmarks would be valuable.
+- **Unjustified choice of random neuron pairs** — The method of selecting random subsets of neuron pairs to represent synchronization. Pure randomness...
+- **Limited data on scalability** — No information on how the model scales with increasing numbers of neurons or task complexity.

@@ -1,216 +1,212 @@
 ![Figure_0](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-16/assets/Figure_0.png)
 
-# **Эра мультиагентов? Как LangChain, только на стероидах: протокол Agent2Agent (A2A) от Google + MCP**
+# **The Age of Multi-Agents? LangChain, but on Steroids: Google’s Agent2Agent (A2A) Protocol + MCP**
 
-## **0. Формализация**
+## **0. Formalization**
 
-Предлагаю сначала дать определение понятию "протокол": 
+Let’s begin by defining the term "protocol":
 
-**Формальное определение:**
+**Formal Definition:**
 
-**Протокол** (в контексте компьютерных сетей и технологий) — это набор заранее определённых правил и стандартов, которые регулируют взаимодействие между устройствами, программами или системами. Он задаёт:  
-- **формат данных** (как информация структурирована и кодируется); 
-- **последовательность действий** (например, установка соединения, передача данных, завершение сеанса);
-- **методы обработки ошибок** и гарантии доставки информации.  
+**Protocol** (in the context of computer networks and technologies) is a set of predefined rules and standards that govern interactions between devices, programs, or systems. It specifies:
+- **Data format** (how information is structured and encoded);
+- **Sequence of actions** (e.g., connection establishment, data transfer, session termination);
+- **Error handling methods** and delivery guarantees.
 
-Протоколы обеспечивают **совместимость** между разными устройствами и системами, позволяя им понимать друг друга, даже если они созданы разными производителями.  
+Protocols ensure **compatibility** between different devices and systems, enabling them to understand each other even if produced by different manufacturers.
 
-**Примеры**:  
-- **HTTP** — для передачи веб-страниц;  
-- **TCP/IP** — для разбивки и сборки данных в интернете;
-- **FTP** — для обмена файлами.
+**Examples:**
+- **HTTP** — for transferring web pages;
+- **TCP/IP** — for breaking down and reassembling data over the internet;
+- **FTP** — for file exchange.
 
-**Определение протокола в данном контексте:**
+**Definition of protocol in this context:**
 
-Протокол — это стандартизированный набор правил, определяющий:  
-- **Формат данных** (например, JSON, HTTP-запросы);  
-- **Порядок взаимодействия** (обнаружение агентов, выполнение задач, обмен сообщениями);
-- **Безопасность** (аутентификация, шифрование);
-- **Поддержку различных сценариев** (долгие задачи, мультимодальность).  
+A protocol is a standardized set of rules defining:
+- **Data format** (e.g., JSON, HTTP requests);
+- **Interaction sequence** (agent discovery, task execution, message exchange);
+- **Security** (authentication, encryption);
+- **Support for diverse scenarios** (long-running tasks, multimodality).
 
-Оба протокола соответствуют этому определению, но решают разные задачи в экосистеме ИИ.
+Both protocols adhere to this definition but address different challenges within the AI ecosystem.
 
+## **1. Background**
 
-## **1. Предыстория**
+### **Growth of AI Agents and Interaction Challenges**
 
-### **Рост числа агентов ИИ и проблемы взаимодействия**
+In recent years, there has been explosive development and adoption of agent technologies in the field of artificial intelligence (AI). AI agents are designed as software entities capable of perceiving their environment, making reasoned decisions, and autonomously performing tasks. They have demonstrated significant potential across numerous domains—including customer service, enterprise automation, and scientific research—and are viewed as the next frontier in business operations. However, as the number of agents created by different vendors and based on diverse frameworks increases, a serious problem emerges: compatibility.
 
-В последние годы в области искусственного интеллекта (ИИ) наблюдается бурное развитие и применение агентных технологий. Агенты ИИ разработаны как программные объекты, которые могут воспринимать окружающую среду, принимать обоснованные решения и выполнять задачи автономно. Они продемонстрировали большой потенциал во многих областях, включая обслуживание клиентов, автоматизацию предприятий и научные исследования, и рассматриваются как следующий рубеж в бизнес- операциях. Однако по мере увеличения числа агентов, созданных разными поставщиками и основанных на разных фреймворках, возникает серьезная проблема: совместимость. 
+The current AI agent ecosystem is fragmented. Each agent often operates in an isolated environment, like an information island, making efficient communication, collaboration, or information exchange between them difficult. This lack of interoperability severely limits the potential of multi-agent systems to solve complex enterprise tasks and automate cross-system processes. To fully unlock the potential of AI agents, it is critical to break down these barriers and enable seamless interaction between agents.
 
-Текущая экосистема агентов ИИ фрагментирована. Каждый агент часто действует в изолированной среде, словно на информационном острове, что затрудняет для них эффективное общение, сотрудничество или обмен информацией. Такое отсутствие взаимодействия существенно ограничивает потенциал многоагентных систем для решения сложных корпоративных задач и автоматизации кросс-системных процессов. Чтобы в полной мере раскрыть потенциал агентов ИИ, крайне важно разрушить эти барьеры и добиться бесперебойного взаимодействия между агентами.
+### **Background and Goal of Google’s A2A Agreement**
 
-### **Предыстория и цель соглашения A2A компании Google**
+To address this challenge, Google officially unveiled a new open protocol named Agent2Agent (A2A) at the Google Cloud Next '25 conference held on April 9, 2025. The primary goal of the A2A protocol is to provide a common, open standard enabling AI agents to securely communicate, exchange information, and coordinate actions across different platforms, frameworks, and vendors. Google claims that the development of A2A is grounded in the company’s experience scaling intelligent systems internally and is designed to solve practical problems encountered when deploying large-scale multi-agent systems for customers.
 
-Чтобы решить эту задачу, Google официально представила новый открытый протокол под названием Agent2Agent (A2A) на конференции Google Cloud Next '25, состоявшейся 9 апреля 2025 года. Основная цель протокола A2A — предоставить общий открытый стандарт для агентов ИИ, позволяющий им безопасно общаться, обмениваться информацией и координировать действия на разных платформах, фреймворках и у разных поставщиков4 . Google утверждает, что разработка протокола A2A основана на опыте компании в области масштабирования интеллектуальных систем внутри компании и призвана решать практические проблемы, возникающие при развертывании крупномасштабных многоагентных систем для клиентов. 
+With A2A, Google hopes to empower developers to build applications capable of connecting to any other agent adhering to the protocol, allowing users to combine agents from different vendors to create solutions tailored to their specific needs.
 
-С помощью A2A Google надеется дать разработчикам возможность создавать приложения, которые смогут подключаться к любому другому агенту, следующему протоколу, и предоставить пользователям возможность комбинировать агентов от разных поставщиков.
+## **2. Overview of the A2A Protocol**
 
-## **2. Обзор протокола A2A**
+### **Basic Definition and Core Value Proposition**
 
-### **Базовое определение и основное ценностное предложение**
+A2A is defined as an open protocol designed to enable AI agents to securely communicate, exchange information, and coordinate actions across different platforms and vendors. Its core value proposition lies in opening a "new era of agent interaction," increasing agent autonomy, significantly boosting productivity, and potentially reducing long-term costs by advancing innovation and enabling more powerful, universal agent systems. The protocol allows users to flexibly combine agents from different vendors to construct solutions meeting their specific requirements.
 
-A2A определяется как открытый протокол, разработанный для того, чтобы позволить агентам ИИ безопасно общаться, обмениваться информацией и координировать действия на разных платформах и у разных поставщиков. Его основное ценностное предложение заключается в том, чтобы открыть «новую эру взаимодействия агентов», которая увеличит автономность агентов, многократно увеличит производительность и потенциально сократит долгосрочные затраты за счет продвижения инноваций и создания более мощных и универсальных систем агентов. Протокол позволяет пользователям гибко комбинировать агентов от разных поставщиков для создания решений, отвечающих их конкретным потребностям.
+The timing and market positioning of the A2A protocol are noteworthy. It was launched after the Model Context Protocol (MCP) by Anthropic (discussed here: https://habr.com/ru/articles/893482/) attracted significant market attention and gained industry adoption. MCP primarily addresses the challenge of how intelligent agents connect to and utilize external tools and data sources. Its success confirmed the value of standardization in the intelligent agent domain. Google has closely observed this trend and identified the next key area requiring standardization: interaction between intelligent agents. Google explicitly positions A2A as a complement to MCP, not a competitor. This positioning strategy allows A2A to leverage the existing momentum of MCP, lowering the adoption barrier for developers and enterprises and avoiding market resistance that might arise from direct competition.
 
-Заслуживают внимания сроки появления и позиционирование на рынке протокола A2A. Он был запущен после того, как протокол контекста модели (MCP) от компании Anthropic (о нам мы писали тут https://habr.com/ru/articles/893482/) привлек значительное внимание рынка и был принят в отрасли. MCP в основном решает проблему того, как интеллектуальные агенты подключаются и используют внешние инструменты и источники данных. Его успех подтвердил ценность стандартизации в области интеллектуальных агентов. Компания Google внимательно следит за этой тенденцией и определяет следующую ключевую область, требующую стандартизации: взаимодействие между интеллектуальными агентами. Google явно позиционирует A2A как дополнение к MCP, а не как конкурента. Такая стратегия позиционирования позволяет A2A использовать существующий импульс MCP, снижая порог принятия нового протокола разработчиками и предприятиями и избегая сопротивления рынка, которое может возникнуть в результате прямой конкуренции. 
+Thus, Google can establish standards in a key adjacent area of the agent ecosystem (inter-agent interaction) while tightly integrating it with its broader cloud AI strategy (e.g., Vertex AI, Agentspace, Agent Development Kit, etc.), simultaneously stimulating enterprise adoption by emphasizing a strong partner ecosystem. This suggests Google is attempting to shape and direct the evolution of the agent ecosystem through what appears to be a collaborative approach (built upon existing standards), helping to channel agent interaction through or via cloud infrastructure.
 
-Таким образом, Google может устанавливать стандарты в ключевой смежной области экосистемы агентов (межагентное взаимодействие) и тесно интегрировать ее со своей более широкой стратегией облачного ИИ (такой как Vertex AI, Agentspace, Agent Development Kit и т.д.), одновременно стимулируя внедрение на корпоративном рынке, подчеркивая сильную партнерскую экосистему. Это говорит о том, что Google пытается сформировать и направить развитие экосистемы агентов посредством, казалось бы, коллективного подхода (основанного на существующих стандартах), который может помочь направить взаимодействие агентов в облачную инфраструктуру или через нее.
-
-## **3. Цели и основные принципы дизайна**
+## **3. Goals and Core Design Principles**
 
 ![Figure_1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-16/assets/Figure_01.png)
 
-При разработке протокола A2A компания Google следовала нескольким основным принципам, чтобы обеспечить его эффективность, простоту использования и безопасность, особенно для сценариев приложений корпоративного уровня.
+In developing the A2A protocol, Google followed several core principles to ensure its effectiveness, usability, and security—particularly for enterprise-level application scenarios.
 
-**Используйте возможности агентов:** A2A предназначен для поддержки взаимодействия агентов естественным образом, даже если эти агенты не используют общую внутреннюю память, инструменты или контекст. Цель протокола — обеспечить реализацию настоящих сценариев многоагентного взаимодействия, а не просто рассматривать одного агента как простой «инструмент» или API-интерфейс для другого агента. Это контрастирует с простой интеграцией API или расширенными вызовами инструментов, которые часто ограничивают гибкость и глубину взаимодействия.
+**Leverage Agent Capabilities:** A2A is designed to support natural agent-to-agent interaction, even when agents do not share a common internal memory, tools, or context. The protocol’s goal is to enable genuine multi-agent interaction scenarios—not merely treating one agent as a simple "tool" or API endpoint for another. This contrasts with simple API integrations or extended function calls, which often limit interaction flexibility and depth.
 
-**Создание на основе существующих стандартов:** для упрощения интеграции и обучения, протокол A2A создан на основе широко используемых существующих технологических стандартов, включая HTTP, Server-Sent Events (SSE) и JSON-RPC. Выбор этих зрелых технологий означает, что предприятиям будет проще интегрировать A2A в существующую IT-инфраструктуру, которую они используют каждый день.
+**Built on Existing Standards:** To simplify integration and learning, the A2A protocol is built upon widely adopted existing technological standards, including HTTP, Server-Sent Events (SSE), and JSON-RPC. The selection of these mature technologies means enterprises can more easily integrate A2A into their existing IT infrastructure used daily.
 
-**Безопасность по умолчанию:** безопасность является краеугольным камнем архитектуры протокола A2A. Протокол предназначен для поддержки механизмов аутентификации и авторизации на уровне предприятия. На момент выпуска его модель безопасности была приведена в соответствие со схемой аутентификации OpenAPI, что обеспечивало совместимость с принятыми в отрасли стандартами безопасности.
+**Security by Default:** Security is a cornerstone of the A2A protocol architecture. The protocol is designed to support enterprise-grade authentication and authorization mechanisms. At release, its security model was aligned with the OpenAPI authentication scheme, ensuring compatibility with industry-standard security practices.
 
-**Поддержка длительных задач и обратная связь в реальном времени:** совместная работа агентов часто подразумевает выполнение сложных задач, выполнение которых может занять часы или даже дни, а иногда и требует участия человека. Протокол A2A разработан таким образом, чтобы быть достаточно гибким для выполнения как задач быстрого реагирования, так и длительных углубленных исследований или сложных процессов. На протяжении всего выполнения миссии, протокол способен обеспечивать обратную связь, уведомления и обновления статуса в режиме реального времени, что, скорее всего, достигается за счет использования технологии SSE.
+**Support for Long-Running Tasks and Real-Time Feedback:** Collaborative agent work often involves executing complex tasks that may take hours or even days, sometimes requiring human intervention. The A2A protocol is designed to be sufficiently flexible to handle both rapid-response tasks and long-running, in-depth investigations or complex processes. Throughout task execution, the protocol enables real-time feedback, notifications, and status updates—likely achieved through Server-Sent Events (SSE).
 
-**Независимость от модальности:** понимая, что мир агентов не ограничивается текстовыми взаимодействиями, протокол A2A разработан таким образом, чтобы быть независимым от модальности. Он разработан для поддержки различных способов взаимодействия, включая потоковую передачу аудио и видео, чтобы адаптироваться к разнообразным потребностям будущих взаимодействий интеллектуальных агентов.
+**Modality Independence:** Recognizing that the agent world extends beyond text-based interactions, the A2A protocol is designed to be modality-agnostic. It supports various interaction modes, including audio and video streaming, to adapt to diverse future needs of intelligent agent interactions.
 
-В совокупности эти принципы проектирования воплощают прагматичную стратегию, направленную на широкое внедрение протокола в корпоративных средах. Выбор зрелых веб-стандартов (HTTP, JSON-RPC, SSE) и следование модели безопасности OpenAPI, значительно снижает технический порог и затраты предприятий на интеграцию. Вместо того чтобы вкладывать огромные ресурсы в изучение совершенно нового технологического стека или парадигмы, компании могут напрямую использовать существующую инфраструктуру и технический опыт. 
+Collectively, these design principles embody a pragmatic strategy aimed at broad adoption within enterprise environments. The choice of mature web standards (HTTP, JSON-RPC, SSE) and adherence to the OpenAPI security model significantly reduces the technical barrier and integration costs for enterprises. Instead of investing massive resources in learning an entirely new technology stack or paradigm, companies can directly leverage existing infrastructure and technical expertise.
 
-Кроме того, поддержка «непрозрачных агентов», то есть агентов, которые могут взаимодействовать, не раскрывая своего внутреннего состояния или рассуждений, напрямую решает основные проблемы предприятия, связанные с безопасностью, защитой интеллектуальной собственности и модульностью системы при работе с агентами от разных поставщиков или из разных бизнес-подразделений. Такая прагматичная, ориентированная на спрос предприятий конструкция увеличивает вероятность того, что A2A станет фактическим стандартом отрасли за счет снижения сопротивления внедрению.
+Moreover, support for "opaque agents"—agents that can interact without revealing their internal state or reasoning—directly addresses key enterprise concerns related to security, intellectual property protection, and system modularity when working with agents from different vendors or business units. This pragmatic, demand-driven design increases the likelihood that A2A will become the de facto industry standard by reducing resistance to adoption.
 
-## **4. Техническая архитектура и основные функции**
+## **4. Technical Architecture and Key Features**
 
-### **Механизм коммуникации**
+### **Communication Mechanism**
 
-Уровень связи протокола A2A построен на следующих широко используемых стандартах:
+The A2A protocol’s communication layer is built on the following widely adopted standards:
 
-- **HTTP:** базовый протокол запроса/ответа, используемый для базовых коммуникационных взаимодействий между агентами. HTTP обеспечивает фундаментальную инфраструктуру для всех взаимодействий A2A и делает протокол легко интегрируемым с существующими веб-сервисами и корпоративными системами. Использование HTTP обеспечивает практичность и упрощает реализацию протокола, что важно для быстрого внедрения в корпоративных средах.
+- **HTTP:** The foundational request/response protocol used for basic communication interactions between agents. HTTP provides the fundamental infrastructure for all A2A interactions and makes the protocol easily integrable with existing web services and enterprise systems. Using HTTP ensures practicality and simplifies implementation, which is critical for rapid adoption in enterprise environments.
 
-- **SSE (Server-Sent Events):** используется для реализации одностороннего потока данных в реальном времени от сервера к клиенту. Это особенно важно для длительных задач, поскольку позволяет удаленному агенту отправлять обновления статуса, уведомления или промежуточные результаты клиентскому агенту без необходимости постоянного опроса со стороны клиента. SSE позволяет удаленным агентам транслировать обновления клиентам по мере выполнения работы, что обеспечивает эффективность при длительных операциях. Для долгосрочных задач серверы, поддерживающие функцию потоковой передачи, могут использовать метод `tasks/sendSubscribe`, при котором клиент получает событийные уведомления, содержащие сообщения `TaskStatusUpdateEvent` или `TaskArtifactUpdateEvent` для отслеживания выполнения в режиме реального времени.
+- **SSE (Server-Sent Events):** Used to implement one-way real-time data streaming from server to client. This is especially important for long-running tasks, as it allows a remote agent to send status updates, notifications, or intermediate results to the client agent without requiring constant polling. SSE enables remote agents to broadcast updates to clients as work progresses, ensuring efficiency during long operations. For long-running tasks, servers supporting streaming can use the `tasks/sendSubscribe` method, where the client receives event notifications containing `TaskStatusUpdateEvent` or `TaskArtifactUpdateEvent` messages to track real-time progress.
 
-- **JSON-RPC:** облегченный протокол удаленного вызова процедур (RPC), использующий JSON в качестве формата данных. A2A использует JSON-RPC для стандартизации структурированных вызовов методов и ответов между агентами. A2A использует JSON-RPC 2.0 для обмена сообщениями, что обеспечивает простой, независимый от языка способ выполнения удаленных вызовов процедур с использованием формата данных JSON. Базовая структура запросов JSON-RPC включает поле `method` (строка, идентифицирующая операцию, например "tasks/send"), `params` (объект или массив с параметрами для метода) и `id` (уникальный идентификатор для корреляции запроса и ответа).
+- **JSON-RPC:** A lightweight remote procedure call (RPC) protocol using JSON as its data format. A2A uses JSON-RPC to standardize structured method calls and responses between agents. A2A employs JSON-RPC 2.0 for message exchange, providing a simple, language-independent way to perform remote procedure calls using JSON data format. The basic JSON-RPC request structure includes a `method` field (string identifying the operation, e.g., "tasks/send"), `params` (an object or array containing parameters for the method), and `id` (a unique identifier correlating the request and response).
 
-- **Модель взаимодействия "клиент-сервер":** A2A реализует чистую модель клиент-сервер, где клиентские и серверные агенты могут работать и размещаться удаленно. Конфигурация агента достаточно проста и требует только указания базового URL-адреса, а "Карточка агента" заботится об обмене контекстом. Этот подход упрощает интеграцию и обеспечивает гибкость при добавлении новых агентов в систему. Протокол чётко определяет типы взаимодействий: открытие (получение карточки агента), инициирование (отправка задачи), взаимодействие (при необходимости ввода) и завершение (когда задача достигает терминального состояния).
+- **Client-Server Interaction Model:** A2A implements a clean client-server model, where client and server agents can operate and be hosted remotely. Agent configuration is simple and requires only specifying a base URL; the "Agent Card" handles context exchange. This approach simplifies integration and provides flexibility when adding new agents to the system. The protocol clearly defines interaction types: discovery (retrieving the agent card), initiation (sending a task), interaction (when input is required), and completion (when the task reaches a terminal state).
 
+### **Data Format and Structure**
 
-### **Формат и структура данных**
+Data exchange in the protocol primarily occurs in JSON format. Key data structures include:
 
-Обмен данными в протоколе в основном осуществляется в формате JSON. Ключевые структуры данных включают в себя:
+- **Agent Card:** A JSON object used by an agent to publish and describe its capabilities, identity information, etc. This is the foundation for intelligent agent discovery. The method by which an A2A server announces its capabilities is implemented via an "Agent Card" in JSON format. The card is typically hosted at the standard path `/.well-known/agent.json`, making discovery predictable—similar to how web browsers locate robots.txt files. The card contains information about the agent’s capabilities, required authentication schemes, supported content types, and API endpoints.
 
-- **Карточка агента (Agent Card):** объект JSON, используемый агентом для публикации и описания своих возможностей, идентификационной информации и т.д. Это основа для реализации функции обнаружения интеллектуальных агентов. Способ, которым сервер A2A сообщает миру о своих возможностях, реализуется через "Карточку агента" в формате JSON. Карточка обычно размещается по стандартному пути `/.well-known/agent.json`, что делает процесс обнаружения предсказуемым, аналогично тому, как веб-браузеры находят файлы robots.txt. Карточка содержит информацию о возможностях агента, необходимых схемах аутентификации, поддерживаемых типах содержимого и конечных точках API.
+- **Task:** The primary object representing a work request and serving as the central unit of communication between agents. The protocol defines a lifecycle management mechanism for tasks. A task is the central unit of work. The client initiates a task by sending a message (`tasks/send` or `tasks/sendSubscribe`). Tasks have unique identifiers and progress through various states (submitted, working, input-required, completed, failed, canceled). This enables tracking of progress and facilitates asynchronous agent interaction.
 
-- **Задача (Task):** основной объект, представляющий собой запрос на работу и являющийся центром общения между агентами. Протокол определяет механизм управления жизненным циклом задачи. Задача является центральной единицей работы. Клиент инициирует задачу, отправляя сообщение (tasks/send или tasks/sendSubscribe). Задачи имеют уникальные идентификаторы и проходят через различные состояния (submitted, working, input-required, completed, failed, canceled). Это позволяет отслеживать прогресс выполнения и обеспечивает асинхронное взаимодействие агентов.
+- **Message:** Represents conversational exchanges between a client (role: "user") and an agent (role: "agent"). Messages contain Parts and are used to convey context, responses, artifacts, or user instructions. Message structure enables agents to engage in multi-step dialogues within a single task and exchange various content types.
 
-- **Сообщение (Message):** представляет коммуникационные обороты между клиентом (role: "user") и агентом (role: "agent"). Сообщения содержат Части (Parts) и используются для передачи контекста, ответов, артефактов или инструкций пользователя. Структура сообщений позволяет агентам вести многошаговый диалог в рамках одной задачи и обмениваться различными типами контента.
+- **Artifact:** Output data or results obtained after successful task completion. Artifacts also contain Parts and may represent generated files, structured data, or other agent outputs. This is a standardized method for returning task execution results.
 
-- **Артефакт (Artifact):** выходные данные или результат, полученные после успешного выполнения задачи. Артефакты также содержат Части и могут представлять собой сгенерированные файлы, структурированные данные или другие результаты работы агента. Это стандартизированный способ возврата результатов выполнения задач.
+- **Part:** An autonomous content block included in a message, such as text, generated images, etc. A Part can be textual (TextPart), file-based (FilePart) with embedded bytes or a URI, or structured JSON (DataPart), e.g., for forms. Each part has a clearly defined content type, enabling client and remote agent to agree on required data formats. This is a UI coordination mechanism where each message includes "parts" as fully formed content fragments.
 
-- **Часть (Part):** автономный блок контента, включенный в сообщение, например текст, сгенерированные изображения и т.д. Часть может быть текстовой (TextPart), файловой (FilePart) с встроенными байтами или URI, или структурированным JSON (DataPart), например, для форм. Каждая часть имеет четкий тип контента, что позволяет клиенту и удаленному агенту согласовывать требуемый формат данных. Это механизм согласования пользовательского интерфейса, где каждое сообщение включает "части", являющиеся полностью сформированными фрагментами контента.
+- **Streaming:** For long-running tasks, A2A provides a mechanism to receive real-time updates. Servers supporting streaming can use `tasks/sendSubscribe`. Clients receive Server-Sent Events (SSE) containing `TaskStatusUpdateEvent` or `TaskArtifactUpdateEvent` messages, providing real-time progress tracking.
 
-- **Потоковая передача (Streaming):** для длительных задач A2A предоставляет механизм получения обновлений в реальном времени. Для длительных задач серверы, поддерживающие возможность потоковой передачи, могут использовать tasks/sendSubscribe. Клиент получает события Server-Sent Events (SSE), содержащие сообщения TaskStatusUpdateEvent или TaskArtifactUpdateEvent, обеспечивающие ход выполнения в реальном времени.
+- **Push Notifications:** Servers supporting the `pushNotifications` feature can proactively send task updates to a webhook URL provided by the client via `tasks/pushNotification/set`. This feature allows clients to receive updates without constant server polling.
 
-- **Push-уведомления (Push Notifications):** серверы, поддерживающие функцию pushNotifications, могут проактивно отправлять обновления задач на URL-адрес вебхука, предоставленный клиентом через tasks/pushNotification/set. Эта функция позволяет клиентам получать обновления без необходимости постоянного опроса сервера.
+The A2A architecture implements a complete agent interaction cycle: discovery (client retrieves the agent card from a known server URL), initiation (client sends a task with an initial user message and unique task ID), interaction (if additional input is needed, the client sends follow-up messages), and completion (the task reaches a terminal state: completed, failed, or canceled).
 
-Архитектура A2A реализует полный цикл взаимодействия агентов: обнаружение (клиент получает карточку агента из известного URL сервера), инициирование (клиент отправляет задачу с начальным сообщением пользователя и уникальным ID задачи), взаимодействие (если требуется дополнительный ввод, клиент отправляет последующие сообщения) и завершение (задача достигает конечного состояния — выполнена, неудачна или отменена).
+The full JSON specification is available in the official repository: [GitHub](https://github.com/syntax-syndicate/Agent-2-agent/blob/main/specification/json/a2a.json).
 
-Подробная спецификация JSON доступна в официальном репозитории [GitHub](https://github.com/syntax-syndicate/Agent-2-agent/blob/main/specification/json/a2a.json).
+### **Detailed Explanation of Key Features**
 
+> Full code implementation is available in the A2A directory.
 
-### **Подробное объяснение основных функций**
+The A2A protocol defines four core functions for agent interaction, each supported by specific mechanisms and data structures. Below, we detail each function.
 
-> Полная реализация программного кода доступна в дирректории A2A. 
+1. **Capability Discovery:**
+   *   **Mechanism:** This is the process by which agents find each other and learn about each other's capabilities. Agents "broadcast" their capabilities via [**Agent Cards**](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-16/A2A/hosts/cli/__main__.py#L61-L66) in JSON format. Typically, this card is accessible at a standard path (`/.well-known/agent.json`), making discovery predictable. Client agents (using components such as [`A2ACardResolver`](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-16/A2A/common/client/card_resolver.py#L23-L104)) can retrieve this card to discover and select a remote agent best suited for a specific task.
 
-Протокол A2A определяет четыре основные функции для взаимодействия агентов, каждая из которых подкреплена конкретными механизмами и структурами данных. Ниже мы разберем каждую из них подробнее.
+       *Example of a client retrieving an agent card:*
 
-1.  **Обнаружение возможностей (Capability Discovery):**
-    *   **Механизм:** это процесс, посредством которого агенты находят друг друга и узнают о возможностях друг друга. Агенты «транслируют» свои возможности с помощью [**Карточек агентов (Agent Card)**](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-16/A2A/hosts/cli/__main__.py#L61-L66) в формате JSON. Как правило, эта карточка доступна по стандартному пути (`/.well-known/agent.json`), что делает обнаружение предсказуемым. Клиентские агенты (используя компоненты вроде [`A2ACardResolver`](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-16/A2A/common/client/card_resolver.py#L23-L104)
-)) могут получить эту карточку для обнаружения и выбора удаленного агента, который лучше всего подходит для выполнения конкретной задачи.
+       ```python
+       # From A2A/hosts/cli/__main__.py
+       card_resolver = A2ACardResolver(agent_url)
+       card = card_resolver.get_agent_card()
+       print("======= Agent Card ========")
+       print(card.model_dump_json(exclude_none=True))
 
-        *Пример получения карты агента клиентом:*
+       # Class A2ACardResolver uses httpx for a GET request
+       # to self.base_url + "/" + self.agent_card_path
+       # and parses the JSON response into an AgentCard model
+       class A2ACardResolver:
+           # ...
+           def get_agent_card(self) -> AgentCard:
+               with httpx.Client() as client:
+                   response = client.get(self.base_url + "/" + self.agent_card_path)
+                   response.raise_for_status()
+                   try:
+                       # Uses Pydantic model AgentCard for parsing
+                       return AgentCard(**response.json())
+                   except json.JSONDecodeError as e:
+                       raise A2AClientJSONError(str(e)) from e
+       ```
+   *   **Details:** `AgentCard` contains comprehensive information defined using Pydantic models: identity data (`name`, `description`, `url`, `provider`, `version`), key **capabilities** (`capabilities`), required **authentication schemes** (`authentication`), supported default and skill-specific **input/output modes** (`inputModes`, `outputModes`), and a list of **skills** (`skills`).
 
-        ```python
-        # Из A2A/hosts/cli/__main__.py
-        card_resolver = A2ACardResolver(agent_url)
-        card = card_resolver.get_agent_card()
-        print("======= Agent Card ========")
-        print(card.model_dump_json(exclude_none=True))
+       *[Example structure of AgentCard and nested models](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-16/A2A/common/types.py):*
 
-        # Класс A2ACardResolver использует httpx для GET запроса
-        # к self.base_url + "/" + self.agent_card_path
-        # и парсит JSON ответ в модель AgentCard
-        class A2ACardResolver:
-            # ...
-            def get_agent_card(self) -> AgentCard:
-                with httpx.Client() as client:
-                    response = client.get(self.base_url + "/" + self.agent_card_path)
-                    response.raise_for_status()
-                    try:
-                        # Использует Pydantic модель AgentCard для парсинга
-                        return AgentCard(**response.json())
-                    except json.JSONDecodeError as e:
-                        raise A2AClientJSONError(str(e)) from e
-        ```
-    *   **Детали:** `AgentCard` содержит исчерпывающую информацию, определенную с помощью Pydantic моделей: идентификационные данные (`name`, `description`, `url`, `provider`, `version`), ключевые **возможности** (`capabilities`), требуемые **схемы аутентификации** (`authentication`), поддерживаемые по умолчанию и специфичные для навыков **режимы ввода/вывода** (`inputModes`, `outputModes`), а также список **навыков** (`skills`).
+       ```python
+       # From A2A/common/types.py
+       class AgentCapabilities(BaseModel):
+           streaming: bool = False
+           pushNotifications: bool = False
+           stateTransitionHistory: bool = False
 
-        *[Пример структуры AgentCard и вложенных моделей](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-16/A2A/common/types.py):*
+       class AgentAuthentication(BaseModel):
+           schemes: List[str]
+           credentials: str | None = None
 
-        ```python
-        # Из A2A/common/types.py
-        class AgentCapabilities(BaseModel):
-            streaming: bool = False
-            pushNotifications: bool = False
-            stateTransitionHistory: bool = False
+       class AgentSkill(BaseModel):
+           id: str
+           name: str
+           description: str | None = None
+           # ... other fields ...
+           inputModes:  List[str] | None = None
+           outputModes: List[str] | None = None
 
-        class AgentAuthentication(BaseModel):
-            schemes: List[str]
-            credentials: str | None = None
+       class AgentCard(BaseModel):
+           name: str
+           description: str | None = None
+           url: str # URL for JSON-RPC endpoint
+           provider: AgentProvider | None = None
+           version: str
+           capabilities: AgentCapabilities
+           authentication: AgentAuthentication | None = None
+           defaultInputModes:  List[str] = ["text"]
+           defaultOutputModes: List[str] = ["text"]
+           skills: List[AgentSkill]
+       ```
 
-        class AgentSkill(BaseModel):
-            id: str
-            name: str
-            description: str | None = None
-            # ... другие поля ...
-            inputModes:  List[str] | None = None
-            outputModes: List[str] | None = None
+   *   **Value:** Capability discovery allows the client to dynamically adapt its interaction strategy. For example, the client will use the `tasks/sendSubscribe` method for streaming only if the `AgentCard` specifies `streaming: true`. This is critical for building dynamic, adaptive multi-agent systems.
 
-        class AgentCard(BaseModel):
-            name: str
-            description: str | None = None
-            url: str # URL для JSON-RPC эндпоинта
-            provider: AgentProvider | None = None
-            version: str
-            capabilities: AgentCapabilities
-            authentication: AgentAuthentication | None = None
-            defaultInputModes:  List[str] = ["text"]
-            defaultOutputModes: List[str] = ["text"]
-            skills: List[AgentSkill]
-        ```
+       *[Example of capability usage in CLI client:](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-16/A2A/hosts/cli/__main__.py#L193-L201)*
 
-    *   **Значение:** обнаружение возможностей позволяет клиенту динамически адаптировать стратегию взаимодействия. Например, клиент будет использовать метод `tasks/sendSubscribe` для потоковой передачи, только если `AgentCard` указывает `streaming: true`. Это имеет решающее значение для создания динамических и адаптивных многоагентных систем.
+       ```python
+       # From A2A/hosts/cli/__main__.py
+       async def completeTask(client: A2AClient, streaming, ...):
+           # ...
+           if streaming: # Value obtained from card.capabilities.streaming
+               response_stream = client.send_task_streaming(payload)
+               async for result in response_stream:
+                   print(f"stream event => {result.model_dump_json(exclude_none=True)}")
+               taskResult = await client.get_task({"id": taskId})
+           else:
+               taskResult = await client.send_task(payload)
+           # ...
+       ```
 
-        *[Пример использования возможностей в CLI клиенте:](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-16/A2A/hosts/cli/__main__.py#L193-L201)*
+2.  **Task Management:**
+    *   **Mechanism:** This is the core interaction model of the A2A protocol. All communication revolves around the creation, execution, and completion of **Tasks**. The client initiates a task by sending a JSON-RPC request (e.g., `tasks/send` or `tasks/sendSubscribe`).
 
-        ```python
-        # Из A2A/hosts/cli/__main__.py
-        async def completeTask(client: A2AClient, streaming, ...):
-            # ...
-            if streaming: # Значение получено из card.capabilities.streaming
-                response_stream = client.send_task_streaming(payload)
-                async for result in response_stream:
-                    print(f"stream event => {result.model_dump_json(exclude_none=True)}")
-                taskResult = await client.get_task({"id": taskId})
-            else:
-                taskResult = await client.send_task(payload)
-            # ...
-        ```
-
-2.  **Управление задачами (Task Management):**
-    *   **Механизм:** это основная модель взаимодействия протокола A2A. Все коммуникации вращаются вокруг создания, выполнения и завершения **Задач (Task)**. Клиент инициирует задачу, отправляя запрос JSON-RPC (например, `tasks/send` или `tasks/sendSubscribe`).
-
-        *[Примеры JSON-RPC запросов для управления задачами:](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-16/A2A/common/types.py)*
+        *[Examples of JSON-RPC requests for task management:](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-16/A2A/common/types.py)*
 
         ```python
-        # Из A2A/common/types.py
+        # From A2A/common/types.py
         class SendTaskRequest(JSONRPCRequest):
             method: Literal["tasks/send"] = "tasks/send"
-            params: TaskSendParams  # Содержит id, sessionId, message и др.
+            params: TaskSendParams  # Contains id, sessionId, message, etc.
 
         class SendTaskStreamingRequest(JSONRPCRequest):
             method: Literal["tasks/sendSubscribe"] = "tasks/sendSubscribe"
@@ -218,18 +214,18 @@ A2A определяется как открытый протокол, разр�
 
         class GetTaskRequest(JSONRPCRequest):
             method: Literal["tasks/get"] = "tasks/get"
-            params: TaskQueryParams # Содержит id, historyLength
+            params: TaskQueryParams # Contains id, historyLength
 
         class CancelTaskRequest(JSONRPCRequest):
             method: Literal["tasks/cancel",] = "tasks/cancel"
-            params: TaskIdParams    # Содержит id
+            params: TaskIdParams    # Contains id
         ```
-    *   **Детали:** каждая `Task` имеет уникальный `id`, опциональный `sessionId` для группировки связанных задач, текущий `status`, список полученных `artifacts` и `history` сообщений. Протокол определяет четкие состояния жизненного цикла для задач через перечисление `TaskState`. Текущий статус задачи (`TaskStatus`) включает само состояние (`state`), опциональное сообщение от агента (`message`) и временную метку (`timestamp`).
+    *   **Details:** Each `Task` has a unique `id`, an optional `sessionId` for grouping related tasks, a current `status`, a list of received `artifacts`, and a `history` of messages. The protocol defines clear lifecycle states for tasks via the `TaskState` enumeration. The current task status (`TaskStatus`) includes the state itself (`state`), an optional agent message (`message`), and a timestamp (`timestamp`).
 
-        *Пример структуры [Task](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-16/A2A/common/types.py#L286-L314), [TaskStatus](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-16/A2A/common/types.py#L208-L232) и [TaskState](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-16/A2A/common/types.py#L36-L55):*
+        *Example structure of [Task](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-16/A2A/common/types.py#L286-L314), [TaskStatus](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-16/A2A/common/types.py#L208-L232), and [TaskState](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-16/A2A/common/types.py#L36-L55):*
 
         ```python
-        # Из A2A/common/types.py
+        # From A2A/common/types.py
         class TaskState(str, Enum):
             SUBMITTED = "submitted"
             WORKING = "working"
@@ -241,152 +237,152 @@ A2A определяется как открытый протокол, разр�
 
         class TaskStatus(BaseModel):
             state: TaskState
-            message: Message | None = None # Сообщение от агента о статусе
+            message: Message | None = None # Agent status message
             timestamp: datetime = Field(default_factory=datetime.now)
-            # ... сериализатор для timestamp ...
+            # ... timestamp serializer ...
 
         class Task(BaseModel):
             id: str
             sessionId: str | None = None
             status: TaskStatus
             artifacts: List[Artifact] | None = None
-            history:   List[Message]  | None = None # История сообщений user/agent
+            history:   List[Message]  | None = None # History of user/agent messages
             metadata:  dict[str, Any] | None = None
         ```
-    *   **Длительные задачи:** протокол поддерживает как задачи, которые выполняются немедленно, так и длительные задачи. Для последних используются:
-        *   **SSE (Server-Sent Events):** Метод `tasks/sendSubscribe` позволяет клиенту получать асинхронные обновления ([`TaskStatusUpdateEvent`](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-16/A2A/common/types.py#L317-L341), [`TaskArtifactUpdateEvent`](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-16/A2A/common/types.py#L344-L368)) в реальном времени без необходимости опроса.
+    *   **Long-running tasks:** The protocol supports both immediate tasks and long-running tasks. For the latter, it provides:
+        *   **SSE (Server-Sent Events):** The `tasks/sendSubscribe` method allows the client to receive asynchronous real-time updates ([`TaskStatusUpdateEvent`](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-16/A2A/common/types.py#L317-L341), [`TaskArtifactUpdateEvent`](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-16/A2A/common/types.py#L344-L368)) without polling.
 
-            *[Пример обработки SSE клиентом и структура событий:](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-16/A2A/common/client/client.py#L123-L172)*
+            *[Example of client SSE handling and event structure:](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-16/A2A/common/client/client.py#L123-L172)*
             ```python
-            # Из A2A/common/client/client.py
+            # From A2A/common/client/client.py
             async def send_task_streaming(
                 self, payload: dict[str, Any]
             ) -> AsyncIterable[SendTaskStreamingResponse]:
                 request = SendTaskStreamingRequest(params=payload)
                 with httpx.Client(timeout=None) as client:
-                    with connect_sse( # Использует httpx_sse
+                    with connect_sse( # Uses httpx_sse
                         client, "POST", self.url, json=request.model_dump()
                     ) as event_source:
                         for sse in event_source.iter_sse():
-                            # Парсит данные события в SendTaskStreamingResponse
+                            # Parses event data into SendTaskStreamingResponse
                             yield SendTaskStreamingResponse(**json.loads(sse.data))
                             
-            # Из A2A/common/types.py
+            # From A2A/common/types.py
             class TaskStatusUpdateEvent(BaseModel):
-                id: str             # ID задачи
-                status: TaskStatus  # Новый статус
-                final: bool = False # Является ли это финальным статусом
+                id: str             # Task ID
+                status: TaskStatus  # New status
+                final: bool = False # Is this the final status?
                 metadata: dict[str, Any] | None = None
 
             class TaskArtifactUpdateEvent(BaseModel):
-                id: str            # ID задачи
-                artifact: Artifact # Новый артефакт
+                id: str            # Task ID
+                artifact: Artifact # New artifact
                 metadata: dict[str, Any] | None = None
             ```
-        *   **Push-уведомления:** если агент поддерживает (`pushNotifications: true` в `AgentCard`), клиент может настроить URL для получения проактивных уведомлений о статусе задачи через методы `tasks/pushNotification/set` и `tasks/pushNotification/get`.
+        *   **Push Notifications:** If the agent supports it (`pushNotifications: true` in `AgentCard`), the client can configure a URL to receive proactive task status notifications via `tasks/pushNotification/set` and `tasks/pushNotification/get` methods.
 
-            *Пример настройки [Push Notifications](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-16/A2A/hosts/cli/__main__.py#L182-L189) клиентом и структура конфигурации:*
+            *Example of client setup for [Push Notifications](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-16/A2A/hosts/cli/__main__.py#L182-L189) and configuration structure:*
             ```python
-            # Из A2A/hosts/cli/__main__.py - формирование payload для send_task
+            # From A2A/hosts/cli/__main__.py - forming payload for send_task
             if use_push_notifications:
                 payload["pushNotification"] = {
                     "url": f"http://{notification_receiver_host}:{notification_receiver_port}/notify",
                     "authentication": {
-                        "schemes": ["bearer"], # Указывает на JWT Bearer аутентификацию
+                        "schemes": ["bearer"], # Indicates JWT Bearer authentication
                     },
                 }
 
-            # Из A2A/common/types.py - структуры для запросов и конфигурации
+            # From A2A/common/types.py - structures for requests and configuration
             class SetTaskPushNotificationRequest(JSONRPCRequest):
                 method: Literal["tasks/pushNotification/set",] = "tasks/pushNotification/set"
                 params: TaskPushNotificationConfig
 
             class TaskPushNotificationConfig(BaseModel):
-                id: str # ID задачи
+                id: str # Task ID
                 pushNotificationConfig: PushNotificationConfig
 
             class PushNotificationConfig(BaseModel):
-                url: str # URL клиента для получения уведомлений
-                token: str | None = None # Может использоваться для простой аутентификации
-                authentication: AuthenticationInfo | None = None # Для более сложной аутентификации (например, JWT)
+                url: str # Client URL to receive notifications
+                token: str | None = None # May be used for simple authentication
+                authentication: AuthenticationInfo | None = None # For complex authentication (e.g., JWT)
             ```
-    *   **Результат:** конечный результат задачи представляется в виде [**Артефактов (Artifact)**](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-16/A2A/common/types.py#L253-L283), которые содержат одну или несколько **Частей (Part)** с результатами работы. Артефакты также могут иметь метаданные, имя, описание и флаги для управления сборкой больших или потоковых результатов (`index`, `append`, `lastChunk`).
+    *   **Result:** The final task outcome is represented as [**Artifacts**](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-16/A2A/common/types.py#L253-L283), which contain one or more **Parts** with the results. Artifacts may also have metadata, a name, a description, and flags for managing large or streaming results (`index`, `append`, `lastChunk`).
 
-        *Пример структуры Artifact:*
+        *Example Artifact structure:*
         ```python
-        # Из A2A/common/types.py
+        # From A2A/common/types.py
         class Artifact(BaseModel):
             name: str | None = None
             description: str | None = None
-            parts: List[Part]             # Содержит фактические данные результата
+            parts: List[Part]             # Contains actual result data
             metadata: dict[str, Any] | None = None
-            index: int = 0                # Для упорядочивания частей артефакта
-            append: bool | None = None    # Указывает, добавлять ли к предыдущему артефакту
-            lastChunk: bool | None = None # Указывает, является ли это последней частью
+            index: int = 0                # For ordering artifact parts
+            append: bool | None = None    # Indicates whether to append to previous artifact
+            lastChunk: bool | None = None # Indicates whether this is the last part
         ```
 
-3.  **Сотрудничество (Collaboration):**
-    *   **Механизм:** определяет, как агенты обмениваются информацией при выполнении задач. Основной единицей обмена является **Сообщение (Message)**.
-    *   **Детали:** каждое `Message` имеет `role` ("user" для клиента, "agent" для сервера), список **Частей (Part)**, содержащих фактический контент, и опциональные `metadata`. Агенты могут обмениваться сообщениями для передачи контекста, отправки ответов, передачи артефактов или пользовательских инструкций. История сообщений (`history` в `Task`) сохраняет контекст диалога.
+3.  **Collaboration:**
+    *   **Mechanism:** Defines how agents exchange information during task execution. The primary unit of exchange is the **Message**.
+    *   **Details:** Each `Message` has a `role` ("user" for the client, "agent" for the server), a list of **Parts** containing the actual content, and optional `metadata`. Agents can exchange messages to convey context, send responses, transfer artifacts, or deliver user instructions. The message history (`history` in `Task`) preserves the dialogue context.
 
-        *Пример структуры [Message](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-16/A2A/common/types.py#L184-L205):*
+        *Example [Message](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-16/A2A/common/types.py#L184-L205) structure:*
         ```python
-        # Из A2A/common/types.py
+        # From A2A/common/types.py
         class Message(BaseModel):
-            role: Literal["user", "agent"] # Определяет отправителя
-            parts: List[Part]              # Список частей сообщения (текст, файлы, данные)
+            role: Literal["user", "agent"] # Defines sender
+            parts: List[Part]              # List of message parts (text, files, data)
             metadata: dict[str, Any] | None = None
         ```
-        *Пример формирования сообщения клиентом:*
+        *Example of client message construction:*
         ```python
-        # Из A2A/hosts/cli/__main__.py
+        # From A2A/hosts/cli/__main__.py
         payload = {
             # ...
             "message": {
                 "role": "user",
                 "parts": [
                     {
-                        "type": "text", # Указывает тип части
-                        "text": prompt, # Текст от пользователя
+                        "type": "text", # Indicates part type
+                        "text": prompt, # User-provided text
                     }
                 ],
             },
             # ...
         }
         ```
-    *   **Многошаговое взаимодействие:** состояние `TaskState.INPUT_REQUIRED` явно указывает, что агент ожидает дополнительного ввода от клиента для продолжения задачи, позволяя реализовать многошаговый диалог в рамках одной задачи.
+    *   **Multi-step interaction:** The `TaskState.INPUT_REQUIRED` state explicitly indicates that the agent awaits additional input from the client to continue the task, enabling multi-step dialogue within a single task.
 
-        *Пример обработки [INPUT_REQUIRED](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-16/A2A/hosts/cli/__main__.py#L203-L215) в CLI клиенте:*
+        *Example of handling [INPUT_REQUIRED](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-16/A2A/hosts/cli/__main__.py#L203-L215) in the CLI client:*
         ```python
-        # Из A2A/hosts/cli/__main__.py
+        # From A2A/hosts/cli/__main__.py
         async def completeTask(client: A2AClient, ...):
-            # ... (отправка задачи, получение taskResult) ...
+            # ... (task submission, receiving taskResult) ...
             state = TaskState(taskResult.result.status.state)
             if state.name == TaskState.INPUT_REQUIRED.name:
-                # Если агент требует ввода, рекурсивно вызываем ту же функцию
-                # для получения следующего ввода от пользователя в рамках той же задачи (taskId)
+                # If agent requires input, recursively call the same function
+                # to obtain next user input within the same task (taskId)
                 return await completeTask(
                     client,
                     streaming,
                     use_push_notifications,
                     notification_receiver_host,
                     notification_receiver_port,
-                    taskId, # Используем тот же ID задачи
+                    taskId, # Use same task ID
                     sessionId
                 )
             else:
-                # Задача завершена (COMPLETED, FAILED, CANCELED)
+                # Task completed (COMPLETED, FAILED, CANCELED)
                 return True
         ```
-    *   **Непрозрачные агенты:** протокол позволяет агентам динамично сотрудничать (например, запрашивая друг у друга разъяснения), не требуя раскрытия их внутреннего состояния или логики рассуждений, что важно для корпоративных сценариев с агентами от разных поставщиков.
+    *   **Opaque agents:** The protocol enables agents to dynamically collaborate (e.g., requesting clarifications from each other) without requiring disclosure of their internal state or reasoning logic—critical for enterprise scenarios involving agents from different vendors.
 
-4.  **Согласование пользовательского опыта (User Experience Negotiation):**
-    *   **Механизм:** позволяет агенту и клиенту согласовывать и адаптировать формат и способ представления информации на основе возможностей друг друга и потребностей пользователя. Ключевым элементом здесь являются **Части (Part)**.
-    *   **Детали:** протокол определяет различные типы `Part` с помощью Pydantic Union и дискриминатора `type`.
+4.  **User Experience Negotiation:**
+    *   **Mechanism:** Allows an agent and client to negotiate and adapt the format and presentation of information based on each other's capabilities and user needs. The key element here is the **Part**.
+    *   **Details:** The protocol defines various `Part` types using Pydantic Union with a `type` discriminator.
 
-        *Пример определения Part и его вариантов:*
+        *Example Part definition and variants:*
         ```python
-        # Из A2A/common/types.py
+        # From A2A/common/types.py
         class TextPart(BaseModel):
             type: Literal["text"] = "text"
             text: str
@@ -395,9 +391,9 @@ A2A определяется как открытый протокол, разр�
         class FileContent(BaseModel):
             name: str | None = None
             mimeType: str | None = None
-            bytes: str | None = None # base64 закодированные данные
-            uri: str | None = None   # Ссылка на внешний ресурс
-            # Валидатор требует наличия bytes ИЛИ uri
+            bytes: str | None = None # base64-encoded data
+            uri: str | None = None   # Link to external resource
+            # Validator requires either bytes OR uri
 
         class FilePart(BaseModel):
             type: Literal["file"] = "file"
@@ -406,135 +402,135 @@ A2A определяется как открытый протокол, разр�
 
         class DataPart(BaseModel):
             type: Literal["data"] = "data"
-            data: dict[str, Any] # Произвольные JSON данные
+            data: dict[str, Any] # Arbitrary JSON data
             metadata: dict[str, Any] | None = None
 
-        # Union с дискриминатором для автоматического парсинга нужного типа
+        # Union with discriminator for automatic parsing of correct type
         Part = Annotated[Union[TextPart, FilePart, DataPart], Field(discriminator="type")]
         ```
-        Клиент при отправке задачи может указать предпочитаемые форматы ответа в поле `acceptedOutputModes` запроса `TaskSendParams`. Серверный агент, зная свои возможности (из `AgentCard` и `AgentSkill`) и предпочтения клиента, может выбрать наиболее подходящий формат для ответа.
+        When submitting a task, the client can specify preferred output formats in the `acceptedOutputModes` field of the `TaskSendParams` request. The server agent, aware of its own capabilities (from `AgentCard` and `AgentSkill`) and client preferences, can select the most suitable format for its response.
 
-        *Пример указания принимаемых форматов клиентом:*
+        *Example of client specifying accepted formats:*
         ```python
-        # Из A2A/hosts/cli/__main__.py
+        # From A2A/hosts/cli/__main__.py
         payload = {
             # ...
-            "acceptedOutputModes": ["text", "image/png"],   # Клиент готов принять текст или PNG изображения
+            "acceptedOutputModes": ["text", "image/png"],   # Client accepts text or PNG images
             # ...
         }
 
-        # Из A2A/common/types.py
+        # From A2A/common/types.py
         class TaskSendParams(BaseModel):
             # ...
-            acceptedOutputModes: Optional[List[str]] = None # Список MIME-типов или других идентификаторов
+            acceptedOutputModes: Optional[List[str]] = None # List of MIME types or other identifiers
             # ...
         ```
-    *   **Гибкость:** эта система позволяет явно поддерживать согласование различных пользовательских интерфейсов (текст, изображения, файлы, формы, потенциально потоковое аудио/видео), делая взаимодействие более богатым и адаптируемым к контексту. Поля `metadata` на разных уровнях (Task, Message, Part, Artifact) предоставляют дополнительный канал для передачи информации, специфичной для UI или контекста.
+    *   **Flexibility:** This system explicitly supports negotiation of diverse user interfaces (text, images, files, forms, potentially streaming audio/video), making interactions richer and context-adaptive. The `metadata` fields at various levels (Task, Message, Part, Artifact) provide an additional channel for conveying UI- or context-specific information.
 
 
-### **Безопасность протокола A2A**
+### **A2A Protocol Security**
 
-Спецификация протокола A2A включает в себя корпоративные соображения безопасности:
+The A2A protocol specification includes enterprise security considerations:
 
-- Поддержка механизмов аутентификации (AuthN) и авторизации (AuthZ) на уровне предприятия;
-- Модель безопасности соответствует схеме аутентификации OpenAPI на момент выпуска;
-- В официальной документации представлено тематическое обсуждение Enterprise Ready;
-- Цель протокола — обеспечить безопасный обмен информацией и координацию действий.
+- Support for enterprise-grade authentication (AuthN) and authorization (AuthZ) mechanisms;
+- The security model aligns with the OpenAPI authentication scheme at release;
+- Official documentation includes a dedicated discussion on "Enterprise Ready";
+- The protocol's goal is to ensure secure information exchange and coordination.
 
-Однако существует потенциальное противоречие между стандартизацией на уровне протокола и общей безопасностью многоагентной системы. Хотя A2A нацелена на обеспечение безопасной основы для коммуникации, эксперты быстро отметили риски, связанные с межагентным взаимодействием, такие как атаки быстрого внедрения.
+However, a potential contradiction exists between protocol-level standardization and overall security of a multi-agent system. While A2A aims to provide a secure communication foundation, experts quickly noted risks associated with inter-agent interaction, such as rapid injection attacks.
 
-**Особенности протокола A2A**
+**A2A Protocol Characteristics**
 
-1. **Взаимодействие между "непрозрачными" агентами**  
-   A2A разработан для обеспечения взаимодействия между агентами, устройство внутренней реализации которых от нас может быть скрыто. Это подчеркивает важность дополнительных мер безопасности.
+1. **Interaction between "Opaque" Agents**  
+   A2A is designed to enable interaction between agents whose internal implementation details may be hidden. This underscores the importance of additional security measures.
 
-2. **Дополнение к MCP**  
-   A2A служит дополнением к MCP, который сам оказался уязвимым к атакам с мгновенным внедрением при предоставлении разрешений инструментам агента.
+2. **Complement to MCP**  
+   A2A serves as a complement to MCP, which itself proved vulnerable to rapid injection attacks when granting tools to agents.
 
-3. **Причины уязвимостей**  
-   - Стандартизация способа коммуникации облегчает как легальное взаимодействие, так и злоумышленникам использование того же стандарта для запуска атак.
-   - Атаки типа "внедрение подсказок" или "социальная инженерия" нацелены на возможности понимания и следования инструкциям Большой языковой модели (LLM), которые действуют выше уровня протокола связи.
-   - Подключение нескольких агентов через A2A и предоставление им инструментальных возможностей в сочетании с MCP формирует сложную цепочку взаимодействий, усиливая потенциальное воздействие компрометации одного агента.
-   - "Непрозрачная" природа корпоративных приложений означает, что клиентский агент может не полностью понимать внутреннюю работу или надежность удаленного агента, с которым он взаимодействует.
+3. **Reasons for Vulnerabilities**  
+   - Standardization of communication facilitates both legitimate interaction and malicious actors exploiting the same standard to launch attacks.
+   - "Prompt injection" or "social engineering" attacks target the ability of Large Language Models (LLMs) to understand and follow instructions—capabilities operating above the communication protocol level.
+   - Connecting multiple agents via A2A while granting them tool capabilities in combination with MCP creates a complex interaction chain, amplifying the potential impact of compromising one agent.
+   - The "opaque" nature of enterprise applications means the client agent may not fully understand the inner workings or reliability of a remote agent with which it interacts.
 
-**Вывод**
+**Conclusion**
 
-Хотя A2A обеспечивает базовые механизмы безопасности (такие как аутентификация), общая безопасность многоагентных систем, созданных с использованием A2A (и MCP), будет зависеть от:
+Although A2A provides baseline security mechanisms (such as authentication), the overall security of multi-agent systems built using A2A (and MCP) will depend on:
 
-- Надежной конструкции агента;
-- Сложного контроля разрешений;
-- Строгой проверки и фильтрации входных данных;
-- Постоянного мониторинга;
-- Разработки новых парадигм безопасности для агентских систем.
+- Robust agent design;
+- Sophisticated permission control;
+- Rigorous input validation and filtering;
+- Continuous monitoring;
+- Development of new security paradigms for agent systems.
 
-> Соглашение само по себе является необходимым, но не достаточным условием. Это остается серьезной исследовательской и инженерной задачей в современной области безопасности ИИ.
+> The protocol itself is necessary but not sufficient. This remains a significant research and engineering challenge in the current field of AI security.
 
-## **5. История отрасли и экосистема**
+## **5. Industry History and Ecosystem**
 
-Запуск протокола A2A — не единичное событие. Это происходит на фоне быстрого развития технологий ИИ-агентов и растущего спроса отрасли на стандартизацию. Понимание A2A требует рассмотрения его в контексте более широкой отрасли и экосистемы.
+The launch of the A2A protocol is not an isolated event. It occurs against the backdrop of rapid advancement in AI agent technologies and growing industry demand for standardization. Understanding A2A requires situating it within the broader industry and ecosystem.
 
-### Позиционирование отношений
-Представители Google неоднократно подчеркивали, что A2A является дополнением к MCP. Эти два решения решают разные проблемы, но могут работать вместе.
+### Positioning Relationships
+Google representatives have repeatedly emphasized that A2A is an addition to MCP. These two solutions address different problems but can work together.
 
 ![Figure_2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-16/assets/Figure_02.png)
 
-### Основная направленность
-- **MCP**: Основная цель MCP — подключение интеллектуальных агентов к внешним инструментам, API и ресурсам данных, с упором на предоставление структурированных возможностей ввода/вывода для интеллектуальных агентов, чтобы они могли использовать внешние возможности.
-- **A2A**: Суть A2A заключается в том, чтобы связать агентов друг с другом, уделяя особое внимание сотрудничеству, общению и координации задач между агентами, а также поддерживая более динамичные и, возможно, неструктурированные взаимодействия.
+### Primary Focus
+- **MCP**: MCP's primary goal is connecting intelligent agents to external tools, APIs, and data resources, emphasizing structured input/output capabilities to enable agents to leverage external functionalities.
+- **A2A**: A2A's essence lies in connecting agents to each other, focusing on collaboration, communication, and task coordination between agents, while supporting more dynamic and potentially unstructured interactions.
 
-### Требования к совместной работе
-Документация и обсуждения показывают, что для сложных агентских приложений могут потребоваться как MCP (для доступа к инструментам и данным), так и A2A (для совместной работы с другими агентами). Например, комплекс разработки агентов Google (ADK) изначально поддерживает инструмент MCP, а агенты, созданные с использованием ADK, могут взаимодействовать с помощью A2A.
+### Requirements for Joint Operation
+Documentation and discussions indicate that complex agent applications may require both MCP (for accessing tools and data) and A2A (for collaborating with other agents). For example, Google's Agent Development Kit (ADK) initially supports the MCP tooling, and agents built with ADK can interact via A2A.
 
-### Другие протоколы связи интеллектуальных агентов
+### Other Intelligent Agent Communication Protocols
 
-Помимо MCP, в отрасли могут существовать или появляться другие протоколы связи интеллектуальных агентов. Например, протокол Agent Connect Protocol (ACP) компании Cisco также упоминается как дополнение к MCP. Это свидетельствует о том, что отрасль в целом осознает необходимость стандартизации взаимодействия интеллектуальных агентов.
+Beyond MCP, other intelligent agent communication protocols may exist or emerge in the industry. For instance, Cisco's Agent Connect Protocol (ACP) is also mentioned as an addition to MCP. This indicates that the industry broadly recognizes the need for standardizing intelligent agent interaction.
 
-### Сравнительная таблица характеристик протоколов A2A и MCP
+### Comparative Table of A2A and MCP Protocol Features
 
-| Особенности/Аспекты           | A2A (Agent2Agent)                                                                 | MCP (Model Context Protocol)                                |
+| Features/Aspects              | A2A (Agent2Agent)                                                                 | MCP (Model Context Protocol)                                |
 |-------------------------------|----------------------------------------------------------------------------------|---------------------------------------------------------------|
-| **Главные цели**              | Реализовать взаимодействие и сотрудничество между интеллектуальными агентами       | Подключение агентов к внешним инструментам, API и ресурсам данных |
-| **Тип взаимодействия**        | Агент-агент                                                                      | Агент-инструмент/ресурс                                       |
-| **Ключевые сущности**         | Клиентский агент, удаленный агент                                                | Агент, MCP-сервер, инструмент                                 |
-| **Стиль общения**             | Динамичный, консультативный, ориентированный на задачу, поддерживающий неструктурированные и мультимодальные взаимодействия | Структурированный, запрос-ответ, ориентированный на вызов инструмента |
-| **Фокус на структуре данных** | Карточка агента, задача, артефакт, часть                                          | Определение инструмента, вызов/ответ функции, схема ресурсов   |
-| **Фокус на безопасности**     | Межагентская аутентификация/авторизация                                          | - |
-| **Типичные варианты использования** | Автоматизация межсистемных рабочих процессов, многоагентная декомпозиция задач и совместная работа | Агенты используют внешние API для получения информации, выполнения операций и доступа к базам данных |
-| **Дополнительные роли**       | Предоставляет «языковой» и «сетевой уровень» для общения между агентами            | «Система подключаемых модулей», которая предоставляет агентам доступ к внешним возможностям |
+| **Primary Goals**             | Enable interaction and collaboration between intelligent agents                  | Connect agents to external tools, APIs, and data resources     |
+| **Type of Interaction**       | Agent-to-agent                                                                   | Agent-to-tool/resource                                        |
+| **Key Entities**              | Client agent, remote agent                                                       | Agent, MCP server, tool                                       |
+| **Communication Style**       | Dynamic, consultative, task-oriented, supporting unstructured and multimodal interactions | Structured, request-response, tool-calling oriented           |
+| **Data Structure Focus**      | Agent Card, Task, Artifact, Part                                                 | Tool definition, function call/response, resource schema      |
+| **Security Focus**            | Inter-agent authentication/authorization                                         | - |
+| **Typical Use Cases**         | Cross-system workflow automation, multi-agent task decomposition and collaboration | Agents use external APIs to retrieve information, perform operations, access databases |
+| **Additional Roles**          | Provides a "linguistic and network layer" for agent communication                | A "pluggable system" providing agents access to external capabilities |
 
-### Преимущества A2A
-Преимущества A2A включают:
-- Обеспечение кроссплатформенной коммуникации;
-- Содействие совместной работе;
-- Разработка специально для предприятий (аутентификация, долгосрочные задачи, непрозрачные агенты);
-- Использование стандартных форматов;
-- Мощная поддержка партнеров;
-- Снижение барьеров интеграции.
+### Advantages of A2A
+A2A advantages include:
+- Enabling cross-platform communication;
+- Facilitating collaboration;
+- Enterprise-focused design (authentication, long-running tasks, opaque agents);
+- Use of standard formats;
+- Strong partner ecosystem support;
+- Reduced integration barriers.
 
-### Потенциальные недостатки или опасения относительно A2A
-Возможные недостатки или опасения включают:
-- Сомнительную необходимость (по сравнению с соглашениями REST+);
-- Возможную избыточную разработку;
-- Опасения по поводу мотивации и контроля Google;
-- Риски безопасности (особенно быстрое внедрение);
-- Потенциальную сложность и хрупкость;
-- Возможное совпадение с функциональностью MCP;
-- Отсутствие четких примеров на ранних стадиях.
+### Potential Drawbacks or Concerns Regarding A2A
+Potential drawbacks or concerns include:
+- Questionable necessity (compared to REST+ conventions);
+- Potential for redundant development;
+- Concerns regarding Google's motivations and control;
+- Security risks (especially rapid injection);
+- Potential complexity and fragility;
+- Possible overlap with MCP functionality;
+- Lack of clear early-stage examples.
 
-### Пересечение протоколов
+### Protocol Intersections
 
-Google рекомендует приложениям моделировать агентов A2A как ресурсы MCP (описанные AgentCard). Таким образом, фреймворк может не только вызывать инструменты через MCP, но и взаимодействовать с пользователями, удаленными агентами и другими агентами через A2A для достижения бесперебойного взаимодействия.
+Google recommends modeling A2A agents as MCP resources (described by AgentCard). Thus, a framework can not only invoke tools via MCP but also interact with users, remote agents, and other agents via A2A to achieve seamless interaction.
 
 ![Figure_3](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-16/assets/Figure_03.png)
 
-## **Вывод**
+## **Conclusion**
 
-Представленный анализ подробно освещает **протокол Agent2Agent (A2A) от Google**, разработанный с целью **стандартизации взаимодействия между искусственными интеллектами (ИИ-агентами)**. В условиях бурного роста числа агентов, созданных на различных платформах и фреймворках, **A2A предлагает общий открытый стандарт для безопасного обмена информацией и координации действий между ними**.
+This analysis thoroughly examines **Google’s Agent2Agent (A2A) protocol**, developed to **standardize interaction between artificial intelligence (AI) agents**. Amidst the rapid proliferation of agents built on diverse platforms and frameworks, **A2A proposes a common open standard for secure information exchange and coordination among them**.
 
-Ключевыми аспектами протокола A2A являются его **ориентация на взаимодействие между "непрозрачными" агентами**, **использование существующих веб-стандартов** (HTTP, SSE, JSON-RPC) для упрощения интеграции, **поддержка длительных задач и обратной связи в реальном времени**, а также **независимость от модальности взаимодействия**. Техническая архитектура A2A включает **механизм обнаружения возможностей агентов через "Карточку агента"**, **управление жизненным циклом задач**, **поддержку многошагового сотрудничества через обмен "Сообщениями" и "Частями"**, и **согласование пользовательского опыта** через определение форматов данных.
+Key aspects of the A2A protocol include its **focus on interaction between "opaque" agents**, **use of existing web standards** (HTTP, SSE, JSON-RPC) to simplify integration, **support for long-running tasks and real-time feedback**, and **modality-independent interaction**. A2A’s technical architecture includes a **mechanism for agent capability discovery via the "Agent Card"**, **task lifecycle management**, **support for multi-step collaboration through "Message" and "Part" exchange**, and **user experience negotiation via defined data formats**.
 
-Важно отметить, что **Google позиционирует A2A как дополнение к протоколу контекста модели (MCP) от Anthropic**, где MCP фокусируется на подключении агентов к внешним инструментам и данным, а **A2A — на взаимодействии между самими агентами**. Таким образом, для построения сложных многоагентных систем может потребоваться одновременное использование обоих протоколов.
+Importantly, **Google positions A2A as a complement to Anthropic’s Model Context Protocol (MCP)**, where MCP focuses on connecting agents to external tools and data, while **A2A focuses on interaction between agents themselves**. Thus, building complex multi-agent systems may require simultaneous use of both protocols.
 
-Несмотря на потенциальные преимущества A2A, такие как **обеспечение кроссплатформенной коммуникации и содействие совместной работе**, существуют и потенциальные недостатки и опасения, включая **риски безопасности, особенно в контексте атак с быстрым внедрением**. **Безопасность многоагентных систем, построенных на A2A, будет зависеть не только от самого протокола, но и от надежности реализации агентов, контроля разрешений и постоянного мониторинга**.
+Despite A2A’s potential advantages—such as **enabling cross-platform communication and fostering collaboration**—there are also potential drawbacks and concerns, including **security risks, particularly in the context of rapid injection attacks**. **The security of multi-agent systems built on A2A will depend not only on the protocol itself but also on the robustness of agent implementation, permission control, and continuous monitoring**.
 
-В целом, **протокол Agent2Agent представляет собой значительный шаг в направлении стандартизации взаимодействия между ИИ-агентами**, что может существенно **увеличить автономность агентов, повысить производительность и снизить долгосрочные затраты** за счет развития более мощных и универсальных систем. Однако для его широкого и безопасного внедрения потребуется **дальнейшая разработка и внимание к вопросам безопасности в межагентном взаимодействии**.
+Overall, the **Agent2Agent protocol represents a significant step toward standardizing interaction between AI agents**, potentially **greatly increasing agent autonomy, boosting productivity, and reducing long-term costs** by enabling more powerful and universal systems. However, for its broad and secure adoption, **further development and focused attention on security in inter-agent interaction are required**.

@@ -1,64 +1,67 @@
-# DAPO: RL-алгоритм для обучения больших языковых моделей 🚀🤖
+# DAPO: An RL Algorithm for Training Large Language Models 🚀🤖**
 
-[![arXiv](https://img.shields.io/badge/arXiv-2501.12948-b31b1b.svg)](https://arxiv.org/abs/2503.14476)
-[![Telegram Channel](https://img.shields.io/badge/Telegram-TheWeeklyBrief-blue)](https://t.me/TheWeeklyBrief)
+[![arXiv](https://img.shields.io/badge/arXiv-2501.12948-b31b1b.svg  )](https://arxiv.org/abs/2503.14476  )
 
-Привет, друзья! Сегодня мы рады представить вам **DAPO (Decoupled Clip and Dynamic sAmpling Policy Optimization)** — инновационный алгоритм от команды ByteDance, который открывает новые горизонты в обучении больших языковых моделей с использованием методов обучения с подкреплением (RLHF).  
+Hello everyone! Today we are excited to introduce **DAPO (Decoupled Clip and Dynamic sAmpling Policy Optimization)** — an innovative algorithm from ByteDance that opens new horizons in training large language models using reinforcement learning (RLHF).
 
-## Что такое DAPO?  
-**DAPO** — это открытая платформа для масштабируемого RL-обучения LLM, которая решает ключевые проблемы современных подходов к обучению моделей рассуждений: коллапс энтропии, шум вознаграждения и неэффективность обработки длинных цепочек выводов. Алгоритм предлагает четыре основные инновации, которые меняют правила игры в области обучения с подкреплением.
+## What is DAPO?
+**DAPO** is an open platform for scalable RL training of LLMs that addresses key challenges in modern reasoning model training: entropy collapse, reward noise, and inefficiency in processing long reasoning chains. The algorithm introduces four core innovations that transform the rules of reinforcement learning.
 
-### Основные особенности DAPO:
-- **Clip-Higher**: Асимметричное ограничение клиппинга, которое предотвращает коллапс энтропии и стимулирует исследование маловероятных токенов.
-- **Dynamic Sampling**: Метод динамической выборки, исключающий примеры с нулевым градиентом и ускоряющий сходимость модели.
-- **Token-Level Policy Gradient Loss**: Расчет градиента на уровне каждого токена, что позволяет эффективно обучать модели на длинных последовательностях.
-- **Overlong Reward Shaping**: Интеллектуальная система штрафов за превышение длины, снижающая шум вознаграждения и стабилизирующая процесс обучения.
-
----
-
-## Почему это важно?  
-DAPO демонстрирует рекордные результаты на тесте AIME 2024, достигая **50 баллов** при обучении модели Qwen2.5-32B, что превосходит предыдущий рекорд DeepSeek-R1-Zero-Qwen-32B (47 баллов), используя **вдвое меньше шагов обучения**. Этот подход открывает новые возможности для разработки моделей, способных решать сложные математические задачи и выполнять многоэтапные рассуждения.
-
-Кроме того, проект полностью открыт: код, данные и методология доступны для научного сообщества. Это делает DAPO важным шагом в развитии воспроизводимых исследований в области RLHF.
+### Key Features of DAPO:
+- **Clip-Higher**: Asymmetric clipping bounds that prevent entropy collapse and encourage exploration of low-probability tokens.
+- **Dynamic Sampling**: A dynamic sampling method that excludes examples with zero gradients and accelerates model convergence.
+- **Token-Level Policy Gradient Loss**: Gradient computation at the individual token level, enabling efficient training on long sequences.
+- **Overlong Reward Shaping**: An intelligent length penalty system that reduces reward noise and stabilizes training.
 
 ---
 
-## Как это работает?  
-DAPO строится на базе фреймворка **verl** и включает следующие ключевые компоненты:
+## Why is this important?
+DAPO achieves record-breaking results on the AIME 2024 test, reaching **50 points** using the Qwen2.5-32B base model, surpassing the previous record of DeepSeek-R1-Zero-Qwen-32B (47 points) with **half the number of training steps**. This approach unlocks new possibilities for developing models capable of solving complex mathematical problems and performing multi-step reasoning.
+
+Moreover, the project is fully open-source: the code, data, and methodology are available to the research community. This makes DAPO a significant step toward reproducible research in RLHF.
+
+---
+
+## How does it work?
+DAPO is built on the **verl** framework and includes the following key components:
 
 ### 🟢 **Clip-Higher**
-- Разделяет диапазон клиппинга на нижний (`ε_low = 0.2`) и верхний (`ε_high = 0.28`).
-- Позволяет увеличивать вероятность "токенов с длинным хвостом", сохраняя разнообразие генерации и предотвращая преждевременную детерминированность политики.
+- Splits the clipping range into a lower bound (`ε_low = 0.2`) and an upper bound (`ε_high = 0.28`).
+- Enables increased probability for "long-tail" tokens, preserving generation diversity and preventing premature policy determinism.
 
 ### 🟠 **Dynamic Sampling**
-- Исключает группы ответов с одинаковой наградой (например, 0 или 1), которые не генерируют полезные градиенты.
-- Динамически дополняет батч примерами с промежуточной точностью, что повышает эффективность использования данных и ускоряет сходимость.
+- Excludes output groups with identical rewards (e.g., 0 or 1) that generate no useful gradients.
+- Dynamically replenishes the batch with examples exhibiting intermediate accuracy, enhancing data utilization and accelerating convergence.
 
 ### 🔵 **Token-Level Policy Gradient Loss**
-- Взвешивает вклад каждого токена в loss-функцию, вместо усреднения по всей последовательности.
-- Стимулирует обучение на длинных цепочках рассуждений, предотвращая подавление значимых паттернов.
+- Weights each token’s contribution to the loss function, instead of averaging over the entire sequence.
+- Promotes effective learning on long reasoning chains, preventing suppression of meaningful patterns.
 
 ### 🟣 **Overlong Reward Shaping**
-- Заменяет жесткий штраф за превышение длины на постепенную линейную функцию.
-- Ответы длиной до 16К токенов получают полную награду, а в интервале 16-20К токенов штраф растёт от 0 до -1. Это снижает уровень шума и позволяет модели учиться на частично корректных длинных решениях.
+- Replaces a hard length penalty with a gradual linear function.
+- Responses up to 16K tokens receive full reward; within the 16–20K token range, the penalty increases linearly from 0 to -1. This reduces noise and allows the model to learn from partially correct long solutions.
 
 ---
 
-## Экспериментальные результаты
-- **AIME 2024**: Обученная с применением DAPO модель Qwen2.5-32B достигла рекордных **50 баллов**, обойдя DeepSeek-R1-Zero-Qwen-32B (47 баллов) при **вдвое меньшем числе шагов обучения**.
-- **Отказ от KL-дивергенции**: Удаление штрафа за расхождение Кульбака-Лейблера позволило модели свободнее развивать сложные цепочки рассуждений.
-- **Динамическая эволюция модели**: В процессе обучения модель не только усиливает существующие шаблоны рассуждений, но и формирует принципиально новые способности, такие как самопроверка и переосмысление предыдущих шагов.
+## Experimental Results
+- **AIME 2024**: The DAPO-trained Qwen2.5-32B model achieved a record **50 points**, outperforming DeepSeek-R1-Zero-Qwen-32B (47 points) using **half the training steps**.
+- **Elimination of KL Divergence**: Removing the KL penalty allowed the model greater freedom to develop complex reasoning chains.
+- **Dynamic Model Evolution**: During training, the model not only reinforces existing reasoning patterns but also develops fundamentally new capabilities, such as self-checking and reconsidering prior steps.
 
 ---
 
-## Открытый доступ  
-Проект полностью открыт для сообщества:
-- **Код**: Реализация DAPO доступна в репозитории [GitHub](https://github.com/volcengine/verl).
-- **Датасеты**: Тщательно подготовленный датасет **DAPO-Math-17K** включён в репозиторий.
-- **Фреймворк**: Алгоритм интегрирован в фреймворк **verl** для удобства использования.
-
-⭐ Не забудьте поставить звезду репозиторию, если обзор оказался полезным!
+## Open Access
+The project is fully open to the community:
+- **Code**: DAPO implementation is available on [GitHub](https://github.com/volcengine/verl  ).
+- **Datasets**: The carefully curated **DAPO-Math-17K** dataset is included in the repository.
+- **Framework**: The algorithm is integrated into the **verl** framework for ease of use.
 
 ---
 
-<p align="center">Исследуйте вместе с нами 🚀</p>
+<div align="center">
+
+**Explore with us 🚀**
+
+⭐ Star this repository if you found it helpful
+
+</div>

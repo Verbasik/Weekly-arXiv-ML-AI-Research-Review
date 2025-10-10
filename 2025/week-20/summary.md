@@ -1,155 +1,155 @@
-# Машины непрерывного мышления (Continuous Thought Machines): внедрение нейронной синхронизации в качестве основы для искусственного интеллекта
+# Continuous Thought Machines: Implementing Neural Synchronization as the Foundation for Artificial Intelligence
 
-## Оглавление  
-1. [Введение](#введение)  
-2. [Обзор архитектуры](#обзор-архитектуры)  
-3. [Нейронная динамика и синхронизация](#нейронная-динамика-и-синхронизация)  
-4. [Производительность по всем задачам](#производительность-по-всем-задачам)  
-   - [Классификация изображений](#классификация-изображений)  
-   - [Навигация по лабиринту](#навигация-по-лабиринту)  
-   - [Адаптивные вычисления](#адаптивные-вычисления)  
-   - [Обучение с подкреплением](#обучение-с-подкреплением)  
-   - [Математические задачи](#математические-задачи)  
-5. [Внутренние представления](#внутренние-представления)  
-6. [Биологическая правдоподобность](#биологическая-правдоподобность)  
-7. [Заключение](#заключение)
+## Table of Contents  
+1. [Introduction](#introduction)  
+2. [Architecture Overview](#architecture-overview)  
+3. [Neural Dynamics and Synchronization](#neural-dynamics-and-synchronization)  
+4. [Performance Across Tasks](#performance-across-tasks)  
+   - [Image Classification](#image-classification)  
+   - [Maze Navigation](#maze-navigation)  
+   - [Adaptive Computation](#adaptive-computation)  
+   - [Reinforcement Learning](#reinforcement-learning)  
+   - [Mathematical Tasks](#mathematical-tasks)  
+5. [Internal Representations](#internal-representations)  
+6. [Biological Plausibility](#biological-plausibility)  
+7. [Conclusion](#conclusion)
 
-## **1. Введение**
-Искусственный интеллект добился значительного прогресса благодаря архитектурам глубокого обучения, однако эти системы все еще сталкиваются со значительными ограничениями в рассуждениях здравого смысла, обобщении и прозрачности. Статья «Машины непрерывного мышления» (CTM) представляет новую архитектуру нейронной сети, которая устраняет эти ограничения, явно включая нейронную синхронизацию в качестве фундаментального компонента, черпая вдохновение из того, как биологический мозг обрабатывает информацию.
+## **1. Introduction**
+Artificial intelligence has made significant progress through deep learning architectures, yet these systems still face substantial limitations in commonsense reasoning, generalization, and transparency. The paper "Continuous Thought Machines" (CTM) introduces a novel neural network architecture that overcomes these limitations by explicitly incorporating neural synchronization as a fundamental component, inspired by how the biological brain processes information.
 
-![Рисунок 1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-20/assets/Image_01.jpeg)
+![Figure 1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-20/assets/Image_01.jpeg)
 
-**Рисунок 1:** Архитектура CTM с выделением ключевых компонентов: модель синапса, модели на уровне нейронов с обработкой истории и нейронная синхронизация как скрытое представление.
+**Figure 1:** CTM architecture highlighting key components: synapse model, neuron-level models with history processing, and neural synchronization as a hidden representation.
 
-Разработанный исследователями из Sakana AI в сотрудничестве с Университетом Цукубы и Университетом информационных технологий Копенгагена, CTM представляет собой отход от стандартных подходов глубокого обучения, которые обычно абстрагируются от временной динамики нейронной обработки. Вместо этого CTM принимает время как существенное измерение, в котором могут разворачиваться мыслительные процессы, обеспечивая более сложные рассуждения посредством нейронной синхронизации и непрерывных паттернов нейронной активности.
+Developed by researchers at Sakana AI in collaboration with Tsukuba University and the University of Copenhagen Institute of Information Technology, CTM departs from standard deep learning approaches that typically abstract away the temporal dynamics of neural processing. Instead, CTM treats time as an essential dimension in which thought processes can unfold, enabling more sophisticated reasoning through neural synchronization and continuous patterns of neural activity.
 
-## **2. Обзор архитектуры**
+## **2. Architecture Overview**
 
-CTM (Continuous Thought Machines) представляет три ключевых архитектурных новшества, которые отличают ее от традиционных нейронных сетей:
+CTM (Continuous Thought Machines) introduces three key architectural innovations that distinguish it from traditional neural networks:
 
-1. **Временная обработка на уровне нейронов:** каждый нейрон в CTM использует уникальные весовые параметры для обработки истории входящих сигналов, а не только текущего состояния входа.
+1. **Neuron-level temporal processing:** Each neuron in CTM uses unique weight parameters to process the history of incoming signals, rather than only the current input state.
 
-2. **Нейронная синхронизация как скрытое представление:** модель использует нейронную синхронизацию как фундаментальный механизм представления, обеспечивая формирование и обработку сложных паттернов.
+2. **Neural synchronization as a hidden representation:** The model employs neural synchronization as a fundamental representational mechanism, enabling the formation and processing of complex patterns.
 
-3. **Разделенное внутреннее измерение времени:** CTM вводит внутреннее измерение, в котором мысль может разворачиваться независимо от входной последовательности, что обеспечивает итеративную обработку.
+3. **Separated internal time dimension:** CTM introduces an internal dimension in which thought can unfold independently of the input sequence, enabling iterative processing.
 
-Как показано на рисунке 1, архитектура состоит из нескольких взаимосвязанных компонентов. Модель синапса (компонент 1) обрабатывает входные данные, в то время как модели нейронного уровня (компоненты 2-3) поддерживают историю предварительных активаций, которые развиваются во внутреннем измерении времени/мысли. Система использует механизмы синхронизации (компоненты 5-7) для установления скрытых представлений и создания выходных данных посредством специализированных механизмов внимания (компоненты 8-10).
+As shown in Figure 1, the architecture consists of several interconnected components. The synapse model (component 1) processes inputs, while neuron-level models (components 2–3) maintain histories of prior activations that evolve within the internal time/thought dimension. The system uses synchronization mechanisms (components 5–7) to establish hidden representations and generate outputs via specialized attention mechanisms (components 8–10).
 
-## **3. Нейронная динамика и синхронизация**
+## **3. Neural Dynamics and Synchronization**
 
-Центральным элементом возможностей CTM является использование нейронной синхронизации в качестве механизма представления. В отличие от традиционных нейронных сетей, которые представляют информацию посредством паттернов активации в один момент времени, CTM кодирует информацию в паттернах синхронизации нейронной активности во времени.
+The central element enabling CTM’s capabilities is the use of neural synchronization as a representational mechanism. Unlike traditional neural networks that encode information through activation patterns at a single moment in time, CTM encodes information in patterns of synchronized neural activity over time.
 
-Эти динамические паттерны создают богатое пространство представлений, которое позволяет модели поддерживать и манипулировать сложной информацией. Механизм синхронизации позволяет нейронам устанавливать отношения во времени, формируя то, что можно считать формой рабочей памяти или когнитивной карты.
+These dynamic patterns create a rich representational space that allows the model to maintain and manipulate complex information. The synchronization mechanism enables neurons to establish temporal relationships, forming what can be regarded as a form of working memory or cognitive map.
 
-В статье демонстрируется, что эта нейронная динамика — не просто деталь реализации, а фундаментальный аспект того, как CTM обрабатывает информацию и решает задачи. Например, при решении сложных задач модель демонстрирует характерные паттерны нейронной активности, которые развиваются во времени, при этом каждый нейрон имеет свою уникальную сигнатуру активности.
+The paper demonstrates that this neural dynamics is not merely an implementation detail but a fundamental aspect of how CTM processes information and solves tasks. For instance, when solving complex tasks, the model exhibits characteristic patterns of neural activity that evolve over time, with each neuron possessing a unique activation signature.
 
-![Рисунок 2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-20/assets/Image_02.jpeg)
+![Figure 2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-20/assets/Image_02.jpeg)
 
-**Рисунок 2:** Визуализация нейронной активности CTM, показывающая богатые паттерны, формируемые в процессе обработки. Каждая строка представляет активность отдельного нейрона во времени.
+**Figure 2:** Visualization of CTM neural activity showing rich patterns formed during processing. Each row represents the activity of an individual neuron over time.
 
-## **4. Производительность в различных задачах**
+## **4. Performance Across Tasks**
 
-CTM демонстрирует впечатляющую универсальность в широком спектре задач, что указывает на ее потенциал в качестве архитектуры общего назначения:
+CTM demonstrates impressive versatility across a broad range of tasks, indicating its potential as a general-purpose architecture:
 
-- Классификация изображений (ImageNet-1K, CIFAR-10/100);
-- Навигация по двухмерному лабиринту;
-- Сортировка;
-- Вычисление четности;
-- Вопросно-ответная система (MNIST Q&A);
-- Обучение с подкреплением (CartPole, Acrobot, MiniGrid Four Rooms).
+- Image classification (ImageNet-1K, CIFAR-10/100);
+- Two-dimensional maze navigation;
+- Sorting;
+- Parity computation;
+- Question answering (MNIST Q&A);
+- Reinforcement learning (CartPole, Acrobot, MiniGrid Four Rooms).
 
-Примечательно то, что основная архитектура CTM оставалась в основном неизменной во всех этих задачах, требуя лишь корректировки входных/выходных модулей. Это говорит о том, что подход нейронной динамики предлагает прочную основу для решения разнообразных когнитивных задач.
+Notably, the core CTM architecture remained largely unchanged across all these tasks, requiring only adjustments to input/output modules. This suggests that the neural dynamics approach provides a robust foundation for solving diverse cognitive tasks.
 
-### **Классификация изображений**
+### **Image Classification**
 
-В задачах классификации изображений CTM показывает конкурентоспособную производительность, предлагая при этом дополнительные преимущества с точки зрения интерпретируемости и адаптивных вычислений.
+In image classification tasks, CTM achieves competitive performance while offering additional advantages in terms of interpretability and adaptive computation.
 
-![Рисунок 3](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-20/assets/Image_03.jpeg)
+![Figure 3](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-20/assets/Image_03.jpeg)
 
-**Рисунок 3:** (a) Кривые обучения, показывающие производительность CTM (на рисунке обозначена как ATM) по сравнению с прямоточными (FF) и LSTM-базовыми линиями. (b) График калибровки, сравнивающий CTM с производительностью человека.
+**Figure 3:** (a) Learning curves showing CTM performance (labeled as ATM) compared to feedforward (FF) and LSTM baselines. (b) Calibration plot comparing CTM performance to human performance.
 
-В CIFAR-10 CTM достигла точности тестирования 86,03%, превзойдя как прямые сети (84,44%), так и LSTM (85,54%). Что еще более интересно, калибровка уверенности CTM (ее способность точно оценивать свою неопределенность) была поразительно похожа на производительность человека, что позволяет предположить, что ее процесс рассуждений может иметь некоторые общие черты с человеческим познанием.
+On CIFAR-10, CTM achieved a test accuracy of 86.03%, outperforming both feedforward networks (84.44%) and LSTMs (85.54%). More intriguingly, CTM’s confidence calibration (its ability to accurately assess its own uncertainty) was remarkably similar to human performance, suggesting that its reasoning process may share some characteristics with human cognition.
 
-### **Навигация по лабиринту**
+### **Maze Navigation**
 
-Задача навигации по лабиринту представляет собой одну из наиболее убедительных демонстраций возможностей CTM. Модели было поручено найти кратчайший путь между двумя точками в лабиринте, что требует сложных последовательных рассуждений.
+The maze navigation task presents one of the most compelling demonstrations of CTM’s capabilities. The model was tasked with finding the shortest path between two points in a maze, requiring complex sequential reasoning.
 
-![Рисунок 4](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-20/assets/Image_04.jpeg)
+![Figure 4](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-20/assets/Image_04.jpeg)
 
-**Рисунок 4:** Примеры решения CTM задач навигации по лабиринту. Цветные пути показывают последовательность фокусировки внимания по мере того, как модель решает лабиринт шаг за шагом.
+**Figure 4:** Examples of CTM solving maze navigation tasks. Colored paths show the sequence of attention focus as the model solves the maze step by step.
 
-Примечательно, что CTM смогла решить эту задачу без позиционных вложений, что позволяет предположить, что она строит внутреннее представление пространственной среды посредством своей нейронной динамики. Еще более впечатляющей была способность модели обобщать гораздо более крупные лабиринты, чем те, которые были замечены во время обучения, — успешно решать лабиринты 99×99 после обучения только на лабиринтах 39×39.
+Notably, CTM solved this task without positional embeddings, suggesting it constructs an internal representation of the spatial environment through its neural dynamics. Even more impressive was the model’s ability to generalize to much larger mazes than those seen during training—successfully solving 99×99 mazes after training only on 39×39 mazes.
 
-Визуализация траекторий внимания (рисунок 4) показывает, что CTM подходит к решению лабиринта методично, шаг за шагом, подобно тому, как люди могли бы решать такие задачи. Это открывает окно в ее внутренний процесс рассуждений и демонстрирует ее способность выполнять сложные последовательные рассуждения.
+Visualization of attention trajectories (Figure 4) shows that CTM approaches maze solving methodically, step by step, akin to how humans might solve such tasks. This opens a window into its internal reasoning process and demonstrates its capacity for complex sequential reasoning.
 
-### **Адаптивные вычисления**
+### **Adaptive Computation**
 
-Одним из наиболее интересных свойств CTM является ее способность динамически корректировать свой вычислительный бюджет в зависимости от сложности задачи — возможность, называемая адаптивными вычислениями.
+One of the most interesting properties of CTM is its ability to dynamically adjust its computational budget based on task complexity—a capability termed adaptive computation.
 
-![Рисунок 5](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-20/assets/Image_05.jpeg)
+![Figure 5](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-20/assets/Image_05.jpeg)
 
-**Рисунок 5:** Возможности адаптивных вычислений CTM. (a) При пороге достоверности 0,5 многие образцы классифицируются на ранней стадии. (b) При более высоком пороге 0,8 более сложные примеры получают расширенную обработку.
+**Figure 5:** CTM’s adaptive computation capabilities. (a) At a confidence threshold of 0.5, many samples are classified early. (b) At a higher threshold of 0.8, more complex examples receive extended processing.
 
-Как показано на рисунке 5, CTM можно настроить на продолжение обработки до достижения желаемого порога уверенности. Для более простых примеров он принимает решения раньше, а для более сложных случаев продолжает обработку в течение дополнительных внутренних временных шагов. Такое поведение возникает естественным образом из архитектуры модели и процедуры обучения.
+As shown in Figure 5, CTM can be configured to continue processing until a desired confidence threshold is reached. For simpler examples, it makes decisions earlier; for more complex cases, it extends processing over additional internal time steps. This behavior emerges naturally from the model’s architecture and training procedure.
 
-В статье демонстрируется эта возможность на CIFAR-10, показывая, что уверенность модели сильно коррелирует с точностью и что разные образцы достигают уверенности с разной скоростью. Эта адаптивная вычислительная способность предлагает более эффективное использование вычислительных ресурсов и предоставляет интерпретируемый механизм для контроля компромисса между скоростью и точностью.
+The paper demonstrates this capability on CIFAR-10, showing that the model’s confidence strongly correlates with accuracy and that different samples reach confidence at varying speeds. This adaptive computational capacity offers more efficient use of computational resources and provides an interpretable mechanism for controlling the trade-off between speed and accuracy.
 
-### **Обучение с подкреплением**
+### **Reinforcement Learning**
 
-Чтобы оценить возможности CTM в последовательном принятии решений, исследователи оценили его на классических эталонных тестах обучения с подкреплением, включая CartPole, Acrobot и MiniGrid Four Rooms.
+To evaluate CTM’s capabilities in sequential decision-making, researchers assessed it on classical reinforcement learning benchmarks, including CartPole, Acrobot, and MiniGrid Four Rooms.
 
-![Рисунок 6](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-20/assets/Image_06.jpeg)
+![Figure 6](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-20/assets/Image_06.jpeg)
 
-**Рисунок 6:** Производительность моделей CTM и LSTM в задачах обучения с подкреплением с разными настройками итераций.
+**Figure 6:** Performance of CTM and LSTM models in reinforcement learning tasks under different iteration settings.
 
-CTM достиг конкурентоспособной производительности с соответствующими по параметрам LSTM в этих задачах, демонстрируя, что он может эффективно использовать свою синхронизацию непрерывной истории активаций для изучения стратегий выбора действий. Это говорит о том, что возможности CTM по временной обработке хорошо подходят для последовательной природы задач обучения с подкреплением.
+CTM achieved competitive performance with parameter-matched LSTMs on these tasks, demonstrating that it can effectively leverage its continuous history of synchronized activations to learn action-selection strategies. This suggests that CTM’s temporal processing capabilities are well-suited to the sequential nature of reinforcement learning tasks.
 
-### **Математические задачи**
+### **Mathematical Tasks**
 
-CTM также оценивался на математических задачах, требующих точных логических рассуждений, включая вычисление четности и сортировку.
+CTM was also evaluated on mathematical tasks requiring precise logical reasoning, including parity computation and sorting.
 
-В задаче на четность модель должна была определить, было ли число единиц в битовой строке нечетным или четным. CTM подошел к этому систематически, научившись считать и поддерживать текущую четность в своем нейронном состоянии. Для сортировки модель научилась реализовывать алгоритм, аналогичный сортировке выбором, демонстрируя свою способность разрабатывать алгоритмические решения для четко определенных проблем.
+In the parity task, the model had to determine whether the number of ones in a bit string was odd or even. CTM approached this systematically, learning to count and maintain the current parity state in its neural state. For sorting, the model learned to implement an algorithm analogous to selection sort, demonstrating its ability to develop algorithmic solutions for well-defined problems.
 
-Эти задачи подчеркивают способность CTM разрабатывать структурированные внутренние процессы для решения абстрактных задач — ключевое требование для рассуждений более высокого уровня.
+These tasks underscore CTM’s capacity to develop structured internal processes for solving abstract problems—a key requirement for higher-level reasoning.
 
-### **5. Внутренние представления**
+### **5. Internal Representations**
 
-В статье представлены увлекательные визуализации внутренних представлений CTM, предлагающие понимание того, как он обрабатывает информацию.
+The paper presents compelling visualizations of CTM’s internal representations, offering insight into how it processes information.
 
-![Рисунок 7](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-20/assets/Image_07.jpeg)
+![Figure 7](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-20/assets/Image_07.jpeg)
 
-**Рисунок 7:** Визуализация паттернов нейронной активности во время классификации изображений, показывающая разнообразные временные сигнатуры по нейронам.
+**Figure 7:** Visualization of neural activity patterns during image classification, showing diverse temporal signatures across neurons.
 
-Рисунок 7 показывает богатые и разнообразные временные паттерны, которые возникают в нейронах CTM во время классификации изображений. Каждый нейрон развивает уникальную временную сигнатуру, и эти паттерны коллективно кодируют понимание моделью входных данных.
+Figure 7 reveals rich and diverse temporal patterns emerging in CTM neurons during image classification. Each neuron develops a unique temporal signature, and collectively these patterns encode the model’s understanding of the input data.
 
-Исследователи также проанализировали, как эти паттерны соотносятся между нейронами и между точками данных, обнаружив, что модель развивает специализированные нейронные реакции, сохраняя при этом распределенное представление. Этот баланс между специализацией и распределением напоминает то, как функционируют биологические нейронные сети.
+Researchers also analyzed how these patterns relate across neurons and across data points, discovering that the model develops specialized neural responses while maintaining a distributed representation. This balance between specialization and distribution mirrors the functioning of biological neural networks.
 
-### **6. Биологическая правдоподобность**
+### **6. Biological Plausibility**
 
-Хотя CTM не предназначен для буквальной модели функционирования мозга, принципы его проектирования вдохновлены биологической нейронной обработкой. Включение временной динамики, синхронизации и непрерывной обработки соответствует нескольким аспектам нейронных вычислений в биологических системах:
+Although CTM is not intended as a literal model of brain function, its design principles are inspired by biological neural processing. The incorporation of temporal dynamics, synchronization, and continuous processing aligns with several aspects of neural computation in biological systems:
 
-1. **Временная интеграция:** как и биологические нейроны, нейроны CTM интегрируют информацию во времени, что позволяет выполнять более сложные процессы, чем поточечные операции.
+1. **Temporal integration:** Like biological neurons, CTM neurons integrate information over time, enabling more complex processes than pointwise operations.
 
-2. **Синхронизация:** нейронная синхронизация — хорошо задокументированное явление в биологическом мозге, которое, как считается, играет роль во внимании, рабочей памяти и связывании информации из разных областей мозга.
+2. **Synchronization:** Neural synchronization is a well-documented phenomenon in the biological brain, believed to play roles in attention, working memory, and binding information across brain regions.
 
-3. **Непрерывный процессинг:** биологический мозг работает непрерывно, а не дискретными шагами, что позволяет ему постоянно представлять информацию и манипулировать ею.
+3. **Continuous processing:** The biological brain operates continuously, not in discrete steps, allowing it to constantly represent and manipulate information.
 
-В статье утверждается, что эти вдохновленные биологией особенности способствуют возможностям CTM, предполагая, что дальнейшее изучение биологических принципов может привести к дополнительным достижениям в области искусственного интеллекта.
+The paper argues that these biology-inspired features contribute to CTM’s capabilities, suggesting that further exploration of biological principles may lead to additional breakthroughs in artificial intelligence.
 
-### **7. Заключение**
+### **7. Conclusion**
 
-Машина непрерывного мышления представляет собой значительный отход от стандартных подходов глубокого обучения, явно включая нейронное время в качестве основополагающего элемента. Черпая вдохновение в том, как биологический мозг обрабатывает информацию, CTM демонстрирует возможности, которые решают некоторые ограничения современных систем ИИ.
+Continuous Thought Machines represent a significant departure from standard deep learning approaches by explicitly incorporating neural time as a foundational element. Inspired by how the biological brain processes information, CTM demonstrates capabilities that address some limitations of current AI systems.
 
-Ключевые преимущества CTM включают в себя:
+Key advantages of CTM include:
 
-1. **Универсальность:** модель хорошо работает в различных задачах с минимальными архитектурными изменениями, что предполагает универсальный вычислительный подход.
+1. **Versatility:** The model performs well across diverse tasks with minimal architectural changes, suggesting a universal computational approach.
 
-2. **Интерпретируемость:** внутренняя обработка CTM поддается большей интерпретируемости, о чем свидетельствуют визуализации ее нейронной динамики и моделей внимания.
+2. **Interpretability:** CTM’s internal processing is more interpretable, as evidenced by visualizations of its neural dynamics and attention models.
 
-3. **Адаптивные вычисления:** модель естественным образом реализует адаптивные вычисления, выделяя больше времени обработки для более сложных входных данных.
+3. **Adaptive computation:** The model naturally implements adaptive computation, allocating more processing time to more complex inputs.
 
-4. **Сложное рассуждение:** CTM демонстрирует способность выполнять сложные последовательные рассуждения, как показано в задаче навигации по лабиринту.
+4. **Complex reasoning:** CTM demonstrates the ability to perform complex sequential reasoning, as shown in the maze navigation task.
 
-5. **Надежная генерализация:** модель хорошо обобщает за пределы своего обучающего распределения, о чем свидетельствует ее производительность на больших лабиринтах.
+5. **Robust generalization:** The model generalizes well beyond its training distribution, as demonstrated by its performance on larger mazes.
 
-CTM открывает новые направления исследований, демонстрируя, что включение временной динамики в качестве центрального компонента нейронной обработки может привести к созданию более способных и интерпретируемых систем ИИ. Хотя она не решает все задачи искусственного интеллекта, она предлагает многообещающий подход, который сокращает разрыв между текущими возможностями ИИ и гибкой, общей природой человеческого познания.
+CTM opens new research directions by demonstrating that incorporating temporal dynamics as a central component of neural processing can lead to more capable and interpretable AI systems. While it does not solve all challenges of artificial intelligence, it offers a promising approach that narrows the gap between current AI capabilities and the flexible, general nature of human cognition.

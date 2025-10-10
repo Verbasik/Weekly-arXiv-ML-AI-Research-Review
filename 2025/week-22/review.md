@@ -1,84 +1,84 @@
-# Inference-Time Scaling for Generalist Reward Modeling — технический обзор
+# Inference-Time Scaling for Generalist Reward Modeling — Technical Review
 
-## Оглавление
+## Table of Contents
 
-1. [Введение и мотивация](#введение-и-мотивация)
+1. [Introduction and Motivation](#introduction-and-motivation)
 
-    1.1. [RLHF и роль модели вознаграждения](#rlhf-и-роль-модели-вознаграждения)
+    1.1. [RLHF and the Role of the Reward Model](#rlhf-and-the-role-of-the-reward-model)
 
-    1.2. [Ограничения существующих подходов](#ограничения-существующих-подходов)
+    1.2. [Limitations of Existing Approaches](#limitations-of-existing-approaches)
 
-    1.3. [Возможности масштабируемости при выводе](#возможности-масштабируемости-при-выводе)
+    1.3. [Opportunities for Inference-Time Scaling](#opportunities-for-inference-time-scaling)
 
-    1.4. [Предлагаемый подход](#предлагаемый-подход)
+    1.4. [Proposed Approach](#proposed-approach)
 
-2. [Методология](#методология)
+2. [Methodology](#methodology)
 
-   2.1. [Архитектура и обучение GRM](#архитектура-и-обучение-grm)
+   2.1. [Architecture and Training of GRM](#architecture-and-training-of-grm)
 
-   2.1.1. [Архитектура GRM](#архитектура-grm)
+   2.1.1. [GRM Architecture](#grm-architecture)
 
-   2.1.2. [Обучение GRM (Self-Principled Critique Tuning, SPCT)](#обучение-grm-self-principled-critique-tuning-spct)
+   2.1.2. [Training GRM (Self-Principled Critique Tuning, SPCT)](#training-grm-self-principled-critique-tuning-spct)
 
-   2.2. [Техника *Inference-Time Scaling* (ITS)](#техника-inference-time-scaling-its)
+   2.2. [Inference-Time Scaling (ITS) Technique](#inference-time-scaling-its)
 
-   2.2.1. [Naive Voting (голосование)](#naive-voting-голосование)
+   2.2.1. [Naive Voting](#naive-voting)
 
-   \- Пошаговый пример работы Naive Voting
+   \- Step-by-step example of Naive Voting
 
-   2.2.2. [Meta Reward Model (Meta RM) – улучшенное голосование](#meta-reward-model-meta-rm--улучшенное-голосование)
+   2.2.2. [Meta Reward Model (Meta RM) — Improved Voting](#meta-reward-model-meta-rm--improved-voting)
 
-   2.2.3. [Интуиция ITS и управление trade-off](#интуиция-its-и-управление-trade-off)
+   2.2.3. [Intuition of ITS and Managing the Trade-off](#intuition-of-its-and-managing-the-trade-off)
 
-3. [Эксперименты](#эксперименты)
+3. [Experiments](#experiments)
 
-   3.1. [Задачи, модели и метрики](#задачи-модели-и-метрики)
+   3.1. [Tasks, Models, and Metrics](#tasks-models-and-metrics)
 
-   \- Бенчмарки
+   \- Benchmarks
 
-   \- Процедура оценки
+   \- Evaluation Procedure
 
-   \- Модели для сравнения
+   \- Models for Comparison
 
-   3.2. [Проверяемые гипотезы](#проверяемые-гипотезы)
+   3.2. [Tested Hypotheses](#tested-hypotheses)
 
-   3.3. [Результаты и анализ](#результаты-и-анализ)
+   3.3. [Results and Analysis](#results-and-analysis)
 
-   \- Общее качество на бенчмарках
+   \- Overall Quality on Benchmarks
 
-   \- Эффект SPCT
+   \- Effect of SPCT
 
-   \- Inference-Time Scaling vs Task-specific models (H2, H3)
+   \- Inference-Time Scaling vs Task-specific Models (H2, H3)
 
-   \- Рост качества при увеличении $k$
+   \- Quality Growth with Increasing $k$
 
-   \- Анализ отказов и примеры
+   \- Failure Analysis and Examples
 
-4. [Сравнение с предыдущими подходами](#сравнение-с-предыдущими-подходами)
+4. [Comparison with Previous Approaches](#comparison-with-previous-approaches)
 
    4.1. [Task-Conditioned Reward Models](#task-conditioned-reward-models)
 
-   4.2. [Мультизадачный RLHF (Multi-task RLHF)](#мультизадачный-rlhf-multi-task-rlhf)
+   4.2. [Multi-task RLHF](#multi-task-rlhf)
 
-   4.3. [Pairwise и Semi-scalar RM](#pairwise-и-semi-scalar-rm)
+   4.3. [Pairwise and Semi-scalar RM](#pairwise-and-semi-scalar-rm)
 
-   4.4. [LLM-as-a-Judge (напр., GPT-4)](#llm-as-a-judge-напр-gpt-4)
+   4.4. [LLM-as-a-Judge (e.g., GPT-4)](#llm-as-a-judge-e-g-gpt-4)
 
-5. [Выводы и перспективы](#выводы-и-перспективы)
+5. [Conclusions and Future Work](#conclusions-and-future-work)
 
-   5.1. [Основные выводы](#основные-выводы)
+   5.1. [Key Findings](#key-findings)
 
-   5.2. [Ограничения](#ограничения)
+   5.2. [Limitations](#limitations)
 
-   5.3. [Перспективы развития](#перспективы-развития)
+   5.3. [Future Directions](#future-directions)
 
-   \- Интеграция GRM в контур RL
+   \- Integrating GRM into RL Loops
 
-   \- Совместимое масштабирование политики и RM
+   \- Coordinated Scaling of Policy and RM
 
-   \- Автоматизированные оценщики для исследований
-   
-   \- Улучшение эффективности и снижение bias
+   \- Automated Evaluators for Research
+
+   \- Improving Efficiency and Reducing Bias
 
 ---
 
@@ -86,451 +86,451 @@
 
 <audio controls>
   <source src="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/raw/refs/heads/develop/2025/week-22/TWRB_FM.wav" type="audio/mpeg">
-  Ваш браузер не поддерживает аудиоэлемент.
+  Your browser does not support the audio element.
 </audio>
 
 ---
 
 <details> 
-    <summary><em><strong>Ключевые термины</strong></em></summary>
+    <summary><em><strong>Key Terms</strong></em></summary>
 
-* **Моделирование наград (Reward Modeling, RM)**    
-  Метод пост-обучения больших языковых моделей, цель которого — получение точных сигналов вознаграждения; определяется парадигмами генерации наград и шаблонами оценки.
+* **Reward Modeling (RM)**    
+  A post-training method for large language models aimed at obtaining precise reward signals; defined by reward generation paradigms and evaluation templates.
 
-* **Большие языковые модели (LLM)**     
-  Класс моделей, для которых в процессе пост-обучения широко применяют RM и методы обучения с подкреплением (RL).
+* **Large Language Models (LLM)**     
+  A class of models for which RM and reinforcement learning methods are widely applied during post-training.
 
-* **Генеративное моделирование наград (Generative RM, GRM)**    
-  Парадигма, при которой модель генерирует текстовую критику вместо скалярных оценок. Обеспечивает гибкость и масштабируемость при инференсе.
+* **Generative Reward Model (GRM)**    
+  A paradigm where the model generates textual critiques instead of scalar scores; provides flexibility and scalability during inference.
 
-* **Поточечный шаблон оценки (Pointwise)**      
-  Оценка каждого ответа отдельно; позволяет GRM генерировать награды для произвольного числа ответов в одном формате.
+* **Pointwise Evaluation Template**      
+  Evaluating each response independently; enables GRM to generate rewards for any number of responses in a uniform format.
 
-* **Попарный шаблон оценки (Pairwise)**     
-  Выбор одного наилучшего ответа из набора кандидатов; применяется, например, в методе «LLM-as-a-Judge».
+* **Pairwise Evaluation Template**     
+  Selecting the single best response from a set of candidates; used, for example, in "LLM-as-a-Judge" methods.
 
-* **Скалярная парадигма (Scalar RM)**       
-  Генерация единой числовой оценки за запрос–ответ. Ограничена в масштабировании из-за однообразия сигналов (примеры: DeepSeek-BTRM, DeepSeek-PairRM).
+* **Scalar Paradigm (Scalar RM)**       
+  Generating a single numerical score per query-response pair; limited in scalability due to homogeneous signal nature (examples: DeepSeek-BTRM, DeepSeek-PairRM).
 
-* **Полускалярная парадигма (Semi-Scalar)**     
-  Одновременная генерация текстовой критики и скалярного значения награды для обогащения сигнала (пример: Cloud-Gemma-2-27B).
+* **Semi-Scalar Paradigm (Semi-Scalar)**     
+  Simultaneously generating textual critique and a scalar reward value to enrich the signal (example: Cloud-Gemma-2-27B).
 
-* **Критика (Critique)**        
-  Текстовая обратная связь, создаваемая моделями в рамках полускалярной или генеративной парадигм; в SPCT обучаются точные критические суждения.
+* **Critique**        
+  Textual feedback generated by models under semi-scalar or generative paradigms; in SPCT, precise critique judgments are trained.
 
-* **Принципы (Principles)**     
-  Набор критериев, направляющих генерацию наград; позволяют задавать рамки оценки и повышать точность RM.
+* **Principles**     
+  A set of criteria guiding reward generation; enable defining evaluation boundaries and improving RM accuracy.
 
 * **SPCT (Self-taught with Principles and Critiques Tuning)**       
-  Метод для поточечного GRM, объединяющий тонкую настройку с отклонением и онлайновое RL на основе правил. Обучает модель генерировать адаптивные принципы и критику для эффективного масштабирования при инференсе.
+  A method for pointwise GRM that combines rejection fine-tuning with online RL based on rules. Trains the model to generate adaptive principles and critiques for efficient inference-time scaling.
 
-* **Тонкая настройка с отклонением (Rejection Fine-Tuning, RFT)**       
-  Фаза «холодного старта» SPCT, на которой модель адаптируется генерировать принципы и критику в корректном формате, отбрасывая слишком мягкие или неверные награды.
+* **Rejection Fine-Tuning (RFT)**       
+  The "cold start" phase of SPCT, where the model adapts to generating principles and critiques in the correct format by rejecting overly soft or incorrect rewards.
 
-* **Онлайновое RL на основе правил**        
-  Фаза SPCT, укрепляющая способность GRM сразу оптимизировать генерацию принципов и критики методом подкрепления.
+* **Rule-Based Online RL**        
+  The SPCT phase that reinforces the GRM’s ability to immediately optimize principle and critique generation via reinforcement learning.
 
-* **Масштабирование при инференсе (Inference-Time Scaling)**        
-  Увеличение качества наград за счёт многократной выборки и более интенсивных вычислений во время выполнения запроса.
+* **Inference-Time Scaling**        
+  Improving reward quality through repeated sampling and intensified computation during query execution.
 
-* **Параллельная выборка (Parallel Sampling)**      
-  Подход DeepSeek-GRM для одновременного создания множества наборов принципов и критики с последующим голосованием.
+* **Parallel Sampling**      
+  DeepSeek-GRM’s approach to simultaneously generate multiple sets of principles and critiques followed by voting.
 
-* **Голосование (Voting)**      
-  Агрегация скалярных оценок (суммирование) или критикующих суждений для расширения пространства наград; может поддерживаться мета-моделью.
+* **Voting**      
+  Aggregating scalar scores (summing) or critique judgments to expand the reward space; can be supported by a meta-model.
 
-* **Мета-RM (Meta Reward Model)**   
-  Дополнительный скалярный RM, обученный управлять процессом голосования, оценивая корректность принципов и критики основной GRM.
+* **Meta Reward Model (Meta RM)**   
+  An additional scalar RM trained to manage the voting process by evaluating the correctness of the primary GRM’s principles and critiques.
 
 </details> 
 
-## 1. Введение и мотивация
+## 1. Introduction and Motivation
 
-![Различные парадигмы генерации вознаграждений](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-22/assets/Figure_2.png)
+![Various Reward Generation Paradigms](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-22/assets/Figure_2.png)
 
-> Рисунок 2: различные парадигмы генерации вознаграждений
+> Figure 2: Various reward generation paradigms
 
-### 1.1. RLHF и роль модели вознаграждения
+### 1.1. RLHF and the Role of the Reward Model
 
-Reinforcement Learning from Human Feedback (RLHF) – популярный подход для пост-тренировки больших языковых моделей (LLM) с использованием обратной связи человека. Ключевым компонентом RLHF является модель вознаграждения (reward model, RM), которая оценивает качество сгенерированных ответов модели. Однако традиционно модели вознаграждения обучаются на отдельных задачах или доменах и сталкиваются с трудностями при обобщении на новые сценарии. В многозадачных сценариях RLHF возникает проблема: для каждой новой задачи приходится либо обучать отдельную RM, либо использовать одну модель на всё, что может приводить к снижению точности из-за конфликтующих критериев оценки. Необходима универсальная модель вознаграждения (Generalist Reward Model, GRM), способная гибко работать с разными типами запросов и критериями качества, сохраняя высокую точность оценок во множестве доменов.
+Reinforcement Learning from Human Feedback (RLHF) is a popular approach for post-training large language models (LLMs) using human feedback. The key component of RLHF is the reward model (RM), which evaluates the quality of model-generated responses. However, traditional reward models are typically trained on individual tasks or domains and struggle to generalize to new scenarios. In multi-task RLHF settings, a problem arises: for each new task, one must either train a separate RM or use a single model for everything, potentially leading to reduced accuracy due to conflicting evaluation criteria. There is a need for a universal reward model (Generalist Reward Model, GRM) capable of flexibly handling diverse query types and quality criteria while maintaining high evaluation accuracy across multiple domains.
 
-### 1.2. Ограничения существующих подходов
+### 1.2. Limitations of Existing Approaches
 
-Проблемы применения классических RM в мультизадачных настройках связаны с ограничениями парадигм их обучения. Существуют различные подходы к генерации вознаграждений: скалярные (возвращают одно число), полу-скалярные (комбинация текстовой оценки и числа) и генеративные (полностью текстовое обоснование/оценка) модели. Также различают схемы оценки: pointwise (независимо оценивает каждый ответ) и pairwise (попарно сравнивает ответы). Эти различия влияют на гибкость RM и возможность масштабирования при выводе. Например, pairwise-модели оценивают только относительное предпочтение двух ответов и не умеют напрямую работать с одиночным ответом или списком из нескольких вариантов. Скалярные RM возвращают одно число и не могут генерировать разнообразные сигналы качества для одного и того же ответа, из-за чего трудно улучшить оценки путем множественного семплирования при выводе. В условиях RLHF на многих задачах такие ограничения приводят к узкой специализации модели вознаграждения: она либо обучена под конкретный формат данных, либо не может эффективно использовать дополнительный вычислительный бюджет на этапе вывода для повышения точности оценки.
+Problems with applying classical RMs in multi-task settings stem from limitations in their training paradigms. Various approaches to reward generation exist: scalar (returning a single number), semi-scalar (combining textual evaluation and a number), and generative (fully textual justification/evaluation) models. Evaluation schemes also differ: pointwise (independently evaluating each response) and pairwise (comparing responses in pairs). These differences affect RM flexibility and inference-time scalability. For instance, pairwise models only assess relative preference between two responses and cannot directly handle single responses or lists of multiple candidates. Scalar RMs return a single number and cannot generate diverse quality signals for the same response, making it difficult to improve evaluations through multiple sampling during inference. In RLHF contexts across many tasks, such limitations lead to narrow specialization of the reward model: it is either trained for a specific data format or cannot effectively leverage additional computational budget during inference to enhance evaluation accuracy.
 
-### 1.3. Возможности масштабируемости при выводе
+### 1.3. Opportunities for Inference-Time Scaling
 
-Недавние работы указывают, что с ростом масштабов LLM можно задействовать больше вычислений на этапе вывода (inference) для улучшения рассуждений и оценки без дополнительного обучения модели. Это навело исследователей на мысль, что правильные методы обучения RM могут позволить эффективно масштабировать качество оценки за счет увеличения compute на этапе вывода. Проще говоря, хотим, чтобы одна универсальная reward-модель могла улучшать свою оценку, если ей дать больше времени/вычислений при ответе на сложный запрос. Такая масштабируемость на этапе вывода особенно важна для обобщающей RM: модель, обученная на разнообразных задачах, потенциально может догнать или превзойти специализированные RM, если задействовать дополнительные ресурсы для более глубокой оценки каждого ответа.
+Recent work indicates that as LLM scale increases, more computation can be deployed during inference to improve reasoning and evaluation without further model training. This has led researchers to hypothesize that appropriately trained RMs could efficiently scale evaluation quality by increasing compute during inference. In simpler terms, we want a single universal reward model to improve its evaluation when given more time/compute for complex queries. Such inference-time scalability is especially critical for generalist RMs: a model trained on diverse tasks could potentially match or surpass specialized RMs by leveraging additional resources for deeper evaluation of each response.
 
-### 1.4. Предлагаемый подход
+### 1.4. Proposed Approach
 
-Авторы статьи предлагают именно такую систему. Они разрабатывают Generative Reward Modeling – генеративный подход к оценке ответов, и вводят технику Inference-Time Scaling (ITS) – масштабирование на этапе вывода – для улучшения качества оценок без изменения архитектуры модели. В частности, их pointwise generative reward model (GRM) способна единообразно обрабатывать один или несколько ответов на запрос, представляя оценку в виде текста (так называемых принципов и критики), из которого извлекается итоговый балл. Такая модель легко адаптируется к разным типам входных данных (решает требование гибкости) и допускает применение методов семплирования и агрегации ответов при выводе (решает задачу масштабируемости). Иначе говоря, GRM – это универсальная оценочная модель, обученная сразу на множестве типов запросов и ответов, способная улучшать свои оценки по мере увеличения числа сэмплов (вариантов оценки) при инференсе. Далее мы подробно рассмотрим методологию предлагаемого подхода, эксперименты, сравнение с альтернативами и сделаем выводы о значимости работы.
+The authors of this paper propose precisely such a system. They develop Generative Reward Modeling—a generative approach to response evaluation—and introduce the technique of Inference-Time Scaling (ITS) to improve evaluation quality without altering the model architecture. Specifically, their pointwise generative reward model (GRM) can uniformly process one or multiple responses to a query, representing the evaluation as text (so-called principles and critique), from which a final score is extracted. Such a model easily adapts to various input types (satisfying the requirement for flexibility) and allows application of sampling and aggregation methods during inference (solving the scalability problem). In other words, GRM is a universal evaluation model trained simultaneously on multiple types of queries and responses, capable of improving its evaluations as the number of samples (evaluation variants) increases during inference. We will now examine the methodology of the proposed approach, experiments, comparisons with alternatives, and draw conclusions about the significance of this work.
 
-## 2. Методология
+## 2. Methodology
 
-### 2.1. Архитектура и обучение GRM
+### 2.1. Architecture and Training of GRM
 
-#### Архитектура GRM
+#### GRM Architecture
 
-В работе выбрана генеративная архитектура reward-модели, основанная на большой языковой модели (LLM). В отличие от стандартных RM, которые обычно выдают только оценочное число, *generative reward model* генерирует развернутую оценку в текстовом формате. Конкретно, модель для каждого запроса и набора ответов сначала формулирует некоторый набор критериев оценки (*principles*), а затем выдаёт подробный разбор каждого ответа (*critique*) на основе этих критериев, по итогам которого определяется числовая оценка (reward).
+The paper adopts a generative architecture for the reward model based on a large language model (LLM). Unlike standard RMs, which typically output only a numerical score, the *generative reward model* generates an extended textual evaluation. Specifically, for each query and set of responses, the model first formulates a set of evaluation criteria (*principles*), then provides a detailed analysis (*critique*) of each response based on these principles, from which a numerical reward is derived.
 
-Формально этот процесс можно представить так: модель порождает множество принципов $\{p_i\}$ на основе входных данных $(x, \{y_i\}_{i=1}^n)$, после чего генерирует заключение $C$ (критику) и вычисляет итоговую оценку $R$, учитывая сформулированные принципы. В математической форме это описывается как:
+Formally, this process can be represented as: the model generates a set of principles $\{p_i\}$ based on the input $(x, \{y_i\}_{i=1}^n)$, then generates a conclusion $C$ (critique) and computes a final reward $R$, taking into account the formulated principles. Mathematically, this is described as:
 
 $$\{p_i\}_{i=1}^m \sim p_{\theta}(x, \{y_i\}_{i=1}^n), \qquad R = C \sim r_{\theta}\big(x, \{y_i\}_{i=1}^n, \{p_i\}_{i=1}^m\big),\tag{3}$$
 
-где:
-- $p_{\theta}$ – функция генерации принципов
-- $r_{\theta}$ – функция генерации критики и reward, обе реализованы одной моделью с параметрами $\theta$ (то есть GRM сама генерирует и принципы, и оценку). 
+where:
+- $p_{\theta}$ – principle generation function
+- $r_{\theta}$ – critique and reward generation function, both implemented by a single model with parameters $\theta$ (i.e., GRM generates both principles and rewards).
 
-Такая двухэтапная генерация позволяет *адаптивно* подбирать критерии оценки под каждый конкретный запрос и ответ, что повышает качество и тонкость (granularity) итоговых reward-сигналов. Интуитивно, принципы играют роль **внутренней инструкции** для модели: они определяют, по каким аспектам оценивать ответ, а критика – это уже применение этих принципов к конкретному ответу. Благодаря этому GRM может выдавать более осмысленные и прозрачные оценки, особенно на сложных и разнородных задачах.
+This two-stage generation allows for *adaptive* selection of evaluation criteria tailored to each specific query and response, enhancing the quality and granularity of the resulting reward signals. Intuitively, principles serve as the model’s **internal instruction**: they define which aspects to evaluate, while critique applies these principles to the specific response. This enables GRM to produce more meaningful and transparent evaluations, especially on complex and heterogeneous tasks.
 
-#### Обучение GRM (Self-Principled Critique Tuning)
+#### Training GRM (Self-Principled Critique Tuning)
 
-Давайте сначало вспомним, как устроен алгоритм GRPO 👇
+Let us first recall how the GRPO algorithm works 👇
 
 ![GRPO](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_19.jpeg)
 
-Чтобы научить модель генерировать такие принципы и критику, авторы вводят специальный метод обучения – **Self-Principled Critique Tuning (SPCT)**. SPCT состоит из двух стадий: 
-1. **Rejective Fine-Tuning**: обучение модели генерации структурированных оценок с принципами и критикой.  
-2. **Rule-Based RL Fine-Tuning**: тонкая настройка с использованием обучения с подкреплением на основе правил.
+To train the model to generate such principles and critiques, the authors introduce a specialized training method—**Self-Principled Critique Tuning (SPCT)**. SPCT consists of two stages:
+1. **Rejection Fine-Tuning**: Training the model to generate structured evaluations with principles and critique.
+2. **Rule-Based RL Fine-Tuning**: Fine-tuning using reinforcement learning based on rules.
 
 ![SPCT](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-22/assets/Figure_3.png)
 
->Рисунок 3: Иллюстрация SPCT, включая реджективную тонкую настройку, RL на основе правил и соответствующие масштабируемые поведения во время вывода. Масштабирование во время вывода достигается за счёт наивного голосования или голосования с управлением от мета-модели оценки (RM) с принципами, генерируемыми в масштабе, что приводит к более детализированным вознаграждениям результатов в расширенном пространстве значений.
+> Figure 3: Illustration of SPCT, including rejection fine-tuning, rule-based RL, and corresponding scalable behaviors during inference. Inference-time scaling is achieved via naive voting or meta-reward-model-guided voting with principles generated at scale, leading to more detailed reward outcomes in an expanded value space.
 
-На первой стадии (**rejective fine-tuning**) модель обучается генерировать оценки в требуемом формате (сначала принципы, затем критика с выводом балла) на разнообразных данных. Для этого авторы формируют обучающую выборку, объединяя различные типы задач: с одним правильным ответом, с парой ответов (предпочтительный vs. нет) и с несколькими ответами. Все эти варианты приводятся к *единому формату pointwise-GRM*: модель принимает запрос и один или несколько ответов и должна выдать текст с принципами и оценками для каждого ответа.
+In the first stage (**rejection fine-tuning**), the model is trained to generate evaluations in the required format (first principles, then critique with a score) on diverse data. To construct the training set, the authors combine various task types: those with a single correct answer, those with paired responses (preferred vs. not), and those with multiple responses. All these variants are converted into a *unified pointwise-GRM format*: the model receives a query and one or multiple responses and must output text with principles and evaluations for each response.
 
-Чтобы улучшить качество данных, применяется стратегия *отбраковки*: сгенерированные моделью траектории (принципы + критика + оценки) сравниваются с известной “истиной” (например, с человеческими оценками или отметкой лучшего ответа). Если модель ошиблась (предсказала не тот лучший ответ или неверный балл) – такой пример отклоняется; также отклоняются слишком тривиальные случаи, где модель *всегда* угадывает правильно (чтобы не перенатренироваться на легких примерах). Формально критерий правильности предсказанных reward-оценок можно выразить так: предсказанные моделью pointwise-оценки $S_i^*$ считаются корректными, если (а) для задачи с несколькими ответами модель присвоила наивысший балл именно тому ответу, который по ground truth является наилучшим (т.е. $S_{i_{\text{best}}}^* > S_j^*$ для всех прочих $j$), и (б) для задачи с одним ответом предсказанный балл равен истинному рейтингу. Все некорректные или слишком простые примеры отфильтровываются, а оставшиеся используются для дообучения модели, благодаря чему GRM учится базовым навыкам: выдавать осмысленные принципы и оценивать ответы в правильном формате.
+To improve data quality, a *rejection strategy* is applied: model-generated trajectories (principles + critique + scores) are compared against known ground truth (e.g., human ratings or identification of the best answer). If the model makes an error (predicts the wrong best answer or incorrect score), the example is rejected; trivial cases where the model always guesses correctly are also rejected (to prevent overfitting to easy examples). Formally, the criterion for correct predicted reward scores can be expressed as: predicted pointwise scores $S_i^*$ are deemed correct if (a) for multi-response tasks, the model assigns the highest score to the answer that is ground-truth best (i.e., $S_{i_{\text{best}}}^* > S_j^*$ for all others $j$), and (b) for single-response tasks, the predicted score equals the true rating. All incorrect or overly simple examples are filtered out, and the remaining ones are used for fine-tuning, enabling GRM to learn basic skills: generating meaningful principles and evaluating responses in the correct format.
 
-Вторая стадия – **Rule-Based RL** – призвана дальше улучшить точность и *научить модель правильно расставлять относительные оценки*, особенно в сложных случаях. Авторы применяют модификацию алгоритма RL (они ссылаются на GRPO, вариант Proximal Policy Optimization) с простым сигналом вознаграждения: модель получает положительный ревард (+1) за правильно упорядоченные оценки и отрицательный (–1) за ошибочные. Проще говоря, если GRM сгенерировала критику и баллы, где лучший ответ идентифицирован верно (совпадает с человеческим предпочтением), то эта генерация вознаграждается, иначе – штрафуется. Дополнительно вводится сильная штрафующая функция за отклонение от исходного распределения (KL-penalty), чтобы модель не уходила далеко от предтренированных знаний и сохранила адекватный формат вывода.
+The second stage—**Rule-Based RL**—aims to further improve accuracy and *teach the model to correctly rank responses*, especially in complex cases. The authors apply a modification of an RL algorithm (they reference GRPO, a variant of Proximal Policy Optimization) with a simple reward signal: the model receives a positive reward (+1) for correctly ordered scores and a negative reward (–1) for incorrect ones. In simpler terms, if the GRM generates critique and scores where the best answer is correctly identified (matches human preference), this generation is rewarded; otherwise, it is penalized. Additionally, a strong KL-penalty is introduced to prevent the model from deviating too far from its pre-trained knowledge and to preserve coherent output format.
 
-В отличие от некоторых предыдущих работ, здесь не применяются вручную написанные шаблоны или сложные оценочные функции – только правило правильного ранжирования и формат ответа. Таким образом, **SPCT-файнтюнинг** формирует у модели *само-принципиальную критику*: GRM сама генерирует принципы, сама же их применяет и посредством RL-корректировок обучается делать это максимально точно.
+Unlike some prior work, no hand-crafted templates or complex scoring functions are used—only the rule of correct ranking and output format. Thus, **SPCT fine-tuning** instills in the model *self-principled critique*: the GRM generates principles itself, applies them, and through RL corrections, learns to do so with maximum precision.
 
-### 2.2. Техника *Inference-Time Scaling* (ITS)
+### 2.2. Inference-Time Scaling (ITS) Technique
 
-Ключевая особенность подхода – это **масштабирование на этапе вывода** (*Inference-Time Scaling*, ITS), позволяющее повышать качество оценок GRM без изменения её параметров, просто задействуя больше вычислений в момент инференса. Идея состоит в применении *параллельного семплирования* и последующего *агрегирования результатов* для получения более надежного reward-сигнала. Поскольку наша RM является генеративной, каждый прогон модели может немного отличаться – особенно если добавить случайность (например, неполный детерминизм при генерации принципов и критики). За счет этого можно получить несколько вариантов оценки одного и того же ответа и затем объединить их, сглаживая ошибки отдельного прогона.
+The key feature of this approach is **inference-time scaling** (*Inference-Time Scaling*, ITS), enabling improvement of GRM evaluation quality without changing its parameters, simply by deploying more computation during inference. The idea is to apply *parallel sampling* and subsequent *aggregation of results* to obtain a more reliable reward signal. Since our RM is generative, each model run may differ slightly—especially if randomness is introduced (e.g., partial nondeterminism during principle and critique generation). By generating multiple evaluation variants for the same response, we can aggregate them to smooth out errors from individual runs.
 
-#### Naive voting (голосование)
+#### Naive Voting
 
-Базовый способ агрегировать $k$ сэмплов от GRM – это усреднить или суммировать полученные оценки. Предположим, для некоторого ответа $i$ модель при каждом запуске $j = 1..k$ выдает числовую оценку $S_{i,j}$ (например, балл от 1 до 10). Тогда окончательный *совокупный* рейтинг ответа $S_i^*$ может быть получен суммированием всех частичных оценок:
+The basic way to aggregate $k$ GRM samples is to average or sum the resulting scores. Suppose for some response $i$, the model produces a numerical score $S_{i,j}$ (e.g., a score from 1 to 10) during each run $j = 1..k$. Then the final *aggregate* rating for response $S_i^*$ can be obtained by summing all partial scores:
 
 $$S_i^{*} = \sum_{j=1}^{k} S_{i,j}.\ \tag{6}$$
 
-Авторы определяют процедуру голосования именно таким образом – как суммирование reward-оценок из всех семплов (эквивалентно усреднению, с точностью до множителя $1/k$). Каждый запуск модели $j$ включает генерацию собственного набора принципов $\{p_{i,j}\}$ и на их основе – критики с оценками $S_{i,j}$ для всех рассматриваемых ответов.
+The authors define the voting procedure precisely this way—as summing reward scores from all samples (equivalent to averaging, up to a $1/k$ multiplier). Each model run $j$ includes generation of its own set of principles $\{p_{i,j}\}$ and, based on them, critique with scores $S_{i,j}$ for all considered responses.
 
-В итоге голосование аккумулирует информацию от множества *разных принципов и перспектив оценки*, что приводит к более точному и тонкому итоговому решению. Поскольку каждая отдельная оценка $S_{i,j}$ обычно лежит в некотором ограниченном диапазоне (например, 1–10), суммирование нескольких независимых оценок фактически **расширяет пространство возможных значений reward** и позволяет различать ответы более тонко.
+Ultimately, voting accumulates information from multiple *different principles and evaluation perspectives*, leading to a more accurate and nuanced final decision. Since each individual score $S_{i,j}$ typically lies within a limited range (e.g., 1–10), summing several independent scores effectively **expands the reward value space**, enabling finer discrimination between responses.
 
-Например, если в одном прогоне оба ответа получили максимальный балл 10, модель не различит их; но при 10–20 прогонов могут накопиться различия (скажем, один ответ чаще получает 10, а другой – иногда 9), что даст суммарно 100 vs 95 – заметное различие. Авторы подчёркивают, что увеличение количества сэмплов $k$ пропорционально расширяет шкалу оценок и увеличивает разнообразие сгенерированных принципов, благодаря чему **качество и детализация финальных reward-сигналов улучшаются**.
+For example, if in one run both responses receive the maximum score of 10, the model cannot distinguish them; but over 10–20 runs, differences may accumulate (e.g., one response frequently receives 10, while the other sometimes receives 9), resulting in a total of 100 vs. 95—a noticeable difference. The authors emphasize that increasing the number of samples $k$ proportionally expands the score scale and increases the diversity of generated principles, thereby **improving the quality and granularity of final reward signals**.
 
-Интуитивно, можно считать, что *каждый принцип отражает отдельную «точку зрения» при оценке*, поэтому большее число случайных принципов лучше покрывает все аспекты качества ответа. Важная деталь реализации: чтобы избежать систематических смещений, ответы перед каждой выборкой перемешиваются случайно (shuffling), так модель не привязывается к позиции ответа в списке.
+Intuitively, one can think of *each principle as reflecting a separate "perspective" on evaluation*; thus, a greater number of random principles better covers all aspects of response quality. A crucial implementation detail: to avoid systematic biases, responses are randomly shuffled before each sampling, so the model does not become biased toward response position in the list.
 
-![Naive voting (голосование)](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-22/assets/Figure_3.1.png)
+![Naive Voting](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-22/assets/Figure_3.1.png)
 
-#### Пошаговый пример работы Naive Voting
+#### Step-by-step Example of Naive Voting
 
-В процедуре naive voting модель-оценщик (GRM) многократно ― $k$ раз ― «пере-оценивает» один и тот же набор *вопрос ↔ ответ(ы)*. Каждый прогон $j$ выполняется со стохастическим семплированием (обычно $T\!=\!0{,}5$), поэтому модель заново генерирует:
+In the naive voting procedure, the evaluation model (GRM) repeatedly—$k$ times—"re-evaluates" the same set of *question ↔ answer(s)*. Each run $j$ is performed with stochastic sampling (typically $T\!=\!0{,}5$), so the model regenerates:
 
-1. **Набор принципов** $\{p_{\,j}\}$ — самостоятельные критерии, по которым следует судить ответы;
-2. **Критику + баллы** $S_{i,j}$ для каждого ответа $y_i$.
+1. **A set of principles** $\{p_{\,j}\}$ — independent criteria for judging answers;
+2. **Critique + scores** $S_{i,j}$ for each answer $y_i$.
 
-В формуле голосования это видно по индексам $j$ и $\{p_{i,j}^{\,m_j}\}$ — каждый семпл имеет свои принципы и, как следствие, собственные оценки, которые затем суммируются:
+In the voting formula, this is evident in the indices $j$ and $\{p_{i,j}^{\,m_j}\}$ — each sample has its own principles and, consequently, its own scores, which are then summed:
 
 $$
-S_i^{*} = \sum_{j=1}^{k} S_{i,j} \quad \text{при} \quad
+S_i^{*} = \sum_{j=1}^{k} S_{i,j} \quad \text{where} \quad
 \bigl\{S_{i,j}\bigr\} = f_{\text{point}}(C_j,\{y_i\}) \sim r_\theta\!\bigl(x,\{y_i\},\{p_{i,j}\}\bigr),
 $$
 
-> **Запрос:** «Объясните, что такое квантовая суперпозиция простыми словами».
-> **Ответ 1:** «Суперпозиция — это …» (доступное популярное объяснение).
-> **Ответ 2:** «Суперпозиция описывается линейным сочетанием векторов …» (формально-математическое описание).
+> **Query:** "Explain quantum superposition in simple terms."
+> **Answer 1:** "Superposition is..." (an accessible popular explanation).
+> **Answer 2:** "Superposition is described by a linear combination of vectors..." (a formal-mathematical description).
 
-**Многократная генерация оценок (k = 4)**
+**Multiple Evaluation Runs (k = 4)**
 
-| Семпл j | Балл $S_{1,j}$ для Ответ 1 | Балл $S_{2,j}$ для Ответ 2 |
+| Sample j | Score $S_{1,j}$ for Answer 1 | Score $S_{2,j}$ for Answer 2 |
 | ------- | -------------------------- | -------------------------- |
 | 1       | 8                          | 6                          |
 | 2       | 9                          | 7                          |
 | 3       | 7                          | 7                          |
 | 4       | 8                          | 6                          |
 
-*(цифры условные, но отражают дискретный диапазон 1–10, который описан в статье)*
+*(numbers are illustrative, reflecting the discrete 1–10 range described in the paper)*
 
-**Агрегация голосов**
+**Aggregated Voting**
 
 $$
 S_{1}^{*}=8+9+7+8=32,\qquad
 S_{2}^{*}=6+7+7+6=26.
 $$
 
-**Итог**
+**Final Result**
 
-Так как $S_{1}^{*}>S_{2}^{*}$, RM признаёт **Ответ 1** лучшим.
-Если увеличить k, диапазон $[0,10k]$ расширится, и разница между ответами станет ещё более заметной (например, при k = 16 счёт мог быть 128 vs 104).
+Since $S_{1}^{*}>S_{2}^{*}$, the RM recognizes **Answer 1** as better.
+If $k$ is increased, the range $[0,10k]$ expands, and the difference between answers becomes even more pronounced (e.g., at $k = 16$, the score might be 128 vs. 104).
 
-**Ключевые особенности подхода**
+**Key Features of the Approach**
 
-1. **Простота** — никакой взвешенной схемы: каждая частичная оценка равна одному голосу.
-2. **Линейная масштабируемость** — производительность растёт пропорционально k до ограничений compute.
-3. **Борьба с шумом** — суммирование сглаживает случайные колебания отдельных семплов.
-4. **Расширение шкалы** — суммирование «уплотняет» дискретную шкалу, улучшая разрешение между близкими ответами.
+1. **Simplicity** — no weighted scheme: each partial score counts as one vote.
+2. **Linear Scalability** — performance scales proportionally with $k$ until compute limits.
+3. **Noise Reduction** — summation smooths out random fluctuations from individual samples.
+4. **Scale Expansion** — summation "compresses" the discrete scale, improving resolution between close answers.
 
-Таким образом, **naive voting** в контексте GRM — это элементарное суммирование дискретных reward-оценок, позволяющее эффективно использовать дополнительный вычислительный бюджет инференса для более точной и устойчивой ранжирующей оценки ответов.
+Thus, **naive voting** in the context of GRM is a simple summation of discrete reward scores, enabling efficient use of additional inference compute budget for more accurate and robust ranking of responses.
 
-### Meta Reward Model (meta RM) – улучшенное голосование
+### Meta Reward Model (Meta RM) — Improved Voting
 
 ![Meta Reward Model](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-22/assets/Figure_3.2.png)
 
-Простое усреднение/голосование по множеству сэмплов уже даёт выигрыш, но не все сгенерированные критики одинаково качественны. Некоторые прогоны могут быть неудачными – например, модель выбрала неподходящие принципы или сбилась из-за случайности, дав неправильный вывод.
+Simple averaging/voting across multiple samples already yields gains, but not all generated critiques are equally high-quality. Some runs may be unsuccessful—e.g., the model selects inappropriate principles or is misled by randomness, yielding an incorrect conclusion.
 
-Чтобы учесть это, авторы вводят дополнительную модель – так называемую *meta reward model*. Meta RM – это отдельная небольшая **скалярная** модель вознаграждения, обученная оценивать правильность или качество сгенерированной GRM-критики. Проще говоря, meta RM принимает на вход текст: сгенерированные моделью принципы и критику, – и выдаёт оценку того, насколько эта критика соответствует *правильному* разбору ответа.
+To account for this, the authors introduce an additional model—the *meta reward model*. Meta RM is a separate, smaller **scalar** reward model trained to evaluate the correctness or quality of the GRM-generated critique. In simpler terms, meta RM takes as input the text: the model-generated principles and critique—and outputs a score indicating how well this critique aligns with a *correct* analysis of the response.
 
-Для обучения meta RM используется бинарная кросс-энтропия: на множестве случаев известна “верность” данной критики (1 – если GRM правильно определила лучший ответ, 0 – если ошиблась), и meta RM учится классифицировать эти случаи. Источником данных служат как траектории из RL-тюнинга (где известна правильность каждого прогона GRM), так и дополнительные сгенерированные примеры.
+Meta RM is trained using binary cross-entropy: on a set of cases, the "correctness" of each critique is known (1 if GRM correctly identified the best answer, 0 if it erred), and meta RM learns to classify these cases. Training data comes from both RL-tuning trajectories (where correctness of each GRM run is known) and additional generated examples.
 
-При инференсе meta RM применяется так: для каждого из $k$ сэмплов GRM meta-модель предсказывает вспомогательный “meta-reward” $q_j$, отражающий доверие к данной траектории оценки. Далее финальное решение получается не простым средним всех $S_{i,j}$, а **взвешенным голосованием** – например, усредняются только топ-$k_{\text{meta}}$ сэмплов с наивысшим $q_j$. В экспериментах авторы брали $k_{\text{meta}} = k/2$, т.е. отбрасывали половину наиболее сомнительных выборок.
+During inference, meta RM is applied as follows: for each of the $k$ GRM samples, the meta-model predicts an auxiliary "meta-reward" $q_j$, reflecting confidence in that evaluation trajectory. The final decision is then not a simple average of all $S_{i,j}$, but a **weighted voting**—for example, only the top-$k_{\text{meta}}$ samples with the highest $q_j$ are averaged. In experiments, the authors used $k_{\text{meta}} = k/2$, i.e., discarding the half of most questionable samples.
 
-Такой подход отфильтровывает шум и заметно улучшает итоговую точность. Они сообщают, что *meta-guided voting* даёт более высокий результат, чем наивное голосование, особенно при большом $k$, поскольку эффективно отсеивает случайные ошибки GRM.
+This approach filters out noise and significantly improves final accuracy. They report that *meta-guided voting* achieves higher performance than naive voting, especially at large $k$, as it effectively filters out random GRM errors.
 
 <details> 
-    <summary><em><strong>Формализуем концепцию Meta Reward Model (meta RM)</strong></em></summary>
+    <summary><em><strong>Formalizing the Concept of the Meta Reward Model (Meta RM)</strong></em></summary>
 
 ---
 
-Meta Reward Model — это скалярная модель, предназначенная для оценки качества критик, сгенерированных GRM (Generative Reviewer Model). Основная задача Meta RM — определить, насколько корректна данная критика, и использовать эту информацию при взвешенном голосовании для итогового выбора ответа.
+The Meta Reward Model is a scalar model designed to evaluate the quality of critiques generated by the GRM (Generative Reward Model). The primary task of the Meta RM is to determine how correct a given critique is and to use this information in weighted voting to select the final response.
 
-Модель обучается по бинарной кросс-энтропии: целевая метка равна 1, если критика признана корректной (т.е. GRM правильно определил лучший ответ), и 0 — если ошибочной. Во время инференса модель предсказывает значение `meta-reward` $q_j \in [0, 1]$ для каждой критики, отражающее степень уверенности в её корректности.
+The model is trained using binary cross-entropy: the target label is 1 if the critique is deemed correct (i.e., the GRM correctly identified the best response) and 0 if incorrect. During inference, the model predicts a `meta-reward` value $q_j \in [0, 1]$ for each critique, reflecting the confidence in its correctness.
 
-### Формализация задачи
+### Problem Formalization
 
-Обозначим обучающую выборку как:
+Let the training dataset be denoted as:
 
 $$
 D = \{(x_i, c_i, y_i)\}_{i=1}^N
 $$
 
-где:
+where:
 
-* $x_i$ — входной запрос или задача,
-* $c_i$ — критика, сгенерированная GRM, на основе принципов,
-* $y_i \in \{0, 1\}$ — бинарная метка корректности критики.
+* $x_i$ — the input query or task,
+* $c_i$ — the critique generated by the GRM based on principles,
+* $y_i \in \{0, 1\}$ — the binary label indicating the correctness of the critique.
 
-Структура критики $c_i$ может быть представлена в виде тройки:
+The structure of critique $c_i$ can be represented as a triplet:
 
 $$
 c_i = (P_i, A_i, R_i)
 $$
 
-где:
+where:
 
-* $P_i$ — набор принципов оценки, использованных GRM,
-* $A_i$ — текст критического анализа,
-* $R_i$ — ранжирование или оценка, выданная GRM.
+* $P_i$ — the set of evaluation principles used by the GRM,
+* $A_i$ — the textual critique analysis,
+* $R_i$ — the ranking or score assigned by the GRM.
 
-Целевая переменная определяется следующим образом:
+The target variable is defined as:
 
 $$
 y_i =
 \begin{cases}
-1, & \text{если GRM корректно определил лучший ответ} \\
-0, & \text{в противном случае}
+1, & \text{if the GRM correctly identified the best response} \\
+0, & \text{otherwise}
 \end{cases}
 $$
 
-### Модель и функция потерь
+### Model and Loss Function
 
-Модель Meta RM представляет собой дифференцируемую функцию:
+The Meta RM model is a differentiable function:
 
 $$
 f_\theta: (P, A, R) \rightarrow [0, 1]
 $$
 
-где $\theta$ — параметры модели, а выход $f_\theta(c_i)$ интерпретируется как вероятность корректности критики.
+where $\theta$ are the model parameters, and the output $f_\theta(c_i)$ is interpreted as the probability of critique correctness.
 
-Функция потерь (бинарная кросс-энтропия) формулируется как:
+The loss function (binary cross-entropy) is formulated as:
 
 $$
 \mathcal{L}_{BCE}(\theta) = -\frac{1}{N} \sum_{i=1}^N \left[y_i \log(f_\theta(c_i)) + (1 - y_i)\log(1 - f_\theta(c_i))\right]
 $$
 
-Эта функция штрафует модель:
+This function penalizes the model:
 
-* если она даёт низкую вероятность на действительно корректные критики ($y_i = 1$),
-* или высокую вероятность на некорректные ($y_i = 0$).
+* when it assigns low probability to genuinely correct critiques ($y_i = 1$),
+* or high probability to incorrect ones ($y_i = 0$).
 
-### Роль в инференсе и взвешенном голосовании
+### Role in Inference and Weighted Voting
 
-Во время инференса Meta RM используется следующим образом:
+During inference, the Meta RM is applied as follows:
 
-1. **Генерация критик:** для каждого входа $x$ генерируется набор $\{c_j\}_{j=1}^k$ возможных критик.
-2. **Оценка критик:** каждая критика пропускается через модель:
+1. **Critique Generation:** For each input $x$, a set $\{c_j\}_{j=1}^k$ of possible critiques is generated.
+2. **Critique Scoring:** Each critique is passed through the model:
 
    $$
    q_j = f_\theta(c_j)
    $$
-3. **Отбор:** выбираются топ-$k_{\text{meta}}$ критик по убыванию $q_j$:
+3. **Selection:** The top-$k_{\text{meta}}$ critiques are selected in descending order of $q_j$:
 
    $$
    \mathcal{T} = \text{top}_{k_{\text{meta}}}(\{(c_j, q_j)\})
    $$
 
-   Обычно $k_{\text{meta}} = k / 2$.
-4. **Взвешенное голосование:** итоговый скор агрегируется как:
+   Typically, $k_{\text{meta}} = k / 2$.
+4. **Weighted Voting:** The final score is aggregated as:
 
    $$
    S_{\text{final}} = \frac{1}{|\mathcal{T}|} \sum_{j \in \mathcal{T}} S_{i,j} \cdot q_j
    $$
 
-   где $S_{i,j}$ — оценка соответствующего кандидата от GRM.
+   where $S_{i,j}$ is the corresponding candidate's score from the GRM.
 
-### Эффект фильтрации
+### Filtering Effect
 
-Meta RM выполняет важную функцию фильтрации в условиях многократного сэмплирования:
+The Meta RM performs a crucial filtering function under multi-sample sampling:
 
-* Высокие значения $q_j$ получают критики, которые статистически чаще ведут к корректным заключениям.
-* Низкие значения подавляют ошибки GRM.
-* Взвешенное усреднение на этапе голосования минимизирует влияние шума и случайных сбоев.
+* High $q_j$ values correspond to critiques that statistically more often lead to correct conclusions.
+* Low values suppress GRM errors.
+* Weighted averaging during voting minimizes the impact of noise and random failures.
 
 </details> 
 
-### Интуиция ITS и управление trade-off
+### Intuition of ITS and Managing the Trade-off
 
-Техника ITS позволяет явно контролировать компромисс между временем вычисления и качеством/специализацией модели вознаграждения. **Generalist RM** обучена охватывать широкий спектр задач, но при ограниченном времени (например, $k=1$, т.е. один прогон) её вывод может быть более *поверхностным* – модель выдаст общую оценку, опираясь на самые очевидные принципы. Однако, увеличивая $k$, мы заставляем модель «думать дольше» над ответом: перебирая разные принципы, GRM учитывает более тонкие и редкие аспекты качества.
+The ITS technique allows explicit control over the trade-off between computation time and evaluation quality/specialization. The **Generalist RM** is trained to cover a broad spectrum of tasks, but with limited time (e.g., $k=1$, i.e., one run), its output may be more *superficial*—the model delivers a general evaluation based on the most obvious principles. However, by increasing $k$, we compel the model to "think longer" about the response: by exploring different principles, the GRM considers finer and rarer aspects of quality.
 
-В пределе, при большом числе сэмплов, универсальная модель способна обнаруживать нюансы так же хорошо, как специализированная модель, обученная именно на этой узкой задаче. Таким образом, *ITS обеспечивает механизм адаптации*: для простых случаев можно использовать небольшое $k$ (быстро и достаточно хорошо), а для сложных или критичных задач – увеличить $k$, фактически позволяя модели стать более *специализированной* на данном конкретном запросе.
+In the limit, with a large number of samples, the universal model can detect nuances as effectively as a specialized model trained specifically on that narrow task. Thus, *ITS provides an adaptation mechanism*: for simple cases, a small $k$ can be used (fast and sufficiently accurate), while for complex or critical tasks, $k$ can be increased, effectively allowing the model to become more *specialized* for that specific query.
 
-В статье отмечается, что правильно обученная GRM демонстрирует возрастающую точность по мере увеличения compute на выводе, тогда как для некоторых других моделей рост $k$ даёт меньший эффект. Это говорит о том, что SPCT-навыки (генерация принципов, точная критика) сделали модель особенно способной извлечь пользу из дополнительного времени.
+The paper notes that a properly trained GRM demonstrates increasing accuracy as compute at inference increases, whereas for some other models, increasing $k$ yields a smaller effect. This indicates that SPCT skills (principle generation, precise critique) have made the model particularly adept at leveraging additional time.
 
-В результате, разработчики получают гибрид «одно решение на все задачи», которое при необходимости может почти догнать узко натренированные решения, просто работая усерднее на этапе оценки. Управляя параметром $k$, можно балансировать между **обобщающей способностью** (малые $k$, быстрее, одна модель на всё) и **точечной специализацией** под задачу (большие $k$, медленнее, но точнее) – без переключения моделей и без дополнительного обучения.
+As a result, developers gain a hybrid "one-size-fits-all" solution that, when needed, can nearly match narrowly trained solutions simply by working harder during evaluation. By controlling the parameter $k$, one can balance **generalization ability** (small $k$, faster, one model for all) and **task-specific precision** (large $k$, slower, but more accurate)—without switching models or additional training.
 
-## 3. Эксперименты
+## 3. Experiments
 
-### 3.1 Задачи, модели и метрики
-Авторы провели эксперименты на бенчмарках для моделей вознаграждения из разных доменов. Использованы следующие наборы задач и данных:
+### 3.1 Tasks, Models, and Metrics
+The authors conducted experiments on reward model benchmarks across diverse domains. The following task sets and datasets were used:
 
-#### Бенчмарки
+#### Benchmarks
 - **Reward Bench** (Lambert et al., 2024):  
-  Задачи на выбор лучшего ответа из нескольких кандидатов. Метрика: Accuracy.
+  Tasks selecting the best answer from multiple candidates. Metric: Accuracy.
 
 - **PPE** (Frick et al., 2025):  
-  Включает две метрики: 
-  - *PPE Preference* (удовлетворение запроса)
-  - *PPE Correctness* (фактическая правильность).  
-  Обе метрики измеряются как точность выбора.
+  Includes two metrics: 
+  - *PPE Preference* (query satisfaction)
+  - *PPE Correctness* (actual correctness).  
+  Both metrics measured as selection accuracy.
 
 - **RMB** (Zhou et al., 2025):  
-  Обобщенный набор заданий для моделей вознаграждения. Метрика: Accuracy.
+  Generalized benchmark for reward models. Metric: Accuracy.
 - **RealMistake** (Kamoi et al., 2024):  
-  Задача бинарной классификации (корректный/ошибочный ответ). Метрика: ROC-AUC.
+  Binary classification task (correct/incorrect answer). Metric: ROC-AUC.
 
-#### Процедура оценки
-- Для задач с несколькими ответами: Accuracy выбора лучшего ответа.
-- Для бинарной классификации: ROC-AUC.
-- При совпадении оценок: случайное перемешивание ответов с последующим выбором максимального балла.
+#### Evaluation Procedure
+- For multi-response tasks: Accuracy of selecting the best answer.
+- For binary classification: ROC-AUC.
+- In case of tied scores: Random shuffling of answers followed by selection of the highest score.
 
-#### Модели для сравнения
-1. **Публичные модели и LLM-оценщики**:
-   - Специализированные RM:  
+#### Models for Comparison
+1. **Public models and LLM judges**:
+   - Specialized RMs:  
      `InternLM2-20B-Reward`, `Nemotron-4-340B-Reward`, `ArmoRM-8B`
-   - LLM-оценщики:  
+   - LLM judges:  
      `GPT-4 (GPT-4o)`, `Claude-3.5`, `LLaMA-3.1-70B-Instruct`
    - LLM-as-a-Judge (Zheng et al., 2023)
 
-2. **Базовые модели на архитектуре Gemma-2-27B**:
-   - `DeepSeek-BTRM-27B` (pairwise сравнения с агрегацией Bradley-Terry)
-   - `CLoud-Gemma-2-27B` (semi-scalar подход)
-   - `DeepSeek-PairRM-27B` (попарно обученная RM)
+2. **Base models on Gemma-2-27B architecture**:
+   - `DeepSeek-BTRM-27B` (pairwise comparisons with Bradley-Terry aggregation)
+   - `CLoud-Gemma-2-27B` (semi-scalar approach)
+   - `DeepSeek-PairRM-27B` (pairwise-trained RM)
 
-3. **Варианты предложенной модели**:
-   - `DeepSeek-GRM-27B-RFT` (Rejective Fine-Tuning без RL)
-   - `DeepSeek-GRM-27B` (финальная версия с SPCT)
-   - Режимы вывода:  
+3. **Variants of the proposed model**:
+   - `DeepSeek-GRM-27B-RFT` (Rejection Fine-Tuning without RL)
+   - `DeepSeek-GRM-27B` (final version with SPCT)
+   - Inference modes:  
      `Voting@k`, `MetaRM@k` (k ∈ {1,2,4,8,16,32})
 
-### 3.2 Проверяемые гипотезы
-1. **(H1) Улучшение качества через SPCT**  
-   Сравнение `DeepSeek-GRM-27B-RFT` и `DeepSeek-GRM-27B` для оценки вклада RL-обучения.
+### 3.2 Tested Hypotheses
+1. **(H1) Quality Improvement via SPCT**  
+   Compare `DeepSeek-GRM-27B-RFT` and `DeepSeek-GRM-27B` to assess the contribution of RL training.
 
-2. **(H2) Конкуренция с крупными моделями через ITS**  
-   Проверка способности `DeepSeek-GRM-27B` с Inference-Time Scaling (ITS) превзойти модели 70B+/GPT-4.
+2. **(H2) Competition with Large Models via ITS**  
+   Test whether `DeepSeek-GRM-27B` with Inference-Time Scaling (ITS) can surpass 70B+/GPT-4 models.
 
-3. **(H3) Эффективность compute vs размер модели**  
-   Анализ scaling laws: улучшение качества за счет увеличения k (при фиксированных 27B параметрах) vs переход к большим моделям.
+3. **(H3) Compute Efficiency vs. Model Size**  
+   Analyze scaling laws: quality improvement via increasing $k$ (fixed 27B parameters) vs. transitioning to larger models.
 
-4. **(H4) Универсальность ITS-подхода**  
-   Проверка ограничений inference-time scaling для baseline-моделей:
-   - Скалярные модели: ограниченное разнообразие выборок
-   - Pairwise-модели: сложности агрегации за пределами парных сравнений
+4. **(H4) Universality of the ITS Approach**  
+   Test limitations of inference-time scaling for baseline models:
+   - Scalar models: limited sample diversity
+   - Pairwise models: difficulties aggregating beyond pairwise comparisons
 
-### 3.3 Результаты и анализ
+### 3.3 Results and Analysis
 
-**Общее качество на бенчмарках.**  
-Итоговые совокупные результаты приведены в статье в таблицах (см. пример в Table 2). Ниже кратко резюмируем основные наблюдения:
+**Overall Quality on Benchmarks.**  
+Final aggregate results are presented in the paper’s tables (see example in Table 2). Below is a brief summary of key observations:
 
 ![Table 2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-22/assets/Table_2.png)
 
-> Таблица 2: Общие результаты различных методов и моделей на тестах RM. Подчеркнутые цифры обозначают наилучшую производительность, жирные цифры — наилучшую производительность среди базовых методов и наших методов, а курсивом выделены скалярные или полускалярные RM. Для мета RM с управляемым голосованием (MetaRM).  
+> Table 2: Overall results of various methods and models on RM tests. Underlined numbers denote best performance, bold numbers denote best performance among base methods and our methods, and italics indicate scalar or semi-scalar RMs. For meta RM with guided voting (MetaRM).
 
-*   **Без применения ITS (т.е. $k=1$):**  
-    **DeepSeek-GRM-27B (Ours)** уже показывает конкурентное качество относительно лучших baseline-моделей. Например, на сводной метрике (усреднение по всем задачам) она набирает \~69.9, что сравнимо с GPT-4o (\~71.3) и превосходит другие открытые модели схожего или большего размера. При этом модель превосходит альтернативы на той же архитектуре: DeepSeek-GRM-27B (69.9) vs DeepSeek-PairRM-27B (\~69.0) vs CLoud-Gemma-2-27B (\~68.7) vs BTRM-27B (\~68.6) по overall score. Это подтверждает гипотезу H1: метод SPCT сумел повысить качество универсальной RM по сравнению с другими подходами, даже не пользуясь дополнительным compute.
+*   **Without ITS (i.e., $k=1$):**  
+    **DeepSeek-GRM-27B (Ours)** already shows competitive quality relative to top baseline models. For instance, on the overall score (average across all tasks), it achieves ~69.9, comparable to GPT-4o (~71.3) and surpassing other open models of similar or larger size. It outperforms alternatives on the same architecture: DeepSeek-GRM-27B (69.9) vs. DeepSeek-PairRM-27B (~69.0) vs. CLoud-Gemma-2-27B (~68.7) vs. BTRM-27B (~68.6) on overall score. This confirms hypothesis H1: the SPCT method successfully enhanced the quality of a universal RM compared to other approaches, even without additional compute.
 
-*   **Эффект SPCT:**  
-    Сравнение *GRM-27B-RFT* (без RL) и полной *GRM-27B* демонстрирует ощутимый прирост. Например, по совокупному показателю модель после RL (69.9) лучше, чем до RL-тюнинга (\~68.8 overall). Особенно существенно SPCT улучшает метрики на сложных, неверифицируемых задачах: так, на одном из доменов (например, PPE Preference) показатель поднялся с \~64.1 до \~64.7, и в других колонках видны приросты. Это значит, что online-RL с принципами научил модель более уверенно выделять лучшие ответы, не полагаясь только на статистику из обучающих данных. Интересно, что на легко формализуемых проверках (PPE Correctness – вероятно фактологическая правильность) разница минимальна, ведь там и без RL модель могла ориентироваться на явные правила.
+*   **Effect of SPCT:**  
+    Comparing *GRM-27B-RFT* (without RL) and the full *GRM-27B* demonstrates a significant gain. For example, on the overall metric, the model after RL (69.9) outperforms before RL-tuning (~68.8 overall). SPCT particularly improves metrics on complex, unverifiable tasks: on one domain (e.g., PPE Preference), the score rose from ~64.1 to ~64.7, with improvements visible in other columns. This means online RL with principles taught the model to more confidently identify better responses, relying less on training data statistics. Interestingly, on easily formalized checks (PPE Correctness—likely factual correctness), the difference is minimal, as the model could rely on explicit rules even without RL.
 
-*   **Inference-Time Scaling vs Task-specific models (H2, H3):**  
-    При включении масштабирования $k$ = 32 модель достигла новых рекордов. В режиме **Voting\@32** (простой ансамбль 32 семплов) DeepSeek-GRM-27B подняла совокупную метрику с 69.9 до \~71.0. А с применением **Meta RM (@32)** – ещё выше, до **72.8**. Для сравнения, самая большая из конкурентов, *Nemotron-4 (340B)*, имела \~70.5, GPT-4o \~71.3. Таким образом, **27-миллиардная модель с ITS превзошла модель на 340B параметров** и даже обошла (по совокупному баллу) показатель GPT-4o. Это весьма впечатляющий результат, подтверждающий гипотезу H2: правильно используя compute на выводе, можно компенсировать сотни миллиардов параметров. По отдельным задачам картина следующая:
+*   **Inference-Time Scaling vs Task-specific Models (H2, H3):**  
+    With scaling $k = 32$, the model achieved new records. In **Voting@32** mode (simple ensemble of 32 samples), DeepSeek-GRM-27B raised its overall metric from 69.9 to ~71.0. With **Meta RM (@32)**, it rose even higher, to **72.8**. For comparison, the largest competitor, *Nemotron-4 (340B)*, achieved ~70.5, and GPT-4o ~71.3. Thus, the **27-billion parameter model with ITS surpassed a 340B parameter model** and even outperformed (on overall score) GPT-4o. This is a remarkable result confirming hypothesis H2: correctly utilizing inference compute can compensate for hundreds of billions of parameters. Per-task results are as follows:
 
-    Таким образом, ITS особенно помог на тех задачах, где требуются тонкие суждения (предпочтения, субъективные оценки) – там выигрыш был максимальным. Верифицируемые моменты (факт-чекинг) и так давались модели неплохо, но и там небольшое улучшение присутствует.
+    Thus, ITS was especially beneficial on tasks requiring fine judgments (preferences, subjective evaluations)—where the gain was maximal. Verifiable facts (fact-checking) were already handled well, but even there, modest improvements occurred.
 
-*   **Рост качества при увеличении $k$:**  
-    Авторы приводят отдельный анализ *inference-time scalability* (табл. 3-4 и рис. 1 в статье).
+*   **Quality Growth with Increasing $k$:**  
+    The authors provide a separate analysis of *inference-time scalability* (Tables 3-4 and Figure 1 in the paper).
     
-    Кривая качества DeepSeek-GRM стремительно растет при переходе от $k=1$ к $k=8$, затем рост замедляется, но продолжается до $k=32$.
+    The DeepSeek-GRM quality curve rises steeply from $k=1$ to $k=8$, then slows but continues increasing up to $k=32$.
     
     ![Figure 1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-22/assets/Figure_1.png)
     
-     Интересно, что для *LLM-as-a-Judge* тоже наблюдается некоторый выигрыш от голосования: очевидно, если несколько раз спросить независимую большую ЛМ оценить ответы и затем принять решение большинством, точность повышается (авторы отмечают, что *“LLM-as-a-judge also shows a significant performance increase, indicating reliability of majority vote”*). 
+     Interestingly, *LLM-as-a-Judge* also shows some gain from voting: clearly, if multiple independent large LMs are asked to evaluate answers and a majority decision is taken, accuracy improves (authors note, that *“LLM-as-a-judge also shows a significant performance increase, indicating reliability of majority vote”*). 
      
       ![Table 3-4](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-22/assets/Table_3-4.png)
      
-     Однако другие методы, например, *Cloud-Gemma (semi-scalar)* или *PairRM*, получили лишь ограниченное улучшение с ростом $k$. Это согласуется с нашими ранее изложенными доводами: если модель не умеет выдавать разнообразные оценки или нуждается в парном сравнении, многократный запуск не сильно поможет. Напротив, GRM благодаря случайным принципам получает почти линейный прирост до 32 выборок. Более того, авторы отмечают, что **эффективность увеличения $k$ у GRM выше, чем у простого увеличения размера модели**. В экспериментах DeepSeek-GRM-27B с $k=32$ превзошла DeepSeek-GRM-67B с $k=1$ (модель вдвое больше). Это важный вывод: добавление вычислений при выводе (что дешевле, чем обучать и хранить модель в 2–10 раз больше) может быть более выгодным путем улучшения RM, чем наращивание параметров, при условии правильного обучения, как SPCT.
+     However, other methods, such as *Cloud-Gemma (semi-scalar)* or *PairRM*, achieved only limited improvement with increasing $k$. This aligns with our earlier arguments: if a model cannot generate diverse scores or requires pairwise comparisons, repeated runs offer little benefit. In contrast, GRM, thanks to random principles, achieves nearly linear gains up to 32 samples. Moreover, the authors note that **the efficiency of increasing $k$ for GRM is higher than simply increasing model size**. In experiments, DeepSeek-GRM-27B with $k=32$ outperformed DeepSeek-GRM-67B with $k=1$ (a model twice as large). This is a critical finding: adding inference computation (cheaper than training and storing a model 2–10 times larger) can be a more cost-effective path to improving RMs than increasing parameters, provided proper training like SPCT.
 
-*   **Анализ отказов и примеры:**  
-    В работе также приведены примеры, где метод все еще ошибается. Отмечается, что DeepSeek-GRM иногда не справляется с тонкими случаями, когда, например, ни один из ответов не явно лучше (или все плохие) – тогда выбор может быть случайен. Либо если принцип, сгенерированный моделью, сам по себе некорректен или смещен, то все оценки будут систематически ошибочны. Meta RM частично смягчает такие случаи, отсекая нелепые критики, но не может полностью устранить все ошибки. Тем не менее, в целом **DeepSeek-GRM показала меньший уровень biais по доменам**, чем сравниваемые скалярные модели, и достаточно высокую устойчивость за счет разных принципов.
+*   **Failure Analysis and Examples:**  
+    The paper also presents examples where the method still fails. It is noted that DeepSeek-GRM sometimes struggles with subtle cases where no answer is clearly superior (or all are poor)—leading to random selection. Or if the principle generated by the model itself is incorrect or biased, all evaluations become systematically flawed. Meta RM partially mitigates these cases by filtering out absurd critiques but cannot eliminate all errors. Nevertheless, overall, **DeepSeek-GRM demonstrated lower domain bias** than compared scalar models and sufficient robustness due to diverse principles.
 
-## 4. Сравнение с предыдущими подходами
+## 4. Comparison with Previous Approaches
 
-Предложенный подход (ITS + GRM) объединяет идеи других методов, но отличается реализацией и свойствами:
+The proposed approach (ITS + GRM) combines ideas from other methods but differs in implementation and properties:
 
 1. **Task-Conditioned Reward Models**  
-   * **Суть:** использование явной метки задачи/метрики на входе RM для обобщения  
-   * **Недостатки:** ограниченность предопределенными задачами, неспособность генерировать новые критерии, сложность масштабирования из-за требований к разметке данных  
-   * **Отличие ITS/GRM:** GRM **динамически генерирует** релевантные принципы оценки из запроса без фиксированных меток, обеспечивая гибкость. ITS многократно семплирует принципы, автоматически покрывая разные "задачи"  
+   * **Core idea:** Use explicit task/metric labels as input to the RM for generalization  
+   * **Drawbacks:** Limited to predefined tasks, inability to generate new criteria, scaling complexity due to labeling requirements  
+   * **ITS/GRM distinction:** GRM **dynamically generates** relevant evaluation principles from the query without fixed labels, ensuring flexibility. ITS samples principles multiple times, automatically covering different "tasks"
 
-2. **Мультизадачный RLHF (Multi-task RLHF)**  
-   * **Суть:** обучение одной LM на нескольких типах обратной связи или использование нескольких RM для разных аспектов  
-   * **Недостатки:** конфликт целей, усреднение сигналов и потеря точности при объединении в одну RM, сложность управления  
-   * **Отличие ITS/GRM:** одна GRM выступает **универсальным "судьей"**, генерирующим обоснования оценок. ITS позволяет сфокусировать разные семплы на отдельных аспектах сложной задачи, а голосование объединяет оценки  
+2. **Multi-task RLHF**  
+   * **Core idea:** Train one LM on multiple types of feedback or use multiple RMs for different aspects  
+   * **Drawbacks:** Goal conflicts, signal averaging, loss of precision when merging into one RM, management complexity  
+   * **ITS/GRM distinction:** One GRM acts as a **universal "judge"** generating justifications for scores. ITS allows different samples to focus on distinct aspects of a complex task, and voting aggregates the evaluations
 
-3. **Pairwise и Semi-scalar RM**  
-   * **Суть:** pairwise RM сравнивают два ответа; semi-scalar комбинируют текстовый отзыв и скалярную оценку  
-   * **Недостатки:** pairwise — плохая масштабируемость на >2 ответов, отсутствие абсолютных оценок. Semi-scalar — сложность обучения, ограниченная выразительность  
-   * **Отличие ITS/GRM:** генеративный pointwise подход GRM оценивает все ответы единообразно, дает градуированные оценки, легко усредняется. Полнотекстовая генерация обеспечивает гибкость  
+3. **Pairwise and Semi-scalar RM**  
+   * **Core idea:** Pairwise RM compares two answers; semi-scalar combines textual feedback with a scalar score  
+   * **Drawbacks:** Pairwise—poor scalability beyond two answers, no absolute scores. Semi-scalar—training complexity, limited expressiveness  
+   * **ITS/GRM distinction:** Generative pointwise GRM evaluates all answers uniformly, provides graded scores, and is easily averaged. Full-text generation ensures flexibility
 
-4. **LLM-as-a-Judge (напр., GPT-4)**  
-   * **Суть:** использование мощной готовой LLM (без обучения) как оценщика по инструкции  
-   * **Недостатки:** высокая стоимость вычислений, **непрозрачность** критериев, невозможность дообучения, расхождение с человеческими метриками  
-   * **Отличие ITS/GRM:** ITS+SPCT предлагает **обучить специализированную GRM**. Явная генерация принципов дает **прозрачность**. Множественные прогоны экономичнее использования одной LLM  
+4. **LLM-as-a-Judge (e.g., GPT-4)**  
+   * **Core idea:** Use a powerful pre-trained LLM (without training) as an evaluator via instruction  
+   * **Drawbacks:** High computational cost, **lack of transparency** in criteria, inability to fine-tune, divergence from human metrics  
+   * **ITS/GRM distinction:** ITS+SPCT proposes **training a specialized GRM**. Explicit principle generation provides **transparency**. Multiple runs are more cost-effective than using one LLM  
 
-## 5. Выводы и перспективы
+## 5. Conclusions and Future Work
 
-**Основные выводы.** Работа демонстрирует, что *универсальные модели вознаграждения* (GRM) могут быть успешно реализованы и превосходить традиционные узкоспециализированные RM, если их обучить генерировать развернутые оценки (принципы + критика) и наделить способностью масштабироваться по compute. Представленный метод **Self-Principled Critique Tuning (SPCT)** значительно повышает качество reward-модели в различных доменах, а главное – позволяет ей эффективно использовать дополнительный бюджет вычислений на этапе вывода. Модель **DeepSeek-GRM-27B**, обученная по SPCT, показала более высокую точность на мультидоменных бенчмарках, чем несколько сильных публичных RM аналогичного (и даже большего) размера. При этом ее способность к *inference-time scaling* подтверждена эмпирически: добавление параллельного семплирования и голосования существенно улучшает результаты, особенно при использовании meta RM для фильтрации шумных сэмплов. Фактически, авторы переписывают правило масштабирования: если раньше для повышения качества приходилось увеличивать модель (с 27B на 70B и далее), то теперь можно оставить модель фиксированной, но «думать усерднее» – и достичь аналогичного или лучшего эффекта. Это новое направление для RLHF и систем оценки LLM, указывающее путь к более **экономичным и универсальным reward-системам**.
+**Key Findings.** This work demonstrates that *generalist reward models* (GRM) can be successfully implemented and surpass traditional narrow-specialized RMs if trained to generate detailed evaluations (principles + critique) and endowed with the ability to scale via compute. The presented method, **Self-Principled Critique Tuning (SPCT)**, significantly enhances reward model quality across diverse domains, and crucially, enables it to effectively utilize additional inference compute. The model **DeepSeek-GRM-27B**, trained via SPCT, showed higher accuracy on multi-domain benchmarks than several strong public RMs of similar (and even larger) size. Its capability for *inference-time scaling* was empirically confirmed: adding parallel sampling and voting substantially improves results, especially with meta RM filtering noisy samples. In effect, the authors rewrite the scaling rule: previously, to improve quality, one had to increase model size (from 27B to 70B and beyond); now, one can fix the model size but make it "think harder"—achieving equivalent or superior results. This establishes a new direction for RLHF and LLM evaluation systems, pointing toward more **cost-efficient and universal reward systems**.
 
-**Ограничения.** Несмотря на успех, подход имеет ряд ограничений. Во-первых, *эффективность*: запуск десятков сэмплов на выводе увеличивает затраты времени и вычислений. Для практических приложений нужно искать баланс $k$ или оптимизировать модель (например, через сжатие или специальные ускорители), иначе оценка может стать узким местом. Во-вторых, *некоторые задачи остаются вызовом*: авторы отмечают, что DeepSeek-GRM все еще ошибается в отдельных случаях, особенно когда данные выходят за размах обучающих доменов или содержат новые виды ошибок. Если модель не сталкивалась с определенным типом контента, ее сгенерированные принципы могут оказаться неадекватными. Это частично проявилось на отдельных заданиях, где специализированные RM превосходят GRM. В-третьих, *принципы и критика, будучи сгенерированными автоматически*, могут нести *смещения или ошибки*, унаследованные от данных. Авторы честно заявляют, что хоть DeepSeek-GRM и показала меньшую выраженность bias, полностью избежать его не удалось. Кроме того, генерация принципов – палка о двух концах: модель может выписать правдоподобное, но не относящееся к делу правило и затем по нему же некорректно осудить ответ. Нужны методы контроля или валидации этих внутренних рассуждений.
+**Limitations.** Despite its success, the approach has several limitations. First, *efficiency*: running dozens of samples at inference increases time and computational cost. For practical applications, a balance of $k$ must be found or the model optimized (e.g., via compression or specialized accelerators), otherwise evaluation may become a bottleneck. Second, *some tasks remain challenging*: authors note that DeepSeek-GRM still errs in isolated cases, particularly when data falls outside training domain boundaries or contains novel error types. If the model has not encountered a certain type of content, its generated principles may be inadequate. This partially manifested on specific tasks where specialized RMs outperformed GRM. Third, *principles and critiques, being automatically generated*, may carry *biases or errors* inherited from training data. The authors candidly admit that although DeepSeek-GRM showed reduced bias, complete elimination was not achieved. Moreover, principle generation is a double-edged sword: the model may generate a plausible but irrelevant rule and then incorrectly judge an answer based on it. Methods for controlling or validating these internal reasoning steps are needed.
 
-**Перспективы развития.** Статья открывает несколько направлений для будущей работы:
+**Future Directions.** The paper opens several avenues for future work:
 
-* **Интеграция GRM в контур RL**: один из очевидных шагов – использовать DeepSeek-GRM непосредственно в процессе RLHF как универсальный “критик” для обучения политики. Сейчас его тестировали оффлайн на готовых ответах, но можно включить в on-policy обучение новых моделей (например, обучать сразу Chat-модель на основе сигналов от GRM). Это превратит SPCT-обученную RM в *многофункциональный модуль награды* для любых сценариев.
-* **Совместимое масштабирование политики и RM:** интересная идея – *inference-time co-scaling* с моделью-генератором ответов. Если и политика (генерирующая ответы) и критик (наша RM) могут обмениваться несколькими сэмплами или итеративно улучшать друг друга, это может привести к еще более качественному итеративному выводу. Например, policy выдает несколько кандидатов, RM несколько раз их оценивает, policy дорабатывает ответ и т.д. Такие циклы раздумий модели над своим ответом с помощью критика могли бы улучшить конечный результат.
-* **Автоматизированные оценщики для исследований:** универсальные RM с ITS могут выступать как мощные оффлайн-оценщики качества для сравнения различных LLM. Авторы отмечают, что такую модель можно сделать **робастным инструментом для оценки** больших моделей без человеческого участия. Если DeepSeek-GRM достаточно хорошо имитирует человеческие предпочтения, ее можно применять для быстрой проверки новых моделей, выявления тонких ошибок (RealMistake) и т.д. Открытое размещение ее в сообществе (авторы собираются опубликовать модель в открытом доступе) поможет и независимым исследованиям.
-* **Улучшение эффективности и снижение bias:** отдельная ветвь – это работа над самим GRM: снижение размера без потери качества (например, дистилляция знаний SPCT-модели в более мелкую), разработка методов детектирования и удаления систематических смещений в генерируемых принципах. Meta RM можно усилить или заменить более продвинутыми моделями контроля качества, чтобы еще увереннее отсеивать плохие сэмплы. Также интерес представляет адаптация подхода к мультимодальным данным (например, оценка ответов, содержащих изображения, код и пр.).
+* **Integrating GRM into RL Loops:** One obvious next step is to use DeepSeek-GRM directly within RLHF as a universal "critic" for policy training. Currently tested offline on fixed responses, it can be incorporated into on-policy learning of new models (e.g., training a Chat model directly using signals from GRM). This would transform the SPCT-trained RM into a *multifunctional reward module* for any scenario.
+* **Coordinated Scaling of Policy and RM:** An intriguing idea is *inference-time co-scaling* with the answer-generating model. If both the policy (generating answers) and the critic (our RM) can exchange multiple samples or iteratively improve each other, this could lead to even higher-quality iterative inference. For example, the policy generates several candidates, the RM evaluates them multiple times, the policy refines the response, etc. Such reasoning cycles, where the model deliberates over its answer with a critic, could enhance the final output.
+* **Automated Evaluators for Research:** Universal RMs with ITS can serve as powerful offline quality evaluators for comparing various LLMs. The authors note such a model can become a **robust assessment tool** for evaluating large models without human involvement. If DeepSeek-GRM sufficiently mimics human preferences, it can be used for rapid testing of new models, detecting subtle errors (RealMistake), etc. Open release of the model (authors plan to publish it publicly) will aid independent research.
+* **Improving Efficiency and Reducing Bias:** A separate branch focuses on improving the GRM itself: reducing size without quality loss (e.g., knowledge distillation of SPCT models into smaller architectures), developing methods to detect and remove systematic biases in generated principles. Meta RM can be strengthened or replaced with more advanced quality-control models to more reliably filter poor samples. Adapting the approach to multimodal data (e.g., evaluating responses containing images, code, etc.) is also promising.
 
-В заключение, **Inference-Time Scaling для универсальных моделей вознаграждения** представляет собой значимый шаг вперед в области RLHF. Он демонстрирует, как за счет разумного использования возможностей LLM (генерации текстовых рассуждений) и дополнительного вычисления на этапе инференса можно существенно повысить качество оценки без увеличения размеров модели. Эта работа закладывает основу для более гибких и мощных систем обратной связи, которые смогут идти в ногу с растущими возможностями самих больших языковых моделей.
+In conclusion, **Inference-Time Scaling for Generalist Reward Models** represents a significant advancement in RLHF. It demonstrates how, by intelligently leveraging LLM capabilities (generating textual reasoning) and additional inference compute, evaluation quality can be substantially improved without increasing model size. This work lays the foundation for more flexible and powerful feedback systems capable of keeping pace with the growing capabilities of large language models themselves.

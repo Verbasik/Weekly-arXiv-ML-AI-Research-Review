@@ -1,188 +1,181 @@
-# Qwen2.5-Omni: Мультимодальная модель нового поколения
+# Qwen2.5-Omni: A Next-Generation Multimodal Model
 
-## Содержание
-1. Введение  
-2. Архитектура модели  
-3. Методы мультимодальной интеграции  
-4. Возможности потоковой передачи  
-5. Методология обучения  
-6. Производительность и бенчмарки  
-7. Практическое применение  
-8. Заключение
+## Table of Contents
+1. Introduction  
+2. Model Architecture  
+3. Multimodal Integration Methods  
+4. Streaming Capabilities  
+5. Training Methodology  
+6. Performance and Benchmarks  
+7. Practical Applications  
+8. Conclusion
 
-### **TWRB_FM 📻**
+## Introduction
 
-<audio controls>
-  <source src="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/raw/refs/heads/develop/2025/week-14/TWRB_FM.mp3" type="audio/mpeg">
-  Ваш браузер не поддерживает аудиоэлемент.
-</audio>
+Qwen2.5-Omni represents a significant advancement in multimodal AI systems, developed by the Qwen team at Alibaba Group. This model uniquely unifies language, visual, and audio processing capabilities within a single unified architecture, while supporting real-time interaction through streaming.
 
-## Введение
+![Figure_1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-14/assets/Figure_1.png  )  
+*Figure 1: Overview of Qwen2.5-Omni's multimodal capabilities, demonstrating various interaction modes—including video chat, image chat, text chat, and audio chat—all supported by the unified Thinker-Talker architecture.*
 
-Qwen2.5-Omni представляет собой значительный шаг вперед в мультимодальных AI системах, разработанный командой Qwen в Alibaba Group. Эта модель уникальным образом объединяет возможности обработки языка, визуальной информации и аудио в единую унифицированную архитектуру, поддерживая при этом взаимодействие в режиме реального времени посредством потоковой передачи.
+Unlike previous approaches that often treat different modalities as separate systems, Qwen2.5-Omni integrates them into a cohesive structure capable of understanding and generating content across textual, visual, audio, and video domains. The model is designed not only to process these inputs but also to simultaneously generate outputs in both text and natural-sounding speech, with streaming capabilities enabling real-time interaction.
 
-![Figure_1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-14/assets/Figure_1.png)  
-*Рисунок 1: Обзор мультимодальных возможностей Qwen2.5-Omni, демонстрирующий различные режимы взаимодействия, включая видеочат, чат с изображениями, текстовый чат и аудиочат, которые поддерживаются унифицированной архитектурой Thinker-Talker.*
+The key innovations of Qwen2.5-Omni lie in its architecture, which effectively manages inter-modal information while maintaining competitive performance within each individual modality. This review examines the technical foundations, methodological approaches, and evaluation results that demonstrate the model’s capabilities.
 
-В отличие от предыдущих подходов, которые часто рассматривают различные модальности как отдельные системы, Qwen2.5-Omni интегрирует их в согласованную структуру, способную понимать и генерировать контент в текстовой, визуальной, аудио и видео областях. Модель разработана не только для обработки этих входных данных, но и для одновременного создания выходных данных как в виде текста, так и в виде естественно звучащей речи, с возможностями потоковой передачи, которые обеспечивают взаимодействие в режиме реального времени.
+## Model Architecture
 
-Основные инновации Qwen2.5-Omni заключаются в ее архитектуре, которая эффективно управляет межмодальной информацией, сохраняя при этом конкурентоспособную производительность в каждой отдельной модальности. В этом обзоре рассматриваются технические основы, методологические подходы и результаты тестов, которые демонстрируют возможности модели.
+The foundation of Qwen2.5-Omni is its novel Thinker-Talker architecture, which separates text generation from speech generation while maintaining coordination through shared hidden representations.
 
-## Архитектура модели
+![Figure_2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-14/assets/Figure_2.png  )
+*Figure 2: Detailed architecture of Qwen2.5-Omni, illustrating the Thinker-Talker structure, video and audio encoders, and the streaming codec decoder with token flow between components.*
 
-Основой Qwen2.5-Omni является ее новая архитектура Thinker-Talker, которая разделяет генерацию текста и генерацию речи, поддерживая при этом координацию посредством общих скрытых представлений.
+The architecture consists of several key components:
 
-![Figure_2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-14/assets/Figure_2.png)
-*Рисунок 2: Подробная архитектура Qwen2.5-Omni, демонстрирующая структуру Thinker-Talker, кодировщики видео и аудио, а также декодер потокового кодека с потоком токенов между компонентами.*
+1. **Qwen2.5-Omni Thinker:** Essentially a large language model responsible for understanding multimodal inputs and generating corresponding textual responses. It processes encoded representations from visual and audio inputs alongside text.
 
-Архитектура состоит из нескольких ключевых компонентов:
+2. **Qwen2.5-Omni Talker:** A two-stream autoregressive model that receives hidden representations from Thinker and generates audio tokens, which are subsequently decoded into speech waveforms.
 
-1. **Qwen2.5-Omni Thinker:** По сути, большая языковая модель, отвечающая за понимание мультимодальных входных данных и генерацию соответствующих текстовых ответов. Она обрабатывает закодированные представления из визуальных и аудиовходов наряду с текстом.
+3. **Visual Encoder:** Processes images and video inputs, transforming them into representations interpretable by Thinker.
 
-2. **Qwen2.5-Omni Talker:** Двухдорожечная авторегрессионная модель, которая получает скрытые представления от Thinker и генерирует аудиотокены, которые затем декодируются в речевые волны.
+4. **Audio Encoder:** Extracts features from speech and other audio inputs for processing by Thinker.
 
-3. **Визуальный кодировщик:** Обрабатывает изображения и видеовходы, преобразуя их в представления, которые могут быть поняты Thinker.
+5. **Streaming Codec Decoder:** Converts audio tokens from Talker into actual waveform outputs in streaming mode, enabling real-time speech output.
 
-4. **Аудиокодировщик:** Извлекает признаки из речи и других аудиовходов для обработки Thinker.
+This division of labor allows each component to specialize in its task, while shared hidden representations ensure consistency across modalities. Importantly, the architecture is designed as an end-to-end system, enabling mutual improvement across modalities.
 
-5. **Декодер потокового кодека:** Преобразует аудиотокены от Talker в реальные формы волны в потоковом режиме, обеспечивая вывод речи в реальном времени.
+## Multimodal Integration Methods
 
-Такое разделение задач позволяет каждому компоненту специализироваться на своей задаче, а общие скрытые представления обеспечивают согласованность между модальностями. Важно отметить, что архитектура разработана как сквозная, что способствует взаимному улучшению между различными модальностями.
+Effective integration of multiple modalities requires solving several challenges, particularly in aligning temporal information across heterogeneous inputs. Qwen2.5-Omni introduces several innovative methods:
 
-## **Методы мультимодальной интеграции**
+## Time-Aligned Multimodal RoPE (TMRoPE)
 
-Эффективная интеграция нескольких модальностей требует решения нескольких задач, особенно при согласовании временной информации по различным входным данным. Qwen2.5-Omni представляет несколько инновационных методов:
+One of the most significant innovations is Time-Aligned Multimodal RoPE (TMRoPE), a positional embedding method designed to synchronize audio and video inputs:
 
-## **Time-Aligned Multimodal RoPE (TMRoPE)**
+![Figure_4](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-14/assets/Figure_4.png  )
+*Figure 3: Illustration of time-aligned multimodal RoPE (TMRoPE).*
 
-Одной из наиболее значительных инноваций является Time-Aligned Multimodal RoPE (TMRoPE), метод позиционного встраивания, разработанный для синхронизации аудио- и видеовходов:
+TMRoPE operates as follows:
 
-![Figure_4](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-14/assets/Figure_4.png)
-*Рисунок 3: Иллюстрация согласованного по времени мультимодального RoPE (TMRoPE).*
+1. Interleaving of audio and video frames in temporal alignment;
+2. Encoding of 3D positional information (height, width, time) for visual inputs;
+3. Synchronization of audio frames with corresponding visual frames based on temporal metadata.
 
-TMRoPE работает следующим образом:
+This approach ensures the model can accurately link audio and visual events occurring simultaneously, which is critical for tasks such as understanding video with synchronized sound.
 
-1. Чередование аудио- и видеокадров во временном согласовании;
-2. Кодирование 3D-позиционной информации (высота, ширина, время) для визуальных входов;
-3. Синхронизация аудиокадров с соответствующими визуальными кадрами на основе информации о времени.
+The mathematical formulation of TMRoPE extends Rotary Position Embedding to account for the temporal dimension:
 
-Этот подход гарантирует, что модель может точно связывать аудио- и визуальные события, происходящие одновременно, что имеет решающее значение для таких задач, как понимание видео с сопроводительным звуком.
+For a sequence of length L with tokens from multiple modalities, TMRoPE assigns each token a 3D position (x, y, t), where:
 
-Математическая формулировка TMRoPE расширяет Rotary Position Embedding для учета временного измерения:
+* x represents horizontal position (relevant for text and images);
+* y represents vertical position (relevant for images);
+* t represents temporal position (relevant for audio and video).
 
-Для последовательности длины L с токенами из нескольких модальностей TMRoPE присваивает каждому токену 3D-позицию (x, y, t), где:
+## Block-Wise Processing
 
-* x представляет горизонтальное положение (актуально для текста и изображений);
-* y представляет вертикальное положение (актуально для изображений);
-* t представляет временное положение (актуально для аудио и видео).
+To efficiently process long multimodal sequences, Qwen2.5-Omni employs block-wise processing:
 
-## **Блочная обработка**
+![Figure_5](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-14/assets/Figure_5.png  )
+*Figure 4: Block-wise processing approach, illustrating how past, current, and future blocks are managed during sequential data processing.*
 
-Для эффективной обработки длинных последовательностей мультимодальных данных Qwen2.5-Omni использует блочную обработку:
+This method:
 
-![Figure_5](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-14/assets/Figure_5.png)
-*Рисунок 4: Подход блочной обработки, показывающий, как прошлые, текущие и будущие блоки управляются во время обработки последовательных данных.*
+1. Divides input sequences into manageable blocks;
+2. Processes each block with contextual information from neighboring blocks;
+3. Maintains awareness of past context while limiting computational requirements.
 
-Этот метод:
+This approach is especially critical for streaming applications, as it enables the model to process new inputs incrementally without recomputing representations for all prior inputs.
 
-1. Разделяет входные последовательности на управляемые блоки;
-2. Обрабатывает каждый блок с соответствующим контекстом из соседних блоков;
-3. Поддерживает осведомленность о прошлом контексте, ограничивая при этом вычислительные требования.
+## Streaming Capabilities
 
-Этот подход особенно важен для потоковых приложений, поскольку он позволяет модели обрабатывать новые входные данные постепенно, не пересчитывая представления для всех предыдущих входных данных.
+A defining feature of Qwen2.5-Omni is its ability to stream both input processing and output generation. This capability is enabled by several architectural innovations:
 
-## **Возможности потоковой передачи**
+## Streaming Input Processing
 
-Отличительной особенностью Qwen2.5-Omni является ее способность работать в потоковом режиме как для обработки входных данных, так и для генерации выходных данных. Эту возможность поддерживают несколько архитектурных инноваций:
+For streaming input processing, the model utilizes:
 
-## **Потоковая передача входных данных**
+1. **Prefill:** Processing initial inputs and caching their representations to reduce future computational load;
+2. **Incremental Encoding:** Processing new inputs by reusing cached representations from prior inputs;
+3. **Attention Masking:** Ensuring proper context access and preventing leakage of information from future tokens.
 
-Для потоковой передачи входных данных модель использует:
+## Streaming Output Generation
 
-1. **Предварительное заполнение:** Обработка начальных входных данных и кэширование их представлений для снижения будущей вычислительной нагрузки;
-2. **Инкрементное кодирование:** Обработка новых входных данных с повторным использованием кэшированных представлений из предыдущих входных данных;
-3. **Маскирование внимания:** Обеспечение надлежащего доступа к контексту и предотвращение утечки информации от будущих токенов.
+For streaming speech output, Qwen2.5-Omni introduces:
 
+1. **Sliding-Window DiT Model:** A Diffusion Transformer that decodes audio tokens into waveforms using a constrained receptive field;
+2. **Progressive Generation:** Generating audio in small blocks that can be immediately delivered to the user;
+3. **Initial Packet Latency Optimization:** Techniques to minimize delay before the first audio fragment becomes available.
 
-## **Потоковая передача выходных данных**
-Для потоковой передачи речевого вывода Qwen2.5-Omni представляет:
+The combination of these methods enables Qwen2.5-Omni to achieve real-time multimodal interaction with minimal perceived latency, making it suitable for applications such as voice assistants and real-time translation systems.
 
-1. DiT-модель со скользящим окном: Diffusion Transformer, который декодирует аудиотокены в формы волн с использованием ограниченного рецептивного поля;
-2. Прогрессивная генерация: Генерация аудио небольшими блоками, которые можно немедленно отправить пользователю;
-3. Оптимизация задержки начального пакета: Методы минимизации задержки перед тем, как станет доступен первый аудиофрагмент.
+## Training Methodology
 
-Сочетание этих методов позволяет Qwen2.5-Omni достигать мультимодального взаимодействия в реальном времени с минимальной воспринимаемой задержкой, что делает его подходящим для таких приложений, как голосовые помощники и системы перевода в реальном времени.
+Training Qwen2.5-Omni follows a carefully designed multi-stage process to ensure effective learning across all modalities:
 
-## **Методология обучения**
+## Multi-Stage Training
 
-Обучение Qwen2.5-Omni следует тщательно разработанному многоэтапному процессу, чтобы обеспечить эффективное обучение во всех модальностях:
+1. **Initial Stage:** Vision and audio encoders are trained while LLM parameters remain fixed. This stage focuses on teaching encoders to produce representations the LLM can effectively utilize.
 
-## **Многоэтапное обучение**
+2. **Intermediate Stage:** All parameters are unfrozen and trained using a broader spectrum of multimodal data. This enables cross-modal learning and adaptation of the LLM to multimodal inputs.
 
-1. **Начальный этап:** Обучаются энкодеры vision и audio, при этом параметры LLM остаются фиксированными. Этот этап посвящен обучению энкодеров созданию представлений, которые LLM может эффективно использовать;
+3. **Extended Training:** Sequence length is extended to 32,000 tokens, enabling the model to handle longer contexts involving multiple modalities.
 
-2. **Промежуточный этап:** Все параметры размораживаются и обучаются с использованием более широкого спектра мультимодальных данных. Это обеспечивает кросс-модальное обучение и адаптацию LLM к мультимодальным входам;
+## Post-Training Refinement
 
-3. **Расширенное обучение:** Длина последовательности увеличена до 32 тысяч токенов, что позволяет модели обрабатывать более длинные контексты, включающие несколько модальностей.
+After primary training stages, specialized refinement is applied:
 
-## **Пост-тренировочная доводка**
+1. **Thinker Refinement:** Uses ChatML-style instruction-following data to enhance the model’s ability to respond appropriately to user queries.
 
-После основных этапов обучения применяется специализированная доводка:
+2. **Talker Refinement:** Follows a three-stage process:
+   * Training for context-consistent speech generation;
+   * Improving generation stability via Direct Preference Optimization (DPO);
+   * Enhancing naturalness and controllability through fine-tuning on multilingual instructions.
 
-1. Доводка "Thinker": Использует данные для следования инструкциям в формате ChatML, чтобы улучшить способность модели адекватно отвечать на запросы пользователей;
+This staged approach addresses the challenge of balancing learning across modalities, preventing any single modality from dominating and causing interference with others.
 
-2. Доводка "Talker": Следует трехэтапному процессу:
-   * Обучение продолжению контекста для связного создания речи;
-   * Повышение стабильности генерации с помощью Direct Preference Optimization (DPO);
-   * Улучшение естественности и управляемости с помощью точной настройки многоязычных инструкций.
+## Performance and Benchmarks
 
-Этот поэтапный подход решает проблему балансировки обучения между различными модальностями, не позволяя одной модальности доминировать и вызывать помехи другим.
+Qwen2.5-Omni demonstrates competitive performance across modalities and outperforms other models in tasks requiring multimodal integration:
 
-## **Производительность и тесты**
+## Performance by Modality
 
-Qwen2.5-Omni демонстрирует конкурентоспособную производительность в различных модальностях и превосходит другие модели в задачах, требующих мультимодальной интеграции:
+* **Vision Tasks:** Achieves performance comparable to Qwen2.5-VL, with particularly strong results in image-to-text tasks such as MMMU, MathVision, MMBench, TextVQA, DocVQA, and ChartQA;
+* **Audio Tasks:** Outperforms Qwen2-Audio in most audio understanding benchmarks;
+* **Visual Reasoning:** Achieves 42.2 mAP in open-vocabulary object detection tasks.
 
-## **Производительность по отдельным модальностям**
+## Multimodal Benchmarks
+* **OmniBench:** State-of-the-art performance on this multimodal benchmark;
+* **AV-Odyssey Bench:** Leading results in tasks requiring audiovisual understanding.
 
-* Задачи компьютерного зрения: Достигает производительности, сравнимой с Qwen2.5-VL, с особенно сильными результатами в задачах преобразования изображения в текст, таких как MMMU, MathVision, MMBench, TextVQA, DocVQA и ChartQA;
-* Аудиозадачи: Превосходит Qwen2-Audio в большинстве тестов понимания аудио;
-* Визуальное обоснование: Достигает 42.2 mAP в задачах обнаружения объектов с открытым словарным запасом.
+## Speech Generation
 
-## **Мультимодальные тесты**
-* OmniBench: Современная производительность в этом мультимодальном тесте;
-* AV-Odyssey Bench: Ведущие результаты в задачах, требующих аудиовизуального понимания.
+The streaming Talker module demonstrates impressive results in:
+* **Reliability:** Low transcription error rates for generated speech;
+* **Naturalness:** High human-rated quality scores for speech output;
+* **Latency:** Minimal initial delay for speech output compared to competing models.
 
-## **Генерация речи**
+## Voice Instruction Following
 
-Потоковый модуль Talker демонстрирует впечатляющие результаты в:
-* Надежности: Низкий уровень ошибок при транскрибировании сгенерированной речи;
-* Естественности: Высокие оценки качества речи при оценке человеком;
-* Задержке: Минимальная задержка при начальном выводе речи по сравнению с конкурирующими моделями.
+One of the most notable achievements is comparable performance in end-to-end voice instruction following versus text instruction following, as evidenced by results on challenging benchmarks such as MMLU and GSM8K. This indicates the model can understand spoken instructions as effectively as written ones—a significant step toward natural human-AI interaction.
 
-## **Следование голосовым инструкциям**
+## Practical Applications
 
-Одним из наиболее заметных достижений является сопоставимая производительность в сквозном следовании голосовым инструкциям по сравнению со следованием текстовым инструкциям, о чем свидетельствуют результаты в сложных тестах, таких как MMLU и GSM8K. Это указывает на то, что модель может понимать устные инструкции так же эффективно, как и письменные, что является значительным шагом на пути к естественному взаимодействию человека с ИИ.
+The unified multimodal capabilities of Qwen2.5-Omni enable a wide range of practical applications:
 
-## **Практическое применение**
+1. **Advanced Voice Assistants:** Systems that can see, hear, and speak while maintaining contextual awareness during interactions;
 
-Унифицированные мультимодальные возможности Qwen2.5-Omni позволяют использовать множество практических приложений:
+2. **Accessibility Tools:** Technologies that translate between modalities in real time—for example, describing visual content for visually impaired users or transcribing speech for hearing-impaired users;
 
-1. Продвинутые голосовые помощники: Системы, которые могут видеть, слышать и говорить, сохраняя при этом контекстную осведомленность во время взаимодействий;
+3. **Multimodal Content Creation:** Tools for automatically generating content combining text, images, and audio—such as presentations or educational materials;
 
-2. Инструменты доступности: Технологии, которые могут переводить между модальностями в режиме реального времени, например, описывать визуальный контент для пользователей с ослабленным зрением или транскрибировать речь для пользователей с нарушениями слуха;
+4. **Video Understanding:** Applications that analyze and describe audiovisual content by extracting information from both visual and auditory signals;
 
-3. Мультимодальное создание контента: Инструменты для автоматического создания контента, сочетающего текст, изображения и аудио, такие как презентации или учебные материалы;
+5. **Real-Time Translation Systems:** Services that translate spoken language while preserving contextual information from visual cues.
 
-4. Понимание видео: Приложения, которые могут анализировать и описывать видеоконтент со звуком, извлекая информацию как из визуальной, так и из слуховой информации;
+Streaming capabilities make these applications especially compelling, as they enable immediate feedback and natural conversational flow, rather than the step-by-step interaction common in many current AI systems.
 
-5. Системы перевода в реальном времени: Сервисы, которые могут переводить устную речь, сохраняя при этом контекстную информацию из визуальных сигналов.
+## Conclusion
 
-Возможности потоковой передачи делают эти приложения особенно привлекательными, поскольку они могут обеспечивать немедленную обратную связь и естественный ход разговора, а не пошаговое взаимодействие, распространенное во многих современных системах искусственного интеллекта.
+Qwen2.5-Omni represents a major advancement in multimodal AI through its unified architecture that effectively integrates text, vision, and audio processing while supporting real-time streaming interactions. The Thinker-Talker design, alongside innovations such as TMRoPE and block-wise processing, enables the model to understand and generate across modalities with state-of-the-art performance.
 
-## **Заключение**
+While the model demonstrates impressive capabilities, the authors acknowledge remaining challenges in areas such as video OCR and joint audiovisual understanding. These challenges highlight opportunities for future research and development in the rapidly evolving field of multimodal AI.
 
-Qwen2.5-Omni представляет собой значительный прогресс в мультимодальном ИИ благодаря своей унифицированной архитектуре, которая эффективно интегрирует обработку текста, зрения и звука, поддерживая потоковые взаимодействия в реальном времени. Дизайн Thinker-Talker, наряду с инновациями, такими как TMRoPE и блочная обработка, позволяет модели понимать и генерировать в различных модальностях с самой современной производительностью.
-
-Хотя модель демонстрирует впечатляющие возможности, авторы признают остающиеся проблемы в таких областях, как видео OCR и аудио-видео совместное понимание. Эти проблемы подчеркивают возможности для будущих исследований и разработок в быстро развивающейся области мультимодального ИИ.
-
-Будучи инициативой с открытым исходным кодом, доступной на таких платформах, как Hugging Face, ModelScope и GitHub, Qwen2.5-Omni вносит вклад в более широкое исследовательское сообщество и способствует дальнейшему прогрессу в создании более естественных и эффективных систем искусственного интеллекта, которые могут взаимодействовать с людьми через несколько каналов связи.
+As an open-source initiative available on platforms such as Hugging Face, ModelScope, and GitHub, Qwen2.5-Omni contributes to the broader research community and advances the development of more natural and effective AI systems capable of interacting with humans through multiple communication channels.

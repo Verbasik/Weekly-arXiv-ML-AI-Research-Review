@@ -1,42 +1,44 @@
-[![I-CON](https://img.shields.io/badge/I-CON-blue)](https://mhamilton.net/icon)
-[![Telegram Channel](https://img.shields.io/badge/Telegram-TheWeeklyBrief-blue)](https://t.me/TheWeeklyBrief)
+[![I-CON](https://img.shields.io/badge/I-CON-blue  )](https://mhamilton.net/icon  )
+[![Telegram Channel](https://img.shields.io/badge/Telegram-TheWeeklyBrief-blue  )](https://t.me/TheWeeklyBrief  )
 
-# I‑CON — универсальный фреймворк для обучения представлений
+# I‑CON — A Unifying Framework for Representation Learning
 
-> **Одна формула → весь зоопарк лоссов**
-> I‑CON показывает, что SNE, t‑SNE, InfoNCE, SupCon, CLIP, k‑Means, CE и ещё \~20 методов — это частные случаи минимизации одной и той же KL‑дивергенции между «идеальным» распределением соседства *p* и «фактическим» распределением *q*. 
+> **One formula → the entire zoo of losses**  
+> I‑CON reveals that SNE, t‑SNE, InfoNCE, SupCon, CLIP, k‑Means, CE, and ~20 other methods are all special cases of minimizing the same KL divergence between a "perfect" neighborhood distribution *p* and the "actual" distribution *q*.
 
-## 🚀 Кратко о достижениях
+## 🚀 Key Achievements
 
-* 🧩 **«Периодическая таблица» методов** — визуальная карта, где сменой *p* или *q* можно «переходить» от т‑SNE к SimCLR или от CLIP к SupCon. 
-* 📈 **+8 pp к SOTA** в unsupervised классификации ImageNet‑1K благодаря новому Debiased InfoNCE Clustering. 
-* 🧹 **α‑дебиасинг**: добавление равномерного шума к *p* резко повышает устойчивость контрастивных моделей.
-* 🔄 **Перенос идей «через оси»**: приёмы label‑smoothing в классификации работают и в контрастивном обучении, а графовые трики из DR — в кластеризации.
+* 🧩 **"Periodic Table" of Methods** — A visual map where switching *p* or *q* lets you "transition" from t‑SNE to SimCLR or from CLIP to SupCon.  
+* 📈 **+8 pp over SOTA** in unsupervised classification on ImageNet‑1K via the new Debiased InfoNCE Clustering.  
+* 🧹 **α‑Debiasing**: Adding uniform noise to *p* dramatically improves the robustness of contrastive models.  
+* 🔄 **Cross-Axis Idea Transfer**: Techniques like label-smoothing from classification work in contrastive learning, and graph-based tricks from DR apply to clustering.
 
-## Почему I‑CON важен?
+## Why I‑CON Matters?
 
-| Боль                                          | Решение от I‑CON                                |
+| Problem                                       | I‑CON Solution                                  |
 | --------------------------------------------- | ----------------------------------------------- |
-| Несвязные лоссы для DR / CL / Clustering / CE | Одна KL‑формула                                 |
-| Трудно проектировать новые методы             | Достаточно «комбинировать» распределения        |
-| Переуверенность в контрастивных моделях       | α‑дебиасинг сглаживает *p*                      |
-| Нет метрик «в самом лоссе»                    | KL‑дивергенция даёт естественную шкалу качества |
+| Disconnected losses for DR / CL / Clustering / CE | Single KL formulation                           |
+| Hard to design new methods                    | Simply "combine" distributions                  |
+| Overconfidence in contrastive models          | α‑debiasing smooths *p*                         |
+| No intrinsic metrics within the loss          | KL divergence provides a natural quality scale  |
 
-## Ключевые идеи
+## Core Ideas
 
-1. \**Выберите «идеальное» $p(j|i)$:
-   Gaussian, k‑NN, one‑hot, cross‑modal пары — определяет «что считать соседством».
-2. \**Определите «модельное» $q(j|i)$:
-   Gaussian / t‑распределение в эмбеддингах, равномерно по кластерам и т.д.
-3. **Минимизируйте  $D_{KL}\!\bigl(p(\cdot\!\mid i)\,\Vert\,q(\cdot\!\mid i)\bigr)$.**
-   Получите SNE, InfoNCE, CE… или новый гибрид.
-4. **Добавьте α‑дебиасинг:**
-   $\tilde p=(1-\alpha)p+\alpha/N$ — аналог label‑smoothing для любых *p*.
-
-## 🌟 Поддержите проект
-
-- Понравилось? Поставьте звезду и присоединяйтесь к обсуждению!
+1. \**Choose the "ideal" $p(j|i)$:  
+   Gaussian, k‑NN, one‑hot, cross‑modal pairs — defines "what constitutes neighborhood".  
+2. \**Define the "learned" $q(j|i)$:  
+   Gaussian / t-distribution in embeddings, uniform over clusters, etc.  
+3. **Minimize  $D_{KL}\!\bigl(p(\cdot\!\mid i)\,\Vert\,q(\cdot\!\mid i)\bigr)$.**  
+   Obtain SNE, InfoNCE, CE… or a novel hybrid.  
+4. **Add α‑debiasing:**  
+   $\tilde p=(1-\alpha)p+\alpha/N$ — analog of label-smoothing for any *p*.
 
 ---
 
-<p align="center">Исследуйте вместе с нами 🚀</p>
+<div align="center">
+
+**Explore with us 🚀**
+
+⭐ Star this repository if you found it helpful
+
+</div>

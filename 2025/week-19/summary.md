@@ -1,15 +1,15 @@
-# I-CON: Унифицированная платформа для обучения представлений  
+# I-CON: A Unified Platform for Representation Learning  
 
-## Содержание
-0. [TL;DR](#tldr)
-1. [Введение](#введение)  
-2. [Теоретическая основа](#теоретическая-основа)  
-3. [Унификация разрозненных методов](#унификация-разрозненных-методов)  
-4. [Распределения представлений](#распределения-представлений)  
-5. [Стратегия устранения смещения](#стратегия-устранения-смещения)  
-6. [Экспериментальные результаты](#экспериментальные-результаты)  
-7. [Приложения и последствия](#приложения-и-последствия)  
-8. [Заключение](#заключение)
+## Table of Contents
+0. [TL;DR](#tldr)  
+1. [Introduction](#introduction)  
+2. [Theoretical Foundations](#theoretical-foundations)  
+3. [Unifying Disparate Methods](#unifying-disparate-methods)  
+4. [Representation Distributions](#representation-distributions)  
+5. [Bias Correction Strategy](#bias-correction-strategy)  
+6. [Experimental Results](#experimental-results)  
+7. [Applications and Implications](#applications-and-implications)  
+8. [Conclusion](#conclusion)  
 
 ## **0. TL;DR**
 
@@ -18,330 +18,328 @@
 
 ## **Too long; Didn't read**
 
-1. **Введение и Проблема Фрагментации в Обучении Представлений**
+1. **Introduction and the Problem of Fragmentation in Representation Learning**
 
-Развитие машинного обучения в последние годы привело к появлению множества разнообразных методов обучения представлений. Каждый из этих методов часто имеет свои уникальные архитектуры, функции потерь и стратегии обучения. Эта фрагментация создает значительные трудности для исследователей:
+The advancement of machine learning in recent years has led to the emergence of numerous diverse methods for representation learning. Each of these methods often has its own unique architectures, loss functions, and training strategies. This fragmentation creates significant challenges for researchers:
 
-- **Сложность понимания взаимосвязей**: Трудно увидеть, как связаны между собой, казалось бы, разные подходы (например, методы снижения размерности и контрастное обучение).
-- **Выбор оптимального метода**: Определить, какой из множества существующих методов лучше всего подходит для конкретной задачи, становится нетривиальной задачей.
-- **Разрозненные формулировки**: Методы используют разные математические языки (например, "максимизация взаимной информации vs. минимизация MSE"), что затрудняет их сравнение и анализ.
+- **Difficulty understanding relationships**: It is hard to see how seemingly different approaches (e.g., dimensionality reduction and contrastive learning) are connected.
+- **Choosing the optimal method**: Determining which of the many existing methods best suits a specific task has become a non-trivial problem.
+- **Disparate formulations**: Methods use different mathematical languages (e.g., "maximizing mutual information vs. minimizing MSE"), making comparison and analysis difficult.
 
-Как отмечается в источнике:  
-*"Эта фрагментация затрудняет для исследователей понимание взаимосвязей между различными методами и определение того, какой подход лучше всего подходит для данной задачи."*
-
----
-
-2. **Концепция Обучения Представлений (Representation Learning)**
-
-**Обучение представлений** — это ключевое направление, которое направлено на автоматическое извлечение полезных признаков из "сырых" данных. Вместо ручного проектирования признаков, алгоритмы самостоятельно учатся кодировать информацию в компактные векторные формы (эмбеддинги), сохраняющие семантические закономерности.
-
-**Ключевые аспекты**:
-- **Автоматическое извлечение**: Преобразование данных (изображений, текста, звука) в векторные эмбеддинги.
-- **Типы методов**: Включают *supervised* (с учителем, используют метки), *self-supervised* (без учителя, учатся на структуре данных, например, контрастивные методы) и методы на основе информационной теории (оптимизация взаимной информации).
-- **Применение**: Уменьшение размерности, transfer learning, интерпретируемость моделей.
-
-Проблема фрагментации выражается в существовании "зоопарка" методов, таких как Triplet Loss, NT-Xent (в SimCLR), VAE, которые используют разные математические основы для достижения схожих целей.
+As noted in the source:  
+*"This fragmentation hinders researchers from understanding the relationships between various methods and determining which approach is best suited for a given task."*
 
 ---
 
-3. **Фреймворк I-CON: Унификация через Теорию Информации**
+2. **Concept of Representation Learning**
 
-Статья *"I-CON: Унифицированная платформа для обучения представлений"* предлагает решение проблемы фрагментации, вводя всеобъемлющую информационно-теоретическую платформу, которая *"объединяет более 23 различных методов обучения представлений под единой математической формулировкой."*
+**Representation learning** is a key direction focused on automatically extracting useful features from "raw" data. Instead of manually designing features, algorithms learn to encode information into compact vector forms (embeddings) that preserve semantic patterns.
 
-**Основная идея I-CON** заключается в рассмотрении обучения представлений как задачи минимизации средней дивергенции Кульбака-Лейблера (KL) между двумя условными распределениями вероятностей:
+**Key aspects**:
+- **Automatic extraction**: Transforming data (images, text, audio) into vector embeddings.
+- **Types of methods**: Include *supervised* (using labels), *self-supervised* (learning from data structure, e.g., contrastive methods), and information-theoretic methods (optimizing mutual information).
+- **Applications**: Dimensionality reduction, transfer learning, model interpretability.
 
-- **Эталонное распределение** $(p(j|i))$: Отражает желаемые взаимосвязи между точками данных (например, близость, принадлежность к классу, связь в графе).
-- **Обучаемое распределение** $(q(j|i))$: Моделирует эти взаимосвязи в пространстве представлений, которое модель научилась строить.
+The fragmentation problem manifests as a "zoo" of methods—such as Triplet Loss, NT-Xent (in SimCLR), and VAE—that use different mathematical foundations to achieve similar goals.
 
-Целевая функция формулируется следующим образом:  
+---
+
+3. **I-CON Framework: Unification Through Information Theory**
+
+The paper *"I-CON: A Unified Platform for Representation Learning"* proposes a solution to fragmentation by introducing a comprehensive information-theoretic framework that *"unifies over 23 distinct representation learning methods under a single mathematical formulation."*
+
+The core idea of I-CON is to view representation learning as a problem of minimizing the average Kullback-Leibler (KL) divergence between two conditional probability distributions:
+
+- **Reference distribution** $(p(j|i))$: Reflects desired relationships between data points (e.g., proximity, class membership, graph connectivity).
+- **Learned distribution** $(q(j|i))$: Models these relationships in the learned representation space.
+
+The objective function is formulated as:  
 $$ \mathcal{L}_{I-CON} = \mathbb{E}_i \left[ D_{KL}(p(j|i) \| q(j|i)) \right] $$  
 
-Эта формулировка создает "универсальный язык", позволяющий описать разные виды "соседства" (близость по пикселям, принадлежность к классу и т.д.) и четкую цель для обучения: *"сделать так, чтобы ее собственное видение соседства ($q$) стало как можно больше похоже на идеальное видение ($p$)"*.
+This formulation creates a "universal language" capable of describing different types of "neighborhoods" (pixel proximity, class membership, etc.) and provides a clear training goal: *"make its own view of neighborhood ($q$) as similar as possible to the ideal view ($p$)."*
 
-*Рисунок 1* иллюстрирует этот процесс: данные проходят через функцию отображения, создавая представления, которые затем сравниваются с контрольными распределениями с помощью KL-дивергенции.
-
----
-
-4. **Унификация Существующих Методов в Рамках I-CON**
-
-Авторы демонстрируют, что I-CON может воспроизвести широкий спектр существующих алгоритмов обучения представлений, *"выбирая определенные параметризации для контрольных и обученных распределений"*.
-
-*Рисунок 3* визуализирует эту унификацию, классифицируя методы по категориям (уменьшение размерности, кластерное обучение, самообучение, обучение с учителем).
-
-**Примеры унификации**:
-- **t-SNE**: Получается, когда $p(j|i)$ и $q(j|i)$ являются распределениями Стьюдента.
-- **SimCLR**: Получается, когда $p(j|i)$ равномерно по парам аугментации, а $q(j|i)$ — гауссово на единичной сфере.
-- **K-means**: Получается, когда $p(j|i)$ — гауссово, а $q(j|i)$ — равномерно по членам кластера.
-- **PCA**: Получается, когда $p(j|i)$ — тождественное распределение, а $q(j|i)$ — гауссово с $σ→∞$.
-
-Эта способность объединять методы *"выявляет неожиданные связи между, казалось бы, разрозненными методами."*
+*Figure 1* illustrates this process: data passes through a mapping function to generate representations, which are then compared with reference distributions using KL divergence.
 
 ---
 
-5. **Роль и Выбор Распределений Представлений**
+4. **Unifying Existing Methods within I-CON**
 
-Выбор конкретных вероятностных распределений для $p(j|i)$ и $q(j|i)$ критически важен и определяет свойства получаемых эмбеддингов. В статье исследуются несколько ключевых распределений:
+The authors demonstrate that I-CON can reproduce a wide spectrum of existing representation learning algorithms by *"selecting specific parameterizations for reference and learned distributions."*
 
-- **Гауссовское распределение**: Используется в SNE, создает вложения на основе евклидова расстояния.  
+*Figure 3* visualizes this unification, categorizing methods into groups (dimensionality reduction, clustering, self-supervised learning, supervised learning).
+
+**Examples of unification**:
+- **t-SNE**: Emerges when both $p(j|i)$ and $q(j|i)$ are Student-t distributions.
+- **SimCLR**: Emerges when $p(j|i)$ is uniform over augmentation pairs, and $q(j|i)$ is Gaussian on the unit sphere.
+- **K-means**: Emerges when $p(j|i)$ is Gaussian and $q(j|i)$ is uniform over cluster members.
+- **PCA**: Emerges when $p(j|i)$ is an identity distribution and $q(j|i)$ is Gaussian with $σ→∞$.
+
+This ability to unify methods *"reveals unexpected connections between seemingly disparate approaches."*
+
+---
+
+5. **Role and Choice of Representation Distributions**
+
+The choice of specific probability distributions for $p(j|i)$ and $q(j|i)$ is critical and determines the properties of the resulting embeddings. The paper investigates several key distributions:
+
+- **Gaussian distribution**: Used in SNE, creates embeddings based on Euclidean distance.  
   $$ p(j|i) \propto \exp\left(-\frac{|x_i - x_j|^2}{2\sigma^2}\right) $$
-- **Распределение Стьюдента**: Используется в t-SNE, сохраняет как локальную, так и глобальную структуру благодаря более тяжелым хвостам.  
+- **Student-t distribution**: Used in t-SNE, preserves both local and global structure due to heavier tails.  
   $$ p(j|i) \propto \left(1 + \frac{|x_i - x_j|^2}{\gamma^2}\right)^{-1} $$
-- **Равномерное распределение по k ближайшим соседям**: Учитывает только локальную структуру, фокусируясь на k ближайших точках.  
+- **Uniform distribution over k-nearest neighbors**: Considers only local structure by focusing on the k nearest points.  
   $$ p(j|i) = \begin{cases} 
-    1, & \text{если } x_j \in k \text{ ближайших соседей } x_i \\
-    0, & \text{в противном случае}
+    1, & \text{if } x_j \in k \text{ nearest neighbors of } x_i \\
+    0, & \text{otherwise}
   \end{cases} $$
 
-*Рисунок 4* визуализирует эти распределения, демонстрируя их разные характеристики. Использование распределений позволяет точно измерить расхождение между идеальным и реальным соседством с помощью KL-дивергенции и обучать модель для минимизации этого расхождения.
+*Figure 4* visualizes these distributions, demonstrating their distinct characteristics. Using distributions enables precise measurement of the discrepancy between ideal and actual neighborhood via KL divergence, guiding model training to minimize this divergence.
 
 ---
 
-6. **Стратегия Устранения Смещения (Bias Correction)**
+6. **Bias Correction Strategy**
 
-Одним из ключевых нововведений I-CON является принципиальный подход к устранению внутренних смещений в методах обучения представлений. Эта стратегия заключается в модификации целевого (эталонного) распределения $p(j|i)$. Вместо того чтобы модель $q(j|i)$ соответствовала исходному $p(j|i)$, она стремится соответствовать его измененной версии $\hat{p}(j|i)$.
+A key innovation of I-CON is a principled approach to correcting internal biases in representation learning methods. This strategy involves modifying the reference distribution $p(j|i)$. Instead of having the model $q(j|i)$ match the original $p(j|i)$, it aims to match its modified version $\hat{p}(j|i)$.
 
-Предлагается модификация контролирующего распределения с помощью равномерного компонента, управляемого параметром $\alpha$:  
+The proposed modification adds a uniform component controlled by parameter $\alpha$:  
 $$ \hat{p}(j|i) = (1 - \alpha)p(j|i) + \frac{\alpha}{N} $$  
 
-Эта стратегия имеет два важных следствия:
-1. *"Она способствует более разнообразному вниманию к различным примерам".*
-2. *"Она улучшает калибровку оценок уверенности в изученных представлениях".*
+This bias correction strategy has two important consequences:
+1. *"It encourages more diverse attention across different examples."*
+2. *"It improves calibration of confidence estimates in learned representations."*
 
-*Рисунок 5* показывает, как увеличение $\alpha$ улучшает кластеризацию, делая ее "более четкой и лучше разделенной". *Рисунок 6* демонстрирует, что устранение смещения улучшает как точность, так и калибровку на реальных данных.
-
----
-
-7. **Экспериментальные Результаты**
-
-Авторы оценивают эффективность алгоритмов, полученных с помощью I-CON, на стандартных наборах данных классификации изображений (ImageNet-1K, CIFAR-100, STL-10). Используя предобученный Vision Transformer DiNO, они показывают значительные улучшения:
-
-- На **ImageNet-1K** их подход кластеризации InfoNCE с устранением смещения достигает *"8% улучшения по сравнению с предыдущими передовыми методами для неконтролируемой классификации"*.
-- Визуализации на **CIFAR** и **STL-10** (*Рисунки 7 и 8*) демонстрируют, как параметры устранения смещения (например, $\tau^+$) влияют на структуру вложений, улучшая связность кластеров.
-- Тестирование на моделях разного размера (*Рисунок 9*) показывает, что устранение смещения последовательно улучшает точность валидации.
+*Figure 5* shows how increasing $\alpha$ improves clustering, making it "sharper and better separated." *Figure 6* demonstrates that bias correction enhances both accuracy and calibration on real-world data.
 
 ---
 
-8. **Приложения и Последствия**
+7. **Experimental Results**
 
-I-CON предлагает как теоретические, так и практические преимущества:
+The authors evaluate the effectiveness of algorithms derived via I-CON on standard image classification datasets (ImageNet-1K, CIFAR-100, STL-10). Using a pretrained Vision Transformer DiNO, they show significant improvements:
 
-- **Перенос идей**: Фреймворк облегчает обмен успешными техниками между различными областями обучения представлений.
-- **Разработка алгоритмов**: Позволяет систематически создавать новые методы, варьируя $p(j|i)$ и $q(j|i)$.
-- **Повышенная производительность**: Стратегия устранения смещения приводит к более надежным представлениям и улучшению производительности в downstream задачах.
-- **Простота реализации**: Унифицированная формулировка позволяет *"более лаконично и последовательно реализовывать различные методы."*
+- On **ImageNet-1K**, their bias-corrected InfoNCE clustering approach achieves *"8% improvement over previous state-of-the-art methods for unsupervised classification."*
+- Visualizations on **CIFAR** and **STL-10** (*Figures 7 and 8*) demonstrate how bias correction parameters (e.g., $\tau^+$) influence embedding structure, improving cluster connectivity.
+- Testing across model sizes (*Figure 9*) shows that bias correction consistently improves validation accuracy.
 
 ---
 
-9. **Заключение**
+8. **Applications and Implications**
 
-I-CON является *"значительным прогрессом в нашем понимании обучения представлений"*. Предоставляя *"единую математическую структуру"*, которая объединяет разнообразные методы (кластеризация, снижение размерности, контрастное обучение, контролируемая классификация), фреймворк проясняет основные принципы, лежащие в их основе.
+I-CON offers both theoretical and practical advantages:
 
-Фреймворк не только объединяет существующие методы, но и стимулирует разработку новых, более эффективных алгоритмов, что подтверждается улучшенными результатами в экспериментах, особенно за счет подхода к устранению смещения.
+- **Idea transfer**: The framework facilitates the exchange of successful techniques across different representation learning domains.
+- **Algorithm development**: Enables systematic creation of new methods by varying $p(j|i)$ and $q(j|i)$.
+- **Improved performance**: The bias correction strategy leads to more robust representations and enhanced performance in downstream tasks.
+- **Simplified implementation**: The unified formulation allows for *"more concise and consistent implementation of diverse methods."*
 
-Как заключают авторы:  
-*"Поскольку обучение представлений продолжает развиваться, I-CON предоставляет исследователям мощный инструмент для понимания существующих методов, разработки новых алгоритмов и повышения производительности в широком спектре задач машинного обучения."*  
+---
 
-Способность фреймворка объединять традиционно разделенные области предполагает, что *"дальнейшее перекрестное опыление идей может привести к еще более эффективным методам обучения представлений в будущем."*
+9. **Conclusion**
+
+I-CON is a *"significant advance in our understanding of representation learning."* By providing a *"unified mathematical structure"* that connects diverse methods (clustering, dimensionality reduction, contrastive learning, supervised classification), the framework clarifies the fundamental principles underlying them.
+
+The framework not only unifies existing methods but also stimulates the development of new, more effective algorithms, as evidenced by improved experimental results—particularly through the bias correction approach.
+
+As the authors conclude:  
+*"As representation learning continues to evolve, I-CON provides researchers with a powerful tool for understanding existing methods, developing new algorithms, and improving performance across a broad spectrum of machine learning tasks."*  
+
+The framework’s ability to unify traditionally separated domains suggests that *"further cross-pollination of ideas may lead to even more effective representation learning methods in the future."*
 
 </details> 
 
 ---
 
-## **1. Введение**
+## **1. Introduction**
 
-В последние годы в исследованиях машинного обучения наблюдается распространение методов обучения представлений, каждый из которых имеет уникальную архитектуру, функции потерь и стратегии обучения. Эта фрагментация затрудняет для исследователей понимание взаимосвязей между различными методами и определение того, какой подход лучше всего подходит для данной задачи.  
+In recent years, machine learning research has witnessed the proliferation of representation learning methods, each with unique architectures, loss functions, and training strategies. This fragmentation hinders researchers from understanding the relationships between various methods and determining which approach is best suited for a given task.  
 
-В статье **"I-CON: Унифицированная платформа для обучения представлений"** предлагается всеобъемлющая информационно-теоретическая платформа, которая вносит ясность в этот сложный ландшафт, объединяя более 23 различных методов обучения представлений под единой математической формулировкой.  
+In the paper **"I-CON: A Unified Platform for Representation Learning,"** a comprehensive information-theoretic framework is proposed that brings clarity to this complex landscape by unifying over 23 distinct representation learning methods under a single mathematical formulation.  
 
-> **Фреймворк I-CON**, показывающий взаимосвязь между входными данными, контрольными сигналами, изученными представлениями и распределениями вероятностей.  
-
----
-
-### **Что такое методы обучения представлений?**
-
-**Обучение представлений** (representation learning) — это направление в машинном обучении, целью которого является автоматическое выявление и выделение полезных признаков (features) из исходных данных. В отличие от традиционных методов, где признаки проектируются вручную (feature engineering), обучение представлений позволяет алгоритмам самостоятельно находить оптимальные способы кодирования информации.
-
-#### Ключевые аспекты:
-1. **Автоматическое извлечение признаков**  
-   - Методы обучения представлений преобразуют "сырые" данные (изображения, текст, звук) в компактные векторные формы (эмбеддинги), сохраняющие семантически значимые закономерности.
-   - Пример: свёрточные нейросети (CNN) выделяют иерархию признаков в изображениях — от границ объектов до их семантических частей.
-
-2. **Типы методов**  
-   - **С учителем** (supervised): используют размеченные данные (например, классификационные метки) для обучения.  
-     *Пример:* Fine-tuning предобученных моделей (ResNet, BERT).  
-   - **Без учителя** (self-supervised): учатся на внутренней структуре данных без явных меток.  
-     *Пример:* Контрастивные методы (SimCLR), маскирование в NLP (BERT).  
-   - **На основе информационной теории**: оптимизируют взаимную информацию между представлениями (например, VAE, InfoGAN).  
-
-3. **Применение**  
-   - Уменьшение размерности (t-SNE, PCA).  
-   - Перенос обучения (transfer learning).  
-   - Интерпретируемость моделей (визуализация эмбеддингов).  
-
-#### Проблема фрагментации
-Разнообразие подходов — от автоэнкодеров до contrastive learning — создаёт "зоопарк" методов, которые часто:  
-- Используют разные математические формулировки (например, максимизация взаимной информации vs. минимизация MSE).  
-- Требуют специфичных архитектур (например, наличие memory bank в MoCo).  
-- Затрудняют сравнение эффективности на новых задачах.  
-
-**Пример:** Для одной и той же задачи (классификация изображений) можно применить:  
-- Triplet Loss (на основе расстояний между эмбеддингами).  
-- Нормализованную температурно-масштабированную кросс-энтропию (NT-Xent, как в SimCLR).  
-- Вариационный автоэнкодер (VAE) с регуляризацией KL-дивергенцией.
+> **I-CON Framework**, illustrating the relationships between input data, control signals, learned representations, and probability distributions.  
 
 ---
 
-![Рисунок 1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-19/assets/Image_01.png)
+### **What are Representation Learning Methods?**
 
-**Рисунок 1:** Фреймворк I-CON иллюстрирует, как обучение представлений может быть сформулировано как согласование условных распределений вероятностей. Фреймворк показывает, как данные проходят через функцию отображения для создания представлений, которые затем сравниваются с контрольными распределениями с использованием дивергенции Куллбака-Лейблера.
+**Representation learning** (representation learning) is a field in machine learning aimed at automatically discovering and extracting useful features (features) from raw data. Unlike traditional methods where features are hand-engineered (feature engineering), representation learning enables algorithms to autonomously find optimal ways to encode information.
 
-## **2. Теоретические основы**
+#### Key aspects:
+1. **Automatic feature extraction**  
+   - Representation learning methods transform "raw" data (images, text, audio) into compact vector forms (embeddings) that preserve semantically meaningful patterns.  
+   - Example: Convolutional neural networks (CNNs) extract hierarchical features from images—from object edges to semantic parts.
 
-Метод I-CON (Информационно-теоретическая конвергенция) рассматривает обучение представлений как задачу минимизации средней дивергенции Кульбака-Лейблера (KL) между двумя условными распределениями вероятностей:
+2. **Types of methods**  
+   - **Supervised**: Use labeled data (e.g., classification labels) for training.  
+     *Example:* Fine-tuning pretrained models (ResNet, BERT).  
+   - **Self-supervised**: Learn from the internal structure of data without explicit labels.  
+     *Example:* Contrastive methods (SimCLR), masking in NLP (BERT).  
+   - **Information-theoretic**: Optimize mutual information between representations (e.g., VAE, InfoGAN).  
 
-1. **Эталонное распределение** $( p(j|i) )$, которое отражает взаимосвязи между точками данных.  
-2. **Обучаемое распределение** $( q(j|i) )$, которое моделирует эти взаимосвязи в пространстве представлений.  
+3. **Applications**  
+   - Dimensionality reduction (t-SNE, PCA).  
+   - Transfer learning.  
+   - Model interpretability (embedding visualization).  
 
-Целевая функция метода записывается следующим образом:  
+#### The Fragmentation Problem
+
+The diversity of approaches—from autoencoders to contrastive learning—creates a "zoo" of methods that often:  
+- Use different mathematical formulations (e.g., maximizing mutual information vs. minimizing MSE).  
+- Require specialized architectures (e.g., memory bank in MoCo).  
+- Make it difficult to compare effectiveness on new tasks.  
+
+**Example:** For the same task (image classification), one might apply:  
+- Triplet Loss (based on embedding distances).  
+- Normalized temperature-scaled cross-entropy (NT-Xent, as in SimCLR).  
+- Variational autoencoder (VAE) with KL-divergence regularization.
+
+---
+
+![Figure 1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-19/assets/Image_01.png  )
+
+**Figure 1:** The I-CON framework illustrates how representation learning can be formulated as aligning conditional probability distributions. It shows how data passes through a mapping function to generate representations, which are then compared with reference distributions using Kullback-Leibler divergence.
+
+## **2. Theoretical Foundations**
+
+The I-CON (Information-Theoretic Convergence) method frames representation learning as minimizing the average Kullback-Leibler (KL) divergence between two conditional probability distributions:
+
+1. **Reference distribution** $( p(j|i) )$, capturing relationships between data points.  
+2. **Learned distribution** $( q(j|i) )$, modeling these relationships in the representation space.  
+
+The method’s objective function is written as:  
 
 $$
 \mathcal{L}_{I-CON} = \mathbb{E}_i \left[ D_{KL}(p(j|i) \| q(j|i)) \right]
 $$
 
-Эта компактная формулировка позволяет анализировать и интерпретировать различные методы обучения. Эталонное распределение $( p(j|i) )$ задаёт желаемые взаимосвязи между точками данных (например, на основе близости в пространстве, принадлежности к одному классу или пар аугментаций), а обучаемое распределение $( q(j|i) )$ показывает, как модель воспроизводит эти взаимосвязи.
+This compact formulation enables analysis and interpretation of diverse learning methods. The reference distribution $( p(j|i) )$ defines desired relationships between data points (e.g., based on proximity, class membership, or augmentation pairs), while the learned distribution $( q(j|i) )$ reflects how the model reproduces these relationships.
 
-## **3. Унификация разрозненных методов**
+## **3. Unifying Disparate Methods**
 
-Авторы демонстрируют, что, выбирая определенные параметризации для контрольных и обученных распределений, I-CON может воспроизвести широкий спектр существующих алгоритмов обучения представлений:
+The authors demonstrate that, by selecting specific parameterizations for reference and learned distributions, I-CON can reproduce a wide spectrum of existing representation learning algorithms:
 
-![Рисунок 2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-19/assets/Image_02.png)
+![Figure 2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-19/assets/Image_02.png  )
 
-**Рисунок 2:** Различные типы контрольных сигналов могут использоваться для определения взаимосвязей между точками данных, включая пространственную близость, дискретные взаимосвязи, принадлежность к кластеру и связность графа.
+**Figure 2:** Various types of control signals can be used to define relationships between data points, including spatial proximity, discrete relationships, cluster membership, and graph connectivity.
 
-Например:
+Examples:
 
-- **t-SNE:** когда оба распределения являются распределениями Стьюдент;
-- **SimCLR:** когда $p(j|i)$ является равномерным по парам аугментации, а $q(j|i)$ является гауссовым на единичной сфере;
-- **K-means:** когда $p(j|i)$ является гауссовым, а $q(j|i)$ является равномерным по членам кластера;
-- **PCA:** когда $p(j|i)$ является тождественным распределением, а $q(j|i)$ является гауссовым с $σ→∞$.
+- **t-SNE**: When both distributions are Student-t.  
+- **SimCLR**: When $p(j|i)$ is uniform over augmentation pairs and $q(j|i)$ is Gaussian on the unit sphere.  
+- **K-means**: When $p(j|i)$ is Gaussian and $q(j|i)$ is uniform over cluster members.  
+- **PCA**: When $p(j|i)$ is an identity distribution and $q(j|i)$ is Gaussian with $σ→∞$.  
 
-Эта унификация выявляет неожиданные связи между, казалось бы, разрозненными методами. Например, авторы показывают, что подходы контрастного обучения (например, InfoNCE) и методы снижения размерности (например, t-SNE) фундаментально связаны через их основные целевые функции.
+This unification reveals unexpected connections between seemingly disparate methods. For example, the authors show that contrastive learning approaches (e.g., InfoNCE) and dimensionality reduction methods (e.g., t-SNE) are fundamentally linked through their core objective functions.
 
-![Рисунок 3](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-19/assets/Image_03.png)
+![Figure 3](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-19/assets/Image_03.png  )
 
-**Рисунок 3:** I-CON объединяет различные алгоритмы обучения представлений, показывая, как они возникают из различных вариантов контролирующих и изученных распределений. Цвета указывают на различные категории: уменьшение размерности (синий), кластерное обучение (оранжевый), одномодальное самообучение (красный), многомодальное самообучение (фиолетовый) и обучение с учителем (зеленый).
+**Figure 3:** I-CON unifies various representation learning algorithms by showing how they arise from different configurations of control and learned distributions. Colors indicate categories: dimensionality reduction (blue), clustering (orange), unimodal self-supervised (red), multimodal self-supervised (purple), and supervised learning (green).
 
-## **4. Распределения представлений**
+## **4. Representation Distributions**
 
-Выбор распределения представлений значительно влияет на результирующие вложения. В статье исследуются несколько ключевых распределений:
+The choice of representation distribution significantly affects the resulting embeddings. The paper investigates several key distributions:
 
-1. **Гауссовское распределение**: создает вложения на основе евклидова расстояния, как используется в SNE.
-
+1. **Gaussian distribution**: Creates embeddings based on Euclidean distance, as in SNE.  
    $$p(j|i) \propto \exp\left(-\frac{\|x_i - x_j\|^2}{2\sigma^2}\right)$$
 
-2. **Распределение Стьюдента**: сохраняет как локальную, так и глобальную структуру с более тяжелыми хвостами, как в t-SNE.
-
+2. **Student-t distribution**: Preserves both local and global structure with heavier tails, as in t-SNE.  
    $$p(j|i) \propto \left(1 + \frac{\|x_i - x_j\|^2}{\gamma^2}\right)^{-1}$$
 
-3. **Равномерное распределение по k ближайшим соседям**: учитывает только k ближайших соседей каждой точки.
-
+3. **Uniform distribution over k-nearest neighbors**: Considers only the k nearest neighbors of each point.  
    $$
    p(j|i) = \begin{cases} 
-   1, & \text{если } x_j \in k \text{ ближайших соседей } x_i \\
-   0, & \text{в противном случае}
+   1, & \text{if } x_j \in k \text{ nearest neighbors of } x_i \\
+   0, & \text{otherwise}
    \end{cases}
    $$
 
-![Рисунок 4](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-19/assets/Image_04.png)
+![Figure 4](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-19/assets/Image_04.png  )
 
-**Рисунок 4**: Визуализация различных распределений вероятностей, используемых в I-CON: гауссовское (слева), Стьюдента (в центре) и равномерное по k ближайшим соседям (справа). Каждое распределение создает различные свойства вложения. 
+**Figure 4**: Visualization of various probability distributions used in I-CON: Gaussian (left), Student-t (center), and uniform over k-nearest neighbors (right). Each distribution generates distinct embedding properties. 
 
-### **Почему вообще речь зашла про распределения в I-CON?**
+### **Why Discuss Distributions in I-CON at All?**
 
-Представьте, что основная задача обучения представлений — это **создать хорошую "карту" ваших данных**. На этой карте похожие объекты (например, картинки с котиками) должны оказаться рядом, а непохожие (котики и автомобили) — далеко друг от друга.
+Imagine the core task of representation learning is to **create a good "map" of your data**. On this map, similar objects (e.g., cat images) should be close, while dissimilar ones (cats and cars) should be far apart.
 
-Фреймворк I-CON предлагает посмотреть на эту задачу так:
+The I-CON framework proposes viewing this task as follows:
 
-1.  **Определим "идеальное соседство":** сначала решим, как *должны* выглядеть окрестности каждого объекта на нашей идеальной карте. Например, мы можем сказать: "Для этой картинки с котиком (`i`) другие картинки с котиками (`j`) должны считаться 'близкими соседями' с высокой вероятностью, а картинки с машинами — с низкой". Это наше **целевое** представление о соседстве.
-2.  **Посмотрим на "реальное соседство" в модели:** затем посмотрим, как нейросеть *на самом деле* расположила объекты на своей текущей "карте" (в пространстве эмбеддингов). Насколько близки там котики к котикам? Насколько далеки от машин? Это **фактическое** соседство, созданное моделью.
+1.  **Define "ideal neighborhood":** First, decide how the neighborhoods of each object *should* look on our ideal map. For example: "For this cat image (`i`), other cat images (`j`) should be considered 'close neighbors' with high probability, while car images should have low probability." This is our **target** notion of neighborhood.
+2.  **Observe "real neighborhood" in the model:** Then, see how the neural network has *actually* arranged objects on its current "map" (embedding space). How close are cats to cats? How far from cars? This is the **actual** neighborhood created by the model.
 
-**Как сравнить "идеальное" и "реальное" соседство?** Вот тут-то и приходят на помощь **вероятностные распределения**:
+**How to compare "ideal" and "real" neighborhood?** This is where **probability distributions** come in:
 
-*   **$p(j|i)$ — это описание "идеального" соседства:** для каждого объекта `i` это распределение говорит, с какой **вероятностью** любой другой объект `j` должен считаться его "важным соседом". Это наша **цель**, основанная на исходных данных или знаниях (например, метках классов, аугментациях).
-*   **$q(j|i)$ — это описание "реального" соседства в модели:** для каждого объекта `i` это распределение показывает, с какой **вероятностью** модель *считает* объект `j` его "важным соседом", основываясь на близости их текущих представлений (эмбеддингов). Это то, **что модель выучила**.
+*   **$p(j|i)$ — describes "ideal" neighborhood:** For each object `i`, this distribution tells us the **probability** that any other object `j` should be considered its "important neighbor." This is our **goal**, based on source data or knowledge (e.g., class labels, augmentations).
+*   **$q(j|i)$ — describes "real" neighborhood in the model:** For each object `i`, this distribution shows the **probability** that the model considers object `j` its "important neighbor," based on the proximity of their current representations (embeddings). This is what the model has **learned**.
 
-**Зачем это нужно?**
+**Why is this useful?**
 
-1.  **Универсальный язык:** вероятности позволяют описать самые разные виды "соседства" (близость по пикселям, принадлежность к классу, связь в графе) единым математическим языком.
-2.  **Четкая цель для обучения:** задача модели теперь проста — **сделать так, чтобы ее собственное видение соседства ($q$) стало как можно больше похоже на идеальное видение ($p$)**.
-3.  **Измеримое расхождение:** мы можем использовать KL-дивергенцию ($D_{KL}(p || q)$), чтобы точно измерить, насколько $q$ отличается от $p$. Минимизируя эту дивергенцию, мы **обучаем модель** создавать представления, которые отражают желаемую структуру соседства.
+1.  **Universal language:** Probabilities allow describing vastly different types of "neighborhoods" (pixel proximity, class membership, graph links) with a single mathematical language.
+2.  **Clear training objective:** The model’s task becomes simple—**make its own view of neighborhood ($q$) as similar as possible to the ideal view ($p$)**.
+3.  **Measurable discrepancy:** We can use KL-divergence ($D_{KL}(p || q)$) to precisely measure how much $q$ differs from $p$. Minimizing this divergence **trains the model** to create representations reflecting the desired neighborhood structure.
 
-## **5. Стратегия устранения смещения**
+## **5. Bias Correction Strategy**
 
-Одним из ключевых нововведений в I-CON является принципиальный подход к устранению смещения, который решает проблему внутренних смещений в методах обучения представлений. Стратегия устранения смещения в I-CON заключается в модификации целевого (эталонного) распределения $p(j|i)$. Вместо того чтобы модель $q(j|i)$ пыталась идеально соответствовать исходному $p(j|i)$, она будет стремиться соответствовать его слегка измененной версии, $\hat{p}(j|i)$. Авторы предлагают модифицировать контролирующее распределение с помощью равномерного компонента, контролируемого параметром α:
+A key innovation in I-CON is a principled approach to correcting biases, addressing internal biases in representation learning methods. The bias correction strategy in I-CON involves modifying the target (reference) distribution $p(j|i)$. Instead of having the model $q(j|i)$ perfectly match the original $p(j|i)$, it aims to match its slightly modified version, $\hat{p}(j|i)$. The authors propose modifying the control distribution by adding a uniform component controlled by parameter $\alpha$:
 
 $$\hat{p}(j|i) = (1 - \alpha)p(j|i) + \frac{\alpha}{N}$$
 
-Эта стратегия устранения смещения имеет два важных следствия:
+This bias correction strategy has two important consequences:
 
-- Она способствует более разнообразному вниманию к различным примерам;
-- Она улучшает калибровку оценок уверенности в изученных представлениях.
+- It promotes more diverse attention across different examples;
+- It improves calibration of confidence estimates in learned representations.
 
-Влияние этого устранения смещения можно визуализировать в пространствах вложения:
+The impact of this bias correction can be visualized in embedding spaces:
 
-![Рисунок 5](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-19/assets/Image_05.png)
+![Figure 5](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-19/assets/Image_05.png  )
 
-**Рисунок 5:** Визуализация изученных вложений с различными коэффициентами устранения смещения (α). По мере увеличения α от 0 до 0.6 кластеры становятся более четкими и лучше разделенными.
+**Figure 5:** Visualization of learned embeddings with varying bias correction coefficients ($\alpha$). As $\alpha$ increases from 0 to 0.6, clusters become sharper and better separated.
 
-В статье демонстрируется, что этот подход к устранению смещения приводит к значительным улучшениям в различных наборах данных:
+The paper demonstrates that this bias correction approach leads to significant improvements across datasets:
 
-![Рисунок 6](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-19/assets/Image_06.png)
+![Figure 6](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-19/assets/Image_06.png  )
 
-**Рисунок 6:** Слева: Точность проверки с различными размерами пакетов и коэффициентами устранения смещения. Справа: Кривые калибровки, показывающие, как устранение смещения улучшает взаимосвязь между вероятностями присваивания и фактической точностью.
+**Figure 6:** Left: Validation accuracy with varying batch sizes and bias correction coefficients. Right: Calibration curves showing how bias correction improves the alignment between assigned probabilities and actual accuracy.
 
-## **6. Экспериментальные результаты**
+## **6. Experimental Results**
 
-Авторы оценивают алгоритмы, полученные с помощью I-CON, на стандартных задачах классификации изображений, включая ImageNet-1K, CIFAR-100 и STL-10. Используя предварительно обученный Vision Transformer DiNO в качестве экстрактора признаков, они демонстрируют, что их подход кластеризации InfoNCE с устранением смещения достигает 8% улучшения по сравнению с предыдущими передовыми методами для неконтролируемой классификации на ImageNet-1K.
+The authors evaluate algorithms derived via I-CON on standard image classification tasks, including ImageNet-1K, CIFAR-100, and STL-10. Using a pretrained Vision Transformer DiNO as a feature extractor, they demonstrate that their bias-corrected InfoNCE clustering approach achieves 8% improvement over previous state-of-the-art methods for unsupervised classification on ImageNet-1K.
 
-Визуализация вложений на наборе данных CIFAR показывает, как различные параметры устранения смещения влияют на представление:
+Embedding visualizations on CIFAR show how different bias correction parameters affect representation:
 
-![Рисунок 7](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-19/assets/Image_07.png)
+![Figure 7](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-19/assets/Image_07.png  )
 
-**Рисунок 7:** Визуализация вложений набора данных CIFAR с различной степенью устранения смещения. Параметр τ⁺ контролирует информативность сигналов контроля.
+**Figure 7:** Visualization of CIFAR dataset embeddings with varying bias correction. Parameter $\tau^+$ controls informativeness of control signals.
 
-Аналогично, на STL-10 фреймворк показывает улучшенную кластеризацию с устранением смещения:
+Similarly, on STL-10, the framework shows improved clustering with bias correction:
 
-![Рисунок 8](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-19/assets/Image_08.png)
+![Figure 8](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-19/assets/Image_08.png  )
 
-**Рисунок 8:** Встраивания набора данных STL-10 с различными параметрами устранения смещения. На правом изображении (τ⁺ = 0.1) показаны более связные кластеры по сравнению с левым (τ⁺ = 0).
+**Figure 8:** Embeddings of STL-10 dataset with different bias correction parameters. The right image ($\tau^+ = 0.1$) shows more connected clusters compared to the left ($\tau^+ = 0$).
 
-В статье также исследуется влияние различных коэффициентов устранения смещения на модели разных размеров:
+The paper also investigates the effect of different bias correction coefficients on models of varying sizes:
 
-![Рисунок 9](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-19/assets/Image_09.png)
+![Figure 9](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-19/assets/Image_09.png  )
 
-**Рисунок 9:** Точность валидации с различными параметрами устранения смещения для трех размеров модели DiNO (маленький, базовый, большой). Устранение смещения обеих дистрибуций последовательно превосходит устранение смещения только целевой дистрибуции.
+**Figure 9:** Validation accuracy with different bias correction parameters for three DiNO model sizes (small, base, large). Bias correction of both distributions consistently outperforms bias correction of the target distribution alone.
 
-## **7. Приложения и последствия**
+## **7. Applications and Implications**
 
-Помимо теоретического вклада, I-CON предлагает практические преимущества для обучения представлений:
+Beyond its theoretical contribution, I-CON offers practical advantages for representation learning:
 
-1. **Перенос идей:** фреймворк облегчает перекрестное опыление успешных техник между различными областями обучения представлений.
+1. **Idea transfer:** The framework facilitates cross-pollination of successful techniques across different representation learning domains.
 
-2. **Разработка алгоритмов:** исследователи могут систематически изучать новые методы обучения представлений, изменяя контролирующие и изученные дистрибуции в рамках фреймворка I-CON.
+2. **Algorithm development:** Researchers can systematically explore new representation learning methods by varying control and learned distributions within the I-CON framework.
 
-3. **Повышенная производительность:** стратегия устранения смещения, полученная из I-CON, приводит к более надежным и устойчивым представлениям, улучшая производительность в последующих задачах.
+3. **Improved performance:** The bias correction strategy derived from I-CON leads to more robust and reliable representations, enhancing performance in downstream tasks.
 
-4. **Простота реализации:** Унифицированная формулировка позволяет более лаконично и последовательно реализовывать различные методы:
+4. **Simplified implementation:** The unified formulation enables more concise and consistent implementation of diverse methods:
 
 ```python
-# Пример реализации SNE во фреймворке I-CON
+# Example implementation of SNE within I-CON framework
 SNE_model = ICon(
     target_dist = Gaussian(sigma = 2),
     learned_dist = Gaussian(sigma = 1),
     mapper = Embedding(num_embeddings=N, dim=m)
 )
 
-# Пример реализации SimCLR во фреймворке I-CON
+# Example implementation of SimCLR within I-CON framework
 SimCLR_model = ICon(
     target_dist = Augmentation(num_views = 2),
     learned_dist = Gaussian(sigma=0.7, metric='cos'),
@@ -349,10 +347,10 @@ SimCLR_model = ICon(
 )
 ```
 
-## **8. Заключение**
+## **8. Conclusion**
 
-I-CON представляет собой значительный прогресс в нашем понимании обучения представлений. Предоставляя единую математическую структуру, которая охватывает различные методы от кластеризации и снижения размерности до контрастного обучения и контролируемой классификации, она помогает прояснить основные принципы, связывающие эти подходы.
+I-CON represents a significant advance in our understanding of representation learning. By providing a unified mathematical structure encompassing diverse methods—from clustering and dimensionality reduction to contrastive learning and supervised classification—it clarifies the fundamental principles linking these approaches.
 
-Фреймворк не только объединяет существующие методы, но и позволяет разрабатывать новые алгоритмы с улучшенной производительностью. Подход к устранению смещения, полученный из принципов I-CON, демонстрирует существенные успехи в задачах неконтролируемой классификации, подчеркивая практическую ценность этого теоретического объединения.
+The framework not only unifies existing methods but also enables the development of new algorithms with improved performance. The bias correction approach, derived from I-CON principles, demonstrates substantial gains in unsupervised classification tasks, underscoring the practical value of this theoretical unification.
 
-Поскольку обучение представлений продолжает развиваться, I-CON предоставляет исследователям мощный инструмент для понимания существующих методов, разработки новых алгоритмов и повышения производительности в широком спектре задач машинного обучения. Способность фреймворка объединять традиционно разделенные области предполагает, что дальнейшее перекрестное опыление идей может привести к еще более эффективным методам обучения представлений в будущем.
+As representation learning continues to evolve, I-CON provides researchers with a powerful tool for understanding existing methods, developing new algorithms, and improving performance across a broad spectrum of machine learning tasks. The framework’s ability to unify traditionally separate domains suggests that further cross-pollination of ideas may lead to even more effective representation learning methods in the future.

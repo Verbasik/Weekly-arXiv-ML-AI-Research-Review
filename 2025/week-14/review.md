@@ -1,158 +1,158 @@
-# Qwen2.5-Omni: Мультимодальная модель нового поколения 
+# Qwen2.5-Omni: A Next-Generation Multimodal Model
 
 ---
 
 ### **TWRB_FM 📻**
 
 <audio controls>
-  <source src="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/raw/refs/heads/develop/2025/week-14/TWRB_FM.mp3" type="audio/mpeg">
-  Ваш браузер не поддерживает аудиоэлемент.
+  <source src="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/raw/refs/heads/develop/2025/week-14/TWRB_FM.mp3  " type="audio/mpeg">
+  Your browser does not support the audio element.
 </audio>
 
 ---
 
-## **Аннотация**  
-Qwen2.5-Omni представляет собой революционную мультимодальную модель, способную обрабатывать текст, изображения, аудио и видео, а также генерировать текстовые и речевые ответы в режиме реального времени. Это универсальное решение, объединяющее передовые технологии для достижения низкой задержки и естественного взаимодействия, что делает его шагом к созданию истинного AGI.
+## **Abstract**  
+Qwen2.5-Omni is a revolutionary multimodal model capable of processing text, images, audio, and video, while generating both textual and speech responses in real time. This unified solution integrates cutting-edge technologies to achieve low latency and natural interaction, marking a step toward true AGI.
 
-### Ключевые инновации:
-1. **Архитектура Thinker-Talker**  
-   - **Thinker** (мозг): генерирует текст, анализируя данные через трансформер с мультимодальными кодерами.  
-   - **Talker** (речь): преобразует скрытые представления Thinker в аудиопоток с помощью двухдорожечного декодера, избегая конфликтов между модальностями.  
-   - Вдохновлено биологией: разделение задач аналогично работе мозга и речевого аппарата человека.
+### Key Innovations:
+1. **Thinker-Talker Architecture**  
+   - **Thinker** (brain): Generates text by analyzing multimodal inputs via a transformer with multimodal encoders.  
+   - **Talker** (speech): Converts Thinker’s hidden representations into an audio stream using a dual-stream decoder, avoiding cross-modal conflicts.  
+   - Inspired by biology: Task separation mirrors the human brain and vocal apparatus.
 
-2. **TMRoPE: синхронизация мультимодальных данных**  
-   - Новая система позиционного кодирования, выравнивающая временные метки аудио и видео.  
-   - Решает проблему рассинхронизации потоков (например, речь и губы в видео).
+2. **TMRoPE: Multimodal Data Synchronization**  
+   - A novel positional encoding system aligning audio and video timestamps.  
+   - Solves stream desynchronization issues (e.g., speech and lip movements in video).
 
-3. **Потоковая обработка "из коробки"**  
-   - Блочное кодирование входных данных и скользящее окно DiT для генерации речи с минимальной задержкой.  
-   - Поддержка предварительного заполнения контекста для плавного диалога.
+3. **Out-of-the-Box Streaming Processing**  
+   - Block-wise encoding of inputs and a sliding-window DiT for speech generation with minimal latency.  
+   - Support for context pre-filling to enable seamless dialogue.
 
-### Производительность и превосходство:
-- **Лидер в мультимодальных тестах**: превосходит GPT-4o-mini, Qwen2.5-VL и Qwen2-Audio в задачах ASR, OCR, видеоаналитики.  
-- **Генерация речи**: Zero-shot TTS с имитацией голоса и естественностью выше аналогов (включая непотоковые модели).  
-- **Сквозное обучение**: точность обработки голосовых команд сопоставима с текстовым вводом (MMLU: 82.1, GSM8K: 86.3).
+### Performance and Superiority:
+- **Leader in multimodal benchmarks**: Outperforms GPT-4o-mini, Qwen2.5-VL, and Qwen2-Audio in ASR, OCR, and video analytics tasks.  
+- **Speech generation**: Zero-shot TTS with voice imitation and naturalness surpassing alternatives (including non-streaming models).  
+- **End-to-end training**: Voice command processing accuracy comparable to text input (MMLU: 82.1, GSM8K: 86.3).
 
-### Почему это прорыв?
-- **Единая архитектура** для всех модальностей вместо наборов узкоспециализированных моделей.  
-- **Apache 2.0 лицензия** — открытый доступ для исследований и коммерческого использования.  
-- Решает проблему "мультимодального хаоса" через слаженную работу кодеров и декодеров.
+### Why This Is a Breakthrough?
+- **Unified architecture** for all modalities, replacing sets of specialized models.  
+- **Apache 2.0 license** — open access for research and commercial use.  
+- Solves “multimodal chaos” through coordinated encoder-decoder collaboration.
 
-Qwen2.5-Omni задаёт новый стандарт для ИИ-ассистентов будущего, сочетая скорость, точность и человеко-подобное взаимодействие. Исследователи и разработчики уже сейчас могут интегрировать модель в свои продукты, используя публичные веса.
+Qwen2.5-Omni sets a new standard for future AI assistants, combining speed, accuracy, and human-like interaction. Researchers and developers can now integrate the model into their products using publicly available weights.
 
-## **Краткое содержание**
+## **Summary**
 
-### Общее представление
+### Overview
 
-Qwen2.5-Omni представляет собой комплексную сквозную мультимодальную модель, способную одновременно обрабатывать входные данные различных форматов (текст, изображения, аудио, видео) и генерировать как текстовые, так и речевые ответы в режиме реального времени. Модель реализует несколько инновационных архитектурных решений, обеспечивающих эффективную синхронизацию и обработку разнородных данных.
+Qwen2.5-Omni is a comprehensive end-to-end multimodal model capable of simultaneously processing inputs in various formats (text, images, audio, video) and generating both textual and speech responses in real time. The model implements several innovative architectural solutions to ensure efficient synchronization and processing of heterogeneous data.
 
-### Архитектурные инновации
+### Architectural Innovations
 
-#### Блочная обработка мультимодальных данных
+#### Block-Wise Multimodal Processing
 
-Для обеспечения потоковой обработки мультимодальной информации в Qwen2.5-Omni применяется метод блочной обработки как для аудио, так и для визуальных кодировщиков. Эта стратегия реализует эффективное разделение:
-- Восприятие мультимодальных данных поручается специализированным кодировщикам;
-- Моделирование длинных последовательностей возлагается на основную языковую модель;
-- Объединение модальностей достигается через механизм общего внимания.
+To enable streaming multimodal processing, Qwen2.5-Omni employs block-wise processing for both audio and visual encoders. This strategy achieves efficient separation:
+- Specialized encoders handle multimodal perception;
+- The core language model manages long-sequence modeling;
+- Modality fusion is achieved through a shared attention mechanism.
 
-#### TMRoPE: синхронизация временных меток
+#### TMRoPE: Temporal Alignment
 
-Для решения проблемы синхронизации временных меток видео и аудио, разработчики Qwen2.5-Omni предложили инновационный метод позиционного кодирования — Time-Aligned Multimodal RoPE (TMRoPE). Особенность данного метода заключается в последовательном чередующемся размещении аудио и видео данных, что обеспечивает точную временную привязку между модальностями.
+To resolve audio-video timestamp synchronization, the Qwen2.5-Omni team introduced an innovative positional encoding method: Time-Aligned Multimodal RoPE (TMRoPE). The key feature of this method is the alternating interleaving of audio and video data, ensuring precise temporal alignment between modalities.
 
-#### Архитектура "Thinker-Talker" (Мыслитель-Говорящий)
+#### Thinker-Talker Architecture
 
-Для одновременной генерации текста и речи без взаимных помех между модальностями в Qwen2.5-Omni реализована двухкомпонентная архитектура:
+To simultaneously generate text and speech without cross-modal interference, Qwen2.5-Omni implements a two-component architecture:
 
-1. **Мыслитель (Thinker)** — функционирует как основная языковая модель, отвечающая за генерацию текстового содержания
-2. **Говорящий (Talker)** — представляет собой двухдорожечную авторегрессивную модель, напрямую использующую скрытые представления из Мыслителя для генерации аудиотокенов
+1. **Thinker** — functions as the core language model responsible for generating textual content.
+2. **Talker** — a two-stream autoregressive model that directly uses hidden representations from Thinker to generate audio tokens.
 
-Обе компоненты интегрированы в единую сквозную структуру, что позволяет проводить как обучение, так и вывод данных целостным образом.
+Both components are integrated into a unified end-to-end structure, enabling holistic training and inference.
 
-#### Потоковое декодирование аудио
+#### Streaming Audio Decoding
 
-Для снижения начальной задержки при декодировании аудиотокенов в Qwen2.5-Omni применяется скользящее окно DiT (Diffusion Transformer) с ограниченным полем восприятия, что критически важно для обеспечения реактивности в голосовом взаимодействии.
+To reduce initial latency during audio token decoding, Qwen2.5-Omni employs a sliding-window DiT (Diffusion Transformer) with a limited receptive field — critical for responsiveness in voice interaction.
 
-### Производительность и сравнительный анализ
+### Performance and Comparative Analysis
 
-Qwen2.5-Omni демонстрирует впечатляющие результаты в сравнительных тестах:
+Qwen2.5-Omni demonstrates impressive results in comparative benchmarks:
 
-- Сопоставима с аналогичной по размеру моделью Qwen2.5-VL в визуально-текстовых задачах;
-- Превосходит специализированную модель Qwen2-Audio в задачах обработки аудио;
-- Показывает высокие результаты в комплексных мультимодальных тестах Omni-Bench;
-- Производительность при обработке голосовых команд сравнима с текстовым вводом в таких бенчмарках как MMLU и GSM8K;
-- Потоковый генератор речи превосходит большинство существующих решений по стабильности и естественности звучания.
+- Comparable to the similarly sized Qwen2.5-VL in visual-text tasks;
+- Outperforms the specialized Qwen2-Audio in audio processing tasks;
+- Achieves high scores in comprehensive multimodal benchmarks such as Omni-Bench;
+- Voice command processing performance matches text input in benchmarks like MMLU and GSM8K;
+- The streaming speech generator surpasses most existing solutions in stability and naturalness.
 
-### Значимость и потенциал
+### Significance and Potential
 
-Qwen2.5-Omni представляет собой значительный шаг к созданию систем искусственного общего интеллекта (AGI), объединяя:
-- Комплексную мультимодальную обработку данных;
-- Низкую латентность взаимодействия;
-- Человекоподобные способности общения;
-- Единую интегрированную архитектуру для всех модальностей.
+Qwen2.5-Omni represents a significant step toward AGI by unifying:
+- Comprehensive multimodal data processing;
+- Low-latency interaction;
+- Human-like communication capabilities;
+- A single integrated architecture for all modalities.
 
-![Обзор мультимодальных возможностей Qwen2.5-Omni](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-14/assets/Figure_1.png)
-> Рисунок 1: Qwen2.5-Omni — это унифицированная сквозная модель, которая может обрабатывать различные модальности, такие как текст, аудио, изображения и видео, а также генерировать текстовые или голосовые ответы в реальном времени. Благодаря этим функциям Qwen2.5-Omni поддерживает множество задач, включая, помимо прочего, голосовое общение, видеообщение и видеорассуждение.
+![Overview of Qwen2.5-Omni's Multimodal Capabilities](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-14/assets/Figure_1.png  )
+> Figure 1: Qwen2.5-Omni is a unified end-to-end model capable of processing various modalities such as text, audio, images, and video, and generating textual or speech responses in real time. These capabilities enable diverse tasks including, but not limited to, voice communication, video conferencing, and video reasoning.
 
-## **Введение**
+## **Introduction**
 
-Человеческое восприятие — это сложный многоуровневый процесс. В повседневной жизни мы одновременно воспринимаем многообразную визуальную и слуховую информацию, мгновенно обрабатываем её в мозге и формируем ответную реакцию через речь, письмо или использование инструментов. Этот естественный механизм взаимодействия с миром долгое время оставался недостижимым идеалом для систем искусственного интеллекта.
+Human perception is a complex, multi-level process. In daily life, we simultaneously perceive diverse visual and auditory information, instantly process it in the brain, and respond through speech, writing, or tool use. This natural mechanism of interacting with the world has long remained an unattainable ideal for AI systems.
 
-В последние годы область ИИ совершила значительный прорыв, во многом благодаря стремительному развитию больших языковых моделей (LLM). Эти системы, обучаемые на беспрецедентных объёмах текстовых данных, продемонстрировали впечатляющую способность к решению сложных задач и быстрому обучению. Параллельно развивались и специализированные модели "язык-аудио-язык" (LALM) и "язык-зрение-язык" (LVLM), расширяющие возможности ИИ в области слухового и визуального восприятия.
+In recent years, AI has made significant breakthroughs, largely due to the rapid advancement of large language models (LLMs). These systems, trained on unprecedented volumes of textual data, have demonstrated remarkable capabilities in solving complex tasks and rapid learning. Parallel progress has been made in specialized “language-audio-language” (LALM) and “language-vision-language” (LVLM) models, expanding AI’s capabilities in auditory and visual perception.
 
-Однако эффективное сквозное объединение этих разнородных модальностей, использование их полного потенциала и обеспечение естественного человекоподобного взаимодействия через текстовые и голосовые потоки остаётся серьёзным вызовом для современной науки. Разработка по-настоящему универсальной омнимодальной модели требует решения целого комплекса проблем:
+However, effectively integrating these heterogeneous modalities, fully leveraging their potential, and enabling natural human-like interaction through text and speech streams remains a serious challenge for modern science. Developing a truly universal omnimodal model requires solving a complex set of problems:
 
-1. Создание единого системного подхода к совместному обучению различным модальностям (текст, изображения, видео, аудио);
-2. Обеспечение точной временной синхронизации аудио- и видеосигналов;
-3. Устранение потенциальных помех между выходными данными разных модальностей;
-4. Разработка архитектуры, позволяющей в реальном времени понимать мультимодальную информацию и генерировать потоковые ответы.
+1. Creating a unified systemic approach to jointly training on multiple modalities (text, images, video, audio);
+2. Ensuring precise temporal synchronization of audio and video signals;
+3. Eliminating potential interference between outputs of different modalities;
+4. Designing an architecture capable of real-time understanding of multimodal inputs and generating streaming responses.
 
-В данном брифе мы разберем Qwen2.5-Omni — революционную унифицированную модель, способную одновременно обрабатывать несколько модальностей и генерировать как текстовые, так и естественные речевые ответы в потоковом режиме. Для преодоления вышеуказанных препятствий авторами были разработаны инновационные решения:
+In this brief, we analyze Qwen2.5-Omni — a revolutionary unified model capable of simultaneously processing multiple modalities and generating both textual and natural speech responses in streaming mode. To overcome the above challenges, the authors developed innovative solutions:
 
-1. **TMRoPE (Time-aligned Multimodal RoPE)** — принципиально новый метод позиционного встраивания, который явно включает временную информацию для синхронизации аудио- и видеоданных. Метод размещает аудио и видеокадры в чередующейся структуре, чтобы представить видеопоследовательность в чётком временном порядке.
+1. **TMRoPE (Time-aligned Multimodal RoPE)** — a fundamentally new positional embedding method that explicitly incorporates temporal information to synchronize audio and video data. The method arranges audio and video frames in an alternating structure to represent video sequences in clear temporal order.
 
-2. **Архитектура "Thinker-Talker"** — биомиметический подход, вдохновлённый функционированием человеческого мозга. В данной архитектуре "Мыслитель" отвечает за генерацию текста, а "Говорящий" фокусируется на создании потоковых речевых токенов, получая высокоуровневые представления непосредственно от "Мыслителя". Это решение позволяет обеспечить естественную координацию разнородных выходных сигналов.
+2. **Thinker-Talker Architecture** — a biomimetic approach inspired by human brain function. In this architecture, the “Thinker” generates text, while the “Talker” focuses on producing streaming speech tokens, receiving high-level representations directly from the “Thinker.” This solution ensures natural coordination of heterogeneous outputs.
 
-3. **Потоковая блочная обработка** — модификация всех мультимодальных кодеров для обеспечения понимания сигналов в реальном времени и упрощения предварительного заполнения.
+3. **Streaming Block-Wise Processing** — modifications to all multimodal encoders to enable real-time signal understanding and simplified context pre-filling.
 
-4. **Двухдорожечная авторегрессивная модель** — для потоковой генерации речи, которая преобразует речевые токены в звуковые волны с минимальной начальной задержкой.
+4. **Two-Stream Autoregressive Model** — for streaming speech generation that converts speech tokens into waveforms with minimal initial latency.
 
-![Figure_2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-14/assets/Figure_2.png)
-*Рисунок 2: Обзор Qwen2.5-Omni. Qwen2.5-Omni использует архитектуру «Thinker-Talker». Мыслитель отвечает за генерацию текста, в то время как говорящий фокусируется на генерации потоковых речевых маркеров, получая высокоуровневые представления непосредственно от мыслителя.*
+![Figure_2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-14/assets/Figure_2.png  )
+*Figure 2: Overview of Qwen2.5-Omni. Qwen2.5-Omni uses the “Thinker-Talker” architecture. The Thinker generates text, while the Talker focuses on generating streaming speech tokens, receiving high-level representations directly from the Thinker.*
 
-При сравнительном тестировании Qwen2.5-Omni демонстрирует выдающиеся результаты. Она сопоставима с Qwen2.5-VL в обработке визуальной информации и значительно превосходит Qwen2-Audio в работе со звуком. В мультимодальных бенчмарках, таких как OmniBench и AV-Odyssey Bench, модель показывает высочайшие показатели производительности. Особенно примечателен тот факт, что Qwen2.5-Omni обрабатывает голосовые команды на уровне, сопоставимом с текстовым вводом, что продемонстрировано в таких тестах, как MMLU и GSM8K.
+In comparative testing, Qwen2.5-Omni demonstrates outstanding results. It is comparable to Qwen2.5-VL in visual processing and significantly outperforms Qwen2-Audio in audio tasks. In multimodal benchmarks such as OmniBench and AV-Odyssey Bench, the model achieves state-of-the-art performance. Notably, Qwen2.5-Omni processes voice commands at a level comparable to text input, as demonstrated in benchmarks like MMLU and GSM8K.
 
-В области генерации речи модель достигает впечатляющих результатов с показателями Word Error Rate (WER) всего 1,42%, 2,33% и 6,54% в тестовых наборах test-zh, test-en и test-hard seed-tts-eval соответственно, что превосходит достижения таких известных систем, как MaskGCT и CosyVoice 2.
+In speech generation, the model achieves impressive results with Word Error Rate (WER) of just 1.42%, 2.33%, and 6.54% on the test-zh, test-en, and test-hard seed-tts-eval datasets respectively, surpassing well-known systems such as MaskGCT and CosyVoice 2.
 
-Таким образом, Qwen2.5-Omni представляет собой значительный шаг на пути к созданию истинного AGI (искусственного общего интеллекта), объединяя мультимодальность, низкую задержку и человекоподобное взаимодействие в единой модели. Эта разработка открывает новые горизонты для применения ИИ в различных областях, от повседневной коммуникации до сложных профессиональных задач, требующих интеграции разнородных типов данных и естественного диалога.
+Thus, Qwen2.5-Omni represents a major step toward true AGI (Artificial General Intelligence), unifying multimodality, low latency, and human-like interaction in a single model. This development opens new horizons for AI applications across domains — from everyday communication to complex professional tasks requiring integration of heterogeneous data types and natural dialogue.
 
-Я выступаю в роли эксперта в области мультимодальных языковых моделей и нейросетевых архитектур. Давайте обогатим ваш технический обзор дополнительной информацией о Qwen2.5-Omni.
+I am an expert in multimodal language models and neural architectures. Let us enrich your technical review with additional information on Qwen2.5-Omni.
 
-Для начала, мне необходимо найти более подробную информацию об архитектуре Qwen2.5-Omni и использованных в ней технологиях.
+First, I need to find more detailed information about Qwen2.5-Omni’s architecture and the technologies it employs.
 
-Теперь мне нужно поискать более подробную информацию о TMRoPE и системе восприятия в Qwen2.5-Omni.
+Now I need to search for more detailed information on TMRoPE and the perception system in Qwen2.5-Omni.
 
-Теперь давайте поищем еще информацию о методах восприятия и обработки различных модальностей в Qwen2.5-Omni.
+Now let’s search for further information on the methods of perceiving and processing various modalities in Qwen2.5-Omni.
 
-На основе полученной информации, я улучшу и обогащу ваш текст о Qwen2.5-Omni, делая его более детальным и академичным.
+Based on the acquired information, I will enhance and enrich your text on Qwen2.5-Omni, making it more detailed and academic.
 
-## **1. Архитектура**
+## **1. Architecture**
 
-### **1.1 Обзор**
+### **1.1 Overview**
 
-Qwen2.5-Omni имплементирует инновационную архитектуру типа «Thinker-Talker» (Мыслитель-Говорящий), представляющую собой передовой подход к построению мультимодальных моделей. Thinker функционирует как когнитивный центр системы, отвечающий за обработку и интерпретацию входных данных различных модальностей (текст, аудио, изображения и видео), формирование высокоуровневых репрезентаций и генерацию соответствующего текстового контента. В свою очередь, Talker оперирует как артикуляционная составляющая системы, принимающая потоковым образом высокоуровневые репрезентации и текст, продуцируемые Thinker, и генерирующая дискретные речевые токены.
+Qwen2.5-Omni implements an innovative “Thinker-Talker” architecture, representing a state-of-the-art approach to building multimodal models. Thinker functions as the cognitive center of the system, responsible for processing and interpreting inputs from multiple modalities (text, audio, images, video), forming high-level representations, and generating corresponding textual content. Meanwhile, Talker acts as the articulatory component, receiving high-level representations and text produced by Thinker in streaming fashion and generating discrete speech tokens.
 
-Архитектурно Thinker реализован как декодер модели Transformer, дополненный специализированными энкодерами для извлечения информации из аудио и визуальных данных. Talker спроектирован как двухдорожечная авторегрессивная архитектура декодера Transformer, основанная на принципах, изложенных в работе Mini-Omni (Xie & Wu, 2024). Существенной особенностью данной архитектуры является то, что на этапах обучения и инференса Talker непосредственно получает многомерные репрезентации от Thinker и имеет доступ ко всей исторической контекстной информации, обработанной компонентом Thinker. Благодаря такой интеграции вся архитектурная система функционирует как единая унифицированная модель, обеспечивающая эффективное сквозное обучение и инференс.
+Architecturally, Thinker is implemented as a Transformer decoder enhanced with specialized encoders for extracting information from audio and visual data. Talker is designed as a two-stream autoregressive Transformer decoder based on principles outlined in Mini-Omni (Xie & Wu, 2024). A key feature of this architecture is that during both training and inference, Talker directly receives multidimensional representations from Thinker and has access to the entire historical context processed by the Thinker component. This integration allows the entire architectural system to function as a unified, consistent model enabling efficient end-to-end training and inference.
 
-В последующих разделах мы детально рассмотрим механизмы восприятия различных сигналов в Qwen2.5-Omni и проанализируем инновационный алгоритм позиционного кодирования TMRoPE (Time-aligned Multimodal RoPE). Далее будут освещены технические аспекты генерации текста и речи. В заключении мы представим обзор усовершенствований, внедренных в модули понимания и генерации, которые обеспечивают эффективное потоковое рассуждение.
+In subsequent sections, we will examine in detail the mechanisms for perceiving various signals in Qwen2.5-Omni and analyze the innovative TMRoPE (Time-aligned Multimodal RoPE) positional encoding algorithm. Technical aspects of text and speech generation will then be addressed. Finally, we present an overview of enhancements implemented in the understanding and generation modules that enable efficient streaming reasoning.
 
-### **Архитектура «Мыслитель-Говорящий» (псевдокод)**
+### **Thinker-Talker Architecture (Pseudocode)**
 
 ```python
-# Стандартные библиотеки
+# Standard libraries
 import torch
 import torch.nn as nn
 
-# Константы
+# Constants
 DEFAULT_NUM_LAYERS = 12
 DEFAULT_HIDDEN_SIZE = 768
 DEFAULT_NUM_HEADS = 12
@@ -162,26 +162,26 @@ class ThinkerTalker(nn.Module):
     """
     Description:
     ---------------
-        Модель архитектуры "Мыслитель-Говорящий" (ThinkerTalker), состоящая из
-        двух основных компонентов: модуля Thinker для обработки входных данных и
-        модуля Talker для генерации аудиотокенов.
+        Thinker-Talker architecture model, consisting of
+        two main components: the Thinker module for processing inputs and
+        the Talker module for generating audio tokens.
 
     Args:
     ---------------
-        config: Конфигурация модели, содержащая параметры:
-            - num_layers: Количество слоев в модуле Thinker
-            - hidden_size: Размерность скрытого состояния
-            - num_heads: Количество голов внимания
-            - audio_vocab_size: Размер словаря аудиотокенов
+        config: Model configuration containing parameters:
+            - num_layers: Number of layers in the Thinker module
+            - hidden_size: Hidden state dimensionality
+            - num_heads: Number of attention heads
+            - audio_vocab_size: Size of the audio token vocabulary
 
     Returns:
     ---------------
-        Экземпляр модели ThinkerTalker
+        An instance of the ThinkerTalker model
 
     Raises:
     ---------------
-        ValueError: Если параметры конфигурации некорректны
-        AttributeError: Если в конфигурации отсутствуют необходимые атрибуты
+        ValueError: If configuration parameters are invalid
+        AttributeError: If required attributes are missing in configuration
 
     Examples:
     ---------------
@@ -198,23 +198,23 @@ class ThinkerTalker(nn.Module):
     def __init__(self, config) -> None:
         super().__init__()
         
-        # Модуль Thinker (основан на TransformerDecoder)
+        # Thinker module (based on TransformerDecoder)
         self.thinker = TransformerDecoder(
             num_layers=config.num_layers,
             hidden_size=config.hidden_size,
             num_heads=config.num_heads
         )
         
-        # Модуль Talker (двухслойный трансформер-декодер)
+        # Talker module (two-layer transformer decoder)
         self.talker = nn.TransformerDecoder(
             decoder_layer=nn.TransformerDecoderLayer(
                 d_model=config.hidden_size,
                 nhead=config.num_heads
             ),
-            num_layers=2  # Фиксированное значение для Talker
+            num_layers=2  # Fixed value for Talker
         )
         
-        # Проекционный слой для преобразования в аудиотокены
+        # Projection layer for converting to audio tokens
         self.audio_proj = nn.Linear(
             config.hidden_size, 
             config.audio_vocab_size
@@ -228,24 +228,24 @@ class ThinkerTalker(nn.Module):
         """
         Description:
         ---------------
-            Прямой проход через модель ThinkerTalker. Сначала модуль Thinker
-            обрабатывает текстовый ввод, затем модуль Talker генерирует 
-            аудиотокены в авторегрессивном режиме.
+            Forward pass through the ThinkerTalker model. First, the Thinker module
+            processes the text input, then the Talker module generates audio tokens
+            in an autoregressive manner.
 
         Args:
         ---------------
-            text_input: Тензор с текстовыми входными данными 
+            text_input: Tensor with text input data 
                         [batch, seq_len, dim]
-            audio_input: Тензор с аудио входными данными
+            audio_input: Tensor with audio input data
                         [batch, seq_len, dim]
 
         Returns:
         ---------------
-            Тензор сгенерированных аудиотокенов [batch, seq_len, audio_vocab_size]
+            Tensor of generated audio tokens [batch, seq_len, audio_vocab_size]
 
         Raises:
         ---------------
-            RuntimeError: При несоответствии размерностей входных тензоров
+            RuntimeError: If input tensor dimensions are incompatible
 
         Examples:
         ---------------
@@ -255,349 +255,349 @@ class ThinkerTalker(nn.Module):
             >>> output.shape
             torch.Size([2, 5, 10000])
         """
-        # Обработка входных данных через модуль Thinker
+        # Process inputs through the Thinker module
         thinker_output = self.thinker(text_input)  # [batch, seq_len, dim]
         
-        # Авторегрессивная генерация аудиотокенов через модуль Talker
+        # Autoregressive generation of audio tokens through the Talker module
         audio_tokens = []
         
-        # Итерация по шагам генерации (потоковый режим с кешированием)
+        # Iteration over generation steps (streaming mode with caching)
         for i in range(audio_input.size(1)):
-            # Авторегрессивная генерация: p(a_t|a_{<t}, h_{Thinker})
+            # Autoregressive generation: p(a_t|a_{<t}, h_{Thinker})
             audio_out = self.talker(
-                audio_input[:, :i+1],  # Используем только предыдущие токены
-                memory=thinker_output  # Контекст от модуля Thinker
+                audio_input[:, :i+1],  # Use only previous tokens
+                memory=thinker_output  # Context from Thinker module
             )
             
-            # Получаем следующий токен из выходного слоя
+            # Obtain next token from output layer
             next_token = self.audio_proj(audio_out[:, -1:])
             
-            # Добавляем в список результатов
+            # Append to results list
             audio_tokens.append(next_token)
         
-        # Объединяем все сгенерированные токены в один тензор
+        # Concatenate all generated tokens into a single tensor
         return torch.cat(audio_tokens, dim=1)
 ```
 
-<div style="border: 2px solid #3498db; border-radius: 8px; padding: 12px; background-color: #f8f9fa; margin: 10px 0;"> <p style="margin: 0; font-weight: bold; color: #2c3e50;">First Checkpoint:</p> <p style="margin: 8px 0 0 0; color: #2c3e50;">Qwen2.5-Omni использует инновационную архитектуру «Thinker-Talker»: Thinker обрабатывает мультимодальные данные (текст, аудио, изображения, видео) и формирует высокоуровневые репрезентации, а Talker преобразует их в речь. Система работает как единая модель, обеспечивая эффективное сквозное обучение и генерацию.</p> </div>
+<div style="border: 2px solid #3498db; border-radius: 8px; padding: 12px; background-color: #f8f9fa; margin: 10px 0;"> <p style="margin: 0; font-weight: bold; color: #2c3e50;">First Checkpoint:</p> <p style="margin: 8px 0 0 0; color: #2c3e50;">Qwen2.5-Omni employs the innovative “Thinker-Talker” architecture: Thinker processes multimodal data (text, audio, images, video) and forms high-level representations, while Talker converts them into speech. The system operates as a unified model, enabling efficient end-to-end training and generation.</p> </div>
 
-### **1.2 Восприятие**
+### **1.2 Perception**
 
-#### **Текст, аудио, изображения и видео**
+#### **Text, Audio, Images, and Video**
 
-Компонент Thinker обрабатывает мультимодальные входные данные (текст, аудио, изображения и видео), трансформируя их в векторные репрезентации для последующей обработки. Для сегментации текста используется специализированный токенизатор Qwen (Yang et al., 2024a, arXiv:2407.10671), реализующий кодирование пар байтов на байтовом уровне с лексиконом, содержащим 151 643 стандартных токенов.
+The Thinker component processes multimodal inputs (text, audio, images, video), transforming them into vector representations for subsequent processing. For text segmentation, a specialized Qwen tokenizer (Yang et al., 2024a, arXiv:2407.10671) is used, implementing byte-pair encoding with a vocabulary of 151,643 standard tokens.
 
-Для обработки аудиовходов и аудиодорожек видео Qwen2.5-Omni применяет передискретизацию до частоты 16 кГц с последующим преобразованием исходных волновых форм в Мел-спектрограммы, характеризующиеся 128 каналами, размером окна 25 мс и шагом 10 мс. Для эффективной потоковой обработки аудио и видеоданных модель использует блочно-ориентированный подход (block-wise processing), который позволяет секвенциально обрабатывать фрагменты данных, не требуя полного входного сигнала. Это особенно важно для работы с продолжительными аудио и видеоматериалами в режиме реального времени.
+For processing audio inputs and audio tracks in video, Qwen2.5-Omni applies resampling to 16 kHz followed by conversion of raw waveforms into Mel spectrograms with 128 channels, a window size of 25 ms, and a hop length of 10 ms. For efficient streaming processing of audio and video data, the model adopts a block-wise processing approach, enabling sequential processing of data fragments without requiring the full input signal. This is particularly critical for handling long-duration audio and video materials in real time.
 
-Аудиокодер основан на архитектуре Qwen2-Audio (Chu et al., 2024b), где каждый аудиокадр представляет примерно 40-миллисекундный сегмент исходного аудиосигнала. Для визуальной модальности применяется специализированный визуальный кодер, основанный на архитектуре Vision Transformer (ViT), содержащий около 675 миллионов параметров. Данный кодер обеспечивает эффективную обработку входных изображений и видеоданных благодаря применению инновационных техник, включая оптимизированную оконную систему внимания (Window Attention), которая значительно улучшает вычислительную эффективность при работе с визуальными данными высокого разрешения.
+The audio encoder is based on the Qwen2-Audio architecture (Chu et al., 2024b), where each audio frame represents approximately a 40-millisecond segment of the original audio signal. For the visual modality, a specialized visual encoder based on Vision Transformer (ViT) architecture is employed, containing approximately 675 million parameters. This encoder ensures efficient processing of input images and video data through innovative techniques, including an optimized windowed attention system that significantly improves computational efficiency when handling high-resolution visual data.
 
-Визуальный кодер обучен на комбинированном датасете изображений и видео с использованием гибридной схемы обучения, что обеспечивает превосходную производительность как при анализе статичных изображений, так и при обработке динамического видеоконтента. Подобно Qwen2.5-VL, визуальный кодер в Qwen2.5-Omni поддерживает динамическое разрешение, что позволяет эффективно обрабатывать изображения различных размеров без стандартной нормализации координат, сохраняя естественное масштабирование визуальных объектов.
+The visual encoder is trained on a combined dataset of images and video using a hybrid training scheme, ensuring superior performance in both static image analysis and dynamic video content processing. Similar to Qwen2.5-VL, the visual encoder in Qwen2.5-Omni supports dynamic resolution, enabling efficient processing of images of varying sizes without standard coordinate normalization, preserving natural scaling of visual objects.
 
-Для максимального сохранения видеоинформации и синхронизации с частотой дискретизации аудио, система использует динамическую частоту кадров. Синхронизация между аудио и видео достигается благодаря последовательной организации входных данных в перемежающемся порядке и применению инновационного подхода Time-aligned Multimodal RoPE (TMRoPE). Это позволяет модели точно интерпретировать временные зависимости между тем, что она "видит" и "слышит". Для обеспечения единообразия каждое статичное изображение обрабатывается как последовательность из двух идентичных кадров.
+To maximize video information retention and synchronization with audio sampling rate, the system employs dynamic frame rates. Audio-video synchronization is achieved through sequential interleaving of input data and application of the innovative Time-aligned Multimodal RoPE (TMRoPE) approach. This enables the model to accurately interpret temporal dependencies between what it “sees” and what it “hears.” For consistency, each static image is processed as a sequence of two identical frames.
 
 <details> 
-    <summary><em><strong>Мел-спектрограмма</strong></em></summary>
+    <summary><em><strong>Mel Spectrogram</strong></em></summary>
 
 ---
 
-**Мел-спектрограмма** — это визуальное представление звукового сигнала, которое отражает его частотные характеристики с учетом **мел-шкалы** (шкалы восприятия высоты звука человеком).  
+**Mel spectrogram** is a visual representation of a sound signal that reflects its frequency characteristics according to the **mel scale** (a perceptual scale of perceived pitch by the human ear).  
 
-### **Основные понятия**:
+### **Key Concepts**:
 
-1. **Спектрограмма** – это график, показывающий, как частотный состав звука меняется во времени (ось X – время, ось Y – частота, цвет – амплитуда).  
-2. **Мел-шкала** – психоакустическая шкала, которая приближает восприятие частот человеческим ухом (люди лучше различают низкие частоты, чем высокие).  
-   - Например: разница между 100 Гц и 200 Гц воспринимается значительной, а между 8000 Гц и 8100 Гц – почти незаметной.  
+1. **Spectrogram** – a graph showing how the frequency composition of a sound changes over time (X-axis: time, Y-axis: frequency, color: amplitude).  
+2. **Mel scale** – a psychoacoustic scale that approximates human hearing sensitivity (humans perceive low frequencies more distinctly than high ones).  
+   - For example: The difference between 100 Hz and 200 Hz is perceived as significant, while the difference between 8000 Hz and 8100 Hz is nearly imperceptible.  
 
-### **Как получают мел-спектрограмму?**
+### **How is a Mel spectrogram generated?**
 
-1. **Разбиение сигнала на фреймы** (короткие отрезки);  
-2. **Применение БПФ (FFT)** для получения спектра каждого фрейма;
-3. **Фильтры мел-банка** – набор треугольных фильтров, распределенных по мел-шкале (больше фильтров на низких частотах, меньше – на высоких);
-4. **Логарифмирование энергии** (т.к. человек воспринимает громкость логарифмически).  
+1. **Splitting the signal into frames** (short segments);  
+2. **Applying FFT (Fast Fourier Transform)** to obtain the spectrum of each frame;  
+3. **Mel filterbank filters** – a set of triangular filters distributed along the mel scale (more filters at low frequencies, fewer at high frequencies);  
+4. **Logarithmic scaling of energy** (since human perception of loudness is logarithmic).  
 
-### **Формула перевода Герц в меллы**:
+### **Formula for converting Hertz to mels**:
 
 $$
 m = 2595 \cdot \log_{10}\left(1 + \frac{f}{700}\right)
 $$
 
-где:  
-- $( f )$ – частота в Герцах,  
-- $( m )$ – частота в меллах.  
+where:  
+- $( f )$ – frequency in Hertz,  
+- $( m )$ – frequency in mels.  
 
-### **Применение**:
-- **Распознавание речи** (ASR, например, в Siri, Google Assistant).  
-- **Анализ музыки** (жанровая классификация, выделение тональности).  
-- **Генерация звука** (нейросети типа WaveNet, Tacotron).  
+### **Applications**:
+- **Speech recognition** (ASR, e.g., in Siri, Google Assistant).  
+- **Music analysis** (genre classification, key extraction).  
+- **Sound generation** (neural networks such as WaveNet, Tacotron).  
 
-### **Пример визуализации**:
+### **Visualization Example**:
 
-![Мел-спектрограмма](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-14/assets/Figure_3.jpeg)
+![Mel spectrogram](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-14/assets/Figure_3.jpeg  )
 
-(По горизонтали – время, по вертикали – мел-частоты, цвет – мощность сигнала).  
+(Horizontal axis: time, vertical axis: mel frequencies, color: signal power).  
 
-Если у вас есть аудиофайл, можно построить мел-спектрограмму в Python с помощью `librosa`:  
+If you have an audio file, you can generate a Mel spectrogram in Python using `librosa`:  
 
 ```python
 import librosa
 import librosa.display
 import matplotlib.pyplot as plt
 
-# Загружаем аудиофайл "audio.wav" с помощью функции librosa.load
-# y — это одномерный массив, содержащий аудиосигнал (амплитуды звука)
-# sr — частота дискретизации аудиофайла (количество выборок в секунду)
+# Load audio file "audio.wav" using librosa.load
+# y — a 1D array containing the audio signal (amplitudes)
+# sr — the sampling rate of the audio file (samples per second)
 y, sr = librosa.load("audio.wav")
 
-# Вычисляем мел-спектрограмму (Mel Spectrogram) из аудиосигнала
-# librosa.feature.melspectrogram преобразует сигнал в представление частотного спектра,
-# используя шкалу мелов, которая более адаптирована к восприятию человека.
-# Параметры:
-#   y — аудиосигнал
-#   sr — частота дискретизации
+# Compute the Mel spectrogram from the audio signal
+# librosa.feature.melspectrogram converts the signal into a frequency spectrum representation
+# using the mel scale, which is better aligned with human perception.
+# Parameters:
+#   y — audio signal
+#   sr — sampling rate
 S = librosa.feature.melspectrogram(y=y, sr=sr)
 
-# Преобразуем мощность спектрограммы в децибелы (dB), чтобы улучшить визуализацию
-# librosa.power_to_db выполняет логарифмическое преобразование,
-# где ref=np.max означает, что максимальное значение мощности используется как точка отсчета.
+# Convert spectrogram power to decibels (dB) to improve visualization
+# librosa.power_to_db performs a logarithmic transformation,
+# where ref=np.max means the maximum power value is used as the reference point.
 S_dB = librosa.power_to_db(S, ref=np.max)
 
-# Создаем новое окно для графика размером 10x4 дюймов
+# Create a new figure with size 10x4 inches
 plt.figure(figsize=(10, 4))
 
-# Отображаем мел-спектрограмму с помощью функции librosa.display.specshow
-# Параметры:
-#   S_dB — данные спектрограммы в децибелах
-#   sr — частота дискретизации
-#   x_axis="time" — ось X будет отображать время
-#   y_axis="mel" — ось Y будет использовать шкалу мелов для частот
+# Display the Mel spectrogram using librosa.display.specshow
+# Parameters:
+#   S_dB — spectrogram data in decibels
+#   sr — sampling rate
+#   x_axis="time" — X-axis displays time
+#   y_axis="mel" — Y-axis uses mel scale for frequencies
 librosa.display.specshow(S_dB, sr=sr, x_axis="time", y_axis="mel")
 
-# Добавляем цветовую шкалу (colorbar) справа от графика
-# format="%+2.0f dB" указывает формат отображения значений в децибелах
+# Add a colorbar on the right side of the plot
+# format="%+2.0f dB" specifies the display format for dB values
 plt.colorbar(format="%+2.0f dB")
 
-plt.title("Мел-спектрограмма")
+plt.title("Mel Spectrogram")
 plt.show()
 ```  
 
-Это мощный инструмент для анализа звука, особенно там, где важно учитывать человеческое восприятие! 🎵
+This is a powerful tool for audio analysis, especially where human perception matters! 🎵
 
 </details>
 
-<div style="border: 2px solid #3498db; border-radius: 8px; padding: 12px; background-color: #f8f9fa; margin: 10px 0;"> <p style="margin: 0; font-weight: bold; color: #2c3e50;">Second Checkpoint:</p> <p style="margin: 8px 0 0 0; color: #2c3e50;">Thinker обрабатывает мультимодальные данные с помощью специализированных энкодеров: текстовый токенизатор Qwen, аудиокодер (Mel-спектрограммы + блочная обработка), ViT-based визуальный кодер с динамическим разрешением. Синхронизация аудио и видео обеспечивается алгоритмом TMRoPE, а статичные изображения адаптируются как двукадровая последовательность.</p> </div>
+<div style="border: 2px solid #3498db; border-radius: 8px; padding: 12px; background-color: #f8f9fa; margin: 10px 0;"> <p style="margin: 0; font-weight: bold; color: #2c3e50;">Second Checkpoint:</p> <p style="margin: 8px 0 0 0; color: #2c3e50;">Thinker processes multimodal data using specialized encoders: the Qwen text tokenizer, an audio encoder (Mel spectrograms + block-wise processing), and a ViT-based visual encoder with dynamic resolution. Audio-video synchronization is ensured by the TMRoPE algorithm, and static images are adapted as two-frame sequences.</p> </div>
 
-#### **Видео и TMRoPE**
+#### **Video and TMRoPE**
 
-Авторы предлагают алгоритм временного чередования аудио и видео, а также новый метод позиционного кодирования. Как показано на рисунке 3, TMRoPE кодирует трехмерную информацию о положении мультимодального ввода, а именно мультимодальное встраивание вращательного положения (M-RoPE) с абсолютным временным положением (Bai et al., 2023b). Это достигается путем разложения исходного повернутого вложения на три компонента: время, высоту и ширину. Для ввода текста эти части используют один и тот же идентификатор местоположения, что делает M-RoPE функционально эквивалентным 1D RoPE. Аналогично для аудиовхода также используется тот же идентификатор позиции и вводится кодирование абсолютной временной позиции, при этом каждый идентификатор времени соответствует 40 мс.
+The authors propose an algorithm for temporal interleaving of audio and video, along with a novel positional encoding method. As shown in Figure 3, TMRoPE encodes three-dimensional positional information of multimodal inputs, specifically multimodal rotational positional embedding (M-RoPE) with absolute temporal position (Bai et al., 2023b). This is achieved by decomposing the original rotated embedding into three components: time, height, and width. For text input, these components share the same position identifier, making M-RoPE functionally equivalent to 1D RoPE. Similarly, for audio input, the same position identifier is used, and absolute temporal position encoding is introduced, with each time identifier corresponding to 40 ms.
 
-При обработке изображения временной идентификатор каждого визуального маркера остается постоянным, тогда как компонентам высоты и ширины присваиваются разные идентификаторы в зависимости от положения маркера на изображении. Если на вход подается видео со звуком, звук по-прежнему кодируется с тем же идентификатором позиции 40 мс на кадр, тогда как видео обрабатывается как серия изображений с увеличивающимися временными идентификаторами для каждого кадра, а части высоты и ширины следуют тому же шаблону назначения идентификаторов, что и изображения. Поскольку частота кадров видео не фиксирована, мы динамически корректируем временной идентификатор между кадрами в соответствии с фактическим временем каждого кадра, чтобы гарантировать, что один временной идентификатор соответствует 40 мс. В случае, когда входные данные модели содержат несколько модальностей, номер позиции каждой модальности инициализируется путем увеличения максимального идентификатора позиции предыдущей модальности на единицу. TMRoPE улучшает моделирование информации о местоположении и максимально увеличивает интеграцию различных модальностей, позволяя Qwen2.5-Omni понимать и анализировать информацию из нескольких модальностей одновременно.
+When processing an image, the temporal identifier of each visual token remains constant, while the height and width components are assigned different identifiers depending on the token's position on the image. When processing audiovisual video, audio is still encoded with the same 40 ms position identifier per frame, while video is processed as a sequence of images with incrementing temporal identifiers for each frame, and the height and width components follow the same identifier assignment pattern as images. Since video frame rate is not fixed, we dynamically adjust the temporal identifier between frames according to the actual timestamp of each frame to ensure one temporal identifier corresponds to 40 ms. When the model input contains multiple modalities, the position identifier for each modality is initialized by incrementing the maximum position identifier of the previous modality by one. TMRoPE enhances positional modeling and maximizes integration across modalities, enabling Qwen2.5-Omni to understand and analyze information from multiple modalities simultaneously.
 
-![Figure_4](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-14/assets/Figure_4.png)
-*Рисунок 3: Иллюстрация согласованного по времени мультимодального RoPE (TMRoPE).*
+![Figure_4](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-14/assets/Figure_4.png  )
+*Figure 3: Illustration of time-aligned multimodal RoPE (TMRoPE).*
 
-После включения информации о положении в каждую модальность мы располагаем представления по порядку. Чтобы модель могла одновременно получать как визуальную, так и слуховую информацию, как показано на рисунке 3, мы применяем специальную конструкцию для видео со звуком, называемую методом временного чередования , который делит представление видео со звуком на блоки каждые 2 секунды в соответствии с фактическим временем. Затем в течение 2 секунд визуальное представление помещается спереди, а звуковое представление — сзади, чередуя представление видео со звуком.
+After incorporating positional information into each modality, we arrange representations in order. To enable the model to simultaneously receive both visual and auditory information, as shown in Figure 3, we apply a special construction for audiovisual video called the **temporal interleaving method**, which divides audiovisual representation into 2-second blocks based on actual time. Within each 2-second window, the visual representation is placed first, followed by the audio representation, alternating between audio and video representations.
 
-<div style="border: 2px solid #3498db; border-radius: 8px; padding: 12px; background-color: #f8f9fa; margin: 10px 0;"> <p style="margin: 0; font-weight: bold; color: #2c3e50;">Third Checkpoint:</p> <p style="margin: 8px 0 0 0; color: #2c3e50;">TMRoPE кодирует трехмерную позиционную информацию мультимодальных данных, применяя различные стратегии кодирования для текста, аудио, изображений и видео. Метод временного чередования интегрирует видео и аудио в двухсекундные блоки, максимизируя взаимодействие между разными модальностями.</p> </div>
+<div style="border: 2px solid #3498db; border-radius: 8px; padding: 12px; background-color: #f8f9fa; margin: 10px 0;"> <p style="margin: 0; font-weight: bold; color: #2c3e50;">Third Checkpoint:</p> <p style="margin: 8px 0 0 0; color: #2c3e50;">TMRoPE encodes three-dimensional positional information of multimodal data using distinct encoding strategies for text, audio, images, and video. The temporal interleaving method integrates video and audio into two-second blocks, maximizing cross-modal interaction.</p> </div>
 
 <details> 
-    <summary><em><strong>Ротационное позиционное кодирование (RoPE)</strong></em></summary>
+    <summary><em><strong>Rotary Positional Encoding (RoPE)</strong></em></summary>
 
 ---
 
-## Ротационное позиционное кодирование (RoPE)
+## Rotary Positional Encoding (RoPE)
 
-### 1. Основная идея и постановка задачи
+### 1. Core Idea and Problem Formulation
 
-RoPE модифицирует векторы запроса $q$ и ключа $k$ так, чтобы их скалярное произведение $\langle q_m, k_n \rangle$ (где $m, n$ - позиции) неявно содержало информацию об их относительном положении $m-n$. 
+RoPE modifies query vectors $q$ and key vectors $k$ such that their dot product $\langle q_m, k_n \rangle$ (where $m, n$ are positions) implicitly encodes their relative position $m-n$. 
 
-Математически, мы ищем функцию преобразования $f(\mathbf{x}, p)$, применяемую к вектору $\mathbf{x}$ (будь то $q$ или $k$) с учётом его позиции $p$, такую что:
+Mathematically, we seek a transformation function $f(\mathbf{x}, p)$ applied to vector $\mathbf{x}$ (either $q$ or $k$) given its position $p$, such that:
 
 $$ \langle f(\mathbf{q}_m, m), f(\mathbf{k}_n, n) \rangle = g(\mathbf{q}_m, \mathbf{k}_n, m-n) $$
 
-где $g$ - некоторая функция, зависящая только от исходных векторов и их относительного положения.
+where $g$ is some function depending only on the original vectors and their relative position.
 
-### 2. Математическое решение через вращение
+### 2. Mathematical Solution via Rotation
 
-#### 2.1. Базовый случай в 2D-пространстве
+#### 2.1. Basic Case in 2D Space
 
-Для 2-мерных векторов $\mathbf{q}, \mathbf{k} \in \mathbb{R}^2$ RoPE использует матрицу вращения:
+For 2D vectors $\mathbf{q}, \mathbf{k} \in \mathbb{R}^2$, RoPE uses a rotation matrix:
 
 $$ \mathbf{R}_{\theta, p} = \begin{pmatrix} \cos p\theta & -\sin p\theta \\ \sin p\theta & \cos p\theta \end{pmatrix} $$
 
-Преобразования векторов:
+Transformations of vectors:
 $$ \mathbf{q}'_m = f(\mathbf{q}_m, m) = \mathbf{R}_{\theta, m} \mathbf{q}_m $$
 $$ \mathbf{k}'_n = f(\mathbf{k}_n, n) = \mathbf{R}_{\theta, n} \mathbf{k}_n $$
 
-#### 2.2. Доказательство свойства относительности
+#### 2.2. Proof of Relative Position Property
 
-Скалярное произведение преобразованных векторов:
+The dot product of transformed vectors:
 $$ (\mathbf{q}'_m)^\top \mathbf{k}'_n = (\mathbf{R}_{\theta, m} \mathbf{q}_m)^\top (\mathbf{R}_{\theta, n} \mathbf{k}_n) = \mathbf{q}_m^\top \mathbf{R}_{\theta, m}^\top \mathbf{R}_{\theta, n} \mathbf{k}_n $$
 
-Поскольку $\mathbf{R}_{\theta, m}^\top = \mathbf{R}_{\theta, -m}$ и $\mathbf{R}_{\theta, -m} \mathbf{R}_{\theta, n} = \mathbf{R}_{\theta, n-m}$, получаем:
+Since $\mathbf{R}_{\theta, m}^\top = \mathbf{R}_{\theta, -m}$ and $\mathbf{R}_{\theta, -m} \mathbf{R}_{\theta, n} = \mathbf{R}_{\theta, n-m}$, we obtain:
 
 $$ (\mathbf{q}'_m)^\top \mathbf{k}'_n = \mathbf{q}_m^\top \mathbf{R}_{\theta, n-m} \mathbf{k}_n $$
 
-Таким образом, скалярное произведение зависит только от исходных векторов и относительной позиции $n-m$.
+Thus, the dot product depends only on the original vectors and their relative position $n-m$.
 
-### 3. Реализация в многомерном пространстве
+### 3. Implementation in Higher Dimensions
 
-#### 3.1. Обобщение на произвольную размерность
+#### 3.1. Generalization to Arbitrary Dimensionality
 
-Для вектора $\mathbf{x} \in \mathbb{R}^d$ (где $d$ обычно четное):
+For a vector $\mathbf{x} \in \mathbb{R}^d$ (where $d$ is typically even):
 
-1. Вектор разбивается на $d/2$ пар компонент
-2. К каждой паре применяется 2D-вращение с уникальной частотой $\theta_i$
+1. The vector is split into $d/2$ pairs of components
+2. A 2D rotation is applied to each pair with a unique frequency $\theta_i$
 
-Формально это эквивалентно умножению на блочно-диагональную матрицу:
+Formally, this is equivalent to multiplication by a block-diagonal matrix:
 
 $$ \mathbf{R}_{\Theta, m} = \bigoplus_{i=1}^{d/2} \mathbf{R}_{\theta_i, m} $$
 
-где $\mathbf{R}_{\theta_i, m} = \begin{pmatrix} \cos m\theta_i & -\sin m\theta_i \\ \sin m\theta_i & \cos m\theta_i \end{pmatrix}$.
+where $\mathbf{R}_{\theta_i, m} = \begin{pmatrix} \cos m\theta_i & -\sin m\theta_i \\ \sin m\theta_i & \cos m\theta_i \end{pmatrix}$.
 
-#### 3.2. Выбор частот
+#### 3.2. Frequency Selection
 
-Частоты образуют геометрическую прогрессию:
+Frequencies follow a geometric progression:
 
 $$ \theta_i = \text{base}^{-2i/d} $$
 
-где $\text{base}$ - гиперпараметр (обычно 10000). Такой подход позволяет:
-- Первые пары компонент кодируют грубое, крупномасштабное положение (низкие частоты)
-- Последующие пары кодируют более тонкое, локальное положение (высокие частоты)
+where $\text{base}$ is a hyperparameter (typically 10000). This approach enables:
+- The first few component pairs to encode coarse, large-scale position (low frequencies)
+- Subsequent pairs to encode fine, local position (high frequencies)
 
-#### 3.3. Эффективная реализация
+#### 3.3. Efficient Implementation
 
-Вместо явного умножения на матрицу используются векторные операции:
+Instead of explicit matrix multiplication, vector operations are used:
 
 $$ \mathbf{x}' = \mathbf{x} \odot \mathbf{c}_m + \text{rotate\_half}(\mathbf{x}) \odot \mathbf{s}_m $$
 
-где:
-- $\mathbf{c}_m$ - вектор косинусов $(\cos m\theta_1, \cos m\theta_1, \cos m\theta_2, \cos m\theta_2, \dots)$
-- $\mathbf{s}_m$ - вектор синусов $(\sin m\theta_1, \sin m\theta_1, \sin m\theta_2, \sin m\theta_2, \dots)$
-- $\text{rotate\_half}(\mathbf{x})$ - векторная операция, меняющая местами пары элементов с изменением знака: $(-x_2, x_1, -x_4, x_3, \dots)$
+where:
+- $\mathbf{c}_m$ — cosine vector $(\cos m\theta_1, \cos m\theta_1, \cos m\theta_2, \cos m\theta_2, \dots)$
+- $\mathbf{s}_m$ — sine vector $(\sin m\theta_1, \sin m\theta_1, \sin m\theta_2, \sin m\theta_2, \dots)$
+- $\text{rotate\_half}(\mathbf{x})$ — a vector operation swapping and negating pairs: $(-x_2, x_1, -x_4, x_3, \dots)$
 
-### 4. Преимущества RoPE
+### 4. Advantages of RoPE
 
-1. **Экстраполяция длины:** Естественно обобщается на последовательности, превышающие длину обучающих данных, благодаря зависимости только от относительных позиций
+1. **Length extrapolation:** Naturally generalizes to sequences longer than those seen during training due to reliance on relative positions only
 
-2. **Вычислительная эффективность:** Не требует хранения таблиц позиционных эмбеддингов, использует векторные операции, хорошо оптимизированные для GPU/TPU
+2. **Computational efficiency:** Eliminates need for storing positional embedding tables; uses optimized vector operations suitable for GPU/TPU
 
-3. **Интерпретируемость:** Напрямую реализует идею относительного позиционного кодирования через интуитивно понятное вращение векторов
+3. **Interpretability:** Directly implements relative positional encoding via intuitive vector rotation
 
-4. **Стабильность обучения:** Сохраняет норму векторов запросов и ключей
+4. **Training stability:** Preserves norms of query and key vectors
 
 </details>
 
 ---
 
-## Расширение RoPE до мультимодального случая: TMRoPE
+## Extending RoPE to Multimodal Case: TMRoPE
 
-Как эксперт в области глубокого обучения и мультимодальных трансформеров, представляю анализ расширения RoPE для обработки мультимодальной информации.
+As an expert in deep learning and multimodal transformers, I present an analysis of extending RoPE for multimodal information processing.
 
-### 1. Основная идея TMRoPE
+### 1. Core Idea of TMRoPE
 
-TMRoPE (Temporal Multimodal Rotary Position Embedding) расширяет концепцию ротационного позиционного кодирования для синхронизации различных модальностей (аудио, видео, текст) с разными частотами дискретизации в едином пространстве представлений.
+TMRoPE (Temporal Multimodal Rotary Position Embedding) extends the concept of rotary positional encoding to synchronize diverse modalities (audio, video, text) with different sampling rates within a unified representation space.
 
-### 2. Математическая формализация
+### 2. Mathematical Formalization
 
-#### 2.1. Синхронизация временных шкал
+#### 2.1. Temporal Scale Synchronization
 
-Для разных модальностей с различными частотами дискретизации применяется нормализация временных меток:
+For modalities with different sampling rates, temporal labels are normalized:
 
 $$ t_{video} = t_{audio} \cdot \frac{f_{video}}{f_{audio}} $$
 
-где $f$ — частота дискретизации соответствующей модальности.
+where $f$ is the sampling rate of the respective modality.
 
-#### 2.2. Модификация матрицы вращения
+#### 2.2. Modified Rotation Matrix
 
-В TMRoPE матрица вращения модифицируется с учетом модальности:
+In TMRoPE, the rotation matrix is modified to account for modality:
 
 $$ \mathbf{R}_{\theta, p, m} = \begin{pmatrix} 
 \cos(p\theta \cdot s_m) & -\sin(p\theta \cdot s_m) \\ 
 \sin(p\theta \cdot s_m) & \cos(p\theta \cdot s_m) 
 \end{pmatrix} $$
 
-где $s_m$ — масштабирующий коэффициент для модальности $m$.
+where $s_m$ is a scaling factor for modality $m$.
 
-### 3. Интеграция с блочной обработкой
+### 3. Integration with Block-Wise Processing
 
-#### 3.1. Обработка блоков в мультимодальном контексте
+#### 3.1. Block Processing in Multimodal Context
 
-Для каждого блока $B_k$ модальности $m$:
+For each block $B_k$ of modality $m$:
 
 $$ z_{k,m} = f_{enc,m}(B_{k,m}) $$
 
 $$ z'_{k,m} = \mathbf{R}_{\Theta, k, m} z_{k,m} $$
 
-#### 3.2. Контекстная синхронизация
+#### 3.2. Contextual Synchronization
 
-Контекстное окно включает блоки разных модальностей, синхронизированные по времени:
+The context window includes blocks from different modalities synchronized in time:
 
 $$ C_k = \{z'_{i,m} | t_{start}(i,m) \leq t_k \leq t_{end}(i,m), \forall m \} $$
 
-### 4. Механизм кросс-модального внимания
+### 4. Cross-Modal Attention Mechanism
 
-В TMRoPE позиционное кодирование обеспечивает корректное внимание между различными модальностями:
+In TMRoPE, positional encoding ensures correct attention across modalities:
 
 $$ \text{Attention}(Q_{m_1}, K_{m_2}, V_{m_2}) = \text{softmax}\left(\frac{Q_{m_1}K_{m_2}^T}{\sqrt{d_k}}\right)V_{m_2} $$
 
-Благодаря TMRoPE скалярное произведение $Q_{m_1}K_{m_2}^T$ корректно отражает временные соотношения между токенами разных модальностей.
+Thanks to TMRoPE, the dot product $Q_{m_1}K_{m_2}^T$ correctly reflects temporal relationships between tokens of different modalities.
 
-### 5. Адаптивные частоты для разных модальностей
+### 5. Adaptive Frequencies per Modality
 
-Частоты $\theta_i$ для разных модальностей выбираются с учетом их характеристик:
+Frequencies $\theta_i$ for different modalities are chosen based on their characteristics:
 
 $$ \theta_{i,m} = \text{base}_m^{-2i/d} $$
 
-где $\text{base}_m$ — базовый параметр для модальности $m$.
+where $\text{base}_m$ is the base parameter for modality $m$.
 
-### 6. Преимущества TMRoPE
+### 6. Advantages of TMRoPE
 
-1. **Унифицированное временное представление:** Обеспечивает единую временную шкалу для всех модальностей
+1. **Unified temporal representation:** Provides a single temporal scale across all modalities
 
-2. **Масштабируемость:** Легко адаптируется к различным частотам дискретизации и характеристикам модальностей
+2. **Scalability:** Easily adapts to varying sampling rates and modality characteristics
 
-3. **Эффективность в потоковой обработке:** Позволяет обрабатывать непрерывные потоки данных с минимальной задержкой
+3. **Streaming efficiency:** Enables continuous data processing with minimal latency
 
-4. **Синхронизация с блочной обработкой:** Обеспечивает плавное взаимодействие с блочным механизмом обработки, сохраняя темпоральные зависимости между модальностями
+4. **Synchronization with block-wise processing:** Ensures seamless interaction with block processing while preserving temporal dependencies across modalities
 
-5. **Аналитическая дифференцируемость:** Поддерживает сквозное обучение с распространением градиентов через границы блоков и между различными модальностями
+5. **Analytical differentiability:** Supports end-to-end training with gradient propagation across block boundaries and between modalities
 
 
-### **Кодирование позиции TMRoPE (псевдокод):**
+### **TMRoPE Positional Encoding (Pseudocode):**
 
 ```python
-# Стандартные библиотеки
+# Standard libraries
 import torch
 import torch.nn as nn
 
-# Константы для RoPE
-BASE_FREQ = 10000  # Базовая частота для вычисления позиционного кодирования
-VIDEO_FPS = 25     # Частота кадров видео (кадров в секунду)
-FRAME_TIME = 0.04  # Время одного кадра в секундах (1/25 = 0.04)
+# Constants for RoPE
+BASE_FREQ = 10000  # Base frequency for positional encoding calculation
+VIDEO_FPS = 25     # Video frame rate (frames per second)
+FRAME_TIME = 0.04  # Time per frame in seconds (1/25 = 0.04)
 
 
 class TMRoPE(nn.Module):
     """
     Description:
     ---------------
-        Реализация временного RoPE (Rotary Position Embedding) для 
-        мультимодальных данных. Метод адаптирует стандартный RoPE для работы
-        с различными типами модальностей (текст, аудио, изображения, видео),
-        применяя специфичные временные масштабы для каждого типа.
+        Implementation of Temporal RoPE (Rotary Position Embedding) for
+        multimodal data. The method adapts standard RoPE to work with
+        different modality types (text, audio, images, video),
+        applying modality-specific temporal scales.
 
     Args:
     ---------------
-        dim: Размерность эмбеддинга
-        max_seq_len: Максимальная длина последовательности
+        dim: Embedding dimension
+        max_seq_len: Maximum sequence length
 
     Returns:
     ---------------
-        Модуль PyTorch для применения ротационной позиционной кодировки
+        PyTorch module for applying rotary positional encoding
         
     Raises:
     ---------------
-        ValueError: Если указана некорректная размерность эмбеддинга
-        TypeError: Если входные тензоры имеют неправильный тип
+        ValueError: If embedding dimension is invalid
+        TypeError: If input tensors have incorrect type
 
     Examples:
     ---------------
@@ -610,14 +610,14 @@ class TMRoPE(nn.Module):
         super().__init__()
         self.dim = dim
         
-        # Расчет базовых частот (оригинальный метод RoPE)
-        # Формула: inv_freq_i = 1 / (BASE_FREQ^(i / dim)), где i - четные индексы
+        # Compute base frequencies (original RoPE method)
+        # Formula: inv_freq_i = 1 / (BASE_FREQ^(i / dim)), where i are even indices
         inv_freq = 1.0 / (BASE_FREQ ** (torch.arange(0, dim, 2).float() / dim))
         self.register_buffer("inv_freq", inv_freq)
         
-        # Параметр временного масштабирования (каждые 40мс = 1 позиция)
-        # Для видео с 25 кадрами в секунду, время кадра = 0.04с
-        self.time_scale = 1 / FRAME_TIME  # 25fps для видео
+        # Time scaling parameter (each 40ms = 1 position)
+        # For video at 25 fps, frame time = 0.04s
+        self.time_scale = 1 / FRAME_TIME  # 25fps for video
 
     def forward(
         self, 
@@ -628,27 +628,27 @@ class TMRoPE(nn.Module):
         """
         Description:
         ---------------
-            Применяет ротационную позиционную кодировку к входной
-            последовательности с учетом типа модальности данных.
+            Applies rotary positional encoding to input sequence
+            considering the type of input modality.
 
         Args:
         ---------------
-            x: Входной тензор формы [batch, seq_len, dim]
-            pos_ids: Позиционные ID формы [batch, seq_len]
-            modality_type: Тип модальности:
-                0 - текст
-                1 - аудио
-                2 - изображение
-                3 - видео
+            x: Input tensor of shape [batch, seq_len, dim]
+            pos_ids: Position IDs of shape [batch, seq_len]
+            modality_type: Modality type:
+                0 - text
+                1 - audio
+                2 - image
+                3 - video
 
         Returns:
         ---------------
-            Тензор с примененной ротационной позиционной кодировкой
+            Tensor with applied rotary positional encoding
             
         Raises:
         ---------------
-            ValueError: Если указан неподдерживаемый тип модальности
-            RuntimeError: При несоответствии размерностей входных тензоров
+            ValueError: If modality type is unsupported
+            RuntimeError: If input tensor dimensions are incompatible
 
         Examples:
         ---------------
@@ -657,109 +657,109 @@ class TMRoPE(nn.Module):
             >>> pos_ids = torch.arange(10).expand(2, 10)
             >>> output = model(x, pos_ids, modality_type=3)
         """
-        # Получаем длину последовательности из входного тензора
+        # Obtain sequence length from input tensor
         seq_len = x.size(1)
         
-        # Коррекция временной размерности в зависимости от типа модальности
-        if modality_type == 3:  # Видео
-            # Для видео используем полный временной масштаб
+        # Adjust temporal dimension based on modality type
+        if modality_type == 3:  # Video
+            # For video, use full temporal scale
             pos_ids = pos_ids * self.time_scale
-        elif modality_type == 1:  # Аудио
-            # Для аудио используем половину временного масштаба видео
+        elif modality_type == 1:  # Audio
+            # For audio, use half the video temporal scale
             pos_ids = pos_ids * self.time_scale / 2
             
-        # Расчет углов поворота по формуле: θᵢ = pos · inv_freqᵢ
-        # Используем эйнштейновскую нотацию для матричного умножения
+        # Compute rotation angles: θᵢ = pos · inv_freqᵢ
+        # Use Einstein summation for matrix multiplication
         sinusoid = torch.einsum("i,j->ij", pos_ids.float(), self.inv_freq)
         
-        # Вычисляем синусы и косинусы для углов поворота
+        # Compute sines and cosines of rotation angles
         sin, cos = torch.sin(sinusoid), torch.cos(sinusoid) 
         
-        # Применение ротационной позиционной кодировки:
+        # Apply rotary positional encoding:
         # x' = x ⊙ cosθ + xᵣₒₜ ⊙ sinθ
-        # где xᵣₒₜ - это x с переупорядоченными и инвертированными элементами
+        # where xᵣₒₜ is x with swapped and negated elements
         x_rot = torch.cat([-x[..., 1::2], x[..., ::2]], dim=-1)
         
-        # Финальное применение ротации через умножение и сложение
+        # Final rotation via multiplication and addition
         x = x * cos.unsqueeze(-1) + x_rot * sin.unsqueeze(-1)
         return x
 ```
 
-## **2. Генерация**
+## **2. Generation**
 
-### **2.1 Текст**  
+### **2.1 Text**
 
-Текст генерируется непосредственно модулем Thinker. Логика генерации текста в целом аналогична подходу, используемому в распространенных LLM (Large Language Models), а именно: автопрогрессивная выборка на основе вероятностного распределения словаря. Для повышения разнообразия в процессе генерации могут применяться такие техники, как штраф за повторение и top-p выборка.  
+Text is generated directly by the Thinker module. The logic of text generation follows the approach used in standard Large Language Models (LLMs): autoregressive sampling based on the vocabulary's probability distribution. Techniques such as repetition penalty and top-p sampling may be applied to enhance generation diversity.  
 
-### **2.2 Речь**  
+### **2.2 Speech**
 
-Модуль Speaker получает от Thinker высокоуровневые представления (эмбеддинги) и сэмплированные текстовые токены. Комбинация высокоразмерных представлений и дискретных токенов играет ключевую роль. Поскольку алгоритм работает в потоковом режиме, генерация речи должна предсказывать интонацию и эмоциональную окраску до полного формирования текста. Высокоуровневые представления от Thinker неявно передают эту информацию, делая потоковую генерацию более естественной. Кроме того, эмбеддинги Thinker в основном отражают семантическую, а не фонетическую схожесть. Поэтому даже фонетически разные слова могут иметь близкие высокоуровневые представления, что требует использования дискретных токенов для устранения неоднозначности.  
+The Speaker module receives high-level representations (embeddings) and sampled text tokens from the Thinker. The combination of high-dimensional representations and discrete tokens plays a critical role. Since the algorithm operates in streaming mode, speech generation must predict intonation and emotional coloring before the full text is formed. The high-level representations from Thinker implicitly convey this information, making streaming generation more natural. Furthermore, Thinker’s embeddings primarily reflect semantic, rather than phonetic, similarity. Therefore, even phonetically distinct words may have similar high-level representations, necessitating the use of discrete tokens to resolve ambiguity.
 
-Авторы разработали эффективный речевой кодек под названием **qwen-tts-tokenizer**, который компактно кодирует ключевую речевую информацию и позволяет потоково декодировать аудиопоток с помощью каузального аудиодекодера. Получив данные, Speaker начинает автопрогрессивно генерировать аудио и текстовые токены. Генерация речи не требует жесткого выравнивания с текстом на уровне слов или временных меток, что значительно упрощает требования к обучающим данным и процессу вывода.
+The authors developed an efficient speech codec named **qwen-tts-tokenizer**, which compactly encodes key speech information and enables streaming decoding of the audio stream via a causal audio decoder. Upon receiving the data, the Speaker begins autoregressively generating both audio and text tokens. Speech generation does not require strict alignment with text at the word or timestamp level, significantly simplifying training data requirements and inference procedures.
 
-### **2.3 Потоковый дизайн**
+### **2.3 Streaming Design**
 
-В сценариях потокового аудио и видео взаимодействия **начальная задержка пакета** (initial packet latency) является ключевым показателем производительности системы. На нее влияют следующие факторы:
+In streaming audio and video interaction scenarios, **initial packet latency** is a key performance metric. It is influenced by the following factors:
 
-1) Задержка обработки многомодального ввода;  
-2) Задержка между получением первого текстового токена и выводом первого речевого токена;  
-3) Задержка преобразования первого сегмента речи в аудиосигнал;  
-4) Внутренняя задержка архитектуры, зависящая от размера модели, объема вычислений (FLOPs) и других факторов.  
+1) Latency in multimodal input processing;  
+2) Latency between receiving the first text token and outputting the first speech token;  
+3) Latency in converting the first speech segment into an audio signal;  
+4) Internal architecture latency, dependent on model size, computational volume (FLOPs), and other factors.  
 
-Далее в статье обсуждаются алгоритмические и архитектурные улучшения, направленные на сокращение задержки по этим четырем направлениям.  
+Subsequent sections discuss algorithmic and architectural improvements aimed at reducing latency along these four dimensions.  
 
-**Поддержка предзаполнения (prefill)**
+**Prefill Support**
 
-Чанковое предзаполнение (chunked prefill) — широко используемый механизм в современных системах вывода. Для его поддержки в многомодальном взаимодействии мы модифицировали аудио- и визуальные энкодеры, добавив блочное внимание (chunked attention) по временной оси. Аудиоэнкодер теперь обрабатывает данные блоками по 2 секунды вместо полного аудиофайла, а визуальный энкодер использует быстрое внимание (flash attention), объединяя соседние 2×2 токена в один через MLP-слой для эффективности. Размер патча установлен в 14, что позволяет агрегировать изображения разных разрешений в единую последовательность.  
+Chunked prefill — a widely used mechanism in modern inference systems — is adapted for multimodal interaction by modifying the audio and visual encoders to incorporate chunked attention along the temporal axis. The audio encoder now processes data in 2-second chunks instead of the full audio file, while the visual encoder uses flash attention, aggregating adjacent 2×2 tokens into one via an MLP layer for efficiency. The patch size is set to 14, enabling aggregation of images of varying resolutions into a unified sequence.  
 
-**Потоковая генерация кодеком**
+**Streaming Codec Generation**
 
-Для удобства потоковой передачи длинных аудиопоследовательностей мы предложили механизм **скользящего оконного блочного внимания** (sliding window chunked attention), ограничивающий контекст текущего токена. В основе лежит DiT-модель на базе **Flow-Matching**: входные коды преобразуются в мел-спектрограммы, которые затем восстанавливаются с помощью модифицированного BigVGAN.
+To facilitate streaming transmission of long audio sequences, we propose a **sliding-window chunked attention** mechanism, which limits the context of each current token. The core is a DiT model based on **Flow-Matching**: input codes are transformed into Mel spectrograms, which are then reconstructed using a modified BigVGAN.
 
-![Figure_5](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-14/assets/Figure_5.png)
-*Рисунок 4: Подход блочной обработки, показывающий, как прошлые, текущие и будущие блоки управляются во время обработки последовательных данных.*
+![Figure_5](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-14/assets/Figure_5.png  )
+*Figure 4: Block-wise processing approach, illustrating how past, current, and future blocks are managed during sequential data processing.*
 
-Как показано на рисунке 4, для генерации волновых форм из кодов мы группируем смежные коды в блоки и используем эти блоки в качестве масок внимания. Мы ограничиваем рецептивное поле DiT четырьмя блоками, включая взгляд на 2 блока назад и на 1 блок вперед. Во время декодирования мы используем Flow Matching для генерации Mel-спектрограмм по блокам, гарантируя, что каждый блок кода имеет доступ к необходимым контекстным блокам. Такой подход улучшает качество потокового вывода за счет сохранения контекстной информации. Мы также используем этот подход с фиксированным рецептивным полем BigVGAN для достижения потоковой генерации сигналов.
+As shown in Figure 4, for waveform generation from codes, we group adjacent codes into blocks and use these blocks as attention masks. We constrain the DiT receptive field to four blocks, including a lookback of 2 blocks and a lookahead of 1 block. During decoding, we use Flow Matching to generate Mel spectrograms block-by-block, ensuring each code block has access to necessary contextual blocks. This approach improves streaming output quality by preserving contextual information. We also apply this fixed-receptive-field approach with BigVGAN to achieve streaming signal generation.
 
-### **Генерация потокового звука DiT** (псевдокод)
+### **Streaming Audio Generation with DiT** (Pseudocode)
 
 ```python
-# Стандартные библиотеки
+# Standard libraries
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-# Константы
+# Constants
 DEFAULT_EMBED_DIM = 256
 DEFAULT_NUM_HEADS = 8
 DEFAULT_MLP_DIM = 1024
 DEFAULT_WINDOW_SIZE = 4
-LOOKBACK_SIZE = 2   # Размер окна для просмотра назад
-LOOKAHEAD_SIZE = 1  # Размер окна для просмотра вперёд
+LOOKBACK_SIZE = 2   # Window size for looking back
+LOOKAHEAD_SIZE = 1  # Window size for looking ahead
 
 
 class StreamingDiT(nn.Module):
     """
     Description:
     ---------------
-        Модель StreamingDiT для генерации потокового звука с использованием
-        оконного механизма внимания. Модель применяет скользящее окно внимания
-        для обработки аудиопоследовательностей в потоковом режиме.
+        StreamingDiT model for generating streaming audio using
+        a sliding-window attention mechanism. The model applies 
+        sliding-window attention to process audio sequences in streaming mode.
 
     Args:
     ---------------
-        window_size: Общий размер окна внимания (lookback + lookahead + 1)
-        embed_dim: Размерность эмбеддинга модели
-        num_heads: Количество голов в механизме внимания
-        mlp_dim: Размерность скрытого слоя в MLP
+        window_size: Total attention window size (lookback + lookahead + 1)
+        embed_dim: Model embedding dimension
+        num_heads: Number of attention heads
+        mlp_dim: Hidden dimension size in MLP
 
     Returns:
     ---------------
-        Экземпляр модели StreamingDiT
+        Instance of the StreamingDiT model
 
     Raises:
     ---------------
-        ValueError: Если указан некорректный размер окна (должен быть >= 3)
+        ValueError: If window size is invalid (must be >= 3)
 
     Examples:
     ---------------
@@ -779,27 +779,27 @@ class StreamingDiT(nn.Module):
         super().__init__()
         
         if window_size < 3:
-            raise ValueError("Размер окна должен быть не менее 3 (1 текущий + "
-                            "минимум 1 назад + минимум 1 вперед)")
+            raise ValueError("Window size must be at least 3 (1 current + "
+                            "at least 1 backward + at least 1 forward)")
         
         self.window_size = window_size
         self.embed_dim = embed_dim
         
-        # Механизм внимания со скользящим окном (Attention(Q,K,V)_window)
+        # Sliding-window attention mechanism (Attention(Q,K,V)_window)
         self.attention = nn.MultiheadAttention(
             embed_dim=embed_dim,
             num_heads=num_heads,
             batch_first=True
         )
         
-        # MLP блок для обработки после внимания
+        # MLP block for post-attention processing
         self.mlp = nn.Sequential(
             nn.Linear(embed_dim, mlp_dim),
             nn.GELU(),
             nn.Linear(mlp_dim, embed_dim)
         )
         
-        # Нормализации (добавлены явно вместо функционального вызова)
+        # Normalizations (explicitly added instead of functional calls)
         self.norm1 = nn.LayerNorm(embed_dim)
         self.norm2 = nn.LayerNorm(embed_dim)
 
@@ -807,23 +807,22 @@ class StreamingDiT(nn.Module):
         """
         Description:
         ---------------
-            Прямой проход через модель StreamingDiT с механизмом скользящего окна.
-            Реализует окно с LOOKBACK_SIZE=2 (просмотр назад) и 
-            LOOKAHEAD_SIZE=1 (просмотр вперед).
+            Forward pass through the StreamingDiT model with sliding-window mechanism.
+            Implements a window with LOOKBACK_SIZE=2 (look back) and 
+            LOOKAHEAD_SIZE=1 (look ahead).
 
         Args:
         ---------------
-            x: Входной тензор размера [batch, seq_len, dim]
+            x: Input tensor of shape [batch, seq_len, dim]
 
         Returns:
         ---------------
-            Выходной тензор той же размерности [batch, seq_len, dim]
+            Output tensor of same dimension [batch, seq_len, dim]
 
         Raises:
         ---------------
-            RuntimeError: При несовместимости размерностей тензоров
-            ValueError: Если размерность входного тензора не соответствует
-                        размерности эмбеддинга модели
+            RuntimeError: On tensor dimension mismatches
+            ValueError: If input tensor dimension does not match model embedding dimension
 
         Examples:
         ---------------
@@ -833,78 +832,78 @@ class StreamingDiT(nn.Module):
             >>> output.shape
             torch.Size([1, 8, 256])
         """
-        # Проверяем соответствие размерностей
+        # Validate dimensions
         batch_size, seq_len, dim = x.size()
         if dim != self.embed_dim:
             raise ValueError(
-                f"Размерность входа {dim} не соответствует размерности "
-                f"модели {self.embed_dim}"
+                f"Input dimension {dim} does not match model embedding dimension "
+                f"{self.embed_dim}"
             )
         
         outputs = []
         
-        # Обрабатываем каждую позицию в последовательности
+        # Process each position in the sequence
         for i in range(seq_len):
-            # Определяем границы скользящего окна
-            # LOOKBACK_SIZE=2 - количество токенов в прошлом
-            # LOOKAHEAD_SIZE=1 - количество токенов в будущем
+            # Define sliding window boundaries
+            # LOOKBACK_SIZE=2 — number of past tokens
+            # LOOKAHEAD_SIZE=1 — number of future tokens
             start = max(0, i - LOOKBACK_SIZE)
             end = min(seq_len, i + LOOKAHEAD_SIZE + 1)
             
-            # Выделяем окно для текущей позиции
+            # Extract window for current position
             window = x[:, start:end]
             
-            # Создаем причинную маску для механизма внимания
-            # Маска позволяет видеть только предыдущие и текущую позиции
+            # Create causal attention mask
+            # Mask allows viewing only previous and current positions
             window_size = end - start
             attn_mask = torch.triu(
                 torch.ones(window_size, window_size), 
                 diagonal=1
             ).bool()
             
-            # Применяем механизм внимания с маской
+            # Apply attention mechanism with mask
             attn_out, _ = self.attention(
-                query=x[:, i:i+1],                # Запрос - текущая позиция
-                key=window,                       # Ключи - окно контекста
-                value=window,                     # Значения - окно контекста
-                attn_mask=attn_mask.to(x.device)  # Причинная маска
+                query=x[:, i:i+1],                # Query — current position
+                key=window,                       # Keys — context window
+                value=window,                     # Values — context window
+                attn_mask=attn_mask.to(x.device)  # Causal mask
             )
             
-            # Применяем первый остаточный слой: LayerNorm(x + Attention(x))
+            # Apply first residual layer: LayerNorm(x + Attention(x))
             norm_out = self.norm1(attn_out + x[:, i:i+1])
             
-            # Применяем MLP слой
+            # Apply MLP layer
             mlp_out = self.mlp(norm_out)
             
-            # Применяем второй остаточный слой: LayerNorm(norm_out + MLP(norm_out))
+            # Apply second residual layer: LayerNorm(norm_out + MLP(norm_out))
             final_out = self.norm2(norm_out + mlp_out)
             
-            # Добавляем результат для текущей позиции
+            # Append result for current position
             outputs.append(final_out)
         
-        # Объединяем результаты всех позиций
+        # Concatenate results from all positions
         return torch.cat(outputs, dim=1)
 ```
 
-<div style="border: 2px solid #3498db; border-radius: 8px; padding: 12px; background-color: #f8f9fa; margin: 10px 0;"> <p style="margin: 0; font-weight: bold; color: #2c3e50;">Fourth Checkpoint:</p> <p style="margin: 8px 0 0 0; color: #2c3e50;">Потоковый дизайн минимизирует начальную задержку пакета через блочную обработку данных. Аудио обрабатывается 2-секундными блоками, визуальные данные агрегируются через flash attention, а скользящее оконное внимание с ограниченным рецептивным полем обеспечивает эффективную генерацию, сохраняя контекстную информацию между блоками.</p> </div>
+<div style="border: 2px solid #3498db; border-radius: 8px; padding: 12px; background-color: #f8f9fa; margin: 10px 0;"> <p style="margin: 0; font-weight: bold; color: #2c3e50;">Fourth Checkpoint:</p> <p style="margin: 8px 0 0 0; color: #2c3e50;">The streaming design minimizes initial packet latency through block-wise data processing. Audio is processed in 2-second blocks, visual data is aggregated via flash attention, and sliding-window attention with a constrained receptive field ensures efficient generation while preserving contextual information across blocks.</p> </div>
 
 
-## **3 Предварительная подготовка**
+## **3. Pretraining**
 
-Обучение Qwen2.5-Omni делится на три этапа. На первом этапе авторы фиксируют параметры Большой языковой модели (LLM) и сосредотачиваются на обучении визуального кодировщика и аудиокодировщика с использованием большого количества пар аудио-текст и изображение-текст для улучшения семантического понимания в LLM. На втором этапе авторы размораживаем все параметры и проводим обучение с использованием более обширных мультимодальных данных для достижения более комплексного обучения. На последнем этапе авторы используют данные с длиной последовательностью 32 тыс., чтобы улучшить способность модели понимать сложные длинные данные последовательностей.
+Training Qwen2.5-Omni is divided into three stages. In the first stage, the authors fix the parameters of the Large Language Model (LLM) and focus on training the visual and audio encoders using large-scale audio-text and image-text pairs to enhance semantic understanding in the LLM. In the second stage, all parameters are unfrozen and training is performed using broader multimodal data to achieve more comprehensive learning. In the final stage, the authors use data with sequence lengths of 32k tokens to improve the model’s ability to understand complex long sequences.
 
-Модель предварительно обучена на разнообразном наборе данных, включая корпуса изображений и текста, видео и текста, видео и аудио, аудио и текста, а также простые текстовые корпуса. Авторы заменяют иерархические метки подсказками на естественном языке, следуя Qwen2-Audio, что улучшает возможности обобщения модели и следования инструкциям. На начальном этапе предварительного обучения компонент LLM Qwen2.5-Omni инициализируется с параметрами Qwen2.5, визуальный кодер такой же, как Qwen2.5-VL, а аудиокодер инициализируется с помощью Whisper-large-v3. Два кодировщика обучаются отдельно на фиксированном уровне LLM, сначала уделяя особое внимание обучению соответствующих адаптеров, а затем обучая кодировщиков. Эта базовая подготовка имеет решающее значение для того, чтобы дать модели четкое понимание основных взаимосвязей и соотношений зрительного восприятия и текста, а также аудио-текста. Второй этап предварительной подготовки знаменует собой значительный прогресс за счет введения дополнительных 800 миллиардов размеченных данных для изображений и видео, 300 миллиардов размеченных данных для аудио и 100 миллиардов размеченных данных для видео и аудио. На этом этапе были введены более масштабные смешанные мультимодальные данные и более широкий спектр задач, что улучшило взаимодействие и понимание слуховой, визуальной и текстовой информации. Включение мультимодальных, многозадачных наборов данных имеет решающее значение для разработки возможностей моделей обрабатывать несколько задач и модальностей одновременно, что особенно важно при работе со сложными реальными наборами данных. Кроме того, данные в виде простого текста играют важную роль в поддержании и улучшении уровня владения языком. Для повышения эффективности обучения авторы ограничили максимальную длину токена до 8192 токенов на предыдущем этапе. Затем авторы вводят длинные аудио и видеоданные и расширяют исходные текстовые, аудио, графические и видеоданные до 32 768 токенов для обучения. Экспериментальные результаты показывают, что данные значительно улучшились в плане поддержки данных длинных последовательностей.
+The model is pretrained on a diverse dataset, including image-text, video-text, video-audio, audio-text, and plain text corpora. The authors replace hierarchical labels with natural language prompts, following Qwen2-Audio, which improves the model’s generalization and instruction-following capabilities. In the initial pretraining stage, the LLM component of Qwen2.5-Omni is initialized with Qwen2.5 parameters, the visual encoder is identical to Qwen2.5-VL, and the audio encoder is initialized using Whisper-large-v3. The two encoders are trained separately with a fixed LLM level, first focusing on training the corresponding adapters, then the encoders. This foundational pretraining is critical to establish a clear understanding of fundamental relationships between visual perception and text, as well as audio-text. The second pretraining stage marks significant progress through the introduction of additional 800 billion labeled image and video data, 300 billion labeled audio data, and 100 billion labeled video-audio data. On this stage, larger-scale mixed multimodal data and a broader range of tasks were introduced, improving the interaction and understanding of auditory, visual, and textual information. Inclusion of multimodal, multitask datasets is crucial for developing models capable of simultaneously handling multiple tasks and modalities, especially important when working with complex real-world datasets. Additionally, plain text data plays a vital role in maintaining and improving language proficiency. To improve training efficiency, the authors limited the maximum token length to 8192 tokens in the previous stage. Then, they introduced long audio and video data and extended the original text, audio, image, and video data to 32,768 tokens for training. Experimental results show significant improvements in supporting long-sequence data.
 
-### **Мультимодальный процесс обучения** (псевдокод)
+### **Multimodal Training Process** (Pseudocode)
 
 ```python
-# Стандартные библиотеки
+# Standard libraries
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from typing import Dict, List, Tuple, Optional, Union, Any
 
-# Константы
+# Constants
 TEXT_MODALITY = 0
 AUDIO_MODALITY = 1
 IMAGE_MODALITY = 2
@@ -930,151 +929,150 @@ def train_step(
     """
     Description:
     ---------------
-        Выполняет один шаг обучения мультимодальной модели с использованием
-        различных типов входных данных (текст, изображение, аудио, видео).
-        Поддерживает дополнительную оптимизацию с помощью DPO (Direct 
-        Preference Optimization).
+        Performs one training step for a multimodal model using
+        various input modalities (text, image, audio, video).
+        Supports additional optimization via DPO (Direct Preference Optimization).
 
     Args:
     ---------------
-        batch: Словарь с входными данными разных модальностей:
-            - text: Тензор текстовых данных
-            - image: Тензор изображений
-            - audio: Тензор аудиоданных
-            - video: Тензор видеоданных (опционально)
-        model: Основная мультимодальная модель
-        optimizer: Оптимизатор для обновления весов модели
-        text_embed: Модуль для получения текстовых эмбеддингов
-        image_encoder: Энкодер изображений (например, ViT)
-        audio_encoder: Энкодер аудио (например, 1D-CNN)
-        dpo_reference_model: Опциональная эталонная модель для DPO
-        text_labels: Метки для текстовых данных
-        audio_labels: Метки для аудиоданных
-        rewards: Значения наград для DPO оптимизации
+        batch: Dictionary with input data of different modalities:
+            - text: Tensor of text data
+            - image: Tensor of images
+            - audio: Tensor of audio data
+            - video: Tensor of video data (optional)
+        model: Main multimodal model
+        optimizer: Optimizer for model weight updates
+        text_embed: Module for obtaining text embeddings
+        image_encoder: Image encoder (e.g., ViT)
+        audio_encoder: Audio encoder (e.g., 1D-CNN)
+        dpo_reference_model: Optional reference model for DPO
+        text_labels: Labels for text data
+        audio_labels: Labels for audio data
+        rewards: Reward values for DPO optimization
 
     Returns:
     ---------------
-        Словарь с метриками обучения:
-            - loss: Общее значение функции потерь
-            - loss_text: Значение функции потерь для текста
-            - loss_audio: Значение функции потерь для аудио
-            - loss_dpo: Значение функции потерь DPO (если применимо)
+        Dictionary with training metrics:
+            - loss: Total loss value
+            - loss_text: Text loss value
+            - loss_audio: Audio loss value
+            - loss_dpo: DPO loss value (if applicable)
 
     Raises:
     ---------------
-        ValueError: При некорректных входных данных или несоответствии размерностей
-        RuntimeError: При ошибках в вычислениях тензоров
+        ValueError: On invalid inputs or dimension mismatches
+        RuntimeError: On tensor computation errors
 
     Examples:
     ---------------
         >>> batch = {
         ...     'text': torch.randint(0, 1000, (8, 64)),  # batch=8, seq_len=64
-        ...     'image': torch.randn(8, 3, 224, 224),     # batch=8, RGB изображения
-        ...     'audio': torch.randn(8, 1, 16000)         # batch=8, аудио 1 сек
+        ...     'image': torch.randn(8, 3, 224, 224),     # batch=8, RGB images
+        ...     'audio': torch.randn(8, 1, 16000)         # batch=8, 1s audio
         ... }
         >>> metrics = train_step(
         ...     batch, model, optimizer, text_embed, 
         ...     image_encoder, audio_encoder
         ... )
     """
-    # Распаковываем пакет данных
+    # Unpack batch data
     text, image, audio, video = batch['text'], batch['image'], batch['audio'], batch.get('video')
     
-    # Применяем модальные энкодеры без вычисления градиентов
+    # Apply modal encoders without gradient computation
     with torch.no_grad():
-        # Кодирование изображения с помощью Vision Transformer
+        # Encode image using Vision Transformer
         image_feats = image_encoder(image)  
         
-        # Кодирование аудио с помощью 1D-CNN
+        # Encode audio using 1D-CNN
         audio_feats = audio_encoder(audio)  
     
-    # Объединяем мультимодальные входные данные [text; image; audio; video]
-    # Применяем усреднение по пространственным/временным измерениям для изображений и аудио
+    # Concatenate multimodal inputs [text; image; audio; video]
+    # Apply spatial/temporal averaging for images and audio
     inputs = torch.cat([
-        text_embed(text),              # Эмбеддинги текста
-        image_feats.mean(dim=1),       # Усреднение признаков изображения
-        audio_feats.mean(dim=1)        # Усреднение признаков аудио
+        text_embed(text),              # Text embeddings
+        image_feats.mean(dim=1),       # Average image features
+        audio_feats.mean(dim=1)        # Average audio features
     ], dim=1)
     
-    # Создаем позиционные ID для различных модальностей
-    # Текстовые позиции начинаются с 0
-    # Позиции изображений следуют за текстом
-    # Позиции аудио следуют за изображениями
+    # Create positional IDs for different modalities
+    # Text positions start at 0
+    # Image positions follow text
+    # Audio positions follow images
     pos_ids = torch.cat([
-        torch.arange(text.size(1)),                           # Позиции для текста
-        torch.zeros(image_feats.size(1)) + text.size(1),      # Позиции для изображений
-        torch.arange(audio_feats.size(1)) + text.size(1) + 1  # Позиции для аудио
+        torch.arange(text.size(1)),                           # Text positions
+        torch.zeros(image_feats.size(1)) + text.size(1),      # Image positions
+        torch.arange(audio_feats.size(1)) + text.size(1) + 1  # Audio positions
     ])
     
-    # Создаем маски типов модальностей
+    # Create modality type masks
     modality_types = (
         [TEXT_MODALITY] * text.size(1) + 
         [IMAGE_MODALITY] * image_feats.size(1) + 
         [AUDIO_MODALITY] * audio_feats.size(1)
     )
     
-    # Применяем ротационную позиционную кодировку с учетом времени (TMRoPE)
+    # Apply rotational positional encoding with temporal awareness (TMRoPE)
     inputs = model.tmrope(inputs, pos_ids, modality_types)
     
-    # Прямой проход через модель Thinker-Talker
+    # Forward pass through Thinker-Talker model
     text_logits, audio_logits = model(inputs)
     
-    # Вычисляем комбинированную функцию потерь
+    # Compute combined loss function
     # L = α * L_text + β * L_audio
     loss_text = F.cross_entropy(text_logits, text_labels)
     loss_audio = F.binary_cross_entropy(audio_logits, audio_labels)
     
-    # Применяем весовые коэффициенты к разным компонентам потерь
+    # Apply weight coefficients to different loss components
     loss = TEXT_LOSS_WEIGHT * loss_text + AUDIO_LOSS_WEIGHT * loss_audio
     
-    # Метрики для отслеживания
+    # Metrics for tracking
     metrics = {
         'loss_text': loss_text.item(),
         'loss_audio': loss_audio.item(),
         'loss': loss.item()
     }
     
-    # Оптимизация DPO (Direct Preference Optimization), если предоставлена эталонная модель
+    # DPO (Direct Preference Optimization) optimization, if reference model provided
     if dpo_reference_model is not None and rewards is not None:
         with torch.no_grad():
-            # Получаем предсказания от эталонной модели
+            # Obtain predictions from reference model
             ref_logits = dpo_reference_model(inputs)
         
-        # Вычисляем DPO потери согласно формуле (4) из статьи
-        # Отношение логарифмов вероятностей между основной и эталонной моделями
+        # Compute DPO losses according to Equation (4) in the paper
+        # Log-ratio of probabilities between main and reference models
         pi_logratios = torch.log(audio_logits) - torch.log(ref_logits)
         
-        # DPO потери на основе наград, смещенных относительно базового уровня
+        # DPO losses based on rewards, offset by baseline
         loss_dpo = -F.logsigmoid(pi_logratios * (rewards - REWARD_BASELINE))
         
-        # Добавляем DPO компонент к общим потерям
+        # Add DPO component to total loss
         loss += DPO_LOSS_WEIGHT * loss_dpo
         metrics['loss_dpo'] = loss_dpo.item()
     
-    # Выполняем шаг оптимизации
-    optimizer.zero_grad()  # Обнуляем накопленные градиенты
-    loss.backward()        # Обратное распространение ошибки
-    optimizer.step()       # Обновление весов модели
+    # Perform optimization step
+    optimizer.zero_grad()  # Zero accumulated gradients
+    loss.backward()        # Backward pass
+    optimizer.step()       # Update model weights
     
     return metrics
 ```
 
-<div style="border: 2px solid #3498db; border-radius: 8px; padding: 12px; background-color: #f8f9fa; margin: 10px 0;"> <p style="margin: 0; font-weight: bold; color: #2c3e50;">Fifth Checkpoint:</p> <p style="margin: 8px 0 0 0; color: #2c3e50;">Предварительная подготовка Qwen2.5-Omni реализована в три этапа: сначала обучаются только визуальный и аудиокодировщики при фиксированной LLM, затем размораживаются все параметры для совместного обучения на обширных мультимодальных данных, и наконец, расширяется контекстное окно до 32K токенов для улучшения обработки длинных последовательностей.</p> </div>
+<div style="border: 2px solid #3498db; border-radius: 8px; padding: 12px; background-color: #f8f9fa; margin: 10px 0;"> <p style="margin: 0; font-weight: bold; color: #2c3e50;">Fifth Checkpoint:</p> <p style="margin: 8px 0 0 0; color: #2c3e50;">Qwen2.5-Omni’s pretraining is implemented in three stages: first, only the visual and audio encoders are trained with a fixed LLM; then all parameters are unfrozen for joint training on extensive multimodal data; finally, the context window is expanded to 32K tokens to enhance long-sequence processing.</p> </div>
 
-## **4. Оценка**
+## **4. Evaluation**
 
-Оценка Qwen2.5-Omni проводилась по двум основным направлениям: понимание (X→Текст) и генерация речи (X→Речь).
+Evaluation of Qwen2.5-Omni was conducted along two primary dimensions: understanding (X→Text) and speech generation (X→Speech).
 
-В категории X→Текст модель демонстрирует производительность между Qwen2-7B и Qwen2.5-7B, превосходя Qwen2-7B в большинстве текстовых тестов. В задачах аудио→текст Qwen2.5-Omni достигает результатов на уровне или лучше современных специализированных моделей в распознавании речи, переводе и голосовом чате, значительно сокращая разрыв с текстовыми командами.
+In the X→Text category, the model demonstrates performance between Qwen2-7B and Qwen2.5-7B, outperforming Qwen2-7B in most text benchmarks. In audio→text tasks, Qwen2.5-Omni achieves results on par with or better than state-of-the-art specialized models in speech recognition, translation, and voice chat, significantly narrowing the gap with text-based commands.
 
-В обработке изображений модель работает наравне с Qwen2.5-VL-7B и превосходит другие открытые модели, включая GPT-4o-mini. Аналогично, в понимании видео и мультимодальных задачах Qwen2.5-Omni превосходит современные модели с открытым исходным кодом, демонстрируя значительное преимущество в тестах OmniBench.
+In image processing, the model performs on par with Qwen2.5-VL-7B and outperforms other open models, including GPT-4o-mini. Similarly, in video understanding and multimodal tasks, Qwen2.5-Omni surpasses current open-source models, demonstrating significant advantages in OmniBench tests.
 
-В генерации речи модель показывает конкурентоспособные результаты как в создании речи с нуля, так и в имитации конкретных дикторов. После оптимизации обучения с подкреплением значительно улучшилась стабильность генерации, а точно настроенная модель обеспечивает качество, близкое к человеческому.
+In speech generation, the model shows competitive results in both zero-shot speech synthesis and speaker voice imitation. After reinforcement learning optimization, generation stability improved significantly, and a finely tuned model delivers quality close to human levels.
 
-![Figure_6](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-14/assets/Figure_6.png)
+![Figure_6](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-14/assets/Figure_6.png  )
 
-## **5 Заключение**
+## **5. Conclusion**
 
-Qwen2.5-Omni представляет собой унифицированную модель, способную понимать и генерировать несколько модальностей, включая текст и речь в реальном времени. Предложенные инновации, такие как TMRoPE и архитектура Thinker-Talker, а также оптимизации для потоковой передачи, позволили достичь значительного прогресса в области мультимодального взаимодействия. Модель демонстрирует сильные результаты на различных бенчмарках, превосходя модели схожего размера, особенно в задачах следования голосовым командам и мультимодального понимания.
+Qwen2.5-Omni is a unified model capable of understanding and generating multiple modalities, including text and speech in real time. The proposed innovations — TMRoPE and the Thinker-Talker architecture — along with streaming optimizations, have achieved significant progress in multimodal interaction. The model demonstrates strong performance across various benchmarks, outperforming models of similar size, particularly in voice command following and multimodal understanding.
 
-Авторы отмечают важность дальнейшей работы над сложными, но часто игнорируемыми задачами, такими как видео OCR и совместное аудио-визуальное понимание, что требует сотрудничества между академическим и индустриальным секторами. Qwen2.5-Omni рассматривается как важный шаг на пути к AGI, и будущие цели включают разработку более robustной и быстрой модели с расширенными возможностями генерации различных модальностей (изображения, видео, музыка).
+The authors highlight the importance of further work on complex but often neglected tasks such as video OCR and joint audio-visual understanding, which require collaboration between academic and industry sectors. Qwen2.5-Omni is viewed as a vital step toward AGI, with future goals including the development of a more robust and faster model with expanded generation capabilities across modalities (images, video, music).

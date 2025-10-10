@@ -1,67 +1,68 @@
-[![arXiv](https://img.shields.io/badge/arXiv-2501.12948-b31b1b.svg)](https://arxiv.org/abs/2503.21676)
-[![Telegram Channel](https://img.shields.io/badge/Telegram-TheWeeklyBrief-blue)](https://t.me/TheWeeklyBrief)
+[![arXiv](https://img.shields.io/badge/arXiv-2501.12948-b31b1b.svg  )](https://arxiv.org/abs/2503.21676  )
 
-# Как LLM выучивают факты и почему они галлюцинируют?
+# How Do LLMs Learn Facts and Why Do They Hallucinate?
 
-![Figure 2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Figure_02.png)
+![Figure 2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Figure_02.png  )
 
-## 📝 Описание
+## 📝 Description
 
-Данный репозиторий содержит подробный обзор исследования **"Как языковые модели узнают факты? Динамика, учебные программы и галлюцинации"**, выполненное исследователями из Google DeepMind и ETH Zürich. В нем рассматривается процесс приобретения фактических знаний большими языковыми моделями (LLM), а также причины их склонности к галлюцинациям. Это исследование предоставляет углубленный анализ динамики обучения, которая происходит, когда языковые модели учатся связывать объекты с их атрибутами.
+This repository contains a detailed overview of the research **"How Do Language Models Learn Facts? Dynamics, Curricula, and Hallucinations"** conducted by researchers from Google DeepMind and ETH Zürich. It examines the process by which large language models (LLMs) acquire factual knowledge and the reasons behind their propensity for hallucinations. This study provides an in-depth analysis of the learning dynamics that occur as language models learn to associate entities with their attributes.
 
-## 🔍 Ключевые особенности исследования
+## 🔍 Key Features of the Research
 
-- **Трехфазный процесс обучения**: начальное понимание языка → Плато производительности → Появление знаний;
-- **Нейронные механизмы хранения и извлечения знаний**: распределение информации между слоями внимания и MLP;
-- **Влияние распределения данных**: как частота встречаемости индивидуумов влияет на скорость обучения и точность;
-- **Стратегии учебной программы данных**: эффективные подходы для оптимизации обучения;
-- **Галлюцинации и искажение знаний**: причины появления ложных фактов и способы их минимизации.
+- **Three-Phase Learning Process**: Initial language understanding → Performance plateau → Knowledge emergence;
+- **Neural Mechanisms for Knowledge Storage and Retrieval**: Distribution of information across attention layers and MLPs;
+- **Impact of Data Distribution**: How the frequency of individual occurrences affects learning speed and accuracy;
+- **Data Curriculum Strategies**: Effective approaches for optimizing training;
+- **Hallucinations and Knowledge Distortion**: Causes of false fact generation and methods to minimize them.
 
-## 📈 Ключевые выводы исследования
+## 📈 Key Findings of the Research
 
-### 1. Трехфазный процесс обучения
+### 1. Three-Phase Learning Process
 
-Исследование выделяет три основные фазы, через которые проходят языковые модели при обучении:
+The study identifies three primary phases through which language models progress during learning:
 
-- **Фаза 1: Начальное понимание языка** — модель учится общей статистике значений атрибутов;
-- **Фаза 2: Плато производительности** — критический период формирования нейронных цепей для последующего приобретения знаний;
-- **Фаза 3: Появление знаний** — быстрое развитие способности связывать людей с конкретными атрибутами.
+- **Phase 1: Initial Language Understanding** — The model learns the overall statistics of attribute values;
+- **Phase 2: Performance Plateau** — A critical period during which neural circuits for subsequent knowledge acquisition are formed;
+- **Phase 3: Knowledge Emergence** — Rapid development of the ability to link individuals with specific attributes.
 
-Продолжительность плато зависит от количества индивидуумов в наборе данных:
+The duration of the plateau depends on the number of individuals in the dataset:
 
 ```
-Продолжительность_плато ≈ 0.43 × (Количество_индивидов)^0.81
+Plateau_Duration ≈ 0.43 × (Number_of_Individuals)^0.81
 ```
 
-### 2. Нейронные механизмы хранения и извлечения знаний
+### 2. Neural Mechanisms for Knowledge Storage and Retrieval
 
-Знания распределены между несколькими компонентами модели:
-- **Ранние слои внимания**: обрабатывают токены имени для формирования запроса;
-- **Средние MLP-слои**: действуют как ассоциативная память;
-- **Финальные слои внимания**: извлекают конкретные атрибуты для запрашиваемых лиц.
+Knowledge is distributed across several model components:
+- **Early Attention Layers**: Process name tokens to form a query;
+- **Middle MLP Layers**: Act as associative memory;
+- **Final Attention Layers**: Retrieve specific attributes for queried individuals.
 
-### 3. Галлюцинации и искажение знаний
+### 3. Hallucinations and Knowledge Distortion
 
-Исследование показывает, что галлюцинации возникают одновременно с приобретением знаний. Модели начинают уверенно генерировать неверную информацию о неизвестных лицах, даже если изначально правильно указывают на неопределенность.
+The study shows that hallucinations emerge simultaneously with knowledge acquisition. Models begin confidently generating incorrect information about unfamiliar individuals, even though they initially correctly express uncertainty.
 
-### 4. Проблемы тонкой настройки
+### 4. Fine-Tuning Challenges
 
-Тонкая настройка на новых данных может привести к:
-- Искажению существующих знаний;
-- Уязвимости ассоциативной памяти;
-- Стабильности паттернов внимания.
+Fine-tuning on new data can lead to:
+- Distortion of existing knowledge;
+- Vulnerability of associative memory;
+- Stability of attention patterns.
 
-## 🛠️ Практические последствия
+## 🛠️ Practical Implications
 
-Исследование предлагает несколько рекомендаций для разработчиков LLM:
-- **Оптимизация учебной программы данных** для сокращения времени обучения;
-- **Методы смягчения галлюцинаций**;
-- **Альтернативные подходы к тонкой настройке**, такие как разреженная тонкая настройка или архитектурные модификации.
-
-## 🌟 Поддержите проект
-
-Если этот обзор оказался полезным, не забудьте поставить звезду репозиторию!
+The study offers several recommendations for LLM developers:
+- **Optimizing Data Curricula** to reduce training time;
+- **Methods for Mitigating Hallucinations**;
+- **Alternative Fine-Tuning Approaches**, such as sparse fine-tuning or architectural modifications.
 
 ---
 
-<p align="center">Исследуйте вместе с нами 🚀</p>
+<div align="center">
+
+**Explore with us 🚀**
+
+⭐ Star this repository if you found it helpful
+
+</div>

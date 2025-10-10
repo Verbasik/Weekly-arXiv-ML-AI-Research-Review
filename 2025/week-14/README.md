@@ -1,51 +1,54 @@
-[![arXiv](https://img.shields.io/badge/arXiv-2501.12948-b31b1b.svg)](https://arxiv.org/abs/2503.20215)
-[![GitHub](https://img.shields.io/badge/GitHub-Qwen2.5-Omni-brightgreen)](https://github.com/QwenLM/Qwen2.5-Omni)
-[![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Models-yellow)](https://huggingface.co/Qwen/Qwen2.5-Omni-7B)
-[![Telegram Channel](https://img.shields.io/badge/Telegram-TheWeeklyBrief-blue)](https://t.me/TheWeeklyBrief)
+[![arXiv](https://img.shields.io/badge/arXiv-2501.12948-b31b1b.svg  )](https://arxiv.org/abs/2503.20215  )
+[![GitHub](https://img.shields.io/badge/GitHub-Qwen2.5-Omni-brightgreen  )](https://github.com/QwenLM/Qwen2.5-Omni  )
+[![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Models-yellow  )](https://huggingface.co/Qwen/Qwen2.5-Omni-7B  )
 
-# Обзор Qwen2.5-Omni: Мультимодальная модель нового поколения
+# Qwen2.5-Omni Overview: A Next-Generation Multimodal Model
 
-![Qwen2.5-Omni Banner](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-14/assets/Figure_1.png)
+![Qwen2.5-Omni Banner](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-14/assets/Figure_1.png  )
 
-## 📝 Описание
+## 📝 Description
 
-Данный репозиторий содержит подробный технический обзор революционной мультимодальной модели **Qwen2.5-Omni**, разработанной командой Qwen в Alibaba Group. Модель представляет собой значительный шаг вперёд в области искусственного интеллекта, объединяя обработку текста, изображений, аудио и видео в единую унифицированную архитектуру с возможностью потоковой передачи в режиме реального времени.
+This repository contains a detailed technical overview of the revolutionary multimodal model **Qwen2.5-Omni**, developed by the Qwen team at Alibaba Group. The model represents a significant leap forward in artificial intelligence, unifying the processing of text, images, audio, and video into a single unified architecture with real-time streaming capabilities.
 
-## 🔍 Ключевые особенности модели
+## 🔍 Key Model Features
 
-- **Унифицированная архитектура Thinker-Talker**: разделение на компоненты для понимания контента и генерации речи;
-- **Мультимодальная интеграция**: синхронизированная обработка текста, изображений, аудио и видео;
-- **Time-Aligned Multimodal RoPE (TMRoPE)**: инновационный метод позиционного кодирования для временной синхронизации разных модальностей;
-- **Потоковая обработка**: возможность работы в режиме реального времени с минимальной задержкой;
-- **Конкурентоспособная производительность**: высокие результаты в бенчмарках для каждой отдельной модальности.
+- **Unified Thinker-Talker Architecture**: Separation of components for content understanding and speech generation;
+- **Multimodal Integration**: Synchronized processing of text, images, audio, and video;
+- **Time-Aligned Multimodal RoPE (TMRoPE)**: An innovative positional encoding method for temporal synchronization across modalities;
+- **Streaming Processing**: Real-time operation with minimal latency;
+- **Competitive Performance**: High scores on benchmarks for each individual modality.
 
-## 📈 Ключевые технические инновации
+## 📈 Key Technical Innovations
 
-### 1. Архитектура Thinker-Talker
+### 1. Thinker-Talker Architecture
 
-Модель разделяет генерацию текста и речи, поддерживая координацию через общие скрытые представления:
+The model separates text and speech generation while maintaining coordination through shared hidden representations:
 
-- **Qwen2.5-Omni Thinker**: крупная языковая модель для понимания мультимодальных входных данных;
-- **Qwen2.5-Omni Talker**: двухдорожечная авторегрессионная модель для генерации речи;
-- **Визуальный и аудио кодировщики**: для обработки изображений, видео и звука.
+- **Qwen2.5-Omni Thinker**: A large language model for understanding multimodal inputs;
+- **Qwen2.5-Omni Talker**: A two-stream autoregressive model for speech generation;
+- **Visual and Audio Encoders**: For processing images, video, and audio.
 
 ### 2. Time-Aligned Multimodal RoPE (TMRoPE)
 
-Инновационный метод позиционного кодирования, обеспечивающий синхронизацию аудио и видео:
+An innovative positional encoding method enabling audio-video synchronization:
 
-- Чередование аудио и видеокадров во временном согласовании;
-- Кодирование 3D-позиционной информации (высота, ширина, время);
-- Синхронизация аудиокадров с соответствующими визуальными кадрами.
+- Interleaving of audio and video frames in temporal alignment;
+- Encoding of 3D positional information (height, width, time);
+- Synchronization of audio frames with corresponding visual frames.
 
-### 3. Потоковые возможности
+### 3. Streaming Capabilities
 
-Технологии для обеспечения взаимодействия в реальном времени:
+Technologies enabling real-time interaction:
 
-- **Предварительное заполнение и инкрементное кодирование** для потоковой обработки входных данных;
-- **DiT-модель со скользящим окном** для декодирования аудиотокенов с минимальной задержкой.
-
-⭐ Не забудьте поставить звезду репозиторию, если обзор оказался полезным!
+- **Prefill and Incremental Encoding** for streaming input processing;
+- **Sliding-Window DiT Model** for decoding audio tokens with minimal latency.
 
 ---
 
-<p align="center">Исследуйте вместе с нами 🚀</p>
+<div align="center">
+
+**Explore with us 🚀**
+
+⭐ Star this repository if you found it helpful
+
+</div>

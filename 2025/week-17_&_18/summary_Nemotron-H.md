@@ -1,272 +1,271 @@
-# Nemotron-H: Семейство точных и эффективных гибридных моделей Mamba-Transformer  
+# Nemotron-H: A Family of Accurate and Efficient Hybrid Mamba-Transformer Models
 
-## Содержание
+## Table of Contents
 0. [TL;DR](#tl;dr)  
-1. [Введение](#введение)  
-2. [Дизайн гибридной архитектуры](#дизайн-гибридной-архитектуры)  
-3. [Методология обучения](#методология-обучения)  
-4. [Сжатие модели с помощью MiniPuzzle](#сжатие-модели-с-помощью-minipuzzle)  
-5. [Повышение производительности и эффективности](#повышение-производительности-и-эффективности)  
-6. [Применение и универсальность](#применение-и-универсальность)  
-7. [Заключение](#заключение)
+1. [Introduction](#introduction)  
+2. [Hybrid Architecture Design](#hybrid-architecture-design)  
+3. [Training Methodology](#training-methodology)  
+4. [Model Compression with MiniPuzzle](#model-compression-with-minipuzzle)  
+5. [Performance and Efficiency Improvements](#performance-and-efficiency-improvements)  
+6. [Applications and Universality](#applications-and-universality)  
+7. [Conclusion](#conclusion)
 
 ## **0. TL;DR**
 
-## Основная тема
-Внедрение и характеристика Nemotron-H, семейства больших языковых моделей (LLM) от NVIDIA, использующих гибридную архитектуру, сочетающую слои Transformer и Mamba для повышения эффективности и точности, особенно при обработке длинных последовательностей.
+## Core Theme
+The introduction and characterization of Nemotron-H, a family of large language models (LLMs) from NVIDIA, utilizing a hybrid architecture that combines Transformer and Mamba layers to enhance efficiency and accuracy, particularly for processing long sequences.
 
-## **Ключевые идеи и факты**
+## **Key Ideas and Facts**
 
-### **Гибридная архитектура**
-- Nemotron-H сочетает сильные стороны Transformer и Mamba.
-- Слои Mamba, основанные на моделях пространства состояний (SSM), имеют постоянную вычислительную и объемную сложность на токен, что делает их очень эффективными для длинных последовательностей.
-- Слои самовнимания Transformer сохраняются в стратегически расположенных местах для захвата глобальных отношений.
+### **Hybrid Architecture**
+- Nemotron-H leverages the strengths of both Transformer and Mamba.
+- Mamba layers, based on State Space Models (SSMs), offer constant computational and memory complexity per token, making them highly efficient for long sequences.
+- Transformer self-attention layers are retained at strategically placed positions to capture global relationships.
 
-> "Семейство моделей Nemotron-H решает это ограничение, представляя гибридную архитектуру, которая сочетает в себе сильные стороны Transformer с эффективностью слоев Mamba."
+> "The Nemotron-H family addresses this limitation by introducing a hybrid architecture that combines the strengths of Transformer with the efficiency of Mamba layers."
 
-> "Разработанные NVIDIA модели Nemotron-H стратегически заменяют большую часть слоев самовнимания в Transformer слоями Mamba..."
+> "NVIDIA's Nemotron-H models strategically replace the majority of Transformer self-attention layers with Mamba layers..."
 
-> "В отличие от самовнимания, вычислительная и объемная сложность которого масштабируются квадратично с длиной последовательности, слои Mamba предлагают постоянную вычислительную и объемную сложность на токен..."
+> "Unlike self-attention, whose computational and memory complexity scales quadratically with sequence length, Mamba layers provide constant computational and memory complexity per token..."
 
-- Примерно 8% слоев в моделях Nemotron-H-8B/56B составляют слои самовнимания, равномерно распределенные по всей модели.
+- Approximately 8% of layers in Nemotron-H-8B/56B models are self-attention layers, uniformly distributed across the entire model.
 
-### **Повышенная эффективность логического вывода**
-- Гибридная архитектура приводит к значительному увеличению пропускной способности при логическом выводе, особенно для длинных последовательностей (65 536 токенов).
+### **Enhanced Inference Efficiency**
+- The hybrid architecture leads to significantly higher inference throughput, especially for long sequences (65,536 tokens).
 
-> "Nemotron-H-56B предлагает в 2,4 раза более высокую пропускную способность, чем Llama-3.1-70B, при более высоких уровнях точности." (Рисунок 1)
+> "Nemotron-H-56B offers 2.4x higher throughput than Llama-3.1-70B at higher accuracy levels." (Figure 1)
 
-> "Nemotron-H-56B достигает до 3 раз более высокой пропускной способности при выводе, чем Qwen-2.5-72B и Llama-3.1-70B"
+> "Nemotron-H-56B achieves up to 3x higher inference throughput than Qwen-2.5-72B and Llama-3.1-70B"
 
-> "Nemotron-H-8B обеспечивает в 1,8 раза более высокую пропускную способность, чем Qwen-2.5-7B при аналогичных уровнях точности"
+> "Nemotron-H-8B provides 1.8x higher throughput than Qwen-2.5-7B at comparable accuracy levels"
 
-### **Высокая точность**
-- Несмотря на изменения в архитектуре, модели Nemotron-H демонстрируют конкурентоспособную или превосходящую точность по сравнению с чистыми моделями Transformer аналогичного размера в широком спектре тестов.
+### **High Accuracy**
+- Despite architectural changes, Nemotron-H models demonstrate competitive or superior accuracy compared to pure Transformer models of similar size across a broad range of benchmarks.
 
-> "Nemotron-H-56B превосходит Llama-3.1-70B в 16 из 17 оцененных задач"
+> "Nemotron-H-56B outperforms Llama-3.1-70B in 16 out of 17 evaluated tasks"
 
-- Модели демонстрируют особенно высокую производительность в задачах математического мышления, что может быть связано с включением значительной доли академических данных (8,8%) и данных по коду (20%) в обучающий набор.
+- Models show particularly strong performance in mathematical reasoning tasks, potentially linked to the inclusion of substantial academic data (8.8%) and code data (20%) in the training set.
 
-## **Методология обучения**
+## **Training Methodology**
 
-### **Данные**
-- Обучение проводилось на разнообразной смеси данных, включая веб-сканирование (59% для 56B), код (20%) и академический контент (8,8%), для развития широкого спектра возможностей.
-- Объем данных для модели 56B составил около 20 триллионов токенов.
+### **Data**
+- Training was conducted on a diverse data mixture including web scraping (59% for 56B), code (20%), and academic content (8.8%) to develop a broad spectrum of capabilities.
+- The 56B model was trained on approximately 20 trillion tokens.
 
-### **Обучение FP8**
-- Использование 8-битной арифметики с плавающей запятой (FP8) для обучения значительно снижает требования к памяти и вычислительные затраты, сохраняя при этом качество модели.
-- Метод включает текущее масштабирование, сохранение точности BF16 для определенных слоев и постепенную сходимость с обучением BF16.
+### **FP8 Training**
+- The use of 8-bit floating-point arithmetic (FP8) for training significantly reduces memory and computational requirements while preserving model quality.
+- The method includes dynamic scaling, BF16 precision retention for specific layers, and gradual convergence from BF16 training.
 
-> "Значительным нововведением в разработке Nemotron-H является использование 8-битной арифметики с плавающей запятой (FP8) для обучения, что снижает требования к памяти и вычислительные затраты при сохранении качества модели"
+> "A significant innovation in Nemotron-H development is the use of 8-bit floating-point arithmetic (FP8) for training, which reduces memory and computational requirements while preserving model quality"
 
-> "Результаты показывают, что обучение FP8 может соответствовать или превосходить производительность обучения BF16 по различным тестам" (Рисунок 5)
+> "Results show that FP8 training can match or exceed BF16 training performance across various benchmarks" (Figure 5)
 
-### **Сжатие модели с помощью MiniPuzzle**
-- Разработана новая структура сжатия, сочетающая обрезку, поиск нейронной архитектуры и дистилляцию знаний для дальнейшего повышения эффективности развертывания.
-- MiniPuzzle включает оценку важности слоев, поиск архитектуры-кандидата и дистилляцию.
-- Nemotron-H-56B был успешно сжат до Nemotron-H-47B, что привело к сокращению параметров на 16%, сохранению сопоставимой точности и увеличению пропускной способности при логическом выводе на 20%.
+### **Model Compression with MiniPuzzle**
+- A novel compression framework combining pruning, neural architecture search, and knowledge distillation was developed to further improve deployment efficiency.
+- MiniPuzzle includes layer importance evaluation, candidate architecture search, and distillation.
+- Nemotron-H-56B was successfully compressed to Nemotron-H-47B, reducing parameters by 16%, preserving comparable accuracy, and increasing inference throughput by 20%.
 
-## **Применение и универсальность**
-Nemotron-H разработан как универсальные базовые модели с потенциалом для различных применений:
+## **Applications and Universality**
+Nemotron-H is designed as a universal base model with potential for diverse applications:
 
-- **Vision-Language**: Базовые модели были расширены для создания моделей vision-language (VLM), демонстрирующих самые современные результаты в соответствующих тестах (VQAv2, GQA, VizWiz).
-- **Генерация кода**: Модели демонстрируют сильные возможности в задачах, связанных с кодом, что связано со значительным объемом данных кода в обучающем наборе.
-- **Обработка длинного контекста**: Гибридная архитектура особенно хорошо подходит для эффективной обработки длинных контекстов.
-- **Адаптация данных для способностей**: Распределение данных обучения может быть скорректировано для развития специфических возможностей, например, компетенций в STEM-областях, без изменения архитектуры.
+- **Vision-Language**: Base models were extended to create vision-language models (VLMs), achieving state-of-the-art results on corresponding benchmarks (VQAv2, GQA, VizWiz).
+- **Code Generation**: Models demonstrate strong capabilities in code-related tasks, attributable to the large volume of code data in the training set.
+- **Long Context Processing**: The hybrid architecture is particularly well-suited for efficient long-context processing.
+- **Data-Driven Capability Adaptation**: The training data distribution can be adjusted to develop specific capabilities, such as STEM competencies, without modifying the architecture.
 
-## **Вывод**
-Семейство Nemotron-H представляет собой значительный шаг вперед в разработке LLM, успешно решая проблемы эффективности традиционных Transformer-ов при сохранении высокой точности. Гибридная архитектура, инновационная методология обучения FP8 и структура сжатия MiniPuzzle делают Nemotron-H эффективным и мощным решением для обработки длинных контекстов и различных приложений. Ожидается, что доступность этих моделей в популярных фреймворках будет способствовать их более широкому внедрению и дальнейшим исследованиям гибридных архитектур.
+## **Conclusion**
+The Nemotron-H family represents a significant advancement in LLM development, successfully addressing the efficiency limitations of traditional Transformers while preserving high accuracy. The hybrid architecture, innovative FP8 training methodology, and MiniPuzzle compression framework make Nemotron-H an efficient and powerful solution for long-context processing and diverse applications. The availability of these models in popular frameworks is expected to accelerate their adoption and further research into hybrid architectures.
 
 ---
 
-## **1. Введение**
-Большие языковые модели (LLM) продемонстрировали замечательные возможности в различных задачах, но их вычислительные потребности во время логического вывода остаются серьезной проблемой, особенно для обработки длинных последовательностей. Семейство моделей Nemotron-H решает это ограничение, представляя гибридную архитектуру, которая сочетает в себе сильные стороны Transformer с эффективностью слоев Mamba.
+## **1. Introduction**
+Large language models (LLMs) have demonstrated remarkable capabilities across diverse tasks, but their computational demands during inference remain a serious challenge, especially for processing long sequences. The Nemotron-H family addresses this limitation by introducing a hybrid architecture that combines the strengths of Transformer with the efficiency of Mamba layers.
 
-![Figure_01](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_01.jpeg)
+![Figure_01](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_01.jpeg  )
 
-*Сравнение пропускной способности и точности. Рисунок 1: Сравнение моделей Nemotron-H с другими современными LLM с точки зрения пропускной способности (токенов/с/GPU) и точности на эталонном тесте MMLU. Nemotron-H-56B предлагает в 2,4 раза более высокую пропускную способность, чем Llama-3.1-70B, при более высоких уровнях точности.*
+*Comparison of throughput and accuracy. Figure 1: Comparison of Nemotron-H models with other modern LLMs in terms of throughput (tokens/s/GPU) and accuracy on the MMLU benchmark. Nemotron-H-56B offers 2.4x higher throughput than Llama-3.1-70B at higher accuracy levels.*
 
-Разработанные NVIDIA модели Nemotron-H стратегически заменяют большую часть слоев самовнимания в Transformer слоями Mamba, которые основаны на моделях пространства состояний (SSM). В отличие от самовнимания, вычислительная и объемная сложность которого масштабируются квадратично с длиной последовательности, слои Mamba предлагают постоянную вычислительную и объемную сложность на токен, что делает их особенно эффективными для генерации длинных последовательностей.
+NVIDIA's Nemotron-H models strategically replace the majority of self-attention layers in Transformers with Mamba layers, which are based on State Space Models (SSMs). Unlike self-attention, whose computational and memory complexity scales quadratically with sequence length, Mamba layers provide constant computational and memory complexity per token, making them especially efficient for generating long sequences.
 
-Ключевое новшество Nemotron-H заключается в тщательном балансировании этих двух архитектурных парадигм для поддержания или улучшения точности при значительном увеличении скорости логического вывода. Этот подход отвечает критической потребности в сообществе LLM в моделях, которые могут эффективно обрабатывать длинные контексты без ущерба для производительности.
+The key innovation of Nemotron-H lies in the careful balancing of these two architectural paradigms to maintain or improve accuracy while significantly increasing inference speed. This approach addresses the critical community need for LLMs that can efficiently handle long contexts without sacrificing performance.
 
-## **2. Дизайн гибридной архитектуры**
+## **2. Hybrid Architecture Design**
 
-Архитектура Nemotron-H сочетает в себе слои Mamba-2 с традиционными компонентами Transformer для создания сбалансированной гибридной конструкции. Структура модели стратегически располагает слои самовнимания, чтобы использовать их сильные стороны в захвате глобальных отношений, в то время как слои Mamba используются для эффективной обработки последовательностей.
+The Nemotron-H architecture combines Mamba-2 layers with traditional Transformer components to create a balanced hybrid design. The model structure strategically places self-attention layers to leverage their strength in capturing global relationships, while Mamba layers are used for efficient sequence processing.
 
-![Figure_02](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_02.png)
+![Figure_02](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_02.png  )
 
-*Рисунок 2 | Архитектуры моделей Nemotron-H-8B/56B. Примерно 8% от общего числа слоев в модели составляют слои самовнимания (self-attention); эти слои равномерно распределены по всей модели. Остальная часть модели состоит из чередующихся слоев Mamba-2 и FFN.*
+*Figure 2 | Architectures of Nemotron-H-8B/56B models. Approximately 8% of total layers are self-attention layers; these are uniformly distributed across the model. The remainder consists of alternating Mamba-2 and FFN layers.*
 
-Как показано на рисунке 2, как Nemotron-H-8B, так и Nemotron-H-56B следуют схожей схеме: серия начальных пар слоев Mamba-2 и FFN, за которой следует средняя секция, которая включает в себя один слой внимания среди нескольких пар Mamba-2 и FFN, и завершается дополнительными слоями Mamba-2 и FFN. Ключевое различие заключается в количестве повторений — в то время как Nemotron-H-8B имеет 4 повторения в своей средней секции, Nemotron-H-56B имеет 10.
+As shown in Figure 2, both Nemotron-H-8B and Nemotron-H-56B follow a similar scheme: an initial series of Mamba-2 and FFN layer pairs, followed by a middle section containing one self-attention layer among several Mamba-2 and FFN pairs, and concluding with additional Mamba-2 and FFN layers. The key difference lies in the number of repetitions—while Nemotron-H-8B has 4 repetitions in its middle section, Nemotron-H-56B has 10.
 
-Эта архитектура была тщательно разработана посредством обширных экспериментов, чтобы найти оптимальный баланс между вычислительной эффективностью и возможностями модели. Сохраняя некоторые слои самовнимания, Nemotron-H сохраняет способность моделировать определенные глобальные отношения, с которыми слои Mamba могут испытывать трудности, при этом используя эффективность Mamba для большинства операций обработки последовательностей.
+This architecture was meticulously designed through extensive experimentation to find the optimal balance between computational efficiency and model capability. By retaining some self-attention layers, Nemotron-H preserves the model’s ability to capture certain global relationships that Mamba layers may struggle with, while leveraging Mamba’s efficiency for the majority of sequence processing operations.
 
-В архитектуре используются несколько ключевых компонентов:
+Key components used in the architecture include:
 
-1. **Слои Mamba-2:** обеспечивают эффективное моделирование последовательностей с постоянной вычислительной сложностью на токен;
-2. **Слои самовнимания:** стратегически расположены для захвата глобальных отношений;
-3. **Прямые нейронные сети (FFN):** обрабатывают выходы слоев Mamba и внимания.
+1. **Mamba-2 layers**: Enable efficient sequence modeling with constant computational complexity per token;
+2. **Self-attention layers**: Strategically positioned to capture global relationships;
+3. **Feedforward Networks (FFN)**: Process outputs from Mamba and attention layers.
 
-Этот гибридный подход позволяет Nemotron-H обрабатывать последовательности более эффективно, чем чистые модели Transformer, при этом поддерживая сопоставимую или лучшую точность в широком диапазоне задач.
+This hybrid approach allows Nemotron-H to process sequences more efficiently than pure Transformer models while maintaining comparable or superior accuracy across a wide range of tasks.
 
-## **3. Методология обучения**
+## **3. Training Methodology**
 
-Модели Nemotron-H обучались с использованием комбинации инновационных подходов для обеспечения высокой производительности и эффективности:
+Nemotron-H models were trained using a combination of innovative approaches to ensure high performance and efficiency:
 
-### **3.1 Курирование и подготовка данных**
+### **3.1 Data Curation and Preparation**
 
-Обучающие данные состояли из разнообразной смеси источников, тщательно сбалансированных для развития различных возможностей:
+Training data consisted of a diverse mixture of sources, carefully balanced to develop various capabilities:
 
-![Figure_03](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_05.jpeg)
+![Figure_03](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_05.jpeg  )
 
-*Рисунок 3: Распределение источников данных предварительного обучения для моделей Nemotron-H, показывающее баланс между веб-сканированием, кодом, академическими и другими типами данных.*
+*Figure 3: Distribution of pre-training data sources for Nemotron-H models, showing the balance between web scraping, code, academic, and other data types.*
 
-Модель 56B была обучена примерно на 20 триллионах токенов, при этом данные веб-сканирования составляли наибольшую часть (59%), за ними следовали код (20%) и академический контент (8,8%). Смесь данных была разработана для обеспечения всестороннего охвата общих знаний при одновременном развитии сильных возможностей в специализированных областях, таких как кодирование и математика.
+The 56B model was trained on approximately 20 trillion tokens, with web-scraped data comprising the largest portion (59%), followed by code (20%) and academic content (8.8%). The data mixture was designed to ensure comprehensive coverage of general knowledge while simultaneously developing strong capabilities in specialized domains such as coding and mathematics.
 
-Для этапов постобработки распределение данных было скорректировано с упором на примеры контролируемой тонкой настройки (SFT), как показано на последующих графиках распределения данных.
+For post-processing stages, data distribution was adjusted to emphasize supervised fine-tuning (SFT) examples, as shown in subsequent data distribution plots.
 
-### **3.2 Рецепт обучения FP8**
+### **3.2 FP8 Training Recipe**
 
-Значительным нововведением в разработке Nemotron-H является использование 8-битной арифметики с плавающей запятой (FP8) для обучения, что снижает требования к памяти и вычислительные затраты при сохранении качества модели:
+A significant innovation in Nemotron-H development is the use of 8-bit floating-point arithmetic (FP8) for training, which reduces memory and computational requirements while preserving model quality:
 
-![Относительная разница в потерях при обучении между FP8 и BF16](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_06.jpeg)
+![Relative loss difference between FP8 and BF16 training](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_06.jpeg  )
 
-*Рисунок 4: Относительная разница в потерях при обучении между FP8 и BF16, показывающая сходимость по мере прогресса обучения.*
+*Figure 4: Relative loss difference between FP8 and BF16 training, showing convergence over training progress.*
 
-Рецепт обучения FP8 включает в себя:
+The FP8 training recipe includes:
 
-- Текущее масштабирование для каждого тензора для повышения стабильности
-- Сохранение первых и последних четырех GEMM модели в точности BF16
-- Постепенную сходимость с обучением BF16 с течением времени
+- Dynamic scaling for each tensor to enhance stability
+- Preservation of the first and last four GEMMs of the model in BF16 precision
+- Gradual convergence from BF16 training over time
 
-Результаты показывают, что обучение FP8 может соответствовать или превосходить производительность обучения BF16 по различным тестам:
+Results show that FP8 training can match or exceed BF16 training performance across various benchmarks:
 
-![Сравнение обучения FP8 и BF16](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_07.jpeg)
+![Comparison of FP8 and BF16 training](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_07.jpeg  )
 
-*Рисунок 5: Сравнение обучения FP8 и BF16 по различным тестам, показывающее сопоставимую или лучшую производительность при обучении FP8.*
+*Figure 5: Comparison of FP8 and BF16 training across various benchmarks, demonstrating comparable or superior performance with FP8 training.*
 
-Этот метод позволяет проводить более эффективное обучение, сохраняя или улучшая качество модели, о чем свидетельствуют показатели производительности на тестах MMLU, понимания здравого смысла, генерации кода и GSM8K.
+This method enables more efficient training while preserving or improving model quality, as evidenced by performance metrics on MMLU, commonsense reasoning, code generation, and GSM8K benchmarks.
 
-## **4. Сжатие модели с помощью MiniPuzzle**
+## **4. Model Compression with MiniPuzzle**
 
-Чтобы еще больше повысить эффективность развертывания, исследователи разработали MiniPuzzle, новую структуру сжатия, которая сочетает в себе обрезку, поиск нейронной архитектуры и дистилляцию знаний:
+To further enhance deployment efficiency, researchers developed MiniPuzzle, a novel compression framework combining pruning, neural architecture search, and knowledge distillation:
 
-![Рабочий процесс структуры сжатия MiniPuzzle](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_08.jpeg)
+![MiniPuzzle compression framework workflow](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_08.jpeg  )
 
-*Рисунок 6: Рабочий процесс структуры сжатия MiniPuzzle, показывающий переход от предварительно обученной модели к сжатой модели посредством оценки важности, поиска нейронной архитектуры и дистилляции.*
+*Figure 6: MiniPuzzle compression framework workflow, showing transition from a pre-trained model to a compressed model via importance evaluation, neural architecture search, and distillation.*
 
-**Подход MiniPuzzle состоит из нескольких этапов:**
+**The MiniPuzzle approach consists of several stages:**
 
-1. **Оценка важности:** анализ вклада каждого слоя в производительность модели
+1. **Importance Estimation**: Analysis of each layer’s contribution to model performance
 
 ```python
 def importance_estimation(model: Any, dataset: Any) -> List[float]:
     """
     Description:
     ---------------
-        Вычисляет оценки важности для каждого слоя модели на основе
-        влияния слоя на функцию потерь при его временном отключении.
+        Computes importance scores for each model layer based on
+        the impact of temporarily disabling the layer on the loss function.
     """
 
-    # Вычисление оценок важности для каждого слоя
+    # Compute importance scores for each layer
     scores: List[float] = []
     for layer in model.layers:
-        # Зануление выходов слоя и измерение влияния на потери
+        # Zero out layer outputs and measure impact on loss
         layer_score = measure_impact_on_loss(model, layer, dataset)
         scores.append(layer_score)
 
     return scores
 ```
 
-2. **Анализ важности слоев:** понимание того, какие слои вносят наибольший вклад в производительность модели
+2. **Layer Importance Analysis**: Understanding which layers contribute most to model performance
 
-![Оценки важности для каждого слоя](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_09.jpeg)
+![Layer importance scores](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_09.jpeg  )
 
-*Рисунок 7: Оценки важности для каждого слоя, показывающие различные вклады различных типов слоев модели.*
+*Figure 7: Layer importance scores, showing varying contributions of different layer types.*
 
-3. **Условный поиск нейронной архитектуры:** изучение кандидатов на сжатую архитектуру
+3. **Conditional Neural Architecture Search**: Exploration of candidate compressed architectures
 
-![Шаблоны выбора слоев для различных кандидатов](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_10.jpeg)
+![Layer selection patterns for various candidates](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_10.jpeg  )
 
-*Рисунок 8: Шаблоны выбора слоев для различных кандидатов на архитектуру, показывающие, какие слои сохраняются в каждой потенциальной сжатой модели.*
+*Figure 8: Layer selection patterns for various architecture candidates, showing which layers are retained in each potential compressed model.*
 
-4. **Компромисс между памятью и производительностью:** оценка моделей на основе использования памяти и точности
+4. **Memory-Performance Trade-off**: Evaluation of models based on memory usage and accuracy
 
-![Поиск компромисса между памятью и производительностью](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_11.jpeg)
+![Memory-performance trade-off search](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_11.jpeg  )
 
-*Рисунок 9: Компромисс между предполагаемой нагрузкой на память и производительностью в тестах для архитектур-кандидатов.*
+*Figure 9: Trade-off between estimated memory load and performance on benchmarks for candidate architectures.*
 
-5. **Дистилляция знаний:** обучение сжатой модели, чтобы соответствовать или превосходить возможности исходной
+5. **Knowledge Distillation**: Training the compressed model to match or exceed the original model’s capabilities
 
-Благодаря этому процессу Nemotron-H-56B был успешно сжат до Nemotron-H-47B, что позволило сократить количество параметров на 16%, сохранив сопоставимую точность и повысив пропускную способность при выводе на 20%.
+Through this process, Nemotron-H-56B was successfully compressed to Nemotron-H-47B, reducing parameters by 16%, preserving comparable accuracy, and increasing inference throughput by 20%.
 
-## **5. Повышение производительности и эффективности**
+## **5. Performance and Efficiency Improvements**
 
-Модели Nemotron-H демонстрируют значительное повышение производительности и эффективности по сравнению с сопоставимыми моделями на основе Transformer:
+Nemotron-H models demonstrate significant performance and efficiency improvements over comparable Transformer-based models:
 
-### **Пропускная способность при выводе**
+### **Inference Throughput**
 
-Гибридная архитектура обеспечивает значительно более быстрый вывод, особенно для длинных последовательностей:
+The hybrid architecture enables substantially faster inference, especially for long sequences:
 
-- Nemotron-H-56B достигает до 3 раз более высокой пропускной способности при выводе, чем Qwen-2.5-72B и Llama-3.1-70B
-- Nemotron-H-8B обеспечивает в 1,8 раза более высокую пропускную способность, чем Qwen-2.5-7B при аналогичных уровнях точности
+- Nemotron-H-56B achieves up to 3x higher inference throughput than Qwen-2.5-72B and Llama-3.1-70B
+- Nemotron-H-8B provides 1.8x higher throughput than Qwen-2.5-7B at comparable accuracy levels
 
-![Сравнение Nemotron-H-8B с моделями аналогичного размера](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_12.jpeg)
+![Comparison of Nemotron-H-8B with similarly sized models](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_12.jpeg  )
 
-*Рисунок 10: Сравнение Nemotron-H-8B с моделями аналогичного размера с точки зрения пропускной способности и точности.*
+*Figure 10: Comparison of Nemotron-H-8B with similarly sized models in terms of throughput and accuracy.*
 
-Эти улучшения эффективности особенно заметны при обработке длинных последовательностей (65 536 токенов в представленных примерах), что подчеркивает преимущество постоянной вычислительной сложности слоев Mamba на токен.
+These efficiency gains are especially pronounced when processing long sequences (65,536 tokens in the presented examples), highlighting the advantage of Mamba layers’ constant per-token computational complexity.
 
-### **Точность по результатам тестов**
+### **Benchmark Accuracy**
 
-Несмотря на архитектурные изменения, модели Nemotron-H сохраняют высокую производительность в широком диапазоне тестов:
+Despite architectural changes, Nemotron-H models maintain high performance across a broad range of benchmarks:
 
-- Nemotron-H-56B превосходит Llama-3.1-70B в 16 из 17 оцененных задач
-- Модели демонстрируют особенно высокую производительность в задачах математического мышления
+- Nemotron-H-56B outperforms Llama-3.1-70B in 16 out of 17 evaluated tasks
+- Models show particularly strong performance in mathematical reasoning tasks
 
-![Сравнение Nemotron-H и других моделей в тесте MMLU](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_13.jpeg)
+![Comparison of Nemotron-H and other models on MMLU](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_13.jpeg  )
 
-*Рисунок 11: Сравнение Nemotron-H и других моделей в тесте MMLU, показывающее конкурентоспособную производительность.*
+*Figure 11: Comparison of Nemotron-H and other models on MMLU, showing competitive performance.*
 
-Модели были оценены с помощью комплексного набора тестов, включая MMLU, GSM8K, MATH, HumanEval и различные задачи на рассуждение, неизменно демонстрируя конкурентоспособную или превосходящую производительность по сравнению с моделями Transformer аналогичного размера.
+Models were evaluated using a comprehensive suite of benchmarks, including MMLU, GSM8K, MATH, HumanEval, and various reasoning tasks, consistently demonstrating competitive or superior performance compared to similarly sized Transformer models.
 
-## **6. Применения и универсальность**
+## **6. Applications and Universality**
 
-Модели Nemotron-H были разработаны как универсальные базовые модели, которые можно адаптировать для различных приложений:
+Nemotron-H models were designed as universal base models adaptable to diverse applications:
 
-### **Возможности Vision-Language**
+### **Vision-Language Capabilities**
 
-Базовые модели были расширены для создания моделей vision-language (VLM) в соответствии с архитектурой NVLM-D. Эти VLM продемонстрировали самую современную производительность в тестах, таких как VQAv2, GQA и VizWiz, что показывает адаптируемость гибридной архитектуры к мультимодальным задачам.
+Base models were extended to create vision-language models (VLMs) following the NVLM-D architecture. These VLMs achieved state-of-the-art performance on benchmarks such as VQAv2, GQA, and VizWiz, demonstrating the adaptability of the hybrid architecture to multimodal tasks.
 
-### **Генерация кода**
+### **Code Generation**
 
-Модели демонстрируют особенно высокую производительность в задачах, связанных с кодом. Включение значительной доли данных кода (20%) в обучающую смесь способствует их способности понимать и генерировать высококачественный код на нескольких языках программирования.
+Models demonstrate particularly strong performance in code-related tasks. The inclusion of a substantial volume of code data (20%) in the training mixture contributes to their ability to understand and generate high-quality code across multiple programming languages.
 
-### **Обработка длинного контекста**
+### **Long Context Processing**
 
-Одним из наиболее значительных преимуществ гибридной архитектуры является ее способность эффективно обрабатывать длинные контексты. Модель Nemotron-H-8B была специально настроена для возможностей длинного контекста, демонстрируя высокую производительность в тесте RULER и других задачах оценки длинного контекста.
+One of the most significant advantages of the hybrid architecture is its ability to efficiently process long contexts. The Nemotron-H-8B model was specifically tuned for long-context capabilities, demonstrating high performance on the RULER benchmark and other long-context evaluation tasks.
 
-### **Распределение данных для различных способностей**
+### **Data Distribution for Different Capabilities**
 
-Исследователи тщательно настроили распределение данных для различных этапов обучения, чтобы развить определенные способности:
+Researchers carefully calibrated the data distribution across training stages to develop specific capabilities:
 
-![Распределение данных обучения](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_14.jpeg)
+![Training data distribution](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-17_&_18/assets/Figure_14.jpeg  )
 
-*Рисунок 12: Распределение данных обучения, оптимизированное для STEM-компетенций, с повышенным акцентом на математический и кодовый контент.*
+*Figure 12: Training data distribution optimized for STEM competencies, with increased emphasis on mathematical and code content.*
 
-Регулируя долю различных типов данных (веб-сканирование, код, математика, академические и т. д.), исследователи могли улучшить определенные возможности модели, не требуя архитектурных изменений.
+By adjusting the proportion of different data types (web scraping, code, mathematics, academic, etc.), researchers were able to enhance specific model capabilities without requiring architectural changes.
 
-## **7. Заключение**
+## **7. Conclusion**
 
-Семейство моделей Nemotron-H представляет собой значительный прогресс в разработке БЯМ, успешно сочетая сильные стороны архитектур Transformer и Mamba для создания моделей, которые являются одновременно точными и эффективными. Ключевые достижения включают:
+The Nemotron-H family represents a significant leap forward in LLM development, successfully combining the strengths of Transformer and Mamba architectures to create models that are both accurate and efficient. Key achievements include:
 
-1. Гибридную архитектуру, которая стратегически интегрирует слои Mamba с механизмом самовнимания для баланса производительности и эффективности.
-2. Рецепт обучения FP8, который снижает вычислительные и требования к памяти, сохраняя при этом качество модели.
-3. Фреймворк сжатия MiniPuzzle, который обеспечивает дальнейшее повышение эффективности за счет целевого прунинга и дистилляции.
-4. Демонстрация значительного ускорения вывода (до 3 раз) по сравнению с Transformer-моделями аналогичного размера.
-5. Конкурентоспособная или превосходящая точность в широком диапазоне бенчмарк-задач.
+1. A hybrid architecture that strategically integrates Mamba layers with self-attention mechanisms to balance performance and efficiency.
+2. An FP8 training recipe that reduces computational and memory requirements while preserving model quality.
+3. The MiniPuzzle compression framework, which further enhances efficiency through targeted pruning and distillation.
+4. Demonstration of significant inference speedup (up to 3x) compared to similarly sized Transformer models.
+5. Competitive or superior accuracy across a wide range of benchmark tasks.
 
-Успех моделей Nemotron-H указывает на то, что гибридные архитектуры представляют собой перспективное направление для будущего развития БЯМ, особенно по мере того, как приложения все больше требуют эффективной обработки длинных контекстов. Решая вычислительные узкие места традиционных Transformer-ов, сохраняя при этом их сильные стороны, Nemotron-H предлагает практическое решение для развертывания мощных языковых моделей в средах с ограниченными ресурсами.
+The success of Nemotron-H models indicates that hybrid architectures represent a promising direction for the future of LLM development, particularly as applications increasingly demand efficient long-context processing. By addressing the computational bottlenecks of traditional Transformers while preserving their strengths, Nemotron-H offers a practical solution for deploying powerful language models in resource-constrained environments.
 
-Планируемый выпуск этих моделей с поддержкой в популярных фреймворках, таких как Hugging Face, NeMo и Megatron-LM, позволит более широкому AI-сообществу воспользоваться этими достижениями и в дальнейшем изучить потенциал гибридных архитектур для языкового моделирования.
-
+The planned release of these models with support in popular frameworks such as Hugging Face, NeMo, and Megatron-LM will enable the broader AI community to leverage these advances and further explore the potential of hybrid architectures for language modeling.

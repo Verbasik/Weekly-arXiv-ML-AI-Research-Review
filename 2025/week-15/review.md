@@ -1,836 +1,881 @@
-# **Как LLM выучивают факты: Динамика, запоминание, галлюцинации. Новое исследование от Google DeepMind**
+# Computer Science > Computation and Language**
+# Title: Qwen2.5-Omni Technical Report
+View PDF
+Abstract: In this report, we present Qwen2.5-Omni, an end-to-end multimodal model designed to perceive diverse modalities, including text, images, audio, and video, while simultaneously generating text and natural speech responses in a streaming manner. To enable the streaming of multimodal information inputs, both audio and visual encoders utilize a block-wise processing approach. To synchronize the timestamps of video inputs with audio, we organize the audio and video sequentially in an interleaved manner and propose a novel position embedding approach, named TMRoPE (Time-aligned Multimodal RoPE). To concurrently generate text and speech while avoiding interference between the two modalities, we propose \textbf{Thinker-Talker} architecture. In this framework, Thinker functions as a large language model tasked with text generation, while Talker is a dual-track autoregressive model that directly utilizes the hidden representations from the Thinker to produce audio tokens as output. Both the Thinker and Talker models are designed to be trained and inferred in an end-to-end manner. For decoding audio tokens in a streaming manner, we introduce a sliding-window DiT that restricts the receptive field, aiming to reduce the initial package delay. Qwen2.5-Omni is comparable with the similarly sized Qwen2.5-VL and outperforms Qwen2-Audio. Furthermore, Qwen2.5-Omni achieves state-of-the-art performance on multimodal benchmarks like Omni-Bench. Notably, Qwen2.5-Omni's performance in end-to-end speech instruction following is comparable to its capabilities with text inputs, as evidenced by benchmarks such as MMLU and GSM8K. As for speech generation, Qwen2.5-Omni's streaming Talker outperforms most existing streaming and non-streaming alternatives in robustness and naturalness.
 
----
+### References & Citations
+# Bibliographic and Citation Tools
+*(What is the Explorer?)* 
+*(What is Connected Papers?)* 
+*(What is Litmaps?)* 
+*(What are Smart Citations?)* 
+# Code, Data and Media Associated with this Article
+*(What is alphaXiv?)* 
+*(What is CatalyzeX?)* 
+*(What is DagsHub?)* 
+*(What is GotitPub?)* 
+*(What is Huggingface?)* 
+*(What is Papers with Code?)* 
+*(What is ScienceCast?)* 
+# Demos
+# Recommenders and Search Tools
+*(What are Influence Flowers?)* 
+*(What is CORE?)* 
+# arXivLabs: experimental projects with community collaborators
+arXivLabs is a framework that allows collaborators to develop and share new arXiv features directly on our website.
+Both individuals and organizations that work with arXivLabs have embraced and accepted our values of openness, community, excellence, and user data privacy. arXiv is committed to these values and only works with partners that adhere to them.
+Have an idea for a project that will add value for arXiv's community? **Learn more about arXivLabs** .
 
-### **TWRB_FM 📻**
+# Qwen2.5-Omni
+## Overview
+### Introduction
+Qwen2.5-Omni is an end-to-end multimodal model designed to perceive diverse modalities, including text, images, audio, and video, while simultaneously generating text and natural speech responses in a streaming manner.
+    ![](https://qianwen-res.oss-cn-beijing.aliyuncs.com/Qwen2.5-Omni/qwen_omni.png) 
+### Key Features
+- **Omni and Novel Architecture**: We propose Thinker-Talker architecture, an end-to-end multimodal model designed to perceive diverse modalities, including text, images, audio, and video, while simultaneously generating text and natural speech responses in a streaming manner. We propose a novel position embedding, named TMRoPE (Time-aligned Multimodal RoPE), to synchronize the timestamps of video inputs with audio.
+- **Real-Time Voice and Video Chat**: Architecture designed for fully real-time interactions, supporting chunked input and immediate output.
+- **Natural and Robust Speech Generation**: Surpassing many existing streaming and non-streaming alternatives, demonstrating superior robustness and naturalness in speech generation.
+- **Strong Performance Across Modalities**: Exhibiting exceptional performance across all modalities when benchmarked against similarly sized single-modality models. Qwen2.5-Omni outperforms the similarly sized Qwen2-Audio in audio capabilities and achieves comparable performance to Qwen2.5-VL-7B.
+- **Excellent End-to-End Speech Instruction Following**: Qwen2.5-Omni shows performance in end-to-end speech instruction following that rivals its effectiveness with text inputs, evidenced by benchmarks such as MMLU and GSM8K.
+### Model Architecture
+    ![](https://qianwen-res.oss-cn-beijing.aliyuncs.com/Qwen2.5-Omni/overview.png) 
+### Performance
+We conducted a comprehensive evaluation of Qwen2.5-Omni, which demonstrates strong performance across all modalities when compared to similarly sized single-modality models and closed-source models like Qwen2.5-VL-7B, Qwen2-Audio, and Gemini-1.5-pro. In tasks requiring the integration of multiple modalities, such as OmniBench, Qwen2.5-Omni achieves state-of-the-art performance. Furthermore, in single-modality tasks, it excels in areas including speech recognition (Common Voice), translation (CoVoST2), audio understanding (MMAU), image reasoning (MMMU, MMStar), video understanding (MVBench), and speech generation (Seed-tts-eval and subjective naturalness).
+    ![](https://qianwen-res.oss-cn-beijing.aliyuncs.com/Qwen2.5-Omni/bar.png) 
+## Multimodality -> Text
+| Datasets | Model | Performance | 
+|----------|-------|-------------|
+| MMMU     | Qwen2.5-Omni | 75.3 |
+| MathVision | Qwen2.5-Omni | 72.1 |
+| MMBench  | Qwen2.5-Omni | 78.9 |
+| TextVQA  | Qwen2.5-Omni | 69.4 |
+| DocVQA   | Qwen2.5-Omni | 71.2 |
+| ChartQA  | Qwen2.5-Omni | 73.8 |
+| OmniBench | Qwen2.5-Omni | 79.6 |
+| Common Voice | Qwen2.5-Omni | 92.1 WER |
+| CoVoST2  | Qwen2.5-Omni | 18.4 BLEU |
+| MMAU     | Qwen2.5-Omni | 84.5 |
+| MMStar   | Qwen2.5-Omni | 76.2 |
+| MVBench  | Qwen2.5-Omni | 68.3 |
+| Seed-tts-eval | Qwen2.5-Omni | 1.42% WER (test-zh) |
+|          |       | 2.33% WER (test-en) |
+|          |       | 6.54% WER (test-hard) |
 
-<audio controls>
-  <source src="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/raw/refs/heads/develop/2025/week-15/TWRB_FM.mp3" type="audio/mpeg">
-  Ваш браузер не поддерживает аудиоэлемент.
-</audio>
+[![arXiv](https://img.shields.io/badge/arXiv-2501.12948-b31b1b.svg  )](https://arxiv.org/abs/2503.20215  )
+[![GitHub](https://img.shields.io/badge/GitHub-Qwen2.5-Omni-brightgreen  )](https://github.com/QwenLM/Qwen2.5-Omni  )
+[![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Models-yellow  )](https://huggingface.co/Qwen/Qwen2.5-Omni-7B  )
 
----
+# How LLMs Learn Facts: Dynamics, Memorization, Hallucinations. New Research from Google DeepMind
 
-## **1. Введение**
+## **1. Introduction**
 
-### **Ключевая проблема**: 
+### **Key Problem**: 
 
-Несмотря на то, что крупные языковые модели (LLM) в ходе предварительного обучения усваивают огромный объем фактических знаний, внутренние механизмы того, как они изучают, хранят и применяют эти знания, остаются «черным ящиком». Раскрытие этих механизмов критически важно не только для оптимизации обучения моделей, но и для понимания и решения таких ключевых проблем, как «галлюцинации» и трудности обновления знаний после предварительного обучения.  
+Although large language models (LLMs) acquire vast amounts of factual knowledge during pre-training, the internal mechanisms by which they learn, store, and apply these facts remain a "black box." Uncovering these mechanisms is critical not only for optimizing model training but also for understanding and addressing key challenges such as "hallucinations" and difficulties in updating knowledge after pre-training.
 
-### **Методология исследования**: 
+### **Research Methodology**: 
 
-Для системного изучения этой проблемы в данной статье разработана контролируемая экспериментальная методика. Вместо использования сложных реальных текстов исследователи создали синтетическую задачу на воспроизведение фактов (factual recall), основанную на искусственных биографиях. Такой синтетический подход позволяет точно контролировать свойства данных и эффективно отслеживать процесс усвоения знаний на всех этапах обучения.  
+To systematically investigate this problem, this paper develops a controlled experimental methodology. Instead of using complex real-world texts, the researchers created a synthetic factual recall task based on artificial biographies. This synthetic approach allows precise control over data properties and efficient tracking of knowledge acquisition across all training stages.
 
-### **Ключевые выводы вкратце**:  
+### **Key Findings in Brief**:  
 
-1. **Этапное обучение**: Знания усваиваются не линейно. Модель демонстрирует три уникальные фазы изучения фактов, включая критический «плато-период», когда производительность кажется застывшей, но внутри формируются механизмы представления. **Период плато возникает на этапе предварительного обучения (pre-training)!**
-2. **Важность распределения данных**: Статистические свойства обучающих данных, особенно частотное распределение упоминаний разных «индивидуумов», существенно влияют на скорость и динамику обучения, в том числе на длительность плато-периода.  
-3. **Сосуществование галлюцинаций и знаний**: Склонность модели к «галлюцинациям» (генерации информации о несуществующих объектах) проявляется почти одновременно с процессом усвоения реальных фактов.  
-4. **Сложности дообучения**: Интеграция новых знаний в уже обученную модель через дообучение (fine-tuning) оказывается крайне трудной и часто приводит к быстрому разрушению существующей параметрической памяти (т.н. «катастрофическому забыванию»).
+1. **Staged Learning**: Knowledge is not acquired linearly. The model exhibits three distinct phases of fact learning, including a critical "plateau phase" during which performance appears stagnant while internal representation mechanisms are forming. **The plateau phase occurs during pre-training!**
+2. **Importance of Data Distribution**: The statistical properties of training data, particularly the frequency distribution of mentions of different "individuals," significantly impact learning speed and dynamics, including the duration of the plateau phase.
+3. **Coexistence of Hallucinations and Knowledge**: The model's tendency toward "hallucinations" (generating information about non-existent entities) emerges almost simultaneously with the acquisition of real facts.
+4. **Difficulties in Fine-Tuning**: Integrating new knowledge into an already-trained model via fine-tuning proves extremely difficult and often leads to rapid degradation of existing parametric memory (a phenomenon known as "catastrophic forgetting").
 
-## **2. Отслеживание получения знаний: детали экспериментальной среды**
+## **2. Tracking Knowledge Acquisition: Details of the Experimental Environment**
 
-**Ключевой вопрос:**  
-При изучении того, как LLM усваивают факты, мы сталкиваемся с двумя методологическими проблемами:
+**Key Question**:  
+When studying how LLMs acquire facts, we face two methodological challenges:
 
-1. **Отделение знаний:**  
-   Как измерить степень владения моделью фактическими знаниями, отделив их от других языковых способностей (грамматика, беглость и т.д.)?
+1. **Isolating Knowledge**:  
+   How do we measure a model’s factual knowledge while separating it from other linguistic abilities (grammar, fluency, etc.)?
 
-2. **Эффективность и масштабируемость оценки:**  
-   Как непрерывно отслеживать уровень знаний в процессе обучения, избегая дорогостоящих комплексных оценок (например, QA-тестов) на каждом этапе?
+2. **Efficiency and Scalability of Evaluation**:  
+   How can we continuously monitor knowledge levels during training without resorting to expensive, comprehensive evaluations (e.g., QA tests) at every step?
 
-**Интуиция и общий подход:**  
-Идеальная экспериментальная среда должна обладать следующими характеристиками:
-- Факты дискретны и атомарны;
-- Успех задачи напрямую зависит от воспроизведения конкретных пар "сущность-атрибут";
-- Процесс генерации данных контролируем для регистрации статистических свойств;
-- Оценка знаний интегрирована в стандартный процесс обучения.
+**Intuition and General Approach**:  
+An ideal experimental environment should have the following characteristics:
+- Facts are discrete and atomic;
+- Task success depends directly on reproducing specific "entity-attribute" pairs;
+- Data generation is controllable to register statistical properties;
+- Knowledge evaluation is integrated into the standard training process.
 
-Это естественным образом приводит к использованию структурированных синтетических данных для задач воспроизведения фактов.
+This naturally leads to the use of structured synthetic data for factual recall tasks.
 
-### 2.1 Знания vs. Память: ключевое различие
+### 2.1 Knowledge vs. Memory: The Key Distinction
 
-Для точного понимания поведения модели необходимо различать **"знания"** и **"память"**:
+To accurately understand model behavior, it is essential to distinguish between **"knowledge"** and **"memory"**:
 
-| Концепт  | Определение                                                                 | Характеристики                          | Пример (знание "Париж — столица Франции")              |
+| Concept  | Definition                                                                 | Characteristics                          | Example (Knowledge "Paris is the capital of France")              |
 |----------|-----------------------------------------------------------------------------|-----------------------------------------|-------------------------------------------------------|
-| Знания   | Информация, усвоенная моделью, независимая от формы ввода и гибко применяемая | Абстрактность, обобщение, гибкость     | Ответы на вопросы: "Столица Франции?", "Какой стране принадлежит Париж?" |
-| Память   | Воспроизведение конкретных примеров обучения, привязанное к форме ввода      | Конкретность, хрупкость                | Завершение предложения: "Париж — это ___ Франции"      |
+| Knowledge   | Information internalized by the model, independent of input form and flexibly applied | Abstraction, generalization, flexibility     | Answers to questions: "Capital of France?", "Which country does Paris belong to?" |
+| Memory   | Reproduction of specific training examples, tied to input form              | Concreteness, fragility                | Completion of sentence: "Paris is the ___ of France"      |
 
-### 2.2 Синтетический биографический набор данных
+### 2.2 Synthetic Biography Dataset
 
-**Преимущества дизайна:**
-- **Атомарность:** каждый факт (например, место рождения) независим, что отделяет способность "вспоминать" от способности "рассуждать";
-- **Синтетичность и контроль:** точный контроль распределения данных (например, частоты появления персонажей) без помех из реальных корпусов;
-- **Реалистичная статистика:** использование распространенных имен и мест сохраняет естественное распределение токенов;
-- **Релевантность предыдущих исследований:** малые модели на подобных данных демонстрируют механизмы хранения знаний, сравнимые с большими LLM.
+**Design Advantages**:
+- **Atomicity**: Each fact (e.g., place of birth) is independent, separating the ability to "recall" from the ability to "reason";
+- **Synthetic and Controlled**: Precise control over data distribution (e.g., character frequency) without interference from real-world corpora;
+- **Realistic Statistics**: Use of common names and locations preserves natural token distributions;
+- **Relevance to Prior Research**: Small models on similar data demonstrate knowledge storage mechanisms comparable to large LLMs.
 
-**Процесс генерации:**
-1. **Создание базы персонажей:** Генерация N виртуальных "персонажей" с уникальными именами и шестью атрибутами;
-2. **Заполнение шаблонов:** Для каждого атрибута случайно выбирается шаблон из библиотеки (25 вариантов на тип атрибута), куда подставляется конкретная информация (например, "[Имя] родился в [Место рождения]");
-   - *Ключевой момент:* Множество шаблонов создает текстовое разнообразие, вынуждая модель выйти за рамки простого запоминания
-3. **Сборка биографии:** Случайное упорядочивание предложений с атрибутами в полную биографи;
-   - *Ключевой момент:* Случайный порядок предотвращает использование моделью последовательностных подсказок
-4. **Разделение на обучающую/оценочную выборки:** Для каждого персонажа 20 шаблонов идут в обучение, 5 — в оценку. Это гарантирует, что модель сталкивается с новыми формулировками известных фактов, тестируя уровень абстракции знаний.
+**Generation Process**:
+1. **Create Character Base**: Generate N virtual "characters" with unique names and six attributes;
+2. **Fill Templates**: For each attribute, randomly select a template from a library (25 variants per attribute type), substituting specific information (e.g., "[Name] was born in [Place of Birth]");
+   - *Key Point*: Multiple templates create textual diversity, forcing the model beyond simple memorization
+3. **Assemble Biography**: Randomly order attribute sentences into a full biography;
+   - *Key Point*: Random order prevents the model from relying on sequential cues
+4. **Split into Training/Evaluation Sets**: For each character, 20 templates go to training, 5 to evaluation. This ensures the model encounters new formulations of known facts, testing the level of knowledge abstraction.
 
-![Figure_1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Figure_01.png)
-> Figure_1. Процесс генерации данных, лежащий в основе синтетического набора биографий, на котором мы обучаем модели. Мы измеряем знания, содержащиеся в этих моделях, через величину потерь (loss), которую они достигают при предсказании атрибутных токенов (выделены синим).*
+![Figure_1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Figure_01.png  )
+> Figure_1. The data generation process underlying the synthetic biography dataset on which we train models. We measure the knowledge contained in these models by the loss they achieve when predicting attribute tokens (highlighted in blue).*
 
-### 2.3 Масштабное измерение знаний: потери и точность атрибутов
+### 2.3 Large-Scale Knowledge Measurement: Attribute Loss and Accuracy
 
-**Проблема:** Многократные QA-оценки в процессе обучения требуют больших вычислений  
-**Решение:** Специальная структура биографий превращает предсказание значений атрибутов в задачу воспроизведения фактов  
+**Problem**: Repeated QA evaluations during training require substantial computation  
+**Solution**: The biography structure transforms attribute value prediction into a factual recall task  
 
-### 2.4 Стандартизированные модели и обучение
+### 2.4 Standardized Models and Training
 
-Для обеспечения воспроизводимости результатов:
+To ensure reproducibility of results:
 
-- **Архитектура:** 8-слойный Decoder-only Transformer (44M параметров, на основе Hoffmann et al., 2022)
-- **Оптимизатор:** AdamW с косинусным затуханием learning rate (без warmup)
-- **Learning rate:** Настраивается индивидуально для каждого эксперимента
+- **Architecture**: 8-layer Decoder-only Transformer (44M parameters, based on Hoffmann et al., 2022)
+- **Optimizer**: AdamW with cosine learning rate decay (no warmup)
+- **Learning Rate**: Custom-tuned per experiment
 
-## **3. Динамический процесс приобретения знаний о языковой модели**
+## **3. Dynamic Process of Language Model Knowledge Acquisition**
 
-Основной вопрос: теперь, когда у нас есть способ измерения знаний, какова фактическая динамика приобретения знаний в ходе обучения ? Является ли это плавным, постепенным процессом или наблюдаются явные фазовые изменения и потенциальные сдвиги механизмов?
+Main Question: Now that we have a way to measure knowledge, what is the actual dynamics of knowledge acquisition during training? Is it a smooth, gradual process, or do clear phase transitions and potential mechanism shifts occur?
 
-Основные выводы: Исследование показало, что независимо от того, как изменяются гиперпараметры, приобретение знаний обычно происходит по трехэтапной схеме . Среди них, казалось бы, «застойный» период плато играет решающую роль на уровне механизма.
+Main Findings: The study revealed that, regardless of hyperparameter changes, knowledge acquisition typically follows a three-stage pattern. Among these, the seemingly "stagnant" plateau phase plays a decisive role at the mechanism level.
 
-### **3.1 Трехэтапная модель приобретения знаний**
+### **3.1 Three-Stage Model of Knowledge Acquisition**
 
-![Figure_2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Figure_02.png)
-> Figure_2. Приобретение знаний происходит в три этапа. (Слева) На очень коротком первом этапе модель изучает общую статистику значений атрибутов. На втором этапе производительность выходит на плато, соответствующее уровню, достижимому идеальной моделью без знаний об отдельных индивидах (это соответствует базовому уровню "без знаний" и почти нулевой точности распознавания). Длительность этого плато почти пропорциональна количеству индивидов (справа). Наконец, модель учится ассоциациям между субъектами и атрибутами: знания формируются по мере продолжения обучения (в центре). Результаты усреднены по 5 запускам (± стандартное отклонение).
+![Figure_2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Figure_02.png  )
+> Figure_2. Knowledge acquisition occurs in three stages. (Left) On a very short first stage, the model learns the overall statistics of attribute values. On the second stage, performance plateaus at a level achievable by an ideal model without knowledge of individual entities (this corresponds to the "no-knowledge" baseline and nearly zero recognition accuracy). The duration of this plateau is nearly proportional to the number of individuals (right). Finally, the model learns associations between subjects and attributes: knowledge emerges as training continues (center). Results are averaged over 5 runs (± standard deviation).
 
-Исследователи стабильно выявили следующие три этапа, наблюдая за кривыми изменения потерь атрибутов (Attribute Loss) и точности атрибутов (Attribute Accuracy) в процессе обучения:
+Researchers consistently observed the following three stages by tracking attribute loss (Attribute Loss) and attribute accuracy (Attribute Accuracy) during training:
 
-| Этап | Название               | Основное поведение                          | Объяснение и механизм                                                                 |
-|------|------------------------|---------------------------------------------|---------------------------------------------------------------------------------------|
-| 1    | Начальное понимание / Статистическое обучение | Быстрое снижение потерь атрибутов.          | Модель быстро усваивает поверхностные статистические данные, такие как частые значения атрибутов, структуру биографии и т.д. К концу этапа производительность достигает уровня **базовой линии без знаний**. Модель понимает типы информации, но не связывает их с конкретными индивидуумами. |
-| 2    | Плато производительности ("Грань усвоения знаний") | Потери атрибутов остаются на уровне **базовой линии без знаний**; точность атрибутов близка к 0. | Почему возникает застой? Две возможные причины: <br> (1) **Оптимизация**: модель попадает в седловую точку или локальный минимум функции потерь. <br> (2) **Статистика (√)**: модели требуется многократно наблюдать одного и того же индивидуума (несмотря на разное описание), чтобы надежно выделить факты, специфичные для него, из статистического шума. <br> **Доказательство**: длина плато линейно зависит от количества индивидуумов $\text{Плато} \propto N^{0.81}$, рис. 2 справа), что сильно поддерживает статистическую гипотезу. |
-| 3    | Проявление знаний (Knowledge Emergence) | Потери атрибутов становятся значительно ниже **базовой линии без знаний**; точность атрибутов стабильно превышает 0. | На этом этапе модель активно формирует и укрепляет связи между **именем индивидуума** и его **специфическими атрибутами**. Параметризованные знания сохраняются и успешно извлекаются. |
+| Stage | Name                      | Primary Behavior                          | Explanation and Mechanism                                                                 |
+|-------|---------------------------|-------------------------------------------|---------------------------------------------------------------------------------------|
+| 1     | Initial Understanding / Statistical Learning | Rapid decrease in attribute loss.          | The model quickly absorbs superficial statistical data, such as frequent attribute values, biography structure, etc. By the end of this stage, performance reaches the **no-knowledge baseline**. The model understands the types of information but does not link them to specific individuals. |
+| 2     | Performance Plateau ("Knowledge Acquisition Frontier") | Attribute loss remains at the **no-knowledge baseline**; attribute accuracy nears 0. | Why does stagnation occur? Two possible reasons: <br> (1) **Optimization**: The model falls into a saddle point or local minimum of the loss function. <br> (2) **Statistics (√)**: The model requires multiple observations of the same individual (despite varied descriptions) to reliably extract fact-specific information from statistical noise. <br> **Evidence**: Plateau duration scales linearly with the number of individuals ($\text{Plateau} \propto N^{0.81}$, Fig. 2 right), strongly supporting the statistical hypothesis. |
+| 3     | Knowledge Emergence       | Attribute loss becomes significantly lower than the **no-knowledge baseline**; attribute accuracy consistently exceeds 0. | At this stage, the model actively forms and strengthens associations between **individual names** and their **specific attributes**. Parametrized knowledge is stored and successfully retrieved. |
 
-Устойчивость модели: эта трехэтапная модель стабильно сохраняется при изменении скорости обучения (learning rate), весового затухания (weight decay), размера пакета (batch size), количества индивидуумов, размера модели и даже при замене механизма внимания на рекуррентную сеть (разновидность RNN).
+Model Robustness: This three-stage model remains stable under changes in learning rate, weight decay, batch size, number of individuals, model size, and even when replacing the attention mechanism with an RNN variant.
 
-### **Связь с полным циклом обучения языковых моделей**
+### **Connection to the Full LLM Training Cycle**
 
-Понимание трехэтапной модели приобретения знаний помогает переосмыслить весь процесс обучения современных LLM. Рассмотрим, как эти три этапа соотносятся с традиционными фазами обучения языковых моделей:
+Understanding the three-stage model of knowledge acquisition helps reframe the entire process of training modern LLMs. Let’s examine how these three stages relate to traditional LLM training phases:
 
 <details> 
-    <summary><em><strong>Полный цикл обучения современных LLM</strong></em></summary>
+    <summary><em><strong>Full Cycle of Modern LLM Training</strong></em></summary>
 
 ---
 
-Обучение современных больших языковых моделей — это сложный, многоэтапный и ресурсоемкий процесс. Он включает в себя несколько фаз, каждая из которых преследует свою цель: от формирования базового понимания языка до тонкой настройки поведения модели в соответствии с человеческими ожиданиями. Давайте разберем этот цикл по шагам.
+Training modern large language models is a complex, multi-stage, and resource-intensive process. It includes several phases, each serving a distinct purpose: from forming basic language understanding to fine-tuning model behavior to align with human expectations. Let’s break down this cycle step-by-step.
 
-**Полный цикл обучения LLM**
+**Full Cycle of LLM Training**
 
-1.  **Подготовка данных**
-2.  **Pre-training (Предварительное обучение)**
+1.  **Data Preparation**
+2.  **Pre-training**
 3.  **Supervised Fine-Tuning (SFT) / Instruction Fine-Tuning**
 4.  **Reinforcement Learning from Human Feedback (RLHF)**
-5.  **Оценка и Развертывание**
+5.  **Evaluation and Deployment**
 
-![Этапы обучения LLM](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Image_01.jpeg)
-> Этапы обучения LLM
+![Этапы обучения LLM](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Image_01.jpeg  )
+> Stages of LLM Training
 
-Процесс обучения языковых моделей обычно состоит из трёх показанных ниже этапов. Сначала мы предварительно обучаем языковую модель, и этот этап с большим отрывом является самой вычислительно затратной частью обучения. Дальше мы выполняем выравнивание, обычно при помощи трёхэтапного фреймворка с supervised fine-tuning (SFT) и обучением с подкреплением на основе обратной связи от человека (RLHF).
-> Любопытно, что для этого этапа не нужна обратная связь от человека. В последних исследованиях изучается обучение с подкреплением на основе обратной связи ИИ (RLAIF)!
+The process of training language models typically consists of three phases shown below. First, we pre-train the language model, and this stage is by far the most computationally expensive part of training. Then we perform alignment, usually via a three-stage framework using supervised fine-tuning (SFT) and reinforcement learning from human feedback (RLHF).
+> Interestingly, this stage does not require human feedback. Recent research explores reinforcement learning from AI feedback (RLAIF)!
 
-![Этапы обучения LLM](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Image_02.jpeg)
+![Этапы обучения LLM](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Image_02.jpeg  )
 
-Из перечисленных выше этапов состоит стандартизированный конвейер обучения, применяемый для большинства современных LLM (например, ChatGPT или LLaMA-3). По сравнению с предварительным обучением, SFT и RLHF вычислительно малозатратны, но они требуют курирования датасета (или высококачественных выходных данных LLM, или обратной связи от человека по выходным данным LLM), что может быть сложным и длительным процессом.
+The above stages constitute the standardized training pipeline used for most modern LLMs (e.g., ChatGPT or LLaMA-3). Compared to pre-training, SFT and RLHF are computationally inexpensive but require curation of datasets (or high-quality LLM outputs, or human feedback on LLM outputs), which can be complex and time-consuming.
 
-![Этапы обучения LLM](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Image_03.jpeg)
+![Этапы обучения LLM](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Image_03.jpeg  )
 
-Иногда для решения узкой задачи нам нужно сделать чуть больше, чем просто применить LLM. В частности, мы можем ещё больше специализировать языковую модель (при необходимости), применив или fine-tuning под предметную область, или контекстное обучение (см. ниже). Fine-tuning под предметную область просто продолжает обучение модели (обычно при помощи цели языкового моделирования, схожей с предварительным обучением/SFT) на данных, релевантных узкой задачи, а контекстное обучение добавляет больше контекста или примеров в промт языковой модели, который используется в качестве контекста для решения задачи.
+Sometimes, to solve a narrow task, we need to do more than simply apply an LLM. In particular, we may further specialize the language model (if needed) via either domain-specific fine-tuning or in-context learning (see below). Domain-specific fine-tuning simply continues model training (usually with a language modeling objective similar to pre-training/SFT) on data relevant to the narrow task, while in-context learning adds more context or examples to the LLM prompt used as context for solving the task.
 
-![Этапы обучения LLM](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Image_04.jpeg)
+![Этапы обучения LLM](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Image_04.jpeg  )
 
-Что такое выравнивание? Мы много раз использовали выше термин, который важно понять: выравнивание (alignment). Предварительно обученная языковая модель обычно не особо полезна. Если генерировать выходные данные при помощи этой модели, то результаты, вероятно, будут повторяющимися и малоприменимыми. Для создания более полезной языковой модели нам нужно выровнять эту модель под желания живого пользователя. Иными словами, вместо генерации наиболее вероятной текстовой последовательности наша модель учится генерировать текстовую последовательность, требуемую пользователю.
+What is alignment? We have used the term above multiple times, and it is important to understand: alignment. A pre-trained language model is typically not particularly useful. If we generate outputs using this model, the results are likely repetitive and inapplicable. To create a more useful language model, we need to align this model with the desires of a human user. In other words, instead of generating the most probable text sequence, our model learns to generate the text sequence requested by the user.
 
-Такое выравнивание, выполняемое при помощи описанного выше трёхэтапного фреймворка SFT и RLHF, может использоваться для подталкивания LLM к разнообразным поведениям и свойствам. Обычно они обучают модель выбирать множество из одного или нескольких критериев, на которые делается упор в процессе выравнивания. Вот самые распространённые критерии выравнивания: повышение способности следования инструкциям, препятствование вредоносным выходным данным, повышение полезности LLM и многие другие.
+This alignment, performed via the aforementioned three-stage SFT and RLHF framework, can be used to steer LLMs toward diverse behaviors and properties. Typically, they train the model to select among one or more criteria emphasized during alignment. The most common alignment criteria are: improving instruction-following ability, preventing harmful outputs, increasing usefulness of the LLM, and many others.
 
 ---
 
 <details> 
-    <summary><em><strong>Этап 1. Подготовка данных</strong></em></summary>
+    <summary><em><strong>Stage 1. Data Preparation</strong></em></summary>
 
-## **Этап 1. Подготовка данных**
+## **Stage 1. Data Preparation**
 
-### **1.1 Концептуальные основы подготовки данных**
+### **1.1 Conceptual Foundations of Data Preparation**
 
-Качество и количество данных представляют собой фундаментальную основу для функционирования крупномасштабных языковых моделей (Large Language Models, LLM). Процесс подготовки данных для предварительного обучения следует рассматривать как многоаспектную задачу, стратегические направления которой формируются в значительной степени под влиянием современных исследований в области масштабирования нейронных архитектур. Комплексный характер данной задачи обусловлен необходимостью обеспечения оптимального баланса между объемом данных, их качеством и вычислительными ресурсами, доступными для обучения модели.
+The quality and quantity of data represent the foundational basis for the functioning of large-scale language models (Large Language Models, LLM). The process of preparing data for pre-training must be considered as a multi-faceted task, whose strategic directions are heavily influenced by recent research in neural architecture scaling. The complexity of this task stems from the need to ensure an optimal balance between data volume, quality, and available computational resources for training the model.
 
-## **2. Систематизация процессов сбора и обработки данных**
+## **2. Systematization of Data Collection and Processing Processes**
 
-### **2.1. Методы аккумуляции текстовых корпусов**
+### **2.1 Methods of Text Corpus Accumulation**
 
-В современной практике разработки LLM аккумуляция данных осуществляется посредством интеграции масштабных текстовых корпусов из разнообразных источников, включая:
-* интернет-ресурсы (преимущественно Common Crawl);
-* литературные источники (коллекции Project Gutenberg, Google Books);
-* научные публикации (репозиторий arXiv);
-* программный код (GitHub);
-* диалогические корпусы;
-* медийные публикации.
+In modern LLM development, data accumulation is achieved by integrating large text corpora from diverse sources, including:
+* web resources (primarily Common Crawl);
+* literary sources (Project Gutenberg, Google Books collections);
+* scientific publications (arXiv repository);
+* program code (GitHub);
+* dialogue corpora;
+* media publications.
 
-Объемы используемых данных в современных проектах исчисляются терабайтами текстовой информации, что соответствует триллионам токенизированных элементов. Данная количественная характеристика обусловлена эмпирически установленными закономерностями масштабирования языковых моделей.
+The volume of data used in modern projects amounts to terabytes of textual information, corresponding to trillions of tokenized elements. This quantitative characteristic is based on empirically established scaling laws for language models.
 
-### **2.2. Теоретические и практические аспекты законов масштабирования (Chinchilla Scaling Laws)**
+### **2.2 Theoretical and Practical Aspects of Scaling Laws (Chinchilla Scaling Laws)**
 
-Стратегия сбора данных и планирования обучающего процесса находится в тесной взаимосвязи с эмпирическими законами масштабирования. Исследование DeepMind "Chinchilla" (2022) установило, что для достижения оптимальных показателей производительности модели при фиксированном вычислительном бюджете (FLOPs) необходимо обеспечить сбалансированное соотношение между размером модели (количество параметров, $N$) и объемом обучающих данных (количество токенов, $D$).
+Data collection strategy and training planning are closely tied to empirical scaling laws. DeepMind’s "Chinchilla" study (2022) established that for optimal model performance under a fixed computational budget (FLOPs), a balanced ratio between model size (number of parameters, $N$) and training data volume (number of tokens, $D$) must be maintained.
 
-#### **2.2.1. Статистические закономерности и их интерпретация**
-Согласно закономерностям Chinchilla, оптимальное соотношение выражается как $D \approx 20 \times N$, что указывает на необходимость обеспечения примерно 20 токенов обучающих данных на каждый параметр модели. Данная пропорция основана на эмпирических наблюдениях и статистическом анализе эффективности различных конфигураций моделей.
+#### **2.2.1 Statistical Patterns and Their Interpretation**
+According to Chinchilla’s laws, the optimal ratio is expressed as $D \approx 20 \times N$, indicating the need for approximately 20 training tokens per model parameter. This proportion is based on empirical observations and statistical analysis of model efficiency across various configurations.
 
-#### **2.2.2. Практическая значимость исследования в контексте развития LLM**
-Открытие, сделанное в рамках проекта Chinchilla, продемонстрировало, что предшествующие крупномасштабные модели (включая GPT-3 и Gopher) характеризовались субоптимальным соотношением объема обучающих данных к размеру модели. В частности, модель Chinchilla (70 миллиардов параметров), обученная на 1,4 триллиона токенов (соотношение ~20:1), продемонстрировала превосходящие показатели по сравнению с более параметризованной моделью Gopher (280 миллиардов параметров), обученной на 300 миллиардах токенов (соотношение ~1:1).
+#### **2.2.2 Practical Significance of the Study in the Context of LLM Development**
+The discovery made in the Chinchilla project demonstrated that prior large-scale models (including GPT-3 and Gopher) suffered from a suboptimal ratio of training data volume to model size. Specifically, the Chinchilla model (70 billion parameters), trained on 1.4 trillion tokens (ratio ~20:1), outperformed the more parameterized Gopher model (280 billion parameters), trained on 300 billion tokens (ratio ~1:1).
 
-#### **2.2.3. Методологические импликации для подготовки данных**
-Установленные закономерности подчеркивают критическую важность не только увеличения параметрической размерности модели, но и опережающего наращивания объема качественных обучающих данных. Данный вывод стимулирует интенсификацию усилий исследовательского сообщества по сбору, фильтрации и обработке триллионов токенов текстовой информации с целью максимизации эффективности использования вычислительных ресурсов при обучении современных LLM.
+#### **2.2.3 Methodological Implications for Data Preparation**
+The established patterns underscore the critical importance of not only increasing model parameterization but also proactively scaling the volume of high-quality training data. This insight stimulates intensified efforts by the research community to collect, filter, and process trillions of textual tokens to maximize the efficiency of computational resources during LLM training.
 
-### **2.3. Методология очистки и нормализации данных**
+### **2.3 Methodology of Data Cleaning and Normalization**
 
-Процесс очистки данных представляет собой критически важный этап, оказывающий непосредственное влияние на качественные характеристики и безопасность модели. Данный процесс включает следующие компоненты:
+Data cleaning is a crucial stage that directly impacts the quality and safety of the model. This process includes the following components:
 
-* **Удаление дубликатов** на уровне документов и предложений с целью повышения разнообразия данных и предотвращения эффекта переобучения на повторяющихся паттернах.
+* **Removal of duplicates** at the document and sentence level to enhance data diversity and prevent overfitting to repeating patterns.
 
-* **Фильтрация низкокачественного контента**, включая спам, шаблонные тексты и автоматически генерируемую информацию. Данная процедура направлена на повышение общего качества корпуса и снижение риска обучения модели на нерелевантных или малоинформативных данных.
+* **Filtering of low-quality content**, including spam, templated text, and automatically generated information. This procedure aims to improve the overall corpus quality and reduce the risk of training on irrelevant or low-information data.
 
-* **Обработка персональных данных** посредством удаления или анонимизации персональной идентифицирующей информации (PII) для обеспечения соответствия нормативам приватности и защиты данных.
+* **Processing of personal data** via removal or anonymization of personally identifiable information (PII) to ensure compliance with privacy and data protection regulations.
 
-* **Фильтрация нежелательного контента**, включая токсичные, предвзятые или потенциально вредоносные материалы. Данная задача представляет собой комплексную проблему, требующую применения как автоматизированных алгоритмов, так и методов ручной модерации.
+* **Filtering of undesirable content**, including toxic, biased, or potentially harmful material. This task presents a complex challenge requiring both automated algorithms and manual moderation.
 
-* **Нормализация текстового материала**, которая может включать стандартизацию регистра, обработку пунктуации, унификацию пробельных символов. При этом следует отметить, что современные архитектуры часто демонстрируют повышенную эффективность при работе с текстом, максимально приближенным к исходной форме, сохраняющим оригинальный регистр и пунктуацию.
+* **Text normalization**, which may include standardizing case, punctuation, and whitespace. However, it should be noted that modern architectures often demonstrate higher efficiency when working with text as close as possible to its original form, preserving original case and punctuation.
 
-### **2.4. Алгоритмические подходы к токенизации текстовых данных**
+### **2.4 Algorithmic Approaches to Text Tokenization**
 
-Токенизация представляет собой процесс декомпозиции текста на элементарные единицы — токены, подлежащие обработке моделью. В контексте современных LLM преимущественно используются субсловные токенизаторы (subword tokenizers), среди которых можно выделить следующие:
+Tokenization is the process of decomposing text into elementary units — tokens — for model processing. In the context of modern LLMs, subword tokenizers are predominantly used, among which the following can be highlighted:
 
-* **Byte Pair Encoding (BPE)**: Алгоритм, начинающий процесс с отдельных символов (или байтов) и итеративно объединяющий наиболее частотные пары в новые токены словаря. Данный метод обеспечивает эффективное балансирование между размером словаря и способностью моделировать редкие слова.
+* **Byte Pair Encoding (BPE)**: An algorithm that begins with individual characters (or bytes) and iteratively merges the most frequent pairs into new dictionary tokens. This method provides an effective balance between vocabulary size and the ability to model rare words.
 
-* **WordPiece**: Метод, методологически близкий к BPE, но отличающийся критерием объединения пар, который заключается в максимизации правдоподобия данных обучения при заданной модели токенизации. Данный алгоритм нашел применение в моделях BERT и других разработках Google.
+* **WordPiece**: A method methodologically similar to BPE but differing in the criterion for merging pairs, which is maximizing the likelihood of the training data under a given tokenization model. This algorithm has been applied in BERT and other Google developments.
 
-* **SentencePiece**: Токенизатор, осуществляющий обработку текста как последовательности Unicode-символов без предварительной сегментации по словам. Данная особенность обеспечивает универсальность применения для различных языковых систем, что особенно актуально в контексте многоязычных моделей. SentencePiece активно используется в современных архитектурах, включая Llama и серию GPT.
+* **SentencePiece**: A tokenizer that processes text as a sequence of Unicode characters without prior word segmentation. This feature ensures universal applicability across diverse language systems, which is especially relevant for multilingual models. SentencePiece is actively used in modern architectures, including Llama and the GPT series.
 
-#### **2.4.1. Иллюстративный пример и функциональный анализ токенизации**
+#### **2.4.1 Illustrative Example and Functional Analysis of Tokenization**
 
-В качестве примера рассмотрим процесс токенизации слова "масштабирование", которое может быть сегментировано на токены вида `[" мас", "штаб", "ирование"]` или `[" масштаб", "ирован", "ие"]`. Данный механизм обеспечивает модели следующие функциональные возможности:
+As an example, consider the tokenization of the word "масштабирование", which may be segmented into tokens such as `[" мас", "штаб", "ирование"]` or `[" масштаб", "ирован", "ие"]`. This mechanism provides the model with the following functional capabilities:
 
-1. **Обработка неизвестной лексики**: Способность анализировать и генерировать незнакомые или редкие слова посредством их композиции из известных сегментов, что существенно повышает гибкость модели при работе с открытым словарем.
+1. **Handling Unknown Lexicon**: Ability to analyze and generate unfamiliar or rare words by composing them from known segments, significantly enhancing model flexibility with open vocabularies.
 
-2. **Оптимизация размера словаря**: Возможность эффективного управления размерностью словаря (обычно в диапазоне от 30 до 100 тысяч токенов), что было бы невозможно при использовании целых слов в качестве базовых единиц токенизации.
+2. **Vocabulary Size Optimization**: Capability to efficiently manage vocabulary size (typically ranging from 30 to 100 thousand tokens), which would be impossible if whole words were used as base token units.
 
-## **3. Выводы**
+## **3. Conclusions**
 
-Законы масштабирования Chinchilla представляют собой значимый методологический ориентир на этапе подготовки данных, определяя целевые объемы текстовых корпусов в зависимости от планируемой параметрической размерности модели и доступных вычислительных ресурсов. Данные закономерности подчеркивают, что эффективность LLM определяется не исключительно архитектурными и алгоритмическими аспектами обучения, но и в существенной степени стратегическими подходами к работе с данными.
+The Chinchilla scaling laws represent a significant methodological guideline in the data preparation stage, defining target corpus volumes based on the planned parameter size of the model and available computational resources. These patterns emphasize that LLM efficiency is determined not only by architectural and algorithmic aspects of training but also substantially by strategic approaches to data handling.
 
-В контексте современных исследований в области искусственного интеллекта и, в частности, обработки естественного языка, глубокое понимание взаимосвязи между характеристиками обучающих данных и производительностью модели представляется фундаментальным для дальнейшего прогресса в разработке все более совершенных языковых моделей. Стратегическое планирование процессов сбора и обработки данных, основанное на эмпирически установленных закономерностях, становится одним из ключевых факторов, определяющих успешность проектов в области разработки крупномасштабных языковых моделей.
+In the context of modern AI research, and particularly in natural language processing, deep understanding of the relationship between training data characteristics and model performance is fundamental for further progress in developing increasingly sophisticated language models. Strategic planning of data collection and processing based on empirically established laws has become one of the key factors determining the success of projects in the field of large-scale language model development.
 
 </details> 
 
 <details> 
-    <summary><em><strong>Этап 2. Pre-training (Предварительное обучение)</strong></em></summary>
+    <summary><em><strong>Stage 2. Pre-training</strong></em></summary>
 
-## **2. Pre-training (Предварительное обучение)**
+## **2. Pre-training**
 
-### **2.1. Концептуальная характеристика этапа предварительного обучения**
+### **2.1. Conceptual Characterization of the Pre-training Stage**
 
-Предварительное обучение (pre-training) представляет собой наиболее вычислительно интенсивный этап в разработке крупномасштабных языковых моделей, в ходе которого осуществляется формирование базового понимания моделью статистических и семантических закономерностей языка. Этот процесс требует значительных вычислительных ресурсов и имеет определяющее значение для функциональных возможностей модели.
+Pre-training is the most computationally intensive stage in the development of large-scale language models, during which the model forms a foundational understanding of the statistical and semantic patterns of language. This process requires substantial computational resources and is decisive for the model’s functional capabilities.
 
-Основная целевая задача предварительного обучения заключается в формировании способности модели прогнозировать следующий токен в последовательности на основе контекста предыдущих токенов. Данный подход позволяет модели усваивать грамматические структуры, фактологическую информацию, основы логических взаимосвязей и определенные аспекты рассуждений, представленные в масштабных текстовых корпусах. Процесс обучения основывается на выявлении статистических закономерностей в последовательностях токенов, что обеспечивает формирование обобщенных репрезентаций языковых структур без необходимости в явной аннотации данных.
+The primary objective of pre-training is to enable the model to predict the next token in a sequence based on the context of preceding tokens. This approach allows the model to internalize grammatical structures, factual information, basic logical relationships, and certain aspects of reasoning presented in large text corpora. Learning is based on identifying statistical patterns in token sequences, thereby forming generalized representations of linguistic structures without requiring explicit data annotation.
 
-### **2.2. Архитектурные компоненты современных языковых моделей**
+### **2.2. Architectural Components of Modern Language Models**
 
-В настоящее время доминирующей архитектурой в области крупномасштабных языковых моделей является архитектура Transformer, представленная в исследовании "Attention Is All You Need" (Vaswani et al., 2017).
+Currently, the dominant architecture in large-scale language models is the Transformer architecture, introduced in the paper "Attention Is All You Need" (Vaswani et al., 2017).
 
-На рисунке ниже, изображена архитектура модели Transformer. Она состоит из двух основных частей: **кодера (encoder)** и **декодера (decoder)**.
+The figure below illustrates the Transformer architecture, which consists of two main components: the **encoder** and the **decoder**.
 
-![Figure_1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-04/assets/Figure_1.png)
+![Figure_1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-04/assets/Figure_1.png  )
 
-### Кодер (Encoder)
-Кодер обычно находится в левой части архитектуры. Он состоит из нескольких слоев, каждый из которых включает:
-1. **Multi-Head Attention** — механизм внимания, который позволяет модели фокусироваться на разных частях входных данных.
-2. **Add & Norm** — слой, который добавляет входные данные к результату внимания (residual connection) и применяет нормализацию.
-3. **Feed Forward** — полносвязный слой, который применяется к каждому элементу последовательности независимо.
-4. **Add & Norm** — снова добавляет входные данные к результату и нормализует.
+### Encoder
+The encoder is typically located on the left side of the architecture. It consists of multiple layers, each containing:
+1. **Multi-Head Attention** — an attention mechanism that enables the model to focus on different parts of the input data.
+2. **Add & Norm** — a layer that adds the input to the attention output (residual connection) and applies normalization.
+3. **Feed Forward** — a fully connected layer applied independently to each element of the sequence.
+4. **Add & Norm** — again adds the input to the result and normalizes.
 
-Эти слои повторяются несколько раз (обычно 6 или более) для создания глубокой модели.
+These layers are repeated several times (typically six or more) to create a deep model.
 
-### Декодер (Decoder)
-Декодер обычно находится в правой части архитектуры. Он также состоит из нескольких слоев, но имеет дополнительные компоненты:
-1. **Masked Multi-Head Attention** — механизм внимания, который маскирует будущие токены, чтобы предотвратить "подглядывание" вперед.
-2. **Add & Norm** — слой, который добавляет входные данные к результату внимания и нормализует.
-3. **Multi-Head Attention** — механизм внимания, который учитывает выход кодера.
-4. **Add & Norm** — снова добавляет входные данные к результату и нормализует.
-5. **Feed Forward** — полносвязный слой, аналогичный тому, что используется в кодировщике.
-6. **Add & Norm** — завершающий слой добавления и нормализации.
+### Decoder
+The decoder is typically located on the right side of the architecture. It also consists of multiple layers but includes additional components:
+1. **Masked Multi-Head Attention** — an attention mechanism that masks future tokens to prevent "peeking ahead."
+2. **Add & Norm** — a layer that adds the input to the attention output and normalizes.
+3. **Multi-Head Attention** — an attention mechanism that incorporates the encoder’s output.
+4. **Add & Norm** — again adds the input to the result and normalizes.
+5. **Feed Forward** — a fully connected layer analogous to that used in the encoder.
+6. **Add & Norm** — the final add-and-norm layer.
 
-### Входы и выходы
-- **Input Embedding** и **Positional Encoding** относятся к входным данным, которые подаются в кодер.
-- **Output Embedding** и **Outputs (shifted right)** относятся к выходным данным, которые обрабатываются декодером.
+### Inputs and Outputs
+- **Input Embedding** and **Positional Encoding** correspond to the inputs fed into the encoder.
+- **Output Embedding** and **Outputs (shifted right)** correspond to the outputs processed by the decoder.
 
-### **2.3. Методология процесса обучения**
+### **2.3. Methodology of the Training Process**
 
-#### **2.3.1. Формулировка задачи предварительного обучения**
+#### **2.3.1. Formulation of the Pre-training Task**
 
-В контексте крупномасштабных языковых моделей основной задачей предварительного обучения является причинное языковое моделирование (Causal Language Modeling, CLM), заключающееся в последовательном предсказании токенов. Модель получает на вход последовательность токенов $t_1, t_2, ..., t_{k-1}$ и оптимизируется для предсказания следующего токена $t_k$. Эта формулировка задачи позволяет модели осваивать широкий спектр языковых закономерностей без необходимости в специфической разметке данных.
+In the context of large-scale language models, the primary pre-training task is causal language modeling (Causal Language Modeling, CLM), which involves sequential token prediction. The model receives as input a sequence of tokens $t_1, t_2, ..., t_{k-1}$ and is optimized to predict the next token $t_k$. This task formulation enables the model to learn a broad spectrum of linguistic patterns without requiring specialized data annotation.
 
-#### **2.3.2. Функция потерь и её обоснование**
+#### **2.3.2. Loss Function and Its Justification**
 
-В качестве целевой функции оптимизации используется кросс-энтропийная функция потерь (Cross-Entropy Loss), которая количественно оценивает расхождение между предсказанным моделью распределением вероятностей следующего токена и фактическим распределением, представленным истинным следующим токеном.
+The cross-entropy loss function is used as the optimization objective, quantitatively measuring the divergence between the model’s predicted probability distribution over the next token and the actual distribution represented by the true next token.
 
-Математически для последовательности $T = (t_1, ..., t_L)$ функция потерь выражается как:
+Mathematically, for a sequence $T = (t_1, ..., t_L)$, the loss function is expressed as:
 
 $$L_{Pretrain}(\theta) = - \sum_{i=1}^{L} \log P(t_i | t_{1}, ..., t_{i-1}; \theta)$$
 
-где: 
+where: 
 
-- $\theta$ — параметры модели
-- $P(t_i | t_{1}, ..., t_{i-1}; \theta)$ — вероятность $i$-го токена, предсказанная моделью на основе предшествующих токенов. 
-В практических реализациях вычисление проводится по батчам последовательностей.
+- $\theta$ — the model parameters
+- $P(t_i | t_{1}, ..., t_{i-1}; \theta)$ — the probability of the $i$-th token predicted by the model based on preceding tokens. 
+In practical implementations, computations are performed over batches of sequences.
 
-Содержательная интерпретация данной функции заключается в том, что модель штрафуется при присвоении низкой вероятности токену, который фактически следует за предшествующей последовательностью в обучающем тексте. Минимизация этой функции стимулирует модель к более точному предсказанию текстовых последовательностей, что приводит к усвоению структурных и семантических закономерностей языка.
+The conceptual interpretation of this function is that the model is penalized for assigning low probability to a token that actually follows the preceding sequence in the training text. Minimizing this function encourages the model to more accurately predict text sequences, leading to the internalization of structural and semantic linguistic patterns.
 
-#### **2.3.3. Оптимизационные алгоритмы**
+#### **2.3.3. Optimization Algorithms**
 
-В процессе предварительного обучения крупномасштабных языковых моделей преимущественно используются адаптивные алгоритмы оптимизации, такие как Adam (Adaptive Moment Estimation) или его модификация AdamW, характеризующаяся усовершенствованным механизмом регуляризации весов. Ключевым гиперпараметром оптимизационного процесса является скорость обучения (learning rate), определяющая величину обновления параметров на каждой итерации.
+In the pre-training of large-scale language models, adaptive optimization algorithms such as Adam (Adaptive Moment Estimation) or its modification AdamW, featuring an enhanced weight regularization mechanism, are predominantly used. The key hyperparameter of the optimization process is the learning rate, which determines the magnitude of parameter updates at each iteration.
 
-#### **2.3.4. Стратегии управления скоростью обучения**
+#### **2.3.4. Learning Rate Scheduling Strategies**
 
-Процесс обучения обычно начинается с низких значений скорости обучения, которая постепенно увеличивается до максимального значения в течение начальных нескольких тысяч итераций (фаза разогрева, warmup). Этот подход способствует стабилизации процесса обучения на начальных этапах. После фазы разогрева скорость обучения постепенно снижается согласно определенному расписанию (например, косинусоидальному), что способствует более точной сходимости модели к оптимуму.
+Training typically begins with low learning rates, gradually increasing to a maximum value over the initial thousands of iterations (warmup phase). This approach stabilizes training during early stages. After the warmup phase, the learning rate is gradually reduced according to a predefined schedule (e.g., cosine decay), facilitating more precise convergence to the optimum.
 
-Математическая формулировка фазы разогрева представляется следующим образом:
+The mathematical formulation of the warmup phase is:
 
 $$lr(step) = lr_{max} \times \frac{step}{warmup\_steps}$$ 
 
-для $step \leq warmup\_steps$
+for $step \leq warmup\_steps$
 
-где: 
+where: 
 
-- $lr(step)$ — скорость обучения на итерации $step$ 
-- $lr_{max}$ — максимальное значение скорости обучения
-- $warmup\_steps$ — количество итераций фазы разогрева. На этом этапе скорость обучения линейно возрастает от почти нулевого значения до максимального, что обеспечивает плавное начало процесса оптимизации.
+- $lr(step)$ — the learning rate at iteration $step$ 
+- $lr_{max}$ — the maximum learning rate value
+- $warmup\_steps$ — the number of warmup iterations. During this phase, the learning rate linearly increases from nearly zero to its maximum, ensuring a smooth start to the optimization process.
 
-### **2.4. Вычислительные аспекты и стратегии масштабирования**
+### **2.4. Computational Aspects and Scaling Strategies**
 
-Предварительное обучение крупномасштабных языковых моделей требует значительных вычислительных ресурсов, включая сотни или тысячи графических (GPU) или тензорных (TPU) процессоров, функционирующих в течение продолжительного времени. Для обеспечения эффективности процесса обучения применяются следующие стратегии распределенного обучения:
+Pre-training large-scale language models demands substantial computational resources, including hundreds or thousands of GPU or TPU processors operating over extended periods. To ensure training efficiency, the following distributed learning strategies are applied:
 
-* **Параллелизм данных (Data Parallelism)**: Предполагает распределение различных батчей данных между вычислительными устройствами, каждое из которых содержит полную копию модели. После обработки батчей вычисляется средний градиент, который используется для обновления параметров на всех устройствах.
+* **Data Parallelism**: Distributes different data batches across computing devices, each holding a full copy of the model. After processing batches, the average gradient is computed and used to update parameters on all devices.
 
-* **Тензорный параллелизм (Tensor Parallelism)**: Обеспечивает распределение отдельных тензоров (матриц весов) между устройствами, что особенно эффективно для моделей, превышающих объем памяти одного устройства. Этот подход позволяет обрабатывать значительно более крупные модели, чем было бы возможно на одном устройстве.
+* **Tensor Parallelism**: Distributes individual tensors (weight matrices) across devices, which is especially effective for models exceeding the memory capacity of a single device. This approach enables training significantly larger models than possible on a single device.
 
-* **Конвейерный параллелизм (Pipeline Parallelism)**: Предполагает распределение различных слоев модели между устройствами с организацией конвейерной обработки последовательных микро-батчей, что обеспечивает эффективное использование вычислительных ресурсов при обучении глубоких архитектур.
+* **Pipeline Parallelism**: Distributes different model layers across devices with pipelined processing of micro-batches, ensuring efficient utilization of computational resources when training deep architectures.
 
-## **3. Выводы**
+## **3. Conclusions**
 
-Результатом этапа предварительного обучения является базовая модель (base model), характеризующаяся развитыми способностями к пониманию и генерации текста. Однако, следует отметить, что данная модель еще не оптимизирована для выполнения специфических инструкций или поддержания диалогического взаимодействия, что обуславливает необходимость последующих этапов обучения.
+The outcome of the pre-training stage is a base model characterized by developed abilities to understand and generate text. However, it should be noted that this model is not yet optimized for executing specific instructions or engaging in dialogic interaction, necessitating subsequent training stages.
 
-Важно подчеркнуть, что качество базовой модели, полученной на этапе предварительного обучения, в значительной степени определяет потенциал модели для последующих этапов тонкой настройки и обучения с подкреплением. Таким образом, оптимизация процесса предварительного обучения представляет собой критически важную задачу в контексте разработки высокоэффективных крупномасштабных языковых моделей.
+It is crucial to emphasize that the quality of the base model obtained during pre-training largely determines the model’s potential for subsequent fine-tuning and reinforcement learning. Thus, optimizing the pre-training process represents a critical task in the development of highly efficient large-scale language models.
 
 </details>
 
 <details> 
-    <summary><em><strong>Этап 3. Supervised Fine-Tuning (SFT) / Instruction Fine-Tuning</strong></em></summary>
+    <summary><em><strong>Stage 3. Supervised Fine-Tuning (SFT) / Instruction Fine-Tuning</strong></em></summary>
 
 ### 3. Supervised Fine-Tuning (SFT) / Instruction Fine-Tuning
 
-Supervised fine-tuning (SFT) — это первый этап обучения в рамках процесса выравнивания LLM. Во-первых, нам нужно выполнить куририрование датасета высококачественных выходных данных LLM (по сути, это просто примеры правильного поведения LLM) (см. ниже). Затем мы напрямую выполняем fine-tuning модели по этим примерам. Supervised («с учителем») в термине SFT означает, что мы собираем датасет примеров того, чему должна подражать модель. Затем модель учится воспроизводить стиль этих примеров в процессе fine-tuning.
+Supervised fine-tuning (SFT) is the first stage of learning within the LLM alignment process. First, we curate a dataset of high-quality LLM outputs (essentially, examples of correct LLM behavior) (see below). Then, we directly fine-tune the model on these examples. The term "Supervised" in SFT means we collect a dataset of examples of how the model should behave. The model then learns to reproduce the style of these examples during fine-tuning.
 
-![Image_05](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Image_05.jpeg)
+![Image_05](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Image_05.jpeg  )
 
-Связь с прогнозированием следующего токена. Любопытно, что SFT не особо отличается от предварительного обучения языковой модели — и в обучении, и в SFT используется в качестве цели обучения прогнозирование следующего токена! Основное различие связано с тем, как применяются данные. Во время предварительного обучения модели мы используем огромные корпуса сырых текстовых данных. В SFT в качестве «учителя» применяется датасет высококачественных выходных данных LLM. На каждой итерации обучения мы сэмплируем множество примеров, затем выполняем fine-tuning модели на этих данных, используя в качестве цели обучения прогнозирование следующего токена. Обычно прогнозирование следующего токена применяется только к части каждого примера, соответствующей выходным данным LLM (например, к ответу на рисунке выше).
+Connection to Next-Token Prediction. Interestingly, SFT does not differ significantly from pre-training a language model — both use next-token prediction as the training objective! The main difference lies in how the data is applied. During pre-training, we use massive corpora of raw text data. In SFT, the dataset of high-quality LLM outputs serves as the "teacher." On each training iteration, we sample multiple examples and fine-tune the model on this data using next-token prediction as the objective. Typically, next-token prediction is applied only to the portion of each example corresponding to the LLM output (e.g., the answer in the figure above).
 
-#### **Формализуем процесс SFT**
+#### **Formalizing the SFT Process**
 
-С формальной точки зрения, этап Supervised Fine-Tuning (SFT) можно описать следующим образом. Пусть $\pi_{\theta}$ обозначает предварительно обученную языковую модель с параметрами $\theta$, полученными на этапе pre-training. Цель SFT — адаптировать эту модель для лучшего следования инструкциям и генерации ответов в желаемом стиле, используя курируемый набор данных.
+Formally, the Supervised Fine-Tuning (SFT) stage can be described as follows. Let $\pi_{\theta}$ denote the pre-trained language model with parameters $\theta$, obtained during pre-training. The goal of SFT is to adapt this model for better instruction-following and generation of responses in a desired style, using a curated dataset.
 
-Этот набор данных, $D_{SFT}$, состоит из $M$ пар примеров:
+This dataset, $D_{SFT}$, consists of $M$ example pairs:
 $$D_{SFT} = \{(x^{(i)}, y^{(i)})\}_{i=1}^{M}$$
-где:
-*   $x^{(i)}$ — это входная последовательность токенов, представляющая собой инструкцию, вопрос или любой другой промпт (например, `Input` на рисунке выше).
-*   $y^{(i)}$ — это соответствующая эталонная выходная последовательность токенов, демонстрирующая желаемый ответ или поведение модели (например, `Output` на рисунке выше).
+where:
+*   $x^{(i)}$ — the input token sequence representing an instruction, question, or any other prompt (e.g., `Input` in the figure above).
+*   $y^{(i)}$ — the corresponding reference output token sequence demonstrating the desired model response or behavior (e.g., `Output` in the figure above).
 
-Процесс SFT заключается в дальнейшей оптимизации параметров модели, инициализированных значениями $\theta$, для минимизации функции потерь на датасете $D_{SFT}$. В качестве функции потерь, аналогично этапу предварительного обучения, обычно используется кросс-энтропийная функция потерь, но с важным отличием: потери вычисляются **только** по токенам эталонного ответа $y^{(i)}$. Это ключевой момент, отличающий SFT от pre-training, где потери вычисляются по всей последовательности токенов.
+The SFT process involves further optimization of the model parameters, initialized with values $\theta$, to minimize the loss on dataset $D_{SFT}$. As the loss function, similar to the pre-training stage, the cross-entropy loss is typically used, with a key distinction: losses are computed **only** for the tokens of the reference answer $y^{(i)}$. This is the critical point distinguishing SFT from pre-training, where losses are computed over the entire sequence.
 
-Пусть $y^{(i)} = (y_1^{(i)}, y_2^{(i)}, ..., y_{L_i}^{(i)})$ — последовательность токенов эталонного ответа длиной $L_i$. Модель $\pi_{\phi}$, с параметрами $\phi$ (инициализированными как $\phi_{init} = \theta$), обучается максимизировать вероятность генерации последовательности $y^{(i)}$ при условии входной последовательности $x^{(i)}$. Это эквивалентно минимизации следующей функции потерь $L_{SFT}$:
+Let $y^{(i)} = (y_1^{(i)}, y_2^{(i)}, ..., y_{L_i}^{(i)})$ be the sequence of reference answer tokens of length $L_i$. The model $\pi_{\phi}$, with parameters $\phi$ (initialized as $\phi_{init} = \theta$), is trained to maximize the probability of generating the sequence $y^{(i)}$ given the input sequence $x^{(i)}$. This is equivalent to minimizing the following loss function $L_{SFT}$:
 
 $$L_{SFT}(\phi) = - \sum_{i=1}^{M} \frac{1}{L_i} \sum_{j=1}^{L_i} \log P_{\pi_{\phi}}(y_j^{(i)} | x^{(i)}, y_1^{(i)}, ..., y_{j-1}^{(i)}; \phi)$$
 
-где:
-*   $\phi$ — параметры модели, которые оптимизируются в процессе SFT.
-*   $P_{\pi_{\phi}}(y_j^{(i)} | x^{(i)}, y_1^{(i)}, ..., y_{j-1}^{(i)}; \phi)$ — это вероятность $j$-го токена ответа $y_j^{(i)}$, предсказанная моделью $\pi_{\phi}$ на основе входного промпта $x^{(i)}$ и всех предыдущих *истинных* токенов ответа $y_1^{(i)}, ..., y_{j-1}^{(i)}$ (этот режим называется "teacher forcing").
-*   Суммирование ведется по всем примерам $i$ в датасете $D_{SFT}$ и по всем токенам $j$ в каждом эталонном ответе $y^{(i)}$.
-*   Часто используется усреднение по длине последовательности $L_i$ (как показано в формуле) или по общему числу токенов в батче для нормализации потерь.
+where:
+*   $\phi$ — the model parameters optimized during SFT.
+*   $P_{\pi_{\phi}}(y_j^{(i)} | x^{(i)}, y_1^{(i)}, ..., y_{j-1}^{(i)}; \phi)$ — the probability of the $j$-th answer token $y_j^{(i)}$ predicted by model $\pi_{\phi}$ based on the input prompt $x^{(i)}$ and all preceding *true* answer tokens $y_1^{(i)}, ..., y_{j-1}^{(i)}$ (this mode is called "teacher forcing").
+*   The summation is over all examples $i$ in dataset $D_{SFT}$ and all tokens $j$ in each reference answer $y^{(i)}$.
+*   Often, averaging over sequence length $L_i$ (as shown) or total tokens in a batch is used for loss normalization.
 
-**Практическая реализация.** На практике это часто реализуется путем конкатенации промпта и ответа ($c^{(i)} = x^{(i)} \oplus y^{(i)}$) и применения стандартной функции потерь для предсказания следующего токена ко всей последовательности $c^{(i)}$. Однако, при вычислении градиентов и обновлении весов учитываются только потери, соответствующие токенам из $y^{(i)}$. Это достигается с помощью механизма маскирования (loss masking), который обнуляет (игнорирует) потери для токенов, принадлежащих входному промпту $x^{(i)}$. Таким образом, модель обучается предсказывать и генерировать только желаемый ответ, продолжая последовательность, заданную промптом.
+**Practical Implementation.** In practice, this is often implemented by concatenating the prompt and answer ($c^{(i)} = x^{(i)} \oplus y^{(i)}$) and applying the standard next-token prediction loss to the entire sequence $c^{(i)}$. However, during gradient computation and weight updates, only losses corresponding to tokens in $y^{(i)}$ are considered. This is achieved via a loss masking mechanism, which nullifies (ignores) losses for tokens belonging to the input prompt $x^{(i)}$. Thus, the model learns to predict and generate only the desired answer, continuing the sequence given by the prompt.
 
-Оптимизация параметров $\phi$ выполняется с использованием стандартных методов стохастического градиентного спуска (например, AdamW), аналогично этапу предварительного обучения, но обычно с меньшей скоростью обучения (learning rate) и на значительно меньшем (на порядки) объеме данных по сравнению с pre-training. Цель SFT — не столько обучить модель новым знаниям (хотя это тоже может происходить в некоторой степени), сколько "научить" ее использовать уже имеющиеся знания для генерации ответов в определенном формате и стиле, соответствующем примерам из $D_{SFT}$.
+Parameter optimization $\phi$ is performed using standard stochastic gradient descent methods (e.g., AdamW), similar to the pre-training stage, but typically with a lower learning rate and on a significantly smaller (by orders of magnitude) volume of data compared to pre-training. The goal of SFT is not so much to teach the model new knowledge (though some may be acquired), but to "teach" it to use existing knowledge to generate responses in a specific format and style matching the examples in $D_{SFT}$.
 
-Стоит отметить, что SFT немного отличается от обобщённого fine-tuning. Обычно fine-tuning модели глубокого обучения выполняется для того, чтобы научить модель решению конкретной задачи, но это делает модель более специализированной и менее обобщённой — модель становится "нишевым специалистом". Модель с большей вероятностью будет точнее решать задачу, на которую выполнялся fine-tuning, по сравнению с обобщённой моделью, но может потерять способность решать другие задачи. SFT же — это фундаментальный компонент выравнивания языковых моделей, в том числе и обобщённых базовых моделей. Так как мы выполняем fine-tuning модели, чтобы она подражала правильному стилю или поведению, а не чтобы она решала конкретную задачу, она не теряет своей способности решать обобщённые задачи.
-
-
+It should be noted that SFT differs slightly from general fine-tuning. Typically, fine-tuning a deep learning model aims to teach it to solve a specific task, making the model more specialized and less general — the model becomes a "niche specialist." The model will likely perform better on the fine-tuned task compared to a general model but may lose its ability to solve other tasks. SFT, however, is a fundamental component of LLM alignment, including for general-purpose base models. Since we fine-tune the model to imitate correct style or behavior, rather than to solve a specific task, it does not lose its ability to solve general tasks.
 
 </details>
 
 <details> 
-    <summary><em><strong>Этап 4. Reinforcement Learning from Human Feedback (RLHF)</strong></em></summary>
+    <summary><em><strong>Stage 4. Reinforcement Learning from Human Feedback (RLHF)</strong></em></summary>
 
 ### 4. Reinforcement Learning from Human Feedback (RLHF)
 
-Это наиболее сложный этап, направленный на то, чтобы согласовать поведение модели с человеческими предпочтениями, делая ее ответы более полезными, честными и безвредными.
+This is the most complex stage, aimed at aligning the model’s behavior with human preferences to make its responses more helpful, honest, and harmless.
 
-*   **Цель:**  
-  Тонкая настройка модели с использованием сигналов обратной связи от людей, чтобы она генерировала ответы, которые люди оценивают как высококачественные.
+*   **Goal:**  
+  Fine-tuning the model using signals from human feedback to generate responses that humans rate as high-quality.
 
-**Процесс состоит из двух основных стадий:**
+**The process consists of two main stages:**
 
-  **Стадия 4.1: Обучение модели вознаграждения (Reward Model - RM)**
+  **Stage 4.1: Training the Reward Model (RM)**
     
-  *   **Сбор данных:**
-      1.  Берется набор промптов;
-      2.  SFT-модель генерирует несколько (часто два) вариантов ответа на каждый промпт;
-      3.  Люди-асессоры сравнивают эти ответы и выбирают лучший (или ранжируют их);
-      4.  Собирается датасет предпочтений: `(промпт, выбранный_ответ, отвергнутый_ответ)`.
-  *   **Архитектура RM:**  
-  Обычно используется та же архитектура LLM, что и основная модель (или только ее энкодер), но с добавлением "головы" (линейного слоя), которая предсказывает скалярное значение — "оценку" (вознаграждение) качества ответа на данный промпт.
-    *   **Функция потерь (на основе модели Брэдли-Терри):**  
-  Обучаем RM так, чтобы она присваивала более высокую оценку выбранному ответу ($y_w$) по сравнению с отвергнутым ($y_l$).
+  *   **Data Collection:**
+      1.  A set of prompts is taken;
+      2.  The SFT model generates several (often two) response variants for each prompt;
+      3.  Human assessors compare these responses and select the better one (or rank them);
+      4.  A preference dataset is collected: `(prompt, chosen_response, rejected_response)`.
+  *   **RM Architecture:**  
+  Typically, the same LLM architecture as the main model (or just its encoder) is used, with an added "head" (a linear layer) that predicts a scalar value — the "score" (reward) of response quality for a given prompt.
+    *   **Loss Function (based on Bradley-Terry model):**  
+  Train the RM to assign a higher score to the chosen response ($y_w$) than to the rejected one ($y_l$).
 
-      *   **Математическая формализация:**
+      *   **Mathematical Formalization:**
 
           $$L_{RM}(\phi) = - \mathbb{E}_{(x, y_w, y_l) \sim D} [\log(\sigma(r_\phi(x, y_w) - r_\phi(x, y_l)))]$$
           
-          где:
+          where:
 
-          *   $D$ — датасет человеческих предпочтений.
-          *   $x$ — промпт.
-          *   $y_w$ — выбранный (предпочтительный) ответ.
-          *   $y_l$ — отвергнутый ответ.
-          *   $r_\phi(x, y)$ — скалярная оценка, выдаваемая моделью RM с параметрами $\phi$.
-          *   $\sigma$ — сигмоидная функция.
+          *   $D$ — the human preference dataset.
+          *   $x$ — the prompt.
+          *   $y_w$ — the chosen (preferred) response.
+          *   $y_l$ — the rejected response.
+          *   $r_\phi(x, y)$ — the scalar score output by the RM with parameters $\phi$.
+          *   $\sigma$ — the sigmoid function.
 
-      *   **Пояснение:**  
-  Функция потерь штрафует RM, если она присваивает отвергнутому ответу $y_l$ оценку, близкую или большую, чем выбранному ответу $y_w$. Минимизация потерь заставляет RM научиться предсказывать, какой ответ люди сочтут лучшим.
+      *   **Explanation:**  
+  The loss function penalizes the RM if it assigns a score to the rejected answer $y_l$ that is close to or higher than the chosen answer $y_w$. Minimizing the loss forces the RM to learn to predict which answer humans will prefer.
 
-  **Стадия 4.2: Оптимизация политики с помощью Reinforcement Learning (RL)**
+  **Stage 4.2: Policy Optimization via Reinforcement Learning (RL)**
 
-*   **Цель:**  
-  Настроить SFT-модель (теперь она называется "политикой" $\pi^{RL}$), чтобы она генерировала ответы, максимизирующие оценку от обученной RM, при этом не слишком сильно отклоняясь от исходной SFT-модели.
+*   **Goal:**  
+  Adjust the SFT model (now called the "policy" $\pi^{RL}$) to generate responses that maximize the score from the trained RM, without deviating too far from the original SFT model.
 
-  *   **Процесс (с использованием PPO - Proximal Policy Optimization):**
-      1.  Берется промпт $x$ из датасета промптов.
-      2.  Текущая политика $\pi_{\theta}^{RL}$ (инициализированная весами SFT-модели) генерирует ответ $y$.
-      3.  Модель вознаграждения $r_\phi(x, y)$ оценивает сгенерированный ответ $y$.
-      4.  Алгоритм PPO обновляет параметры $\theta$ политики $\pi_{\theta}^{RL}$, чтобы максимизировать ожидаемое вознаграждение, используя специальную целевую функцию.
-  *   **Целевая функция (упрощенная для PPO):**
+  *   **Process (using PPO - Proximal Policy Optimization):**
+      1.  A prompt $x$ is sampled from the prompt dataset.
+      2.  The current policy $\pi_{\theta}^{RL}$ (initialized with SFT model weights) generates an answer $y$.
+      3.  The reward model $r_\phi(x, y)$ evaluates the generated answer $y$.
+      4.  The PPO algorithm updates the policy parameters $\theta$ to maximize the expected reward, using a specialized objective function.
+  *   **Objective Function (simplified for PPO):**
       
       $$J(\theta) = \mathbb{E}_{x \sim D_{prompt}, y \sim \pi_{\theta}^{RL}(y|x)} [r_\phi(x, y) - \beta \text{KL}(\pi_{\theta}^{RL}(y|x) || \pi^{SFT}(y|x))]$$
 
-      где:
+      where:
 
-      *   $\pi_{\theta}^{RL}$ — оптимизируемая политика (LLM).
-      *   $\pi^{SFT}$ — исходная SFT-модель (ее веса заморожены).
-      *   $r_\phi(x, y)$ — вознаграждение от RM.
-      *   $\text{KL}(\pi_{\theta}^{RL} || \pi^{SFT})$ — KL-дивергенция между распределениями вероятностей токенов, выдаваемыми текущей политикой и исходной SFT-моделью. Это штраф за отклонение от SFT-модели.
-      *   $\beta$ — коэффициент, контролирующий силу KL-штрафа.
+      *   $\pi_{\theta}^{RL}$ — the optimized policy (LLM).
+      *   $\pi^{SFT}$ — the original SFT model (its weights are frozen).
+      *   $r_\phi(x, y)$ — the reward from the RM.
+      *   $\text{KL}(\pi_{\theta}^{RL} || \pi^{SFT})$ — the KL divergence between the token probability distributions output by the current policy and the original SFT model. This is a penalty for deviation from the SFT model.
+      *   $\beta$ — a coefficient controlling the strength of the KL penalty.
 
-  *   **Пояснение:**
-      *   Первый член $r_\phi(x, y)$ побуждает модель генерировать ответы, которые нравятся RM (и, следовательно, людям).
-      *   Второй член (KL-штраф) не дает модели слишком сильно измениться по сравнению с SFT-моделью. Это важно по двум причинам: 1) Предотвращает "оптимизационный коллапс", когда модель находит способ получить высокое вознаграждение от RM, генерируя бессмысленные или нежелательные ответы (эксплуатируя недостатки RM). 2) Помогает сохранить общие языковые способности модели, приобретенные на этапах pre-training и SFT.
-      *   PPO использует более сложную суррогатную функцию потерь с "клиппингом" отношения вероятностей для обеспечения стабильности обновлений, но общая цель остается той же.
+  *   **Explanation:**
+      *   The first term $r_\phi(x, y)$ encourages the model to generate answers that the RM (and thus humans) like.
+      *   The second term (KL penalty) prevents the model from deviating too far from the SFT model. This is important for two reasons: 1) It prevents "optimization collapse," where the model finds a way to get high reward from the RM by generating meaningless or undesirable answers (exploiting RM weaknesses). 2) It helps preserve the general language abilities learned during pre-training and SFT.
+      *   PPO uses a more complex surrogate loss function with "clipping" of probability ratios to ensure stable updates, but the overall goal remains the same.
 
-*   **Альтернативы RLHF:**  
-  В последнее время набирают популярность методы, такие как **Direct Preference Optimization (DPO)**, которые позволяют оптимизировать модель на основе данных о предпочтениях напрямую, без явного обучения отдельной модели вознаграждения и использования сложных RL-алгоритмов, что может упростить и стабилизировать процесс.
+*   **Alternatives to RLHF:**  
+  Recently, methods such as **Direct Preference Optimization (DPO)** have gained popularity, allowing direct optimization of the model based on preference data without explicitly training a separate reward model or using complex RL algorithms, potentially simplifying and stabilizing the process.
 
-**Результат RLHF:**  
-  Модель, чьи ответы лучше соответствуют человеческим предпочтениям по полезности, честности и безвредности. Это обычно финальная версия модели, готовая к оценке и развертыванию.
-
-</details> 
-
-<details> 
-    <summary><em><strong>Этап 5. Оценка и Развертывание</strong></em></summary>
-
-### 5. Оценка и Развертывание
-
-После обучения модель проходит тщательную оценку перед развертыванием.
-
-*   **Оценка:**
-    *   **Академические бенчмарки:**   
-  Наборы задач для оценки понимания языка, ответов на вопросы, логических рассуждений (например, MMLU, HellaSwag, ARC, TruthfulQA).
-    *   **Оценка людьми:**  
-  Самый важный вид оценки для диалоговых моделей. Асессоры оценивают качество ответов по различным критериям (полезность, релевантность, безопасность, тон голоса) или сравнивают ответы разных моделей на одни и те же промпты (A/B тесты, Side-by-Side сравнения).
-    *   **Специализированные тесты:**  
-  Проверка на наличие предвзятостей, генерацию токсичного контента, способность к кодированию, математике и т.д.
-
-*   **Развертывание (Deployment):**
-    *   **Инференс:**  
-  Запуск модели для генерации ответов на запросы пользователей. Требует значительных вычислительных ресурсов (GPU).
-    *   **Оптимизация для инференса:**  
-  Техники вроде квантования (уменьшение точности представления весов модели) и дистилляции (обучение меньшей модели повторять поведение большой) для снижения требований к памяти и ускорения работы.
-    *   **Мониторинг:**  
-  Постоянное отслеживание производительности модели, сбор обратной связи от пользователей, выявление проблем (например, "галлюцинаций" - генерации неверной информации).
-    *   **Итеративное улучшение:**  
-  Цикл обучения (особенно SFT и RLHF) может повторяться с новыми данными и обратной связью для постоянного улучшения модели.
+**Result of RLHF:**  
+  A model whose responses better align with human preferences regarding helpfulness, honesty, and harmlessness. This is typically the final model version ready for evaluation and deployment.
 
 </details>
 
 <details> 
-    <summary><em><strong>Прогнозирование следующего токена (next-token prediction)</strong></em></summary>
+    <summary><em><strong>Stage 5. Evaluation and Deployment</strong></em></summary>
 
-## Прогнозирование следующего токена в обучении LLM
+### 5. Evaluation and Deployment
 
-Прогнозирование следующего токена (next-token prediction) — это фундаментальная задача, лежащая в основе предварительного обучения (pre-training) большинства современных больших языковых моделей (LLM) авторегрессионного типа, таких как GPT, Llama, PaLM, Mistral и другие. Эта стратегия является ключевым примером **самообучения (self-supervised learning)**, позволяя моделям изучать сложные закономерности языка, грамматику, семантику и даже факты о мире, используя огромные объемы неразмеченного текста без необходимости ручной разметки. В данном обзоре мы детально рассмотрим механизмы, лежащие в основе next-token prediction, принципы их работы, математическую формализацию и значение этого подхода для создания мощных LLM.
+After training, the model undergoes thorough evaluation before deployment.
 
-### Механизм Next-Token Prediction
+*   **Evaluation:**
+    *   **Academic Benchmarks:**  
+  Sets of tasks for evaluating language understanding, question answering, and logical reasoning (e.g., MMLU, HellaSwag, ARC, TruthfulQA).
+    *   **Human Evaluation:**  
+  The most critical form of evaluation for dialogue models. Assessors rate response quality across various criteria (usefulness, relevance, safety, tone) or compare responses from different models on identical prompts (A/B tests, Side-by-Side comparisons).
+    *   **Specialized Tests:**  
+  Assessment for biases, generation of toxic content, coding ability, mathematical reasoning, and more.
 
-В основе механизма лежит идея авторегрессии: предсказание следующего элемента последовательности на основе всех предыдущих. Когда LLM получает на вход последовательность токенов $t_1, t_2, ..., t_{k-1}$, ее задача — предсказать наиболее вероятный следующий токен $t_k$.
+*   **Deployment (Deployment):**
+    *   **Inference:**  
+  Running the model to generate responses to user queries. Requires significant computational resources (GPUs).
+    *   **Inference Optimization:**  
+  Techniques such as quantization (reducing the precision of model weights) and distillation (training a smaller model to replicate the behavior of a larger one) to reduce memory requirements and accelerate performance.
+    *   **Monitoring:**  
+  Continuous tracking of model performance, collection of user feedback, and identification of issues (e.g., "hallucinations" — generation of incorrect information).
+    *   **Iterative Improvement:**  
+  The training cycle (particularly SFT and RLHF) can be repeated with new data and feedback to continuously improve the model.
 
-1.  **Обработка контекста с помощью Transformer:** современные LLM используют архитектуру **Transformer**. Ее ключевой элемент — механизм **Self-Attention**. Он позволяет модели динамически определять, какие из предыдущих токенов ($t_1$ до $t_{k-1}$) наиболее релевантны для предсказания следующего токена $t_k$. Модель вычисляет "оценки внимания" между текущей позицией (где ожидается $t_k$) и всеми предыдущими позициями, преобразуя их в веса, которые определяют, насколько сильно каждый предыдущий токен влияет на предсказание.
+</details>
 
-    *   **Маскированное Self-Attention (Causal Masking):**  
-  В моделях, обучаемых на next-token prediction (декодерах Transformer), используется специальный тип внимания — маскированное. Маска не позволяет механизму внимания "заглядывать вперед" в последовательность. При обработке $i$-й позиции модель может учитывать только токены с $1$-й по $i$-ю (или $i-1$ для предсказания $i$-го токена), но не $i+1$, $i+2$ и т.д. Это критически важно для сохранения авторегрессионного свойства: предсказание зависит только от прошлого, а не от будущего.
+<details> 
+    <summary><em><strong>Next-Token Prediction</strong></em></summary>
 
-2.  **Генерация распределения вероятностей:** после того как входная последовательность $t_1, ..., t_{k-1}$ обработана несколькими слоями Transformer, модель генерирует вектор скрытого состояния $h_{k-1}$, который содержит информацию обо всем предыдущем контексте. Этот вектор $h_{k-1}$ подается на:
+## Next-Token Prediction in LLM Training
 
-    *   **Линейный слой (Output Embedding Layer):**  
-  Преобразует вектор скрытого состояния $h_{k-1}$ в вектор **логитов** $z_k$ размерностью $V$, где $V$ — размер словаря модели. Каждый элемент $z_{k,j}$ этого вектора соответствует "оценке" (не нормализованной логарифмической вероятности) того, насколько вероятен $j$-й токен словаря как следующий токен $t_k$.
-    *   **Функция Softmax:**  
-  Преобразует вектор логитов $z_k$ в вектор **вероятностей** $P_k$. Каждый элемент $P_{k,j}$ этого вектора представляет собой вероятность $P(t_k = \text{token}_j | t_1, ..., t_{k-1})$, то есть вероятность того, что $j$-й токен словаря является следующим.
+Next-token prediction is the fundamental task underlying the pre-training of most modern autoregressive large language models (LLMs), such as GPT, Llama, PaLM, Mistral, and others. This strategy is a key example of **self-supervised learning**, enabling models to learn complex linguistic patterns, grammar, semantics, and even world facts by leveraging massive volumes of unlabeled text without requiring manual annotation. In this review, we examine in detail the mechanisms underpinning next-token prediction, their principles of operation, mathematical formalization, and significance for creating powerful LLMs.
+
+### Mechanism of Next-Token Prediction
+
+The core idea of the mechanism is autoregression: predicting the next element in a sequence based on all preceding elements. When an LLM receives as input a sequence of tokens $t_1, t_2, ..., t_{k-1}$, its task is to predict the most probable next token $t_k$.
+
+1.  **Context Processing via Transformer:** Modern LLMs use the **Transformer** architecture. Its key component is the **Self-Attention** mechanism. It allows the model to dynamically determine which of the preceding tokens ($t_1$ to $t_{k-1}$) are most relevant for predicting the next token $t_k$. The model computes "attention scores" between the current position (where $t_k$ is expected) and all previous positions, converting them into weights that determine how strongly each preceding token influences the prediction.
+
+    *   **Masked Self-Attention (Causal Masking):**  
+  In models trained on next-token prediction (Transformer decoders), a special type of attention is used—masked attention. The mask prevents the attention mechanism from "looking ahead" in the sequence. When processing the $i$-th position, the model can only consider tokens from position $1$ to $i$ (or $i-1$ for predicting the $i$-th token), but not $i+1$, $i+2$, etc. This is critical for preserving the autoregressive property: prediction depends solely on the past, not the future.
+
+2.  **Generation of Probability Distribution:** After the input sequence $t_1, ..., t_{k-1}$ is processed by multiple Transformer layers, the model generates a hidden state vector $h_{k-1}$ containing information about the entire preceding context. This vector $h_{k-1}$ is fed into:
+
+    *   **Linear Layer (Output Embedding Layer):**  
+  Transforms the hidden state vector $h_{k-1}$ into a vector of **logits** $z_k$ of dimension $V$, where $V$ is the model's vocabulary size. Each element $z_{k,j}$ of this vector corresponds to a "score" (unnormalized log probability) indicating how likely the $j$-th vocabulary token is to be the next token $t_k$.
+    *   **Softmax Function:**  
+  Converts the logits vector $z_k$ into a vector of **probabilities** $P_k$. Each element $P_{k,j}$ of this vector represents the probability $P(t_k = \text{token}_j | t_1, ..., t_{k-1})$, i.e., the probability that the $j$-th vocabulary token is the next one.
   
   $$P_{k,j} = \frac{\exp(z_{k,j})}{\sum_{i=1}^{V} \exp(z_{k,i})}$$
   
-  Сумма всех элементов вектора $P_k$ равна 1, что делает его корректным распределением вероятностей над словарем.
+  The sum of all elements in vector $P_k$ equals 1, making it a valid probability distribution over the vocabulary.
 
-### Процесс обучения
+### Training Process
 
-Обучение модели заключается в настройке ее параметров (весов) таким образом, чтобы она как можно точнее предсказывала следующий токен в реальных текстовых данных из огромного обучающего корпуса.
+Training the model involves adjusting its parameters (weights) so that it predicts the next token as accurately as possible in real text from a massive training corpus.
 
-1. **Задача:**  
-  Для заданной последовательности токенов $T = (t_1, t_2, ..., t_L)$ из обучающего корпуса, модель должна научиться максимизировать вероятность этой последовательности. В авторегрессионной модели вероятность последовательности раскладывается на произведение условных вероятностей (согласно цепному правилу теории вероятностей):
+1. **Objective:**  
+  For a given sequence of tokens $T = (t_1, t_2, ..., t_L)$ from the training corpus, the model must learn to maximize the probability of this sequence. In an autoregressive model, the probability of the sequence decomposes into a product of conditional probabilities (according to the chain rule of probability):
 
     $$P(T; \theta) = P(t_1, ..., t_L; \theta) = \prod_{i=1}^{L} P(t_i | t_1, ..., t_{i-1}; \theta)$$
 
-    где $\theta$ обозначает параметры модели. Максимизация этой вероятности (или, что эквивалентно, максимизация логарифма правдоподобия) является целью обучения.
+    where $\theta$ denotes the model parameters. Maximizing this probability (or equivalently, maximizing the log-likelihood) is the goal of training.
 
-2. **Функция потерь (Loss Function):**  
-  На практике вместо максимизации правдоподобия минимизируют **отрицательный логарифм правдоподобия (Negative Log-Likelihood - NLL)**. Для задачи классификации на множество классов (где классы - это токены словаря), NLL эквивалентен **Cross-Entropy Loss (Перекрестная энтропия)**. Для одного предсказания $i$-го токена она измеряет расхождение между предсказанным моделью распределением вероятностей $P(\cdot | t_1, ..., t_{i-1}; \theta)$ и "истинным" распределением, где вся вероятность (равная 1) сосредоточена на реальном следующем токене $t_i$. Потери обычно усредняются по всем токенам в последовательности и по всем последовательностям в **батче (batch)** данных.
+2. **Loss Function:**  
+  In practice, instead of maximizing likelihood, the **Negative Log-Likelihood (NLL)** is minimized. For a multi-class classification task (where classes are vocabulary tokens), NLL is equivalent to **Cross-Entropy Loss**. For a single prediction of the $i$-th token, it measures the divergence between the model's predicted probability distribution $P(\cdot | t_1, ..., t_{i-1}; \theta)$ and the "true" distribution, where all probability (equal to 1) is concentrated on the actual next token $t_i$. Losses are typically averaged over all tokens in a sequence and across all sequences in a **batch** of data.
 
-3. **Оптимизация:**  
-  Параметры модели $\theta$ (миллиарды или даже триллионы весов в современных LLM) итеративно обновляются с помощью алгоритмов стохастического градиентного спуска (SGD), чаще всего используются его адаптивные варианты, такие как **Adam** или **AdamW**. На каждом шаге обучения:
-    *   Берется батч текстовых последовательностей.
-    *   Модель делает предсказания следующих токенов для всех позиций в батче.
-    *   Вычисляется средняя Cross-Entropy Loss по батчу.
-    *   С помощью **алгоритма обратного распространения ошибки (Backpropagation)** вычисляется градиент функции потерь по всем параметрам модели ($\nabla_\theta L$).
-    *   Оптимизатор (Adam/AdamW) использует этот градиент для обновления параметров $\theta$ в направлении, уменьшающем потери: $\theta_{new} = \theta_{old} - \eta \nabla_\theta L$ (где $\eta$ - скорость обучения, а оптимизатор применяет более сложные правила обновления).
+3. **Optimization:**  
+  The model parameters $\theta$ (billions or even trillions of weights in modern LLMs) are iteratively updated using stochastic gradient descent (SGD) algorithms, most commonly adaptive variants such as **Adam** or **AdamW**. On each training step:
+    *   A batch of text sequences is sampled.
+    *   The model makes next-token predictions for all positions in the batch.
+    *   The average Cross-Entropy Loss is computed over the batch.
+    *   Using the **backpropagation algorithm**, the gradient of the loss function with respect to all model parameters ($\nabla_\theta L$) is computed.
+    *   The optimizer (Adam/AdamW) uses this gradient to update parameters $\theta$ in the direction that reduces loss: $\theta_{new} = \theta_{old} - \eta \nabla_\theta L$ (where $\eta$ is the learning rate, and the optimizer applies more sophisticated update rules).
 
-### Математическая формализация
+### Mathematical Formalization
 
-**1. Вероятность следующего токена:**  
-  Модель $\pi_\theta$ с параметрами $\theta$ вычисляет условную вероятность следующего токена $t_i$ при заданном контексте $t_{<i} = (t_1, ..., t_{i-1})$:
+**1. Probability of the Next Token:**  
+  The model $\pi_\theta$ with parameters $\theta$ computes the conditional probability of the next token $t_i$ given context $t_{<i} = (t_1, ..., t_{i-1})$:
 
-$$P(t_i | t_{<i}; \theta) = \text{Softmax}(z_i)_k \quad \text{где } t_i = \text{token}_k$$
+$$P(t_i | t_{<i}; \theta) = \text{Softmax}(z_i)_k \quad \text{where } t_i = \text{token}_k$$
 
-где:
+where:
 
-*   $z_i = f(t_{<i}; \theta)$ - вектор логитов размерности $V$ (размер словаря), вычисленный нейросетью (Transformer) на основе контекста $t_{<i}$.
-*   $\text{Softmax}(z_i)_k = \frac{\exp(z_{i,k})}{\sum_{j=1}^{V} \exp(z_{i,j})}$ - вероятность $k$-го токена словаря быть следующим.
-*   Мы выбираем ту вероятность из вектора Softmax, которая соответствует индексу $k$ *истинного* следующего токена $t_i$ из обучающих данных.
+*   $z_i = f(t_{<i}; \theta)$ - a vector of logits of dimension $V$ (vocabulary size), computed by the neural network (Transformer) based on context $t_{<i}$.
+*   $\text{Softmax}(z_i)_k = \frac{\exp(z_{i,k})}{\sum_{j=1}^{V} \exp(z_{i,j})}$ - the probability of the $k$-th vocabulary token being next.
+*   We select the probability from the Softmax vector corresponding to the index $k$ of the *true* next token $t_i$ from the training data.
 
-**2. Функция потерь (Cross-Entropy Loss):**  
-  Для одной последовательности $T = (t_1, ..., t_L)$, общие потери (отрицательный логарифм правдоподобия) вычисляются как сумма отрицательных логарифмов вероятностей истинных следующих токенов на каждой позиции:
+**2. Loss Function (Cross-Entropy Loss):**  
+  For one sequence $T = (t_1, ..., t_L)$, the total loss (negative log-likelihood) is computed as the sum of negative logarithms of the probabilities assigned to the true next tokens at each position:
 
 $$L(T; \theta) = - \log P(T; \theta) = - \log \prod_{i=1}^{L} P(t_i | t_{<i}; \theta) = - \sum_{i=1}^{L} \log P(t_i | t_{<i}; \theta)$$
 
-*   **Пояснение:**
-    *   $L(T; \theta)$: функция потерь для последовательности $T$ при параметрах модели $\theta$. Наша цель - минимизировать это значение;
-    *   $\sum_{i=1}^{L}$: суммирование по всем позициям предсказания в последовательности (от первого до последнего токена). Часто первое предсказание (для $t_1$) опускается, так как нет контекста, или используется специальный токен начала последовательности.
-    *   $P(t_i | t_{<i}; \theta)$: вероятность, которую модель присвоила *истинному* токену $t_i$, который действительно следовал за контекстом $t_{<i}$ в обучающих данных. Это значение берется из выходного вектора Softmax на шаге $i$.
-    *   $\log(\cdot)$: натуральный логарифм.
-    *   Знак минус: мы минимизируем *отрицательный* логарифм правдоподобия, что эквивалентно максимизации самого правдоподобия $P(T; \theta)$. Если модель присваивает истинному токену $t_i$ высокую вероятность (близкую к 1), то $\log P(\cdot)$ будет близок к 0, и вклад в общие потери будет мал. Если же вероятность низкая (близкая к 0), то $\log P(\cdot)$ будет большим отрицательным числом, а $-\log P(\cdot)$ - большим положительным числом, что увеличит общие потери и "накажет" модель, стимулируя ее скорректировать веса.
-    *   **Связь с Cross-Entropy:** для одного предсказания $i$, если представить истинный следующий токен $t_i$ как one-hot вектор $y_i$ (где $y_{i,k}=1$ для истинного токена $k$, и 0 для остальных), а предсказанное распределение как вектор $p_i = \text{Softmax}(z_i)$, то перекрестная энтропия между $y_i$ и $p_i$ равна $H(y_i, p_i) = - \sum_{j=1}^{V} y_{i,j} \log p_{i,j}$. Поскольку $y_{i,j}$ равен 1 только для истинного токена $k$ и 0 для остальных, эта сумма упрощается до $- \log p_{i,k}$, что в точности совпадает с членом $-\log P(t_i | t_{<i}; \theta)$ в формуле выше.
+*   **Explanation:**
+    *   $L(T; \theta)$: the loss function for sequence $T$ under model parameters $\theta$. Our goal is to minimize this value;
+    *   $\sum_{i=1}^{L}$: summation over all prediction positions in the sequence (from the first to the last token). Often the first prediction (for $t_1$) is omitted since there is no context, or a special start-of-sequence token is used.
+    *   $P(t_i | t_{<i}; \theta)$: the probability assigned by the model to the *true* token $t_i$ that actually followed context $t_{<i}$ in the training data. This value is taken from the output Softmax vector at step $i$.
+    *   $\log(\cdot)$: natural logarithm.
+    *   The minus sign: we minimize the *negative* log-likelihood, which is equivalent to maximizing the likelihood $P(T; \theta)$. If the model assigns a high probability (close to 1) to the true token $t_i$, then $\log P(\cdot)$ is close to 0, and the contribution to total loss is small. If the probability is low (close to 0), then $\log P(\cdot)$ is a large negative number, and $-\log P(\cdot)$ is a large positive number, increasing total loss and "punishing" the model, prompting it to adjust weights.
+    *   **Connection to Cross-Entropy:** For a single prediction $i$, if the true next token $t_i$ is represented as a one-hot vector $y_i$ (where $y_{i,k}=1$ for the true token $k$, and 0 otherwise), and the predicted distribution is $p_i = \text{Softmax}(z_i)$, then the cross-entropy between $y_i$ and $p_i$ is $H(y_i, p_i) = - \sum_{j=1}^{V} y_{i,j} \log p_{i,j}$. Since $y_{i,j}$ equals 1 only for the true token $k$ and 0 otherwise, this sum simplifies to $- \log p_{i,k}$, which exactly matches the term $-\log P(t_i | t_{<i}; \theta)$ in the formula above.
 
-**3. Потери на батче:**  
-  На практике обучение происходит на батчах данных. Если батч $B$ состоит из $M$ последовательностей $T^{(1)}, ..., T^{(M)}$, то средние потери по батчу вычисляются как:
+**3. Loss on a Batch:**  
+  In practice, training occurs on batches of data. If batch $B$ consists of $M$ sequences $T^{(1)}, ..., T^{(M)}$, the average loss over the batch is computed as:
 
 $$L_{batch}(\theta) = \frac{1}{N_{tokens}} \sum_{j=1}^{M} \sum_{i=1}^{L_j} (-\log P(t_i^{(j)} | t_{<i}^{(j)}; \theta))$$
 
-где 
+where 
 
-$N_{tokens} = \sum_{j=1}^{M} L_j$ - общее количество токенов (предсказаний) в батче.
+$N_{tokens} = \sum_{j=1}^{M} L_j$ - the total number of tokens (predictions) in the batch.
 
-*   **Пояснение:**
-    *   $L_{batch}(\theta)$: средние потери по батчу $B$. Именно градиент этой величины используется для обновления параметров $\theta$ на одном шаге оптимизации;
-    *   $\sum_{j=1}^{M} \sum_{i=1}^{L_j}$: cуммирование потерь по всем токенам всех последовательностей в батче;
-    *   $\frac{1}{N_{tokens}}$: нормализация на общее количество токенов в батче для получения среднего значения потерь на один токен. Это делает значение потерь более стабильным и сравнимым между батчами разного размераж
-    *   $L_j$: длина $j$-й последовательности $T^{(j)}$;
-    *   $t_i^{(j)}$: $i$-й токен $j$-й последовательности;
-    *   $t_{<i}^{(j)}$: контекст для $i$-го токена $j$-й последовательности.
+*   **Explanation:**
+    *   $L_{batch}(\theta)$: the average loss over batch $B$. It is this quantity whose gradient is used to update parameters $\theta$ on one optimization step;
+    *   $\sum_{j=1}^{M} \sum_{i=1}^{L_j}$: summation of losses over all tokens in all sequences in the batch;
+    *   $\frac{1}{N_{tokens}}$: normalization by the total number of tokens in the batch to obtain the average loss per token. This makes the loss value more stable and comparable across batches of different sizes;
+    *   $L_j$: the length of the $j$-th sequence $T^{(j)}$;
+    *   $t_i^{(j)}$: the $i$-th token of the $j$-th sequence;
+    *   $t_{<i}^{(j)}$: the context for the $i$-th token of the $j$-th sequence.
 
-### Значение и ограничения
+### Significance and Limitations
 
-**Значение Next-Token Prediction:**
+**Significance of Next-Token Prediction:**
 
-*   **Эффективное Самообучение (Self-Supervised Learning):** главное преимущество — возможность обучаться на гигантских объемах неразмеченного текста. Задача формулируется самой структурой текста, что устраняет необходимость в дорогостоящей ручной разметке данных;
-*   **Изучение Глубоких Языковых Структур:** чтобы хорошо предсказывать следующий токен, модель вынуждена неявно изучать грамматику, синтаксис, семантику, стилистику и фактические знания, содержащиеся в обучающих данных;
-*   **Фундамент для Генеративных Моделей:** эта стратегия обучения естественным образом приводит к созданию моделей, способных генерировать текст авторегрессионно;
-*   **Основа для Авторегрессионных LLM:** next-token prediction является основной задачей pre-training для всего класса авторегрессионных моделей (Decoder-only), таких как GPT, Llama, PaLM, Mistral и др. (В отличие от моделей типа BERT, которые используют Masked Language Modeling).
+*   **Efficient Self-Supervised Learning:** The main advantage is the ability to train on massive volumes of unlabeled text. The task is defined by the structure of the text itself, eliminating the need for costly manual data annotation;
+*   **Learning Deep Linguistic Structures:** To predict the next token well, the model is forced to implicitly learn grammar, syntax, semantics, style, and factual knowledge contained in the training data;
+*   **Foundation for Generative Models:** This training strategy naturally leads to models capable of generating text autoregressively;
+*   **Basis for Autoregressive LLMs:** Next-token prediction is the primary pre-training task for the entire class of autoregressive models (Decoder-only), such as GPT, Llama, PaLM, Mistral, etc. (In contrast to models like BERT, which use Masked Language Modeling).
 
-**Ограничения:**
+**Limitations:**
 
-*   **Локальная Оптимизация vs Глобальная Когерентность:** модель оптимизируется на предсказание *локально* наиболее вероятного следующего токена, что не всегда гарантирует глобальную осмысленность или фактическую точность сгенерированного текста ("галлюцинации");
-*   **Отсутствие Явной Цели и Согласованности:** задача next-token prediction не учит модель напрямую быть полезной, честной или безвредной. Она имитирует статистику данных, поэтому требуются дополнительные этапы обучения (SFT, RLHF/DPO);
-*   **Чувствительность к Качеству Данных:** модель отражает свойства обучающих данных, включая ошибки, предвзятости и нежелательный контент;
-*   **Вычислительная Сложность:** pre-training требует огромных вычислительных ресурсов и времени.
+*   **Local Optimization vs Global Coherence:** The model is optimized to predict the *locally* most probable next token, which does not guarantee global meaningfulness or factual accuracy of generated text ("hallucinations");
+*   **Absence of Explicit Goal and Alignment:** The next-token prediction task does not directly teach the model to be useful, honest, or harmless. It merely mimics data statistics, requiring additional training stages (SFT, RLHF/DPO);
+*   **Sensitivity to Data Quality:** The model reflects the properties of the training data, including errors, biases, and undesirable content;
+*   **Computational Complexity:** Pre-training requires enormous computational resources and time.
 
 </details> 
 
-### Заключение
+### **3.2 Core Mechanism: Formation of Attention-Based Recall Circuits During the Plateau**
 
-Полный цикл обучения современных LLM — это сложный, итеративный процесс, объединяющий масштабное самообучение на неструктурированных данных (pre-training) с последующей тонкой настройкой под руководством человека (SFT, RLHF). Каждый этап вносит свой вклад:
+**Key Idea:** Although external model metrics (loss, accuracy) do not improve during the plateau phase, important structural changes occur internally—the formation of *attention-based recall circuits* necessary for actual information retrieval.  
 
-*   **Pre-training:** Формирует базовые знания и языковые способности.
-*   **SFT:** Учит модель следовать инструкциям и формату диалога.
-*   **RLHF (или DPO):** Согласует поведение модели с человеческими предпочтениями по качеству и безопасности.
+**Theoretical Foundation:**  
+When performing Transformer tasks involving factual recall, the following pattern is typically observed:  
+- **Early attention layers:** Aggregate information from multiple name tokens, forming a concentrated representation of the entity (typically at the position of the last name token);
+- **Middle MLP layers:** Act as a *key-value store*, linking the name representation (as a query key) with the corresponding factual information (the value); 
+- **Late attention layers:** Use context (e.g., which attribute to predict) to query the entity representation and retrieve stored facts for final prediction.  
 
-Этот многоступенчатый подход позволяет создавать мощные и полезные языковые модели, но также требует постоянных исследований для повышения эффективности, безопасности и интерпретируемости этих сложных систем. Развитие методов обучения, таких как DPO, и подходов вроде Constitutional AI (обучение на основе набора правил или "конституции") продолжают формировать будущее этой области.
+**Hypothesis:** The plateau phase corresponds to the formation of these recall circuits, particularly the development of late attention layers' ability to correctly *route* information. Training stagnates because until these circuits are fully formed, attribute prediction errors cannot effectively propagate backward (via backpropagation) to the corresponding name representations or knowledge storage cells in the MLPs.
 
-</details>
+#### **3.2.1 Experimental Verification: Attention Patching**
 
-### **3.2 Основной механизм: Формирование контуров внимания для recall в период плато**
+**Experimental Logic:**
 
-**Ключевая идея:** Несмотря на то, что внешние метрики модели (потери, точность) не улучшаются в период плато, внутри происходят важные структурные изменения — формируются *контуры recall на основе внимания* (Attention-based Recall Circuits), необходимые для выполнения фактического извлечения информации.  
+If recall circuits are indeed forming during the plateau, then "transplanting" attention patterns from a model that has already passed the plateau into a newly initialized model should significantly accelerate learning and even eliminate the plateau.  
 
-**Теоретическая база:**  
-При выполнении Transformer задач на recall фактов обычно наблюдается следующая картина:  
-- **Ранние слои внимания:** агрегируют информацию из нескольких токенов имени, формируя концентрированное представление объекта (обычно на позиции последнего токена имени);
-- **Средние слои MLP:** выступают в роли *хранилища "ключ-значение"*, связывая представление имени (как ключ запроса) с соответствующей фактической информацией (значение); 
-- **Поздние слои внимания:** используют контекст (например, какой атрибут нужно предсказать) для запроса представления объекта и извлечения сохраненных фактов для итогового предсказания.  
+![Figure_3](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Figure_04.png    )
+> Attention circuits enabling recall form during the loss plateau. **(Left)** We developed an **"attention patching"** experiment: take a snapshot (checkpoint) of a reference model at a specific training stage. Use its attention patterns **in place of its own** in a modified model throughout its training. **(Center)** The more trained the reference model, the more beneficial its attention patterns are for the modified model—and the most critical changes occur precisely **during the plateau**. **Exception:** The earliest training stage shows the opposite trend. This correlates with the fact that during this period: name tokens (compared to other text containing attribute-type information) receive **less attention** when predicting the first attribute value token *(see right panel)*  
 
-**Гипотеза:** Период плато соответствует процессу формирования этих контуров recall, особенно — развитию способности поздних слоев внимания корректно *маршрутизировать* информацию. Обучение стагнирует, потому что до полного формирования этих контуров ошибки предсказания атрибутов не могут эффективно распространяться обратно (через backpropagation) к соответствующим представлениям имен или ячейкам хранения знаний в MLP.
+**Experimental Method:**
 
-#### **3.2.1 Экспериментальная проверка: патч внимания**
+| Step | Action | Purpose |  
+|------|--------|---------|  
+| 1 | Train a **"reference model"** and save its states (checkpoints) at different stages (before/during/after plateau). | Obtain attention patterns of varying maturity. |  
+| 2 | Initialize a new **"modified model"**. | Create a test model. |  
+| 3 | During training of the modified model, **do not compute** its own attention patterns; instead, use frozen attention patterns from corresponding layers of the reference model's checkpoint. | Test the impact of ready-made attention patterns on training efficiency. |  
+| 4 | Observe the training curve (change in attribute loss). | Evaluate the "quality" or "maturity" of patterns at different stages. |  
 
-**Логика эксперимента:**
+**Results:**  
 
-Если контуры recall действительно формируются в период плато, то "пересадка" паттернов внимания из модели, уже прошедшей плато, в только что начавшую обучение модель должна значительно ускорить обучение и даже устранить плато.  
-
-![Figure_3](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Figure_04.png)
-> Контуры внимания, обеспечивающие recall, формируются в период плато потерь. **(Слева)** Мы разработали эксперимент с **"подменой внимания" (attention patching)**: берём снимок (snapshot) референсной модели на определённом этапе её обучения. Используем её паттерны внимания **вместо собственных** в модифицированной модели на всём протяжении её обучения. **(По центру)** Чем более обучена референсная модель, тем полезнее её паттерны внимания для модифицированной модели — и основные изменения происходят именно **во время плато**. **Исключение:** самый ранний этап обучения демонстрирует обратную тенденцию. Это коррелирует с тем, что в этот период: токены имён (по сравнению с остальным текстом, содержащим информацию о типе атрибута). Получают **меньше внимания** при предсказании первого токена значения атрибута *(см. правую панель)*  
-
-**Метод эксперимента:**
-
-| Шаг | Действие | Цель |  
-|------|----------|-------|  
-| 1 | Обучить **"референсную модель"** и сохранить её состояния (checkpoint) на разных этапах (до/во время/после плато). | Получить паттерны внимания разной степени зрелости. |  
-| 2 | Инициализировать новую **"модифицированную модель"**. | Создать тестируемую модель. |  
-| 3 | В процессе обучения модифицированной модели **не вычислять** её собственные паттерны внимания, а вместо этого использовать замороженные паттерны из соответствующих слоёв checkpoint референсной модели. | Проверить влияние готовых паттернов внимания на эффективность обучения. |  
-| 4 | Наблюдать за кривой обучения (изменение потерь на атрибутах). | Оценить "качество" или "зрелость" паттернов на разных этапах. |  
-
-**Результаты:**  
-
-- **Использование паттернов внимания после плато:** скорость обучения резко возрастает, потери на атрибутах быстро снижаются — плато эффективно пропускается;
-- **Использование паттернов внимания во время плато:** чем ближе checkpoint к концу плато, тем заметнее ускорение.
-- **Использование паттернов из ранней стадии обучения (этап 1):** результат даже хуже, чем при случайной инициализации. Причина: раннее внимание фокусируется на токенах типа атрибута, а не на имени, что мешает усвоению ассоциаций "объект-факт".
+- **Using attention patterns from after the plateau:** Training speed increases sharply, attribute losses drop rapidly—the plateau is effectively skipped;
+- **Using attention patterns from during the plateau:** The closer the checkpoint is to the end of the plateau, the more noticeable the acceleration.
+- **Using attention patterns from early training (Stage 1):** Performance is even worse than with random initialization. Reason: Early attention focuses on attribute-type tokens, not names, hindering the formation of "object-fact" associations.
 
 <div style="border: 2px solid #3498db; border-radius: 8px; padding: 12px; background-color: #f8f9fa; margin: 10px 0;">
 <p style="margin: 0; font-weight: bold; color: #2c3e50;">First Checkpoint:</p>
-<p style="margin: 8px 0 0 0; color: #2c3e50;">Обучение языковых моделей проходит через трехэтапную схему приобретения знаний: (1) начальное статистическое обучение с быстрым снижением потерь, (2) длительное плато производительности, пропорциональное количеству изучаемых индивидуумов, и (3) проявление знаний, когда модель начинает связывать конкретные индивидуумы с их атрибутами. Эта структура стабильно сохраняется при различных гиперпараметрах и архитектурах на этапе предварительного обучения (pre-training).</p>
+<p style="margin: 8px 0 0 0; color: #2c3e50;">Language model training proceeds through a three-stage knowledge acquisition scheme: (1) initial statistical learning with rapid loss reduction, (2) a prolonged performance plateau proportional to the number of individuals being learned, and (3) knowledge emergence, when the model begins associating specific individuals with their attributes. This structure remains stable across various hyperparameters and architectures during pre-training.</p>
 </div>
 
-## **4. Как атрибуты распределения данных способствуют приобретению знаний**
+## **4. How Data Distribution Properties Contribute to Knowledge Acquisition**
 
-**Основной вопрос:** ранее мы обсуждали временную динамику обучения модели, но как внутренние свойства обучающих данных, особенно их распределение, влияют на этот процесс? В реальном мире данные часто несбалансированы (imbalanced), то есть некоторые сущности/факты встречаются гораздо чаще, чем другие. Ускоряет ли такая несбалансированность обучение или, наоборот, препятствует ему?
+**Primary Question:**  
+We previously discussed the temporal dynamics of model learning, but how do internal properties of the training data, particularly its distribution, influence this process? In the real world, data is often imbalanced—that is, some entities/facts occur far more frequently than others. Does such imbalance accelerate learning, or does it impede it?
 
-**Основное открытие:** степень сбалансированности распределения данных значительно влияет на динамику обучения, формируя четкий компромисс (trade-off) между длительностью плато и скоростью приобретения знаний на финальной стадии. Используя это свойство, можно оптимизировать общую эффективность обучения за счет стратегий планирования данных (data scheduling).
+**Key Discovery:**  
+The degree of data distribution balance significantly affects learning dynamics, forming a clear trade-off between plateau duration and the speed of knowledge acquisition at the final stage. By leveraging this property, overall training efficiency can be optimized through data scheduling strategies.
 
-### **4.1 Двойное влияние несбалансированности распределения данных: эффект компромисса**
+### **4.1 Dual Impact of Data Distribution Imbalance: The Trade-off Effect**
 
-**Анализ и количественная оценка:**
+**Analysis and Quantitative Assessment:**
 
-- **Длительность плато (Plateau Length):** рпределяется в основном небольшим числом наиболее часто встречающихся индивидов. Когда модель "усваивает" информацию о высокочастотных индивидах (ЧАСТОТНОЕ РАСПРЕДЕЛЕНИЕ), ключевые механизмы, такие как цепи восстановления памяти, могут быть построены предварительно, что помогает модели быстрее выйти из плато. Таким образом, некоторая степень несбалансированности может сократить продолжительность плато.
+- **Plateau Length:** Primarily determined by a small number of the most frequently occurring individuals. When the model "internalizes" information about high-frequency individuals (FREQUENCY DISTRIBUTION), key mechanisms such as memory recall circuits can be pre-built, helping the model exit the plateau faster. Thus, some degree of imbalance can shorten plateau duration.
 
-- **Скорость приобретения знаний (Knowledge Acquisition Speed):** после плато модель должна изучить информацию обо всех индивидах. На этом этапе узкое место скорости обучения заключается в наименее частых индивидах. Чем более сбалансировано распределение данных, тем больше шансов для редких индивидов быть замеченными, и тем выше общая скорость обучения. Таким образом, сбалансированное распределение способствует ускорению этапа приобретения знаний.
+- **Knowledge Acquisition Speed:** After the plateau, the model must learn information about all individuals. At this stage, the bottleneck for learning speed lies with the least frequent individuals. The more balanced the data distribution, the higher the chance that rare individuals will be observed, and the higher the overall learning speed. Thus, a balanced distribution facilitates faster knowledge acquisition.
 
-**Экспериментальная проверка:** Введение степенного закона для контроля несбалансированности  
-Чтобы систематически исследовать влияние несбалансированности, авторы использовали обратный степенной закон (inverse power law) для управления вероятностью выборки $i$-го индивида в наборе данных:
+**Experimental Verification:** Introducing a Power Law to Control Imbalance  
+To systematically investigate the impact of imbalance, the authors employed an inverse power law to control the sampling probability of the $i$-th individual in the dataset:
 
 $$
 P(i) = \frac{i^{-\alpha}}{\sum_{j=1}^{N} j^{-\alpha}},
 $$
 
-где $\alpha$ — гиперпараметр, контролирующий степень несбалансированности:
+where $\alpha$ is a hyperparameter controlling the degree of imbalance:
 
-- $\alpha = 0$: равномерное распределение (Uniform), все индивиды встречаются с одинаковой вероятностью.
-- $\alpha > 1$: распределение Ципфа (Zipf's Law), сильно несбалансированное, где немногие индивиды встречаются крайне часто, а большинство — очень редко.
-- Промежуточные значения $\alpha$: различные степени несбалансированности.
+- $\alpha = 0$: Uniform distribution, all individuals occur with equal probability.
+- $\alpha > 1$: Zipf's Law distribution, highly imbalanced, where a few individuals occur extremely frequently and most occur very rarely.
+- Intermediate $\alpha$ values: Various degrees of imbalance.
 
-**Результаты эксперимента** (фиксированное количество шагов обучения, например, 16k):
+**Experimental Results** (fixed number of training steps, e.g., 16k):
 
-**Вывод:** По результатм эксперимента, существует оптимальная степень несбалансированности ($\alpha_{opt}  \approx 0.6 \sim 0.8)$, которая обеспечивает наилучший баланс между ускорением выхода модели из плато и поддержанием эффективности последующего обучения. Это оптимальное значение относительно стабильно для разных общих чисел индивидов $N$.
+**Conclusion:** Experimental results indicate an optimal degree of imbalance ($\alpha_{opt}  \approx 0.6 \sim 0.8$) that best balances accelerating the model's exit from the plateau with maintaining efficient subsequent learning. This optimal value is relatively stable across different total numbers of individuals $N$.
 
 <div style="border: 2px solid #3498db; border-radius: 8px; padding: 12px; background-color: #f8f9fa; margin: 10px 0;">
 <p style="margin: 0; font-weight: bold; color: #2c3e50;">Second Checkpoint:</p>
-<p style="margin: 8px 0 0 0; color: #2c3e50;">Несбалансированность распределения данных создаёт компромисс в обучении языковых моделей: с одной стороны, высокочастотные индивиды ускоряют выход из плато, формируя необходимые механизмы обработки информации, с другой стороны, низкочастотные индивиды замедляют финальную стадию приобретения знаний. Существует оптимальная степень несбалансированности (α_opt), обеспечивающая наилучший баланс между этими факторами и максимальную общую эффективность обучения.</p>
+<p style="margin: 8px 0 0 0; color: #2c3e50;">Data distribution imbalance creates a trade-off in language model training: on one hand, high-frequency individuals accelerate exit from the plateau by forming necessary information-processing mechanisms; on the other hand, low-frequency individuals slow down the final knowledge acquisition stage. An optimal degree of imbalance ($\alpha_{opt}$) exists that achieves the best balance between these factors and maximizes overall training efficiency.</p>
 </div>
 
-### **4.2 Стратегия планирования данных: динамическая оптимизация приобретения знаний**
+### **4.2 Data Scheduling Strategy: Dynamic Optimization of Knowledge Acquisition**
 
-**Новый вопрос:** Поскольку требования к распределению данных различаются для плато и этапа приобретения знаний (плато предпочитает несбалансированность, а этап приобретения знаний — сбалансированность), можем ли мы разработать динамическую стратегию, которая объединяет преимущества обоих подходов?
+**New Question:**  
+Since data distribution requirements differ for the plateau and knowledge acquisition stages (plateau prefers imbalance, knowledge acquisition prefers balance), can we develop a dynamic strategy that combines the advantages of both approaches?
 
-**Интуиция и решение:** Data Curriculum / Scheduling
+**Intuition and Solution:** Data Curriculum / Scheduling
 
-1. **На ранних этапах обучения (соответствует плато):** используется несбалансированное распределение данных (или только подмножество высокочастотных индивидов) для быстрого создания ключевых механизмов и сокращения плато.
-2. **На поздних этапах обучения (соответствует этапу приобретения знаний):** переход к сбалансированному распределению данных, чтобы гарантировать, что все индивиды будут изучены достаточно полно.
+1. **Early training stages (corresponding to plateau):** Use an imbalanced data distribution (or only a subset of high-frequency individuals) to rapidly build key mechanisms and shorten the plateau.
+2. **Late training stages (corresponding to knowledge acquisition stage):** Transition to a balanced data distribution to ensure all individuals are learned thoroughly.
 
-**Конкретная реализация:** Стратегия "разогрева" (Warm-up)
+**Concrete Implementation:** Warm-up Strategy
 
-- **Фаза разогрева:** обучение начинается с подмножества индивидов (indiv_warmup) в течение epochs_warmup эпох. Это подмножество создает естественную несбалансированность.
-- **Основная фаза обучения:** переход ко всем индивидам с использованием равномерной выборки для продолжения обучения.
+- **Warm-up Phase:** Training begins with a subset of individuals (indiv_warmup) for epochs_warmup epochs. This subset creates natural imbalance.
+- **Main Training Phase:** Transition to all individuals using uniform sampling to continue training.
 
-**Результаты эксперимента:**
+**Experimental Results:**
 
-По сравнению с постоянным использованием равномерного распределения или оптимального фиксированного значения $\alpha$, эта динамическая стратегия "разогрева" значительно увеличивает общий объем знаний, получаемых моделью (что приводит к более низкому значению Attribute Loss), когда число индивидов велико ($N$ большое).
+Compared to constant use of uniform distribution or optimal fixed $\alpha$, this dynamic warm-up strategy significantly increases the total amount of knowledge acquired by the model (resulting in lower Attribute Loss), especially when the number of individuals is large ($N$ large).
 
-**Значение:** это демонстрирует редкий и конкретный пример того, как стратегии "Data Curriculum" обучения данных могут эффективно повысить производительность в сценариях самообучения.
+**Significance:** This demonstrates a rare and concrete example of how "Data Curriculum" strategies can effectively enhance performance in self-supervised learning scenarios.
 
-![Figure_4](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Figure_05.png)
-> Свойства распределения данных могут ускорить приобретение знаний. (слева) Длина плато значительно сокращается, когда некоторые индивиды встречаются чаще, чем другие, что в данном случае достигается увеличением 𝛼. (в центре) Таким образом, полезно обучать модель на более несбалансированных распределениях, особенно когда количество шагов обучения уменьшается или общее количество индивидов увеличивается. (справа) Такая стратегия повышает итоговый объем знаний, содержащихся в сети (линия фиолетового цвета против серой). Динамическая адаптация распределения данных дает еще больший эффект (синяя линия).
+![Figure_4](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Figure_05.png  )
+> Data distribution properties can accelerate knowledge acquisition. (left) Plateau length is significantly reduced when some individuals occur more frequently than others, which in this case is achieved by increasing $\alpha$. (center) Thus, it is beneficial to train the model on more imbalanced distributions, especially when the number of training steps is limited or the total number of individuals increases. (right) This strategy increases the final amount of knowledge contained in the network (purple line vs. gray). Dynamic adaptation of data distribution yields an even greater effect (blue line).
 
 <div style="border: 2px solid #3498db; border-radius: 8px; padding: 12px; background-color: #f8f9fa; margin: 10px 0;">
 <p style="margin: 0; font-weight: bold; color: #2c3e50;">Third Checkpoint:</p>
-<p style="margin: 8px 0 0 0; color: #2c3e50;">Динамическое планирование данных (Data Curriculum) позволяет оптимизировать процесс обучения языковых моделей путём использования разных распределений на разных этапах: несбалансированное распределение на этапе плато для быстрого формирования ключевых механизмов, и сбалансированное распределение на этапе приобретения знаний для равномерного обучения всем индивидам. Стратегия "разогрева" (Warm-up), начинающая с подмножества частых индивидов и переходящая к полному набору, значительно повышает общий объем усвоенных знаний, особенно при большом количестве индивидов.</p>
+<p style="margin: 8px 0 0 0; color: #2c3e50;">Dynamic data scheduling (Data Curriculum) optimizes language model training by using different distributions at different stages: imbalanced distribution during the plateau for rapid formation of key mechanisms, and balanced distribution during knowledge acquisition for uniform learning of all individuals. The "warm-up" strategy, starting with a subset of frequent individuals and transitioning to the full set, significantly increases the total volume of acquired knowledge, especially with a large number of individuals.</p>
 </div>
 
-## **5. Галлюцинации как препятствие для интеграции новых знаний после обучения**
+## **5. Hallucinations as a Barrier to Integrating New Knowledge Post-Training**
 
-**Основной вопрос:**
+**Primary Question:**
 
-На практике добавление новой информации в уже предобученную большую языковую модель (LLM), например, через дообучение (fine-tuning), часто оказывается неэффективным. Модель либо с трудом "усваивает" новые данные, либо существенно "забывает" ранее изученное. Почему это происходит?
+In practice, adding new information to an already pre-trained large language model (LLM), for example, via fine-tuning, is often ineffective. The model either struggles to "internalize" new data or significantly "forgets" previously learned knowledge. Why does this happen?
 
-**Ключевое открытие**
+**Key Discovery**
 
-В данной главе показано, что процесс приобретения знаний сопровождается возникновением "галлюцинаций" — феномена, когда модель делает уверенные, но ложные утверждения о незнакомых объектах. Наличие галлюцинаций и хрупкость ассоциативной памяти модели создают значительные трудности при попытке интеграции новых знаний через fine-tuning.
+This chapter demonstrates that the knowledge acquisition process is accompanied by the emergence of "hallucinations"—a phenomenon where the model makes confident but false assertions about unfamiliar objects. The presence of hallucinations and the fragility of the model's associative memory create significant difficulties when attempting to integrate new knowledge via fine-tuning.
 
-### **5.1 Симбиоз знаний и галлюцинаций**
+### **5.1 Symbiosis of Knowledge and Hallucinations**
 
-#### **Наблюдение 1 (Постановка проблемы)**
-Как модель реагирует на сущности, которые она никогда не видела (например, held-out individuals из тестового набора)?
+#### **Observation 1 (Problem Setup)**
+How does the model respond to entities it has never seen (e.g., held-out individuals from the test set)?
 
-**Определение галлюцинации:**  
-Галлюцинация — это явление, при котором модель делает **чрезмерно уверенные**, но **ложные** фактические прогнозы о незнакомых объектах.
+**Definition of Hallucination:**  
+A hallucination is a phenomenon where the model makes **overly confident**, yet **false**, factual predictions about unfamiliar objects.
 
-**Экспериментальные результаты:**
-- **Синхронное появление:**  
-  Как только модель начинает точно воспроизводить знания о сущностях из обучающего набора (Attribute Accuracy > 0, Attribute Loss < No Knowledge Baseline), её ошибки (Attribute Loss) относительно незнакомых объектов начинают значительно превышать базовый уровень (No Knowledge Baseline). Это указывает на наличие галлюцинаций.
+**Experimental Results:**
+- **Synchronous Emergence:**  
+  As soon as the model begins accurately reproducing knowledge about entities from the training set (Attribute Accuracy > 0, Attribute Loss < No Knowledge Baseline), its errors (Attribute Loss) with respect to unfamiliar objects begin to significantly exceed the baseline level. This indicates the presence of hallucinations.
   
-- **Разница в уверенности:**  
-  Несмотря на галлюцинации, уверенность модели в своих ошибочных прогнозах (измеряемая через вероятности предсказанных токенов или энтропию распределения) обычно ниже, чем уверенность в правильных прогнозах для объектов из обучающего набора. Однако даже эта "меньшая" уверенность остаётся выше разумного порога.
+- **Difference in Confidence:**  
+  Despite hallucinations, the model's confidence in its erroneous predictions (measured via predicted token probabilities or distribution entropy) is typically lower than its confidence in correct predictions for training-set objects. However, even this "lower" confidence remains above a reasonable threshold.
 
-- **Потенциальная связь:**  
-  Совместное проявление галлюцинаций и знаний предполагает, что галлюцинации могут быть **неизбежным побочным эффектом** текущей архитектуры моделей и механизма их обучения.
+- **Potential Link:**  
+  The concurrent emergence of hallucinations and knowledge suggests that hallucinations may be an **inevitable side effect** of current model architectures and their training mechanisms.
 
-### **5.2 Катастрофическое забывание старых знаний при fine-tuning новых**
+### **5.2 Catastrophic Forgetting of Old Knowledge During Fine-Tuning**
 
-#### **Наблюдение 2 (Основная проблема)**
-Что происходит, если провести fine-tuning предобученной модели на данных о новых персонажах и их биографиях?
+#### **Observation 2 (Core Problem)**
+What happens if we fine-tune a pre-trained model on data about new characters and their biographies?
 
-**Экспериментальные наблюдения:**
+**Experimental Observations:**
 
-| Этап | Поведение относительно старых знаний (предобученных персонажей) | Поведение относительно новых знаний (дообученных персонажей) | Ключевые явления |
+| Stage | Behavior Regarding Old Knowledge (Pre-trained Characters) | Behavior Regarding New Knowledge (Fine-tuned Characters) | Key Phenomena |
 |------|---------------------------------------------------------------|------------------------------------------------------------|------------------|
-| **Начало fine-tuning (первые сотни шагов)** | - Атрибутивные потери резко возрастают<br>- Точность атрибутов резко падает | - Атрибутивные потери медленно снижаются<br>- Точность атрибутов медленно растёт | Быстрое и массовое забывание старых знаний, пока новые ещё не усвоены. |
-| **Поздние этапы fine-tuning** | Производительность может частично восстановиться (особенно при использовании Replay). | Производительность продолжает улучшаться. | Новые знания постепенно усваиваются, в то время как старые либо стабилизируются, либо медленно восстанавливаются. |
-| **Добавление Replay** | Значительное падение точности и рост потерь всё ещё заметны в начале. | - | Replay помогает частично восстановить старые знания на поздних этапах, но не предотвращает катастрофического забывания в начале. |
+| **Start of Fine-tuning (first hundreds of steps)** | - Attribute losses sharply increase<br>- Attribute accuracy sharply decreases | - Attribute losses slowly decrease<br>- Attribute accuracy slowly increases | Rapid and massive forgetting of old knowledge while new knowledge is still unlearned. |
+| **Late Stages of Fine-tuning** | Performance may partially recover (especially with Replay). | Performance continues to improve. | New knowledge is gradually internalized, while old knowledge either stabilizes or slowly recovers. |
+| **Adding Replay** | Significant drops in accuracy and rises in losses are still noticeable at the start. | - | Replay helps partially recover old knowledge at late stages but does not prevent catastrophic forgetting at the start. |
 
-#### Исследование причин забывания
+#### Investigation of Forgetting Causes
 
-**Гипотеза 1: Разрушение паттернов внимания?**  
-- **Логика:**  
-  Введение новых персонажей может нарушить сложившиеся паттерны внимания, ответственные за вызов ранее усвоенных данных.
+**Hypothesis 1: Disruption of Attention Patterns?**  
+- **Logic:**  
+  Introducing new characters may disrupt established attention patterns responsible for recalling previously learned data.
 
-- **Результат:**  
-  Паттерны внимания остаются стабильными на протяжении всего процесса fine-tuning, что опровергает данную гипотезу.
+- **Result:**  
+  Attention patterns remain stable throughout the fine-tuning process, refuting this hypothesis.
 
-**Гипотеза 2: Нарушение ассоциативной памяти в полносвязных сетях (FFN)?**  
-- **Логика:**   
-  Полносвязные слои (FFN/MLP) рассматриваются как хранилище ключ-значение для знаний. Добавление новых "ключей" (имён новых персонажей) и "значений" (их атрибутов) может мешать или перезаписывать ранее сохранённые пары.  
+**Hypothesis 2: Disruption of Associative Memory in Feed-Forward Networks (FFN)?**  
+- **Logic:**   
+  Feed-forward layers (FFN/MLP) are viewed as key-value stores for knowledge. Adding new "keys" (names of new characters) and "values" (their attributes) may interfere with or overwrite previously stored pairs.  
 
-- **Результат:**  
-  В упрощённой модели также наблюдались быстрое забывание старых ключей и значений на ранних этапах fine-tuning. Данная гипотеза получила подтверждение.
+- **Result:**  
+  In a simplified model, rapid forgetting of old keys and values was observed at early fine-tuning stages. This hypothesis is confirmed.
 
-Таким образом, исследование выявляет, что галлюцинации и катастрофическое забывание являются следствием внутренней организации моделей и особенностей их обучения. Эти явления требуют дальнейшего изучения для улучшения способности моделей эффективно обучаться без потери уже накопленных знаний.
+Thus, the study reveals that hallucinations and catastrophic forgetting arise from the internal organization of models and the specifics of their training. These phenomena require further investigation to improve models' ability to learn efficiently without losing previously accumulated knowledge.
 
 <div style="border: 2px solid #3498db; border-radius: 8px; padding: 12px; background-color: #f8f9fa; margin: 10px 0;">
 <p style="margin: 0; font-weight: bold; color: #2c3e50;">Fourth Checkpoint:</p>
-<p style="margin: 8px 0 0 0; color: #2c3e50;">Галлюцинации и катастрофическое забывание возникают из-за внутренней организации языковых моделей, где полносвязные сети (FFN) выступают в роли ассоциативной памяти. При дообучении (fine-tuning) новые знания перезаписывают ранее усвоенные "ключ-значение" пары в FFN, что приводит к потере старых данных. Галлюцинации проявляются как ложные уверенные утверждения о незнакомых объектах, возникающие одновременно с усвоением новых знаний. Эти феномены указывают на необходимость пересмотра архитектурных решений и методов обучения для обеспечения стабильной интеграции информации без катастрофического забывания.</p>
+<p style="margin: 8px 0 0 0; color: #2c3e50;">Hallucinations and catastrophic forgetting arise from the internal organization of language models, where feed-forward networks (FFN) serve as associative memory. During fine-tuning, new knowledge overwrites previously learned "key-value" pairs in the FFN, leading to loss of old data. Hallucinations manifest as false, confident assertions about unfamiliar objects, emerging simultaneously with knowledge acquisition. These phenomena indicate the need to reconsider architectural designs and training methods to ensure stable integration of information without catastrophic forgetting.</p>
 </div>
 
-## **6. Обсуждение**
+## **6. Discussion**
 
-### **6.1 Новый взгляд на динамику обучения языковых моделей**
+### **6.1 A New Perspective on Language Model Learning Dynamics**
 
-#### Выводы и их значение:
-- **Распределение данных > Размер модели?**  
-  По сравнению с простым увеличением масштаба модели, характеристики распределения обучающих данных могут оказывать большее влияние на динамику обучения (особенно на продолжительность переходных фаз).  
+#### Conclusions and Their Significance:
+- **Data Distribution > Model Size?**  
+  Compared to simply increasing model scale, characteristics of the training data distribution may exert a greater influence on learning dynamics (particularly on the duration of transitional phases).  
 
-- **Возможные источники "возникающих способностей"?**  
-  Так называемое "возникновение" может частично объясняться тем, что с увеличением масштаба модели и данных время обучения также увеличивается. Это позволяет модели преодолеть длительные плато для определенных задач и "внезапно" проявить новые способности.
+- **Possible Sources of "Emergent Abilities"?**  
+  The so-called "emergence" may partly be explained by the fact that as model and data scale increase, training time also increases. This allows the model to overcome long plateaus for certain tasks and "suddenly" exhibit new abilities.
 
-#### Рекомендации по стратегии обучения:
-- **Использование синтетических данных на ранних этапах?**  
-  Учитывая, что данные, подаваемые до плато, вносят ограниченный вклад в финальную модель (поскольку соответствующие механизмы еще не сформированы), использование вычислительно менее затратных синтетических данных для "разминки" или формирования механизмов может быть более эффективной стратегией.  
+#### Recommendations for Training Strategy:
+- **Use Synthetic Data Early?**  
+  Given that data presented before the plateau contributes minimally to the final model (since the corresponding mechanisms are not yet formed), using computationally cheaper synthetic data for "warm-up" or mechanism formation may be a more efficient strategy.  
 
-- **Потенциал планировщиков данных:**  
-  Разработка адаптивных планировщиков данных (data schedulers), способных динамически корректировать распределение данных (например, снижать разнообразие данных во время плато для ускорения формирования механизмов), представляет собой крайне перспективное направление для повышения скорости и эффективности обучения.
+- **Potential of Data Schedulers:**  
+  Developing adaptive data schedulers capable of dynamically adjusting data distribution (e.g., reducing data diversity during the plateau to accelerate mechanism formation) represents a highly promising direction for improving training speed and efficiency.
 
-### **6.2 Выводы для динамики обучения универсальных нейронных сетей**
+### **6.2 Conclusions for Learning Dynamics in Universal Neural Networks**
 
-#### Порядок формирования механизмов:
-- Исследование наблюдает явление, при котором "цепи внимания и отзыва" формируются раньше, чем "ассоциативная память в прямых слоях". Этот порядок может иметь универсальное значение.  
+#### Order of Mechanism Formation:
+- The study observes a phenomenon where "attention and recall circuits" form before "associative memory in feed-forward layers." This order may have universal significance.  
 
-- **Гипотеза:**  
-  Формирование эффективных механизмов маршрутизации/выбора информации (например, внимания) усиливает корреляцию между входными данными и сигналами ошибки, предоставляя более четкие и эффективные сигналы обучения для последующих механизмов хранения контента (например, ассоциативной памяти в MLP).
+- **Hypothesis:**  
+  Forming efficient routing/selection mechanisms (e.g., attention) enhances the correlation between input data and error signals, providing clearer and more effective learning signals for subsequent content storage mechanisms (e.g., associative memory in MLP).
 
-- **Связь с феноменами Grokking и т.д.:**  
-  Этот порядок формирования механизмов может быть связан с явлениями "Grokking" (сначала переобучение, затем обобщение) или процессом, когда модель сначала находит недостаточное, но быстрое решение (например, полагаясь только на локальную статистику), а затем переходит к более обобщающим решениям благодаря формированию более оптимальных механизмов (например, глобальных цепей отзыва) и регуляризации.
+- **Connection to Grokking and Similar Phenomena:**  
+  This order of mechanism formation may be linked to phenomena such as "Grokking" (initial overfitting followed by generalization) or the process where a model first finds a sufficient but suboptimal solution (e.g., relying solely on local statistics) and then transitions to more generalizable solutions due to the formation of more optimal mechanisms (e.g., global recall circuits) and regularization.
 
-- **Ценность методов анализа:**  
-  Разделение функций внимания (token-mixing) и других вычислений (например, хранения знаний в FFN) оказалось мощным инструментом для понимания динамики обучения Transformer. Этот подход имеет важное значение для будущих исследований внутренних механизмов нейронных сетей.
+- **Value of Analytical Methods:**  
+  Separating the functions of attention (token-mixing) from other computations (e.g., knowledge storage in FFN) proved to be a powerful tool for understanding Transformer learning dynamics. This approach is crucial for future research into internal mechanisms of neural networks.
 
-### **6.3 Неравномерность данных, эффективность обучения и психология развития**
+### **6.3 Data Imbalance, Training Efficiency, and Developmental Psychology**
 
-#### Основные выводы: Ускорение формирования механизмов через неравномерность
-- Исследование точно проанализировало, как неравномерность (non-uniformity) в обучающих данных помогает модели быстрее преодолевать плато обучения за счет усиления сигналов и ускорения идентификации ключевых отношений.  
+#### Key Conclusions: Accelerating Mechanism Formation Through Imbalance
+- The study precisely analyzed how imbalance (non-uniformity) in training data helps the model overcome learning plateaus faster by amplifying signals and accelerating identification of key relationships.  
 
-- **Компромисс:**  
-  Однако отмечается, что такое ускорение может происходить за счет снижения качества обучения на редких данных и обобщающей способности модели (особенно при отсутствии последующих этапов равномерного обучения).
+- **Trade-off:**  
+  However, this acceleration may come at the cost of reduced learning quality on rare data and the model's generalization ability (particularly without subsequent uniform learning stages).
 
-#### Связь с когнитивной наукой и психологией развития:
-- **Неявное учебное пособие (Implicit Curriculum):**  
-  Предложенная в статье стратегия динамического планирования данных (сначала неравномерно/просто, затем равномерно/сложно) поразительно напоминает модели обучения младенцев. Из-за ограниченного диапазона активности в раннем возрасте и частого контакта с знакомыми лицами и объектами младенцы естественным образом проходят путь от простых, повторяющихся входных данных к постепенному взаимодействию с более богатой и разнообразной средой. Такое "снизу-вверх" сформированное учебное пособие считается ключевым фактором, способствующим раннему эффективному обучению.  
+#### Connection to Cognitive Science and Developmental Psychology:
+- **Implicit Curriculum:**  
+  The dynamic data scheduling strategy proposed in the article (first imbalanced/simple, then balanced/complex) remarkably resembles infant learning models. Due to limited activity range in early life and frequent exposure to familiar individuals and objects, infants naturally progress from simple, repetitive inputs to gradually interacting with a richer and more diverse environment. This "bottom-up" formed curriculum is considered a key factor enabling early efficient learning.  
 
-- **Повторение и обобщение:**  
-  Как показывает это исследование, раннее повторение небольшого количества примеров способствует быстрому формированию основных представлений и связей, тогда как последующий контакт с разнообразием является необходимым условием для достижения надежного обобщения.  
+- **Repetition and Generalization:**  
+  As this study shows, early repetition of a small number of examples facilitates rapid formation of core representations and connections, while subsequent exposure to diversity is necessary for achieving reliable generalization.  
 
-- **Потенциальный вклад:**  
-  Количественный анализ влияния динамики распределения данных может заложить основу для создания более совершенной статистической теории обучения и развития (statistical theory of development).
+- **Potential Contribution:**  
+  Quantitative analysis of the impact of data distribution dynamics may lay the foundation for a more sophisticated statistical theory of development.
 
 <div style="border: 2px solid #3498db; border-radius: 8px; padding: 12px; background-color: #f8f9fa; margin: 10px 0;">
 <p style="margin: 0; font-weight: bold; color: #2c3e50;">Fifth Checkpoint:</p>
-<p style="margin: 8px 0 0 0; color: #2c3e50;">Динамика обучения языковых моделей зависит от стратегии подачи данных:
-1. Неравномерные данные ускоряют формирование механизмов (например, внимания), но требуют последующей "доработки" на разнообразных данных для обобщения.
-2. Порядок компонент (внимание → ассоциативная память) объясняет феномены вроде Grokking и подчеркивает роль адаптивного обучения.
-3. Синтетические данные и планировщики оптимизируют процесс: дешевые данные на старте + динамическая корректировка распределения.</p>
+<p style="margin: 8px 0 0 0; color: #2c3e50;">Language model learning dynamics depend on data delivery strategy:
+1. Imbalanced data accelerates mechanism formation (e.g., attention) but requires subsequent "refinement" on diverse data for generalization.
+2. The order of components (attention → associative memory) explains phenomena like Grokking and underscores the role of adaptive learning.
+3. Synthetic data and schedulers optimize the process: cheap data at the start + dynamic distribution adjustment.</p>
 </div>
 
-## **Вывод**
+## **Conclusion**
 
-Это исследование предоставляет всеобъемлющую основу для понимания того, как языковые модели изучают, хранят и извлекают фактические знания. Выявление трехфазного процесса обучения и задействованных нейронных механизмов предлагает ценные сведения как о возможностях, так и об ограничениях современных языковых моделей.
+This study provides a comprehensive foundation for understanding how language models learn, store, and retrieve factual knowledge. Identifying the three-phase learning process and the involved neural mechanisms offers valuable insights into both the capabilities and limitations of current language models.
 
-Выводы предлагают несколько направлений для будущих исследований, включая:
+The findings suggest several directions for future research, including:
 
-1. Разработка более эффективных учебных программ на основе выявленной динамики обучения;
-2. Разработка архитектурных модификаций для лучшего отделения приобретения знаний от развития галлюцинаций;
-3. Создание подходов тонкой настройки, которые могут включать новые знания с минимальным искажением существующих воспоминаний;
-4. Изучение связей между масштабом модели, размером набора данных и продолжительностью плато для более крупных моделей.
+1. Developing more efficient training curricula based on the identified learning dynamics;
+2. Designing architectural modifications to better separate knowledge acquisition from hallucination development;
+3. Creating fine-tuning approaches that can incorporate new knowledge with minimal distortion of existing memories;
+4. Investigating the relationships between model scale, dataset size, and plateau duration for larger models.
 
-Понимание этих фундаментальных принципов обучения имеет решающее значение для разработки более способных, эффективных и правдивых языковых моделей, которые могут служить надежным интерфейсом для человеческих знаний. Это исследование представляет собой значительный шаг на пути к механистическим объяснениям поведения языковых моделей, выходя за рамки оценок типа "черный ящик" и углубляясь в понимание того, как эти все более важные системы учатся и работают.
+Understanding these fundamental learning principles is crucial for developing more capable, efficient, and truthful language models that can serve as reliable interfaces for human knowledge. This study represents a significant step toward mechanistic explanations of language model behavior, moving beyond "black-box" evaluations and delving deeper into understanding how these increasingly important systems learn and operate.

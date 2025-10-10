@@ -1,97 +1,99 @@
-# Eso-LM от NVIDIA: как гибрид диффузионного и авторегрессивного подходов меняет NLP
-**Оглавление**
+# Computer Science > Computation and Language
+# Title: Eso-LM from NVIDIA: How a Hybrid Diffusion and Autoregressive Approach is Transforming NLP
 
-1. [Введение](#введение)  
-2. [Предпосылки и мотивация](#предпосылки-и-мотивация)  
-3. [Основная методология](#основная-методология)  
-4. [Дизайн Механизма Внимания](#механизмы-внимания-и-кэширование-ключ-значение)  
-5. [Экспериментальные результаты](#экспериментальные-результаты)  
-6. [Значимость и влияние](#значимость-и-влияние)
+**Table of Contents**
 
-## 1. Введение
+1. [Introduction](#introduction)  
+2. [Background and Motivation](#background-and-motivation)  
+3. [Core Methodology](#core-methodology)  
+4. [Attention Mechanism Design](#attention-mechanism-and-key-value-caching)  
+5. [Experimental Results](#experimental-results)  
+6. [Significance and Impact](#significance-and-impact)
 
-Эзотерические языковые модели (Eso-LMs) представляют собой значительный прорыв в генеративном языковом моделировании, впервые успешно объединив парадигмы авторегрессионных (AR) и моделей маскированной диффузии (MDM). В то время как авторегрессионные модели, такие как GPT, превосходны в качестве генерации, но страдают от медленного последовательного вывода, модели маскированной диффузии предлагают возможности параллельной генерации, но традиционно отстают по показателям перплексии и не имеют эффективных механизмов кеширования. Эта работа устраняет эти фундаментальные ограничения, предлагая унифицированную структуру, которая сочетает в себе сильные стороны обоих подходов, минимизируя при этом их соответствующие недостатки.
+## 1. Introduction
+
+Eso-LMs represent a significant breakthrough in generative language modeling, successfully unifying autoregressive (AR) and masked diffusion model (MDM) paradigms for the first time. While autoregressive models such as GPT excel in generation quality but suffer from slow sequential inference, masked diffusion models offer parallel generation capabilities but traditionally lag in perplexity and lack efficient caching mechanisms. This work eliminates these fundamental limitations by proposing a unified architecture that combines the strengths of both approaches while minimizing their respective weaknesses.
 
 ![Figure_01](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-26/assets/Figure_01.png)
 
-*Рисунок 1: Процесс генерации Eso-LM иллюстрирует двухэтапную процедуру семплирования. Фаза диффузии (оранжевый) постепенно удаляет шум из токенов параллельно, в то время как последовательная фаза (зеленый) заполняет оставшиеся маскированные токены авторегрессивно с богатым обусловливанием как от левого контекста, так и от чистых токенов, обнаруженных во время диффузии.*
+*Figure 1: Eso-LM generation process illustrates a two-stage sampling procedure. The diffusion phase (orange) progressively removes noise from tokens in parallel, while the sequential phase (green) fills remaining masked tokens autoregressively with rich conditioning from both left context and clean tokens discovered during diffusion.*
 
-## 2. Предпосылки и мотивация
+## 2. Background and Motivation
 
-Ландшафт языкового моделирования доминируют авторегрессионные модели, которые генерируют текст последовательно слева направо. Хотя эти модели достигают отличных показателей перплексии, их последовательная природа ограничивает скорость вывода и гибкость. Модели маскированной диффузии появились как альтернатива, предлагая параллельную генерацию токенов и улучшенную управляемость, но они сталкиваются с двумя критическими проблемами: более медленный вывод из-за двунаправленного внимания, которое предотвращает кеширование KV, и заметный разрыв в качестве по сравнению с AR-моделями.
+The language modeling landscape is dominated by autoregressive models, which generate text sequentially from left to right. Although these models achieve excellent perplexity scores, their sequential nature limits inference speed and flexibility. Masked diffusion models emerged as an alternative, offering parallel token generation and improved controllability, but they face two critical challenges: slower inference due to bidirectional attention preventing KV caching, and a noticeable quality gap compared to AR models.
 
-Недавние гибридные подходы, такие как модели дискретного языка с блочным шумоподавлением и диффузией (BD3-LMs), попытались преодолеть этот разрыв, объединив авторегрессионное блочное моделирование с внутриблочной диффузией. Однако эти методы страдают от коллапса мод при низких шагах семплирования и предоставляют лишь частичные преимущества кеширования. Исследование определяет эти ограничения как ключевые барьеры для практического внедрения языковых моделей на основе диффузии.
+Recent hybrid approaches, such as Block-Denoising and Diffusion Language Models (BD3-LMs), attempted to bridge this gap by combining autoregressive block modeling with intra-block diffusion. However, these methods suffer from mode collapse at low sampling steps and provide only partial caching benefits. This study identifies these limitations as key barriers to the practical adoption of diffusion-based language models.
 
-## 3. Основная методология
+## 3. Core Methodology
 
-### Гибридная Цель Обучения
+### Hybrid Training Objective
 
-Eso-LMs представляют новую структуру обучения, которая плавно интерполирует между целями AR и MDM посредством гибридной функции потерь. Ключевое новшество заключается в формулировке вариационной границы:
+Eso-LMs introduce a novel training structure that smoothly interpolates between AR and MDM objectives via a hybrid loss function. The key innovation lies in formulating a variational bound:
 
 ![Figure_02](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-26/assets/Figure_02.png)
 
-Эта потеря объединяет авторегрессионный член (вычисляемый для изначально маскированных токенов) с членом маскированной диффузии (взвешенное среднее по прогрессивно зашумленным последовательностям). Гиперпараметр $α_0$ контролирует интерполяцию: $α_0=1$ дает чистое поведение MDM, тогда как $α_0=0$ приводит к чистому поведению AR.
+This loss combines an autoregressive term (computed for originally masked tokens) with a masked diffusion term (a weighted average over progressively noised sequences). The hyperparameter $α_0$ controls interpolation: $α_0=1$ yields pure MDM behavior, while $α_0=0$ results in pure AR behavior.
 
-### Двухэтапный Процесс Семплирования
+### Two-Stage Sampling Process
 
-Генерация проходит в два различных этапа:
+Generation proceeds in two distinct phases:
 
-1. **Фаза диффузии:** начиная с полностью маскированной последовательности, модель постепенно удаляет шум из подмножества токенов параллельно, создавая частично маскированную последовательность $z_0$. Ключевая оптимизация обрабатывает только чистые токены и те, которые запланированы для шумоподавления на каждом шаге, значительно сокращая вычислительные затраты.
+1. **Diffusion Phase:** Starting from a fully masked sequence, the model gradually removes noise from a subset of tokens in parallel, producing a partially masked sequence $z_0$. A key optimization processes only clean tokens and those scheduled for denoising at each step, significantly reducing computational cost.
 
-2. **Последовательная фаза:** оставшиеся маскированные токены заполняются авторегрессивно слева направо, при этом каждый токен обуславливается как своим левым контекстом, так и чистыми токенами, обнаруженными во время фазы диффузии.
+2. **Sequential Phase:** Remaining masked tokens are filled autoregressively from left to right, with each token conditioned on its left context as well as clean tokens discovered during the diffusion phase.
 
-## 4. Дизайн Механизма Внимания
+## 4. Attention Mechanism Design
 
-В статье представлены два варианта с различными механизмами внимания:
+The paper presents two variants with distinct attention mechanisms:
 
-**Eso-LM (A)** использует двунаправленное внимание между чистыми токенами во время обучения диффузии, при этом применяя причинное внимание к маскированным токенам. Во время последовательной фазы он использует пользовательский шаблон внимания, позволяющий маскированным токенам обращать внимание на себя, чистый левый контекст и чистый правый контекст из $z_0$.
+**Eso-LM (A)** uses bidirectional attention among clean tokens during diffusion training, while applying causal attention to masked tokens. During the sequential phase, it employs a custom attention pattern allowing masked tokens to attend to themselves, the clean left context, and clean right context from $z_0$.
 
-**Eso-LM (B)** расширяет принципы причинного внимания, позволяя использовать полное KV-кеширование на обеих фазах. Он обеспечивает причинное внимание между всеми токенами на основе случайных перестановок во время обучения диффузии, поддерживая согласованность между паттернами внимания при обучении и выводе.
+**Eso-LM (B)** extends causal attention principles to enable full KV caching on both phases. It enforces causal attention across all tokens based on random permutations during diffusion training, maintaining consistency between attention patterns during training and inference.
 
-## 5. Экспериментальные результаты
+## 5. Experimental Results
 
-### Качество генерации
+### Generation Quality
 
-Eso-LM достигают современного уровня перплексии среди дискретных диффузионных моделей на стандартных бенчмарках. На наборе данных One Billion Words, Eso-LM (A) превосходит предыдущие модели MDLM примерно на 1 PPL даже в чистой конфигурации MDM ($a_0$ = 1). Возможность плавной интерполяции позволяет точно настраивать компромисс между качеством и скоростью: более низкие значения $a_0$ (более похожие на AR) обычно дают лучшую перплексию, приближаясь к производительности чистых авторегрессионных моделей.
+Eso-LMs achieve state-of-the-art perplexity among discrete diffusion models on standard benchmarks. On the One Billion Words dataset, Eso-LM (A) outperforms prior MDLMs by approximately 1 PPL even in pure MDM configuration ($a_0 = 1$). The ability to smoothly interpolate allows precise tuning of the quality-speed trade-off: lower $a_0$ values (more AR-like) typically yield better perplexity, approaching the performance of pure autoregressive models.
 
 ![Figure_03](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-26/assets/Figure_03.png)
 
-### Эффективность вывода
+### Inference Efficiency
 
 ![Figure_04](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-26/assets/Figure_04.svg)
 
-Прорывное достижение состоит в обеспечении KV-кеширования для маскированных диффузионных моделей. Eso-LM (B) демонстрирует выдающееся ускорение по сравнению со стандартными MDM:
+The breakthrough lies in enabling KV caching for masked diffusion models. Eso-LM (B) demonstrates remarkable speedups compared to standard MDMs:
 
-- в 14 раз быстрее для длины контекста L=2048
-- в 65 раз быстрее для длины контекста L=8192
+- 14x faster for context length L=2048
+- 65x faster for context length L=8192
 
-По сравнению с предыдущими полуавторегрессионными подходами, Eso-LM (B) показывает существенные улучшения:
+Compared to previous semi-autoregressive approaches, Eso-LM (B) shows substantial improvements:
 
-- в 3,2 раза быстрее, чем BD3-LM (L'=16)
-- в 3,8 раза быстрее, чем BD3-LM (L'=4) при L=8192
+- 3.2x faster than BD3-LM (L'=16)
+- 3.8x faster than BD3-LM (L'=4) at L=8192
 
-### Парето-фронтир "скорость-качество"
+### Pareto Frontier: Speed vs. Quality
 
 ![Figure_05](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-26/assets/Figure_05.png)
 
-*Рисунок 2: Парето-фронтир, сравнивающий перплексию генерации со средней продолжительностью выборки. Eso-LM устанавливают новый современный уровень по всему спектру "скорость-качество", при этом различные значения $a_0$ обучения предлагают оптимальные компромиссы для разных вычислительных бюджетов.*
+*Figure 2: Pareto frontier comparing generation perplexity against average sampling duration. Eso-LMs establish a new state-of-the-art across the entire speed-quality spectrum, with different training $a_0$ values offering optimal trade-offs for varying computational budgets.*
 
-Eso-LM устанавливают новый современный уровень на Парето-фронтире "скорость-качество". В отличие от BD3-LM, которые страдают от серьезного коллапса мод при низких значениях NFE, Eso-LM поддерживают конкурентоспособную производительность при любых бюджетах выборки, демонстрируя превосходную надежность и стабильность.
+Eso-LMs set a new state-of-the-art on the Pareto frontier of speed-quality. Unlike BD3-LMs, which suffer severe mode collapse at low NFE values, Eso-LMs maintain competitive performance across all sampling budgets, demonstrating superior reliability and stability.
 
-###  Технические инновации
+### Technical Innovations
 
-**KV-кеширование для диффузионных моделей**
+**KV Caching for Diffusion Models**
 
-Наиболее значительным техническим вкладом является успешная реализация KV-кеширования для маскированных диффузионных моделей с сохранением их возможностей параллельной генерации. Этот прорыв устраняет фундаментальное ограничение, которое препятствовало практическому применению диффузионных моделей для генерации языка.
+The most significant technical contribution is the successful implementation of KV caching for masked diffusion models while preserving their parallel generation capabilities. This breakthrough eliminates the fundamental limitation that has hindered the practical application of diffusion models for language generation.
 
-**Оптимизированный прямой проход**
+**Optimized Forward Pass**
 
-Во время диффузионной выборки Eso-LM обрабатывают только подмножество токенов, фактически требуемых на каждом шаге, избегая вычислений над будущими маскированными токенами, не запланированными для денойзинга. Эта оптимизация в сочетании с тщательным дизайном паттерна внимания значительно способствует наблюдаемому ускорению.
+During diffusion sampling, Eso-LMs process only the subset of tokens actually required at each step, avoiding computation over future masked tokens not scheduled for denoising. This optimization, combined with careful attention pattern design, significantly contributes to the observed acceleration.
 
-## 6. Значимость и влияние
+## 6. Significance and Impact
 
-Eso-LM представляют собой сдвиг парадигмы в генеративном языковом моделировании, успешно объединяя два ранее отдельных подхода. Работа демонстрирует, что традиционный компромисс между качеством генерации и эффективностью вывода может быть преодолен с помощью тщательного архитектурного дизайна и методологии обучения.
+Eso-LMs represent a paradigm shift in generative language modeling, successfully unifying two previously separate approaches. The work demonstrates that the traditional trade-off between generation quality and inference efficiency can be overcome through careful architectural design and training methodology.
 
-Введение KV-кеширования для диффузионных моделей имеет глубокие последствия для практического развертывания этих моделей. Продемонстрированные ускорения делают языковые модели на основе диффузии жизнеспособными для приложений реального времени и задач генерации длинного контекста, где они ранее были непрактичны.
+The introduction of KV caching for diffusion models has profound implications for the practical deployment of these models. The demonstrated speedups make diffusion-based language models viable for real-time applications and long-context generation tasks where they were previously impractical.
 
-Помимо непосредственного прироста производительности, это исследование открывает новые возможности для будущей работы в области гибридных генеративных архитектур. Плавная интерполяция между поведениями AR и MDM обеспечивает гибкую основу для разработки моделей, адаптированных к конкретным требованиям приложений, будь то приоритет качества, скорости или управляемости.
+Beyond immediate performance gains, this research opens new avenues for future work in hybrid generative architectures. The smooth interpolation between AR and MDM behaviors provides a flexible foundation for developing models tailored to specific application requirements—whether prioritizing quality, speed, or controllability.

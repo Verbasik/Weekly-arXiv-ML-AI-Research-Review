@@ -1,142 +1,140 @@
-# **Как LLM выучивают факты и почему они галлюцинируют?**
+# **How Do LLMs Learn Facts and Why Do They Hallucinate?**
 
-## Содержание
-1. [Введение](#введение)
-2. [Трехфазный Процесс Обучения](#трехфазный-процесс-обучения)
-3. [Нейронные Механизмы, Лежащие в Основе Фактических Знаний](#нейронные-механизмы-лежащие-в-основе-фактических-знаний)
-4. [Влияние Распределения Данных](#влияние-распределения-данных)
-5. [Стратегии Учебной Программы Данных](#стратегии-учебной-программы-данных)
-6. [Галлюцинации и Искажение Знаний](#галлюцинации-и-искажение-знаний)
-7. [Проблемы Тонкой Настройки](#проблемы-тонкой-настройки)
-8. [Практические Последствия](#практические-последствия)
-9. [Заключение](#заключение)
+## Table of Contents
+1. [Introduction](#introduction)
+2. [The Three-Phase Learning Process](#the-three-phase-learning-process)
+3. [Neural Mechanisms Underlying Factual Knowledge](#neural-mechanisms-underlying-factual-knowledge)
+4. [The Impact of Data Distribution](#the-impact-of-data-distribution)
+5. [Data Curriculum Strategies](#data-curriculum-strategies)
+6. [Hallucinations and Knowledge Distortion](#hallucinations-and-knowledge-distortion)
+7. [Fine-Tuning Challenges](#fine-tuning-challenges)
+8. [Practical Implications](#practical-implications)
+9. [Conclusion](#conclusion)
 
-## Введение
-Большие языковые модели (LLM) служат все более важными интерфейсами к человеческим знаниям, однако наше понимание того, как они приобретают, представляют и вспоминают фактическую информацию, остается ограниченным. В статье _"Как языковые модели узнают факты? Динамика, учебные программы и галлюцинации"_ исследователи из Google DeepMind и ETH Zürich предоставляют углубленный анализ динамики обучения, которая происходит, когда языковые модели приобретают фактические знания.
+## Introduction
+Large language models (LLMs) serve as increasingly vital interfaces to human knowledge, yet our understanding of how they acquire, represent, and recall factual information remains limited. In the paper _"How Do Language Models Learn Facts? Dynamics, Curricula, and Hallucinations,"_ researchers from Google DeepMind and ETH Zürich provide an in-depth analysis of the learning dynamics that occur as language models acquire factual knowledge.
 
-![Figure_2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Figure_02.png)
-> Figure_2. Приобретение знаний происходит в три этапа. (Слева) На очень коротком первом этапе модель изучает общую статистику значений атрибутов. На втором этапе производительность выходит на плато, соответствующее уровню, достижимому идеальной моделью без знаний об отдельных индивидах (это соответствует базовому уровню "без знаний" и почти нулевой точности распознавания). Длительность этого плато почти пропорциональна количеству индивидов (справа). Наконец, модель учится ассоциациям между субъектами и атрибутами: знания формируются по мере продолжения обучения (в центре). Результаты усреднены по 5 запускам (± стандартное отклонение).
+![Figure_2](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Figure_02.png  )
+> Figure_2. Knowledge acquisition occurs in three stages. (Left) On a very short first stage, the model learns the overall statistics of attribute values. On the second stage, performance plateaus at a level achievable by an ideal model without knowledge of individual entities (this corresponds to the "no-knowledge" baseline and nearly zero recognition accuracy). The duration of this plateau is nearly proportional to the number of individuals (right). Finally, the model learns associations between subjects and attributes: knowledge emerges as training continues (center). Results are averaged over 5 runs (± standard deviation).
 
-В исследовании используются синтетические наборы данных биографий для систематического изучения того, как модели учатся связывать отдельные объекты с их атрибутами. Этот подход обеспечивает точный контроль над распределением данных и позволяет эффективно измерять приобретение знаний на протяжении всего обучения. Анализ выявляет захватывающий трехфазный процесс обучения с важными последствиями для обучения и надежности модели.
+The study employs synthetic biography datasets to systematically investigate how models learn to associate individual entities with their attributes. This approach provides precise control over data distribution and enables efficient measurement of knowledge acquisition throughout training. The analysis reveals a compelling three-phase learning process with significant implications for model training and reliability.
 
-## **Трехфазный процесс обучения**
+## **The Three-Phase Learning Process**
 
-Исследователи выделяют отчетливый трехфазный процесс, посредством которого языковые модели приобретают фактические знания:
+Researchers identify a distinct three-phase process through which language models acquire factual knowledge:
 
-1. **Начальное Понимание Языка**: на ранних этапах обучения модель изучает общую статистику значений атрибутов, но ей не хватает знаний, специфичных для отдельных лиц;
+1. **Initial Language Understanding**: During early training stages, the model learns the overall statistics of attribute values but lacks knowledge specific to individual entities;
+2. **Performance Plateau**: Model performance plateaus at a level achievable by a model without knowledge specific to individual entities. This plateau phase represents a critical period during which the model constructs the neural circuits necessary for subsequent knowledge acquisition;
+3. **Knowledge Emergence**: After the plateau, the model rapidly develops the ability to link individuals with their specific attributes, leading to a sharp improvement in factual recall performance.
 
-2. **Плато Производительности**: производительность модели выходит на плато на уровне, достижимом моделью без знаний, специфичных для отдельных лиц. Эта фаза плато представляет собой критический период, когда модель создает нейронные цепи, необходимые для последующего приобретения знаний;
-
-3. **Появление Знаний**: после плато модель быстро развивает способность связывать людей с их конкретными атрибутами, что приводит к резкому улучшению производительности припоминания фактов.
-
-Ключевым выводом является то, что продолжительность фазы плато почти пропорциональна количеству людей в наборе данных и соответствует следующей зависимости:
+A key finding is that the duration of the plateau phase is nearly proportional to the number of individuals in the dataset, following this relationship:
 
 ```
-Продолжительность_плато ≈ 0.43 × (Количество_индивидов)^0.81
+Plateau_Duration ≈ 0.43 × (Number_of_Individuals)^0.81
 ```
 
-Этот закон масштабирования указывает на то, что с увеличением числа людей модели требуется непропорционально больше шагов обучения для перехода от общего понимания языка к конкретным фактическим знаниям. Эта зависимость имеет существенное значение для обучения крупномасштабных моделей, которым необходимо запоминать огромные объемы фактической информации.
+This scaling law indicates that as the number of individuals increases, models require a disproportionate amount of additional training steps to transition from general language understanding to specific factual knowledge. This dependency has substantial implications for training large-scale models that must memorize vast volumes of factual information.
 
-## **Нейронные механизмы, лежащие в основе фактических знаний**
+## **Neural Mechanisms Underlying Factual Knowledge**
 
-Чтобы понять нейронные механизмы, лежащие в основе припоминания фактов, исследователи использовали методы attention patching, чтобы выделить компоненты, ответственные за хранение и извлечение знаний.
+To understand the neural mechanisms underlying factual recall, researchers used attention patching techniques to isolate components responsible for storing and retrieving knowledge.
 
-![Figure_3](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Figure_03.png)
-> **Схемы внимания, поддерживающие воспроизведение, формируются во время плато потерь.**  (слева) Мы разрабатываем эксперимент с модификацией внимания, в котором делаем снимок эталонной модели на определенном этапе её обучения и используем её шаблоны внимания вместо шаблонов модифицированной модели на протяжении всего её обучения. (в центре) Чем более обучена эталонная модель, тем лучше её шаблоны внимания подходят для модифицированной модели, и эти изменения в основном происходят во время плато. Однако самое начало обучения является исключением из этой тенденции. Это коррелирует с тем, что на данном этапе обучения токены имен (по сравнению с остальным текстом, содержащим информацию о типе атрибута) получают меньше внимания при предсказании первого токена значения атрибута (см. правую панель).  
+![Figure_3](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Figure_03.png  )
+> **Attention circuits enabling recall form during the loss plateau.** (left) We develop an attention patching experiment where we take a snapshot of a reference model at a specific training stage and use its attention patterns in place of the modified model's own patterns throughout its training. (center) The more trained the reference model, the more beneficial its attention patterns are for the modified model, and these changes primarily occur during the plateau. However, the very beginning of training is an exception to this trend. This correlates with the fact that during this stage, name tokens (compared to other text containing attribute-type information) receive less attention when predicting the first attribute value token (see right panel).  
 
-Результаты показывают, что фактические знания распределены между несколькими компонентами модели:
+Results show that factual knowledge is distributed across several model components:
 
-1. **Ранние Слой Внимания:** обрабатывают и объединяют токены имени для формирования запроса;
-2. **Средние MLP-Слои:** действуют как ассоциативная память, содержащая информацию обо всех значениях атрибутов;
-3. **Финальные Слои Внимания:** извлекают конкретный атрибут для запрашиваемого человека.
+1. **Early Attention Layers**: Process and aggregate name tokens to form a query;
+2. **Middle MLP Layers**: Act as associative memory, storing information about all attribute values;
+3. **Final Attention Layers**: Retrieve the specific attribute for the queried individual.
 
-Это распределенное представление знаний помогает объяснить, почему модели требуется значительное обучение, прежде чем она сможет эффективно хранить и извлекать информацию, относящуюся к конкретным лицам. Паттерны внимания в модели развиваются в процессе обучения, при этом более поздние слои внимания становятся все более специализированными для извлечения знаний по мере выхода модели из фазы плато.
+This distributed representation of knowledge helps explain why models require substantial training before they can effectively store and retrieve information pertaining to specific individuals. The model's attention patterns evolve during training, with later attention layers becoming increasingly specialized for knowledge retrieval as the model exits the plateau phase.
 
-Исследователи обнаружили, что схемы извлечения на основе внимания начинают развиваться во время фазы плато, даже до того, как модель демонстрирует улучшенную производительность при извлечении фактической информации. Это говорит о том, что плато представляет собой критический период формирования цепей, а не период стагнации.
+Researchers discovered that retrieval-based attention circuits begin developing during the plateau phase, even before the model demonstrates improved factual recall performance. This suggests that the plateau is a critical period of circuit formation, not a period of stagnation.
 
-## **Эффекты распределения данных**
+## **The Impact of Data Distribution**
 
-Исследование показывает, что распределение индивидуумов в обучающих данных существенно влияет на то, как быстро и эффективно модели усваивают фактические знания.
+The study demonstrates that the distribution of individuals in training data significantly affects how quickly and effectively models internalize factual knowledge.
 
-![Figure H](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Figure_06.png)
-> Кривые обучения для распределения "знаменитостей", полученные при 8k шагах обучения и 64k индивидов. На левом графике вес для знаменитостей установлен в 8, а на правом графике количество знаменитостей установлено в 4k.
+![Figure H](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Figure_06.png  )
+> Learning curves for "celebrity" distributions, obtained after 8k training steps and 64k individuals. On the left graph, the celebrity weight is set to 8, and on the right graph, the number of celebrities is set to 4k.
 
-Когда обучающие данные содержат несбалансированные частоты индивидуумов (например, распределение Ципфа или распределение "знаменитостей", когда некоторые индивидуумы встречаются чаще), возникают несколько эффектов:
+When training data contains imbalanced individual frequencies (e.g., Zipf's distribution or a "celebrity" distribution where some individuals occur more frequently), several effects emerge:
 
-1. Фаза плато сокращается для часто встречающихся индивидуумов;
-2. Модель усваивает факты о высокочастотных индивидуумах раньше, чем о низкочастотных;
-3. Однако высокочастотные индивидуумы могут привести к переобучению, когда модель хорошо работает на обучающих данных, но плохо на новых примерах.
+1. The plateau phase is shortened for frequently occurring individuals;
+2. The model internalizes facts about high-frequency individuals earlier than those about low-frequency ones;
+3. However, high-frequency individuals can lead to overfitting, where the model performs well on training data but poorly on novel examples.
 
-Этот анализ показывает, что существует фундаментальный компромисс в приобретении фактических знаний: ускорение обучения за счет несбалансированного распределения данных может повысить эффективность, но потенциально снизить обобщение на новые факты или индивидуумов.
+This analysis reveals a fundamental trade-off in factual knowledge acquisition: accelerating learning through imbalanced data distribution may improve efficiency but potentially reduce generalization to new facts or individuals.
 
-## **Стратегии учебной программы данных**
+## **Data Curriculum Strategies**
 
-Основываясь на информации, полученной из эффектов распределения данных, исследователи изучили различные стратегии учебной программы данных для оптимизации приобретения фактических знаний.
+Building on insights from the effects of data distribution, researchers investigated various data curriculum strategies to optimize factual knowledge acquisition.
 
-![Figure I](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Figure_07.png)
-> Кривые обучения для распределения "разогрева", полученные при 8k шагах обучения и 64k индивидов. На левом графике количество шагов разогрева установлено в 1,5k, а на правом графике количество индивидов разогрева установлено в 8k.
+![Figure I](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Figure_07.png  )
+> Learning curves for "warm-up" distributions, obtained after 8k training steps and 64k individuals. On the left graph, the warm-up steps are set to 1.5k, and on the right graph, the number of warm-up individuals is set to 8k.
 
-Особенно эффективным подходом является учебная программа "разминки", в которой:
+A particularly effective approach is the "warm-up" curriculum, in which:
 
-1. Модель изначально обучается на небольшом подмножестве индивидуумов с высокой частотой;
-2. После этого периода разминки обучение продолжается на полном наборе данных с равномерным распределением.
+1. The model is initially trained on a small subset of high-frequency individuals;
+2. After this warm-up period, training continues on the full dataset with uniform distribution.
 
-Эта двухэтапная учебная программа значительно ускоряет переход модели через фазу плато, сохраняя при этом хорошую производительность обобщения. Исследователи систематически исследовали различные комбинации индивидуумов для разминки и шагов разминки, находя оптимальные конфигурации, которые уравновешивают эффективность обучения с итоговой производительностью модели.
+This two-stage curriculum significantly accelerates the model's transition through the plateau phase while maintaining strong generalization performance. Researchers systematically explored various combinations of warm-up individuals and warm-up steps, identifying optimal configurations that balance training efficiency with final model performance.
 
-Данные показывают, что лучшие учебные программы включают умеренное количество индивидуумов для разминки (приблизительно 8-16 тысяч индивидуумов для набора данных из 64 тысяч индивидуумов) и умеренное количество шагов разминки (приблизительно 1-2 тысячи шагов). Слишком малое или слишком большое количество индивидуумов/шагов для разминки приводит к субоптимальной производительности.
+Data shows that the best curricula include a moderate number of warm-up individuals (approximately 8–16 thousand individuals for a 64-thousand-individual dataset) and a moderate number of warm-up steps (approximately 1–2 thousand steps). Too few or too many warm-up individuals/steps lead to suboptimal performance.
 
-![Figure K](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Figure_08.png)
-> Визуализация того, как меняется итоговая производительность при изменении гиперпараметров начального распределения (warm-up). Общее количество индивидуумов фиксировано на уровне 64 тысяч, и эти графики соответствуют рисунку J (в центре справа и справа).
+![Figure K](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Figure_08.png  )
+> Visualization of how final performance changes as hyperparameters of the initial distribution (warm-up) are varied. The total number of individuals is fixed at 64 thousand, and these graphs correspond to Figure J (center right and right).
 
-## **Галлюцинации и искажение знаний**
+## **Hallucinations and Knowledge Distortion**
 
-Одним из наиболее тревожных аспектов языковых моделей является их склонность к галлюцинациям - выдаче неверной информации с высокой уверенностью. Исследование предоставляет важную информацию об этом явлении.
+One of the most concerning aspects of language models is their propensity for hallucinations—generating incorrect information with high confidence. The study provides critical insights into this phenomenon.
 
-![Figure M](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Figure_09.png)
-> Модель начинает галлюцинировать во время обучения. Синяя линия соответствует производительности модели на знакомых индивидуумах (как и в других частях статьи), а фиолетовая — её производительности на 16 тысячах отложенных индивидуумов. (слева) потеря атрибутов, (слева посередине) точность знаний, (справа посередине) средняя вероятность наиболее вероятного предсказанного токена (для значений атрибутов), и (справа) средняя энтропия предсказательного распределения (для значений атрибутов). В целом, модель менее уверена в своих галлюцинациях, чем в обоснованных предсказаниях.
+![Figure M](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Figure_09.png  )
+> The model begins to hallucinate during training. The blue line corresponds to the model's performance on familiar individuals (as in other parts of the paper), and the purple line corresponds to its performance on 16 thousand held-out individuals. (left) Attribute loss, (middle left) knowledge accuracy, (middle right) average probability of the most likely predicted token (for attribute values), and (right) average entropy of the predictive distribution (for attribute values). Overall, the model is less confident in its hallucinations than in its justified predictions.
 
-Исследователи обнаружили, что галлюцинации возникают одновременно с приобретением знаний во время перехода от фазы плато. Когда модели предъявляют неизвестных индивидуумов (не встречавшихся во время обучения), ее поведение следует определенной схеме:
+Researchers discovered that hallucinations emerge simultaneously with knowledge acquisition during the transition from the plateau phase. When presented with unknown individuals (not seen during training), the model follows a distinct pattern:
 
-1. Изначально модель правильно указывает на неопределенность, выдавая прогнозы с низкой степенью уверенности;
-2. По мере того, как модель учится ассоциировать известных людей с атрибутами, у нее одновременно развивается тенденция уверенно генерировать неправильные атрибуты для неизвестных людей;
-3. Это проявляется в виде более высоких максимальных вероятностных выходных данных и более низких энтропийных распределений для неизвестных людей, что указывает на увеличение (но неуместной) уверенности.
+1. Initially, the model correctly expresses uncertainty, producing predictions with low confidence;
+2. As the model learns to associate known individuals with attributes, it simultaneously develops a tendency to confidently generate incorrect attributes for unknown individuals;
+3. This manifests as higher maximum predicted probabilities and lower predictive distribution entropies for unknown individuals, indicating increased (but misplaced) confidence.
 
-Этот вывод предполагает, что нейронные механизмы, отвечающие за фактическое воспроизведение и галлюцинации, неразрывно связаны, что представляет собой фундаментальную проблему для разработки правдивых языковых моделей.
+This finding suggests that the neural mechanisms responsible for factual recall and hallucinations are inextricably linked, presenting a fundamental challenge for developing truthful language models.
 
-## **Проблемы тонкой настройки**
+## **Fine-Tuning Challenges**
 
-В исследовании также изучаются проблемы включения новых знаний посредством тонкой настройки, выявляющие серьезные ограничения в том, как модели адаптируются к новой информации.
+The study also examines the challenges of incorporating new knowledge via fine-tuning, revealing serious limitations in how models adapt to new information.
 
-![Figure N](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Figure_10.png)
-> Эволюция производительности модели на распределении предобучения (левая и средняя левая панели) и на распределении дообучения (средняя правая и правая панели) по мере прогресса дообучения. В первой строке во время дообучения не используется повторение данных предобучения, и мы варьируем количество индивидуумов для дообучения. Во второй строке, полученной для 4 тысяч индивидуумов дообучения, мы вводим некоторое повторение и варьируем его вес (вес соответствует тому, насколько больше вероятность выборки индивидуума из предобучения по сравнению с одним из набора дообучения). Данные, представленные здесь, те же, что и на рисунке 5 (средняя и правая панели), но здесь они построены как функция времени и включают точность.
+![Figure N](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-15/assets/Figure_10.png  )
+> Evolution of model performance on the pre-training distribution (left and middle-left panels) and on the fine-tuning distribution (middle-right and right panels) as fine-tuning progresses. In the first row, pre-training data repetition is not used during fine-tuning, and we vary the number of individuals for fine-tuning. In the second row, obtained for 4 thousand fine-tuning individuals, we introduce some repetition and vary its weight (weight corresponds to how much more likely sampling an individual from pre-training is compared to one from the fine-tuning set). The data presented here are the same as in Figure 5 (middle and right panels), but are plotted as a function of time and include accuracy.
 
-Когда обученная модель подвергается тонкой настройке на новых людях, возникает несколько проблем:
+When a trained model is fine-tuned on new individuals, several problems arise:
 
-1. Искажение знаний: Тонкая настройка на новых людях быстро искажает существующие воспоминания, при этом производительность предварительно обученных людей быстро ухудшается;
-2. Уязвимость прямого слоя: Ассоциативные воспоминания, хранящиеся в прямых слоях, особенно восприимчивы к искажению во время тонкой настройки;
-3. Стабильность паттернов внимания: Паттерны внимания остаются относительно стабильными во время тонкой настройки, что говорит о том, что механизм извлечения знаний сохраняется, в то время как фактическое хранилище памяти искажается.
+1. **Knowledge Distortion**: Fine-tuning on new individuals rapidly distorts existing memories, causing performance on pre-trained individuals to deteriorate quickly;
+2. **Vulnerability of Feed-Forward Layers**: Associative memories stored in feed-forward layers are especially susceptible to distortion during fine-tuning;
+3. **Stability of Attention Patterns**: Attention patterns remain relatively stable during fine-tuning, suggesting that the knowledge retrieval mechanism is preserved while the actual memory storage is distorted.
 
-Это нарушение памяти представляет собой серьезную проблему для языковых моделей, которые необходимо постоянно обновлять новой информацией, не теряя существующих знаний. Компромисс между изучением новых фактов и сохранением старых представляется фундаментальным для современных архитектур нейронных сетей.
+This memory disruption presents a serious challenge for language models that must be continuously updated with new information without losing existing knowledge. The trade-off between learning new facts and preserving old ones appears fundamental to current neural network architectures.
 
-## **Практические последствия**
+## **Practical Implications**
 
-Выводы имеют несколько важных практических последствий для разработки LLM:
+The findings have several important practical implications for LLM development:
 
-1. Эффективность обучения: стратегии учебной программы данных, особенно подходы к разогреву, могут значительно сократить время обучения и вычислительные требования для крупномасштабных моделей;
-2. Масштабирование модели: закон масштабирования плато предоставляет рекомендации по оценке вычислительных ресурсов, необходимых по мере обучения моделей на все более крупных наборах данных;
-3. Смягчение галлюцинаций: понимание связи между приобретением знаний и развитием галлюцинаций может помочь исследователям разрабатывать целевые вмешательства для уменьшения ложных выходных данных;
-4. Непрерывное обучение: выявленные проблемы в тонкой настройке предполагают, что для эффективного обновления знаний могут потребоваться альтернативные подходы, такие как методы разреженной тонкой настройки или архитектурные модификации;
-5. Оценка модели: трехфазный процесс обучения подчеркивает важность оценки моделей на протяжении всего обучения, а не только в конечной точке, поскольку производительность может кардинально измениться во время переходов между фазами.
+1. **Training Efficiency**: Data curriculum strategies, particularly warm-up approaches, can significantly reduce training time and computational requirements for large-scale models;
+2. **Model Scaling**: The plateau scaling law provides guidance for estimating the computational resources required as models are trained on increasingly larger datasets;
+3. **Mitigating Hallucinations**: Understanding the link between knowledge acquisition and the development of hallucinations can help researchers develop targeted interventions to reduce false outputs;
+4. **Continual Learning**: The identified fine-tuning challenges suggest that alternative approaches—such as sparse fine-tuning methods or architectural modifications—may be needed for effective knowledge updating;
+5. **Model Evaluation**: The three-phase learning process underscores the importance of evaluating models throughout training, not just at the final point, as performance can change dramatically during phase transitions.
 
-## **Вывод**
+## **Conclusion**
 
-Это исследование предоставляет основу для понимания того, как языковые модели изучают, хранят и извлекают фактические знания. Выявление трехфазного процесса обучения и задействованных нейронных механизмов предлагает ценные сведения как о возможностях, так и об ограничениях современных языковых моделей.
+This study provides a foundation for understanding how language models learn, store, and retrieve factual knowledge. Identifying the three-phase learning process and the involved neural mechanisms offers valuable insights into both the capabilities and limitations of modern language models.
 
-Выводы предлагают несколько направлений для будущих исследований, включая:
+The findings suggest several directions for future research, including:
 
-1. Разработка более эффективных учебных программ на основе выявленной динамики обучения;
-2. Разработка архитектурных модификаций для лучшего отделения приобретения знаний от развития галлюцинаций;
-3. Создание подходов тонкой настройки, которые могут включать новые знания с минимальным искажением существующих воспоминаний;
-4. Изучение связей между масштабом модели, размером набора данных и продолжительностью плато для более крупных моделей.
+1. Developing more effective curricula based on the identified learning dynamics;
+2. Designing architectural modifications to better separate knowledge acquisition from the development of hallucinations;
+3. Creating fine-tuning approaches that can incorporate new knowledge with minimal distortion of existing memories;
+4. Investigating the relationships between model scale, dataset size, and plateau duration for larger models.
 
-Понимание этих фундаментальных принципов обучения имеет решающее значение для разработки более способных, эффективных и правдивых языковых моделей, которые могут служить надежным интерфейсом для человеческих знаний. Это исследование представляет собой значительный шаг на пути к механистическим объяснениям поведения языковых моделей, выходя за рамки оценок типа "черный ящик" и углубляясь в понимание того, как эти все более важные системы учатся и работают.
+Understanding these fundamental learning principles is crucial for developing more capable, efficient, and truthful language models that can serve as reliable interfaces for human knowledge. This study represents a significant step toward mechanistic explanations of language model behavior, moving beyond "black-box" evaluations and deepening our understanding of how these increasingly important systems learn and operate.

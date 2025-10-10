@@ -1,193 +1,180 @@
-# **DAPO: революционный RL-алгоритм от ByteDance**
+# **DAPO: A Revolutionary RL Algorithm from ByteDance**
 
-## **Аннотация**
+## **Abstract**
 
-В данной работе представлена система **DAPO (Decoupled Clip and Dynamic sAmpling Policy Optimization)**, представляющая собой открытую платформу для обучения больших языковых моделей (LLM) с использованием методов обучения с подкреплением (Reinforcement Learning, RL). Несмотря на значительные успехи современных LLM, таких как OpenAI o1 и DeepSeek R1, ключевые технические детали их RL-обучения остаются недоступными для научного сообщества, что существенно затрудняет воспроизводимость результатов и дальнейшие исследования. В ответ на эту проблему авторы предлагают инновационный алгоритм DAPO, который не только демонстрирует высокую эффективность, но и предоставляет полную открытость кода, данных и методологии.
+This paper introduces **DAPO (Decoupled Clip and Dynamic sAmpling Policy Optimization)**, an open platform for training large language models (LLMs) using reinforcement learning (RL). Despite significant advances in modern LLMs such as OpenAI o1 and DeepSeek R1, the key technical details of their RL training remain inaccessible to the research community, severely hindering reproducibility and further investigation. In response, the authors propose the innovative DAPO algorithm, which not only demonstrates high efficiency but also provides full openness of code, data, and methodology.
 
-Система DAPO достигла рекордного результата в 50 баллов на математическом конкурсе **AIME 2024**, превзойдя предыдущий рекорд модели DeepSeek-R1 (47 баллов). При этом DAPO добилась такого результата, сократив количество шагов обучения вдвое. В основе алгоритма лежат четыре ключевые технологии: **стратегия Clip-Higher**, **динамическая выборка**, **оптимизация градиента на уровне токенов** и **интеллектуальный штраф длины**. Эти методы направлены на решение основных проблем RL-обучения, таких как коллапс энтропии, шум вознаграждения и неэффективность обучения на длинных текстах.
+The DAPO system achieved a record score of 50 points on the **AIME 2024** mathematics competition, surpassing the previous record of DeepSeek-R1 (47 points). Crucially, DAPO achieved this result while reducing the number of training steps by half. The algorithm is built upon four key technologies: **Clip-Higher strategy**, **dynamic sampling**, **token-level policy gradient optimization**, and **intelligent length penalty**. These methods address core challenges in RL training, including entropy collapse, reward noise, and inefficiency in learning from long texts.
 
-Авторы подчеркивают, что масштабное обучение с подкреплением является критически важным для развития способности LLM к сложным рассуждениям. Однако, в отличие от предыдущих работ, где детали RL-обучения оставались скрытыми (например, в блогах OpenAI и технических отчетах DeepSeek R1), DAPO предоставляет полную прозрачность. В открытый доступ выложены не только исходные коды обучения, разработанные на базе фреймворка **verl**, но и тщательно подготовленные датасеты. Это способствует повышению воспроизводимости результатов и открывает новые возможности для исследований в области крупномасштабного RL-обучения LLM.
+The authors emphasize that large-scale reinforcement learning is critical for advancing LLMs’ capacity for complex reasoning. However, unlike prior works where RL training details remained hidden (e.g., in OpenAI’s blog posts and DeepSeek R1 technical reports), DAPO provides full transparency. Not only are the training codes, built on the **verl** framework, openly released, but also meticulously curated datasets. This promotes reproducibility and opens new avenues for research in large-scale RL training of LLMs.
 
-Таким образом, работа представляет собой значительный вклад в развитие открытых и воспроизводимых методов обучения больших языковых моделей, предлагая как теоретические инновации, так и практические инструменты для научного сообщества.
+Thus, this work makes a significant contribution to the development of open and reproducible methods for training large language models, offering both theoretical innovations and practical tools for the research community.
 
-## **1. Введение**
+## **1. Introduction**
 
-Появление моделей с расширенным временем тестирования и рассуждения (Test-time Compute), таких как O1 от OpenAI и R1 от DeepSeek, а так же совсем недавно Claude от Antropic, ознаменовало фундаментальный сдвиг парадигмы в области больших языковых моделей (LLM) на основе обучения с подкреплением (Reinforcement Learning, RL). Эти модели продемонстрировали беспрецедентные способности к комплексным рассуждениям, позволяющие им успешно решать сложные математические и программистские задачи уровня соревнований AIME и Codeforces.
+The emergence of models with extended test-time reasoning (Test-time Compute), such as OpenAI’s O1, DeepSeek’s R1, and recently Anthropic’s Claude, has marked a fundamental paradigm shift in large language models (LLMs) based on reinforcement learning (Reinforcement Learning, RL). These models have demonstrated unprecedented capabilities in complex reasoning, enabling them to successfully solve challenging mathematical and programming problems at the level of AIME and Codeforces competitions.
 
-Центральной технологией, обеспечивающей этот прорыв, выступает масштабное обучение с подкреплением (Reinforcement Learning, RL), которое стимулирует развитие сложных форм рассуждения, включая самопроверку, итеративное уточнение и рефлексию. Несмотря на впечатляющие результаты, конкретные алгоритмы и методологические подходы к масштабируемому RL-обучению остаются в значительной степени скрытыми в технических отчетах существующих моделей. Как отмечают авторы, "ключевые технические детали современных рассуждающих LLM скрыты (например, в блоге OpenAI о модели o1 и техническом отчете DeepSeek R1)", из-за чего исследовательское сообщество испытывает трудности с воспроизведением их результатов.
+The central technology enabling this breakthrough is large-scale reinforcement learning (RL), which fosters the development of sophisticated reasoning forms—including self-checking, iterative refinement, and reflection. Despite impressive results, the specific algorithms and methodological approaches to scalable RL training remain largely obscured in the technical reports of existing models. As the authors note, “key technical details of modern reasoning LLMs are hidden (e.g., in OpenAI’s blog post on model o1 and DeepSeek R1’s technical report),” making it difficult for the research community to reproduce their results.
 
-В ходе экспериментов авторы использовали Qwen2.5-32B в качестве предварительно обученной модели для применения обучения с подкреплением на основе обратной связи. При первоначальных запусках с использованием базового алгоритма GRPO (Generalized Reward-weighted Policy Optimization) модель достигла лишь 30 баллов на тесте AIME, что значительно уступает 47 баллам модели DeepSeek-RL. Углубленный анализ выявил, что наивная имплементация GRPO сталкивается с рядом критических проблем, среди которых:
+During experiments, the authors used Qwen2.5-32B as the pretrained model for reinforcement learning based on feedback. Initial runs using the baseline GRPO (Generalized Reward-weighted Policy Optimization) algorithm yielded only 30 points on the AIME test, significantly lagging behind DeepSeek-RL’s 47 points. Deeper analysis revealed that a naive implementation of GRPO encounters several critical problems:
 
-1. **Коллапс энтропии** — тенденция модели к сужению разнообразия генерируемых ответов;
-2. **Шум вознаграждения** — некорректное присвоение наград за частично правильные или слишком длинные ответы;
-3. **Нестабильность обучения** — трудности при масштабировании процесса обучения на длинных цепочках рассуждений.
+1. **Entropy collapse** — the tendency of the model to narrow the diversity of generated responses;
+2. **Reward noise** — incorrect assignment of rewards for partially correct or overly long responses;
+3. **Training instability** — difficulties in scaling training across long reasoning chains.
 
-Аналогичные проблемы отмечались в более широком сообществе при попытках воспроизвести результаты DeepSeek, что указывает на возможное отсутствие ключевых деталей обучения в опубликованной статье о R1 — деталей, критически важных для разработки масштабируемых и воспроизводимых систем RL-обучения промышленного уровня.
+Similar issues were observed more broadly in attempts to reproduce DeepSeek’s results, suggesting possible omissions of critical training details in the published R1 paper—details essential for developing industrial-scale, scalable, and reproducible RL training systems.
 
-Для преодоления этого разрыва авторы предоставляют современную систему масштабного RL-обучения LLM с открытым исходным кодом, которая достигает 50 баллов на AIME 2024 на базе модели Qwen2.5-32B. Данный результат превосходит предыдущий рекорд DeepSeek-RL-Zero-Qwen-32B (47 баллов), при этом требуя лишь 50% объема тренировочных шагов (см. рисунок 1). В основе системы лежит предложенный авторами алгоритм Decoupled Clip and Dynamic sAmpling Policy Optimization (DAPO), включающий четыре ключевые инновации, которые принципиально улучшают эффективность RL-обучения в сценариях длинных цепочек рассуждений:
+To bridge this gap, the authors present a state-of-the-art open-source large-scale RL training system for LLMs that achieves 50 points on AIME 2024 using the Qwen2.5-32B model. This result surpasses the previous record of DeepSeek-RL-Zero-Qwen-32B (47 points), requiring only 50% of the training steps (see Figure 1). The system is built upon the authors’ proposed algorithm, Decoupled Clip and Dynamic sAmpling Policy Optimization (DAPO), which incorporates four key innovations that fundamentally enhance RL training efficiency in long reasoning chain scenarios:
 
 ![Figure_1](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-13/assets/Figure_1.png)
 
-- **Clip-Higher** — стратегия, способствующая разнообразию генерации и позволяющая проводить адаптивную выборку, разделяя нижние и верхние границы клиппирования (ε-low и ε-high);
-- **Dynamic Sampling** — метод динамической выборки, повышающий эффективность и стабильность обучения путем исключения примеров с нулевым градиентом;
-- **Token-Level Policy Gradient Loss** — расчет градиента политики на уровне отдельных токенов, что критически важно для эффективного обучения на длинных последовательностях;
-- **Overlong Reward Shaping** — интеллектуальная система штрафов за превышение длины, снижающая шум вознаграждения и стабилизирующая процесс обучения.
+- **Clip-Higher** — a strategy promoting generation diversity by enabling adaptive sampling through separate lower and upper clipping bounds (ε-low and ε-high);
+- **Dynamic Sampling** — a dynamic sampling method that improves training efficiency and stability by excluding examples with zero gradients;
+- **Token-Level Policy Gradient Loss** — computing policy gradients at the individual token level, critically important for efficient learning on long sequences;
+- **Overlong Reward Shaping** — an intelligent length penalty system that reduces reward noise and stabilizes the training process.
 
-Особую ценность работы составляет полная открытость всех аспектов системы: весь код реализации, построенный на фреймворке verl, вместе с тщательно подготовленным датасетом DAPO-Math-17K, доступны в открытом репозитории. Эта открытость контрастирует с предыдущими работами, которые, несмотря на впечатляющие результаты, не раскрывали критически важных деталей обучения.
+A key value of this work lies in the full openness of all system components: the entire implementation code, built on the verl framework, along with the carefully curated DAPO-Math-17K dataset, are publicly available. This openness contrasts sharply with prior works that, despite impressive results, withheld critical training details.
 
-В ходе экспериментов авторы также наблюдали интересное явление: модель не только усиливает существующие шаблоны рассуждения, но и постепенно развивает принципиально новые способности, в частности, поведение, связанное с самопроверкой и переосмыслением предыдущих шагов. Это открывает новые перспективы для понимания фундаментальных механизмов обучения LLM сложным формам рассуждения.
+During experiments, the authors also observed an intriguing phenomenon: the model not only reinforces existing reasoning patterns but gradually develops fundamentally new capabilities—particularly behaviors related to self-checking and reconsidering prior steps. This opens new perspectives for understanding the fundamental mechanisms by which LLMs learn complex reasoning.
 
 ---
 
 <details> 
-    <summary><em><strong>Сущность Test-time Compute</strong></em></summary>
+    <summary><em><strong>Understanding Test-time Compute</strong></em></summary>
 
-### Сущность Test-time Compute
+### Understanding Test-time Compute
 
-"**Test-time compute**" (вычисления во время тестирования/инференса) представляет собой парадигму масштабирования RL LLM, которая акцентирует внимание на увеличении вычислительных ресурсов, доступных модели непосредственно в момент обработки пользовательского запроса (inference time).  В отличие от традиционного подхода, "Test-time compute" позволяет улучшить производительность уже обученной модели, предоставляя ей больше **ВРЕМЕНИ** и **ВЫЧИСЛИТЕЛЬНОЙ МОЩНОСТИ** для "размышления" над каждым конкретным запросом.
+"**Test-time compute**" refers to a paradigm for scaling RL LLMs that emphasizes increasing computational resources available to the model precisely during the processing of a user query (inference time). Unlike the traditional approach, "Test-time compute" enhances the performance of an already-trained model by providing it with more **TIME** and **COMPUTATIONAL POWER** to "think" about each specific query.
 
-### Отличие от традиционного масштабирования
+### Difference from Traditional Scaling
 
-Традиционное масштабирование LLM фокусировалось на следующих аспектах **во время обучения**:
+Traditional LLM scaling focused on the following aspects **during training**:
 
-* **Размер модели:** увеличение количества параметров и сложности архитектуры;
-* **Объем данных:** расширение и разнообразие обучающих данных;
-* **Вычислительные ресурсы для обучения:** использование более мощных GPU и увеличение времени обучения.
+* **Model size:** increasing the number of parameters and architectural complexity;
+* **Data volume:** expanding and diversifying training data;
+* **Training computational resources:** using more powerful GPUs and extending training duration.
 
-"Test-time compute" вводит **дополнительное измерение масштабирования**, применяемое **после обучения модели**.  Это позволяет повысить эффективность модели, не изменяя ее архитектуру или параметры, а оптимизируя вычислительные ресурсы в момент инференса.
+"Test-time compute" introduces an **additional scaling dimension**, applied **after model training**. This allows improved model efficiency without altering its architecture or parameters, optimizing computational resources at inference time.
 
-### Механизм и преимущества Test-time Compute
+### Mechanism and Advantages of Test-time Compute
 
-Предоставление модели больше вычислительных ресурсов во время инференса позволяет:
+Providing the model with greater computational resources during inference enables:
 
-* **Углубленная обработка запросов:**  модель может проводить более детальный анализ входного текста и контекста, на основе более глубоких цепочек рассуждения;
-* **Улучшение рассуждений:**  дополнительные вычисления способствуют более эффективному планированию, поиску оптимальных решений и генерации логически обоснованных ответов;
-* **Использование сложных алгоритмов инференса:**  возможность применения ресурсоемких, но более качественных методов декодирования и генерации.
+* **Deeper query processing:** the model can perform more detailed analysis of input text and context through deeper reasoning chains;
+* **Improved reasoning:** additional computations facilitate better planning, search for optimal solutions, and generation of logically sound responses;
+* **Use of complex inference algorithms:** the ability to apply resource-intensive but higher-quality decoding and generation methods.
 
-### Как итог
+### In Summary
 
-"Test-time compute" знаменует собой важный сдвиг в подходах к масштабированию LLM.  Он дополняет традиционные методы, сосредотачиваясь на оптимизации вычислительных ресурсов в момент использования модели.  Это открывает перспективы для создания более интеллектуальных и reasoning-ориентированных языковых моделей, особенно в задачах, требующих глубокого анализа и логического вывода. 
+"Test-time compute" represents a significant shift in LLM scaling approaches. It complements traditional methods by focusing on optimizing computational resources at the point of model usage. This opens prospects for creating more intelligent, reasoning-oriented language models, especially in tasks requiring deep analysis and logical deduction.
 
 </details> 
 
 ---
 
-Далее мы шаг за шагом рассмотрим переход от PPO к GRPO, а затем к DAPO, чтобы увидеть, как был разработан этот новый алгоритм обучения с подкреплением.
+We now step-by-step examine the evolution from PPO to GRPO, and then to DAPO, to understand how this new reinforcement learning algorithm was developed.
 
-## **2. Предпосылки**
+## **2. Background**
 
-### **2.1 Проксимальная оптимизация политики (PPO)**
+### **2.1 Proximal Policy Optimization (PPO)**
 
-#### Основная концепция
+#### Core Concept
 
-Проксимальная оптимизация политики (PPO) — это один из наиболее популярных и эффективных алгоритмов обучения с подкреплением, разработанный исследователями из OpenAI в 2017 году. PPO представляет собой усовершенствование предыдущих методов оптимизации политики, таких как TRPO (Trust Region Policy Optimization), но с более простой реализацией и сравнимой или лучшей производительностью.
+Proximal Policy Optimization (PPO) is one of the most popular and effective reinforcement learning algorithms, developed by researchers at OpenAI in 2017. PPO is an improvement over earlier policy optimization methods such as TRPO (Trust Region Policy Optimization), with a simpler implementation and comparable or superior performance.
 
-#### Ключевые особенности PPO
+#### Key Features of PPO
 
-1. **Стабильность обучения**: основная идея PPO заключается в ограничении изменений политики между итерациями, что предотвращает слишком резкие обновления, которые могут дестабилизировать процесс обучения;
+1. **Training stability**: The core idea of PPO is to constrain policy updates between iterations, preventing overly drastic changes that could destabilize learning;
+2. **Clipping mechanism**: PPO employs a clipping function to bound the importance sampling ratio, ensuring the new policy does not deviate significantly from the old one;
+3. **Sample efficiency**: Compared to other algorithms, PPO makes more efficient use of collected data, achieving better results with fewer environmental interactions.
 
-2. **Механизм отсечения**: PPO использует функцию отсечения для ограничения коэффициента важности выборки, что гарантирует, что новая политика не будет сильно отклоняться от старой;
+#### Mathematical Formulation
 
-3. **Эффективность выборки**: по сравнению с другими алгоритмами, PPO более эффективно использует собранные данные, что позволяет достигать лучших результатов при меньшем количестве взаимодействий со средой.
-
-#### Математическая формализация
-
-Целевая функция PPO определяется следующим образом:
+The PPO objective function is defined as:
 
 $$\mathcal{J}_{\text{PPO}}(\theta) = \mathbb{E}_{(q,a) \sim \mathcal{D}, o_{<t} \sim \pi_{\theta_{\text{old}}}(\cdot|q)} \left[ \min \left( \frac{\pi_\theta(o_t | q, o_{<t})}{\pi_{\theta_{\text{old}}}(o_t | q, o_{<t})} \hat{A}_t, \text{clip}\left(\frac{\pi_\theta(o_t | q, o_{<t})}{\pi_{\theta_{\text{old}}}(o_t | q, o_{<t})}, 1 - \varepsilon, 1 + \varepsilon \right) \hat{A}_t \right) \right], \quad (1)$$
 
-где:
+where:
 
-- $\mathcal{J}_{\text{PPO}}(\theta)$ — целевая функция PPO, которую необходимо максимизировать путем подбора параметров $\theta$;
-- $(q, a)$ — пара вопрос-ответ из распределения данных $\mathcal{D}_e$, где $q$ представляет запрос (или состояние среды), а $a$ — соответствующий ответ (или действие);
-- $o_t$ — текущий токен вывода на шаге $t$;
-- $o_{<t}$ — последовательность предыдущих токенов вывода до шага $t$;
-- $\pi_\theta(o_t | q, o_{<t})$ — вероятность выбора токена $o_t$ при текущей политике с параметрами $\theta$, учитывая запрос $q$ и предыдущие токены $o_{<t}$;
-- $\pi_{\theta_{\text{old}}}(o_t | q, o_{<t})$ — вероятность выбора того же токена при старой политике с параметрами $\theta_{\text{old}}$;
-- $\frac{\pi_\theta(o_t | q, o_{<t})}{\pi_{\theta_{\text{old}}}(o_t | q, o_{<t})}$ — коэффициент важности выборки, показывающий отношение вероятностей выбора токена при новой и старой политиках;
-- $\varepsilon$ — гиперпараметр отсечения (обычно в диапазоне 0.1-0.3), определяющий допустимый диапазон изменения коэффициента важности выборки;
-- $\text{clip}(x, a, b)$ — функция отсечения, ограничивающая значение $x$ в диапазоне $[a, b]$;
-- $\hat{A}_t$ — оценка преимущества на временном шаге $t$, характеризующая относительную ценность выбранного действия по сравнению со средним значением всех действий в данном состоянии.
+- $\mathcal{J}_{\text{PPO}}(\theta)$ — the PPO objective function to be maximized by tuning parameters $\theta$;
+- $(q, a)$ — a question-answer pair from data distribution $\mathcal{D}_e$, where $q$ represents the query (or environment state), and $a$ the corresponding response (or action);
+- $o_t$ — the current output token at step $t$;
+- $o_{<t}$ — the sequence of preceding output tokens before step $t$;
+- $\pi_\theta(o_t | q, o_{<t})$ — the probability of selecting token $o_t$ under the current policy with parameters $\theta$, given query $q$ and prior tokens $o_{<t}$;
+- $\pi_{\theta_{\text{old}}}(o_t | q, o_{<t})$ — the probability of selecting the same token under the old policy with parameters $\theta_{\text{old}}$;
+- $\frac{\pi_\theta(o_t | q, o_{<t})}{\pi_{\theta_{\text{old}}}(o_t | q, o_{<t})}$ — the importance sampling ratio, indicating the relative likelihood of selecting the token under the new versus old policy;
+- $\varepsilon$ — the clipping hyperparameter (typically in range 0.1–0.3), defining the permissible range of change in the importance ratio;
+- $\text{clip}(x, a, b)$ — the clipping function, constraining value $x$ within range $[a, b]$;
+- $\hat{A}_t$ — the advantage estimate at time step $t$, characterizing the relative value of the selected action compared to the average value of all actions in the current state.
 
-Функция $\mathbb{E}$ обозначает математическое ожидание, и все выражение представляет собой ожидаемую ценность выбранных действий с учетом ограничений на изменение политики.
+The function $\mathbb{E}$ denotes the mathematical expectation, and the entire expression represents the expected value of selected actions under policy change constraints.
 
-Учитывая функцию ценности $V$ и функцию вознаграждения $R$, $\hat{A}_t$ рассчитывается с использованием обобщенной оценки преимущества (GAE):
+Given the value function $V$ and reward function $R$, $\hat{A}_t$ is computed using the Generalized Advantage Estimation (GAE):
 
 $$\hat{A}_t^{GAE(\gamma,\lambda)} = \sum_{l=0}^{\infty}(\gamma\lambda)^l\delta_{t+l} \quad (2)$$
 
-где:
+where:
 
-- $\hat{A}_t^{GAE(\gamma,\lambda)}$ — обобщенная оценка преимущества для временного шага $t$;
-- $\gamma$ — коэффициент дисконтирования будущих вознаграждений (обычно близкий к 1, например, 0.99), определяющий, насколько агент ценит будущие вознаграждения по сравнению с немедленными;
-- $\lambda$ — параметр экспоненциального взвешивания для различных оценок преимущества (обычно между 0.9 и 1.0), контролирующий компромисс между смещением и дисперсией в оценке;
-- $\delta_t$ — временная разница между ожидаемой и фактической ценностью, рассчитываемая по формуле (3);
-- $l$ — индекс суммирования, представляющий количество шагов вперед от текущего временного шага $t$.
+- $\hat{A}_t^{GAE(\gamma,\lambda)}$ — the generalized advantage estimate for time step $t$;
+- $\gamma$ — the discount factor for future rewards (typically close to 1, e.g., 0.99), determining how much the agent values future rewards relative to immediate ones;
+- $\lambda$ — the exponential weighting parameter for different advantage estimates (typically between 0.9 and 1.0), controlling the bias-variance trade-off in estimation;
+- $\delta_t$ — the temporal difference between expected and actual value, computed by formula (3);
+- $l$ — the summation index representing the number of steps ahead from current time step $t$.
 
 $$\delta_t = R_t + \gamma V(s_{t+1}) - V(s_t), \quad 0 \leq \gamma, \lambda \leq 1 \quad (3)$$
 
-где:
+where:
 
-- $\delta_t$ — временная разница на шаге $t$;
-- $R_t$ — немедленное вознаграждение, полученное после выполнения действия на шаге $t$;
-- $V(s_t)$ — оценка ценности состояния $s_t$ согласно текущей функции ценности;
-- $V(s_{t+1})$ — оценка ценности следующего состояния $s_{t+1}$.
+- $\delta_t$ — the temporal difference at step $t$;
+- $R_t$ — the immediate reward received after taking action at step $t$;
+- $V(s_t)$ — the estimated value of state $s_t$ according to the current value function;
+- $V(s_{t+1})$ — the estimated value of the next state $s_{t+1}$.
 
-**Обобoбщим: что "под капотом" без математических деталей:**
+**Summary: What’s “under the hood” without mathematical details:**
 
-* **Политика (Policy):**  это как "инструкция" для программы, говорящая, какое действие нужно выбрать в каждой ситуации. В PPO политика представлена нейронной сетью.
-* **Функция ценности (Value Function):** это оценка того, насколько "хорошо" находиться в определенной ситуации.  Она помогает программе понимать, к каким ситуациям стоит стремиться.  Тоже обычно нейронная сеть.
-* **Преимущество (Advantage):**  это разница между тем, насколько хорошо действие, которое программа выбрала, и насколько "в среднем" хорошо действовать в этой ситуации.  Помогает понять, какие действия были действительно удачными.
-* **Целевая функция PPO (формула (1)):**  это главная "цель" обучения.  Программа пытается ее максимизировать, чтобы стать лучше.  Самое важное в ней - это механизм "отсечения" (clip), который ограничивает изменения политики.
-* **Оценка преимущества GAE (формула (2)):**  способ посчитать, насколько хороши были действия программы, учитывая не только немедленный результат, но и будущие последствия.
-* **Временная разница (формула (3)):**  помогает функции ценности учиться, сравнивая предсказанную ценность ситуации с тем, что реально произошло.
+* **Policy**: This is like an “instruction manual” for the program, dictating which action to take in each situation. In PPO, the policy is represented by a neural network.
+* **Value Function**: This estimates how “good” a given state is. It helps the program understand which states to aim for. Also typically a neural network.
+* **Advantage**: This is the difference between how good the chosen action was and how good actions typically are in this situation. It helps identify which actions were truly successful.
+* **PPO Objective Function (Equation 1)**: This is the main “goal” of learning. The program seeks to maximize it to improve. The most critical element is the “clipping” mechanism, which constrains policy changes.
+* **GAE Advantage Estimation (Equation 2)**: A method to evaluate how good the program’s actions were, considering not only immediate outcomes but also future consequences.
+* **Temporal Difference (Equation 3)**: Helps the value function learn by comparing the predicted state value with what actually occurred.
 
-#### Процесс работы PPO
+#### PPO Workflow
 
-1. **Сбор опыта**: агенты взаимодействуют со средой, следуя текущей политике $\pi_{\theta_{\text{old}}}$, и собирает траектории (последовательности состояний, действий, вознаграждений).
+1. **Experience Collection**: Agents interact with the environment following the current policy $\pi_{\theta_{\text{old}}}$, collecting trajectories (sequences of states, actions, rewards).
+2. **Advantage Estimation**: For each time step in collected trajectories, the advantage estimate $\hat{A}_t$ is computed using equations (2) and (3).
+3. **Policy Optimization**: Policy parameters $\theta$ are updated via stochastic gradient ascent on the objective function (1) over multiple epochs.
+4. **Value Function Update**: Value function parameters are updated by minimizing the mean squared error between predicted and actual state values.
+5. **Iteration**: Steps 1–4 are repeated until desired performance or a set number of iterations is reached.
 
-2. **Оценка преимущества**: для каждого временного шага в собранных траекториях рассчитывается оценка преимущества $\hat{A}_t$ с использованием формул (2) и (3).
+#### Advantages of PPO
 
-3. **Оптимизация политики**: параметры политики $\theta$ обновляются путем оптимизации целевой функции (1) с использованием стохастического градиентного восхождения в течение нескольких эпох.
+1. **Simple implementation**: PPO is easier to implement than TRPO and other complex RL algorithms.
+2. **High performance**: PPO achieves excellent results across diverse tasks, from Atari games to complex robotics.
+3. **Compatibility with neural networks**: PPO works seamlessly with deep neural networks and can train complex policies.
+4. **Good scalability**: PPO can be efficiently parallelized to accelerate training.
 
-4. **Обновление функции ценности**: параметры функции ценности обновляются путем минимизации среднеквадратичной ошибки между предсказанными и фактическими ценностями состояний.
+#### Applications of PPO
 
-5. **Итерация**: шаги 1-4 повторяются до достижения желаемой производительности или заданного числа итераций.
+PPO is widely used across domains:
 
-#### Преимущества PPO
+1. **Games**: From simple games to complex strategies and simulators.
+2. **Robotics**: Training robots to perform complex physical tasks.
+3. **Recommendation Systems**: Optimizing recommendation strategies in interactive systems.
+4. **Large Language Models**: In recent years, PPO has been actively applied to fine-tune language models via RLHF (Reinforcement Learning from Human Feedback).
 
-1. **Простота реализации**: PPO проще в реализации, чем TRPO и другие сложные алгоритмы обучения с подкреплением.
+#### Conclusion
 
-2. **Высокая производительность**: PPO показывает отличные результаты во многих задачах, от игр Atari до сложных задач робототехники.
+Proximal Policy Optimization (PPO) is a powerful and flexible reinforcement learning algorithm that, due to its simplicity and effectiveness, has become the de facto standard in deep reinforcement learning. Its applications span from games and robotics to training modern language models, demonstrating the universality and power of this approach.
 
-3. **Совместимость с нейронными сетями**: PPO прекрасно работает с глубокими нейронными сетями и может использоваться для обучения сложных политик.
+### **2.2 Group Relative Policy Optimization (GRPO)**
 
-4. **Хорошая масштабируемость**: PPO можно эффективно распараллеливать для ускорения обучения.
-
-#### Применение PPO
-
-PPO широко используется в различных областях:
-
-1. **Игры**: От простых игр до сложных стратегий и симуляторов.
-
-2. **Робототехника**: Обучение управлению роботами для выполнения сложных физических задач.
-
-3. **Системы рекомендаций**: Оптимизация стратегий рекомендаций в интерактивных системах.
-
-4. **Большие языковые модели**: В последние годы PPO активно применяется для настройки языковых моделей через обучение с подкреплением на основе обратной связи от человека (RLHF).
-
-#### Заключение
-
-Проксимальная оптимизация политики (PPO) представляет собой мощный и гибкий алгоритм обучения с подкреплением, который благодаря своей простоте и эффективности стал стандартом де-факто в области глубокого обучения с подкреплением. Его применение простирается от игр и робототехники до обучения современных языковых моделей, демонстрируя универсальность и мощь данного подхода.
-
-### **2.2 Оптимизация групповой относительной политики (GRPO)**
-
-Group Relative Policy Optimization (GRPO) — это алгоритм обучения с подкреплением, предназначенный для оптимизации LLM в задачах, требующих структурированного рассуждения, таких как математика и логика. Он был представлен в работах DeepSeekMath и DeepSeek-R1 **как ответ на вызовы обучения моделей с миллиардами параметров**. GRPO предлагает более эффективный подход по сравнению с традиционными методами, такими как Proximal Policy Optimization (PPO), **за счет устранения ключевых узких мест, связанных с вычислением advantage-функций**.
-
+Group Relative Policy Optimization (GRPO) is a reinforcement learning algorithm designed for optimizing LLMs in tasks requiring structured reasoning, such as mathematics and logic. It was introduced in the works of DeepSeekMath and DeepSeek-R1 **as a response to the challenges of training models with billions of parameters**. GRPO offers a more efficient approach compared to traditional methods such as Proximal Policy Optimization (PPO), **by eliminating key bottlenecks associated with advantage function computation**.
 
 <details> 
-    <summary><em><strong>Объяснение Advantage-функций</strong></em></summary>
+    <summary><em><strong>Explanation of Advantage Functions</strong></em></summary>
 
-**Advantage-функция** — это ключевое понятие в обучении с подкреплением (Reinforcement Learning, RL), которое **количественно оценивает преимущество выбора конкретного действия `a` в состоянии `s` по сравнению со средним действием, предписанным текущей политикой модели**. Формально она выражается как разница между **Q-функцией** (ожидаемая суммарная награда за действие `a` в состоянии `s`) и **V-функцией** (средняя ожидаемая награда в состоянии `s` при текущей политике):
+**Advantage function** is a fundamental concept in reinforcement learning (RL) that **quantitatively evaluates the advantage of selecting a specific action `a` in state `s` relative to the average action prescribed by the current model policy**. Formally, it is expressed as the difference between the **Q-function** (expected cumulative reward for action `a` in state `s`) and the **V-function** (average expected reward in state `s` under the current policy):
 
 $$
 A(s, a) = Q(s, a) - V(s)
@@ -195,312 +182,315 @@ $$
 
 ---
 
-### **Зачем нужна Advantage-функция?**
-1. **Оценка относительной ценности действий**:
-   - Помогает модели понять, насколько конкретное действие лучше или хуже "стандартного" поведения в данном контексте при текущей политике.
-   - Пример: В математической задаче действие "выбрать метод интегрирования по частям" может иметь высокий advantage, если приводит к правильному ответу, и низкий — если усложняет решение.
+### **Why is the Advantage Function Needed?**
+1. **Assessing Relative Action Value**:
+   - Helps the model understand how much better or worse a specific action is compared to the “standard” behavior in a given context under the current policy.
+   - Example: In a math problem, the action "choose integration by parts" may have high advantage if it leads to a correct answer, and low advantage if it complicates the solution.
 
-2. **Снижение дисперсии градиентов**:
-   - Использование относительных advantage-значений вместо абсолютных наград делает обновления политики более стабильными.
-
----
-
-### **Как вычисляются Advantage-функции в классическом RL (например, PPO)?**
-В Proximal Policy Optimization (PPO):
-1. **Value-сеть** (отдельная нейросеть) обучается предсказывать `V(s)` — ожидаемую награду для состояния `s`.
-2. **Q(s, a)** оценивается через фактическую полученную награду + дисконтированные будущие награды.
-3. **Advantage** вычисляется как:
-   $$
-   A(s, a) = R_{\text{total}} - V(s)
-   $$
-   где $( R_{\text{total}} )$ — дисконтированная сумма наград за траекторию.
-
-**Проблемы PPO**:
-- Value-сеть требует дополнительных вычислительных ресурсов и памяти.
-- Ошибки в предсказаниях `V(s)` (особенно в задачах с **многомодальным распределением наград**, как в LLM) искажают advantage-значения.
-
-> Тут будет ссылка на тетрадку
-
-</details> 
+2. **Reducing Gradient Variance**:
+   - Using relative advantage values instead of absolute rewards leads to more stable policy updates.
 
 ---
 
-### **Новаторский подход GRPO к Advantage-функциям**
+### **How are Advantage Functions Computed in Classical RL (e.g., PPO)?**  
+In Proximal Policy Optimization (PPO):  
+1. The **Value network** (a separate neural network) is trained to predict $V(s)$ — the expected reward for state $s$.  
+2. $Q(s, a)$ is estimated via the actual received reward plus discounted future rewards.  
+3. The **Advantage** is computed as:  
+$$
+A(s, a) = R_{\text{total}} - V(s)
+$$  
+where $R_{\text{total}}$ is the discounted sum of rewards over the trajectory.  
 
-![Figure_19](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_19.jpg)
+**Problems with PPO**:  
+- The Value network requires additional computational resources and memory.  
+- Errors in predicting $V(s)$ (especially in tasks with **multimodal reward distributions**, as in LLMs) distort advantage values.  
+
+> Here will be a link to the notebook  
+
+</details>  
+
+---
+
+### **GRPO’s Innovative Approach to Advantage Functions**
+
+![Figure_19](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-07_%26_08/assets/Figure_19.jpg  )
 
 <details> 
     <summary><em><strong>Step-by-step PPO and GRPO:</strong></em></summary>
 
 ## PPO (Proximal Policy Optimization)
 
-**1. Входной запрос (q):**
+**1. Input Query (q):**
 
-- **Описание:** Начало процесса - это входной запрос, обозначенный как `q`. В контексте языковых моделей, это может быть текстовый промпт или вопрос, на который модель должна сгенерировать ответ.
-- **На диаграмме:** Блок слева с надписью `q`.
+- **Description:** The process begins with an input query, denoted as `q`. In the context of language models, this may be a textual prompt or question to which the model must generate a response.  
+- **On diagram:** Left block labeled `q`.
 
-**2. Policy Model (Модель политики):**
+**2. Policy Model:**
 
-- **Описание:** Это нейронная сеть, которая принимает запрос `q` на вход и генерирует выход `o`. `o` представляет собой сгенерированный ответ или последовательность действий (токенов в случае LLM) на основе текущей политики. Модель политики стремится максимизировать ожидаемую награду.
-- **На диаграмме:** Желтый блок с надписью `Policy Model`, принимающий вход от `q` и выдающий выход `o`. Желтый цвет указывает на то, что эта модель является **обучаемой** (Trained Models).
+- **Description:** This is a neural network that takes query `q` as input and generates output `o`. `o` represents the generated response or sequence of actions (tokens, in the case of LLMs), based on the current policy. The policy model aims to maximize expected reward.  
+- **On diagram:** Yellow block labeled `Policy Model`, taking input from `q` and outputting `o`. Yellow color indicates this model is **trainable** (Trained Models).
 
-**3. Reference Model (Референсная модель) и Reward Model (Модель награды):**
+**3. Reference Model and Reward Model:**
 
-- **Описание:** После того, как Policy Model сгенерировала выход `o`, этот выход поступает в два блока: `Reference Model` и `Reward Model`.
-    - **Reference Model:** Это **замороженная** (Frozen Models, синий цвет) модель, представляющая собой предыдущую версию Policy Model или какую-либо другую модель, к которой мы хотим, чтобы текущая политика не отклонялась слишком сильно. Она используется для расчета **KL-дивергенции**, которая регулирует обновление политики, чтобы оно не было слишком резким.
-    - **Reward Model:** Это модель, которая оценивает качество выхода `o` и присваивает ему награду `r`. Как описано в тексте, на **первой итерации** обучения GRPO, эта награда берется из **внешней функции награды** (reward function), которая может быть ручной, автоматизированной или основанной на правилах. На диаграмме Reward Model также показана как **замороженная** (синий цвет), что подразумевает, что на данном этапе обучения она не обновляется, а используется как внешний источник оценки.
-- **На диаграмме:** Два синих блока `Reference Model` и `Reward Model`, принимающие вход `o`. Стрелка с надписью `KL` идет от `Reference Model` к символу "⊕", указывая на использование **KL-дивергенции**. `Reward Model` выдает награду `r`.
+- **Description:** After the Policy Model generates output `o`, it is fed into two blocks: `Reference Model` and `Reward Model`.  
+    - **Reference Model:** This is a **frozen** (Frozen Models, blue color) model representing either the previous version of the Policy Model or another model to which the current policy should not deviate too strongly. It is used to compute the **KL divergence**, which regulates policy updates to prevent overly drastic changes.  
+    - **Reward Model:** This model evaluates the quality of output `o` and assigns it a reward `r`. As described in the text, on the **first iteration** of GRPO training, this reward is taken from an **external reward function**, which may be manual, automated, or rule-based. On the diagram, the Reward Model is also shown as **frozen** (blue color), implying it is not updated during this training stage but serves as an external evaluation source.  
+- **On diagram:** Two blue blocks `Reference Model` and `Reward Model`, taking input `o`. An arrow labeled `KL` goes from `Reference Model` to the symbol "⊕", indicating use of **KL divergence**. The Reward Model outputs reward `r`.
 
-**4. Value Model (Модель ценности):**
+**4. Value Model:**
 
-- **Описание:** В PPO используется Value Model для оценки "ценности" состояния. Она принимает на вход выход `o` от Policy Model и предсказывает скалярное значение `v`, которое представляет собой ожидаемую суммарную награду, которую можно получить, начиная с этого состояния (или после генерации этого выхода). Value Model используется для оценки baseline при расчете **advantage-функции**.
-- **На диаграмме:** Желтый блок `Value Model`, принимающий вход `o` и выдающий выход `v`. Желтый цвет указывает на то, что Value Model также является **обучаемой**.
+- **Description:** In PPO, a Value Model is used to estimate the “value” of a state. It takes output `o` from the Policy Model as input and predicts a scalar value `v`, representing the expected cumulative reward obtainable starting from this state (or after generating this output). The Value Model is used to compute the baseline for the **advantage function**.  
+- **On diagram:** Yellow block `Value Model`, taking input `o` and outputting `v`. Yellow color indicates the Value Model is also **trainable**.
 
-**5. KL Divergence (KL-дивергенция) и операция "⊕":**
+**5. KL Divergence and Operation "⊕":**
 
-- **Описание:** **KL-дивергенция** измеряет разницу между распределениями вероятностей, в данном случае, между распределением текущей Policy Model и Reference Model. На диаграмме символ "⊕" обозначает операцию, в которой **KL-дивергенция** используется для регуляризации. В контексте PPO, **KL-дивергенция** часто добавляется к функции потерь для ограничения изменений политики и обеспечения стабильности обучения.
-- **На диаграмме:** Стрелка с надписью `KL` от `Reference Model` идет к символу "⊕".
+- **Description:** **KL divergence** measures the difference between probability distributions—in this case, between the current Policy Model and the Reference Model. On the diagram, the symbol "⊕" denotes an operation in which **KL divergence** is used for regularization. In PPO, **KL divergence** is often added to the loss function to constrain policy changes and ensure training stability.  
+- **On diagram:** Arrow labeled `KL` from `Reference Model` to symbol "⊕".
 
-**6. Reward (r) и Value (v):**
+**6. Reward (r) and Value (v):**
 
-- **Описание:** `r` - это награда, полученная от Reward Model за выход `o`. `v` - это оценка ценности состояния, полученная от Value Model.
-- **На диаграмме:** Блоки `r` и `v`, представляющие собой выходы Reward Model и Value Model соответственно.
+- **Description:** `r` is the reward received from the Reward Model for output `o`. `v` is the state value estimate from the Value Model.  
+- **On diagram:** Blocks `r` and `v`, representing outputs of the Reward Model and Value Model, respectively.
 
-**7. GAE (Generalized Advantage Estimation) и Advantage (A):**
+**7. GAE (Generalized Advantage Estimation) and Advantage (A):**
 
-- **Описание:** **GAE** (Generalized Advantage Estimation) - это метод для оценки **advantage-функции** `A`. **Advantage-функция** показывает, насколько действие, предпринятое в данном состоянии, лучше или хуже, чем среднее действие в этом состоянии. В PPO, GAE использует как награды `r`, так и оценки ценности `v` для расчета `A`. Формула GAE обычно включает в себя дисконтированные награды и разницу между текущей и следующей оценками ценности.
-- **На диаграмме:** Блок `GAE`, принимающий на вход награду `r` и оценку ценности `v`, и выдающий advantage `A`.
+- **Description:** **GAE** (Generalized Advantage Estimation) is a method for estimating the **advantage function** `A`. The **advantage function** indicates how much better or worse an action taken in a given state is compared to the average action in that state. In PPO, GAE uses both rewards `r` and value estimates `v` to compute `A`. The GAE formula typically includes discounted rewards and the difference between current and next value estimates.  
+- **On diagram:** Block `GAE`, taking inputs reward `r` and value estimate `v`, and outputting advantage `A`.
 
-**8. Advantage (A) и Policy Model (обратная связь):**
+**8. Advantage (A) and Policy Model (Feedback):**
 
-- **Описание:** Рассчитанный advantage `A` используется для обновления Policy Model. Если advantage положительный, это означает, что действие (или сгенерированный выход) был лучше, чем ожидалось, и Policy Model обновляется таким образом, чтобы увеличить вероятность генерации подобных выходов в будущем. Если advantage отрицательный, Policy Model корректируется, чтобы уменьшить вероятность таких выходов.
-- **На диаграмме:** Стрелка от блока `GAE` с advantage `A` обратно к `Policy Model`, указывающая на процесс обучения и обновления параметров Policy Model на основе advantage.
+- **Description:** The computed advantage `A` is used to update the Policy Model. If the advantage is positive, it means the action (or generated output) was better than expected, and the Policy Model is updated to increase the likelihood of generating similar outputs in the future. If the advantage is negative, the Policy Model is adjusted to reduce the probability of such outputs.  
+- **On diagram:** Arrow from block `GAE` with advantage `A` back to `Policy Model`, indicating the learning and parameter update process based on advantage.
 
-**9. Trained Models и Frozen Models:**
+**9. Trained Models and Frozen Models:**
 
-- **Описание:** Блоки `Trained Models` (желтые) и `Frozen Models` (синие) обозначают, какие модели обновляются в процессе обучения, а какие остаются неизменными. В PPO, Policy Model и Value Model являются обучаемыми, а Reference Model и Reward Model (на первой итерации GRPO) являются замороженными.
-- **На диаграмме:** Желтые блоки `Policy Model` и `Value Model` находятся в контейнере `Trained Models`. Синие блоки `Reference Model` и `Reward Model` находятся в контейнере `Frozen Models`.
+- **Description:** Blocks `Trained Models` (yellow) and `Frozen Models` (blue) indicate which models are updated during training and which remain unchanged. In PPO, the Policy Model and Value Model are trainable, while the Reference Model and Reward Model (on the first iteration of GRPO) are frozen.  
+- **On diagram:** Yellow blocks `Policy Model` and `Value Model` reside in the container `Trained Models`. Blue blocks `Reference Model` and `Reward Model` reside in the container `Frozen Models`.
 
-**В итоге, в PPO процесс выглядит так:** Запрос `q` поступает в Policy Model, которая генерирует выход `o`. Этот выход оценивается Reward Model (получаем `r`) и Value Model (получаем `v`). Также используется Reference Model для расчета **KL-дивергенции**. На основе `r` и `v` вычисляется advantage `A` с помощью GAE. Advantage `A` используется для обновления Policy Model и Value Model, чтобы улучшить политику и оценку ценности в будущем. **KL-дивергенция** используется для регуляризации процесса обучения.
+**In summary, the PPO process works as follows:** The query `q` is fed into the Policy Model, which generates output `o`. This output is evaluated by the Reward Model (yielding `r`) and the Value Model (yielding `v`). The Reference Model is also used to compute **KL divergence**. Based on `r` and `v`, the advantage `A` is calculated using GAE. Advantage `A` is then used to update the Policy Model and Value Model to improve the policy and value estimation in the future. **KL divergence** is used to regularize the learning process.
 
 ---
 
 ## GRPO (Group Relative Policy Optimization)
 
-**1. Входной запрос (q):**
+**1. Input Query (q):**
 
-- **Описание:** Аналогично PPO, процесс начинается с входного запроса `q`.
-- **На диаграмме:** Блок слева с надписью `q`.
+- **Description:** Analogous to PPO, the process begins with an input query `q`.  
+- **On diagram:** Left block labeled `q`.
 
-**2. Policy Model (Модель политики) и группа выходов (o₁, o₂, ..., o…):**
+**2. Policy Model and Group of Outputs (o₁, o₂, ..., o…):**
 
-- **Описание:** Policy Model в GRPO также принимает запрос `q`, но вместо генерации одного выхода, она генерирует **группу** из `G` различных выходов: `o₁, o₂, ..., o…`. Как поясняется в тексте, это **горизонтально различные вариативные ответы на один и тот же промпт**. Это означает, что для одного и того же запроса Policy Model генерирует несколько альтернативных ответов.
-- **На диаграмме:** Желтый блок `Policy Model`, принимающий вход `q` и выдающий группу выходов, представленную блоком с надписью `o₁`, `o₂`, ..., `o…`. Желтый цвет указывает на то, что Policy Model является **обучаемой**.
+- **Description:** In GRPO, the Policy Model also takes query `q` as input, but instead of generating a single output, it generates a **group** of `G` distinct outputs: `o₁, o₂, ..., o…`. As explained in the text, these are **horizontally diverse, variant responses to the same prompt**. This means that for a single query, the Policy Model generates multiple alternative responses.  
+- **On diagram:** Yellow block `Policy Model`, taking input `q` and outputting a group of outputs represented by blocks labeled `o₁`, `o₂`, ..., `o…`. Yellow color indicates the Policy Model is **trainable**.
 
-**3. Reference Model (Референсная модель) и Reward Model (Модель награды):**
+**3. Reference Model and Reward Model:**
 
-- **Описание:** Каждый выход из группы `oᵢ` поступает в Reference Model и Reward Model. Аналогично PPO, Reference Model является **замороженной** и используется для **KL-регуляризации**. Reward Model также **заморожена** и оценивает каждый выход `oᵢ` группы, присваивая ему награду `rᵢ`.
-- **На диаграмме:** Синие блоки `Reference Model` и `Reward Model`, принимающие на вход группу выходов `o₁, o₂, ..., o…`. Стрелка с `KL` от `Reference Model` к символу "⊕". Reward Model выдает группу наград `r₁, r₂, ..., r…`.
+- **Description:** Each output from the group `oᵢ` is fed into the Reference Model and Reward Model. Analogous to PPO, the Reference Model is **frozen** and used for **KL regularization**. The Reward Model is also **frozen** and evaluates each group output `oᵢ`, assigning it a reward `rᵢ`.  
+- **On diagram:** Blue blocks `Reference Model` and `Reward Model`, taking input group of outputs `o₁, o₂, ..., o…`. Arrow labeled `KL` from `Reference Model` to symbol "⊕". Reward Model outputs group of rewards `r₁, r₂, ..., r…`.
 
-**4. KL Divergence (KL-дивергенция) и операция "⊕":**
+**4. KL Divergence and Operation "⊕":**
 
-- **Описание:** Аналогично PPO, **KL-дивергенция** используется для регуляризации, ограничивая изменения политики.
-- **На диаграмме:** Стрелка с `KL` от `Reference Model` к символу "⊕".
+- **Description:** Similar to PPO, **KL divergence** is used for regularization to constrain policy changes.  
+- **On diagram:** Arrow labeled `KL` from `Reference Model` to symbol "⊕".
 
 **5. Rewards (r₁, r₂, ..., r…):**
 
-- **Описание:** `r₁, r₂, ..., r…` - это награды, полученные от Reward Model для каждого выхода в группе `o₁, o₂, ..., o…`.
-- **На диаграмме:** Блок `r₁, r₂, ..., r…`, представляющий собой группу наград.
+- **Description:** `r₁, r₂, ..., r…` are the rewards obtained from the Reward Model for each output in the group `o₁, o₂, ..., o…`.  
+- **On diagram:** Block `r₁, r₂, ..., r…`, representing the group of rewards.
 
-**6. Group Computation (Групповые вычисления) и Advantages (A₁, A₂, ..., A…):**
+**6. Group Computation and Advantages (A₁, A₂, ..., A…):**
 
-- **Описание:** Ключевое отличие GRPO от PPO заключается в блоке `Group Computation`. В GRPO **нет Value Model**. Вместо этого, advantage-функция вычисляется на основе **групповой относительной нормализации**. Как описано в тексте, advantage для каждого ответа `Oᵢ` в группе `G = {O₁, O₂, ..., O…}` вычисляется как:
+- **Description:** The key distinction between GRPO and PPO lies in the `Group Computation` block. In GRPO, **there is no Value Model**. Instead, the advantage function is computed via **group-wise relative normalization**. As described in the text, the advantage for each response $O_i$ in group $G = \{O_1, O_2, ..., O_N\}$ is computed as:
 
 $$
 A_i(O_i, G) = R_i - \bar{R}_G = R_i - \frac{1}{N} \sum_{j=1}^N R_j
 $$
 
-где $\bar{R}_G$ - средняя награда по группе. Таким образом, `Group Computation` берет группу наград `r₁, r₂, ..., r…` и вычисляет для каждого выхода `oᵢ` advantage `Aᵢ` как разницу между его наградой `rᵢ` и средней наградой по группе.
+where $\bar{R}_G$ is the average reward across the group. Thus, `Group Computation` takes the group of rewards `r₁, r₂, ..., r…` and computes for each output `oᵢ` the advantage `Aᵢ` as the difference between its reward `rᵢ` and the group’s average reward.
 
-- **На диаграмме:** Блок `Group Computation`, принимающий на вход группу наград `r₁, r₂, ..., r…` и выдающий группу advantages `A₁, A₂, ..., A…`.
+- **On diagram:** Block `Group Computation`, taking input group of rewards `r₁, r₂, ..., r…` and outputting group of advantages `A₁, A₂, ..., A…`.
 
-**7. Advantages (A₁, A₂, ..., A…) и Policy Model (обратная связь):**
+**7. Advantages (A₁, A₂, ..., A…) and Policy Model (Feedback):**
 
-- **Описание:** Группа advantages `A₁, A₂, ..., A…` используется для обновления Policy Model. Политика обновляется таким образом, чтобы увеличить вероятность генерации выходов с более высокими advantages (то есть, выходов, которые лучше, чем среднее по группе).
-- **На диаграмме:** Стрелка от блока `Group Computation` с advantages `A₁, A₂, ..., A…` обратно к `Policy Model`, указывающая на процесс обучения.
+- **Description:** The group of advantages `A₁, A₂, ..., A…` is used to update the Policy Model. The policy is updated to increase the probability of generating outputs with higher advantages (i.e., outputs better than the group average).  
+- **On diagram:** Arrow from block `Group Computation` with advantages `A₁, A₂, ..., A…` back to `Policy Model`, indicating the learning process.
 
-**8. Trained Models и Frozen Models:**
+**8. Trained Models and Frozen Models:**
 
-- **Описание:** Аналогично PPO, Policy Model является обучаемой, а Reference Model и Reward Model (на первой итерации GRPO) являются замороженными.
-- **На диаграмме:** Желтый блок `Policy Model` в контейнере `Trained Models`. Синие блоки `Reference Model` и `Reward Model` в контейнере `Frozen Models`.
+- **Description:** Analogous to PPO, the Policy Model is trainable, while the Reference Model and Reward Model (on the first iteration of GRPO) are frozen.  
+- **On diagram:** Yellow block `Policy Model` in container `Trained Models`. Blue blocks `Reference Model` and `Reward Model` in container `Frozen Models`.
 
-**В итоге, в GRPO процесс выглядит так:** Запрос `q` поступает в Policy Model, которая генерирует группу выходов `o₁, o₂, ..., o…`. Каждый выход из группы оценивается Reward Model (получаем `r₁, r₂, ..., r…`) и используется Reference Model для **KL-регуляризации**. Затем, в блоке `Group Computation`, для каждого выхода вычисляется advantage `Aᵢ` относительно средней награды по группе. Группа advantages `A₁, A₂, ..., A…` используется для обновления Policy Model. **Важно отметить отсутствие Value Model в GRPO.**
+**In summary, the GRPO process works as follows:** The query `q` is fed into the Policy Model, which generates a group of outputs `o₁, o₂, ..., o…`. Each output in the group is evaluated by the Reward Model (yielding `r₁, r₂, ..., r…`) and used by the Reference Model for **KL regularization**. Then, in the `Group Computation` block, the advantage `Aᵢ` for each output is computed as the difference between its reward and the group’s average reward. The group of advantages `A₁, A₂, ..., A…` is used to update the Policy Model. **Importantly, GRPO omits the Value Model entirely.**
 
-**Ключевые отличия GRPO от PPO, наглядно представленные на диаграмме:**
+**Key differences between GRPO and PPO, clearly shown in the diagram:**
 
-1.  **Отсутствие Value Model в GRPO:** Самое заметное отличие - GRPO не использует Value Model. Вместо оценки абсолютной ценности состояния, GRPO фокусируется на **относительном сравнении внутри группы ответов**.
+1.  **Absence of Value Model in GRPO:** The most noticeable difference—GRPO does not use a Value Model. Instead of estimating absolute state value, GRPO focuses on **relative comparison within a group of responses**.
 
-2.  **Групповая обработка выходов и наград в GRPO:** GRPO генерирует и обрабатывает группу выходов для каждого запроса, а затем вычисляет advantage на основе сравнения наград внутри этой группы. PPO обрабатывает каждый выход индивидуально и использует Value Model для оценки baseline.
+2.  **Grouped Processing of Outputs and Rewards in GRPO:** GRPO generates and processes a group of outputs per query, then computes advantage based on reward comparisons within that group. PPO processes each output individually and uses a Value Model to estimate the baseline.
 
-3.  **Group Computation в GRPO:** Этот блок является уникальным для GRPO и реализует **групповую относительную нормализацию**, вычисляя advantage как разницу между наградой конкретного ответа и средней наградой по группе.
+3.  **Group Computation in GRPO:** This block is unique to GRPO and implements **group-wise relative normalization**, computing advantage as the difference between an individual response’s reward and the group’s average reward.
 
 </details>
 
 ---
 
-![Визуализация процесса оценки реворда в GRPO для DeepSeek-R1 от Jay Alammar](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-13/assets/Figure_2.png)
+![Visualization of Reward Evaluation Process in GRPO for DeepSeek-R1 by Jay Alammar](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-13/assets/Figure_2.png  )
 
-GRPO полностью устраняет необходимость в value-сети, используя **групповую относительную нормализацию**:
-для каждого промпта $P$ генерируется группа из $N$ ответов $G = \{O_1, O_2, ..., O_N\}$ с использованием политики $\pi$.  Каждому ответу $O_i$ присваивается награда $R_i = R(O_i)$, отражающая его качество.  Advantage-функция для $i$-го ответа $O_i$ относительно группы $G$ вычисляется по формуле:
+GRPO completely eliminates the need for a value network by using **group-wise relative normalization**:  
+For each prompt $P$, a group of $N$ responses $G = \{O_1, O_2, ..., O_N\}$ is generated using policy $\pi$. Each response $O_i$ is assigned a reward $R_i = R(O_i)$ reflecting its quality. The advantage function for the $i$-th response $O_i$ relative to group $G$ is computed as:
 
 $$
 A_i(O_i, G) = R_i - \bar{R}_G = R_i - \frac{1}{N} \sum_{j=1}^N R_j
 $$
 
-где:
+where:
 
-- В GRPO оценка $R_i$ (награда для ответа $O_i$) в **первой итерации** берётся из **внешней функции награды (reward function)** $R(O_i)$, которая:
+- In GRPO, the reward estimate $R_i$ (reward for response $O_i$) on the **first iteration** is taken from an **external reward function** $R(O_i)$, which:
 
-    1. **Не зависит от текущей политики $\pi$.**  
-    - Это может быть:  
-        - Ручная аннотация (например, экспертные оценки качества ответов).  
-        - Автоматизированный алгоритм (например, модель-критик, отдельная ML-модель, оценивающая тексты).  
-        - Правило на основе heuristics (например, соответствие формату, наличие ключевых слов).  
+    1. **Is independent of the current policy $\pi$.**  
+    - This may be:  
+        - Manual annotation (e.g., expert quality assessments).  
+        - Automated algorithm (e.g., a critic model, a separate ML model scoring texts).  
+        - Rule-based heuristic (e.g., format compliance, keyword presence).  
 
-    2. **Требует предварительной настройки.**  
-    - Если используется модель-критик, её нужно предварительно обучить на размеченных данных.  
-    - Если аннотации ручные, требуется подготовка датасета с оценками.
+    2. **Requires prior configuration.**  
+    - If a critic model is used, it must be pre-trained on annotated data.  
+    - If annotations are manual, a dataset with human ratings must be prepared.
 
-- $\bar{R}_G = \frac{1}{N} \sum_{j=1}^N R_j$ — средняя награда по группе $G$.
+- $\bar{R}_G = \frac{1}{N} \sum_{j=1}^N R_j$ — the average reward across group $G$.
 
-> По сути, Advantage-функция в GRPO для каждого конкретного ответа рассчитывается как награда конкретного ответа  минус  среднее арифметическое наград всех ответов в группе.
+> In essence, the advantage function in GRPO for each specific response is calculated as: the response’s reward minus the arithmetic mean of all rewards in the group.
 
-Группа $G$ в контексте GRPO представляет собой **горизонтально различные вариативные ответы на один и тот же промпт $P$**, а не последовательные шаги в траектории.  
+The group $G$ in GRPO context represents **horizontally diverse variant responses to the same prompt $P$**, not sequential steps along a trajectory.  
 
-**Пояснение:**  
-1. **Горизонтальная вариативность:** для каждого промпта $P$ политика $\pi$ генерирует $N$ **альтернативных ответов** ($O_1, O_2, \dots, O_N$), которые являются независимыми вариантами, а не частями одной цепочки (траектории). Это похоже на сэмплирование нескольких возможных ответов на один вопрос.  
+**Explanation:**  
+1. **Horizontal Variability:** For each prompt $P$, policy $\pi$ generates $N$ **alternative responses** ($O_1, O_2, \dots, O_N$), which are independent variants—not parts of a single chain (trajectory). This resembles sampling multiple possible answers to a single question.  
 
-2. **Сравнение внутри группы:** advantage-функция $A_i$ вычисляет, насколько конкретный ответ $O_i$ лучше или хуже **среднего по группе** ($\bar{R}_G$). Это требует, чтобы все ответы в $G$ были параллельными вариантами, иначе среднее значение теряет смысл как относительный базис.  
+2. **Intra-group Comparison:** The advantage function $A_i$ measures how much a specific response $O_i$ is better or worse than the **group average** ($\bar{R}_G$). This requires all responses in $G$ to be parallel alternatives; otherwise, the mean loses its meaning as a relative baseline.  
 
-3. **Устранение value-сети:** GRPO заменяет оценку "абсолютной" полезности (через value-сеть) на **относительное сравнение внутри группы**. Для этого группа должна содержать разнообразные ответы на один промпт, чтобы средняя награда $\bar{R}_G$ отражала общее качество группы.  
+3. **Elimination of Value Network:** GRPO replaces the assessment of “absolute” utility (via a value network) with **relative comparison within a group**. For this, the group must contain diverse responses to the same prompt so that the average reward $\bar{R}_G$ reflects the group’s overall quality.  
 
-**Ключевые особенности GRPO подхода:**
+**Key Features of the GRPO Approach:**
 
-*   **Групповая относительная нормализация:** advantage-функция вычисляется относительно группы ответов, сгенерированных для одного и того же промпта, что обеспечивает относительную оценку качества;
-*   **Устранение value-сети:**  средняя награда по группе $\bar{R}_G$ служит в качестве baseline, заменяя необходимость в отдельной value-сети для оценки ценности состояний или действий;
-*   **Обучение на основе сравнения:**  GRPO фокусируется на обучении политики, которая генерирует ответы, превосходящие в среднем другие ответы в группе, что делает его эффективным в задачах, где важна относительная оценка качества;
-* **KL-дивергенция: Жесткая интеграция в loss-функцию через относительные веса**: KL-дивергенция вводится в функцию потерь для регуляризации, ограничивая величину изменения политики на каждом шаге обучения и предотвращая её резкие колебания, что способствует стабильности обучения.
+*   **Group-wise Relative Normalization:** The advantage function is computed relative to a group of responses generated for the same prompt, ensuring relative quality assessment;  
+*   **Elimination of Value Network:** The group’s average reward $\bar{R}_G$ serves as the baseline, replacing the need for a separate value network to estimate state or action values;  
+*   **Learning via Comparison:** GRPO focuses on training a policy that generates responses superior to the average within the group, making it effective in tasks where relative quality assessment matters;  
+*   **KL Divergence: Strict Integration into Loss Function via Relative Weights**: KL divergence is incorporated into the loss function to regularize, limiting the magnitude of policy changes at each training step and preventing abrupt oscillations, thus enhancing training stability.
 
-**Ограничения и замечания:**
+**Limitations and Notes:**
 
-*   Эффективность GRPO подхода зависит от качества функции награды $R(O)$.  Необходимо корректно определить функцию награды, чтобы она адекватно отражала желаемые свойства ответов.
-*   Размер группы $N$ является гиперпараметром, который может влиять на стабильность и эффективность обучения.  Выбор оптимального значения $N$ может потребовать экспериментальной настройки.
-*   GRPO, как и другие методы обучения с подкреплением, может быть чувствителен к выбору гиперпараметров оптимизации и архитектуры модели.
-
----
-
-### **Практическая интерпретация для LLM**
-В GRPO advantage-функция становится **инструментом ранжирования вариантов ответа**:
-- Модель учится генерировать ответы, которые не просто "хороши", но **значительно лучше среднего в своей группе**.
-- Это стимулирует:
-  - Поиск неочевидных, но эффективных цепочек рассуждений.
-  - Избегание шаблонных ошибок, типичных для группы.
-
-**Эффект**: Модель фокусируется на **качественных различиях между ответами**, а не на абсолютных значениях наград, что критично для сложных задач с неоднозначными критериями успеха.
-
-**Контекст проблемы**:
-- В задачах рассуждения LLM часто генерируют множественные "рассуждения-цепочки" (chain-of-thought), но стандартные алгоритмы RL слабо адаптированы для их оценки.
-- **Value-сети в PPO требуют значительных ресурсов для обучения и склонны к ошибкам в многомодальных распределениях наград**.
+*   The effectiveness of the GRPO approach depends on the quality of the reward function $R(O)$. The reward function must be properly designed to accurately reflect desired response properties.  
+*   Group size $N$ is a hyperparameter that may influence training stability and efficiency. Optimal $N$ may require experimental tuning.  
+*   Like other reinforcement learning methods, GRPO may be sensitive to optimizer hyperparameters and model architecture choices.
 
 ---
 
-### **Основные отличия GRPO от PPO**
+### **Practical Interpretation for LLMs**
 
-| **Характеристика**                   | **PPO**                               | **GRPO**                                                                 |
+In GRPO, the advantage function becomes a **ranking tool for response variants**:  
+- The model learns to generate responses that are not merely “good,” but **significantly better than the group average**.  
+- This encourages:  
+  - Discovery of non-obvious but effective reasoning chains.  
+  - Avoidance of template-based errors common within the group.
+
+**Effect**: The model focuses on **qualitative differences between responses**, not absolute reward values—critical for complex tasks with ambiguous success criteria.
+
+**Problem Context**:  
+- In reasoning tasks, LLMs often generate multiple “chain-of-thought” reasoning paths, but standard RL algorithms are poorly adapted to evaluate them.  
+- **Value networks in PPO demand significant training resources and are prone to errors under multimodal reward distributions**.
+
+---
+
+### **Key Differences Between GRPO and PPO**
+
+| **Characteristic**                   | **PPO**                               | **GRPO**                                                                 |
 |-------------------------------------|---------------------------------------|---------------------------------------------------------------------------|
-| Наличие value-сети                   | Требуется                             | Исключена                                                                |
-| Оценка преимущества                  | На основе value-сети                  | **Групповая относительная нормализация внутри траекторий**               |
-| KL-дивергенция                       | Опциональная регуляризация            | **Жесткая интеграция в loss-функцию через относительные веса**           |
-| Использование памяти                 | Высокое (2 модели)                    | **Снижено на 40-60% за счет удаления value-сети**                         |
-| Сходимость                           | Зависит от точности value-сети        | **Стабильнее благодаря групповой стабилизации градиентов**               |
+| Presence of Value Network           | Required                              | Eliminated                                                                |
+| Advantage Estimation                | Based on Value Network                | **Group-wise Relative Normalization within Trajectories**                 |
+| KL Divergence                       | Optional Regularization               | **Strict Integration into Loss Function via Relative Weights**           |
+| Memory Usage                        | High (2 models)                       | **Reduced by 40–60% due to removal of Value Network**                     |
+| Convergence                         | Depends on Value Network Accuracy     | **More stable due to group-wise gradient stabilization**                  |
 
 ---
 
-### **Математическая формализация**
+### **Mathematical Formulation**
 
-**Функция целевой оптимизации в GRPO**:
+**GRPO Objective Function**:
 
 $$
 J_{\text{GRPO}}(\theta) = \mathbb{E}_{(q,a)\sim\mathcal{D},\{o_i\}_{i=1}^G\sim\pi_{\theta_{\text{old}}}(\cdot|q)} \left[\frac{1}{G}\sum_{i=1}^{G}\frac{1}{|o_i|}\sum_{t=1}^{|o_i|}\left(\min\left(r_{i,t}(\theta)\hat{A}_{i,t},\text{ clip}\left(r_{i,t}(\theta),1-\varepsilon,1+\varepsilon\right)\hat{A}_{i,t}\right)-\beta D_{\text{KL}}(\pi_\theta||\pi_{\text{ref}})\right)\right],
 $$
 
-где:
-- **$\theta$** — параметры **текущей политики** (нейронной сети), которые оптимизируются в процессе обучения.
-- **$q$** — **запрос** (query), поступающий на вход языковой модели.
-- **$a$** — **ответ** (answer), сгенерированный моделью на запрос $q$.
-- **$\mathcal{D}$** — набор данных пар "запрос-ответ", используемый для обучения модели.
-- **$o_i$** — $i$-й **выход** (output), сгенерированный моделью $\pi_{\theta_{\text{old}}}$ для запроса $q$.
-- **$G$** — количество сгенерированных выходов для каждого запроса.
-- **$|o_i|$** — длина $i$-го выхода (количество токенов).
-- **$r_{i,t}(\theta)$** — отношение вероятностей между текущей и старой политиками для $t$-го токена в $i$-м выходе:
+where:
+- **$\theta$** — parameters of the **current policy** (neural network) optimized during training.
+- **$q$** — the **query**, input to the language model.
+- **$a$** — the **answer**, generated by the model for query $q$.
+- **$\mathcal{D}$** — dataset of question-answer pairs used to train the model.
+- **$o_i$** — the $i$-th **output** generated by model $\pi_{\theta_{\text{old}}}$ for query $q$.
+- **$G$** — number of outputs generated per query.
+- **$|o_i|$** — length of the $i$-th output (number of tokens).
+- **$r_{i,t}(\theta)$** — ratio of probabilities between current and old policies for the $t$-th token in the $i$-th output:
   $$r_{i,t}(\theta) = \frac{\pi_\theta(o_{i,t}|q, o_{i,<t})}{\pi_{\theta_{\text{old}}}(o_{i,t}|q, o_{i,<t})}$$
-- **$\hat{A}_{i,t}$** — оценка **преимущества** (advantage) для $t$-го токена в $i$-м выходе, вычисляемая как разница между ожидаемой наградой при выборе данного токена и средней наградой в текущем контексте.
-- **$\text{clip}(r_{i,t}(\theta),1-\varepsilon,1+\varepsilon)$** — функция ограничения отношения вероятностей в диапазоне $[1-\varepsilon, 1+\varepsilon]$ для предотвращения слишком больших изменений политики за один шаг обучения.
-- **$\varepsilon$** — гиперпараметр, определяющий допустимый диапазон изменения отношения вероятностей (обычно 0.1-0.2).
-- **$D_{\text{KL}}(\pi_\theta||\pi_{\text{ref}})$** — KL-дивергенция между распределениями действий текущей политики $\pi_\theta$ и референсной политики $\pi_{\text{ref}}$, используемая для регуляризации:  
+- **$\hat{A}_{i,t}$** — **advantage** estimate for the $t$-th token in the $i$-th output, computed as the difference between the expected reward for selecting this token and the average reward in the current context.
+- **$\text{clip}(r_{i,t}(\theta),1-\varepsilon,1+\varepsilon)$** — clipping function constraining the probability ratio within range $[1-\varepsilon, 1+\varepsilon]$ to prevent excessively large policy updates per training step.
+- **$\varepsilon$** — hyperparameter defining the allowable range of probability ratio change (typically 0.1–0.2).
+- **$D_{\text{KL}}(\pi_\theta||\pi_{\text{ref}})$** — KL divergence between the action distributions of the current policy $\pi_\theta$ and the reference policy $\pi_{\text{ref}}$, used for regularization:  
   $$D_{KL}(\pi_\theta||\pi_{\text{ref}}) = \mathbb{E}_{o \sim \pi_\theta} \left[ \log \frac{\pi_\theta(o|q)}{\pi_{\text{ref}}(o|q)} \right].$$
-- **$\pi_{\text{ref}}$** — референсная политика, обычно предварительно обученная модель, к которой стремятся сохранить близость в процессе дообучения.
-- **$\beta$** — гиперпараметр, регулирующий силу KL-регуляризации (**типичные значения: 0.05–0.2**).
+- **$\pi_{\text{ref}}$** — reference policy, typically a pretrained model to which the policy is encouraged to remain close during fine-tuning.
+- **$\beta$** — hyperparameter controlling the strength of KL regularization (**typical values: 0.05–0.2**).
 
-Основные особенности данной формулы GRPO:
-1. Оптимизация проводится по нескольким сгенерированным выходам ($G$ шт.) для каждого запроса
-2. Учитывается поэлементный вклад каждого токена в последовательности выхода
-3. Применяется техника клиппирования для стабилизации обучения
-4. Используется KL-регуляризация для сохранения близости к референсной модели
-5. Формула специально адаптирована для обучения генеративных языковых моделей
-
----
-
-### **Пояснения**
-1. **Off-policy обучение**: Градиенты вычисляются на данных, собранных старой политикой ($\pi_{\text{old}}$), но оптимизируется новая политика ($\pi_\theta$).  
-2. **Importance weighting** $\frac{\pi_\theta}{\pi_{\text{old}}}$ корректирует градиенты с учетом различий между политиками, предотвращая смещение оценок.  
-3. **KL-дивергенция** ограничивает скорость изменения политики, обеспечивая устойчивость обучения.  
-4. **Преимущество $A(s,a)$** направляет обновление в сторону действий с большей ожидаемой наградой. Если $A(s,a) > 0$, действие $a$ в состоянии $s$ считается лучше среднего.
-
-**Оптимизация**:
-- Градиенты обновляются только для токенов, критически влияющих на награду (**например, ключевых шагов в математическом выводе**).  
-  - *Формально*, это можно представить как применение маски $( M )$ к градиентам, где $( M_i = 1 )$ для «критических» токенов и $( M_i = 0 )$ для остальных. Таким образом, обновляются только параметры, связанные с «критическими» токенами, что повышает эффективность обучения, фокусируясь на наиболее значимых частях рассуждения.
-- **Сэмплирование ответов**: Для каждого промпта параллельно генерируются 4–8 вариантов, что улучшает покрытие пространства решений.
+Key features of this GRPO formulation:
+1. Optimization is performed across multiple generated outputs ($G$) per query.
+2. Individual token contributions within output sequences are accounted for.
+3. Clipping technique is applied to stabilize training.
+4. KL regularization is employed to maintain proximity to the reference model.
+5. The formulation is specifically adapted for training generative language models.
 
 ---
 
-### **Немного цифр**
-1. **Эффективность**:
-   - Удаление value-сети сокращает объем памяти на **18.2 GB для модели с 33B параметров** (эксперименты DeepSeek-R1).
-   - Время обучения сокращается на **35%** при решении задач уровня MATH dataset.
+### **Explanations**
 
-2. **Стабильность**:
-   - Групповая нормализация уменьшает дисперсию градиентов (**на 60% по сравнению с PPO**).
-   - KL-регуляризация предотвращает "распад политики" — типичную проблему PPO.
+1. **Off-policy learning**: Gradients are computed on data collected by the old policy ($\pi_{\text{old}}$), while optimizing the new policy ($\pi_\theta$).  
+2. **Importance weighting** $\frac{\pi_\theta}{\pi_{\text{old}}}$ adjusts gradients to account for policy differences, preventing estimation bias.  
+3. **KL divergence** constrains the rate of policy change, ensuring training stability.  
+4. **Advantage $A(s,a)$** guides updates toward actions with higher expected reward. If $A(s,a) > 0$, action $a$ in state $s$ is considered better than average.
 
-3. **Результативность**:
-   - На бенчмарке MATH GRPO повысил точность модели DeepSeek-Math-7B с **51.2% до 58.7%**.
-   - В логических задачах (например, FOLIO) улучшение составило **12.3%**.
+**Optimization**:  
+- Gradients are updated only for tokens critically influencing reward (**e.g., key steps in mathematical derivation**).  
+  - *Formally*, this can be represented by applying a mask $( M )$ to gradients, where $( M_i = 1 )$ for "critical" tokens and $( M_i = 0 )$ for others. Thus, only parameters associated with "critical" tokens are updated, improving training efficiency by focusing on the most significant reasoning components.  
+- **Response sampling**: For each prompt, 4–8 variants are generated in parallel, enhancing solution space coverage.
 
 ---
 
-### **Практическая реализация GRPO**
+### **A Few Numbers**
 
-**Шаги внедрения**:
-1. **Супервизионное дообучение (SFT)**:
-   - Используются данные формата:  
+1. **Efficiency**:  
+   - Removal of the value network reduces memory usage by **18.2 GB for a 33B-parameter model** (DeepSeek-R1 experiments).  
+   - Training time is reduced by **35%** on MATH dataset tasks.
+
+2. **Stability**:  
+   - Group normalization reduces gradient variance (**by 60% compared to PPO**).  
+   - KL regularization prevents "policy collapse"—a common PPO issue.
+
+3. **Performance**:  
+   - On the MATH benchmark, GRPO improved DeepSeek-Math-7B accuracy from **51.2% to 58.7%**.  
+   - In logical reasoning tasks (e.g., FOLIO), improvement reached **12.3%**.
+
+---
+
+### **Practical Implementation of GRPO**
+
+**Implementation Steps**:  
+1. **Supervised Fine-Tuning (SFT)**:  
+   - Use data in format:  
      ```json
-     {"prompt": "Решите уравнение ∫₀¹ x² dx", "response": "∫₀¹ x² dx = [x³/3]₀¹ = 1/3"}
+     {"prompt": "Solve ∫₀¹ x² dx", "response": "∫₀¹ x² dx = [x³/3]₀¹ = 1/3"}
      ```
-   - **Ключевой аспект**: очистка данных от ошибок через self-consistency проверку.
+   - **Key aspect**: Clean data via self-consistency checks.
 
-2. **Моделирование награды**:
-   - Для математических задач (пример):  
+2. **Reward Modeling**:  
+   - For math tasks (example):  
      
     $$
      [
@@ -508,119 +498,121 @@ $$
      ]
     $$
 
-   - Разработка эффективной функции награды является ключевым аспектом GRPO. В общем случае, она должна быть спроектирована так, чтобы поощрять желаемые свойства рассуждений — корректность, логическую последовательность, краткость и эффективность решения. Веса коэффициентов (например, 1, 0.5, -0.3 в примере) могут быть настроены эмпирически для достижения оптимального баланса между этими свойствами.
+   - Designing an effective reward function is critical to GRPO. Generally, it should encourage desired reasoning properties: correctness, logical coherence, conciseness, and solution efficiency. Weight coefficients (e.g., 1, 0.5, -0.3 in the example) can be empirically tuned to achieve optimal balance among these properties.
 
-3. **Обучение с GRPO**:
-   - **Гиперпараметры**:
-     - Batch size: 512 промптов (по 4 ответа на промпт → 2048 примеров/шаг).
-     - Learning rate: 1e-6 с линейным затуханием.
-   - **Трюк**: Заморозка первых 10% слоев модели для сохранения общих знаний.
-
----
-
-### **Кейсы применения**
-1. **DeepSeek-Math-33B**:
-   - Решение задач Международной математической олимпиады (IMO) с точностью **44.5%**.
-   - **Особенность**: Использование GRPO + деревоискока (MCTS) для генерации шагов.
-
-2. **Логический планировщик AlphaLogic**:
-   - Автоматическое доказательство теорем в Coq с успешностью **68%** (против 52% у PPO).
+3. **GRPO Training**:  
+   - **Hyperparameters**:  
+     - Batch size: 512 prompts (4 responses per prompt → 2048 examples per step).  
+     - Learning rate: 1e-6 with linear decay.  
+   - **Trick**: Freeze the first 10% of model layers to preserve general knowledge.
 
 ---
 
-### **Заключение**
-GRPO представляет собой значительный шаг вперёд в области обучения с подкреплением для LLM, особенно в задачах, требующих сложного рассуждения. **Его применение уже выходит за рамки математики — текущие исследования тестируют GRPO в юридическом анализе и генерации научных гипотез.** Несмотря на ограничения, алгоритм демонстрирует потенциал для создания "мыслящих" ИИ-систем, способных к глубокому абстрактному мышлению.
+### **Use Cases**
 
-### **2.3 Устранение расхождения KL**
+1. **DeepSeek-Math-33B**:  
+   - Solved International Mathematical Olympiad (IMO) problems with **44.5% accuracy**.  
+   - **Feature**: Combined GRPO with Monte Carlo Tree Search (MCTS) for step generation.
 
-**Устранение расхождения KL в алгоритме DAPO для обучения моделей с длинными цепочками рассуждений**  
+2. **Logical Planner AlphaLogic**:  
+   - Automated theorem proving in Coq with **68% success rate** (vs. 52% for PPO).
 
-В сценарии RLHF (обучение с подкреплением и обратной связью с человеком) штрафной член, основанный на расхождении Кульбака-Лейблера (KL), традиционно используется для регулирования отклонений между обновляемой онлайн-политикой и замороженной эталонной политикой. Его основная цель — обеспечить, чтобы в процессе обучения модель корректировала свое поведение, не отдаляясь слишком сильно от исходного распределения данных, что особенно важно для сохранения предсказуемости и стабильности.  
+---
 
-Однако при обучении моделей, генерирующих длинные цепочки рассуждений (Chain-of-Thought, CoT), это ограничение теряет свою актуальность. В таких задачах распределение модели в процессе обучения может закономерно и значительно отклоняться от исходного из-за сложности и многошаговости выводов. Жесткое регулирование через KL-дивергенцию в данном случае становится избыточным, так как искусственно ограничивает способность модели к исследованию альтернативных стратегий генерации, необходимых для эффективного решения многоэтапных задач.  
+### **Conclusion**
 
-Алгоритм DAPO (Decoupled Adaptive Policy Optimization) предлагает устранить KL-штраф, чтобы смягчить это ограничение. Отказ от термина расхождения KL позволяет модели свободно адаптироваться в процессе обучения, не будучи привязанной к изначальному распределению эталонной политики. Это особенно важно для сценариев, где успешное выполнение задачи требует выхода за рамки шаблонных решений, например, при генерации сложных логических заключений или творческих текстов. Таким образом, DAPO фокусируется на балансе между исследованием новых стратегий и эффективной оптимизацией политики, что повышает гибкость модели в контексте длинных выводов без ущерба для качества генерации.  
+GRPO represents a significant advancement in reinforcement learning for LLMs, particularly in tasks requiring complex reasoning. **Its application is already extending beyond mathematics—current research is testing GRPO in legal analysis and scientific hypothesis generation.** Despite limitations, the algorithm demonstrates strong potential for creating "thinking" AI systems capable of deep abstract reasoning.
 
-Данный подход подчеркивает, что в определенных сценариях RLHF строго контроля за отклонением от исходной политики можно избежать, чтобы раскрыть полный потенциал адаптивности модели в условиях сложных и неоднозначных задач.
+### **2.3 Elimination of KL Divergence**
+
+**Elimination of KL Divergence in DAPO for Training Models with Long Reasoning Chains**
+
+In RLHF (Reinforcement Learning with Human Feedback) scenarios, a KL divergence-based penalty term is traditionally used to regulate deviations between the updating online policy and the frozen reference policy. Its primary purpose is to ensure that during training, the model adjusts its behavior without straying too far from the original data distribution, which is critical for preserving predictability and stability.
+
+However, when training models that generate long reasoning chains (Chain-of-Thought, CoT), this constraint loses relevance. In such tasks, the model’s distribution naturally and significantly diverges from the original due to the complexity and multi-step nature of reasoning. Strict regulation via KL divergence becomes redundant, as it artificially limits the model’s ability to explore alternative generation strategies essential for effectively solving multi-stage problems.
+
+The DAPO (Decoupled Adaptive Policy Optimization) algorithm proposes eliminating the KL penalty to mitigate this limitation. Removing the KL divergence term allows the model to adapt freely during training without being anchored to the initial reference policy distribution. This is especially crucial in scenarios where successful task completion requires moving beyond template solutions—for instance, when generating complex logical conclusions or creative texts. Thus, DAPO focuses on balancing exploration of new strategies with efficient policy optimization, enhancing model flexibility in long-form reasoning without compromising generation quality.
+
+This approach underscores that in certain RLHF scenarios, strict control over deviation from the initial policy can be avoided to fully unlock the model’s adaptive potential in complex and ambiguous tasks.
 
 <div style="border: 2px solid #3498db; border-radius: 8px; padding: 12px; background-color: #f8f9fa; margin: 10px 0;">
   <p style="margin: 0; font-weight: bold; color: #2c3e50;">First Checkpoint:</p>
-  <p style="margin: 8px 0 0 0; color: #2c3e50;">DAPO устраняет штрафы за расхождение KL в RLHF для задач в стиле long-CoT, что позволяет повысить гибкость политики и улучшить возможности рассуждений.</p>
+  <p style="margin: 8px 0 0 0; color: #2c3e50;">DAPO eliminates KL divergence penalties in RLHF for long-CoT tasks, enabling greater policy flexibility and enhanced reasoning capabilities.</p>
 </div>
 
 <details> 
-    <summary><em><strong>Объяснение KL-дивергенции:</strong></em></summary>
+    <summary><em><strong>Explanation of KL Divergence:</strong></em></summary>
 
-#### **Объяснение KL-дивергенции**
+#### **Explanation of KL Divergence**
 
-В сценарии RLHF (обучение с подкреплением с обратной связью от человека) ключевым элементом является использование штрафного члена, основанного на расхождении Кульбака-Лейблера (KL), для регуляризации процесса обучения. Этот штрафной член играет важную роль в управлении отклонениями между обновляемой онлайн-политикой $\pi_{\theta}$ и замороженной эталонной политикой $\pi_{ref}$.  Основная цель KL-регуляризации — обеспечить, чтобы в процессе обучения модель корректировала свое поведение, не отдаляясь слишком сильно от исходного распределения данных, представленного эталонной политикой. Это особенно важно для сохранения предсказуемости, стабильности обучения и предотвращения катастрофического забывания ранее изученных полезных стратегий.
+In RLHF (Reinforcement Learning with Human Feedback), a key element is the use of a KL divergence-based penalty term to regularize the training process. This penalty plays a crucial role in managing deviations between the updating online policy $\pi_{\theta}$ and the frozen reference policy $\pi_{ref}$. The main goal of KL regularization is to ensure that during training, the model adjusts its behavior without deviating too far from the original data distribution represented by the reference policy. This is particularly important for preserving predictability, training stability, and preventing catastrophic forgetting of previously learned useful strategies.
 
-Математически, расхождение Кульбака-Лейблера (KL-дивергенция), обозначаемое как $D_{KL}(P||Q)$, измеряет "расстояние" между двумя распределениями вероятностей $P$ и $Q$. В контексте RLHF, где мы хотим ограничить изменения в политике, KL-дивергенция используется для измерения различия между новой политикой $\pi_{\theta}$ и эталонной политикой $\pi_{ref}$.
+Mathematically, the Kullback-Leibler (KL) divergence, denoted as $D_{KL}(P||Q)$, measures the "distance" between two probability distributions $P$ and $Q$. In RLHF, KL divergence is used to quantify the difference between the new policy $\pi_{\theta}$ and the reference policy $\pi_{ref}$.
 
-Формула для KL-дивергенции между двумя дискретными распределениями $P(x)$ и $Q(x)$ выглядит следующим образом:
+The formula for KL divergence between two discrete distributions $P(x)$ and $Q(x)$ is:
 
 $$D_{KL}(P||Q) = \sum_{x} P(x) \log \left( \frac{P(x)}{Q(x)} \right)$$
 
-Для непрерывных распределений формула аналогична, но вместо суммы используется интеграл:
+For continuous distributions, the formula is analogous but uses an integral instead of a sum:
 
 $$D_{KL}(P||Q) = \int_{-\infty}^{\infty} p(x) \log \left( \frac{p(x)}{q(x)} \right) dx$$
 
-где $p(x)$ и $q(x)$ - функции плотности вероятности для распределений $P$ и $Q$ соответственно.
+where $p(x)$ and $q(x)$ are the probability density functions for distributions $P$ and $Q$, respectively.
 
-**Глубокое пояснение Кульбака-Лейблера (KL) дивергенции:**
+**Deep Explanation of Kullback-Leibler (KL) Divergence**:
 
-1.  **Интуитивное понимание:** KL-дивергенцию можно интерпретировать как меру "информационных потерь", возникающих при использовании распределения $Q$ для аппроксимации истинного распределения $P$.
+1.  **Intuitive Understanding**: KL divergence can be interpreted as a measure of "information loss" incurred when using distribution $Q$ to approximate the true distribution $P$.
 
-2.  **Компоненты формулы:**
-    *   **$P(x)$ (или $p(x)$):** это распределение, которое мы считаем "истинным" или "целевым". В RLHF, в контексте штрафного члена, это часто распределение, порождаемое эталонной политикой $\pi_{ref}$.
-    *   **$Q(x)$ (или $q(x)$):** это распределение, которое мы используем для аппроксимации $P(x)$. В RLHF это распределение, порождаемое текущей обучаемой политикой $\pi_{\theta}$.
-    *   **$\frac{P(x)}{Q(x)}$:** это отношение вероятностей. Если $P(x)$ значительно больше $Q(x)$, то это отношение будет большим, и логарифм этого отношения также будет большим положительным числом. Это означает, что использование $Q$ вместо $P$ в точке $x$ приводит к большой "информационной потере".
-    *   **$\log \left( \frac{P(x)}{Q(x)} \right)$:** логарифм делает меру аддитивной и преобразует отношение вероятностей в более удобную шкалу. Обычно используется натуральный логарифм (основание $e$), но также может использоваться логарифм по основанию 2 (в контексте теории информации, где единицей измерения является бит).
-    *   **$P(x) \log \left( \frac{P(x)}{Q(x)} \right)$:** каждое значение логарифмического отношения взвешивается вероятностью $P(x)$. Это означает, что точки $x$, которые имеют высокую вероятность в распределении $P$, вносят больший вклад в общую KL-дивергенцию.
-    *   **$\sum_{x}$ (или $\int_{-\infty}^{\infty}$):** суммирование (или интегрирование) по всем возможным значениям $x$ дает общую KL-дивергенцию между распределениями $P$ и $Q$.
+2.  **Components of the Formula**:
+    *   **$P(x)$ (or $p(x)$)**: This is the distribution we consider "true" or "target." In RLHF, in the context of the penalty term, this is often the distribution produced by the reference policy $\pi_{ref}$.
+    *   **$Q(x)$ (or $q(x)$)**: This is the distribution we use to approximate $P(x)$. In RLHF, this is the distribution produced by the current trainable policy $\pi_{\theta}$.
+    *   **$\frac{P(x)}{Q(x)}$**: This is the probability ratio. If $P(x)$ is significantly larger than $Q(x)$, this ratio becomes large, and its logarithm becomes a large positive number. This indicates that using $Q$ instead of $P$ at point $x$ results in substantial "information loss."
+    *   **$\log \left( \frac{P(x)}{Q(x)} \right)$**: The logarithm makes the measure additive and transforms the probability ratio into a more convenient scale. Typically, the natural logarithm (base $e$) is used, but base-2 logarithms (in information theory, where the unit is the bit) may also be used.
+    *   **$P(x) \log \left( \frac{P(x)}{Q(x)} \right)$**: Each logarithmic ratio is weighted by the probability $P(x)$. This means that points $x$ with high probability under distribution $P$ contribute more to the overall KL divergence.
+    *   **$\sum_{x}$ (or $\int_{-\infty}^{\infty}$)**: Summing (or integrating) over all possible values of $x$ yields the total KL divergence between distributions $P$ and $Q$.
 
-3.  **Свойства KL-дивергенции:**
-    *   **Неотрицательность:** $D_{KL}(P||Q) \ge 0$. KL-дивергенция всегда неотрицательна. Она равна нулю тогда и только тогда, когда $P = Q$ почти всюду;
-    *   **Несимметричность:**  $D_{KL}(P||Q) \neq D_{KL}(Q||P)$ в общем случае. Это означает, что "расстояние" от $P$ до $Q$ не равно "расстоянию" от $Q$ до $P$. Важно понимать, какое распределение является "целевым" ($P$) и какое является "аппроксимирующим" ($Q$). В формуле $D_{KL}(P||Q)$, мы измеряем, насколько $Q$ отличается от $P$.
+3.  **Properties of KL Divergence**:
+    *   **Non-negativity**: $D_{KL}(P||Q) \ge 0$. KL divergence is always non-negative. It equals zero if and only if $P = Q$ almost everywhere;
+    *   **Asymmetry**:  $D_{KL}(P||Q) \neq D_{KL}(Q||P)$ in general. This means the "distance" from $P$ to $Q$ is not the same as the "distance" from $Q$ to $P$. It is critical to understand which distribution is the "target" ($P$) and which is the "approximation" ($Q$). In $D_{KL}(P||Q)$, we measure how much $Q$ deviates from $P$.
 
-4.  **KL-дивергенция в RLHF:**
-    *   **Регуляризация политики:** в RLHF, KL-дивергенция используется как штрафной член в целевой функции обучения с подкреплением. Цель состоит в том, чтобы обучить политику $\pi_{\theta}$, которая максимизирует награду, но при этом не слишком сильно отклоняется от эталонной политики $\pi_{ref}$.
-    *   **Стабилизация обучения:** ограничение изменений политики с помощью KL-дивергенции помогает стабилизировать процесс обучения. Без этого ограничения, политика может резко меняться от итерации к итерации, что может привести к нестабильности и ухудшению производительности.
-    *   **Предотвращение "policy drift":**  эталонная политика $\pi_{ref}$ часто представляет собой политику, обученную на начальном этапе или политику, которая демонстрирует желаемое поведение.  KL-регуляризация помогает предотвратить "дрейф" политики $\pi_{\theta}$ слишком далеко от $\pi_{ref}$, сохраняя таким образом важные характеристики исходной политики.
-    *   **Баланс между исследованием и использованием:**  KL-штраф позволяет модели исследовать новые стратегии, но при этом удерживает ее в разумных пределах, не позволяя ей полностью забыть или игнорировать ранее изученное поведение, представленное эталонной политикой.
+4.  **KL Divergence in RLHF**:
+    *   **Policy Regularization**: In RLHF, KL divergence is added as a penalty term in the RL objective function. The goal is to train policy $\pi_{\theta}$ to maximize reward while not deviating too far from the reference policy $\pi_{ref}$.
+    *   **Training Stabilization**: Constraining policy changes via KL divergence helps stabilize training. Without this constraint, the policy may change drastically from iteration to iteration, leading to instability and degraded performance.
+    *   **Preventing "Policy Drift"**: The reference policy $\pi_{ref}$ often represents a policy trained initially or one that exhibits desired behavior. KL regularization helps prevent $\pi_{\theta}$ from drifting too far from $\pi_{ref}$, preserving important characteristics of the original policy.
+    *   **Balance Between Exploration and Exploitation**: The KL penalty allows the model to explore new strategies while keeping it within reasonable bounds, preventing complete abandonment of previously learned behaviors encoded in the reference policy.
 
-5.  **Применение в целевой функции RLHF:**  в типичной целевой функции RLHF, оптимизируемой с помощью алгоритмов, таких как PPO (Proximal Policy Optimization), KL-дивергенция добавляется как штрафной член:
+5.  **Application in RLHF Objective Function**: In a typical RLHF objective function optimized by algorithms like PPO (Proximal Policy Optimization), KL divergence is added as a penalty term:
 
     $J(\theta) = \mathbb{E}_{s \sim d_{\pi_{\theta}}, a \sim \pi_{\theta}} \left[ r(s, a) - \beta D_{KL}(\pi_{\theta}(. | s) || \pi_{ref}(. | s)) \right]$
 
-    где:
-    *   $J(\theta)$ - целевая функция, которую мы максимизируем;
-    *   $r(s, a)$ - функция награды;
-    *   $\beta$ - коэффициент регуляризации, определяющий силу KL-штрафа. Чем больше $\beta$, тем сильнее штраф за отклонение от эталонной политики;
-    *   $D_{KL}(\pi_{\theta}(. | s) || \pi_{ref}(. | s))$ - KL-дивергенция между распределением действий текущей политики $\pi_{\theta}$ и эталонной политики $\pi_{ref}$ для состояния $s$.
+    where:
+    *   $J(\theta)$ — the objective function to be maximized;
+    *   $r(s, a)$ — the reward function;
+    *   $\beta$ — the regularization coefficient determining the strength of the KL penalty. Higher $\beta$ imposes stronger penalties for deviation from the reference policy;
+    *   $D_{KL}(\pi_{\theta}(. | s) || \pi_{ref}(. | s))$ — KL divergence between the action distributions of the current policy $\pi_{\theta}$ and the reference policy $\pi_{ref}$ for state $s$.
 
-В заключение, KL-дивергенция является мощным инструментом для регуляризации обучения в RLHF, обеспечивая баланс между оптимизацией награды и сохранением стабильности и предсказуемости поведения модели, путем контроля за отклонением новой политики от заданной эталонной политики.
+In conclusion, KL divergence is a powerful tool for regularizing RLHF training, ensuring a balance between reward optimization and maintaining model stability and predictability by controlling deviations of the new policy from a given reference policy.
 
 </details>
 
-### **2.4 Моделирование вознаграждения на основе правил**
+### **2.4 Rule-Based Reward Modeling**
 
-Традиционные модели вознаграждения часто сталкиваются с проблемой взлома вознаграждения (reward hacking), когда модель манипулирует сигналом вознаграждения для получения высоких оценок вместо того, чтобы действительно улучшить способности к рассуждению. DAPO напрямую использует в качестве вознаграждения окончательную точность проверяемой задачи, избегая при этом сложности модели вознаграждения. В частности, функция вознаграждения выглядит следующим образом:
+Traditional reward models often suffer from reward hacking, where the model manipulates the reward signal to obtain high scores without genuinely improving reasoning ability. DAPO directly uses the final correctness of verifiable tasks as the reward, bypassing the complexity of reward modeling. Specifically, the reward function is defined as:
 
-$$ R(\hat{y}, y) = \begin{cases} 1, & \text{если } \hat{y} \text{ эквивалентен } y \\ -1, & \text{иначе} \end{cases}, \quad (7) $$
+$$ R(\hat{y}, y) = \begin{cases} 1, & \text{if } \hat{y} \text{ is equivalent to } y \\ -1, & \text{otherwise} \end{cases}, \quad (7) $$
 
-Этот подход доказал свою эффективность в различных областях, включая автоматическое доказательство теорем, компьютерное программирование и математические соревнования.
+This approach has proven effective across domains including automated theorem proving, computer programming, and mathematical competitions.
 
-> ИМХО: в данном случае моделирование вознаграждения работает только для детерменированных задач, где ответ однозначен. Для задач с неопределенными ответами (например, ответ LLM на вопрос, где в качестве ответа используется эвристика, а не строгое доказательство) это не сработает.
+> IMHO: This reward modeling works only for deterministic tasks with unambiguous answers. For tasks with open-ended answers (e.g., LLM responses based on heuristics rather than strict proofs), this approach will not work.
 
 <div style="border: 2px solid #3498db; border-radius: 8px; padding: 12px; background-color: #f8f9fa; margin: 10px 0;">
   <p style="margin: 0; font-weight: bold; color: #2c3e50;">Second Checkpoint:</p>
-  <p style="margin: 8px 0 0 0; color: #2c3e50;">DAPO заменяет сложные модели вознаграждения на прямое использование итоговой точности задачи, что устраняет проблему взлома вознаграждения (reward hacking) и упрощает обучение.</p>
+  <p style="margin: 8px 0 0 0; color: #2c3e50;">DAPO replaces complex reward models with direct use of task final accuracy, eliminating reward hacking and simplifying training.</p>
 </div>
 
-## **3. Алгоритм DAPO**
+## **3. DAPO Algorithm**
 
-Исследователи предложили алгоритмы Decouple Clip и Dynamic Sampling Strategy Optimization (DAPO). DAPO делает выборку группы выходных данных ${o_i}_{i=1}^G$ для каждого вопроса $q$, связанного с ответом $a$, и оптимизирует политику через следующую целевую функцию:
+Researchers proposed the Decoupled Clip and Dynamic Sampling Strategy Optimization (DAPO) algorithm. DAPO samples a group of outputs ${o_i}_{i=1}^G$ for each question $q$ associated with answer $a$, and optimizes the policy through the following objective function:
 
 $$J_{DAPO}(\theta) = \mathbb{E}_{(q,a) \sim \mathcal{D}, \{o_i\}_{i=1}^G \sim \pi_{\theta,\text{old}}(·|q)}$$
 
@@ -628,296 +620,296 @@ $$\left[ \frac{1}{\sum_{i=1}^G |o_i|} \sum_{i=1}^G \sum_{t=1}^{|o_i|} \min\left(
 
 $$\text{s.t.}\ 0 < |\{o_i | \text{is\_equivalent}(a, o_i)\}| < G,$$
 
-где
+where
 
 $$r_{i,t}(\theta) = \frac{\pi_\theta(o_{i,t} | q, o_{i,<t})}{\pi_{\theta,\text{old}}(o_{i,t} | q, o_{i,<t})}, \quad \hat{A}_{i,t} = \frac{R_i - \text{mean}(\{R_i\}_{i=1}^G)}{\text{std}(\{R_i\}_{i=1}^G)}, \quad (9)$$
 
-Ниже попробуем разобрать ключевые технологии, связанные с DAPO.
+We now break down the key technologies underlying DAPO.
 
-## **📌 3.1 Clip-Higher: повышение лимита**
+## **📌 3.1 Clip-Higher: Raising the Limit**
 
-В алгоритмах обучения с подкреплением (RL), таких как Proximal Policy Optimization (PPO) и Generalized Proximal Policy Optimization (GRPO), часто наблюдается явление коллапса энтропии, когда энтропия политики быстро уменьшается по мере обучения. Это приводит к тому, что генерируемые ответы становятся практически идентичными, что свидетельствует об ограниченном исследовании пространства возможных действий и преждевременной детерминированности стратегии. В данной работе предлагается стратегия Clip-Higher — модификация стандартного механизма отсечения в PPO, направленная на решение этой проблемы путем улучшения возможностей исследования для токенов с низкой вероятностью.
+In reinforcement learning (RL) algorithms such as Proximal Policy Optimization (PPO) and Generalized Proximal Policy Optimization (GRPO), a common phenomenon is entropy collapse, where policy entropy rapidly decreases during training. This leads to generated responses becoming nearly identical, indicating limited exploration of the action space and premature policy determinism. This paper proposes the Clip-Higher strategy—a modification of the standard clipping mechanism in PPO—designed to address this issue by enhancing exploration capabilities for low-probability tokens.
 
 <details> 
-    <summary><em><strong>Энтропия Шеннона:</strong></em></summary>
+    <summary><em><strong>Shannon Entropy:</strong></em></summary>
 
-### Дополнение о концепции энтропии в алгоритмах обучения с подкреплением
+### Supplement: Concept of Entropy in Reinforcement Learning Algorithms
 
-В контексте представленного текста энтропия является фундаментальной метрикой, которая измеряет уровень неопределенности или случайности в политике агента. Математически энтропия политики π определяется как:
+In the context of this paper, entropy is a fundamental metric measuring the level of uncertainty or randomness in an agent’s policy. Mathematically, the entropy of policy $\pi$ is defined as:
 
 $$H(\pi(\cdot|s)) = -\sum_{a} \pi(a|s) \log \pi(a|s)$$
 
-где:
-- π(a|s) — вероятность выбора действия a в состоянии s согласно текущей политике;
-- Суммирование идет по всем возможным следующим токенам a из словаря, а π(a|s) для каждого из них вычисляется описанным выше способом с помощью языковой модели;
-- Таким образом, энтропия политики — это скалярное значение, которое суммирует характеристики вероятностного распределения π(a|s), но само по себе не является распределением.
+where:
+- $\pi(a|s)$ — probability of selecting action $a$ in state $s$ according to the current policy;
+- Summation runs over all possible next tokens $a$ from the vocabulary, with $\pi(a|s)$ computed via the language model as described above;
+- Thus, policy entropy is a scalar value summarizing the characteristics of the probability distribution $\pi(a|s)$, but is not itself a distribution.
 
-Представленная формула описывает энтропию Шеннона для распределения вероятностей действий, заданного политикой π в конкретном состоянии s. Она измеряет степень неопределенности или "случайности" в выборе действия агентом в этом состоянии. Чем выше энтропия, тем более непредсказуем выбор агента, тем больше он "исследует". Чем ниже энтропия, тем более предсказуем (детерминирован) выбор, тем больше агент "использует" известные хорошие действия.
+The presented formula describes Shannon entropy for the action probability distribution defined by policy $\pi$ in a specific state $s$. It measures the degree of uncertainty or "randomness" in the agent’s action selection in that state. Higher entropy means the agent’s choice is more unpredictable and explores more; lower entropy means the choice is more predictable (deterministic) and exploits known good actions.
 
-Формула вычисляет среднее количество информации, которое мы ожидаем получить, наблюдая за выбором действия агентом в состоянии s.
+The formula computes the expected amount of information we gain by observing the agent’s action selection in state $s$.
 
-### Роль энтропии в обучении с подкреплением
+### Role of Entropy in Reinforcement Learning
 
-Энтропия выполняет несколько критических функций в алгоритмах RL:
+Entropy serves several critical functions in RL algorithms:
 
-1. **Баланс между исследованием и использованием**: высокая энтропия означает более равномерное распределение вероятностей между различными действиями, что способствует исследованию (exploration) пространства действий. Низкая энтропия указывает на концентрацию вероятности на небольшом подмножестве действий, что соответствует использованию (exploitation) уже известных стратегий.
+1. **Exploration-Exploitation Balance**: High entropy implies a more uniform distribution of action probabilities, promoting exploration of the action space. Low entropy indicates concentration of probability on a small subset of actions, corresponding to exploitation of known strategies.
 
-2. **Предотвращение преждевременной сходимости**: сохранение достаточного уровня энтропии помогает избежать застревания в локальных оптимумах, позволяя агенту продолжать исследовать потенциально лучшие стратегии.
+2. **Prevention of Premature Convergence**: Maintaining sufficient entropy helps avoid getting stuck in local optima, allowing the agent to continue exploring potentially better strategies.
 
-3. **Разнообразие генерируемых ответов**: в контексте генеративных моделей, таких как языковые модели, обучаемые с помощью RL, высокая энтропия обеспечивает разнообразие в генерируемых ответах.
+3. **Diversity of Generated Responses**: In generative models such as language models trained with RL, high entropy ensures diversity in generated responses.
 
-### Проблема коллапса энтропии
+### Problem of Entropy Collapse
 
-Когда энтропия политики быстро снижается во время обучения (коллапс энтропии), это приводит к следующим негативным последствиям:
+When policy entropy rapidly declines during training (entropy collapse), it leads to the following negative consequences:
 
-1. **Детерминированность политики**: агент начинает выбирать одни и те же действия с очень высокой вероятностью, фактически превращая стохастическую политику в детерминированную.
+1. **Policy Determinism**: The agent begins selecting the same actions with very high probability, effectively turning a stochastic policy into a deterministic one.
 
-2. **Сокращение пространства исследования**: токены с изначально низкой вероятностью практически исключаются из рассмотрения, что ограничивает разнообразие генерируемых последовательностей.
+2. **Reduced Exploration Space**: Tokens with initially low probability are virtually excluded from consideration, limiting diversity of generated sequences.
 
-3. **Потеря способности к адаптации**: агент теряет способность адаптироваться к изменяющимся условиям, поскольку новые стратегии не получают достаточного представления в обучении.
+3. **Loss of Adaptability**: The agent loses the ability to adapt to changing conditions, as new strategies receive insufficient representation in training.
 
 </details>
 
-### Проблема коллапса энтропии
+### Problem of Entropy Collapse
 
-В ходе первоначальных экспериментов с использованием стандартных реализаций PPO и GRPO было обнаружено, что энтропия политики быстро снижается по мере обучения, что можно наблюдать на рисунке 2b. Выборочные ответы для некоторых групп часто оказываются практически идентичными, что указывает на ограниченное исследование пространства возможных действий и раннюю детерминированность стратегии, потенциально препятствующую процессу расширения.
+During initial experiments using standard implementations of PPO and GRPO, it was observed that policy entropy rapidly decreases during training, as shown in Figure 2b. Sampled outputs for certain groups often become nearly identical, indicating limited exploration of the action space and early policy determinism, potentially hindering expansion.
 
-В основе этой проблемы лежит механизм отсечения коэффициента важности выборки, введенный в алгоритме PPO-Clip для ограничения области доверия и повышения стабильности обучения с подкреплением. Хотя этот механизм обеспечивает стабильность обучения, он также может ограничивать исследование пространства политики, особенно для токенов с низкой вероятностью.
+The root cause lies in the clipping mechanism for the importance sampling ratio, introduced in PPO-Clip to constrain the trust region and improve RL training stability. While this mechanism ensures training stability, it can also restrict policy exploration, particularly for low-probability tokens.
 
-![Figure_3](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-13/assets/Figure_3.png)
+![Figure_3](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-13/assets/Figure_3.png  )
 
-### Асимметрия ограничения коэффициента важности
+### Asymmetry in Importance Ratio Clipping
 
-Стандартный механизм отсечения в PPO использует единый параметр ε (обычно установленный на 0.2) для ограничения изменения вероятностей как в большую, так и в меньшую сторону. Однако это создает асимметрию в возможностях изменения вероятностей для различных токенов.
+The standard clipping mechanism in PPO uses a single parameter ε (typically set to 0.2) to constrain probability changes equally in both directions. However, this creates asymmetry in the capacity for probability adjustment across different tokens.
 
-Рассмотрим пример с двумя действиями, имеющими вероятности $\pi_{\text{data}}(o_i | q) = 0,01$ и $0,9$ соответственно в исходном распределении. При стандартном ограничении коэффициента важности с ε = 0.2, максимально возможные обновленные вероятности составят $\pi(o_i | q) = 0,012$ и $1,08$ соответственно. Это означает, что для токенов с высокой исходной вероятностью (например, 0.9) существует меньше ограничений на рост их вероятности, тогда как для токенов с низкой исходной вероятностью (например, 0.01) возможности значительного увеличения вероятности сильно ограничены.
+Consider an example with two actions having initial probabilities $\pi_{\text{data}}(o_i | q) = 0.01$ and $0.9$ respectively. With standard clipping using ε = 0.2, the maximum possible updated probabilities become $\pi(o_i | q) = 0.012$ and $1.08$ respectively. This means that for tokens with high initial probability (e.g., 0.9), there is less constraint on their probability growth, while for tokens with low initial probability (e.g., 0.01), the potential for significant probability increase is severely limited.
 
-Эмпирические наблюдения также подтверждают, что максимальная вероятность обрезки токена обычно составляет $\pi(o_i | q) < 0,2$, как показано на рисунке 3а. Это подтверждает теоретический анализ, согласно которому верхний порог отсечения ограничивает рост вероятности токенов с низкой исходной вероятностью, тем самым потенциально ограничивая разнообразие системы.
+Empirical observations further confirm that the maximum clipped probability for a token typically remains below $\pi(o_i | q) < 0.2$, as shown in Figure 3a. This validates the theoretical analysis indicating that the upper clipping threshold restricts the growth of probabilities for low-probability tokens, potentially limiting system diversity.
 
-![Figure_4](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-13/assets/Figure_4.png)
+![Figure_4](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-13/assets/Figure_4.png  )
 
-### Стратегия Clip-Higher
+### Clip-Higher Strategy
 
-Для решения вышеописанной проблемы предлагается стратегия Clip-Higher, основанная на разделении нижнего и верхнего диапазонов отсечения на ε_low и ε_high соответственно. Математически это выражается следующей формулой:
+To address the above issue, the Clip-Higher strategy is proposed, which decouples the lower and upper clipping ranges into $\epsilon_{\text{low}}$ and $\epsilon_{\text{high}}$ respectively. Mathematically, this is expressed by the following formula:
 
-$$\left[ \frac{1}{\sum_{i=1}^G |o_i|} \sum_{i=1}^G \sum_{t=1}^{|o_i|} \min\left(r_{i,t}(\theta)\hat{A}{i,t}, \text{clip}\left(r{i,t}(\theta), 1 - \textcolor{red}{\epsilon_{\text{low}}}, 1 + \textcolor{red}{\epsilon_{\text{high}}}\right)\hat{A}_{i,t}\right) \right], \quad (10)$$
+$$\left[ \frac{1}{\sum_{i=1}^G |o_i|} \sum_{i=1}^G \sum_{t=1}^{|o_i|} \min\left(r_{i,t}(\theta)\hat{A}_{i,t}, \text{clip}\left(r_{i,t}(\theta), 1 - \textcolor{red}{\epsilon_{\text{low}}}, 1 + \textcolor{red}{\epsilon_{\text{high}}}\right)\hat{A}_{i,t}\right) \right], \quad (10)$$
 
-где $r_{i,t}(θ)$ представляет отношение вероятностей новой политики к базовой политике, а $Â_{i,t}$ — оценка преимущества.
+where $r_{i,t}(\theta)$ represents the ratio of the new policy's probability to the base policy's probability, and $\hat{A}_{i,t}$ is the advantage estimate.
 
-В отличие от стандартного подхода PPO, где ε_low = ε_high = 0.2, стратегия Clip-Higher использует различные значения для этих параметров: ε_low остается равным 0.2, а ε_high увеличивается до 0.28. Это увеличение верхнего порога отсечения оставляет больше пространства для роста вероятности токенов с низкой исходной вероятностью, тем самым стимулируя исследование "токенов с длинным хвостом".
+Unlike the standard PPO approach where $\epsilon_{\text{low}} = \epsilon_{\text{high}} = 0.2$, the Clip-Higher strategy uses distinct values: $\epsilon_{\text{low}}$ remains at 0.2, while $\epsilon_{\text{high}}$ is increased to 0.28. This elevation of the upper clipping threshold provides greater room for the probability growth of low-initial-probability tokens, thereby encouraging exploration of "long-tail" tokens.
 
-### Экспериментальные результаты
+### Experimental Results
 
-Как показано на графиках выше, предложенная корректировка механизма отсечения эффективно улучшает энтропию стратегии и способствует созданию более разнообразных выборок. Исследователи сознательно решили сохранить ε_low относительно небольшим (0.2), поскольку увеличение этого параметра может привести к чрезмерному снижению вероятности некоторых токенов, что в конечном итоге может вызвать коллапс пространства выборки.
+As shown in the plots above, the proposed adjustment to the clipping mechanism effectively improves policy entropy and promotes more diverse sampling. The researchers deliberately retained $\epsilon_{\text{low}}$ at a relatively low value (0.2), as increasing this parameter may lead to excessive suppression of certain token probabilities, ultimately causing sample space collapse.
 
 <div style="border: 2px solid #3498db; border-radius: 8px; padding: 12px; background-color: #f8f9fa; margin: 10px 0;">
   <p style="margin: 0; font-weight: bold; color: #2c3e50;">Third Checkpoint: Clip-Higher</p>
-  <p style="margin: 8px 0 0 0; color: #2c3e50;">Стратегия Clip-Higher борется с коллапсом энтропии в PPO/GRPO, вводя асимметричные пороги отсечения (ε_low < ε_high). Увеличение верхнего порога (ε_high) стимулирует исследование токенов с низкой вероятностью, повышая разнообразие генерируемых ответов.</p>
+  <p style="margin: 8px 0 0 0; color: #2c3e50;">The Clip-Higher strategy combats entropy collapse in PPO/GRPO by introducing asymmetric clipping thresholds ($\epsilon_{\text{low}} < \epsilon_{\text{high}}$). Increasing the upper threshold ($\epsilon_{\text{high}}$) encourages exploration of low-probability tokens, enhancing the diversity of generated responses.</p>
 </div>
 
-## **📌 3.2 Dynamic Sampling: повышение эффективности градиентного обучения**
+## **📌 3.2 Dynamic Sampling: Enhancing Gradient Learning Efficiency**
 
-### Проблема снижения градиента
+### Problem of Gradient Vanishing
 
-Существующие алгоритмы обучения с подкреплением (RL) часто страдают от проблемы снижения градиента, которая возникает, когда точность некоторых подсказок достигает значения 1. Например, в алгоритме GRPO, если все выходные данные для конкретной подсказки верны и получают одинаковое вознаграждение 1, результирующее преимущество группы становится равным нулю. Это ведет к обновлению политики без градиентов, что существенно снижает эффективность выборки.
+Existing reinforcement learning (RL) algorithms often suffer from gradient vanishing, which occurs when the accuracy of certain prompts reaches 1. For instance, in the GRPO algorithm, if all outputs for a specific prompt are correct and receive the same reward of 1, the resulting group advantage becomes zero. This leads to policy updates with no gradients, significantly reducing sampling efficiency.
 
-Эмпирические наблюдения показывают (Figure3.b - график чуть выще был), что количество образцов с точностью, равной 1, продолжает увеличиваться в процессе обучения. В результате количество действительных сигналов в каждой партии уменьшается, что приводит к:
+Empirical observations (Figure 3.b — the graph above) show that the number of samples with accuracy exactly 1 continues to increase during training. Consequently, the number of valid signals per batch decreases, resulting in:
 
-- Увеличению дисперсии градиента;
-- Ослаблению градиентного сигнала для обучения модели.
+- Increased gradient variance;
+- Weakened gradient signal for model learning.
 
-### Решение: метод динамической выборки
+### Solution: Dynamic Sampling Method
 
-Для решения этой проблемы предлагается метод динамической выборки. Основная идея заключается в следующем:
+To address this issue, the dynamic sampling method is proposed. The core idea is as follows:
 
-1. Выполнение избыточной выборки подсказок;
-2. Фильтрация подсказок с точностью, равной 1 или 0;
-3. Сохранение только подсказок с допустимыми градиентами в пакете;
-4. Поддержание постоянного количества подсказок в обучающем пакете.
+1. Perform oversampling of prompts;
+2. Filter out prompts with accuracy exactly 0 or 1;
+3. Retain only prompts with meaningful gradients in the batch;
+4. Maintain a constant number of prompts in the training batch.
 
-Процесс выборки продолжается до тех пор, пока пакет не будет полностью заполнен примерами, точность которых строго находится в диапазоне (0,1).
+Sampling continues until the batch is fully populated with examples whose accuracy strictly lies within the range (0,1).
 
-### Математическая формализация
+### Mathematical Formulation
 
-Опять же, наша целевая функция DAPO, тут нас интересует ограничение, выделенное красным:
+Again, our DAPO objective function, focusing on the red-highlighted constraint:
 
 $$J_{DAPO}(\theta) = \mathbb{E}_{(q,a) \sim \mathcal{D}, \{o_i\}_{i=1}^G \sim \pi_{\theta,\text{old}}(·|q)}$$
 
 $$\left[ \frac{1}{\sum_{i=1}^G |o_i|} \sum_{i=1}^G \sum_{t=1}^{|o_i|} \min\left(r_{i,t}(\theta)\hat{A}_{i,t}, \text{clip}\left(r_{i,t}(\theta), 1 - \epsilon_{\text{low}}, 1 + \epsilon_{\text{high}}\right)\hat{A}_{i,t}\right) \right], \quad (11)$$
 
-с ограничением: $$\text{s.t.}\textcolor{red}{\ 0 < |\{o_i | \text{is\_equivalent}(a, o_i)\}| < G},$$
+with constraint: $$\text{s.t.}\textcolor{red}{\ 0 < |\{o_i | \text{is\_equivalent}(a, o_i)\}| < G},$$
 
-Это ограничение гарантирует, что в пакете содержатся только подсказки с точностью в диапазоне между 0 и 1. В случае динамической выборки эксперимент может достичь той же производительности быстрее. Наблюдение показано на рисунке 6.
+This constraint ensures that only prompts with accuracy strictly between 0 and 1 are included in the batch. With dynamic sampling, the experiment can achieve the same performance faster, as shown in Figure 6.
 
-![Figure_5](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-13/assets/Figure_5.png)
+![Figure_5](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-13/assets/Figure_5.png  )
 
-Метод динамической выборки представляет собой эффективное решение проблемы снижения градиента в алгоритмах обучения с подкреплением. Путем целенаправленной фильтрации подсказок с крайними значениями точности (0 или 1) и сосредоточения вычислительных ресурсов на подсказках с промежуточной точностью, данный метод позволяет существенно повысить эффективность обучения и ускорить достижение конвергенции модели.
+The dynamic sampling method provides an effective solution to the gradient vanishing problem in RL algorithms. By selectively filtering prompts with extreme accuracy values (0 or 1) and concentrating computational resources on prompts with intermediate accuracy, this method significantly improves learning efficiency and accelerates model convergence.
 
 <div style="border: 2px solid #3498db; border-radius: 8px; padding: 12px; background-color: #f8f9fa; margin: 10px 0;">
   <p style="margin: 0; font-weight: bold; color: #2c3e50;">Fourth Checkpoint: Dynamic Sampling</p>
-  <p style="margin: 8px 0 0 0; color: #2c3e50;">Метод динамической выборки решает проблему снижения градиента в RL-алгоритмах, исключая подсказки с точностью 0 или 1. Фильтрация примеров с промежуточной точностью (0 < acc < 1) позволяет сохранять значимые градиенты в пакете, уменьшает их дисперсию и усиливает сигнал для обучения. Поддержание постоянного размера пакета с «полезными» примерами ускоряет конвергенцию модели.</p>
+  <p style="margin: 8px 0 0 0; color: #2c3e50;">Dynamic sampling addresses gradient vanishing in RL algorithms by excluding prompts with accuracy 0 or 1. Filtering for examples with intermediate accuracy (0 < acc < 1) preserves meaningful gradients in the batch, reduces their variance, and strengthens the learning signal. Maintaining a constant batch size with "useful" examples accelerates model convergence.</p>
 </div>
 
-## **📌 3.3 Token-Level Policy Gradient Loss: действие по перебалансировке**
+## **📌 3.3 Token-Level Policy Gradient Loss: Rebalancing by Token**
 
-Исходный алгоритм GRPO использует расчет потерь на уровне выборки, который включает в себя сначала усреднение потерь по токенам в каждой выборке, а затем агрегирование потерь по всем выборкам. При таком подходе каждому образцу присваивается одинаковый вес при окончательном расчете потерь. Однако авторы обнаружили, что этот подход к сокращению потерь создает ряд проблем в сценариях RL с длинной цепочкой мысли.
+The original GRPO algorithm employs sample-level loss computation, which first averages losses over tokens within each sample and then aggregates losses across all samples. In this approach, each sample is assigned equal weight in the final loss calculation. However, the authors discovered that this loss reduction method creates several problems in long-chain-of-thought RL scenarios.
 
 <details> 
-    <summary><em><strong>Как исходный алгоритм GRPO использует расчет потерь на уровне выборки:</strong></em></summary>
+    <summary><em><strong>How Original GRPO Uses Sample-Level Loss Computation:</strong></em></summary>
 
-### **Как исходный алгоритм GRPO использует расчет потерь на уровне выборки**
+### **How Original GRPO Uses Sample-Level Loss Computation**
 
-#### 1. **Основной принцип расчета потерь**
+#### 1. **Core Principle of Loss Computation**
 
-В GRPO потери вычисляются на уровне **выборок**, то есть для каждой генерации (или ответа) $ o_i $ в группе $ G $, а затем усредняются по всем выборкам. Этот подход можно разбить на несколько шагов:
+In GRPO, losses are computed at the **sample** level — that is, for each generated output $o_i$ in group $G$, then averaged across all samples. This approach can be broken into several steps:
 
-#### Шаг 1: Расчет потерь для отдельных токенов
+#### Step 1: Compute Loss for Individual Tokens
 
-Для каждого ответа $o_i$ в группе $G$ и каждого токена $t$ в ответе вычисляется:
+For each output $o_i$ in group $G$ and each token $t$ in the output, compute:
 
 $$L_{i,t} = \min\left(r_{i,t}(\theta)\hat{A}_{i,t}, \text{clip}\left(r_{i,t}(\theta), 1-\epsilon, 1+\epsilon\right)\hat{A}_{i,t}\right)$$
 
-где:
-- $r_{i,t}(\theta) = \frac{\pi_\theta(t|q, o_{i,<t})}{\pi_{\text{old}}(t|q, o_{i,<t})}$ - отношение вероятностей между текущей и старой политиками
-- $\hat{A}_{i,t}$ - оценка преимущества для токена $t$ в ответе $o_i$
-- $\epsilon$ - параметр клиппирования для ограничения обновления политики
+where:
+- $r_{i,t}(\theta) = \frac{\pi_\theta(t|q, o_{i,<t})}{\pi_{\text{old}}(t|q, o_{i,<t})}$ — ratio of probabilities between current and old policy
+- $\hat{A}_{i,t}$ — advantage estimate for token $t$ in output $o_i$
+- $\epsilon$ — clipping parameter to constrain policy updates
 
-#### Шаг 2: Усреднение потерь по токенам для каждого ответа
+#### Step 2: Average Losses Over Tokens per Output
 
-Потери для каждого ответа $o_i$ усредняются по всем токенам:
+Losses for each output $o_i$ are averaged over all tokens:
 
 $$L_i = \frac{1}{|o_i|} \sum_{t=1}^{|o_i|} L_{i,t}$$
 
-где $|o_i|$ - длина ответа $o_i$ в токенах.
+where $|o_i|$ is the length of output $o_i$ in tokens.
 
-#### Шаг 3: Агрегирование потерь по всем выборкам
+#### Step 3: Aggregate Losses Across All Samples
 
-Окончательная функция потерь:
+Final loss function:
 
 $$L_{\text{GRPO}}(\theta) = \frac{1}{G} \sum_{i=1}^G L_i = \frac{1}{G} \sum_{i=1}^G \left[ \frac{1}{|o_i|} \sum_{t=1}^{|o_i|} L_{i,t} \right]$$
 
-#### 2. **Почему используется такой подход?**
-- **Упрощение расчетов**: усреднение потерь по токенам внутри одного ответа позволяет игнорировать различия в длинах ответов на этапе агрегации. Это делает алгоритм более простым в реализации.
-- **Равномерное влияние выборок**: каждый ответ $ o_i $ вносит одинаковый вклад в общие потери, независимо от его длины. Это обеспечивает равномерное распределение весов между выборками.
+#### 2. **Why Is This Approach Used?**
+- **Simplified computation**: Averaging losses over tokens within one output allows ignoring differences in output lengths during aggregation. This simplifies algorithm implementation.
+- **Uniform sample influence**: Each output $o_i$ contributes equally to total loss, regardless of its length. This ensures balanced weighting across samples.
 
-#### 3. **Проблемы такого подхода**
-Однако этот метод имеет ряд ограничений, особенно в задачах с длинными цепочками рассуждений:
+#### 3. **Problems with This Approach**
+However, this method has limitations, especially in long-chain-of-thought tasks:
 
-- **Непропорциональный вклад длинных ответов**:  
-  В длинных ответах каждый токен оказывает меньшее влияние на общие потери, так как потери усредняются по большому количеству токенов. Это может привести к тому, что модель недоучивает важные паттерны в длинных последовательностях.
+- **Disproportionate contribution of long outputs**:  
+  In long outputs, each token has a smaller impact on total loss due to averaging over many tokens. This may cause the model to underlearn critical reasoning patterns in long sequences.
 
-- **Некачественные длинные ответы**:  
-  Длинные ответы часто содержат "шум" (например, повторяющиеся или бессмысленные фрагменты). Поскольку такие ответы усредняются на уровне выборки, модель может неэффективно подавлять эти нежелательные паттерны.
+- **Low-quality long outputs**:  
+  Long outputs often contain "noise" (e.g., repetitive or meaningless fragments). Since such outputs are averaged at the sample level, the model may inefficiently suppress these undesirable patterns.
 
-- **Искажение обучения**:  
-  Равномерное взвешивание выборок может привести к тому, что модель будет предпочитать короткие ответы, так как они легче оптимизируются.
-
----
-
-### **Как это работает на практике**
-Рассмотрим пример:
-
-1. **Генерация группы ответов**:  
-   Для промпта $ P $ генерируется группа из $ G = 4 $ ответов:
-   - $ o_1 $: "Краткий ответ" (3 токена).
-   - $ o_2 $: "Более длинный ответ с деталями" (10 токенов).
-   - $ o_3 $: "Еще более длинный ответ с повторами" (20 токенов).
-   - $ o_4 $: "Самый длинный ответ с шумом" (30 токенов).
-
-2. **Вычисление потерь для каждого ответа**:  
-   - Для $ o_1 $: Потери усредняются по 3 токенам.
-   - Для $ o_2 $: Потери усредняются по 10 токенам.
-   - Для $ o_3 $: Потери усредняются по 20 токенам.
-   - Для $ o_4 $: Потери усредняются по 30 токенам.
-
-3. **Агрегирование потерь**:  
-   Все ответы вносят одинаковый вклад в общие потери, даже если их длины сильно различаются.
+- **Learning distortion**:  
+  Uniform sample weighting may cause the model to favor shorter outputs, as they are easier to optimize.
 
 ---
 
-### **Заключение**
-Расчет потерь на уровне выборки в GRPO обеспечивает простоту и равномерность в обучении, но имеет ограничения, связанные с обработкой длинных последовательностей. Эти ограничения побудили авторов ввести альтернативный подход — **расчет потерь на уровне токенов**, который устраняет указанные проблемы, позволяя каждому токену оказывать пропорциональное влияние на обновление градиента.
+### **How It Works in Practice**
+Consider an example:
+
+1. **Generate group of outputs**:  
+   For prompt $P$, generate group of $G = 4$ outputs:
+   - $o_1$: "Short answer" (3 tokens).
+   - $o_2$: "Longer answer with details" (10 tokens).
+   - $o_3$: "Even longer answer with repetitions" (20 tokens).
+   - $o_4$: "Longest answer with noise" (30 tokens).
+
+2. **Compute loss per output**:  
+   - For $o_1$: Loss averaged over 3 tokens.
+   - For $o_2$: Loss averaged over 10 tokens.
+   - For $o_3$: Loss averaged over 20 tokens.
+   - For $o_4$: Loss averaged over 30 tokens.
+
+3. **Aggregate losses**:  
+   All outputs contribute equally to total loss, despite vastly different lengths.
+
+---
+
+### **Conclusion**
+Sample-level loss computation in GRPO ensures simplicity and uniformity in training but has limitations in handling long sequences. These limitations motivated the authors to introduce an alternative approach — **token-level loss computation** — which eliminates the above issues by allowing each token to contribute proportionally to the gradient update.
 
 </details>
 
 ---
 
-Поскольку при расчете потерь всем образцам присваивается одинаковый вес, токены в более длинных ответах (содержащих больше токенов) могут вносить непропорционально меньший вклад в общие потери, что может привести к двум нежелательным эффектам. Во-первых, для высококачественных длинных выборок этот эффект может помешать модели изучить закономерности, связанные с рассуждениями. Во-вторых, слишком длинные образцы часто демонстрируют некачественные паттерны, такие как бессмысленная тарабарщина и повторяющиеся слова. Таким образом, расчет потерь на уровне выборки не может эффективно устранить эти плохие закономерности в длинных выборках, что приводит к нездоровому увеличению энтропии и длины отклика, как показано на рисунках 4а и 4б.
+Since all samples are assigned equal weight in loss computation, tokens in longer outputs (containing more tokens) may contribute disproportionately less to total loss, leading to two undesirable effects. First, for high-quality long samples, this effect may prevent the model from learning reasoning-related patterns. Second, excessively long samples often exhibit poor patterns, such as meaningless babbling and repeated words. Thus, sample-level loss computation cannot effectively eliminate these bad patterns in long samples, leading to unhealthy increases in response entropy and length, as shown in Figures 4a and 4b.
 
-![Figure_6](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-13/assets/Figure_6.png)
+![Figure_6](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-13/assets/Figure_6.png  )
 
-Авторы вводят градиентную потерю политики на уровне токенов в сценарий долгосрочной цепочки мышления (RL) для решения вышеуказанных ограничений:
+The authors introduce token-level policy gradient loss in long-chain-of-thought RL scenarios to address the above limitations:
 
 $$J_{DAPO}(\theta) = \mathbb{E}_{(q,a) \sim \mathcal{D}, \{o_i\}_{i=1}^G \sim \pi_{\theta,\text{old}}(·|q)}$$
 
 $$\left[ \frac{1}{\textcolor{red}{\sum_{i=1}^G |o_i|}} \textcolor{red}{\sum_{i=1}^G \sum_{t=1}^{|o_i|}} \min\left(r_{i,t}(\theta)\hat{A}_{i,t}, \text{clip}\left(r_{i,t}(\theta), 1 - \epsilon_{\text{low}}, 1 + \epsilon_{\text{high}}\right)\hat{A}_{i,t}\right) \right], \quad (12)$$
 
-с ограничением: $$\text{s.t.}\ 0 < |\{o_i | \text{is\_equivalent}(a, o_i)\}| < G,$$
+with constraint: $$\text{s.t.}\ 0 < |\{o_i | \text{is\_equivalent}(a, o_i)\}| < G,$$
 
-Ключевые отличия:
-1. Нормализация производится по общему количеству токенов во всех ответах: $\sum_{i=1}^G |o_i|$
-2. Токены агрегируются напрямую, без предварительного усреднения по выборкам
+Key differences:
+1. Normalization is performed over the total number of tokens across all responses: $\sum_{i=1}^G |o_i|$
+2. Tokens are aggregated directly, without prior averaging per sample
 
 <div style="border: 2px solid #3498db; border-radius: 8px; padding: 12px; background-color: #f8f9fa; margin: 10px 0;">
   <p style="margin: 0; font-weight: bold; color: #2c3e50;">Fifth Checkpoint: Token-level Policy Gradient Loss</p>
-  <p style="margin: 8px 0 0 0; color: #2c3e50;">Стандартный расчет потерь GRPO на уровне сэмпла ослабляет градиенты от токенов в длинных ответах long-CoT, ухудшая обучение и подавление ошибок. Предложенный расчет потерь на уровне токенов решает эту проблему путем прямой агрегации и нормализации по всем токенам батча, обеспечивая каждому токену пропорциональный вклад в градиент.</p>
+  <p style="margin: 8px 0 0 0; color: #2c3e50;">Standard GRPO sample-level loss weakens gradients from tokens in long CoT responses, impairing learning and error suppression. The proposed token-level loss resolves this by direct aggregation and normalization over all batch tokens, ensuring proportional contribution of each token to the gradient.</p>
 </div>
 
-## **📌 3.4 Overlong Reward Shaping: супердлинное формирование вознаграждения**
- 
-При обучении с подкреплением обычно устанавливается фиксированная максимальная длина генерации и соответствующим образом обрезаются очень длинные образцы. Авторы обнаружили, что неправильное формирование вознаграждения для усеченных выборок может привести к появлению шума вознаграждения и существенно нарушить процесс обучения.
+## **📌 3.4 Overlong Reward Shaping: Super-Long Reward Formulation**
 
-По умолчанию назначается штрафное вознаграждение за усеченные образцы. Такой подход может внести шум в процесс обучения, поскольку разумный процесс вывода может быть наказан просто за то, что он слишком длинный. Этот штраф может запутать модель относительно эффективности ее процесса рассуждения.
+In reinforcement learning, a fixed maximum generation length is typically enforced, and excessively long samples are truncated. The authors discovered that improper reward formulation for truncated samples can introduce reward noise and severely disrupt the learning process.
 
-Чтобы изучить влияние этого шума вознаграждения, исследователи сначала применили очень длинную стратегию фильтрации, чтобы замаскировать потерю усеченных выборок. Было обнаружено, что такой подход значительно стабилизировал обучение и улучшил результаты, как показано на рисунке 5.
+By default, a penalty reward is assigned to truncated samples. This approach can introduce noise into learning, as a reasonable reasoning process may be penalized merely for being too long. This penalty may confuse the model about the effectiveness of its reasoning process.
 
-![Figure_7](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-13/assets/Figure_7.png)
+To study the impact of this reward noise, researchers first applied a very long filtering strategy to mask the loss of truncated samples. It was found that this approach significantly stabilized learning and improved results, as shown in Figure 5.
 
-Кроме того, исследователи предложили мягкий штраф за превышение длины (Формула 13) — механизм штрафа, учитывающий длину, для усеченных выборок. В частности, определяется штрафной интервал, когда длина ответа превышает предопределенное максимальное значение. В пределах этого интервала, чем длиннее ответ, тем больше штраф. Этот штраф добавляется к изначальной награде за правильность, основанной на правилах, сигнализируя модели о необходимости избегать слишком длинных ответов.
+![Figure_7](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-13/assets/Figure_7.png  )
 
-![Figure_8](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-13/assets/Figure_8.png)
+Additionally, the researchers proposed a soft length penalty (Formula 13) — a length-aware penalty mechanism for truncated samples. Specifically, a penalty interval is defined when the answer length exceeds a predetermined maximum value. Within this interval, the longer the answer, the greater the penalty. This penalty is added to the initial rule-based correctness reward, signaling the model to avoid excessively long responses.
+
+![Figure_8](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-13/assets/Figure_8.png  )
 
 <div style="border: 2px solid #3498db; border-radius: 8px; padding: 12px; background-color: #f8f9fa; margin: 10px 0;">
 <p style="margin: 0; font-weight: bold; color: #2c3e50;">Sixth Checkpoint: Overlong Reward Shaping</p>
-<p style="margin: 8px 0 0 0; color: #2c3e50;">Традиционное бинарное пенальти за превышение длины ответа вносит шум в обучение, наказывая даже частично корректные длинные решения. Предложенный подход Overlong Reward Shaping заменяет жесткий штраф на постепенную линейную функцию в интервале 16-20К токенов, снижая уровень шума и позволяя модели эффективно учиться на длинных последовательностях без резкого отбрасывания данных.</p>
+<p style="margin: 8px 0 0 0; color: #2c3e50;">Traditional binary penalty for exceeding response length introduces noise into learning by penalizing even partially correct long solutions. The proposed Overlong Reward Shaping replaces the hard penalty with a gradual linear function over the 16–20K token range, reducing noise and enabling efficient learning on long sequences without abrupt data rejection.</p>
 </div>
 
-## 4 Эксперименты
+## 4 Experiments
 
-### 4.1 Подробности обучения
+### 4.1 Training Details
 
-Исследователи сосредоточили свое внимание на математических задачах для оценки разработанного алгоритма, который может быть легко адаптирован для других задач с четкими и точными сигналами вознаграждения. Для обучения был использован фреймворк verl с GRPO в качестве базового алгоритма. Преимущество оценивалось с помощью нормализации группового вознаграждения.
+The researchers focused on mathematical tasks to evaluate the developed algorithm, which can be easily adapted to other tasks with clear and precise reward signals. The verl framework was used for training, with GRPO as the baseline algorithm. Advantage was estimated using group reward normalization.
 
-В работе были применены следующие гиперпараметры: оптимизатор AdamW с постоянной скоростью обучения $1 \times 10^{-6}$ и линейным разогревом в 20 шагов. Размер пакета подсказок составил 512, с выбором 16 ответов на каждую подсказку. Для сверхдлинного формирования вознаграждения была установлена ожидаемая максимальная длина в 16 384 токенов с дополнительным мягким штрафным буфером в 4906 токенов. Параметры обрезки $c_{\text{low}}$ и $c_{\text{high}}$ были установлены на уровне 0,2 и 0,28 соответственно.
+The following hyperparameters were applied: AdamW optimizer with constant learning rate $1 \times 10^{-6}$ and linear warmup over 20 steps. Prompt batch size was 512, with 16 responses per prompt. For overlong reward shaping, the expected maximum length was set to 16,384 tokens with an additional soft penalty buffer of 4,906 tokens. Clipping parameters $c_{\text{low}}$ and $c_{\text{high}}$ were set to 0.2 and 0.28 respectively.
 
-### 4.2 Основные результаты
+### 4.2 Main Results
 
-В экспериментах на AIME 2024 метод DAPO успешно обучил базовую модель Qwen-32B, превратив её в мощную модель вывода, превзойдя результаты DeepSeek с использованием метода R1 на Qwen2.5-32B. Было показано значительное улучшение производительности AIME 2024: точность увеличилась с почти 0% до 50% при использовании только 50% шагов обучения, необходимых для DeepSeek-R1-Zero-Qwen-32B.
+In experiments on AIME 2024, the DAPO method successfully trained the base model Qwen-32B into a powerful reasoning model, surpassing DeepSeek’s results using R1 on Qwen2.5-32B. Significant performance improvement on AIME 2024 was demonstrated: accuracy increased from nearly 0% to 50% using only 50% of the training steps required by DeepSeek-R1-Zero-Qwen-32B.
 
-Исследователи проанализировали вклад каждой методики обучения в их подход. Улучшения демонстрируют эффективность этих методик в обучении с подкреплением. В условиях наивной настройки GRPO обучение на основе базовой модели Qwen.2-5-32B достигло только 30% точности.
+The researchers analyzed the contribution of each training technique in their approach. Improvements demonstrate the effectiveness of these methods in reinforcement learning. Under naive GRPO configuration, training based on the base model Qwen2.5-32B achieved only 30% accuracy.
 
-![Figure_10](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-13/assets/Figure_10.png)
+![Figure_10](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-13/assets/Figure_10.png  )
 
-### 4.3 Динамика тренировки
+### 4.3 Training Dynamics
 
-Процесс обучения DAPO продемонстрировал сложность RL в больших языковых моделях. Исследователи обеспечили стабильность обучения, отслеживая ключевые показатели. Эксперименты показали, что DAPO не только улучшает способность модели к рассуждению, но и усиливает её исследовательские способности.
+The DAPO training process demonstrated the complexity of RL in large language models. The researchers ensured training stability by monitoring key metrics. Experiments showed that DAPO not only enhances the model’s reasoning ability but also strengthens its exploratory capabilities.
 
-![Figure_11](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-13/assets/Figure_11.png)
+![Figure_11](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-13/assets/Figure_11.png  )
 
-### 4.4 Анализ случая
+### 4.4 Case Analysis
 
-В ходе обучения с подкреплением модель DAPO продемонстрировала динамически развивающуюся модель рассуждений. По мере обучения модель не только укрепляла существующие шаблоны рассуждений, но и постепенно формировала новые модели поведения.
+During reinforcement learning, the DAPO model demonstrated a dynamically evolving reasoning model. As training progressed, the model not only reinforced existing reasoning patterns but gradually formed new behavioral patterns.
 
-![Figure_12](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-13/assets/Figure_12.png)
+![Figure_12](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-13/assets/Figure_12.png  )
 
-## 5. Заключение
+## 5. Conclusion
 
-Запуск системы DAPO стал, на мой взгляд, небольшим, но всё же прорывом в области крупномасштабного обучения языковых моделей с подкреплением. Благодаря открытому исходному коду алгоритмов, кода и наборов данных, система предоставила ценные ресурсы для будущих исследований
+The launch of the DAPO system represents, in my view, a small but meaningful breakthrough in large-scale reinforcement learning of language models. Thanks to the open-source release of algorithms, code, and datasets, the system provides valuable resources for future research.
 
-Четыре основные технологии DAPO — Clip-Higher, Dynamic Sampling, Token-Level Policy Gradient Loss и Overlong Reward Shaping — предлагают новые решения для обучения с подкреплением. Выпуск DAPO с открытым исходным кодом позволил мировому исследовательскому сообществу лучше понимать и применять методы обучения с подкреплением для крупномасштабных языковых моделей.
+The four core DAPO technologies — Clip-Higher, Dynamic Sampling, Token-Level Policy Gradient Loss, and Overlong Reward Shaping — offer novel solutions for reinforcement learning. The open-source release of DAPO enables the global research community to better understand and apply reinforcement learning methods to large-scale language models.
 
-Наконец, позвольте мне добавить некоторые ограничения, которые пришли мне в голову:
+Finally, let me add some limitations that came to mind:
 
-- С точки зрения итоговой производительности 50%-ная точность AIME все еще отстает от 72,6% DeepSeek-R1-Distill-Qwen-32B.
-- Эффективность этого метода была проверена только на одном обучающем наборе, одном тестовом наборе и одной модели, и его обобщение сомнительно.
-- С другой стороны, даже если DAPO обладает средней степенью обобщения, мы можем представить четыре приема, описанные в этой статье, как набор инструментов, из которого мы можем брать различные инструменты для конкретных сценариев, а не использовать весь DAPO как черный ящик. Фактически, из четырех приемов три предназначены для формирования вознаграждения, которое используется для поощрения исследовательской деятельности, лучшей обработки длинных ответов и лучшей обработки штрафа за длину, а оставшийся — для повышения эффективности выборки. Видно, что между ними нет зависимости, и любое подмножество рационально
+- In terms of final performance, the 50% accuracy on AIME still lags behind DeepSeek-R1-Distill-Qwen-32B’s 72.6%.
+- The method’s effectiveness was tested on only one training set, one test set, and one model; its generalizability is questionable.
+- On the other hand, even if DAPO has only moderate generalization, we can treat the four techniques described in this paper as a toolkit from which we can select individual tools for specific scenarios, rather than treating the entire DAPO as a black box. Indeed, of the four techniques, three are designed for reward shaping — to encourage exploration, better handle long responses, and better manage length penalties — while the remaining one improves sampling efficiency. It is clear that there is no dependency among them, and any subset is rational.
