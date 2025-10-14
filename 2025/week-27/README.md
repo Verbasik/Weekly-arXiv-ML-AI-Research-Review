@@ -1,75 +1,78 @@
-[![arXiv](https://img.shields.io/badge/arXiv-2506.01928-b31b1b.svg)](https://arxiv.org/abs/2506.06105)
+[![arXiv](https://img.shields.io/badge/arXiv-2506.06105-b31b1b.svg)](https://arxiv.org/abs/2506.06105)
 [![GitHub](https://img.shields.io/badge/GitHub-text-to-lora-black?logo=github)](https://github.com/SakanaAI/text-to-lora)
 [![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Models-yellow)](https://huggingface.co/SakanaAI)
 [![Telegram Channel](https://img.shields.io/badge/Telegram-TheWeeklyBrief-blue)](https://t.me/TheWeeklyBrief)
 
-# Text-to-LoRA: Генерация адаптеров по описанию задачи
+# Text-to-LoRA: Generate Adapters from Task Descriptions
 
-> Революционный метод от Sakana AI для мгновенной адаптации языковых моделей через текстовые промпты. Забудьте о тонкой настройке — просто опишите задачу, и система сгенерирует оптимальные LoRA-веса!
+> A revolutionary method from Sakana AI for instant language model adaptation via text prompts. Forget fine-tuning—just describe the task, and the system generates optimal LoRA weights!
 
-Исследователи Sakana AI разработали **Text-to-LoRA (T2L)**, гиперсеть, которая динамически генерирует веса Low-Rank Adaptation (LoRA) для больших языковых моделей на основе описаний целевых задач на естественном языке. Этот метод обеспечивает эффективную адаптацию без предварительной настройки (zero-shot), превосходя установленные базовые показатели и достигая производительности, сравнимой с тонко настроенными адаптерами на ранее не встречавшихся задачах.
-
----
-
-## 🌟 Ключевые возможности
-
-* **Zero-shot адаптация:** получайте работающие адаптеры для новых задач без обучения (до +8% точности vs базовые модели)
-* **Скорость:** генерация адаптера за 1 прямой проход (~0.5 сек на A100)
-* **Универсальность:** поддержка Mistral-7B, Llama-3-8B и Gemma-2B
-* **Семантическое понимание:** реагирует на нюансы в описании задачи ("анализ тональности" vs "детекция сарказма")
-* **Эффективность:** в 4× меньше FLOPs vs few-shot обучение в контексте
+Researchers at Sakana AI have developed **Text-to-LoRA (T2L)**, a hypernetwork that dynamically generates Low-Rank Adaptation (LoRA) weights for large language models based on natural language descriptions of target tasks. This method enables efficient, zero-shot adaptation, surpassing established baselines and achieving performance comparable to fine-tuned adapters on previously unseen tasks.
 
 ---
 
-## 🛠️ Как это работает
+## 🌟 Key Capabilities
+
+* **Zero-shot adaptation:** Obtain functional adapters for new tasks without training (up to +8% accuracy vs. base models)
+* **Speed:** Adapter generation in a single forward pass (~0.5 sec on A100)
+* **Universality:** Support for Mistral-7B, Llama-3-8B, and Gemma-2B
+* **Semantic understanding:** Responds to nuances in task descriptions ("sentiment analysis" vs. "sarcasm detection")
+* **Efficiency:** 4× fewer FLOPs than in-context few-shot learning
+
+---
+
+## 🛠️ How It Works
 
 ```python
 from text_to_lora import T2LGenerator
 
-# Инициализация генератора
+# Initialize generator
 generator = T2LGenerator("sakana-ai/t2l-large")
 
-# Генерация LoRA по описанию
+# Generate LoRA from description
 lora_weights = generator.generate(
-    "Модель для анализа медицинских заключений с акцентом на выявление противоречий"
+    "Model for analyzing medical reports with emphasis on detecting contradictions"
 )
 
-# Применение к базовой модели
+# Apply to base model
 model.apply_lora(lora_weights)
 ```
 
 ---
 
-## 📊 Сравнение архитектур
+## 📊 Architecture Comparison
 
-| Версия   | Параметры | Точность (Avg) | Время генерации |
-|----------|-----------|----------------|-----------------|
-| **T2L-L** | 142M      | 78.2%          | 520 мс          |
-| **T2L-M** | 89M       | 77.1%          | 340 мс          |
-| **T2L-S** | 47M       | 75.3%          | 210 мс          |
+| Version  | Parameters | Accuracy (Avg) | Generation Time |
+|----------|------------|----------------|-----------------|
+| **T2L-L** | 142M       | 78.2%          | 520 ms          |
+| **T2L-M** | 89M        | 77.1%          | 340 ms          |
+| **T2L-S** | 47M        | 75.3%          | 210 ms          |
 
-*Результаты на 10 бенчмарках (MMLU, GSM8K, HumanEval)*
+*Results on 10 benchmarks (MMLU, GSM8K, HumanEval)*
 
 ---
 
-## 🚀 Производительность
+## 🚀 Performance
 
-* **Кодогенерация (HumanEval):**
-  - Базовая модель: 68.5%
+* **Code Generation (HumanEval):**
+  - Base model: 68.5%
   - T2L-L: 76.9% (+8.4%)
-  - Ручная LoRA: 77.2%
+  - Manual LoRA: 77.2%
 
-* **Математика (GSM8K):**
+* **Mathematics (GSM8K):**
   - Few-shot: 72.1%
   - T2L-L: 79.4% (+7.3%)
 
-* **Скорость развертывания:**
-  - Традиционная LoRA: 15-60 мин обучения
-  - T2L: <1 сек генерации
+* **Deployment Speed:**
+  - Traditional LoRA: 15–60 min training
+  - T2L: <1 sec generation
 
 ---
 
-⭐ **Понравился обзор?**
-Не забудьте поставить ★ и подписаться на канал в Telegram, чтобы не пропустить новые разборы!
+<div align="center">
 
-<p align="center">Исследуйте вместе с нами 🚀</p>
+**Explore with us 🚀**
+
+⭐ Star this repository if you found it helpful
+
+</div>

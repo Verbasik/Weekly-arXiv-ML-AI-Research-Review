@@ -1,116 +1,116 @@
-# Text-to-LoRA: мгновенная адаптация трансформеров
+# Text-to-LoRA: Instant Transformer Adaptation
 
-## Аннотация
-Исследователи Sakana AI разработали **Text-to-LoRA (T2L)**, гиперсеть, которая динамически генерирует веса Low-Rank Adaptation (LoRA) для больших языковых моделей на основе описаний целевых задач на естественном языке. Этот метод обеспечивает эффективную адаптацию без предварительной настройки (zero-shot), превосходя установленные базовые показатели и достигая производительности, сравнимой с тонко настроенными адаптерами на ранее не встречавшихся задачах.
+## Abstract
+Researchers at Sakana AI have developed **Text-to-LoRA (T2L)**, a hypernetwork that dynamically generates Low-Rank Adaptation (LoRA) weights for large language models based on natural language descriptions of target tasks. This method enables efficient, zero-shot adaptation, surpassing established baselines and achieving performance comparable to fine-tuned adapters on previously unseen tasks.
 
-## Содержание
-1. [Введение](#введение)
-2. [Базовая архитектура и дизайн](#базовая-архитектура-и-дизайн)
-3. [Методологии обучения](#методологии-обучения)
-4. [Экспериментальные результаты и анализ производительности](#экспериментальные-результаты-и-анализ-производительности)
-5. [Понимание задач и семантическая кластеризация](#понимание-задач-и-семантическая-кластеризация)
-6. [Поведение при масштабировании и архитектурные особенности](#поведение-при-масштабировании-и-архитектурные-особенности)
-7. [Эффективность и практические последствия](#эффективность-и-практические-последствия)
-8. [Ограничения и будущие направления](#ограничения-и-будущие-направления)
+## Contents
+1. [Introduction](#introduction)
+2. [Base Architecture and Design](#base-architecture-and-design)
+3. [Training Methodologies](#training-methodologies)
+4. [Experimental Results and Performance Analysis](#experimental-results-and-performance-analysis)
+5. [Task Understanding and Semantic Clustering](#task-understanding-and-semantic-clustering)
+6. [Scaling Behavior and Architectural Features](#scaling-behavior-and-architectural-features)
+7. [Efficiency and Practical Implications](#efficiency-and-practical-implications)
+8. [Limitations and Future Directions](#limitations-and-future-directions)
 
-## 1. Введение
+## 1. Introduction
 
-Большие языковые модели (БЯМ) продемонстрировали выдающиеся способности в различных задачах, однако адаптация этих базовых моделей к конкретным сценариям использования остается вычислительно дорогой и трудоемкой. Традиционные подходы, такие как дообучение или параметрически-эффективные методы, например, низкоранговая адаптация (LoRA), требуют тщательной подготовки наборов данных, длительных процессов обучения и обширной настройки гиперпараметров для каждой новой задачи. Эта парадигма "одна LoRA на задачу" создает значительные инженерные издержки и ограничивает гибкое развертывание специализированных систем ИИ.
+Large language models (LLMs) have demonstrated exceptional capabilities across diverse tasks, yet adapting these base models to specific use cases remains computationally expensive and labor-intensive. Traditional approaches, such as fine-tuning or parameter-efficient methods like Low-Rank Adaptation (LoRA), require meticulous dataset preparation, lengthy training processes, and extensive hyperparameter tuning for each new task. This "one LoRA per task" paradigm creates significant engineering overhead and limits the flexible deployment of specialized AI systems.
 
 ![Figure_01](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-27/assets/Figure_01.jpeg)
 
-*Обзор фреймворка Text-to-LoRA (T2L), показывающий процесс обучения с помощью функции потерь при реконструкции или контролируемого дообучения (SFT), а также анализ производительности при различных коэффициентах сжатия и размерах обучающего набора данных.*
+*Overview of the Text-to-LoRA (T2L) framework, showing training via reconstruction or supervised fine-tuning (SFT) loss, and performance analysis under varying compression ratios and training set sizes.*
 
-Text-to-LoRA (T2L) вводит изменение парадигмы, обеспечивая мгновенную, адаптацию моделей трансформеров "на лету" с помощью инструкций на естественном языке. Вместо поддержания библиотек предварительно обученных адаптеров или требования специфического для задачи дообучения, T2L динамически генерирует соответствующие LoRA-адаптеры, основываясь исключительно на текстовом описании желаемой задачи. Этот подход, основанный на гиперсетях, обещает демократизировать специализацию БЯМ, делая мощную настройку доступной с минимальными вычислительными требованиями.
+Text-to-LoRA (T2L) introduces a paradigm shift, enabling instant, on-the-fly adaptation of transformer models using natural language instructions. Instead of maintaining libraries of pre-trained adapters or requiring task-specific fine-tuning, T2L dynamically generates the appropriate LoRA adapters based solely on a textual description of the desired task. This hypernetwork-based approach promises to democratize LLM specialization, making powerful customization accessible with minimal computational requirements.
 
-## 2. Базовая архитектура и дизайн
+## 2. Base Architecture and Design
 
-Фреймворк Text-to-LoRA построен вокруг гиперсети, которая преобразует описания задач на естественном языке в параметры LoRA-адаптера. Система принимает в качестве входных данных конкатенированное представление $\phi_{i,m,l}$, которое объединяет три ключевых компонента: векторное представление описания задачи $f(z_i)$, обучаемое встраивание для типа целевого модуля $E[m]$ (например, проекции запроса или значения) и обучаемое встраивание для индекса слоя $E[l]$.
+The Text-to-LoRA framework is built around a hypernetwork that transforms natural language task descriptions into LoRA adapter parameters. The system takes as input a concatenated representation $\phi_{i,m,l}$, which combines three key components: a vector representation of the task description $f(z_i)$, a learned embedding for the target module type $E[m]$ (e.g., query or value projections), and a learned embedding for the layer index $E[l]$.
 
-Гиперсеть $h\_\theta$ затем генерирует низкоранговые матрицы $A$ и $B$, которые составляют LoRA-адаптацию $\Delta W_{i,m,l}$ для каждого модуля и слоя. Такой пакетный подход позволяет T2L генерировать все необходимые параметры для полного LoRA-адаптера за один прямой проход, обеспечивая вычислительную эффективность.
+The hypernetwork $h_\theta$ then generates the low-rank matrices $A$ and $B$ that constitute the LoRA adaptation $\Delta W_{i,m,l}$ for each module and layer. This batched approach allows T2L to generate all necessary parameters for a complete LoRA adapter in a single forward pass, ensuring computational efficiency.
 
 ![Figure_02](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-27/assets/Figure_02.jpeg)
 
-*Три архитектурных варианта T2L (L, M, S), показывающие различные подходы к генерации параметров с различными компромиссами между выразительностью и эффективностью.*
+*Three T2L architectural variants (L, M, S), illustrating different approaches to parameter generation with varying trade-offs between expressiveness and efficiency.*
 
-Авторы исследуют три архитектурных варианта, которые балансируют выразительность с параметрической эффективностью:
+The authors investigate three architectural variants that balance expressiveness with parameter efficiency:
 
-* **T2L-L (Large):** непосредственно выводит обе матрицы $A$ и $B$ одновременно, требуя наибольшего размера выходной головы, масштабируемого как $2 \times r \times d$.
-* **T2L-M (Medium):** использует общий выходной слой для матриц $A$ или $B$, с выделенными встраиваниями для их различения, масштабируемого как $r \times d$.
-* **T2L-S (Small):** генерирует один ранг низкоранговой матрицы за раз с наиболее сильными индуктивными смещениями, масштабируемого как $d$, и требующего дополнительных встраиваний, специфичных для ранга.
+* **T2L-L (Large):** Directly outputs both matrices $A$ and $B$ simultaneously, requiring the largest output head size, scaled as $2 \times r \times d$.
+* **T2L-M (Medium):** Uses a shared output layer for either matrix $A$ or $B$, with dedicated embeddings to distinguish them, scaled as $r \times d$.
+* **T2L-S (Small):** Generates one low-rank matrix component at a time with the strongest inductive biases, scaled as $d$, and requires additional rank-specific embeddings.
 
-Все варианты имеют общую основу, состоящую из начального линейного смесительного слоя, за которым следуют три остаточных блока MLP. Архитектуры инициализируются с использованием "Bias-HyperInit" для обеспечения стабильного обучения путём соответствия начального выходного смещения ожидаемому масштабу весов LoRA.
+All variants share a common backbone consisting of an initial linear mixing layer followed by three residual MLP blocks. Architectures are initialized using "Bias-HyperInit" to ensure stable training by matching the initial output bias to the expected LoRA weight scale.
 
-## 3. Методологии обучения
+## 3. Training Methodologies
 
-T2L использует два различных подхода к обучению, каждый из которых имеет уникальные преимущества для различных сценариев развертывания.
+T2L employs two distinct training approaches, each with unique advantages for different deployment scenarios.
 
-(1) **Обучение путем реконструкции LoRA:** представляет собой более простой подход, при котором T2L учится реконструировать библиотеку предварительно обученных LoRA-адаптеров. Цель минимизирует L1-расстояние между сгенерированными и целевыми весами LoRA:
+(1) **LoRA Reconstruction Training:** A simpler approach where T2L learns to reconstruct a library of pre-trained LoRA adapters. The objective minimizes the L1 distance between generated and target LoRA weights:
 
 ![Figure_03](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-27/assets/Figure_03.png)
 
-Этот метод использует существующие библиотеки LoRA и связанные с ними описания задач, что делает его практичным для сценариев, где такие библиотеки уже существуют.
+This method leverages existing LoRA libraries and associated task descriptions, making it practical for scenarios where such libraries already exist.
 
-(2) **Обучение с контролируемой донастройкой (SFT)** использует более амбициозный сквозной подход, напрямую оптимизируя T2L по производительности в последующих задачах. Вместо реконструкции существующих адаптеров этот метод оптимизирует гиперсеть для генерации адаптеров, которые максимизируют производительность базовой LLM на реальных наборах данных для донастройки:
+(2) **Supervised Fine-Tuning (SFT) Training:** Uses a more ambitious end-to-end approach, directly optimizing T2L for downstream task performance. Instead of reconstructing existing adapters, this method optimizes the hypernetwork to generate adapters that maximize the base LLM's performance on real fine-tuning datasets:
 
 ![Figure_04](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-27/assets/Figure_04.png)
 
-Этот подход позволяет T2L изучать неявную кластеризацию задач и генерировать более эффективные адаптеры, не ограничиваясь потенциально субоптимальными предварительно обученными LoRA.
+This approach enables T2L to learn implicit task clustering and generate more effective adapters without being constrained by potentially suboptimal pre-trained LoRAs.
 
-## 4. Экспериментальные результаты и анализ производительности
+## 4. Experimental Results and Performance Analysis
 
-Экспериментальная оценка демонстрирует эффективность T2L по нескольким измерениям, от сжатия LoRA до обобщения без предварительного обучения (zero-shot generalization) на невиданных ранее задачах.
+Experimental evaluation demonstrates T2L's effectiveness across multiple dimensions, from LoRA compression to zero-shot generalization on previously unseen tasks.
 
 ![Figure_06](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-27/assets/Figure_06.png)
 
-*Взаимосвязь между ошибкой обучения и производительностью, показывающая, как T2L сохраняет существенную производительность даже при значительных артефактах сжатия.*
+*Relationship between training error and performance, showing how T2L retains substantial performance even under significant compression artifacts.*
 
-**Возможности сжатия LoRA:** при обучении методом реконструкции на 9 LoRA, специфичных для бенчмарков, T2L успешно восстанавливает полную производительность оракульных адаптеров для конкретных задач во всех архитектурных вариантах. Примечательно, что T2L часто превосходит исходные адаптеры на нескольких бенчмарках, причем авторы объясняют это эффектами регуляризации от сжатия с потерями, предотвращающего переобучение.
+**LoRA Compression Capabilities:** When trained via reconstruction on 9 task-specific LoRAs for benchmarks, T2L successfully recovers the full performance of oracle adapters for specific tasks across all architectural variants. Notably, T2L often surpasses the original adapters on several benchmarks, with the authors attributing this to regularization effects from lossy compression that prevent overfitting.
 
-**Обобщение без предварительного обучения:** наиболее значимое открытие заключается в способности T2L, обученного с помощью SFT, генерировать эффективные адаптеры для совершенно невиданных ранее задач. При оценке на 10 разнообразных бенчмарках, охватывающих рассуждения, математику, науку и кодирование, T2L, обученный с помощью SFT, постоянно превосходит сильные базовые модели, включая многозадачные LoRA адаптеры и современные методы маршрутизации без предварительного обучения, такие как Arrow Routing и Hyperdecoders.
+**Zero-Shot Generalization:** The most significant finding is the ability of T2L, trained via SFT, to generate effective adapters for completely unseen tasks. Evaluated on 10 diverse benchmarks covering reasoning, mathematics, science, and coding, SFT-trained T2L consistently outperforms strong baselines, including multi-task LoRA adapters and state-of-the-art zero-shot routing methods like Arrow Routing and Hyperdecoders.
 
-Результаты показывают, что T2L значительно сокращает разрыв в производительности с оракульными LoRA, специфичными для задач, работая при этом в истинном режиме zero-shot. На таких бенчмарках, как PIQA и Winogrande, T2L даже превосходит оракульные адаптеры, демонстрируя свой потенциал для генерации превосходных модификаций, специфичных для задач.
+Results show T2L significantly narrows the performance gap with task-specific oracle LoRAs while operating in true zero-shot mode. On benchmarks such as PIQA and Winogrande, T2L even surpasses oracle adapters, demonstrating its potential to generate superior, task-specific modifications.
 
-**Межмодельное обобщение:** эффективность T2L выходит за рамки основной базовой модели Mistral-7B-Instruct, показывая сопоставимые улучшения производительности на Llama-3.1-8B-Instruct и Gemma-2-2B-Instruct. Эта межмодельная согласованность предполагает, что T2L изучает передаваемые принципы адаптации к конкретным задачам, а не артефакты, специфичные для модели.
+**Cross-Model Generalization:** T2L's efficacy extends beyond the primary base model Mistral-7B-Instruct, showing comparable performance improvements on Llama-3.1-8B-Instruct and Gemma-2-2B-Instruct. This cross-model consistency suggests that T2L learns transferable principles of task-specific adaptation, not model-specific artifacts.
 
-## 5. Понимание задач и семантическая кластеризация
+## 5. Task Understanding and Semantic Clustering
 
-Важный аспект функциональности T2L заключается в его способности изучать значимые представления задач и их соответствующих адаптаций. Авторы приводят доказательства того, что T2L развивает семантическое понимание взаимосвязей задач посредством визуализации и корреляционного анализа.
+A crucial aspect of T2L's functionality is its ability to learn meaningful representations of tasks and their corresponding adaptations. The authors provide evidence that T2L develops semantic understanding of task relationships through visualization and correlation analysis.
 
 ![Figure_08](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-27/assets/Figure_08.jpeg)
 
-*Качественные примеры, показывающие, как различные описания задач для одной и той же проблемы приводят к различным подходам к рассуждениям и стилям представления в сгенерированных ответах.*
+*Qualitative examples showing how different task descriptions for the same problem lead to distinct reasoning approaches and presentation styles in generated responses.*
 
-Качественный анализ показывает, что T2L может генерировать различные стратегии адаптации на основе нюансов описания задач. Для одной и той же математической задачи описания, акцентирующие внимание на «систематическом математическом рассуждении» по сравнению с «навыками программирования», приводят к правильным ответам с отчетливо разными подходами к рассуждениям и стилями представления. Это демонстрирует способность T2L улавливать тонкие требования задач и генерировать соответствующее специализированное поведение.
+Qualitative analysis shows T2L can generate diverse adaptation strategies based on nuances in task descriptions. For the same mathematical problem, descriptions emphasizing "systematic mathematical reasoning" versus "programming skills" yield correct answers with distinctly different reasoning approaches and presentation styles. This demonstrates T2L's ability to capture subtle task requirements and generate corresponding specialized behavior.
 
 ![Figure_09](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-27/assets/Figure_09.jpeg)
 
-*Визуализация t-SNE, показывающая семантическую кластеризацию как встраиваний задач, так и выходных активаций T2L, при этом схожие задачи (такие как задачи кодирования MBPP и HumanEval) группируются вместе.*
+*t-SNE visualization showing semantic clustering of both task embeddings and T2L output activations, with similar tasks (e.g., coding tasks MBPP and HumanEval) grouping together.*
 
-Визуализация с помощью t-SNE проекций подтверждает, что T2L учится кластеризовать семантически похожие задачи как в своих входных представлениях, так и в выходных активациях. Задачи кодирования (MBPP и HumanEval) группируются вместе, как и задачи рассуждений, что указывает на то, что T2L освоил значимое функциональное многообразие адаптаций задач.
+t-SNE visualizations confirm that T2L learns to cluster semantically similar tasks both in its input representations and output activations. Coding tasks (MBPP and HumanEval) cluster together, as do reasoning tasks, indicating that T2L has mastered a meaningful functional manifold of task adaptations.
 
-## 6. Поведение при масштабировании и архитектурные особенности
+## 6. Scaling Behavior and Architectural Features
 
-Исследование предоставляет ценные сведения о том, как производительность T2L масштабируется с объемом обучающих данных и архитектурными решениями.
+The study provides valuable insights into how T2L's performance scales with training data volume and architectural choices.
 
 ![Figure_10](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-27/assets/Figure_10.jpeg)
 
-**Влияние масштаба обучения:** увеличение количества обучающих задач для T2L, обученного с помощью SFT, в сочетании с пропорционально масштабированными вычислительными бюджетами, как правило, улучшает среднюю производительность в бенчмарках без предварительной настройки. Это предполагает, что T2L выигрывает от воздействия более широких распределений задач, подтверждая гипотезу о положительном переносе обучения между различными типами задач.
+**Impact of Training Scale:** Increasing the number of training tasks for SFT-trained T2L, coupled with proportionally scaled computational budgets, generally improves average performance on zero-shot benchmarks. This suggests T2L benefits from exposure to broader task distributions, confirming the hypothesis of positive transfer learning across diverse task types.
 
-**Архитектурные компромиссы:** три архитектурных варианта (L, M, S) показывают интересные характеристики производительности. Хотя самый крупный вариант (L) обычно достигает наилучшей производительности, средний вариант (M) часто работает сравнимо со значительно меньшим количеством параметров. Самый маленький вариант (S) показывает ограничения по мощности при масштабировании до большего числа обучающих задач, что указывает на то, что архитектурные ограничения становятся связующими в масштабе.
+**Architectural Trade-offs:** The three architectural variants (L, M, S) exhibit interesting performance characteristics. While the largest variant (L) typically achieves the best performance, the medium variant (M) often performs comparably with significantly fewer parameters. The smallest variant (S) shows capacity limitations when scaling to a larger number of training tasks, indicating architectural constraints become binding at scale.
 
-**Анализ устойчивости:** T2L демонстрирует устойчивость к выбору кодировщика описаний задач, поддерживая сопоставимую производительность независимо от того, используются ли специализированные текстовые кодировщики, такие как gte-large-en-v1.5, или внутренние представления самого базового LLM. Однако производительность очень чувствительна к соответствию между описаниями задач и фактическими задачами: несогласованные или случайные описания приводят к значительному снижению производительности.
+**Robustness Analysis:** T2L demonstrates robustness to the choice of task description encoder, maintaining comparable performance regardless of whether specialized text encoders like gte-large-en-v1.5 or internal representations of the base LLM are used. However, performance is highly sensitive to alignment between task descriptions and actual tasks: inconsistent or random descriptions lead to significant performance degradation.
 
-## 7. Эффективность и практические последствия
+## 7. Efficiency and Practical Implications
 
-Ключевым преимуществом T2L является его вычислительная эффективность во время инференса. Анализ FLOPs, проведенный авторами, показывает, что стоимость адаптации T2L значительно ниже, чем у альтернативных подходов, таких как обучение в контексте, с более чем 4-кратным сокращением вычислительных требований по сравнению с 3-shot ICL в первом экземпляре вопроса.
+A key advantage of T2L is its computational efficiency during inference. The authors' FLOPs analysis shows that T2L's adaptation cost is significantly lower than alternative approaches such as in-context learning, achieving more than a 4-fold reduction in computational requirements compared to 3-shot ICL for the first question instance.
 
-Эта эффективность в сочетании с требованием одного прямого прохода для генерации адаптера делает T2L практичным для приложений реального времени, где быстрая адаптация задач имеет решающее значение. Подход устраняет необходимость в поддержании больших библиотек предварительно обученных адаптеров или выполнении дорогостоящих операций извлечения, вместо этого генерируя соответствующие адаптации по требованию.
+This efficiency, combined with the requirement of only one forward pass to generate adapters, makes T2L practical for real-time applications where rapid task adaptation is critical. The approach eliminates the need to maintain large libraries of pre-trained adapters or perform costly retrieval operations, instead generating appropriate adaptations on demand.
 
-## 8. Ограничения и будущие направления
+## 8. Limitations and Future Directions
 
-Хотя T2L представляет собой значительный прогресс в динамической адаптации LLM, следует рассмотреть ряд ограничений. Производительность подхода остается чувствительной к качеству и согласованности описаний задач, требуя тщательно разработанных инструкций для достижения оптимальных результатов. Кроме того, хотя T2L демонстрирует впечатляющую генерализацию без предварительной настройки, он не всегда полностью соответствует производительности тщательно настроенных адаптеров для конкретных задач, особенно для узкоспециализированных областей.
+While T2L represents a significant advancement in dynamic LLM adaptation, several limitations should be considered. The approach's performance remains sensitive to the quality and consistency of task descriptions, requiring carefully crafted instructions to achieve optimal results. Furthermore, although T2L demonstrates impressive zero-shot generalization, it does not always fully match the performance of meticulously tuned, task-specific adapters, particularly in highly specialized domains.
 
-Текущая работа сосредоточена в основном на адаптерах LoRA, нацеленных на механизмы внимания, но фреймворк гиперсетей потенциально может быть расширен на другие ресурсоэффективные методы тонкой настройки или даже на прямую модуляцию активации. Будущие направления исследований могут включать более сложное понимание описаний задач, интеграцию с генерацией с использованием извлечения для улучшенного понимания задач и расширение на сценарии мультимодальной адаптации.
+The current work focuses primarily on LoRA adapters targeting attention mechanisms, but the hypernetwork framework could potentially be extended to other parameter-efficient fine-tuning methods or even direct activation modulation. Future research directions may include more sophisticated understanding of task descriptions, integration with retrieval-augmented generation for improved task comprehension, and expansion to multimodal adaptation scenarios.
 
-Фреймворк Text-to-LoRA представляет собой значительный шаг к более гибкой, доступной и эффективной адаптации LLM, приближаясь к идеалу настройки ИИ на основе языка с минимальными вычислительными затратами.
+The Text-to-LoRA framework represents a significant step toward more flexible, accessible, and efficient LLM adaptation, bringing us closer to the ideal of AI customization based on language with minimal computational cost.
