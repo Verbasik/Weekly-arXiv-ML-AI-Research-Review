@@ -226,25 +226,17 @@ class OptimizedMoELayer(nn.Module):
         #            experts_flat = (B*S*K,)
 
         # TODO(human): Шаг 2 - Parallel Expert Processing
-        #       2.1. Создайте output тензор:
-        #            expert_outputs = torch.zeros_like(tokens_flat)  # (B*S*K, H)
-        #       2.2. Для каждого эксперта (цикл от 0 до num_experts):
-        #            a) Создайте boolean маску: mask = (experts_flat == expert_idx)
-        #            b) Проверьте: if mask.sum() > 0 (skip пустых экспертов)
-        #            c) Извлеките токены эксперта: expert_tokens = tokens_flat[mask]
-        #            d) Обработайте батчем: output = self.experts[expert_idx](expert_tokens)
-        #            e) Взвесьте по routing_weights:
-        #               expert_weights = weights_flat[mask].unsqueeze(-1)  # (num_tokens, 1)
-        #               weighted_output = output * expert_weights          # (num_tokens, H)
-        #            f) Запишите обратно: expert_outputs[mask] = weighted_output
-
+        #       2.1. Создайте output тензор: expert_outputs
+        #       2.2. Для каждого эксперта:
+        #            a) Создайте boolean маску
+        #            b) Проверьте: (skip пустых экспертов)
+        #            c) Извлеките токены эксперта
+        #            d) Обработайте батчем
+        #            e) Взвесьте по routing_weights
+        #            f) Запишите обратно в weighted_output
+        
         # TODO(human): Шаг 3 - Combine - суммируем K вкладов для каждого токена
-        #       3.1. Reshape: expert_outputs = expert_outputs.reshape(B, S, K, H)
-        #       3.2. Суммируем по оси K: combined = expert_outputs.sum(dim=2)  # (B, S, H)
-
         # TODO(human): Шаг 4 - Residual connection
-        #       output = combined + hidden_states
-
         # TODO(human): Шаг 5 - Return
         #       return output, balance_loss
 
