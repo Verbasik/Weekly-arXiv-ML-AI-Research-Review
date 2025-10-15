@@ -1,11 +1,11 @@
-## Первый выпуск ATLAS уже доступен!
+The first issue of ATLAS is now available!
 
-Готовы пройти путь от математического фундамента к градиентному спуску? В пилотном выпуске:
+Ready to journey from mathematical foundations to gradient descent? In this pilot issue:
 
-- ▫️ Глава 1: Функция — формализация и анализ "начала начал".
-- ▫️ Глава 2: Предел функции — финишная прямая перед производными.
+- ▫️ Chapter 1: Function — formalization and analysis of the "beginning of beginnings."
+- ▫️ Chapter 2: Limit of a Function — the final stretch before derivatives.
 
-🔍 Зачем читать?
-Освежить основы, увидеть математику в движении и подготовиться к градиентному спуску!
+🔍 Why read?
+Refresh your fundamentals, see mathematics in motion, and prepare for gradient descent!
 
-👉 Читать первый выпуск [ATLAS](https://verbasik.github.io/Weekly-arXiv-ML-AI-Research-Review/atlas-wrapper.html)
+👉 Read the first issue of [ATLAS](https://verbasik.github.io/Weekly-arXiv-ML-AI-Research-Review/atlas-wrapper.html)

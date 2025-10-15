@@ -1,110 +1,111 @@
 # Group Sequence Policy Optimization
 
-## Содержание
-1. Введение
-2. Проблема существующих методов
-3. Методология GSPO
-4. Ключевые алгоритмические различия
-5. Результаты экспериментов
-6. Практическое применение и преимущества для инфраструктуры
-7. Значение и будущие последствия
+## Contents
+1. Introduction
+2. Problems with Existing Methods
+3. GSPO Methodology
+4. Key Algorithmic Differences
+5. Experimental Results
+6. Practical Applications and Infrastructure Advantages
+7. Significance and Future Implications
 
-## 1. Введение
+## 1. Introduction
 
-Обучение с подкреплением (RL) стало важным инструментом для масштабирования больших языковых моделей (LLM) для решения сложных задач по рассуждению в математике и программировании. Однако применение RL к моделям с миллиардами параметров сталкивается с критической проблемой: нестабильность обучения, которая может привести к катастрофическому коллапсу модели. Эта статья представляет Group Sequence Policy Optimization (GSPO), новый алгоритм RL, разработанный для устранения фундаментальных недостатков существующих методов, таких как Group Relative Policy Optimization (GRPO).
+Reinforcement learning (RL) has become a critical tool for scaling large language models (LLMs) to solve complex reasoning tasks in mathematics and programming. However, applying RL to models with billions of parameters faces a critical challenge: training instability, which can lead to catastrophic model collapse. This paper introduces Group Sequence Policy Optimization (GSPO), a new RL algorithm designed to eliminate the fundamental shortcomings of existing methods such as Group Relative Policy Optimization (GRPO).
 
-Основное новшество GSPO заключается в переходе от сэмплирования по важности на уровне токенов к сэмплированию на уровне последовательностей, что согласовывает единицу оптимизации с тем, как на самом деле назначаются награды. Это, казалось бы, простое изменение устраняет серьезные проблемы стабильности, которые преследовали крупномасштабное обучение RL, особенно для моделей "Смесь экспертов" (MoE). Работа демонстрирует, что GSPO не только достигает превосходной стабильности, но также улучшает эффективность и производительность обучения, способствуя замечательным улучшениям, наблюдаемым в последних моделях Alibaba Qwen3.
+The core innovation of GSPO lies in shifting importance sampling from the token level to the sequence level, aligning the unit of optimization with how rewards are actually assigned. This seemingly simple change resolves severe stability issues that have plagued large-scale RL training, particularly for Mixture-of-Experts (MoE) models. The work demonstrates that GSPO not only achieves exceptional stability but also improves training efficiency and performance, contributing to the remarkable improvements observed in Alibaba's latest Qwen3 models.
 
-!["Сравнение производительности обучения, показывающее превосходную стабильность и производительность GSPO по сравнению с GRPO по нескольким бенчмаркам, включая награду за обучение, AIME'24, LiveCodeBench и CodeForces"](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-32/assets/Image-01.jpeg)
+!["Comparison of training performance showing GSPO's superior stability and performance over GRPO across multiple benchmarks including training reward, AIME'24, LiveCodeBench, and CodeForces"](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-32/assets/Image-01.jpeg)
 
-## 2. Проблема существующих методов
-Современные передовые алгоритмы RL для LLM страдают от критических проблем стабильности. Proximal Policy Optimization (PPO), хотя и широко используется, требует отдельной модели значений такого же размера, как и модель политики, что создает значительные накладные расходы на память. Group Relative Policy Optimization (GRPO) решил эту проблему, устранив зависимость от модели значений, но ввел более фундаментальную проблему.
+## 2. Problems with Existing Methods
 
-Авторы определяют, что нестабильность GRPO проистекает из неправильного применения сэмплирования по важности. GRPO применяет веса важности на уровне токенов, в то время как награды назначаются на уровне последовательностей. Это создает несоответствие, при котором отдельные токены внутри последовательности получают разные веса важности, несмотря на то, что сигнал награды применяется ко всему ответу.
+Modern state-of-the-art RL algorithms for LLMs suffer from critical stability issues. Proximal Policy Optimization (PPO), while widely used, requires a value model of comparable size to the policy model, creating significant memory overhead. Group Relative Policy Optimization (GRPO) solved this problem by eliminating the dependency on a value model, but introduced a more fundamental issue.
 
-**Давайте немного вспомним как работает GRPO:**
+The authors identify that GRPO's instability stems from incorrect application of importance sampling. GRPO applies importance weights at the token level, while rewards are assigned at the sequence level. This creates a misalignment: individual tokens within a sequence receive different importance weights, despite the reward signal being applied to the entire response.
+
+**Let’s briefly recall how GRPO works:**
 
 !["Group Relative Policy Optimization (GRPO)"](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-32/assets/Image-02.jpg)
 
-Самым распространенным для языковых моделей алгоритмом RL является Proximal Policy Optimization (PPO), и GRPO как раз является его вариацией. Суть: 
+The most common RL algorithm for language models is Proximal Policy Optimization (PPO), and GRPO is a variant of it. The essence is:
 
-➖ У агента есть начальная политика (стратегия), по которой он действует.
+➖ An agent has an initial policy (strategy) it follows.
 
-➖ Агент выполняет действия в среде (отвечает на вопросы), следуя своей текущей политике
+➖ The agent takes actions in the environment (answers questions) according to its current policy.
 
-➖ PPO оценивает действие агента. Для этого обычно используется три модели: 
-reference model – модель, которая выступает эталоном и позволяет измерять, насколько текущая политика изменилась по сравнению с исходной, 
-reward model – оценивает награду, которую агент получает за выполнение действия прямо сейчас, 
-value model – оценивает ожидаемую долгосрочную выгоду от действия, предсказывая будущие награды. 
+➖ PPO evaluates the agent’s action using three models:
+  - **reference model** — serves as a baseline to measure how much the current policy has deviated from the original,
+  - **reward model** — evaluates the immediate reward the agent receives for performing the action,
+  - **value model** — estimates the expected long-term benefit of the action by predicting future rewards.
 
-➖ На основе этих оценок агент меняет свою политику. Здесь заключена основная особенность алгоритма: функция потерь в PPO устроена так, что слишком резкие изменения политики не допускаются.  Это помогает агенту постепенно улучшать свою стратегию, не делая слишком резких шагов сразу, что делает процесс обучения более стабильным и эффективным. 
+➖ Based on these evaluations, the agent updates its policy. The key feature of PPO is that its loss function prevents overly abrupt policy changes. This enables the agent to gradually improve its strategy without making drastic, destabilizing steps, resulting in a more stable and efficient training process.
 
-Но есть в PPO и недостатки. В частности, value model, которая играет ключевую роль в PPO, тащит на себя очень много ресурсов, потому что обычно сопоставима по размерам с моделью, которую мы обучаем. Это делает обучение дорогим. Так что из GRPO (Group Relative Policy Optimization) value model вообще выкинули. Вместо value model в GRPO мы используем среднюю награду от группы ответов на один и тот же вопрос, и так определяем, насколько "хороши" действия модели. То есть в GRPO оценка качества ответа основана на сравнении с другими ответами в группе, а не на абсолютных значениях наград. Если ответ лучше среднего по группе, политика усиливает вероятность его выбора. Если хуже — ослабляет. Это компенсирует оценку value model и делает обучение более эффективным и менее ресурсоемким. 
+However, PPO has drawbacks. In particular, the value model — central to PPO — incurs massive computational costs, typically matching the size of the model being trained. This makes training expensive. GRPO eliminates the value model entirely. Instead, it uses the average reward from a group of responses to the same prompt to determine how "good" the model's actions are. In GRPO, response quality is assessed relative to other responses in the group, not by absolute reward values. If a response is better than the group average, the policy increases its likelihood; if worse, it decreases it. This compensates for the absence of a value model, making training more efficient and less resource-intensive.
 
-Кстати, GRPO работает хорошо даже если пропустить этап файнтюнинга. Так обучали R1-Zero, младшую сестренку R1. Для нее вообще не использовали никакой разметки, и GRPO вытащил все ее качество исключительно на себе.
+Notably, GRPO works well even when skipping supervised fine-tuning. This is how R1-Zero, the younger sibling of R1, was trained: no labeled data was used at all, and GRPO alone extracted all its quality.
 
-Математически GRPO использует веса важности на уровне токенов:
+Mathematically, GRPO uses token-level importance weights:
 
 !["GRPO"](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-32/assets/Image-03.png)
 
-Это взвешивание на уровне токенов вводит высокодисперсионный шум, который накапливается в длинных последовательностях. Дисперсия дополнительно усиливается механизмами обрезки, что в конечном итоге приводит к наблюдаемой нестабильности обучения и коллапсу модели, особенно при крупномасштабных развертываниях.
+This token-level weighting introduces high-variance noise that accumulates over long sequences. Variance is further amplified by clipping mechanisms, ultimately leading to the observed training instability and model collapse, particularly in large-scale deployments.
 
-## 3. Методология GSPO
+## 3. GSPO Methodology
 
-GSPO решает эти проблемы, фундаментально перестраивая сэмплирование по важности в соответствии со структурой вознаграждения. Ключевая идея состоит в определении коэффициентов важности на уровне последовательности, где фактически назначаются награды.
+GSPO resolves these issues by fundamentally restructuring importance sampling to align with the structure of rewards. The key idea is to define importance weights at the sequence level, where rewards are actually assigned.
 
-Функция цели GSPO:
+The GSPO objective function:
 
 !["GSPO"](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-32/assets/Image-04.png)
 
-Коэффициент важности на уровне последовательности определяется как:
+The sequence-level importance weight is defined as:
 
 !["sequence-level"](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-32/assets/Image-05.png)
 
-Ключевым элементом является член нормализации по длине 1/|y_i| в показателе степени. Без такой нормализации коэффициенты правдоподобия на уровне последовательности могли бы значительно варьироваться для ответов разной длины, что потребовало бы использования переменных диапазонов отсечения. Благодаря нормализации значение s_i(theta) остаётся в постоянном числовом диапазоне независимо от длины последовательности.
+The critical element is the length-normalization term $1/|y_i|$ in the exponent. Without such normalization, sequence-level likelihood ratios could vary dramatically across responses of different lengths, requiring variable clipping ranges. Thanks to normalization, the value of $s_i(\theta)$ remains within a constant numerical range regardless of sequence length.
 
-Для оценки преимущества A_i применяется тот же групповой подход без модели значений, что и в GRPO.
+For advantage estimation $A_i$, the same group-based approach without a value model as in GRPO is employed.
 
 !["advantage estimation"](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-32/assets/Image-06.png)
 
-Это сохраняет преимущества вычислительной эффективности GRPO, одновременно решая его фундаментальные проблемы стабильности.
+This preserves GRPO’s computational efficiency while resolving its fundamental stability problems.
 
-## 4. Ключевые алгоритмические различия
+## 4. Key Algorithmic Differences
 
-Основное различие между GSPO и GRPO заключается во взвешивании градиентов. GRPO применяет колеблющиеся веса важности на уровне токенов к градиентам отдельных токенов, создавая высокую дисперсию. GSPO применяет единый, стабильный вес важности на уровне последовательности ко всем токенам в ответе, устраняя проблемную дисперсию.
+The primary distinction between GSPO and GRPO lies in gradient weighting. GRPO applies volatile token-level importance weights to individual token gradients, creating high variance. GSPO applies a single, stable sequence-level importance weight uniformly to all tokens in the response, eliminating this problematic variance.
 
-В терминах градиентов, GSPO взвешивает все токены в последовательности одинаково после применения коэффициента важности на уровне последовательности, в то время как GRPO создает неравномерное взвешивание между токенами в одной и той же последовательности. Это выравнивание со структурой вознаграждения (на уровне последовательности) создает более стабильную и теоретически обоснованную динамику обучения.
+In gradient terms, GSPO weights all tokens in a sequence equally after applying the sequence-level importance coefficient, while GRPO creates uneven weighting between tokens within the same sequence. This alignment with the reward structure (at the sequence level) creates a more stable and theoretically sound training dynamics.
 
-Авторы также представляют GSPO-token, вариант, который позволяет настраивать преимущества по токенам для сценариев, таких как многошаговое обучение с подкреплением (RL), сохраняя при этом основной принцип взвешивания важности на уровне последовательности посредством операций stop-gradient.
+The authors also introduce GSPO-token, a variant that allows per-token advantage tuning for scenarios such as multi-step reinforcement learning, while preserving the core principle of sequence-level importance weighting via stop-gradient operations.
 
-## 5. Результаты экспериментов
+## 5. Experimental Results
 
-Эмпирическая оценка демонстрирует значительные преимущества GSPO по нескольким параметрам:
+Empirical evaluation demonstrates significant advantages of GSPO across multiple metrics:
 
-**Стабильность обучения:** GSPO поддерживает стабильное обучение на протяжении всего процесса, в то время как GRPO демонстрирует нестабильность и потенциальный коллапс. Эта стабильность обеспечивает непрерывное улучшение производительности с увеличением вычислительной мощности обучения, регулярными обновлениями набора запросов и увеличенной длиной генерации.
+**Training Stability:** GSPO maintains stable training throughout the process, while GRPO exhibits instability and potential collapse. This stability enables continuous performance improvement with increased training compute, regular query set updates, and extended generation lengths.
 
-**Производительность и эффективность:** при идентичных вычислительных бюджетах GSPO последовательно достигает лучшей точности обучения и производительности в бенчмарках на сложных задачах, включая AIME'24, LiveCodeBench и CodeForces. Это демонстрирует, что GSPO не только более стабилен, но и более эффективен по выборке.
+**Performance and Efficiency:** At identical computational budgets, GSPO consistently achieves superior training accuracy and performance on challenging benchmarks, including AIME'24, LiveCodeBench, and CodeForces. This demonstrates that GSPO is not only more stable but also more sample-efficient.
 
-**Обучение смешанных экспертов:** особо значительным открытием является способность GSPO разрешать проблемы стабильности в обучении RL больших моделей MoE (Mixture-of-Experts). GRPO требовал сложных обходных путей, таких как "Routing Replay" (передача маршрутизации), для обработки изменчивости активации экспертов. Подход GSPO на уровне последовательности по своей природе нечувствителен к этой изменчивости, что позволяет стабильно обучать MoE без дополнительных накладных расходов или ограничений по мощности.
+**Mixture-of-Experts Training:** Particularly significant is GSPO’s ability to resolve stability issues in RL training of large MoE models. GRPO required complex workarounds such as "Routing Replay" to handle expert activation volatility. The sequence-level approach of GSPO is inherently insensitive to this volatility, enabling stable MoE training without additional overhead or computational constraints.
 
-!['Сравнение долей отсечения, показывающее, что GSPO отсекает значительно больше токенов, чем GRPO, при этом достигая лучшей производительности'](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-32/assets/Image-07.jpeg)
+!['Comparison of clipping rates showing GSPO clips significantly more tokens than GRPO while achieving superior performance'](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-32/assets/Image-07.jpeg)
 
-**Контринтуитивное поведение отсечения:** примечательно, что GSPO отсекает примерно на два порядка больше токенов, чем GRPO, но при этом достигает превосходной эффективности обучения. Это подтверждает гипотезу о том, что оценки градиентов GRPO на уровне токенов по своей природе зашумлены и неэффективны. Подход GSPO на уровне последовательности обеспечивает более качественные сигналы обучения даже при отсечении большего количества данных.
+**Counterintuitive Clipping Behavior:** Notably, GSPO clips approximately two orders of magnitude more tokens than GRPO, yet achieves superior training efficiency. This confirms the hypothesis that GRPO’s token-level gradient estimates are inherently noisy and inefficient. GSPO’s sequence-level approach provides higher-quality learning signals even when discarding more data.
 
-!['Производительность GRPO с и без Routing Replay, демонстрирующая необходимость этого сложного обходного пути для стабильности MoE'](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-32/assets/Image-08.jpeg)
+!['Performance of GRPO with and without Routing Replay, demonstrating the necessity of this complex workaround for MoE stability'](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-32/assets/Image-08.jpeg)
 
-## 6. Практическое применение и преимущества для инфраструктуры
+## 6. Practical Applications and Infrastructure Advantages
 
-Помимо улучшения производительности, GSPO предлагает практические преимущества для инфраструктуры RL. Его зависимость от вероятностей на уровне последовательности делает его более толерантным к расхождениям в точности между движками обучения и вывода. Это позволяет напрямую использовать вероятности из движков вывода, избегая дорогостоящих перерасчетов и упрощая конвейеры RL.
+Beyond performance improvements, GSPO offers practical infrastructure advantages for RL. Its dependence on sequence-level probabilities makes it more tolerant to precision discrepancies between training and inference engines. This allows direct use of probabilities from inference engines, avoiding costly recomputations and simplifying RL pipelines.
 
-Специально для моделей MoE GSPO устраняет необходимость в "Routing Replay" и аналогичных стратегиях стабилизации, снижая накладные расходы на память и связь, а также позволяя моделям использовать всю свою архитектурную мощность без искусственных ограничений.
+Specifically for MoE models, GSPO eliminates the need for "Routing Replay" and similar stabilization strategies, reducing memory and communication overhead and enabling models to fully leverage their architectural capacity without artificial constraints.
 
-## 7. Значение и будущие последствия
+## 7. Significance and Future Implications
 
-GSPO представляет собой эволюцию наверно центрального алгоритма RL для LLM китов, поскольку он устраняет основные теоретические и практические ограничения существующих методов. Его вклад в "заметные улучшения в последних моделях Qwen3" демонстрирует реальное влияние, выходящее за рамки теоретических достижений.
+GSPO represents an evolution of the central RL algorithm for LLM giants, as it removes the core theoretical and practical limitations of existing methods. Its contribution to the "notable improvements in the latest Qwen3 models" demonstrates real-world impact beyond theoretical advances.
 
-Способность алгоритма обеспечивать стабильное, крупномасштабное обучение с подкреплением (ОП) открывает новые возможности для дальнейшего масштабирования возможностей посредством обучения с подкреплением. Решая проблему узкого места в стабильности, GSPO позволяет исследователям инвестировать больше вычислительных ресурсов в обучение с подкреплением с уверенностью в сходимости.
+The algorithm’s ability to enable stable, large-scale reinforcement learning opens new possibilities for further scaling capabilities through RL. By resolving the stability bottleneck, GSPO allows researchers to invest more computational resources into reinforcement learning with confidence in convergence.
 
-Для более широкой области GSPO предоставляет шаблон для проектирования алгоритмов, который тщательно согласует механизмы оптимизации со структурами вознаграждения. Этот принцип может лечь в основу будущих разработок алгоритмов ОП, особенно по мере того, как модели продолжают масштабироваться и усложняться.
+For the broader field, GSPO provides a blueprint for designing algorithms that carefully align optimization mechanisms with reward structures. This principle may underpin future RL algorithm developments, especially as models continue to scale and grow in complexity.
 
-Эта работа позиционирует область для исследования более сложных применений ОП для больших языковых моделей (БЯМ), потенциально обеспечивая прорывы в сложном рассуждении, многошаговом решении задач и других возможностях, которые выигрывают от более глубокого исследования, обеспечиваемого стабильным, крупномасштабным обучением с подкреплением.
+This work positions the field for exploring more sophisticated applications of RL for large language models, potentially enabling breakthroughs in complex reasoning, multi-step problem solving, and other capabilities that benefit from deeper exploration enabled by stable, large-scale reinforcement learning.

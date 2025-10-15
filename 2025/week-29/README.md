@@ -2,93 +2,92 @@
 [![GitHub](https://img.shields.io/badge/GitHub-kimi-k2-black?logo=github)](https://github.com/MoonshotAI/Kimi-K2)
 [![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Models-yellow)](https://huggingface.co/collections/moonshotai/kimi-k2-6871243b990f2af5ba60617d)
 [![Kimi](https://img.shields.io/badge/Kimi-K2-purple)](https://www.kimi.com/)
-[![Telegram Channel](https://img.shields.io/badge/Telegram-TheWeeklyBrief-blue)](https://t.me/TheWeeklyBrief)
 
-# Kimi-K2: MoE-Монстр с триллионом параметров
+# Kimi-K2: A MoE Monster with a Trillion Parameters
 
-> 🔥 Воскресный дамп: MoE-Монстр Kimi-K2! Новая опенсорсная звезда от Китая, которая ставит рекорды и ломает ценники!
+> 🔥 Sunday dump: The MoE Monster Kimi-K2! A new open-source star from China setting records and breaking price tags!
 
-**Kimi-K2** от Moonshot AI — это революционная языковая модель с архитектурой Mixture-of-Experts (MoE), насчитывающая **1 триллион параметров** при активном использовании всего **32 миллиардов**. Модель обучена на беспрецедентном объеме данных (15.5 триллионов токенов) с использованием инновационного оптимизатора MuonClip, обеспечивающего стабильность обучения без единого сбоя. Kimi-K2 устанавливает новые стандарты качества среди открытых моделей, особенно в программировании, математике и агентных задачах.
-
----
-
-## 🌟 Ключевые возможности
-
-* **🔥 MoE-Архитектура:** 1 триллион параметров с активными 32 миллиардами (384 эксперта, топ-8 активация)
-* **🤖 Агентский профи:** лучшая в мире открытая модель для агентских задач без reasoning
-* **👨‍💻 Кодинг-Король:** SOTA среди не-reasoning моделей, бьет GPT-4.1 на SWE-bench (65.8%)
-* **📈 Математическая мощь:** выдающиеся результаты на MATH (70.2%) и GSM8K (92.1%)
-* **⚡ Стабильность:** обучение на 15.5T токенов с ZERO loss-спайков благодаря MuonClip
-* **🌍 Открытость:** полный open-source с Modified MIT License
+**Kimi-K2** from Moonshot AI is a revolutionary language model with a Mixture-of-Experts (MoE) architecture, boasting **1 trillion parameters** with only **32 billion activated**. The model was trained on an unprecedented scale (15.5 trillion tokens) using the innovative MuonClip optimizer, ensuring training stability with zero instabilities. Kimi-K2 sets new benchmarks for open models, especially in programming, mathematics, and agentic tasks.
 
 ---
 
-## 🏗️ Архитектура
+## 🌟 Key Features
+
+* **🔥 MoE Architecture:** 1 trillion parameters with 32 billion activated (384 experts, top-8 activation)
+* **🤖 Agentic Pro:** The world's best open model for agentic tasks without reasoning
+* **👨‍💻 Coding King:** SOTA among non-reasoning models, outperforms GPT-4.1 on SWE-bench (65.8%)
+* **📈 Mathematical Power:** Outstanding results on MATH (70.2%) and GSM8K (92.1%)
+* **⚡ Stability:** Trained on 15.5T tokens with ZERO loss spikes thanks to MuonClip
+* **🌍 Openness:** Fully open-source under the Modified MIT License
+
+---
+
+## 🏗️ Architecture
 
 ### Mixture-of-Experts (MoE)
 
-* **1 триллион параметров с активными 32 миллиардами (384 эксперта, топ-8 активация)**
+* **1 trillion parameters with 32 billion activated (384 experts, top-8 activation)**
 
 ### Multi-Head Latent Attention (MLA)
-* **Компрессия KV-кеша:** в 60× меньше памяти vs стандартное MHA
-* **FlashAttention интеграция:** для эффективной обработки длинного контекста
-* **RoPE scaling:** поддержка 128k токенов без потери качества
+* **KV-cache compression:** 60× less memory vs standard MHA
+* **FlashAttention integration:** For efficient long-context processing
+* **RoPE scaling:** Supports 128k tokens without quality degradation
 
 ---
 
-## 🚀 Производительность
+## 🚀 Performance
 
-### Академические бенчмарки
-* **MMLU (57 предметов):** 87.8% (превосходит GPT-4 ~86.4%)
-* **C-Eval (китайский):** 92.5% (новый рекорд для китайского языка)
-* **MATH (сложная математика):** 70.2% (значительный скачок)
-* **GSM8K (арифметика):** 92.1% (практически без ошибок)
+### Academic Benchmarks
+* **MMLU (57 subjects):** 87.8% (surpasses GPT-4 ~86.4%)
+* **C-Eval (Chinese):** 92.5% (new record for Chinese language)
+* **MATH (advanced math):** 70.2% (significant leap)
+* **GSM8K (arithmetic):** 92.1% (nearly error-free)
 
-### Программирование
-* **LiveCodeBench v6:** 53.7% pass@1 (опережает GPT-4.1 ~44.7%)
-* **MultiPL-E:** 85-86% точность в мультиязычном программировании
-* **SWE-bench Verified:** 65.8% (сравнимо с проприетарными моделями)
+### Programming
+* **LiveCodeBench v6:** 53.7% pass@1 (outperforms GPT-4.1 ~44.7%)
+* **MultiPL-E:** 85–86% accuracy in multilingual programming
+* **SWE-bench Verified:** 65.8% (comparable to proprietary models)
 
-### Агентные задачи
-* **Tau & AceBench:** первые места среди открытых моделей
-* **Инструментальные сценарии:** 70-75% успеха (приближается к Claude 2)
-
----
-
-## 🛠️ Технологические инновации
-
-### Оптимизатор MuonClip
-
-**1. Улучшенная масштабируемость на больших моделях**  
-- Ранние версии Muon показывали хорошие результаты на моделях среднего размера, но их эффективность на архитектурах с миллиардами параметров требовала доработок.  
-- В обновленной версии устранены узкие места, связанные с управлением памятью и вычислительной эффективностью, что позволяет стабильно обучать гигантские модели, включая MoE (Mixture of Experts).  
-
-**2. Решена проблема нестабильности логитов внимания**  
-- В оригинальном Muon агрессивная оптимизация матриц **Query** и **Key** иногда приводила к аномально высоким значениям весов, из-за чего логиты внимания взрывались (достигая 10³–10⁵). Это нарушало работу механизма внимания и вызывало резкий рост потерь (loss).  
-- В новой версии (**MuonClip**) внедрена техника **QK-clip**, которая **явно ограничивает норму весов** после каждого обновления. Это предотвращает неконтролируемый рост логитов и стабилизирует обучение, особенно на поздних этапах.  
-
-**3. Повышена совместимость с MoE-архитектурами**  
-- Проблема взрывающихся логитов была особенно критичной в моделях с экспертами (MoE), где дисбаланс в одном слое мог нарушить работу всей системы.  
-- MuonClip обеспечивает **более предсказуемую динамику обучения** в таких моделях, что подтверждено экспериментами (например, в модели **Kimi K2**).  
-
-Теперь Muon сочетает преимущества **высокой токен-эффективности** и **стабильности** даже при обучении самых больших языковых моделей.
-
-### Распределенное обучение
-* **DeepSpeed + ZeRO:** эффективное распределение параметров
-* **Экспертная параллелизация:** естественное масштабирование MoE
-* **Градиентный чекпоинтинг:** экономия памяти на длинных последовательностях
-
-### Пост-тюнинг
-* **Large-Scale Agentic Data Synthesis:** синтетические агентные задачи
-* **Self-critique RL:** обучение с самооценкой без человеческого фидбэка
-* **Reflex-grade модель:** быстрые оптимальные ответы без длительных раздумий
+### Agentic Tasks
+* **Tau & AceBench:** Top rankings among open models
+* **Tool-use scenarios:** 70–75% success rate (approaching Claude 2)
 
 ---
 
-## 📊 Сравнение с предшественниками
+## 🛠️ Technological Innovations
 
-| Модель | Параметры | MMLU | MATH | SWE-bench | Статус |
-|--------|-----------|------|------|-----------|--------|
+### MuonClip Optimizer
+
+**1. Enhanced scalability for large models**  
+- Early versions of Muon showed strong results on medium-sized models, but their efficiency on architectures with billions of parameters required refinement.  
+- The updated version eliminates bottlenecks related to memory management and computational efficiency, enabling stable training of massive models, including MoE (Mixture of Experts).  
+
+**2. Solved attention logit instability**  
+- In the original Muon, aggressive optimization of **Query** and **Key** matrices sometimes led to abnormally high weight values, causing attention logits to explode (reaching 10³–10⁵). This disrupted the attention mechanism and triggered sharp loss spikes.  
+- The new version (**MuonClip**) introduces **QK-clip**, a technique that **explicitly bounds weight norms** after each update. This prevents uncontrolled logit growth and stabilizes training, especially during later stages.  
+
+**3. Improved compatibility with MoE architectures**  
+- The exploding logits problem was particularly critical in expert-based models (MoE), where imbalance in one layer could disrupt the entire system.  
+- MuonClip ensures **more predictable training dynamics** in such models, as confirmed by experiments (e.g., in the **Kimi K2** model).  
+
+Now Muon combines the advantages of **high token efficiency** and **stability**, even when training the largest language models.
+
+### Distributed Training
+* **DeepSpeed + ZeRO:** Efficient parameter distribution
+* **Expert parallelism:** Natural scaling for MoE
+* **Gradient checkpointing:** Memory savings on long sequences
+
+### Post-training
+* **Large-Scale Agentic Data Synthesis:** Synthetic agentic tasks
+* **Self-critique RL:** Training with self-evaluation without human feedback
+* **Reflex-grade model:** Fast optimal responses without prolonged reasoning
+
+---
+
+## 📊 Comparison with Predecessors
+
+| Model | Parameters | MMLU | MATH | SWE-bench | Status |
+|-------|------------|------|------|-----------|--------|
 | **Kimi-K2** | 1T (32B) | 87.8% | 70.2% | 65.8% | Open |
 | Kimi k1.5 | 389B (52B) | ~82% | ~60% | ~45% | API |
 | GPT-4.1 | ~1.8T | ~86.4% | ~85% | ~70% | Closed |
@@ -96,7 +95,10 @@
 
 ---
 
-⭐ **Понравился обзор?**
-Не забудьте поставить ★ и подписаться на канал в Telegram, чтобы не пропустить новые разборы!
+<div align="center">
 
-<p align="center">Исследуйте вместе с нами 🚀</p> 
+**Explore with us 🚀**
+
+⭐ Star this repository if you found it helpful
+
+</div>

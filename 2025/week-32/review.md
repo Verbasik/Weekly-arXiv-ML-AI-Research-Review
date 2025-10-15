@@ -1,359 +1,348 @@
-# Групповая оптимизация политик в обучении с подкреплением: GSPO vs GRPO
+# Group Policy Optimization in Reinforcement Learning: GSPO vs GRPO
 
----
+**Group Relative Policy Optimization (GRPO)** and **Group Sequence Policy Optimization (GSPO)** are two advanced approaches to reinforcement learning of large language models, each addressing fundamental issues of classical methods through innovative group-based strategies. GRPO, first introduced by the DeepSeek team in February 2024, revolutionized the field by replacing the critic network with group-wise reward normalization. GSPO, developed by the Qwen team in July 2025, extended these ideas further by shifting from token-level to sequence-level optimization and resolving critical stability issues, particularly for Mixture-of-Experts architectures.
 
-### **TWRB_FM 📻**
+Experimental results demonstrate dramatic improvements: GRPO reduces memory consumption by 50% compared to PPO while maintaining performance, and GSPO further increases training stability by 200% when working with MoE models. Both methods have shown outstanding results in mathematical reasoning—DeepSeekMath with GRPO achieved 51.7% on the MATH benchmark, while Qwen3 with GSPO demonstrates even higher training efficiency.
 
-<audio controls>
-  <source src="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/raw/refs/heads/develop/2025/week-32/TWRB_FM.mp3" type="audio/mpeg">
-  Ваш браузер не поддерживает аудиоэлемент.
-</audio>
+## Mathematical Foundations of GRPO: Replacing the Critic with Group Comparison
 
----
+Group Relative Policy Optimization represents a fundamental shift in policy gradient architectures, **eliminating the need for a separate value network** through an elegant group-wise reward comparison. The method optimizes a clipped surrogate objective similar to PPO, but with a fundamentally different advantage estimation.
 
-**Group Relative Policy Optimization (GRPO)** и **Group Sequence Policy Optimization (GSPO)** представляют собой два передовых подхода к обучению с подкреплением больших языковых моделей, каждый из которых решает фундаментальные проблемы классических методов через инновационные групповые стратегии. GRPO, впервые представленный командой DeepSeek в феврале 2024 года, произвел революцию в области путем замены критической сети групповой нормализацией наград. GSPO, разработанный командой Qwen в июле 2025 года, развил эти идеи дальше, перейдя от токен-уровневой к последовательность-уровневой оптимизации и решив критические проблемы стабильности, особенно для Mixture-of-Experts архитектур.
-
-Экспериментальные результаты демонстрируют драматические улучшения: GRPO сокращает потребление памяти на 50% по сравнению с PPO при сохранении производительности, а GSPO дополнительно повышает стабильность обучения на 200% при работе с MoE моделями. Оба метода показали выдающиеся результаты в математических рассуждениях - DeepSeekMath с GRPO достиг 51.7% на MATH benchmark, в то время как Qwen3 с GSPO демонстрирует еще более высокую эффективность обучения.
-
-## Математические основы GRPO: замена критика групповым сравнением
-
-Group Relative Policy Optimization представляет фундаментальный сдвиг в архитектуре policy gradient методов, **устраняя необходимость в отдельной value network** через элегантное групповое сравнение наград. Метод оптимизирует clipped surrogate objective, аналогичный PPO, но с принципиально иной оценкой преимуществ.
-
-Математическая формулировка GRPO базируется на целевой функции:
+The mathematical formulation of GRPO is based on the objective function:
 
 $$J_{GRPO}(\theta) = \mathbb{E}_{q \sim P(Q), \{o_i\}_{i=1}^G \sim \pi_{\theta_{old}}(O|q)} \left[\frac{1}{G} \sum_{i=1}^G \frac{1}{|o_i|} \sum_{t=1}^{|o_i|} \min\left[\frac{\pi_\theta(o_{i,t}|q,o_{i,<t})}{\pi_{\theta_{old}}(o_{i,t}|q,o_{i,<t})} \cdot \hat{A}_{i,t}, \text{clip}\left(\frac{\pi_\theta(o_{i,t}|q,o_{i,<t})}{\pi_{\theta_{old}}(o_{i,t}|q,o_{i,<t})}, 1-\epsilon, 1+\epsilon\right) \cdot \hat{A}_{i,t}\right]\right] - \beta \cdot D_{KL}[\pi_\theta \parallel \pi_{ref}]$$
 
 <details> 
-    <summary><em><strong>пояснение переменных</strong></em></summary>
+    <summary><em><strong>variable explanations</strong></em></summary>
 
-где:
-- **$J_{GRPO}(\theta)$** — целевая функция (objective function), которую алгоритм максимизирует для оптимизации политики.
-- **$\theta$** — параметры **текущей политики** (нейронной сети), которые обновляются в процессе обучения.
-- **$\theta_{old}$** — параметры **старой политики**, зафиксированной на момент сбора данных (генерации ответов).
-- **$q$** — входной промпт (query), для которого генерируются ответы.
-- **$\mathbb{E}_{...}$** — математическое ожидание, взятое по промптам из набора данных и по группам ответов, сгенерированных старой политикой.
-- **$G$** — размер группы, т.е. количество ответов, сгенерированных для одного промпта $q$.
-- **$\{o_i\}_{i=1}^G$** — группа из $G$ ответов (outputs), сгенерированных на промпт $q$.
-- **$o_{i,t}$** — $t$-й токен в $i$-м ответе.
-- **$|o_i|$** — длина $i$-го ответа в токенах.
-- **$\pi_\theta(o_{i,t}|q,o_{i,<t})$** — вероятность генерации токена $o_{i,t}$ **текущей политикой** $\pi_\theta$ при условии промпта $q$ и предыдущих токенов $o_{i,<t}$.
-- **$\pi_{\theta_{old}}(...)$** — аналогичная вероятность, но для **старой политики** $\pi_{\theta_{old}}$.
-- **$\frac{\pi_\theta}{\pi_{\theta_{old}}}$** — **коэффициент важности (importance weighting)** на уровне токена. Он корректирует градиенты, позволяя обучать новую политику на данных, собранных старой.
-- **$\hat{A}_{i,t}$** — **преимущество (advantage)**, присвоенное $t$-му токену в $i$-м ответе. В GRPO это значение одинаково для всех токенов одной последовательности и равно $\hat{A}_i$.
-- **$\text{clip}(...)$** — функция отсечения, которая ограничивает коэффициент важности диапазоном $[1-\epsilon, 1+\epsilon]$, предотвращая слишком большие обновления политики.
-- **$\epsilon$** — гиперпараметр клиппинга (типично 0.1–0.2).
-- **$\beta$** — коэффициент, регулирующий силу KL-регуляризации.
-- **$D_{KL}[\pi_\theta \parallel \pi_{ref}]$** — KL-дивергенция между текущей и референсной политикой.
+where:
+- **$J_{GRPO}(\theta)$** — the objective function, which the algorithm maximizes to optimize the policy.
+- **$\theta$** — parameters of the **current policy** (neural network), updated during training.
+- **$\theta_{old}$** — parameters of the **old policy**, fixed at the time of data collection (response generation).
+- **$q$** — the input prompt (query) for which responses are generated.
+- **$\mathbb{E}_{...}$** — the mathematical expectation over prompts from the dataset and groups of responses generated by the old policy.
+- **$G$** — group size, i.e., the number of responses generated for one prompt $q$.
+- **$\{o_i\}_{i=1}^G$** — a group of $G$ responses (outputs) generated on prompt $q$.
+- **$o_{i,t}$** — the $t$-th token in the $i$-th response.
+- **$|o_i|$** — the length of the $i$-th response in tokens.
+- **$\pi_\theta(o_{i,t}|q,o_{i,<t})$** — the probability of generating token $o_{i,t}$ under the **current policy** $\pi_\theta$, given prompt $q$ and previous tokens $o_{i,<t}$.
+- **$\pi_{\theta_{old}}(...)$** — the analogous probability under the **old policy** $\pi_{\theta_{old}}$.
+- **$\frac{\pi_\theta}{\pi_{\theta_{old}}}$** — the **importance weight** at the token level. It adjusts gradients, enabling the new policy to be trained on data collected by the old one.
+- **$\hat{A}_{i,t}$** — the **advantage** assigned to the $t$-th token in the $i$-th response. In GRPO, this value is identical for all tokens of a single sequence and equals $\hat{A}_i$.
+- **$\text{clip}(...)$** — the clipping function, which constrains the importance weight to the range $[1-\epsilon, 1+\epsilon]$, preventing overly large policy updates.
+- **$\epsilon$** — the clipping hyperparameter (typically 0.1–0.2).
+- **$\beta$** — coefficient regulating the strength of KL regularization.
+- **$D_{KL}[\pi_\theta \parallel \pi_{ref}]$** — the KL divergence between the current and reference policy.
 
 </details> 
 
 ---
 
-Ключевая инновация заключается в **групповой оценке преимуществ**, которая заменяет традиционную функцию ценности:
+The key innovation lies in the **group-wise advantage estimation**, which replaces the traditional value function:
 
 $$\hat{A}_i = \frac{r_i - \text{mean}(\{r_1, r_2, \ldots, r_G\})}{\text{std}(\{r_1, r_2, \ldots, r_G\})}$$
 
 <details> 
-    <summary><em><strong>пояснение переменных</strong></em></summary>
-где:
-- **$\hat{A}_i$** — нормализованное преимущество для $i$-го ответа в группе. Это значение показывает, насколько $i$-й ответ лучше или хуже "среднего" ответа в группе.
-- **$r_i$** — награда (reward) для $i$-го ответа, полученная от внешней модели-оценщика (reward model).
-- **$\{r_1, r_2, \ldots, r_G\}$** — множество наград для всех $G$ ответов в группе.
-- **$\text{mean}(\{...\})$** — среднее арифметическое наград по всей группе. Это значение служит **динамической базовой линией (baseline)**, которая заменяет выходные данные сети критика (value network).
-- **$\text{std}(\{...\})$** — стандартное отклонение наград по группе. Нормализация на эту величину стабилизирует градиенты и делает обучение менее чувствительным к масштабу наград.
+    <summary><em><strong>variable explanations</strong></em></summary>
+where:
+- **$\hat{A}_i$** — the normalized advantage for the $i$-th response in the group. This value indicates how much better or worse the $i$-th response is compared to the "average" response in the group.
+- **$r_i$** — the reward for the $i$-th response, obtained from an external reward model.
+- **$\{r_1, r_2, \ldots, r_G\}$** — the set of rewards for all $G$ responses in the group.
+- **$\text{mean}(\{...\})$** — the arithmetic mean of rewards across the entire group. This serves as a **dynamic baseline**, replacing the output of the critic network.
+- **$\text{std}(\{...\})$** — the standard deviation of rewards across the group. Normalization by this value stabilizes gradients and makes training less sensitive to reward scaling.
 </details> 
 
 ---
 
-где G представляет размер группы (обычно 32-64 ответа), а нормализация по стандартному отклонению обеспечивает стабильность градиентов. Эта формулировка теоретически обоснована принципом снижения дисперсии: групповое среднее служит естественной базовой линией, а относительные сравнения менее чувствительны к абсолютным значениям наград.
+where $G$ represents group size (typically 32–64 responses), and normalization by standard deviation ensures gradient stability. This formulation is theoretically grounded in variance reduction: the group mean serves as a natural baseline, and relative comparisons are less sensitive to absolute reward values.
 
-Алгоритм GRPO работает итеративно: для каждого вопроса q генерируется группа из G ответов, вычисляются награды через модель оценки, затем **токен-уровневые преимущества** распространяются на всю последовательность. KL-дивергенция с референсной политикой обеспечивает регуляризацию:
+The GRPO algorithm operates iteratively: for each query $q$, a group of $G$ responses is generated, rewards are computed via the reward model, and then **token-level advantages** are propagated across the entire sequence. KL divergence from the reference policy provides regularization:
 
 $$
 D_{KL}[\pi_\theta \parallel \pi_{ref}] = \mathbb{E} \left[ \log\frac{\pi_{ref}(o_{i,t}|q,o_{i,<t})}{\pi_\theta(o_{i,t}|q,o_{i,<t})} \right]
 $$
 
 <details> 
-    <summary><em><strong>пояснение переменных</strong></em></summary>
+    <summary><em><strong>variable explanations</strong></em></summary>
 
-где:
-- **$D_{KL}[\pi_\theta \parallel \pi_{ref}]$** — KL-дивергенция, которая измеряет, насколько сильно текущая политика $\pi_\theta$ отклонилась от **референсной политики** $\pi_{ref}$.
-- **$\pi_{ref}$** — референсная модель (часто исходная SFT-модель), которая служит "якорем". Регуляризация не позволяет оптимизируемой модели слишком сильно отойти от изначального распределения, что помогает сохранить ее общие языковые способности и предотвратить "катастрофическое забывание".
+where:
+- **$D_{KL}[\pi_\theta \parallel \pi_{ref}]$** — the KL divergence, measuring how much the current policy $\pi_\theta$ has deviated from the **reference policy** $\pi_{ref}$.
+- **$\pi_{ref}$** — the reference model (often the original SFT model), serving as an "anchor". Regularization prevents the optimized model from straying too far from the initial distribution, helping preserve its general language capabilities and preventing "catastrophic forgetting".
 </details>
 
 ---
 
-Давайте детально, шаг за шагом, разберем, как работают GRPO и GSPO на конкретном примере. Представим, что мы обучаем модель давать краткие и точные ответы на научные вопросы.
+Let us now break down, step by step, how GRPO and GSPO work on a concrete example. Imagine we are training a model to give concise and accurate answers to scientific questions.
 
-### Сценарий для примера
+### Example Scenario
 
-*   **Промпт (Query):** `q = "Сформулируйте теорему Пифагора в одном предложении."`
-*   **Размер группы (G):** Для простоты возьмем $G = 4$. Это значит, что на один промпт модель сгенерирует 4 разных ответа.
-*   **Политики:**
-    *   $\pi_{\theta_{old}}$ — "старая" версия модели, которую мы используем для генерации ответов.
-    *   $\pi_{\theta}$ — "новая" версия модели, которую мы обучаем.
-*   **Модель-оценщик (Reward Model):** Внешняя система, которая оценивает качество каждого ответа по шкале от 0 до 10, где 10 — идеально.
+*   **Prompt (Query):** `q = "Formulate the Pythagorean theorem in one sentence."`
+*   **Group size (G):** For simplicity, let $G = 4$. This means the model generates four different responses for one prompt.
+*   **Policies:**
+    *   $\pi_{\theta_{old}}$ — the "old" version of the model used to generate responses.
+    *   $\pi_{\theta}$ — the "new" version of the model being trained.
+*   **Reward Model:** An external system that evaluates each response on a scale from 0 to 10, where 10 is perfect.
 
 <details> 
-    <summary><em><strong>пример</strong></em></summary>
+    <summary><em><strong>example</strong></em></summary>
 
-### Пример №1: Как работает GRPO "под капотом"
+### Example #1: How GRPO Works "Under the Hood"
 
-GRPO работает на уровне **токенов**. Он вычисляет общее "преимущество" для всей последовательности, а затем применяет его к каждому токену отдельно, взвешивая по вероятности генерации этого токена.
+GRPO operates at the **token level**. It computes a single "advantage" for the entire sequence and applies it uniformly to each token individually, weighted by the probability of generating that token.
 
-#### **Шаг 1: Генерация ответов и оценка**
+#### **Step 1: Generate Responses and Evaluate**
 
-Наша "старая" модель $\pi_{\theta_{old}}$ генерирует 4 ответа на промпт. Модель-оценщик выставляет им награды ($r_i$):
+Our "old" model $\pi_{\theta_{old}}$ generates four responses to the prompt. The reward model assigns them rewards ($r_i$):
 
-1.  $o_1$: "В прямоугольном треугольнике квадрат гипотенузы равен сумме квадратов катетов."
-    *   **Награда ($r_1$): 10.0** (Идеальный ответ)
-2.  $o_2$: "Сумма квадратов двух сторон равна квадрату третьей."
-    *   **Награда ($r_2$): 6.0** (Неточно, так как не указано, что треугольник прямоугольный)
+1.  $o_1$: "In a right triangle, the square of the hypotenuse equals the sum of the squares of the legs."
+    *   **Reward ($r_1$): 10.0** (Perfect answer)
+2.  $o_2$: "The sum of the squares of two sides equals the square of the third."
+    *   **Reward ($r_2$): 6.0** (Inaccurate—does not specify that the triangle is right-angled)
 3.  $o_3$: "$a^2 + b^2 = c^2$"
-    *   **Награда ($r_3$): 8.0** (Точно, но менее полно, чем первый ответ)
-4.  $o_4$: "Теорема о треугольниках."
-    *   **Награда ($r_4$): 1.0** (Очень плохой, неинформативный ответ)
+    *   **Reward ($r_3$): 8.0** (Accurate but less complete than the first answer)
+4.  $o_4$: "The theorem about triangles."
+    *   **Reward ($r_4$): 1.0** (Very poor, uninformative answer)
 
-#### **Шаг 2: Групповая нормализация (Вычисление преимущества $\hat{A}_i$)**
+#### **Step 2: Group Normalization (Computing Advantage $\hat{A}_i$)**
 
-Теперь ключевая инновация GRPO: вместо того чтобы предсказывать "ценность" ответа с помощью отдельной нейросети (критика), мы сравниваем каждый ответ со средним по группе.
+Now comes GRPO’s key innovation: instead of predicting the "value" of an answer using a separate neural network (critic), we compare each response to the group average.
 
-*   **Формула:** $\hat{A}_i = (r_i - \text{mean}(r)) / \text{std}(r)$
+*   **Formula:** $\hat{A}_i = (r_i - \text{mean}(r)) / \text{std}(r)$
 
-1.  **Считаем среднее (mean):**
+1.  **Compute mean:**
     $\text{mean} = (10.0 + 6.0 + 8.0 + 1.0) / 4 = 25.0 / 4 = 6.25$
-    *   *Интерпретация:* "средний" ответ в этой группе имеет качество 6.25.
+    *   *Interpretation:* The "average" response in this group has a quality of 6.25.
 
-2.  **Считаем стандартное отклонение (std):**
+2.  **Compute standard deviation (std):**
     $\text{std} = \sqrt{((10-6.25)^2 + (6-6.25)^2 + (8-6.25)^2 + (1-6.25)^2)/4} = \sqrt{(14.06 + 0.06 + 3.06 + 27.56)/4} = \sqrt{11.185} \approx 3.34$
-    *   *Интерпретация:* это мера разброса наград. Большая величина означает, что ответы очень разного качества.
+    *   *Interpretation:* This measures reward dispersion. A large value indicates responses vary greatly in quality.
 
-3.  **Вычисляем преимущество ($\hat{A}_i$) для каждого ответа:**
-    *   $\hat{A}_1 = (10.0 - 6.25) / 3.34 \approx +1.12$ (Значительно лучше среднего)
-    *   $\hat{A}_2 = (6.0 - 6.25) / 3.34 \approx -0.07$ (Чуть хуже среднего)
-    *   $\hat{A}_3 = (8.0 - 6.25) / 3.34 \approx +0.52$ (Лучше среднего)
-    *   $\hat{A}_4 = (1.0 - 6.25) / 3.34 \approx -1.57$ (Значительно хуже среднего)
+3.  **Compute advantage ($\hat{A}_i$) for each response:**
+    *   $\hat{A}_1 = (10.0 - 6.25) / 3.34 \approx +1.12$ (Significantly better than average)
+    *   $\hat{A}_2 = (6.0 - 6.25) / 3.34 \approx -0.07$ (Slightly worse than average)
+    *   $\hat{A}_3 = (8.0 - 6.25) / 3.34 \approx +0.52$ (Better than average)
+    *   $\hat{A}_4 = (1.0 - 6.25) / 3.34 \approx -1.57$ (Significantly worse than average)
 
-**Ключевой момент:** положительное преимущество $\hat{A}$ будет поощрять модель, а отрицательное — наказывать.
+**Key point:** A positive advantage $\hat{A}$ encourages the model; a negative one penalizes it.
 
-#### **Шаг 3: Токен-уровневая оптимизация**
+#### **Step 3: Token-Level Optimization**
 
-Теперь самое главное. GRPO "разбирает" каждый ответ на токены и применяет обновление к каждому из них. Давайте посмотрим на ответ $o_1$: "В", "прямоугольном", "треугольнике", "...", "катетов", ".".
+Now the crucial part. GRPO "decomposes" each response into tokens and applies an update to each one individually. Let’s examine response $o_1$: "In", "a", "right", "triangle", "...", "legs", ".".
 
-Для **каждого токена** $o_{1,t}$ в этой последовательности мы делаем следующее:
+For **each token** $o_{1,t}$ in this sequence, we do the following:
 
-1.  **Вычисляем коэффициент важности (importance weight):**
+1.  **Compute the importance weight:**
 
     $w_{1,t} = \pi_\theta(o_{1,t} | ...) / \pi_{\theta_{old}}(o_{1,t} | ...)$
 
-    Допустим, для токена "гипотенузы" старая модель была не очень уверена и дала вероятность 0.4, а новая, обучаемая модель, стала более уверенной и дала вероятность 0.6.
+    Suppose for the token "hypotenuse", the old model was uncertain and assigned a probability of 0.4, while the new, training model became more confident and assigned 0.6.
 
-    $w_{\text{гипотенузы}} = 0.6 / 0.4 = 1.5$
+    $w_{\text{hypotenuse}} = 0.6 / 0.4 = 1.5$
 
-2.  **Вычисляем вклад этого токена в общую функцию потерь:**
+2.  **Compute the contribution of this token to the overall loss function:**
 
     $\text{loss\_contribution} = \min(w_{1,t} \cdot \hat{A}_1, \text{clip}(w_{1,t}) \cdot \hat{A}_1)$
 
-    Используя наше преимущество $\hat{A}_1 = +1.12$ и вес $w = 1.5$:
+    Using our advantage $\hat{A}_1 = +1.12$ and weight $w = 1.5$:
 
     $\text{loss\_contribution} = \min(1.5 \cdot 1.12, \text{clip}(1.5, 0.8, 1.2) \cdot 1.12)$
 
     $\text{loss\_contribution} = \min(1.68, 1.2 \cdot 1.12) = \min(1.68, 1.344) = 1.344$
 
-**Что здесь произошло?**
-Алгоритм увидел, что новая политика $\pi_\theta$ стала генерировать токен "гипотенузы" с большей вероятностью. Поскольку вся последовательность была "хорошей" ($\hat{A}_1 > 0$), это изменение поощряется. Клиппинг ($\text{clip}$) не дает этому поощрению быть слишком большим, чтобы обучение было стабильным.
+**What happened here?**
+The algorithm observed that the new policy $\pi_\theta$ now generates the token "hypotenuse" with higher probability. Since the entire sequence was "good" ($\hat{A}_1 > 0$), this change is encouraged. Clipping ($\text{clip}$) prevents this encouragement from becoming too large, ensuring training stability.
 
-Этот процесс повторяется для **каждого токена во всех четырех ответах**. Преимущество $\hat{A}_1 = +1.12$ будет одинаковым для всех токенов ответа $o_1$, а $\hat{A}_4 = -1.57$ — для всех токенов ответа $o_4$.
+This process repeats for **every token in all four responses**. Advantage $\hat{A}_1 = +1.12$ is identical for all tokens of response $o_1$, and $\hat{A}_4 = -1.57$ is identical for all tokens of response $o_4$.
 
-#### **Итог GRPO:**
+#### **GRPO Summary:**
 
-Модель получает сигнал обратной связи на уровне отдельных токенов. Если последовательность в целом была хорошей ($\hat{A} > 0$), вероятность **каждого** ее токена будет увеличена (пропорционально $w_t$). Если плохой ($\hat{A} < 0$), вероятность каждого токена будет уменьшена. Это просто, но, как говорят ребята из Qwen, теоретически не совсем корректно и может создавать "шум".
+The model receives feedback signals at the individual token level. If the sequence as a whole was good ($\hat{A} > 0$), the probability of **every** token is increased (proportional to $w_t$). If it was bad ($\hat{A} < 0$), the probability of every token is decreased. It is simple, but as the Qwen team notes, theoretically somewhat flawed and potentially noisy.
 
 </details>
 
 ---
 
-## Революционный подход GSPO: переход к последовательность-уровневой оптимизации
+## Revolutionary Approach: GSPO — Transitioning to Sequence-Level Optimization
 
-Group Sequence Policy Optimization представляет следующую эволюцию групповых методов, решая **фундаментальные проблемы токен-уровневого подхода GRPO** через переход к последовательность-уровневой оптимизации. Команда Qwen выявила критический недостаток GRPO: токен-уровневые важностные веса основаны на единственной выборке для каждой позиции токена, что не выполняет корректную коррекцию распределения и вносит высокодисперсионный шум.
+Group Sequence Policy Optimization represents the next evolution of group-based methods, solving **fundamental problems of token-level GRPO** by shifting to sequence-level optimization. The Qwen team identified a critical flaw in GRPO: token-level importance weights are based on single samples per token position, failing to correctly correct the distribution and introducing high-variance noise.
 
-GSPO оптимизирует модифицированную целевую функцию:
+GSPO optimizes a modified objective function:
 
 $$J_{GSPO}(\theta) = \mathbb{E}_{x \sim D, \{y_i\}_{i=1}^G \sim \pi_{\theta_{old}}(\cdot|x)} \left[\frac{1}{G} \sum_{i=1}^{G} \min(s_i(\theta)\hat{A}_i, \text{clip}(s_i(\theta), 1-\epsilon, 1+\epsilon)\hat{A}_i)\right]$$
 
 <details> 
-    <summary><em><strong>пояснение переменных</strong></em></summary>
+    <summary><em><strong>variable explanations</strong></em></summary>
 
-где:
-- **$J_{GSPO}(\theta)$** — целевая функция GSPO, которая оптимизируется на уровне целых последовательностей.
-- **$x$** — входной промпт (аналогично $q$ в GRPO).
-- **$D$** — набор данных с промптами.
-- **$\{y_i\}_{i=1}^G$** — группа из $G$ сгенерированных ответов (последовательностей).
-- **$s_i(\theta)$** — **коэффициент важности на уровне последовательности (sequence-level importance weight)**. Это ключевое отличие от GRPO.
-- **$\hat{A}_i$** — **преимущество на уровне последовательности**, вычисляемое так же, как в GRPO, но применяемое ко всей последовательности как единому целому.
-- **$\min(...)$** и **$\text{clip}(...)$** — механизм отсечения, аналогичный PPO и GRPO, но применяемый к коэффициенту важности всей последовательности $s_i(\theta)$.
+where:
+- **$J_{GSPO}(\theta)$** — the GSPO objective function, optimized at the level of entire sequences.
+- **$x$** — the input prompt (analogous to $q$ in GRPO).
+- **$D$** — the dataset of prompts.
+- **$\{y_i\}_{i=1}^G$** — a group of $G$ generated responses (sequences).
+- **$s_i(\theta)$** — the **sequence-level importance weight**. This is the key distinction from GRPO.
+- **$\hat{A}_i$** — the **sequence-level advantage**, computed the same way as in GRPO but applied to the entire sequence as a single unit.
+- **$\min(...)$** and **$\text{clip}(...)$** — the clipping mechanism, similar to PPO and GRPO, but applied to the entire sequence's importance coefficient $s_i(\theta)$.
 </details> 
 
 ---
 
-**Ключевая инновация** - определение коэффициента важности на уровне последовательности с нормализацией по длине:
+**The key innovation** is defining the sequence-level importance weight with length normalization:
 
 $$s_i(\theta) = \left(\frac{\pi_\theta(y_i|x)}{\pi_{\theta_{old}}(y_i|x)}\right)^{1/|y_i|} = \exp\left(\frac{1}{|y_i|} \sum_{t=1}^{|y_i|} \log\left[\frac{\pi_\theta(y_{i,t}|x,y_{i,<t})}{\pi_{\theta_{old}}(y_{i,t}|x,y_{i,<t})}\right]\right)$$
 
 <details> 
-    <summary><em><strong>пояснение переменных</strong></em></summary>
-где:
-- **$s_i(\theta)$** — отношение вероятностей генерации всей последовательности $y_i$ текущей и старой политиками.
-- **$\pi_\theta(y_i|x)$** — вероятность генерации **всей последовательности** $y_i$ текущей политикой. Вычисляется как произведение вероятностей всех ее токенов.
-- **$\pi_{\theta_{old}}(y_i|x)$** — аналогичная вероятность для старой политики.
-- **$|y_i|$** — длина последовательности $y_i$ в токенах.
-- **$(\cdot)^{1/|y_i|}$** — **нормализация по длине**. Это критически важный шаг, который, по сути, вычисляет геометрическое среднее токен-уровневых отношений. Он выполняет три функции:
-    1.  **Снижает дисперсию**: предотвращает экспоненциальный рост или затухание значения $s_i(\theta)$ с увеличением длины последовательности.
-    2.  **Унифицирует диапазон**: приводит коэффициенты важности для коротких и длинных последовательностей к сопоставимому числовому диапазону.
-    3.  **Предотвращает доминирование**: не позволяет длинным последовательностям (с большим количеством множителей в произведении вероятностей) оказывать непропорционально большое влияние на градиент.
+    <summary><em><strong>variable explanations</strong></em></summary>
+where:
+- **$s_i(\theta)$** — the ratio of the probabilities of generating the entire sequence $y_i$ under the current and old policies.
+- **$\pi_\theta(y_i|x)$** — the probability of generating the **entire sequence** $y_i$ under the current policy. Computed as the product of probabilities of all its tokens.
+- **$\pi_{\theta_{old}}(y_i|x)$** — the analogous probability under the old policy.
+- **$|y_i|$** — the length of sequence $y_i$ in tokens.
+- **$(\cdot)^{1/|y_i|}$** — **length normalization**. This critical step effectively computes the geometric mean of token-level ratios. It performs three functions:
+    1.  **Reduces variance**: Prevents exponential growth or decay of $s_i(\theta)$ with increasing sequence length.
+    2.  **Unifies range**: Brings importance coefficients for short and long sequences to a comparable numerical range.
+    3.  **Prevents domination**: Stops long sequences (with more multiplicative probability factors) from disproportionately influencing gradients.
 </details> 
 
 ---
 
-Нормализация по длине через показатель степени `1/|y_i|` выполняет три критические функции: снижает дисперсию градиентов, унифицирует численный диапазон коэффициентов важности и предотвращает доминирование длинных последовательностей над короткими.
+Length normalization via exponent $1/|y_i|$ performs three critical functions: it reduces gradient variance, unifies the numerical range of importance coefficients, and prevents long sequences from dominating short ones.
 
-Групповое относительное вычисление преимущества остается аналогичным GRPO:
+The group-wise relative advantage computation remains analogous to GRPO:
 
 $$\hat{A}_i = \frac{r(x,y_i) - \text{mean}\{r(x,y_i)\}_{i=1}^G}{\text{std}\{r(x,y_i)\}_{i=1}^G}$$
 
 <details> 
-    <summary><em><strong>пояснение переменных</strong></em></summary>
-где:
-- **$\hat{A}_i$** — нормализованное преимущество для $i$-й последовательности.
-- **$r(x, y_i)$** — награда для ответа $y_i$ на промпт $x$.
-- **$\text{mean}\{...\}$** и **$\text{std}\{...\}$** — среднее и стандартное отклонение наград по группе.
-- **Ключевое отличие от GRPO**: хотя формула идентична, здесь преимущество $\hat{A}_i$ умножается на единый коэффициент важности $s_i(\theta)$ для всей последовательности. Это обеспечивает соответствие между единицей оптимизации (последовательность) и единицей награждения (также последовательность), что **устраняет токен-уровневый шум** и делает обучение более стабильным и теоретически обоснованным.
+    <summary><em><strong>variable explanations</strong></em></summary>
+where:
+- **$\hat{A}_i$** — the normalized advantage for the $i$-th sequence.
+- **$r(x, y_i)$** — the reward for response $y_i$ to prompt $x$.
+- **$\text{mean}\{...\}$** and **$\text{std}\{...\}$** — mean and standard deviation of rewards across the group.
+- **Key difference from GRPO**: Although the formula is identical, here advantage $\hat{A}_i$ is multiplied by a single sequence-level importance coefficient $s_i(\theta)$. This ensures alignment between the unit of optimization (sequence) and the unit of reward (also sequence), **eliminating token-level noise** and making training more stable and theoretically sound.
 </details> 
 
 ---
 
-Но применяется на уровне всей последовательности, что **устраняет токен-уровневый шум** и обеспечивает правильное выравнивание между единицей оптимизации (последовательность) и единицей награждения (также последовательность).
+But applied at the sequence level, this **eliminates token-level noise** and ensures proper alignment between the unit of optimization (sequence) and the unit of reward (also sequence).
 
 <details> 
-    <summary><em><strong>пример</strong></em></summary>
+    <summary><em><strong>example</strong></em></summary>
 
-### Пример №2: Как работает GSPO "под капотом"
+### Example #2: How GSPO Works "Under the Hood"
 
-GSPO устраняет главную проблему GRPO, переходя к оптимизации на уровне **целых последовательностей**. Это более логично, так как награда дается за весь ответ, а не за отдельные слова.
+GSPO resolves the primary flaw of GRPO by shifting to optimization at the level of **entire sequences**. This is more intuitive, since rewards are assigned to complete responses, not individual words.
 
-#### **Шаги 1 и 2: Генерация, оценка и вычисление преимущества**
+#### **Steps 1 and 2: Generation, Evaluation, and Advantage Computation**
 
-Эти шаги **абсолютно идентичны** GRPO. Мы используем тот же промпт, те же 4 ответа и получаем те же самые значения преимущества:
+These steps are **identical** to GRPO. We use the same prompt, the same four responses, and obtain the exact same advantage values:
 *   $\hat{A}_1 \approx +1.12$
 *   $\hat{A}_2 \approx -0.07$
 *   $\hat{A}_3 \approx +0.52$
 *   $\hat{A}_4 \approx -1.57$
 
-#### **Шаг 3: Ключевое отличие — вычисление коэффициента важности на уровне последовательности ($s_i(\theta)$)**
+#### **Step 3: Key Difference — Computing Sequence-Level Importance Weight ($s_i(\theta)$)**
 
-Вместо того чтобы смотреть на каждый токен отдельно, GSPO вычисляет единый коэффициент важности для всей последовательности.
+Instead of examining each token individually, GSPO computes a single importance weight for the entire sequence.
 
-*   **Формула:** $s_i(\theta) = (\pi_\theta(y_i) / \pi_{\theta_{old}}(y_i))^{1/|y_i|}$
+*   **Formula:** $s_i(\theta) = (\pi_\theta(y_i) / \pi_{\theta_{old}}(y_i))^{1/|y_i|}$
 
-Давайте снова рассмотрим наш лучший ответ $o_1$ (в GSPO он называется $y_1$), который состоит, скажем, из 12 токенов ($|y_1| = 12$).
+Let’s revisit our best response $o_1$ (called $y_1$ in GSPO), which consists of, say, 12 tokens ($|y_1| = 12$).
 
-1.  **Считаем вероятность всей последовательности:**
-    *   $\pi_{\theta_{old}}(y_1)$ = P("В") * P("прямоугольном"|"В") * ... * P("."|... "катетов")
-    *   $\pi_\theta(y_1)$ = P_new("В") * P_new("прямоугольном"|"В") * ...
+1.  **Compute the probability of the entire sequence:**
+    *   $\pi_{\theta_{old}}(y_1)$ = P("In") * P("right"|"In") * ... * P("."|... "legs")
+    *   $\pi_\theta(y_1)$ = P_new("In") * P_new("right"|"In") * ...
 
-    Предположим, после перемножения всех вероятностей мы получили:
+    Suppose after multiplying all token probabilities we obtain:
     *   $\pi_{\theta_{old}}(y_1) = 0.00001$
-    *   $\pi_\theta(y_1) = 0.00005$ (Новая модель в целом более уверена в этой хорошей последовательности)
+    *   $\pi_\theta(y_1) = 0.00005$ (The new model is overall more confident in this good sequence)
 
-2.  **Считаем отношение вероятностей:**
+2.  **Compute the probability ratio:**
     $\text{ratio} = \pi_\theta(y_1) / \pi_{\theta_{old}}(y_1) = 0.00005 / 0.00001 = 5.0$
 
-3.  **Нормализуем по длине (самый важный шаг!):**
+3.  **Normalize by length (the most critical step!):**
     $s_1(\theta) = (5.0)^{1/12} \approx 1.14$
 
-**Что здесь произошло?**
-Без нормализации по длине ($^{1/|y_i|}$) отношение для длинных последовательностей могло бы стать астрономически большим или исчезающе малым, вызывая нестабильность. Нормализация (по сути, вычисление среднего геометрического) приводит коэффициент $s_i$ в разумный диапазон (часто около 1.0), независимо от длины ответа.
+**What happened here?**
+Without length normalization ($^{1/|y_i|}$), the ratio for long sequences could become astronomically large or vanishingly small, causing instability. Normalization (essentially computing the geometric mean) brings the coefficient $s_i$ into a reasonable range (often near 1.0), regardless of response length.
 
-#### **Шаг 4: Обновление на уровне последовательности**
+#### **Step 4: Sequence-Level Update**
 
-Теперь обновление становится элегантно простым. Для всей последовательности $y_1$ мы вычисляем ее вклад в функцию потерь:
+Now the update becomes elegantly simple. For the entire sequence $y_1$, we compute its contribution to the loss function:
 
 $\text{loss\_contribution}_1 = \min(s_1(\theta) \cdot \hat{A}_1, \text{clip}(s_1(\theta)) \cdot \hat{A}_1)$
 
 $\text{loss\_contribution}_1 = \min(1.14 \cdot 1.12, \text{clip}(1.14, 0.8, 1.2) \cdot 1.12)$
 
-$\text{loss\_contribution}_1 = \min(1.2768, 1.14 \cdot 1.12) = 1.2768$ (поскольку 1.14 уже в пределах клиппинга)
+$\text{loss\_contribution}_1 = \min(1.2768, 1.14 \cdot 1.12) = 1.2768$ (since 1.14 is already within the clipping range)
 
-Этот процесс повторяется для каждой из 4 последовательностей, используя ее **единый** коэффициент $s_i$ и ее преимущество $\hat{A}_i$.
+This process repeats for each of the four sequences, using its **single** importance coefficient $s_i$ and its advantage $\hat{A}_i$.
 
-#### **Итог GSPO:**
+#### **GSPO Summary:**
 
-Модель получает единый, целостный сигнал обратной связи для всей последовательности. Если ответ $y_i$ был хорошим ($\hat{A}_i > 0$) и новая политика стала генерировать его с большей вероятностью ($s_i > 1$), то вся траектория генерации этого ответа поощряется. Это устраняет токен-уровневый шум и напрямую связывает награду за последовательность с оптимизацией всей последовательности. Это более стабильный и теоретически обоснованный подход.
+The model receives a unified, holistic feedback signal for the entire sequence. If response $y_i$ was good ($\hat{A}_i > 0$) and the new policy generates it with higher probability ($s_i > 1$), the entire generation trajectory is encouraged. This eliminates token-level noise and directly links sequence-level reward to sequence-level optimization. This is a more stable and theoretically grounded approach.
 
 </details>
 
-## Принципиальные различия в механике оптимизации
+## Fundamental Differences in Optimization Mechanics
 
-Фундаментальное различие между методами заключается в **уровне применения importance sampling**. GRPO использует токен-уровневые отношения правдоподобия:
+The core distinction between the methods lies in the **level at which importance sampling is applied**. GRPO employs token-level likelihood ratios:
 
 $$w_{i,t}^{GRPO}(\theta) = \frac{\pi_\theta(y_{i,t}|x,y_{i,<t})}{\pi_{\theta_{old}}(y_{i,t}|x,y_{i,<t})}$$
 
-что теоретически проблематично, поскольку единственная выборка на токен не может корректно выполнить распределительную коррекцию importance sampling. GSPO решает эту проблему через **теоретически обоснованное** применение importance sampling на уровне последовательности.
+which is theoretically problematic, since a single sample per token cannot correctly perform distributional correction for importance sampling. GSPO resolves this through **theoretically sound** application of importance sampling at the sequence level.
 
-Различия в клиппинге также критичны: GRPO применяет клиппинг на каждом токене независимо, что может привести к неконсистентному поведению внутри последовательности. GSPO использует **единое клиппинг-значение для всей последовательности**, обеспечивая когерентные обновления политики.
+Differences in clipping are also critical: GRPO applies clipping independently at each token, potentially causing inconsistent behavior within a sequence. GSPO uses a **single clipping value for the entire sequence**, ensuring coherent policy updates.
 
-Экспериментальные данные показывают парадоксальный результат: GSPO отсекает ~15% ответов против ~0.13% токенов в GRPO, но при этом демонстрирует более высокую эффективность обучения. Это подтверждает гипотезу о том, что **агрессивный клиппинг на правильном уровне** более эффективен, чем консервативный клиппинг на неподходящем уровне.
+Experimental data reveals a paradoxical result: GSPO clips ~15% of responses versus ~0.13% of tokens in GRPO, yet demonstrates higher training efficiency. This confirms the hypothesis that **aggressive clipping at the correct level** is more effective than conservative clipping at an inappropriate level.
 
-## Вычислительная сложность и архитектурные преимущества
+## Computational Complexity and Architectural Advantages
 
-Анализ вычислительной сложности выявляет значительные различия между методами. GRPO требует память порядка O(N·T), где N - размер батча, T - длина последовательности, плюс дополнительные 15-20% памяти для Routing Replay при работе с MoE моделями. GSPO достигает константной по длине сложности O(N), что драматически улучшает масштабируемость.
+Analysis of computational complexity reveals significant differences between the methods. GRPO requires memory of order O(N·T), where N is batch size and T is sequence length, plus an additional 15–20% memory for Routing Replay when working with MoE models. GSPO achieves constant-in-length complexity O(N), dramatically improving scalability.
 
-Для **Mixture-of-Experts архитектур** различия особенно критичны. GRPO страдает от проблемы volatility активации экспертов - токен-уровневые веса создают нестабильные паттерны маршрутизации, требуя специализированных решений типа Routing Replay. GSPO **нативно стабилизирует** MoE обучение через последовательность-уровневые веса, устраняя необходимость в дополнительных механизмах.
+For **Mixture-of-Experts architectures**, the differences are especially critical. GRPO suffers from expert activation volatility—token-level weights create unstable routing patterns, requiring specialized solutions like Routing Replay. GSPO **natively stabilizes** MoE training through sequence-level weights, eliminating the need for additional mechanisms.
 
-Экспериментальные результаты на Qwen3-30B-A3B-Base демонстрируют, что GSPO обеспечивает стабильное обучение MoE моделей без какой-либо дополнительной инфраструктуры, в то время как GRPO требует тщательной настройки и специализированных workaround'ов.
+Experimental results on Qwen3-30B-A3B-Base demonstrate that GSPO enables stable MoE training without any additional infrastructure, whereas GRPO requires careful tuning and specialized workarounds.
 
-## Эмпирические результаты и практические применения
+## Empirical Results and Practical Applications
 
-Практические результаты подтверждают теоретические преимущества обоих методов. **DeepSeekMath с GRPO** продемонстрировал прорывные результаты в математических рассуждениях: GSM8K улучшился с 82.9% до 88.2%, MATH с 46.8% до 51.7%. Особенно впечатляющим стало создание DeepSeek-R1-Zero - первой демонстрации развития рассуждающих способностей через чистое обучение с подкреплением без supervised fine-tuning, достигшей 71.0% на AIME 2024.
+Practical results confirm the theoretical advantages of both methods. **DeepSeekMath with GRPO** achieved breakthrough performance in mathematical reasoning: GSM8K improved from 82.9% to 88.2%, and MATH from 46.8% to 51.7%. Particularly impressive was the creation of DeepSeek-R1-Zero—the first demonstration of developing reasoning capabilities through pure reinforcement learning without supervised fine-tuning, achieving 71.0% on AIME 2024.
 
-**Qwen3 с GSPO** показал еще более сильные улучшения в эффективности обучения - на 30-40% более быстрая сходимость при том же вычислительном бюджете. Критически важно, что GSPO демонстрирует **монотонное улучшение** при увеличении вычислительных ресурсов, в отличие от GRPO, который может страдать от нестабильности при длительном обучении.
+**Qwen3 with GSPO** showed even stronger improvements in training efficiency—30–40% faster convergence at the same computational budget. Critically, GSPO demonstrates **monotonic improvement** with increased computational resources, unlike GRPO, which can suffer from instability during prolonged training.
 
-Анализ стабильности обучения выявляет кардинальные различия: GRPO показывает ~15-20% случаев коллапса модели при длительном обучении, в то время как GSPO демонстрирует менее 2% случаев нестабильности. Это особенно критично для промышленных применений, где требуется гарантированная стабильность.
+Stability analysis reveals stark differences: GRPO exhibits ~15–20% cases of model collapse during prolonged training, while GSPO shows less than 2% instability. This is especially critical for production applications requiring guaranteed stability.
 
-## Теоретические гарантии и свойства сходимости
+## Theoretical Guarantees and Convergence Properties
 
-С теоретической точки зрения, оба метода наследуют гарантии сходимости PPO при соблюдении соответствующих условий клиппинга. Однако **GSPO обладает более строгими теоретическими основаниями** благодаря корректному применению importance sampling. Групповая нормализация в обоих методах обеспечивает естественное снижение дисперсии - математически доказано, что дисперсия групповой оценки не превышает индивидуальную дисперсию, умноженную на (1 - 1/G).
+Theoretically, both methods inherit PPO convergence guarantees under appropriate clipping conditions. However, **GSPO possesses stronger theoretical foundations** due to its correct application of importance sampling. Group normalization in both methods ensures natural variance reduction—mathematically proven, the variance of group estimates does not exceed individual variance multiplied by (1 - 1/G).
 
-GSPO дополнительно обеспечивает **свойства стабильности** через: длинно-нормализованные веса, предотвращающие накопление ошибок; клиппинг на уровне последовательности, исключающий чрезмерно off-policy выборки; равномерное взвешивание токенов, устраняющее конкуренцию за кредит.
+GSPO further ensures **stability properties** through: length-normalized weights preventing error accumulation; sequence-level clipping excluding overly off-policy samples; and uniform token weighting eliminating credit competition.
 
-Хотя формальный анализ сходимости для GSPO не представлен в оригинальной публикации, эмпирические результаты демонстрируют монотонное улучшение производительности и стабильное обучение без коллапса модели даже при работе с триллион-параметровыми MoE моделями.
+Although a formal convergence analysis for GSPO is not presented in the original publication, empirical results demonstrate monotonic performance improvement and stable training without model collapse, even when training trillion-parameter MoE models.
 
-## Современные развития и вариации методов
+## Modern Developments and Method Variants
 
-Активные исследования привели к появлению улучшенных вариантов обоих методов. **GRPO-LEAD** (2024) интегрирует length-dependent rewards и explicit negative penalties, улучшая краткость решений на 24-26%. **GRPO-CARE** (2025) добавляет consistency-aware reinforcement learning, повышая согласованность на 24.5%.
+Active research has led to improved variants of both methods. **GRPO-LEAD** (2024) integrates length-dependent rewards and explicit negative penalties, improving solution conciseness by 24–26%. **GRPO-CARE** (2025) adds consistency-aware reinforcement learning, increasing consistency by 24.5%.
 
-Для GSPO разработан **токен-уровневый вариант GSPO-token** для сценариев, требующих более тонкой настройки:
+For GSPO, a **token-level variant, GSPO-token**, has been developed for scenarios requiring finer control:
 
 $$J_{GSPO\text{-}token}(\theta) = \mathbb{E}\left[\frac{1}{G} \sum_{i=1}^{G} \frac{1}{|y_i|} \sum_{t=1}^{|y_i|} \min(s_{i,t}(\theta)\hat{A}_{i,t}, \text{clip}(s_{i,t}(\theta), 1-\epsilon, 1+\epsilon)\hat{A}_{i,t})\right]$$
 
-где $s_{i,t}(\theta) = \text{sg}[s_i(\theta)] \cdot \frac{\pi_\theta(y_{i,t}|x,y_{i,<t})}{\text{sg}[\pi_\theta(y_{i,t}|x,y_{i,<t})]}$ использует stop-gradient операции для стабильности.
+where $s_{i,t}(\theta) = \text{sg}[s_i(\theta)] \cdot \frac{\pi_\theta(y_{i,t}|x,y_{i,<t})}{\text{sg}[\pi_\theta(y_{i,t}|x,y_{i,<t})]}$ uses stop-gradient operations for stability.
 
-**Гибридные подходы** исследуют комбинирование групповых методов с традиционными value-based подходами, обещая лучшее из обоих миров: стабильность групповых методов и быструю сходимость value-based обучения.
+**Hybrid approaches** explore combining group methods with traditional value-based approaches, promising the best of both worlds: the stability of group methods and the fast convergence of value-based learning.
 
-## Практические рекомендации и выбор метода
+## Practical Recommendations and Method Selection
 
-Для **практических применений** выбор между методами зависит от конкретных требований. GRPO рекомендуется для моделей менее 30B параметров со стандартными dense архитектурами, где проверенная стабильность и широкая экосистема поддержки являются приоритетом. Оптимальные гиперпараметры включают learning rate 1e-6, beta 0.04, epsilon 0.2, и размер группы 8-16.
+For **practical applications**, the choice between methods depends on specific requirements. GRPO is recommended for models under 30B parameters with standard dense architectures, where proven stability and broad ecosystem support are priorities. Optimal hyperparameters include learning rate 1e-6, beta 0.04, epsilon 0.2, and group size 8–16.
 
-GSPO становится предпочтительным выбором для **MoE моделей любого размера**, длинных последовательностей (>500 токенов), и сценариев, требующих максимальной стабильности для производственного использования. Рекомендуемые настройки включают более агрессивное клиппинг (epsilon 3e-4) и sequence-level оптимизацию.
+GSPO becomes the preferred choice for **MoE models of any size**, long sequences (>500 tokens), and scenarios requiring maximum stability for production use. Recommended settings include more aggressive clipping (epsilon 3e-4) and sequence-level optimization.
 
-**Инфраструктурные преимущества** GSPO включают толерантность к precision discrepancies, возможность использования likelihood от inference engine без пересчета в training engine, и упрощение архитектуры через отсутствие необходимости в Routing Replay.
+**Infrastructure advantages** of GSPO include tolerance to precision discrepancies, the ability to use likelihood from the inference engine without recomputation in the training engine, and simplified architecture through elimination of Routing Replay.
 
-## Заключение: парадигмальный сдвиг в обучении с подкреплением
+## Conclusion: A Paradigm Shift in Reinforcement Learning
 
-Group Sequence Policy Optimization и Group Relative Policy Optimization представляют **фундаментальную эволюцию** в обучении с подкреплением для больших языковых моделей. GRPO заложил основы групповых методов, демонстрируя возможность достижения высокой производительности без критических сетей. GSPO развил эти идеи до логического завершения, решив проблемы стабильности через переход к последовательность-уровневой оптимизации.
+Group Sequence Policy Optimization and Group Relative Policy Optimization represent a **fundamental evolution** in reinforcement learning for large language models. GRPO laid the groundwork for group-based methods, demonstrating high performance without critic networks. GSPO extended these ideas to their logical conclusion, solving stability issues through transition to sequence-level optimization.
 
-Ключевой инсайт обоих методов заключается в **выравнивании уровня оптимизации с уровнем награждения** - поскольку награды назначаются целым последовательностям, оптимизация должна происходить на том же уровне. GSPO наиболее полно реализует этот принцип, достигая беспрецедентной стабильности и эффективности.
+The key insight of both methods is **aligning the level of optimization with the level of reward**—since rewards are assigned to entire sequences, optimization must occur at the same level. GSPO most fully realizes this principle, achieving unprecedented stability and efficiency.
 
-Практическое влияние этих методов выходит далеко за рамки академических исследований. Успешное внедрение в производственные системы - от DeepSeekMath до Qwen3 - демонстрирует готовность технологий к реальным применениям. **Экономическая эффективность** особенно впечатляет: 50% сокращение потребления памяти с GRPO и дополнительные 30-40% улучшения эффективности с GSPO открывают возможности для более широкого внедрения advanced RL методов.
+The practical impact of these methods extends far beyond academic research. Successful deployment in production systems—from DeepSeekMath to Qwen3—demonstrates the readiness of these technologies for real-world applications. **Economic efficiency** is especially impressive: 50% memory reduction with GRPO and additional 30–40% efficiency gains with GSPO open possibilities for broader adoption of advanced RL methods.
 
-Будущие исследования сосредоточены на расширении групповых методов на мультимодальные задачи, интеграции с методами поиска по дереву для test-time compute, и развитии теоретического понимания оптимальных размеров групп и стратегий адаптации. Групповые методы оптимизации политик установили новую парадигму для эффективного и стабильного обучения с подкреплением, которая будет определять развитие области в ближайшие годы.
+Future research focuses on extending group methods to multimodal tasks, integrating with tree-search methods for test-time compute, and developing theoretical understanding of optimal group sizes and adaptive strategies. Group policy optimization methods have established a new paradigm for efficient and stable reinforcement learning that will define the field’s development in the coming years.

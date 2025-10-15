@@ -1,10 +1,10 @@
-## Второй выпуск ATLAS уже доступен!
+The second issue of ATLAS is now available!
 
-На этой неделе мы продолжаем наше путешествие по основам машинного обучения в проекте ATLAS.
+This week, we continue our journey through the fundamentals of machine learning in the ATLAS project.
 
-- ▫️ Глава 3: Производная = скорость изменения
-- ▫️ Глава 4: Градиент — производная в многомерном мире
+- ▫️ Chapter 3: Derivative = Rate of Change
+- ▫️ Chapter 4: Gradient — The Derivative in Multidimensional Space
 
-🔍 Готовы сделать следующий шаг в понимании машинного обучения?
+🔍 Ready to take the next step in understanding machine learning?
 
-👉 Читать второй выпуск [ATLAS](https://verbasik.github.io/Weekly-arXiv-ML-AI-Research-Review/atlas-wrapper.html)
+👉 Read the second issue of [ATLAS](https://verbasik.github.io/Weekly-arXiv-ML-AI-Research-Review/atlas-wrapper.html)

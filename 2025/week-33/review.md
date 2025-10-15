@@ -1,77 +1,77 @@
-# Google Agent Development Kit (ADK): модульный подход к созданию ИИ-агентов
+# Google Agent Development Kit (ADK): A Modular Approach to Building AI Agents
 
-## 1. Введение: инженерный подход к созданию агентов
+## 1. Introduction: An Engineering Approach to Agent Construction
 
-Пока OpenAI делает ставку на простоту и быструю интеграцию со своим Assistants API, Google предлагает иной путь — модульность, гибкость и строгие инженерные практики. **Agent Development Kit (ADK)** — это ответ Google на растущую потребность в создании сложных, кастомизируемых и модельно-независимых ИИ-агентов. Этот фреймворк создан для тех, кто хочет строить агентные системы с той же строгостью и контролем, что и традиционное программное обеспечение.
+While OpenAI bets on simplicity and rapid integration via its Assistants API, Google offers a different path—modularity, flexibility, and rigorous engineering practices. The **Agent Development Kit (ADK)** is Google’s response to the growing need for complex, customizable, and model-agnostic AI agents. This framework is built for developers who want to construct agent systems with the same rigor and control as traditional software.
 
-Этот обзор — глубокое погружение в архитектуру, философию и практическое применение Google ADK. Мы разберем его ключевые компоненты, сравним с популярными альтернативами и определим, для каких задач этот мощный, но менее известный инструмент подходит лучше всего.
+This review is a deep dive into the architecture, philosophy, and practical application of Google ADK. We’ll dissect its key components, compare it to popular alternatives, and determine for which tasks this powerful but lesser-known tool is best suited.
 
-## 2. Архитектура: конструктор для инженера
+## 2. Architecture: A Constructor for Engineers
 
-В основе ADK лежит философия, близкая к микросервисной архитектуре. Вместо монолитного "движка", Google предлагает набор взаимозаменяемых модулей (сервисов), которые разработчик может комбинировать и настраивать под свои нужды. Это дает беспрецедентный контроль, но требует более глубокого понимания компонентов.
+At the heart of ADK lies a philosophy akin to microservices architecture. Instead of a monolithic “engine,” Google provides a set of interchangeable modules (services) that developers can combine and customize to their needs. This grants unprecedented control—but demands a deeper understanding of the components.
 
 ```
 ┌───────────────────────────┐
-│          Runner           │  <- Уровень исполнения и сессий
-│ (Управляет жизненным циклом)│
+│          Runner           │  <- Execution and session layer
+│ (Manages lifecycle)       │
 └─────────────┬─────────────┘
               │
 ┌─────────────▼─────────────┐
-│           Agent           │  <- Уровень логики (инструкции, модель)
-│ (Может иметь sub-agents)  │
+│           Agent           │  <- Logic layer (instructions, model)
+│ (Can have sub-agents)     │
 └─────────────┬─────────────┘
               │
 ┌─────────────▼─────────────┐
-│          Services         │  <- Уровни поддержки
+│          Services         │  <- Support layers
 │ (Memory, Tools, Artifacts)│
 └───────────────────────────┘
 ```
 
-Ключевая идея — каждый компонент (управление памятью, инструментами, хранилищем файлов) является независимым сервисом с четким интерфейсом, который можно заменить собственной реализацией.
+The core idea is that each component (memory management, tools, file storage) is an independent service with a well-defined interface that can be replaced with a custom implementation.
 
-## 3. Ключевые возможности: что делает ADK мощным?
+## 3. Key Capabilities: What Makes ADK Powerful?
 
-*   **Иерархическая мульти-агентность**: в отличие от простых цепочек, ADK позволяет строить древовидные структуры, где `parent_agent` может делегировать задачи нескольким `sub_agents`. Это идеально подходит для сложных рабочих процессов, где разные агенты отвечают за разные этапы задачи.
-*   **Расширяемость и модельная-независимость**: ADK не привязывает вас к Gemini. Благодаря абстракции `BaseLlm` вы можете подключить любую модель (GPT, Claude, open-source), просто реализовав соответствующий интерфейс.
-*   **Продвинутое управление состоянием**: фреймворк разделяет управление памятью (`MemoryService`) и хранение артефактов (`ArtifactService`), позволяя подключать разные бэкенды (in-memory для тестов, Google Cloud Storage для продакшена).
-*   **Встроенная система оценки (`Evaluation`)**: ADK предлагает инструменты для систематического тестирования агентов по наборам данных. Это приближает разработку агентов к классическому TDD (Test-Driven Development) и позволяет итеративно улучшать их качество.
-*   **Исполнение кода (`Code Executors`)**: аналог Code Interpreter от OpenAI, но с большей гибкостью в настройке среды выполнения и управления зависимостями.
+*   **Hierarchical Multi-Agent Architecture**: Unlike simple chains, ADK enables tree-like structures where a `parent_agent` can delegate tasks to multiple `sub_agents`. This is ideal for complex workflows where different agents handle distinct stages of a task.
+*   **Extensibility and Model-Agnosticism**: ADK does not lock you into Gemini. Through the `BaseLlm` abstraction, you can plug in any model (GPT, Claude, open-source) by simply implementing the corresponding interface.
+*   **Advanced State Management**: The framework separates memory management (`MemoryService`) from artifact storage (`ArtifactService`), allowing you to connect different backends (in-memory for testing, Google Cloud Storage for production).
+*   **Built-in Evaluation System (`Evaluation`)**: ADK provides tools for systematic agent testing against datasets. This brings agent development closer to classical TDD (Test-Driven Development) and enables iterative quality improvement.
+*   **Code Execution (`Code Executors`)**: Analogous to OpenAI’s Code Interpreter, but with greater flexibility in configuring execution environments and managing dependencies.
 
-## 4. Практические примеры: от теории к коду
+## 4. Practical Examples: From Theory to Code
 
-### Пример 1: "Hello, World!" — одиночный агент
+### Example 1: "Hello, World!" — A Single Agent
 
-Создание и запуск простого агента-помощника.
+Creating and running a simple assistant agent.
 
 ```python
 from google.adk.agents import LlmAgent
 from google.adk.runners import Runner
 
-# 1. Определяем агента с инструкцией
+# 1. Define the agent with instructions
 agent = LlmAgent(instructions="You are a helpful assistant.")
 
-# 2. Запускаем его с задачей
+# 2. Run it with a task
 result = Runner.run_sync(agent, "Write a haiku about modular architecture.")
 
-# 3. Печатаем результат
+# 3. Print the result
 print(result.output)
 
-# Вывод:
+# Output:
 # Parts fit, one by one,
 # Stronger whole has now begun,
 # Change one, not all done.
 ```
 
-### Пример 2: агент с внешним инструментом
+### Example 2: Agent with an External Tool
 
-Обучаем агента получать информацию о статусе проекта.
+Teaching an agent to retrieve project status information.
 
 ```python
 from google.adk.agents import LlmAgent
 from google.adk.runners import Runner
 from google.adk.tools import tool
 
-# Определяем нашу Python-функцию как инструмент
+# Define our Python function as a tool
 @tool
 def get_project_status(project_id: str) -> str:
     """Gets the status for a given project."""
@@ -79,63 +79,63 @@ def get_project_status(project_id: str) -> str:
         return "On track for Q3 release."
     return "Project ID not found."
 
-# Создаем агента и передаем ему наш новый инструмент
+# Create an agent and pass it our new tool
 agent = LlmAgent(
     instructions="You are a project manager assistant.",
     tools=[get_project_status],
 )
 
-# Запускаем агента с задачей, требующей вызова инструмента
+# Run the agent with a task requiring tool invocation
 result = Runner.run_sync(agent, "What is the status of project ADK-101?")
 print(result.output)
 
-# Вывод:
+# Output:
 # The status for project ADK-101 is: On track for Q3 release.
 ```
 
-## 5. Сравнение с OpenAI Agents SDK
+## 5. Comparison with OpenAI Agents SDK
 
-| Критерий | Google ADK | OpenAI Agents SDK |
+| Criterion | Google ADK | OpenAI Agents SDK |
 | :--- | :--- | :--- |
-| **Основной фокус** | Модульность, гибкость, контроль (инженерный подход) | Простота, скорость, интеграция в экосистему OpenAI |
-| **Гибкость** | **Очень высокая.** Модельно-независим, заменяемые компоненты. | Низкая. Сильная привязка к OpenAI API. |
-| **Мульти-агентность** | Встроена на уровне архитектуры (иерархия агентов). | Реализована через Handoffs, концептуально проще. |
-| **Порог входа** | Средний/Высокий. Требует понимания архитектуры. | **Очень низкий.** Идеально для быстрого старта. |
-| **Управление состоянием** | Ручное и гибкое (через `MemoryService` и `ArtifactService`). | Автоматическое ("из коробки") через `Threads`. |  
+| **Primary Focus** | Modularity, flexibility, control (engineering-first approach) | Simplicity, speed, integration within the OpenAI ecosystem |
+| **Flexibility** | **Very high.** Model-agnostic, replaceable components. | Low. Strongly tied to the OpenAI API. |
+| **Multi-Agent Support** | Built into the architecture (agent hierarchy). | Implemented via Handoffs; conceptually simpler. |
+| **Learning Curve** | Medium/High. Requires understanding of architecture. | **Very low.** Ideal for rapid prototyping. |
+| **State Management** | Manual and flexible (via `MemoryService` and `ArtifactService`). | Automatic ("out-of-the-box") via `Threads`. |
 
-## 6. Преимущества и ограничения: честный взгляд
+## 6. Advantages and Limitations: A Honest Look
 
-### ✅ Преимущества
+### ✅ Advantages
 
-*   **Полный контроль и гибкость**: вы контролируете каждый аспект работы агента, от модели до способа хранения истории.
-*   **Модельная-независимость**: настоящая свобода выбора LLM, отсутствие привязки к поставщику.
-*   **Строгие инженерные практики**: встроенные средства для тестирования и оценки повышают надежность и предсказуемость.
-*   **Масштабируемость**: модульная архитектура лучше подходит для сложных, долгоживущих продакшен-систем.
+*   **Full Control and Flexibility**: You control every aspect of the agent’s behavior, from model selection to history storage.
+*   **Model-Agnosticism**: True freedom in choosing LLMs—no vendor lock-in.
+*   **Rigorous Engineering Practices**: Built-in testing and evaluation tools enhance reliability and predictability.
+*   **Scalability**: The modular architecture is better suited for complex, long-lived production systems.
 
-### ❌ Ограничения
+### ❌ Limitations
 
-*   **Высокий порог входа**: требует больше времени на изучение, чем "коробочные" решения.
-*   **Меньшее сообщество**: сложнее найти готовые решения, примеры и получить помощь.
-*   **Больше кода**: за гибкость приходится платить большим количеством "обвязочного" кода для соединения компонентов.
-*   **Отсутствие "магии"**: нет готовых мощных инструментов вроде `Code Interpreter` или `File Search (RAG)` от OpenAI; их аналоги нужно реализовызовывать или настраивать самостоятельно.
+*   **High Learning Curve**: Requires more time to learn than "out-of-the-box" solutions.
+*   **Smaller Community**: Harder to find ready-made solutions, examples, or support.
+*   **More Boilerplate Code**: Flexibility comes at the cost of additional glue code to connect components.
+*   **Lack of “Magic”**: No built-in powerful tools like OpenAI’s `Code Interpreter` or `File Search (RAG)`; their equivalents must be implemented or configured manually.
 
-## 7. Практические рекомендации: когда и что использовать?
+## 7. Practical Recommendations: When and What to Use?
 
-Выбор инструмента зависит от вашей задачи, команды и требований к гибкости.
+The choice of tool depends on your task, team, and requirements for flexibility.
 
-*   **Используйте Google ADK, если:**
-    *   Вам нужен полный контроль над архитектурой и поведением агента.
-    *   Вы планируете использовать различные LLM, включая open-source или собственные.
-    *   Проект требует высокой степени кастомизации и интеграции с существующими системами.
-    *   Вы строите сложную продакшен-систему, а не быстрый прототип.
+*   **Use Google ADK if:**
+    *   You need full control over the agent’s architecture and behavior.
+    *   You plan to use diverse LLMs, including open-source or proprietary models.
+    *   Your project demands high customization and integration with existing systems.
+    *   You’re building a complex production system, not just a quick prototype.
 
-*   **Используйте OpenAI Agents SDK, если:**
-    *   Вам нужен быстрый прототип или MVP.
-    *   Простота и скорость разработки важнее гибкости.
-    *   Ваш проект уже тесно интегрирован в экосистему OpenAI и будет ее использовать.
+*   **Use OpenAI Agents SDK if:**
+    *   You need a fast prototype or MVP.
+    *   Simplicity and development speed matter more than flexibility.
+    *   Your project is already tightly integrated into the OpenAI ecosystem and will rely on it.
 
-## 8. Заключение: итоги и перспективы
+## 8. Conclusion: Summary and Outlook
 
-Google ADK — это фреймворк для "марафонцев", а не для "спринтеров". Он не предлагает магии и быстрых результатов "из коробки", как его конкурент от OpenAI. Вместо этого он дает разработчикам мощный, но сложный конструктор, основанный на проверенных инженерных практиках.
+Google ADK is a framework for “marathon runners,” not “sprinters.” It does not offer the magic or instant results of its OpenAI counterpart. Instead, it provides developers with a powerful, yet complex, constructor grounded in proven engineering practices.
 
-Выбор ADK — это стратегическая ставка на гибкость, контроль и долгосрочную масштабируемость. Для серьезных, кастомизированных продакшен-систем, где важен каждый компонент, модульный подход Google выглядит более зрелым и надежным решением, в то время как для быстрого прототипирования и проектов внутри экосистемы OpenAI его конкурент остается вне досягаемости.
+Choosing ADK is a strategic bet on flexibility, control, and long-term scalability. For serious, customized production systems where every component matters, Google’s modular approach appears more mature and reliable. Meanwhile, for rapid prototyping and projects within the OpenAI ecosystem, its competitor remains unmatched.

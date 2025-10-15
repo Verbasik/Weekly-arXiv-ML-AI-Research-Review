@@ -1,60 +1,50 @@
 # Kimi-K2
 
-![Figure_0](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/Figure_0.png)
-
----
-
-### **TWRB_FM 📻**
-
-<audio controls>
-  <source src="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/raw/refs/heads/develop/2025/week-29/TWRB_FM.wav" type="audio/mpeg">
-  Ваш браузер не поддерживает аудиоэлемент.
-</audio>
-
----
-
-## Введение
-
-Современные большие языковые модели (LLM) стали ключевым инструментом в самых разных областях — от автоматической генерации текста и программного кода до поддержки интеллектуальных агентов, способных выполнять сложные задачи. С ростом объёма параметров и числа токенов предобучения мы наблюдаем качественный скачок в способностях моделей: улучшение понимания контекста, точности генерации и умений решать узкоспециализированные задачи.
-
-Модель Kimi-K2, разработанная Moonshot AI, представляет собой один из самых амбициозных проектов в экосистеме открытых LLM. Она использует архитектуру Mixture-of-Experts (MoE) и насчитывает триллион параметров, при этом благодаря «разряженной» активации задействует для каждого токена лишь порядка 32 миллиардов параметров. Kimi-K2 сочетает в себе передовые методы оптимизации внимания для обработки сверхдлинных контекстов (до 128 тысяч токенов), инновационный оптимизатор MuonClip для стабильного и эффективного обучения на потрясающем объёме данных (15,5 триллионов токенов), а также комплексный пост-тюнинг для превращения базовой модели в интерактивного, агентно-ориентированного ассистента.
-
-В этом обзоре мы подробно рассмотрим:
-
-1. **Архитектуру** Kimi-K2 — принципы работы MoE, модификации механизма внимания, ключевые параметры и инженерные решения для ускорения инференса.
-2. **Процесс обучения** модели — предобучение на огромном корпусе данных, используемые оптимизаторы и техники распределённого обучения, а также этапы fine-tuning и RL-подкрепления для формирования «agentic»-возможностей.
-3. **Ключевые результаты и сравнение** с предыдущими версиями и лидерами отрасли — на академических бенчмарках, в задачах программирования и агентных сценариях.
+![Figure_0](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/Figure_0.png  )
 
 
-## Архитектура модели Kimi-K2
+## Introduction
 
-### Общие характеристики:
+Modern large language models (LLMs) have become a cornerstone tool across diverse domains—from automated text and code generation to supporting intelligent agents capable of executing complex tasks. As parameter counts and pretraining token volumes grow, we observe qualitative leaps in model capabilities: improved context understanding, generation accuracy, and specialized problem-solving skills.
 
-Kimi-K2 – это крупная языковая модель с архитектурой *Mixture-of-Experts* (MoE), про MoE мы как-то писали вот [тут](https://verbasik.github.io/Weekly-arXiv-ML-AI-Research-Review/#2025/week-06). Общий размер модели составляет **1 триллион параметров**, однако в каждый момент времени активна лишь примерно **32 млрд параметров** – то есть только небольшая часть весов участвует в обработке конкретного токена. Модель содержит **61 трансформер-слой** (из них один – «плотный», без разбиения на экспертов). Размер скрытых представлений (эмбеддингов) равен **7168**, используется **64 головы внимания**. Словарный запас – **160k** токенов, а максимальная длина контекста модели – **128k токенов**. Модель является авто-регрессионным декодером (аналогично GPT) – то есть генерирует текст, последовательно предсказывая следующий токен на основе предыдущих.
+Kimi-K2, developed by Moonshot AI, represents one of the most ambitious projects in the open LLM ecosystem. It employs a Mixture-of-Experts (MoE) architecture with a trillion parameters, yet activates only approximately 32 billion parameters per token due to its sparse activation mechanism. Kimi-K2 integrates cutting-edge attention optimizations for processing ultra-long contexts (up to 128k tokens), an innovative optimizer called MuonClip for stable and efficient training on an unprecedented scale of data (15.5 trillion tokens), and a comprehensive post-training pipeline to transform the base model into an interactive, agent-oriented assistant.
 
-![Figure_01](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/Figure_01.jpg)
+In this review, we provide a detailed analysis of:
+
+1. **Kimi-K2’s architecture** — MoE principles, modified attention mechanisms, key parameters, and engineering solutions for accelerated inference.
+2. **The training process** — pretraining on a massive corpus, distributed learning techniques, optimizers used, and fine-tuning and RLHF stages to enable “agentic” capabilities.
+3. **Key results and comparisons** — against prior versions and industry leaders, on academic benchmarks, programming tasks, and agent-based scenarios.
+
+
+## Kimi-K2 Model Architecture
+
+### General Characteristics:
+
+Kimi-K2 is a large language model with a *Mixture-of-Experts* (MoE) architecture, as previously discussed [here](https://verbasik.github.io/Weekly-arXiv-ML-AI-Research-Review/#2025/week-06). The total model size is **1 trillion parameters**, yet at any given moment, only approximately **32 billion parameters** are active—that is, only a small subset participates in processing each token. The model contains **61 transformer layers** (one of which is a “dense” layer without expert partitioning). The hidden representation (embedding) size is **7168**, with **64 attention heads**. The vocabulary size is **160k tokens**, and the maximum context length is **128k tokens**. The model is an autoregressive decoder (similar to GPT), generating text by sequentially predicting the next token based on previous ones.
+
+![Figure_01](  https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/Figure_01.jpg  )
 
 ### Mixture-of-Experts:
 
-В каждом слое трансформера, реализованном как MoE, присутствует **384 отдельных эксперта** (специализированных подсетей-MLP). Для каждого токена *динамический маршрутизатор* (gating) выбирает **топ-8 экспертов** из этих 384, которые будут использованы для обработки данного токена, плюс один специальный **общий эксперт**, активный всегда. Таким образом, на каждый токен приходится вычисление по 9 экспертным подсетям (8 выбранных + 1 общий), что значительно повышает эффективность модели без линейного роста вычислений. Ненужные эксперты остаются «спящими», благодаря чему достигается огромный общий объём параметров (1T) при приемлемых затратах на вывод (активно 32B). Маршрутизация выполняется по принципу *top-k* (в Kimi-K2 выбрано k=8), вероятно с помощью механизмов top-2 или top-8 gating, что позволяет каждому токену получать комбинацию из нескольких «мнений» экспертов вместо одного. Наличие единого **shared (общего) эксперта**, который участвует всегда, служит для улучшения устойчивости и базового качества – этот элемент обеспечивает, что в каждом слое присутствует одна общая плотная подсеть, дополняющая узкоспециализированных экспертов. Активация только части подсетей (**sparse activation**) экономит вычисления: не все параметры участвуют в каждом проходе, а только наиболее релевантные для текущего токена.
+In each transformer layer implemented as MoE, there are **384 separate experts** (specialized MLP subnetworks). For each token, a dynamic router (gating mechanism) selects the **top-8 experts** out of these 384 to process the token, plus one special **shared expert** that is always activated. Thus, each token undergoes computation through 9 expert subnetworks (8 selected + 1 shared), significantly improving model efficiency without linearly increasing computational cost. Unused experts remain “sleeping,” enabling the massive total parameter count (1T) while maintaining manageable inference costs (only 32B active). Routing follows a *top-k* principle (Kimi-K2 uses k=8), likely employing top-2 or top-8 gating, allowing each token to receive a combination of multiple expert “opinions” rather than a single one. The presence of a single **shared expert**, active in every layer, improves robustness and baseline quality—this component ensures that each layer includes a dense subnetwork to complement the specialized experts. **Sparse activation**—activating only a subset of subnetworks—reduces computation: not all parameters participate in every forward pass, only those most relevant to the current token.
 
-### Механизмы внимания:
+### Attention Mechanisms:
 
-Модель использует модифицированный механизм самовнимания, оптимизированный для длинного контекста. Во-первых, количество голов внимания **уменьшено** по сравнению со стандартными трансформерами – Kimi-K2 имеет 64 головы на слой при размере эмбеддинга 7168 (что даёт нетипичный размер проекции ~112 на голову). Более крупные головы в меньшем количестве помогают сделать расчёты внимания более стабильными на больших длинах последовательности. Во-вторых, заимствованный метод **Multi-Head *Latent* Attention (MLA)** – «многоголовое латентное внимание», который был впервые продемонстрирован у DeepSeek V3, об этом мы максимально подробно писали [тут](https://verbasik.github.io/Weekly-arXiv-ML-AI-Research-Review/#2025/week-07_&_08). Этот подход радикально снижает требования к памяти и вычислениям при работе с длинным контекстом. В традиционном многоголовом внимании требуется хранить для каждого токена большие матрицы ключей и значений (размерность пропорциональна числу голов и их размерности). В MLA же каждая позиция в контексте сохраняется в виде **компрессированного латентного вектора** фиксированной размерности (например, ~512-576 измерений, включая позиции) независимо от числа голов. По сути, ключи/значения не хранятся раздельно для каждой головы, а сжимаются в общее представление; затем входной *query*-вектор проецируется в это сжатое пространство для вычисления скалярных весов внимания, и результат проецируется обратно. Такой механизм позволяет уменьшить объём кеша ключей/значений **примерно в 60 раз по сравнению с обычным MHA** и в ~12 раз по сравнению с группированным вниманием (GQA), что делает практичным использование контекста в 128k токенов без переполнения памяти. Несмотря на дополнительные операции проекции, общая сложность вычислений внимания на длинных последовательностях существенно падает – расчёты для обновления KV-кеша и для шага внимания в MLA требуют на порядки меньше FLOPs и объёма памяти, чем в стандартном случае.
+The model employs a modified self-attention mechanism optimized for long contexts. First, the number of attention heads has been **reduced** compared to standard transformers: Kimi-K2 uses 64 heads per layer with an embedding size of 7168, resulting in an atypical projection size of ~112 per head. Larger heads in smaller numbers help stabilize attention computations over long sequences. Second, the model adopts the **Multi-Head *Latent* Attention (MLA)** method, originally demonstrated in DeepSeek V3, which we covered in exhaustive detail [here](https://verbasik.github.io/Weekly-arXiv-ML-AI-Research-Review/#2025/week-07_&_08). This approach dramatically reduces memory and computational demands when handling long contexts. In traditional multi-head attention, large key and value matrices must be stored per token (dimensionality proportional to the number of heads and their size). In MLA, each context position is stored as a **compressed latent vector** of fixed dimensionality (e.g., ~512–576 dimensions, including positional information), independent of the number of heads. Essentially, keys and values are not stored separately per head but compressed into a unified representation; the input *query* vector is then projected into this compressed space to compute scalar attention weights, and the result is projected back. This mechanism reduces the key/value cache size by approximately **60 times compared to standard MHA** and ~12 times compared to Grouped Query Attention (GQA), making the practical use of 128k-token contexts feasible without memory overflow. Despite additional projection operations, the overall computational complexity of attention over long sequences is drastically reduced—MLA requires orders of magnitude fewer FLOPs and memory for KV-cache updates and attention steps than standard attention.
 
-Для реализации внимания в таком огромном контексте разработчики также применили **FlashAttention** – высокоэффективный слитный GPU-алгоритм вычисления матриц внимания. В публикациях отмечается, что при авто-регрессии (генерации по одному токену) MLA интегрируется с FlashAttention-подобным ядром для этапов матричного умножения *QK* и *AV*, выполняя их в т.н. «тайлах» для повышения производительности. Кроме того, Kimi-K2 использует *ротари позиционные эмбеддинги* (RoPE) для кодирования положения токенов в последовательности. Благодаря технике **RoPE scaling** (линейному или динамическому масштабированию шага фазовой ротари-функции) модель поддерживает удлинённое окно контекста без потери способности различать близкие позиции. Наконец, в проекциях внимания **не используются смещения (bias)**, и вероятно отключён dropout в слоях внимания – эти упрощения часто применяются в крупных LLM для экономии параметров и стабильности. В активационных функциях модель задействует **SwiGLU** (Swish + Gated Linear Unit) в позиционно-независимых MLP слоёв – эта функция активации доказала эффективность в больших трансформерах (применялась, например, в PaLM).
+To implement attention at such an enormous context length, the developers also employed **FlashAttention**—a highly efficient fused GPU algorithm for computing attention matrices. Publications note that during autoregressive generation (token-by-token), MLA integrates with a FlashAttention-like kernel for the *QK* and *AV* matrix multiplication stages, performing them in so-called “tiles” to enhance performance. Additionally, Kimi-K2 uses *Rotary Positional Embeddings* (RoPE) to encode token positions in the sequence. Thanks to **RoPE scaling** (linear or dynamic scaling of the rotational phase function step), the model maintains its ability to distinguish nearby positions even with extended context windows. Finally, attention projections **do not use bias terms**, and dropout is likely disabled in attention layers—these simplifications are commonly adopted in large LLMs to conserve parameters and improve stability. For activation functions, the model employs **SwiGLU** (Swish + Gated Linear Unit) in position-independent MLP layers—a function proven effective in large transformers (e.g., used in PaLM).
 
-## Процесс обучения
+## Training Process
 
-### Датасеты и объёмы данных:
+### Datasets and Data Volumes:
 
-Kimi-K2 обучена на *огромном корпусе текстовых данных* объёмом **15,5 триллионов токенов** – это один из самых больших датасетов, использованных для обучения LLM на сегодняшний день. По сути модель «прочитала» практически весь доступный интернет-контент (включая множество источников на английском, китайском и других языках, кодовые репозитории, научные тексты и пр.) многократно. Такая задача обучения заставляет модель формировать обобщённое представление о языке и знаниях, содержащихся в данных. Обучение производилось на последовательностях с переменной длиной и, вероятно, с увеличением максимальной длины контекста по мере обучения (чтобы эффективно задействовать 128k контекст к концу обучения). В состав предобучающего корпуса вошли тексты разнообразных доменов: от энциклопедий и новостей до кода и математических решений. Особый упор, судя по результатам, делался на данные для программирования и математические задачи – модель демонстрирует выдающиеся результаты в кодинге и математике, результаты бенчов будут чуть ниже.
+Kimi-K2 was trained on a *massive corpus of textual data* totaling **15.5 trillion tokens**—one of the largest datasets ever used to train an LLM to date. In essence, the model “read” nearly all accessible internet content (including numerous sources in English, Chinese, and other languages, code repositories, scientific texts, etc.) multiple times. This training task forces the model to form a generalized representation of language and knowledge contained in the data. Training was performed on variable-length sequences, likely with increasing maximum context length throughout training (to effectively leverage the 128k context by the end). The pretraining corpus included texts from diverse domains: from encyclopedias and news articles to code and mathematical solutions. Judging from results, special emphasis was placed on programming and mathematical datasets—the model demonstrates outstanding performance in coding and math, with benchmark results detailed below.
 
-### Оптимизатор Muon и его ограничения
+### The Muon Optimizer and Its Limitations
 
-Muon — это алгоритм оптимизации, основанный на принципах ортогонализации матриц, в частности, использующий итерацию Ньютона-Шульца для ортогонализации матриц градиентов. Основная идея заключается в поощрении разнообразных направлений обновления, предотвращая коллапс весовых матриц в низкоранговые структуры, что может ограничивать выразительность модели.
+Muon is an optimization algorithm based on matrix orthogonalization principles, specifically using the Newton-Schulz iteration to orthogonalize gradient matrices. The core idea is to encourage diverse update directions, preventing weight matrices from collapsing into low-rank structures that could limit model expressiveness.
 
-Исходный алгоритм Muon применяет следующее правило обновления:
+The original Muon algorithm applies the following update rule:
 
 $$
 \begin{aligned}
@@ -64,382 +54,382 @@ W_t &= W_{t-1} - \eta_t \left( \gamma \cdot O_t \cdot \sqrt{\max(A,B)} + \lambda
 \end{aligned}
 $$
 
-### Формирование импульса (momentum)
+### Momentum Formation
 
-![momentum_visualization](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/momentum_visualization.png)
+![momentum_visualization](  https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/momentum_visualization.png  )
 
 $$
 M_t = \mu M_{t-1} + \nabla \mathcal{L}(W_{t-1})
 $$
 
-#### Ключевые компоненты:
-1. **$\mu$ (коэффициент импульса)**  
-   - Аналогичен параметру $\beta_1$ в Adam (обычно выбирается в диапазоне **0.9–0.99**).  
-   - Определяет, какая доля предыдущего импульса сохраняется. Например, при $\mu=0.9$ "истории" градиентов учитывается на каждом шаге.
+#### Key Components:
+1. **$\mu$ (momentum coefficient)**  
+   - Analogous to $\beta_1$ in Adam (typically chosen in the range **0.9–0.99**).  
+   - Determines the proportion of the previous momentum retained. For example, with $\mu=0.9$, gradient history is weighted at each step.
 
-2. **$\nabla \mathcal{L}(W_{t-1})$ (градиент функции потерь)**  
-   - Это матрица той же размерности, что и обучаемые параметры $W_{t-1}$.  
-   - Показывает, как нужно изменить веса, чтобы уменьшить ошибку модели на текущем шаге.
+2. **$\nabla \mathcal{L}(W_{t-1})$ (loss gradient)**  
+   - A matrix of the same dimension as the trainable parameters $W_{t-1}$.  
+   - Indicates how weights should be adjusted to reduce the model’s error on the current step.
 
-3. **$M_t$ (накопленный импульс)**  
-   - Итоговая матрица, объединяющая текущий градиент с "историей" предыдущих обновлений.  
-   - Размерность: идентична $W_{t-1}$ (например, $7168 \times 7168$ для матриц внимания в Kimi-K2).
-
----
-
-#### Подробное объяснение:
-
-*   **Что это?**  
-    - Механизм импульса (momentum) — это аналог **инерции** в физике.  
-    - Вместо резкого изменения направления на каждом шаге (как в обычном SGD), модель "накапливает" градиенты, усредняя их с коэффициентом $\mu$.  
-    - Формула $M_t$ — это **взвешенная сумма** прошлого импульса ($M_{t-1}$) и нового градиента.
-
-*   **Как это работает?**  
-    - На шаге $t=0$: $M_0 = \nabla \mathcal{L}(W_0)$ (нет истории).  
-    - На шаге $t=1$: $M_1 = \mu M_0 + \nabla \mathcal{L}(W_1)$.  
-    - На шаге $t=k$: $M_k$ содержит вклад всех предыдущих градиентов, но чем старше градиент, тем меньше его влияние (из-за умножения на $\mu^k$).
-
-*   **Зачем это нужно?**  
-    1. **Подавление шума**: градиенты в нейронных сетях часто "зашумлены" (особенно при обучении на мини-батчах). Импульс сглаживает эти колебания.  
-    2. **Ускорение сходимости**: в "оврагах" ландшафта функции потерь (узких областях с резкими перепадами) импульс помогает быстрее двигаться вдоль дна оврага.  
-    3. **Проблема "застревания"**: без импульса модель может колебаться вокруг локального минимума, не достигая его (см. визуализацию выше).
+3. **$M_t$ (accumulated momentum)**  
+   - The resulting matrix combining the current gradient with the "history" of prior updates.  
+   - Dimensionality: identical to $W_{t-1}$ (e.g., $7168 \times 7168$ for attention matrices in Kimi-K2).
 
 ---
 
-#### Аналогия:
-Представьте, что вы спускаетесь с холма:  
-- **Без импульса (SGD)**: Вы делаете маленькие шаги строго вниз по склону. Если встретите камень (шум), резко меняете направление.  
-- **С импульсом**: Вы набираете скорость, как шар, катящийся по склону. Мелкие препятствия (шум) не меняют вашу траекторию, а общее движение становится плавнее и быстрее.
+#### Detailed Explanation:
+
+*   **What is it?**  
+    - The momentum mechanism is analogous to **inertia** in physics.  
+    - Instead of abruptly changing direction at each step (as in standard SGD), the model "accumulates" gradients, averaging them with a coefficient $\mu$.  
+    - The formula $M_t$ represents a **weighted sum** of the previous momentum ($M_{t-1}$) and the new gradient.
+
+*   **How does it work?**  
+    - At step $t=0$: $M_0 = \nabla \mathcal{L}(W_0)$ (no history).  
+    - At step $t=1$: $M_1 = \mu M_0 + \nabla \mathcal{L}(W_1)$.  
+    - At step $t=k$: $M_k$ contains contributions from all previous gradients, but older gradients have exponentially diminishing influence (due to multiplication by $\mu^k$).
+
+*   **Why is it needed?**  
+    1. **Noise suppression**: Neural network gradients are often "noisy" (especially with mini-batch training). Momentum smooths these fluctuations.  
+    2. **Faster convergence**: In "ravines" of the loss landscape (narrow regions with sharp gradients), momentum helps accelerate movement along the ravine floor.  
+    3. **Avoiding "sticking"**: Without momentum, the model may oscillate around a local minimum without reaching it (see visualization above).
 
 ---
 
-#### Особенности в Muon:
-- В отличие от Adam, где импульс комбинируется с адаптивным шагом, Muon использует "чистый" импульс перед ортогонализацией.  
-- Матрица $M_t$ позже преобразуется в ортогональную матрицу $O_t$ (через итерацию Ньютона-Шульца), что предотвращает схлопывание весов в низкоранговое подпространство.
+#### Analogy:
+Imagine descending a hill:  
+- **Without momentum (SGD)**: You take small steps strictly downhill. If you hit a rock (noise), you abruptly change direction.  
+- **With momentum**: You build up speed like a ball rolling down the slope. Minor obstacles (noise) don’t alter your trajectory, and overall motion becomes smoother and faster.
 
-> **Важно**: В Muon импульс применяется ко всем матрицам параметров модели (например, $W^Q$, $W^K$ в механизме внимания), а не только к скалярным величинам.
+---
 
-### Ортогонализация градиента с помощью итерации Ньютона-Шульца
+#### Distinctions in Muon:
+- Unlike Adam, where momentum is combined with adaptive step sizes, Muon uses "pure" momentum before orthogonalization.  
+- The matrix $M_t$ is later transformed into an orthogonal matrix $O_t$ (via Newton-Schulz iteration), preventing weight collapse into a low-rank subspace.
 
-![orthogonalization_iterations_3d](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/orthogonalization_iterations_3d.png)
+> **Important**: In Muon, momentum is applied to all model parameter matrices (e.g., $W^Q$, $W^K$ in attention layers), not just scalar quantities.
 
-![orthogonalization_visualization](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/orthogonalization_visualization.png)
+### Gradient Orthogonalization via Newton-Schulz Iteration
+
+![orthogonalization_iterations_3d](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/orthogonalization_iterations_3d.png  )
+
+![orthogonalization_visualization](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/orthogonalization_visualization.png  )
 
 $$
 O_t = \text{Newton-Schulz}(M_t)
 $$
 
-#### Ключевые компоненты:  
-1. **$M_t$ (накопленный импульс)**  
-   - Исходная матрица градиентов с учётом истории (из предыдущего шага Momentum).  
-   - Размерность: например, $7168 \times 7168$ для матриц внимания в Kimi-K2.  
+#### Key Components:  
+1. **$M_t$ (accumulated momentum)**  
+   - The input gradient matrix incorporating historical information (from the prior momentum step).  
+   - Dimensionality: e.g., $7168 \times 7168$ for attention matrices in Kimi-K2.  
 
-2. **Итерация Ньютона-Шульца**  
-   - Быстрый численный метод приближённой ортогонализации матриц.  
-   - Альтернатива дорогостоящему SVD-разложению.  
+2. **Newton-Schulz Iteration**  
+   - A fast numerical method for approximate matrix orthogonalization.  
+   - Alternative to the computationally expensive SVD decomposition.  
 
-3. **$O_t$ (ортогонализованный градиент)**  
-   - Итоговая матрица с перпендикулярными направлениями обновления.  
-   - Гарантирует разнонаправленные шаги оптимизации.  
+3. **$O_t$ (orthogonalized gradient)**  
+   - The resulting matrix with mutually perpendicular update directions.  
+   - Ensures diverse optimization steps.  
 
 ---  
 
-#### Подробное объяснение:  
+#### Detailed Explanation:  
 
-* **Что это?**  
-  - Процесс преобразования градиента $M_t$ в матрицу $O_t$, где все направления обновления становятся **взаимно перпендикулярными**.  
-  - Аналог "разведки местности" по разным осям вместо движения по одной линии.  
+* **What is it?**  
+  - The process of transforming gradient matrix $M_t$ into matrix $O_t$, where all update directions become **mutually perpendicular**.  
+  - Analogous to "mapping the terrain" along multiple axes instead of moving along a single line.  
 
-* **Как это работает?**  
-  1. **Нормировка**:  
-     - $M_t$ масштабируется по Фробениусу (аналог "деления на длину вектора" для матриц):  
+* **How does it work?**  
+  1. **Normalization**:  
+     - $M_t$ is scaled by the Frobenius norm (analogous to "dividing by vector length" for matrices):  
      $$  
      X_0 = \frac{M_t}{\|M_t\|_F}  
      $$  
-  2. **Итеративное уточнение**:  
-     - За 5 шагов ($k=1..5$) вычисляется последовательность матриц $X_k$ по формуле:  
+  2. **Iterative refinement**:  
+     - Over 5 steps ($k=1..5$), a sequence of matrices $X_k$ is computed using the formula:  
      $$  
      X_{k} = 3.4445 \cdot X_{k-1} - 4.7750 \cdot (X_{k-1}X_{k-1}^T)X_{k-1} + 2.0315 \cdot (X_{k-1}X_{k-1}^T)^2 X_{k-1}  
      $$  
-     - Коэффициенты подобраны для устойчивой сходимости.  
-  3. **Результат**:  
-     - После 5 итераций $O_t = X_5$ — почти ортогональная матрица.  
+     - Coefficients are tuned for stable convergence.  
+  3. **Result**:  
+     - After 5 iterations, $O_t = X_5$—an almost orthogonal matrix.  
 
-* **Зачем это нужно?**  
-  1. **Борьба с коллапсом ранга**:  
-     - Предотвращает "сплющивание" матриц весов в низкоразмерное подпространство.  
-  2. **Разнообразие направлений**:  
-     - Каждое обновление исследует новое направление, а не повторяет предыдущие.  
-  3. **Эффективность**:  
-     - Дешевле SVD (в 5-10 раз быстрее для больших матриц).  
+* **Why is it needed?**  
+  1. **Combating rank collapse**:  
+     - Prevents weight matrices from collapsing into low-dimensional subspaces.  
+  2. **Directional diversity**:  
+     - Each update explores a new direction rather than repeating prior ones.  
+  3. **Efficiency**:  
+     - Significantly cheaper than SVD (5–10x faster for large matrices).  
 
 ---  
 
-#### Особенности в Muon:  
-- **Локальность**: ортогонализация применяется отдельно к каждой матрице весов (например, $W_Q$, $W_K$ в слоях внимания).  
-- **Фиксированные затраты**: всегда 5 итераций независимо от размера матрицы.  
-- **Совместимость с BF16**: метод устойчив к погрешностям низкоточной арифметики.  
+#### Distinctions in Muon:  
+- **Locality**: Orthogonalization is applied separately to each weight matrix (e.g., $W_Q$, $W_K$ in attention layers).  
+- **Fixed cost**: Always exactly 5 iterations, regardless of matrix size.  
+- **BF16 compatibility**: The method is robust to low-precision arithmetic errors.  
 
-> **Важно**: Ортогонализация не меняет "силу" градиента (норму), только его **направления**. Это как перераспределить тот же бюджет шагов по разным осям координат.
+> **Important**: Orthogonalization does not alter the "magnitude" of the gradient (its norm), only its **directions**. This is akin to redistributing the same step budget across different coordinate axes.
 
-### Обновление весов
+### Weight Update
 
-![weight_update_visualization](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/weight_update_visualization.png)
+![weight_update_visualization](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/weight_update_visualization.png  )
 
-![weight_decay_visualization](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/weight_decay_visualization.png)
+![weight_decay_visualization](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/weight_decay_visualization.png  )
 
-![scale_normalization_visualization](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/scale_normalization_visualization.png)
+![scale_normalization_visualization](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/scale_normalization_visualization.png  )
 
-С учётом weight decay и согласования масштаба обновлений:
+Considering weight decay and update scale normalization:
 
 $$
 W_t = W_{t-1} - \eta_t \left( \gamma \cdot O_t \cdot \sqrt{\max(A,B)} + \lambda W_{t-1} \right)
 $$
 
-где:
+where:
 
-* $\gamma = 0.2$ — масштаб нормализации, согласующий Muon с RMS обновлений AdamW (обычно в диапазоне 0.2–0.4);
-* $\lambda$ — коэффициент weight decay;
-* $\sqrt{\max(A,B)}$ компенсирует несогласованный масштаб обновлений, обусловленный размерностью матрицы.
+* $\gamma = 0.2$ — scale normalization factor aligning Muon with RMS updates in AdamW (typically in the range 0.2–0.4);
+* $\lambda$ — weight decay coefficient;
+* $\sqrt{\max(A,B)}$ compensates for inconsistent update scales due to matrix dimensions.
 
-#### Ключевые компоненты:  
-1. **$O_t$ (ортогонализованный градиент)**  
-   - Результат предыдущего шага (итерация Ньютона-Шульца).  
-   - Содержит перпендикулярные направления для обновления.  
+#### Key Components:  
+1. **$O_t$ (orthogonalized gradient)**  
+   - Result of the prior step (Newton-Schulz iteration).  
+   - Contains perpendicular update directions.  
 
-2. **$\sqrt{\max(A,B)}$ (нормализация масштаба)**  
-   - $A$ и $B$ — размеры матрицы весов (например, для $W_Q$ размером $7168 \times 7168$: $A=B=7168$).  
-   - Компенсирует разницу в масштабах обновлений для матриц разной формы.  
+2. **$\sqrt{\max(A,B)}$ (scale normalization)**  
+   - $A$ and $B$ are matrix dimensions (e.g., for $W_Q$ of size $7168 \times 7168$: $A=B=7168$).  
+   - Compensates for scale differences in updates across differently shaped matrices.  
 
 3. **$\lambda W_{t-1}$ (weight decay)**  
-   - Регуляризация для предотвращения переобучения.  
-   - Аналог "трения" — постепенно уменьшает величину весов.  
+   - Regularization to prevent overfitting.  
+   - Analogous to "friction"—gradually reduces weight magnitudes.  
 
-4. **$\gamma$ (коэффициент масштабирования)**  
-   - Подбирается эмпирически (0.2 для Kimi-K2).  
-   - Согласует шаг Muon с типичными обновлениями AdamW.  
-
----  
-
-#### Подробное объяснение:  
-
-* **Что происходит?**  
-  Формула обновляет веса модели, комбинируя:  
-  - **Интеллектуальное направление** ($O_t$ — ортогонализованный градиент)  
-  - **Стабилизирующие поправки** (нормализация масштаба + weight decay)  
-
-* **Пошаговая логика:**  
-  1. **Ортогональный шаг**:  
-     $\gamma \cdot O_t$ задаёт основное направление обновления, где:  
-     - $\gamma=0.2$ уменьшает шаг для стабильности  
-     - $O_t$ гарантирует разнонаправленность обновлений  
-
-  2. **Коррекция масштаба**:  
-     Умножение на $\sqrt{\max(A,B)}$ решает проблему:  
-     - Для матрицы $1024 \times 4096$ ($\max=4096$):  
-       $\sqrt{4096} = 64$ увеличит шаг  
-     - Для матрицы $128 \times 128$ ($\max=128$):  
-       $\sqrt{128} \approx 11.3$ уменьшит шаг  
-
-  3. **Регуляризация**:  
-     $\lambda W_{t-1}$ действует как:  
-     - "Тормоз" для больших весов (L2-регуляризация)  
-     - Предотвращает перерост параметров  
-
-  4. **Итоговое обновление**:  
-     Всё суммируется и умножается на скорость обучения $\eta_t$  
-
-* **Зачем такие сложности?**  
-  1. **Для больших моделей**:  
-     - Без $\sqrt{\max(A,B)}$ широкие матрицы получали бы гигантские обновления  
-     - Без $\lambda$ веса выходили бы за пределы bf16  
-
-  2. **Для качества обучения**:  
-     - Ортогональность $O_t$ улучшает исследование пространства параметров  
-     - Weight decay сохраняет обобщающую способность  
+4. **$\gamma$ (scale coefficient)**  
+   - Empirically tuned (0.2 for Kimi-K2).  
+   - Aligns Muon’s step size with typical AdamW updates.  
 
 ---  
 
-#### Практические нюансы:  
-- **Для матриц внимания**:  
-  $W_Q$, $W_K$ дополнительно проходят через **QK-clip** (отдельное ограничение норм)  
-- **Значения параметров в Kimi-K2**:  
+#### Detailed Explanation:  
+
+* **What happens?**  
+  The formula updates model weights by combining:  
+  - **Intelligent direction** ($O_t$ — orthogonalized gradient)  
+  - **Stabilizing corrections** (scale normalization + weight decay)  
+
+* **Step-by-step logic:**  
+  1. **Orthogonal step**:  
+     $\gamma \cdot O_t$ defines the primary update direction, where:  
+     - $\gamma=0.2$ reduces step size for stability  
+     - $O_t$ guarantees diverse update directions  
+
+  2. **Scale correction**:  
+     Multiplication by $\sqrt{\max(A,B)}$ resolves the issue:  
+     - For a $1024 \times 4096$ matrix ($\max=4096$):  
+       $\sqrt{4096} = 64$ increases the step  
+     - For a $128 \times 128$ matrix ($\max=128$):  
+       $\sqrt{128} \approx 11.3$ decreases the step  
+
+  3. **Regularization**:  
+     $\lambda W_{t-1}$ acts as:  
+     - A "brake" for large weights (L2 regularization)  
+     - Prevents parameter explosion  
+
+  4. **Final update**:  
+     All components are summed and multiplied by the learning rate $\eta_t$  
+
+* **Why such complexity?**  
+  1. **For large models**:  
+     - Without $\sqrt{\max(A,B)}$, wide matrices would receive gigantic updates  
+     - Without $\lambda$, weights would exceed bf16 bounds  
+
+  2. **For training quality**:  
+     - Orthogonality of $O_t$ improves parameter space exploration  
+     - Weight decay preserves generalization capacity  
+
+---  
+
+#### Practical Nuances:  
+- **For attention matrices**:  
+  $W_Q$, $W_K$ additionally undergo **QK-clip** (separate norm constraints)  
+- **Parameter values in Kimi-K2**:  
   - $\gamma = 0.2$  
-  - $\lambda \approx 0.01$ (типично для LLM)  
-  - $\eta_t$ уменьшается по расписанию косинусного затухания
+  - $\lambda \approx 0.01$ (typical for LLMs)  
+  - $\eta_t$ decays according to a cosine schedule
 
-### Оптимизатор **MuonClip**
+### Optimizer **MuonClip**
 
-Обучение столь большой MoE-модели сопряжено с серьёзными трудностями – прежде всего, **неустойчивость обучения**, проявляющаяся во взрывающихся логитах внимания. Стандартно для LLM применяется **AdamW**, но команда **Moonshot AI** разработала более токен-эффективный оптимизатор — [**Muon**](https://arxiv.org/abs/2502.16982), который показал превосходство над AdamW при обучении больших языковых моделей. Однако при масштабировании (например, в модели **Kimi K2**, построенной по архитектуре, схожей с DeepSeek-V3) возникла проблема нестабильности — логиты внимания становились чрезмерно высокими, особенно на поздних этапах обучения. Это приводило к "дивергенции" — резкому скачку значений loss и остановке обучения.
+Training such a large MoE model presents significant challenges—primarily **training instability**, manifested in exploding attention logits. The standard approach for LLMs is **AdamW**, but the **Moonshot AI** team developed a more token-efficient optimizer—[**Muon**](https://arxiv.org/abs/2502.16982  )—which has demonstrated superiority over AdamW in training large language models. However, when scaled (e.g., in the **Kimi K2** model, built on an architecture similar to DeepSeek-V3), instability emerged: attention logits became excessively high, particularly during later training stages. This led to "divergence"—a sharp spike in loss values and abrupt training termination.
 
-Чтобы устранить эту проблему, была предложена модификация под названием **MuonClip**, ключевым элементом которой является техника **QK-clip**. Её суть — в **прямом масштабировании весов проекций Query и Key после обновления оптимизатором**. Тем самым логиты внимания контролируются «на источнике» — ещё до применения softmax. Это оказалось более устойчивым решением по сравнению с логит-клиппингом, нормализациями query/key и другими эвристиками.
+To resolve this issue, a modification named **MuonClip** was proposed, with its key innovation being the **QK-clip** technique. Its essence lies in **directly scaling the Query and Key projection weights after optimizer updates**. This controls attention logits at the source—before softmax is applied. This proved more stable than post-hoc logit clipping, query/key normalization, or other heuristics.
 
-![loss_vs_tokens](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/loss_vs_tokens.png)
+![loss_vs_tokens](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/loss_vs_tokens.png  )
 
-Формально, MuonClip вводит адаптивный масштабирующий множитель $\eta$ и балансирующий гиперпараметр $\alpha$, по следующим формулам:
+Formally, MuonClip introduces an adaptive scaling factor $\eta$ and a balancing hyperparameter $\alpha$, following these formulas:
 
 $$
 q_i = \eta^\alpha W_q x_i,\quad
 k_i = \eta^{1 - \alpha} W_k x_i,
 $$
 
-где $W_q$, $W_k$ — веса слоёв внимания, $x_i$ — входной вектор, а итоговый логит внимания становится:
+where $W_q$, $W_k$ are attention layer weights, $x_i$ is the input vector, and the resulting attention logit becomes:
 
 $$
 (\eta^\alpha q_i)^T (\eta^{1 - \alpha} k_j) = \eta \, q_i^T k_j.
 $$
 
-Таким образом, масштаб логитов внимания $q_i^T k_j$ прямо регулируется $\eta$, который обновляется на каждом шаге:
+Thus, the scale of attention logits $q_i^T k_j$ is directly regulated by $\eta$, which is updated at each step:
 
 $$
 \eta = \min\left( \frac{t}{\max_{i,j} (q_i^T k_j)}, 1 \right),
 $$
 
-где $t$ — заранее заданный порог. Это позволяет гарантировать, что никакой логит не превысит допустимого значения, даже в случае накопленных градиентов. Такая адаптация предотвращает взрывы в softmax, сохраняя стабильность градиентов и управление энергией внимания.
+where $t$ is a predefined threshold. This ensures no logit exceeds the allowable value, even under accumulated gradients. Such adaptation prevents softmax explosions, preserving gradient stability and attention energy control.
 
-**Симптомы**:  
-- На поздних этапах обучения логиты $q_i^T k_j$ достигают аномально высоких значений (например, $10^3$ вместо типичных $[-10, 10]$).  
-- Это приводит к:  
-  - **Численной нестабильности**: softmax выдаёт NaN из-за переполнения экспоненты.  
-  - **Дивергенции loss**: Резкий скачок ошибки и коллапс обучения.  
+**Symptoms**:  
+- On late training stages, logits $q_i^T k_j$ reach anomalously high values (e.g., $10^3$ instead of typical $[-10, 10]$).  
+- This leads to:  
+  - **Numerical instability**: softmax outputs NaN due to exponential overflow.  
+  - **Loss divergence**: Sudden loss spikes and training collapse.  
 
-**Причины**:  
-1. Накопление градиентов в $W_q$ и $W_k$ при большой глубине сети.  
-2. Отсутствие естественного ограничения на рост норм весов в Muon (в отличие от AdamW, где адаптивный шаг частично решает эту проблему).  
+**Causes**:  
+1. Gradient accumulation in $W_q$ and $W_k$ due to deep network architecture.  
+2. Absence of natural constraints on weight norm growth in Muon (unlike AdamW, where adaptive step sizes partially mitigate this).  
 
 ---
 
-### Решение: QK-clip — контроль логитов "у истоков"
+### Solution: QK-clip — Controlling Logits at the Source
 
-![qk_clip_visualization](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/qk_clip_visualization.png)
+![qk_clip_visualization](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/qk_clip_visualization.png  )
 
-Вместо постобработки логитов (например, через `torch.clamp`) MuonClip **встраивает ограничение прямо в веса проекций** Query и Key. Это достигается введением адаптивного параметра $\eta$ и балансирующего коэффициента $\alpha$:
+Instead of post-processing logits (e.g., via `torch.clamp`), MuonClip **embeds the constraint directly into Query and Key projection weights**. This is achieved by introducing an adaptive parameter $\eta$ and a balancing coefficient $\alpha$:
 
 $$
 q_i = \eta^\alpha W_q x_i, \quad  
 k_i = \eta^{1 - \alpha} W_k x_i
 $$
 
-**Как это работает**:  
-1. **Масштабирование логитов**:  
-   Результирующий логит $q_i^T k_j$ превращается в $\eta \cdot (W_q x_i)^T (W_k x_j)$.  
-   - Если $\eta = 0.5$, все логиты уменьшаются вдвое.  
-   - При $\eta = 1$ — система работает "как есть".  
+**How it works**:  
+1. **Logit Scaling**:  
+   The resultant logit $q_i^T k_j$ becomes $\eta \cdot (W_q x_i)^T (W_k x_j)$.  
+   - If $\eta = 0.5$, all logits are halved.  
+   - When $\eta = 1$, the system operates "as-is".  
 
-2. **Автоматическая регулировка**:  
-   На каждом шаге $\eta$ пересчитывается по правилу:  
+2. **Automatic Adjustment**:  
+   At each step, $\eta$ is recalculated as:  
    $$
    \eta = \min\left( \frac{t}{\max_{i,j} (q_i^T k_j)}, 1 \right),  
    $$  
-   где $t$ — пороговое значение (например, $t=50$).  
+   where $t$ is a threshold value (e.g., $t=50$).  
 
-3. **Баланс между Query и Key**:  
-   Гиперпараметр $\alpha \in [0,1]$ распределяет "ответственность" за масштабирование:  
-   - $\alpha=0.5$: равномерное масштабирование обеих проекций.  
-   - $\alpha=0.8$: большая нагрузка на $W_q$ (полезно, если Key должны оставаться стабильными).  
-
----
-
-### Практическая реализация в Kimi K2
-
-1. **Место в пайплайне**:  
-   - QK-clip применяется **после каждого обновления весов** Muon, но **перед forward-pass**.  
-   - Вычисляется для **каждого головы внимания** независимо.  
-
-2. **Гиперпараметры**:  
-   - Порог $t$: выбирается из диапазона $[30, 100]$ (зависит от глубины сети).  
-   - $\alpha$: обычно $0.5$ или $0.6$ (подбирается на валидации).  
-
-3. **Совместимость с BF16/FP16**:  
-   - Масштабирование через $\eta$ предотвращает переполнение при вычислении softmax.  
-   - Градиенты для $\eta$ не требуются — это детерминированная операция.  
-
-4. **Результаты**:  
-   - Обучение на **15.5 трлн токенов** без инцидентов.  
-   - Отсутствие NaN даже в слоях с 7168 размерностью.  
+3. **Balance Between Query and Key**:  
+   The hyperparameter $\alpha \in [0,1]$ distributes the scaling responsibility:  
+   - $\alpha=0.5$: equal scaling of both projections.  
+   - $\alpha=0.8$: heavier burden on $W_q$ (useful if Keys must remain stable).  
 
 ---
 
-### Дополнительные техники в MuonClip
+### Practical Implementation in Kimi K2
 
-1. **Динамический порог $t$**:  
-   - На ранних этапах $t=100$ (разрешает исследование).  
-   - К концу обучения $t=30$ (жесткий контроль).  
+1. **Placement in Pipeline**:  
+   - QK-clip is applied **after every weight update** by Muon, but **before the forward pass**.  
+   - Computed independently for **each attention head**.  
 
-2. **Экспоненциальное сглаживание $\eta$**:  
-   Чтобы избежать резких скачков, используется:  
+2. **Hyperparameters**:  
+   - Threshold $t$: selected from range $[30, 100]$ (depends on network depth).  
+   - $\alpha$: typically $0.5$ or $0.6$ (tuned on validation).  
+
+3. **Compatibility with BF16/FP16**:  
+   - Scaling via $\eta$ prevents overflow during softmax computation.  
+   - No gradients required for $\eta$—it is a deterministic operation.  
+
+4. **Results**:  
+   - Training on **15.5 trillion tokens** completed without incidents.  
+   - No NaNs even in layers with 7168-dimensional embeddings.  
+
+---
+
+### Additional Techniques in MuonClip
+
+1. **Dynamic Threshold $t$**:  
+   - Early training: $t=100$ (allows exploration).  
+   - Late training: $t=30$ (strict control).  
+
+2. **Exponential Smoothing of $\eta$**:  
+   To avoid abrupt jumps, use:  
    $$
-   \eta_{\text{новое}} = 0.9 \cdot \eta_{\text{старое}} + 0.1 \cdot \eta_{\text{расчетное}}  
+   \eta_{\text{new}} = 0.9 \cdot \eta_{\text{old}} + 0.1 \cdot \eta_{\text{computed}}  
    $$  
 
-3. **Интеграция с Weight Decay**:  
-   QK-clip дополняет, но не заменяет L2-регуляризацию. Общая формула обновления:  
+3. **Integration with Weight Decay**:  
+   QK-clip complements, but does not replace, L2 regularization. The full update formula:  
    $$
    W_t = (1 - \lambda) W_{t-1} - \eta_t \cdot \text{MuonGrad} \quad \text{→} \quad \text{QK-clip}  
    $$  
 
-![optimizer_comparison_visualization](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/optimizer_comparison_visualization.png)
+![optimizer_comparison_visualization](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/optimizer_comparison_visualization.png  )
 
-![practical_implementation_visualization](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/practical_implementation_visualization.png)
+![practical_implementation_visualization](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/practical_implementation_visualization.png  )
 
-![qk_clip_mechanism_visualization](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/qk_clip_mechanism_visualization.png)
+![qk_clip_mechanism_visualization](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/qk_clip_mechanism_visualization.png  )
 
-![exploding_logits_visualization](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/exploding_logits_visualization.png)
+![exploding_logits_visualization](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/exploding_logits_visualization.png  )
 
-#### Ограничения Muon
+#### Limitations of Muon
 
-**Проблемы масштабируемости в исходной версии**
+**Scalability Issues in the Original Version**
 
-- Изначально Muon демонстрировал хорошие результаты на малых моделях, но его эффективность при масштабировании на крупные модели (с миллиардами параметров) оставалась под вопросом.
+- Muon initially showed strong results on small models, but its efficacy when scaling to large models (billions of parameters) remained unproven.
 
-**Нестабильность логитов внимания в MoE-моделях**
+**Attention Logit Instability in MoE Models**
 
-- Muon, оптимизируя матрицы проекций Query и Key, мог генерировать веса с аномально большими значениями, особенно на поздних этапах обучения. Это приводило к взрывным логитам внимания (до 10³–10⁵), что ломало softmax и вызывало дивергенцию loss.
+- Muon, optimizing Query and Key projection matrices, could generate weights with anomalously large values, especially during late training. This led to explosive attention logits (up to $10^3$–$10^5$), breaking softmax and causing loss divergence.
 
-- В отличие от AdamW, где learning rate и моменты косвенно ограничивают шаг обновления, Muon (особенно в сочетании с техниками вроде weight decay) иногда слишком агрессивно масштабировал веса.
+- Unlike AdamW, where learning rate and momentum indirectly constrain update steps, Muon (particularly when combined with techniques like weight decay) sometimes scaled weights too aggressively.
 
-На практике, **Kimi K2** была успешно предобучена на **15.5 триллионов токенов** с использованием MuonClip — **без единого сбоя, всплеска loss или остановки обучения**. Это стало возможным благодаря точному контролю за логитами внимания и адаптивному масштабированию весов. Отметим, что обучение, вероятнее всего, происходило в формате **BF16** или **FP16** с динамическим скейлингом потерь, что позволило эффективно использовать память GPU. На этапе инференса веса были переведены в формат **FP8 с блоковым квантованием**, но сама тренировка проводилась в высокой точности.
+In practice, **Kimi K2** was successfully pretrained on **15.5 trillion tokens** using MuonClip—**without a single crash, loss spike, or training halt**. This was made possible by precise control over attention logits and adaptive weight scaling. Note that training likely occurred in **BF16** or **FP16** format with dynamic loss scaling, enabling efficient GPU memory usage. During inference, weights were converted to **FP8 with block quantization**, but training itself was conducted in high precision.
 
-Таким образом, **MuonClip** представляет собой не просто очередной оптимизатор, а **инженерное решение проблемы масштабируемости LLM**. Он объединяет преимущества токен-эффективности Muon с точной стабилизацией механизма внимания — и становится одним из ключевых факторов, позволивших обучить модель такого масштаба без сбоев.
+Thus, **MuonClip** is not merely another optimizer, but an **engineering solution to LLM scalability**. It unites Muon’s token efficiency with precise attention stabilization—becoming one of the key factors enabling training of a model of this scale without failure.
 
-### Распределённое обучение
+### Distributed Training
 
-Триллион параметров – запредельно много для памяти одного устройства, поэтому обучение Kimi-K2 проводилось распределённо на большом количестве GPU. Moonshot не раскрывает точной конфигурации, но оценки экспертов предполагают сотни высокопроизводительных карт (например, NVIDIA A100/H100) и затраты порядка десятков миллионов долларов. Для эффективной параллелизации модели использовался стек решений на базе [**DeepSpeed**](https://github.com/deepspeedai/DeepSpeed) и техник [Zero Redundancy Optimizer (**ZeRO**)](https://arxiv.org/abs/1910.02054). В частности, применялась по крайней мере **ZeRO Stage-1** или Stage-2, при которых градиенты и стейты оптимизатора распределяются между узлами, уменьшая требование к памяти на каждую карту. Вероятно, модель также разрезалась по экспертам между различными узлами (естественное решение для MoE – разные эксперты хранятся на разных девайсах, а токены роутятся к ним). Такой подход масштабируется почти линейно – добавление новых GPU позволяет вместить больше экспертов. Кроме того, применялись стандартные приёмы вроде **градиентного чекпоутинга** (checkpointing activations) – промежуточные активации не сохраняются полностью, а пересчитываются при обратном проходе, что существенно экономит память при обучении на длинных последовательностях ценой небольшого дополнительного времени. Все эти инженерные решения вместе сделали возможным обучение модели невероятного размера.
+One trillion parameters is far beyond the memory capacity of a single device; therefore, Kimi-K2 training was distributed across hundreds of GPUs. Moonshot has not disclosed the exact configuration, but expert estimates suggest hundreds of high-performance cards (e.g., NVIDIA A100/H100) and costs on the order of tens of millions of dollars. For efficient model parallelization, the training stack leveraged [**DeepSpeed**](https://github.com/deepspeedai/DeepSpeed  ) and techniques like [Zero Redundancy Optimizer (**ZeRO**)](https://arxiv.org/abs/1910.02054  ). Specifically, at least **ZeRO Stage-1** or Stage-2 was employed, distributing optimizer states and gradients across nodes to reduce per-device memory requirements. The model was likely also partitioned across experts among different nodes—a natural solution for MoE (different experts stored on different devices, with tokens routed to them). This approach scales nearly linearly: adding more GPUs allows inclusion of more experts. Additionally, standard techniques like **gradient checkpointing** (activations not stored fully but recomputed during backpropagation) were used to significantly reduce memory consumption during long-sequence training at the cost of minor additional computation. Together, these engineering solutions made training a model of unprecedented size feasible.
 
-### Fine-tuning и RLHF:
+### Fine-tuning and RLHF:
 
-После окончания предобучения, разработчики провели дополнительную этапную донастройку модели для придания ей *agentic*-возможностей и пользовательского интерфейса. Было выпущено две версии: **Kimi-K2-Base** – базовая модель после предобучения (предназначена для исследователей, можно самостоятельно дообучать), и **Kimi-K2-Instruct** – модель, прошедшая специальный пост-тюнинг, готовая для интерактивного использования в качестве чат-бота или агентной системы.
+After pretraining, the developers conducted additional staged fine-tuning to imbue the model with *agentic* capabilities and a user interface. Two versions were released: **Kimi-K2-Base**—the base model after pretraining (intended for researchers to fine-tune independently), and **Kimi-K2-Instruct**—a model that underwent specialized post-tuning and is ready for interactive use as a chatbot or agent system.
 
-В пост-тюнинге особое внимание уделялось обучению модели выполнять *действия*, а не только отвечать текстом. Этот этап можно условно разделить на **supervised fine-tuning на синтетических задачах** и **подкрепляющее обучение с обратной связью**.
+In post-tuning, special emphasis was placed on training the model to *perform actions*, not merely generate text. This stage can be broadly divided into **supervised fine-tuning on synthetic tasks** and **reinforcement learning with feedback**.
 
-* **Имитирование использования инструментов:** команда Moonshot сгенерировала обширный набор задач, требующих взаимодействия с внешними инструментами (API, базы данных, shell-команды, веб-поиск и т.д.), чтобы научить модель последовательности действий. Вместо ручной разметки был применён метод *Large-Scale Agentic Data Synthesis*: с помощью вспомогательных ИИ-агентов симулировались тысячи сценариев из сотен доменов, где агент (модель) должен был пользоваться различными инструментами для достижения цели. Все шаги (запросы к инструментам, полученные ответы, финальные решения) фиксировались в виде псевдодиалогов. Затем отдельная модель-судья (LLM-critic) оценивала эти сгенерированные эпизоды по заданным рубрикам качества, отбирая только лучшие, наиболее успешные попытки. Отфильтрованные таким образом высококачественные последовательности действий были использованы для *обучения с учителем* – Kimi-K2 дообучалась повторять такие многошаговые решения, фактически впитывая шаблоны, как планировать и вызывать инструменты. Этот процесс заложил фундамент «агентного мышления» уже в веса базовой модели.
+* **Simulating Tool Usage**: The Moonshot team generated an extensive dataset of tasks requiring interaction with external tools (APIs, databases, shell commands, web search, etc.) to teach the model sequences of actions. Instead of manual annotation, they employed *Large-Scale Agentic Data Synthesis*: auxiliary AI agents simulated thousands of scenarios across hundreds of domains, where the agent (model) had to use various tools to achieve goals. All steps (tool queries, received responses, final decisions) were recorded as pseudo-dialogues. An independent model-judge (LLM-critic) then evaluated these generated episodes against predefined quality criteria, selecting only the highest-quality, most successful attempts. These filtered, high-quality action sequences were used for *supervised learning*—Kimi-K2 was fine-tuned to replicate such multi-step solutions, effectively internalizing patterns for planning and tool invocation. This process laid the foundation for “agentive thinking” directly within the base model weights.
 
-![workflow-agent](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/workflow-agent.png)
+![workflow-agent](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/workflow-agent.png  )
 
-* **RL с самооценкой (в духе RLHF):** помимо имитационного обучения, разработчики внедрили механизм *Reinforcement Learning* для дальнейшего повышения навыков модели решать задачи, особенно те, где нет однозначного правильного ответа. Главная проблема классического RLHF (обучения с подкреплением от отклика человека) – ограниченность и узость сигналов вознаграждения для творческих или аналитических задач. В Kimi-K2 подошли творчески: модель обучалась *самостоятельно оценивать свои ответы* по заданным критериям. Реализована система **самокритики (self-critique)**: модель генерирует ответ и параллельно (или последующим шагом) генерирует оценку этому ответу на основе заранее заданных “рубрик” качества. Поскольку такой критик сам может быть несовершенным, его регулярно улучшали на заданиях, где успех легко проверяется (например, решение матем. задач или кодовых тестов) – эти *верифицируемые задачи* использовались для *обучения критика* более точному прогнозированию качества. Затем этот улучшенный критик применялся к неверифицируемым заданиям (написание эссе, анализ) и давал сигнал награды/штрафа основной модели. Таким образом, шло итеративное обучение с подкреплением без непосредственного участия человека: модель училась улучшать свои действия, опираясь на внутреннюю «судейскую систему», калиброванную на решаемых задачах. Такой подход родственен RLHF, но заменяет человеческий фидбэк на масштабируемый AI-фидбэк. В результате **Kimi-K2-Instruct** получила «рефлекторные» навыки: она сразу выдаёт действие или ответ, близкий к оптимальному, без необходимости в длинных раздумьях (т.н. *reflex-grade model* без длительного chain-of-thought).
+* **RL with Self-Critique (in the spirit of RLHF)**: Beyond imitation learning, the developers implemented a **Reinforcement Learning** mechanism to further enhance the model’s ability to solve tasks, especially those without a single correct answer. The primary limitation of classical RLHF (learning from human feedback) is the limited and narrow scope of reward signals for creative or analytical tasks. In Kimi-K2, they took a creative approach: the model was trained to *self-evaluate* its outputs against predefined quality criteria. A **self-critique system** was implemented: the model generates an answer and, either in parallel or as a subsequent step, generates an evaluation of that answer based on predefined “quality rubrics.” Since this critic itself may be imperfect, it was periodically improved on verifiable tasks (e.g., math problems or code tests)—these *verifiable tasks* were used to *train the critic* to more accurately predict quality. The improved critic was then applied to non-verifiable tasks (e.g., essay writing, analysis) to provide reward/penalty signals to the main model. Thus, iterative reinforcement learning occurred without direct human involvement: the model learned to improve its actions by relying on an internal “judicial system” calibrated on solvable tasks. This approach is analogous to RLHF but replaces human feedback with scalable AI feedback. As a result, **Kimi-K2-Instruct** acquired “reflexive” skills: it immediately outputs actions or responses close to optimal, without requiring lengthy chain-of-thought deliberation (*reflex-grade model*).
 
-Итогом финального обучения стала модель, способная **следовать инструкциям**, поддерживать диалог и *автономно выполнять сложные последовательности действий*. Отметим, что на текущий момент Kimi-K2-Instruct не является мультимодальной – в отличие от предыдущей версии (Kimi k1.5) она не умеет обрабатывать визуальные данные напрямую и не имеет отдельного «режима раздумий». Команда сконцентрировалась на текстовых и агентных возможностях, планируя добавить поддержку изображений и более продвинутые механизмы рассуждения («длительное размышление») в будущих версиях.
+The outcome of this final training was a model capable of **following instructions**, maintaining dialogue, and **autonomously executing complex action sequences**. Note that, at present, Kimi-K2-Instruct is not multimodal—unlike its predecessor (Kimi k1.5), it cannot process visual data directly and lacks a dedicated “thinking mode.” The team focused on textual and agentic capabilities, planning to add image/audio support and more advanced reasoning mechanisms (“long thinking”) in future versions.
 
-## Дополнительные детали и сравнение с предшественниками
+## Additional Details and Comparison with Predecessors
 
-### Эволюция по сравнению с Kimi k1.5 
+### Evolution Compared to Kimi k1.5
 
-Новая модель Kimi-K2 знаменует существенный шаг вперёд относительно предыдущих моделей Moonshot AI. Предшественник (Kimi k1.5) был выпущен ранее в 2025 году и представлял собой мультимодальный LLM с поддержкой изображений и расширенным контекстом 128k. Kimi k1.5 также использовала RL-подходы в обучении и имела внушительный размер, однако значительно уступающий Kimi-K2: около **389 млрд параметров (52 млрд активных)** при архитектуре MoE, то есть была почти втрое меньше нынешней модели. Kimi-K2 расширила масштабы: 1 трлн параметров (+157% к K1.5) и внедрила новые технологические решения – в частности, механизм MLA для внимания, тогда как Kimi k1.5 в своих длинноконтекстных способностях опиралась на более традиционные подходы (позиционное интерполирование). Кроме того, K1.5 была ориентирована на мультимодальность и диалог, тогда как K2 сделала упор на **agentic-возможности** (автономное выполнение задач). Kimi-K2 в текущей версии не поддерживает обработку изображений или аудио (мультимодальные аспекты планируются позднее), но заметно превосходит K1.5 по *текстовым* и *кодовым* задачам, а также по способности пользоваться инструментами. Еще одно отличие – **открытость**: Kimi-K2 выпущена с открытым исходным кодом и весами (Modified MIT License), тогда как Kimi k1.5 была скорее свободно доступна через API/интерфейс, но без полноценной открытой модели. Таким образом, Kimi-K2 представляет собой более масштабную, узкоспециализированную на агентности эволюцию семейства Kimi.
+The new model Kimi-K2 marks a significant leap forward compared to prior Moonshot AI models. The predecessor (Kimi k1.5), released earlier in 2025, was a multimodal LLM supporting images and extended context up to 128k. Kimi k1.5 also employed RL techniques and had substantial size, yet was significantly smaller than Kimi-K2: approximately **389 billion parameters (52 billion active)** under an MoE architecture—roughly one-third the scale of the current model. Kimi-K2 expanded scale: 1 trillion parameters (+157% over K1.5) and introduced novel technological solutions—specifically, the MLA mechanism for attention, whereas Kimi k1.5 relied on more traditional approaches (positional interpolation) for long-context capabilities. Furthermore, K1.5 emphasized multimodality and dialogue, while K2 prioritized **agentic capabilities** (autonomous task execution). Kimi-K2 in its current version does not support image or audio processing (multimodal aspects are planned for later), but substantially outperforms K1.5 in *textual* and *coding* tasks, as well as tool usage. Another distinction is **openness**: Kimi-K2 was released with open-source code and weights (Modified MIT License), whereas Kimi k1.5 was primarily accessible via API/interface without a fully open model. Thus, Kimi-K2 represents a more scalable, agent-focused evolution of the Kimi family.
 
-### Производительность на бенчмарках
+### Performance on Benchmarks
 
-![Figure_02](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/Figure_02.png)
+![Figure_02](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-29/assets/Figure_02.png  )
 
-Kimi-K2 на момент выпуска демонстрирует *state-of-the-art* результаты среди открытых моделей и вплотную подбирается к закрытым лидерам. На академическом тесте знаний и мышления **MMLU** (57 предметов) модель набирает около **87,8%** точности, что превышает результаты всех предшествующих open-source LLM (для сравнения, OpenAI GPT-4 оценивался \~86.4% на MMLU). На конкурсе **C-Eval** (китайский аналог MMLU) Kimi-K2 показала \~**92,5%**, существенно опередив предыдущие модели на китайском языке – подтверждение её глубокого понимания китайских данных. В сложных математических задачах (**MATH** комплексные задачи школьной программы) достигнуто **70,2%** правильных решений – это заметный скачок относительно моделей прошлого поколения (для сравнения, GPT-4 – около 85%, Llama-2 70B – \~50%). На арифметических задачах начальной школы (**GSM8K**) модель верно решает **92,1%** задач, практически устранив ранее характерные ошибки в многошаговых вычислениях.
+At release, Kimi-K2 demonstrates *state-of-the-art* results among open models and closely approaches closed-source leaders. On the academic knowledge and reasoning benchmark **MMLU** (57 subjects), the model achieves approximately **87.8%** accuracy, surpassing all prior open-source LLMs (for comparison, OpenAI GPT-4 was evaluated at ~86.4% on MMLU). On the Chinese-language equivalent **C-Eval**, Kimi-K2 scored ~**92.5%**, decisively outperforming previous Chinese-language models—confirming its deep understanding of Chinese data. In complex mathematical problems (**MATH**—school-level problem-solving), it achieved **70.2%** correct solutions—a notable leap over previous-generation models (for comparison, GPT-4 ~85%, Llama-2 70B ~50%). On elementary arithmetic (**GSM8K**), the model correctly solves **92.1%** of problems, nearly eliminating earlier errors in multi-step calculations.
 
-Особенно впечатляют показатели в программировании. В тестах генерации кода Kimi-K2 устанавливает новые рекорды среди открытых моделей. Например, **LiveCodeBench v6** (реалистичный бенчмарк по конкурентному программированию) – базовая модель Kimi-K2-Base достигает \~**26,3%** точности *pass\@1*, а финальная инструкционная версия Kimi-K2-Instruct – **53,7%** *pass\@1*, **опережая** даже GPT-4.1 (около 44.7%) на этих задачах. В мульти-язычном программировании (**MultiPL-E** бенчмарк) модель приближается к верхним строчкам с \~85-86% точности, а на внутреннем тесте **SWE-bench (Software Engineering)** показала **65,8%** успешных решений, что сравнимо с некоторыми проприетарными моделями Anthropic и значительно лучше большинства open-source моделей.
+Particularly impressive are performance metrics in programming. In code generation benchmarks, Kimi-K2 sets new records among open models. For example, on **LiveCodeBench v6** (a realistic competitive programming benchmark), the base Kimi-K2-Base model achieves ~**26.3%** *pass@1* accuracy, while the final instruct version, Kimi-K2-Instruct, reaches **53.7%** *pass@1*, **outperforming** even GPT-4.1 (~44.7%) on these tasks. In multilingual programming (**MultiPL-E** benchmark), the model approaches the top tier with ~85–86% accuracy, and on the internal **SWE-bench (Software Engineering)** test, it achieved **65.8%** successful solutions—comparable to some proprietary models from Anthropic and significantly better than most open-source models.
 
-Также Kimi-K2 лидирует на специализированных агентных бенчмарках: так, на наборах **Tau** и **AceBench** (оценка умения модели использовать инструменты) она заняла первые места среди открытых моделей. Например, в сценариях Tau (поиск решения в доменах ритейла, авиабилетов, телеком и пр. с помощью инструментов) Kimi-K2-Instruct показывает 70-75% успеха, приближаясь к уровням Claude 2 и превосходя другие открытые аналоги.
+Kimi-K2 also leads on specialized agent benchmarks: it ranked first among open models on **Tau** and **AceBench** (evaluating tool usage capability). For instance, in Tau scenarios (solving tasks in retail, flight booking, telecom, etc., via tools), Kimi-K2-Instruct achieves 70–75% success, approaching Claude 2 levels and surpassing other open alternatives.
 
-В совокупности эти результаты свидетельствуют, что **Kimi-K2 установила новый уровень качества** для открытых моделей. По многим метрикам она **догоняет, а порой и превосходит** крупнейшие закрытые системы. Например, разработчики отмечают, что Kimi-K2-Instruct обходит версии Claude 4 (Anthropic) и даже обновлённый GPT-4.1 на ряде ключевых тестов. VentureBeat также подчёркивает, что Kimi-K2 превзошла GPT-4 в некоторых «болевых точках» вроде математических доказательств и сложного кода.
+Collectively, these results indicate that **Kimi-K2 has established a new quality standard** for open models. On many metrics, it **catches up to, and occasionally surpasses**, leading closed systems. For example, developers note that Kimi-K2-Instruct outperforms versions of Claude 4 (Anthropic) and even updated GPT-4.1 on several key tests. VentureBeat also highlights that Kimi-K2 surpassed GPT-4 in certain “pain points,” such as mathematical proofs and complex code.
 
-Конечно, модель не идеальна – разработчики указывают, что Kimi-K2 всё ещё может ошибаться в очень длинных цепочках рассуждений, может давать избыточно подробные ответы на простые вопросы, и пока *не* обладает мультимодальными способностями (не «видит» изображения). Однако эти недостатки признаны и активно прорабатываются (планируется улучшение «долгого мышления» и добавление зрения в следующих версиях).
+Of course, the model is not flawless—developers acknowledge that Kimi-K2 can still err in very long reasoning chains, may produce overly verbose answers to simple questions, and currently **lacks multimodal capabilities** (cannot "see" images). However, these shortcomings are acknowledged and actively addressed (improvements to "long thinking" and vision are planned for future versions).
 
-### Вывод
+### Conclusion
 
-Kimi-K2 представляет собой выдающуюся в техническом плане LLM: инновационная архитектура MoE с топ-8 экспертизой и QK-клип оптимизацией позволили создать *открытую* модель с 1 трлн параметров, обученную на беспрецедентном объёме данных без сбоев. Процесс обучения включал передовые методы устойчивой оптимизации (MuonClip, BF16), распределения нагрузки (ZeRO) и имитационного/подкрепляющего обучения для формирования агентных навыков. Получившаяся модель задаёт новый стандарт качества среди open-source AI, особенно блистая в программировании, математике и автономном выполнении задач. Kimi-K2-Base предоставляет исследователям мощную базу для собственных экспериментов и дообучения, а Kimi-K2-Instruct уже сейчас доступна для прямого использования – её можно запустить локально или через API без каких-либо платных подписок. Модель Kimi-K2 демонстрирует, что открытые инициативы могут конкурировать с лидерами индустрии, и открывает путь к созданию ещё более продвинутых и доступных ИИ-систем в ближайшем будущем.
+Kimi-K2 represents a technically outstanding LLM: an innovative MoE architecture with top-8 expert routing and QK-clip optimization enabled the creation of an *open* model with 1 trillion parameters, trained on an unprecedented data volume without failure. The training process incorporated advanced stability techniques (MuonClip, BF16), distributed workload (ZeRO), and imitation/reinforcement learning to cultivate agentic skills. The resulting model sets a new benchmark for open-source AI, excelling particularly in programming, mathematics, and autonomous task execution. Kimi-K2-Base provides researchers with a powerful foundation for their own experiments and fine-tuning, while Kimi-K2-Instruct is already available for direct use—deployable locally or via API without any paid subscriptions. Kimi-K2 demonstrates that open initiatives can compete with industry leaders and paves the way for even more advanced and accessible AI systems in the near future.

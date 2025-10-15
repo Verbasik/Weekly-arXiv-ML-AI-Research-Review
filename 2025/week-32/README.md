@@ -1,36 +1,38 @@
 [![arXiv](https://img.shields.io/badge/arXiv-2507.18071-b31b1b.svg)](https://arxiv.org/abs/2507.18071)
 [![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Models-yellow)](https://huggingface.co/papers/2507.18071)
-[![Telegram Channel](https://img.shields.io/badge/Telegram-TheWeeklyBrief-blue)](https://t.me/TheWeeklyBrief)
 
-# 🔥 ВОСКРЕСНЫЙ ДАМП: GSPO (Qwen RL Algorithm by Alibaba Cloud) 🚀
+# 🔥 Sunday Dump: GSPO (Qwen RL Algorithm by Alibaba Cloud) 🚀
 
-**Qwen** снова радуют релизом. Но на этот раз это не модель, а новый RL-алгоритм для обучения LLM.
+**Qwen** is back with another release. But this time, it's not a model—it's a new RL algorithm for training LLMs.
 
-Метод называется **Group Sequence Policy Optimization (GSPO)**, и именно он лег в основу последних громких моделей компании: **Qwen3 Instruct**, **Coder** и **Thinking**. Статья вышла пару дней назад, но о ней уже говорят все. Значит, пока разбираться и нам.  
+The method is called **Group Sequence Policy Optimization (GSPO)**, and it forms the foundation of the company's latest high-profile models: **Qwen3 Instruct**, **Coder**, and **Thinking**. The paper was published just a few days ago, but everyone is already talking about it. So it's time we dive in too.
 
-Сегодня один из самых популярных RL-алгоритмов для LLM – это **GRPO (by DeepSeek)**. Если вам он не знаком – почитайте разбор вот тут. GRPO работает здорово и довольно стабильно, но на уровне токенов. 
+Today, one of the most popular RL algorithms for LLMs is **GRPO (by DeepSeek)**. If you're unfamiliar with it, read the breakdown here. GRPO works well and is fairly stable—but at the token level.
 
-То есть в GRPO мы:
-- Считаем награду для всей последовательности 
-- Считаем важность каждого токена и применяем клиппинг также для каждого токена отдельно 
-- Обновляем политику "на уровне токенов". 
+In GRPO, we:
+- Compute the reward for the entire sequence
+- Calculate the importance weight for each token and apply clipping individually to each token
+- Update the policy at the token level.
 
-А в **GSPO** все то же самое происходит сразу для всей последовательности:
-- Считаем награду 
-- Рассчитываем единый **importance weight** для всей последовательности и применяем клиппинг для всего ответа целиком с нормализацией по длине 
-- Обновляем политику. 
+In **GSPO**, everything happens at the sequence level:
+- Compute the reward
+- Calculate a single **importance weight** for the entire sequence and apply clipping to the full response with length normalization
+- Update the policy.
 
-### В чем преимущество такого подхода? 
+### What are the advantages of this approach?
 
-1. **Не нужно устраивать танцы с бубном**, когда работаешь с MoE. У GRPO из-за архитектурных особенностей MoE идет со скрипом, а тут все заводится из коробки. 
-2. **Градиенты получаются менее шумными**, потому что снижается дисперсия. Следовательно – еще более стабильное обучение. Следовательно – лучшие метрики при тех же ресурсах. 
-3. **Инженерно реализуется гораздо проще**. 
+1. **No need for elaborate workarounds** when working with MoE. With GRPO, MoE architecture struggles, but here it works out of the box.
+2. **Gradients are less noisy** due to reduced variance. Consequently—more stable training. Consequently—better metrics with the same resources.
+3. **Much simpler to implement engineering-wise**.
 
-Короче, выглядит очень привлекательно и, вероятно, станет следующим словом в RL для LLM (особенно в опенсорсе).
+In short, it looks extremely attractive and is likely to become the next big thing in RL for LLMs (especially in open source).
 
 ---
 
-⭐ **Понравился обзор?**
-Не забудьте поставить ★ и подписаться на канал в Telegram, чтобы не пропустить новые разборы!
+<div align="center">
 
-<p align="center">Исследуйте вместе с нами 🚀</p> 
+**Explore with us 🚀**
+
+⭐ Star this repository if you found it helpful
+
+</div>

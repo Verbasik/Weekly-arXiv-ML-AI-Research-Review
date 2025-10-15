@@ -1,28 +1,28 @@
-[![Telegram Channel](https://img.shields.io/badge/Telegram-TheWeeklyBrief-blue)](https://t.me/TheWeeklyBrief)
+[![Telegram Channel](https://img.shields.io/badge/Telegram-TheWeeklyBrief-blue  )](https://t.me/TheWeeklyBrief  )
 
-# OpenAI Agents SDK: Быстрый старт или дорогой «черный ящик»?
+# OpenAI Agents SDK: Quick Start or Expensive “Black Box”?
 
-> Глубокий разбор архитектуры агентских инструментов OpenAI от команды The Weekly Brief. Узнайте, когда стоит выбирать этот инструмент, а когда лучше использовать альтернативы вроде LangChain.
+> A deep dive into the architecture of OpenAI’s agent tools by The Weekly Brief team. Learn when to choose this tool—and when to opt for alternatives like LangChain.
 
-🚀 **Новый выпуск в рубрике [#AgentsUnderHood](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/tree/develop/agents-under-hood/openai-cs-agents-demo)!**  
-
----
-
-## 🔍 Основные выводы
-
-* **Архитектура в два уровня**: Assistants API (исполнение) + Agents SDK (оркестрация)
-* **Zero-shot мультиагентность**: передача задач между агентами через `Handoffs`
-* **Скорость разработки**: рабочий прототип с RAG и тулами за 2 часа
-* **Ценовой компромисс**: удобство vs высокая стоимость и vendor lock-in
+🚀 **New release in the [#AgentsUnderHood](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/tree/develop/agents-under-hood/openai-cs-agents-demo  ) series!**
 
 ---
 
-## 🏗️ Архитектурные компоненты
+## 🔍 Key Takeaways
+
+* **Two-level architecture**: Assistants API (execution) + Agents SDK (orchestration)
+* **Zero-shot multi-agent capability**: Task handoff between agents via `Handoffs`
+* **Rapid development**: A working prototype with RAG and tools in under 2 hours
+* **Cost trade-off**: Convenience vs. high cost and vendor lock-in
+
+---
+
+## 🏗️ Architectural Components
 
 ```python
 from agents import Agent, Runner, function_tool
 
-# Создание агента с инструментом
+# Create an agent with a tool
 @function_tool
 def get_weather(city: str) -> str:
     return f"Weather in {city}: Sunny"
@@ -33,47 +33,50 @@ agent = Agent(
     tools=[get_weather]
 )
 
-# Запуск мультиагентного workflow
+# Run a multi-agent workflow
 result = Runner.run_sync(agent, "What's the weather in Tokyo?")
 ```
 
 ---
 
-## ⚖️ Сравнение с LangChain
+## ⚖️ Comparison with LangChain
 
-| Критерий        | Agents SDK                     | LangChain                      |
+| Criterion       | Agents SDK                     | LangChain                      |
 |-----------------|--------------------------------|--------------------------------|
-| Порог входа     | ★★★★★ (очень низкий)          | ★★★☆☆ (средний)               |
-| Гибкость        | ★★☆☆☆ (ограниченная)           | ★★★★★ (полная)                |
-| Стоимость       | ★★☆☆☆ (высокая)                | ★★★★☆ (контролируемая)        |
-| Мультиагентность| Встроенная через Handoffs      | Через LangGraph                |
+| Learning curve  | ★★★★★ (very low)               | ★★★☆☆ (moderate)               |
+| Flexibility     | ★★☆☆☆ (limited)                | ★★★★★ (full)                   |
+| Cost            | ★★☆☆☆ (high)                   | ★★★★☆ (controllable)           |
+| Multi-agent     | Built-in via Handoffs          | Via LangGraph                  |
 
 ---
 
-## 💡 Когда использовать?
+## 💡 When to Use?
 
-**✅ Идеально для:**
-- Быстрого прототипирования MVP
-- Проектов внутри экосистемы OpenAI
-- Знакомства с концепцией агентов
+**✅ Ideal for:**
+- Rapid MVP prototyping
+- Projects within the OpenAI ecosystem
+- Getting started with agent concepts
 
-**❌ Проблемные сценарии:**
-- Продакшен с требованием к контролю затрат
-- Системы с hybrid-архитектурой (разные LLM)
-- Проекты с кастомными RAG-пайплайнами
+**❌ Problematic scenarios:**
+- Production systems requiring cost control
+- Hybrid-architecture systems (multiple LLMs)
+- Projects requiring custom RAG pipelines
 
 ---
 
-## 📌 Ключевые особенности
+## 📌 Key Features
 
-* **Автоматическое управление состоянием** через Threads
-* **Встроенные инструменты**: Code Interpreter, File Search
-* **Трассировка выполнения** для отладки сложных workflow
-* **Декоратор @function_tool** для интеграции любых функций
+* **Automatic state management** via Threads
+* **Built-in tools**: Code Interpreter, File Search
+* **Execution tracing** for debugging complex workflows
+* **`@function_tool` decorator** for integrating arbitrary functions
 
+---
 
-## ⭐ **Понравился разбор?**
+<div align="center">
 
-Подписывайтесь на [Telegram-канал](https://t.me/TheWeeklyBrief) и ставьте звезду в репозитории!
+**Explore with us 🚀**
 
-<p align="center">Исследуем технологии ИИ вместе! 🚀</p>
+⭐ Star this repository if you found it helpful
+
+</div>

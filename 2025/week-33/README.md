@@ -28,12 +28,10 @@ commit -yes
 
 ---
 
-## 🎁 Что уже можно сделать?
+<div align="center">
 
-1. Поставить ⭐ в [репозитории](https://github.com/...)
-2. Собрать [autocommiter](https://github.com/.../adk-commit-generator)
-3. Обсудить в [чате](https://t.me/TheWeeklyBrief_chat) ваш опыт с ADK
+**Explore with us 🚀**
 
-<p align="center">
-  <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcW0yY2VhN3BqY3B6eWg0Y3R5Z2VhbmRyc3B6dGJ6eGJtY2V5eSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7abAHdYvZdBNnGZq/giphy.gif" width="250">
-</p>
+⭐ Star this repository if you found it helpful
+
+</div>
