@@ -5,7 +5,7 @@
 [![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-red.svg)](https://pytorch.org/)
 [![Tests](https://img.shields.io/badge/Tests-110%20passing-success.svg)]()
-[![Progress](https://img.shields.io/badge/Progress-92%25-brightgreen.svg)]()
+[![Progress](https://img.shields.io/badge/Progress-94%25-brightgreen.svg)]()
 
 ---
 
@@ -107,13 +107,20 @@ Qwen3 MoE Model
 - ✅ Forward pass с накоплением balance_loss
 - ✅ Autoregressive generation с temperature/top-k/top-p sampling
 
-### ⏳ Фаза 4: Обучение модели (0%)
+### ✅ Фаза 3.5: Улучшения (100%)
 
-- ⏳ Подготовка датасета (WikiText-2 или tiny shakespeare)
-- ⏳ Токенизация через GPT-2 tokenizer
-- ⏳ Training loop с AdamW optimizer
-- ⏳ Validation и метрики (perplexity, accuracy)
-- ⏳ Сохранение checkpoints
+| Компонент | Статус | Тесты | Файл |
+|-----------|--------|-------|------|
+| OptimizedMoELayer | ✅ Завершено | ✅ Все | `experiments/domain/moe/optimized_moe_layer.py` |
+
+Примечания:
+- Векторизованный MoE слой (flatten + boolean mask + batch processing) даёт ~2–3× ускорение при ~5× росте RAM.
+- Численно эквивалентен `SimpleMoELayer` (проверено тестами).
+
+### ⏳ Фаза 4: Обучение модели (скелеты готовы)
+
+- ✅ Скелеты модулей с TODO: `experiments/train/` (data, collate, trainer, entry)
+- ⏳ Заполнение реализаций: загрузка WikiText‑2 → токенизация (GPT‑2) → чанкинг → DataLoader → лосс (CE + α·balance) → PPL → чекпоинты
 
 ---
 
@@ -142,6 +149,12 @@ pytest experiments/domain/attention/test/test_gqa.py -v
 ```bash
 python3 experiments/domain/moe/test_integration.py
 ```
+
+### Walkthrough Notebook (рекомендуется)
+
+Откройте учебный ноутбук с пошаговыми проверками (Quick Check):
+
+- `notebooks/Qwen3_MoE_Walkthrough.ipynb` (ссылки на документы, эмодзи‑секциями и мини‑тестами)
 
 ### Использование полной модели
 
@@ -263,6 +276,13 @@ experiments/
 │       ├── qwen3_model.py         # Qwen3MoEModel (полная модель)
 │       └── test/
 │           └── test_qwen3_model.py  # 19 комплексных тестов
+│
+├── train/
+│   ├── data.py          # Скелет: загрузка/токенизация/чанкинг (TODO)
+│   ├── collate.py       # Скелет: batching (TODO)
+│   ├── trainer.py       # Скелет: train/eval/checkpoint (TODO)
+│   ├── config.py        # Гиперпараметры тренинга (редактируемо)
+│   └── train_wikitext2.py # Точка входа (связка компонентов, TODO)
 │
 └── memory/
     ├── memory-bank/               # Банк памяти проекта
@@ -478,13 +498,13 @@ python3 experiments/domain/moe/test_integration.py
 
 ### Прогресс проекта
 ```
-Общий прогресс:    92%
+Общий прогресс:    94%
 Строк кода:        ~5200+ (реализация)
 Строк тестов:      ~4200+
 Документация:      ~6400+ строк в .md файлах
 Комментарии:       Подробные в каждом файле
 Компоненты:        10/10 реализовано (100%)
-Улучшения:         1/2 (Tokenizer ✅, Оптимизация MoE ⏳)
+Улучшения:         2/2 (Tokenizer ✅, OptimizedMoE ✅)
 ```
 
 ### Производительность
@@ -530,8 +550,8 @@ Text Interface:    chat() метод с GPT-2 tokenizer ✅
 
 <div align="center">
 
-**Made with ❤️ for ML Education**
+**Explore with us 🚀**
 
-⭐ Star this repo if you found it helpful!
+⭐ Star this repository if you found it helpful
 
 </div>

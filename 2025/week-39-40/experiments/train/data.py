@@ -19,21 +19,17 @@ def get_tokenizer() -> Any:
     Returns:
     ---------------
         Any: Инициализированный токенизатор HF (GPT2Tokenizer или совместимый).
-
-    TODO:
-    ---------------
-        - Загрузить GPT‑2 tokenizer через HF Transformers
-        - Установить pad_token = eos_token и padding_side = "right"
-        - Решить, нужны ли BOS/EOS при предобучении (обычно False для add_special_tokens)
-
-    Вопросы для размышления:
-    ---------------
-        - Почему у GPT‑2 нет pad_token по умолчанию?
-        - Как padding_side влияет на батчинг в LM?
     """
-    # TODO: реализуйте загрузку и настройку токенизатора
-    pass
+    # TODO:
+    # Загрузить GPT‑2 tokenizer через HF Transformers
+    # Установить pad_token = eos_token и padding_side = "right"
+    # Решить, нужны ли BOS/EOS при предобучении (обычно False для add_special_tokens)
 
+    # Вопросы для размышления:
+    # Почему у GPT‑2 нет pad_token по умолчанию?
+    # Как padding_side влияет на батчинг в LM?
+    # pass
+    
 
 def load_wikitext2_splits():
     """
