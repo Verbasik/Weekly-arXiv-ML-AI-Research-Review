@@ -5,10 +5,21 @@ import { ResearchController } from './application/ResearchController.js';
  * Точка входа в приложение с DDD архитектурой
  */
 
-// Конфигурация приложения
+// Определяем язык страницы по пути (index-en.html, about-en.html и т.п.)
+function isEnglishPage() {
+    try {
+        const path = (typeof window !== 'undefined' && window.location && window.location.pathname) ? window.location.pathname : '';
+        return /(?:-|_)en\.html$/i.test(path);
+    } catch (e) {
+        return false;
+    }
+}
+
+// Конфигурация приложения: выбираем ветку под язык
 const APP_CONFIG = {
     githubRepo: 'Verbasik/Weekly-arXiv-ML-AI-Research-Review',
-    githubBranch: 'develop' // Или 'main', если ветка называется так
+    // EN страницы → main-en; RU страницы → main
+    githubBranch: isEnglishPage() ? 'main-en' : 'main'
 };
 
 // Главная функция инициализации

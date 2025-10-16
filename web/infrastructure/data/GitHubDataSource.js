@@ -8,6 +8,7 @@ export class GitHubDataSource {
     constructor(config) {
         this.githubRepo = config.githubRepo;
         this.githubBranch = config.githubBranch;
+        // Default base URL uses provided branch; per-request methods may override branch by language
         this.baseUrl = `https://raw.githubusercontent.com/${this.githubRepo}/${this.githubBranch}`;
     }
 
@@ -23,27 +24,33 @@ export class GitHubDataSource {
             isEnglish = /(?:-|_)en\.html$/i.test(path);
         } catch (e) { /* no-op: default to RU */ }
 
-        // Prefer EN data on EN pages; fallback to alternative EN name, then RU index.json if EN not available
-        const primaryUrl = `${this.baseUrl}/web/infrastructure/data/${isEnglish ? 'index-en.json' : 'index.json'}`;
-        const altEnUrl = `${this.baseUrl}/web/infrastructure/data/index_en.json`;
-        const fallbackUrl = `${this.baseUrl}/web/infrastructure/data/index.json`;
+        // Select branch by language: EN → main-en; otherwise use configured branch
+        const branch = isEnglish ? 'main-en' : this.githubBranch;
+        const langBase = `https://raw.githubusercontent.com/${this.githubRepo}/${branch}`;
+
+        // Prefer EN-named index in EN branch, then its alternatives, then plain index.json in EN branch;
+        // Finally, as a last resort, fallback to RU branch main/index.json
+        const primaryUrl = `${langBase}/web/infrastructure/data/${isEnglish ? 'index-en.json' : 'index.json'}`;
+        const altEnUrl = `${langBase}/web/infrastructure/data/index_en.json`;
+        const enPlainUrl = `${langBase}/web/infrastructure/data/index.json`;
+        const ruFallbackUrl = `https://raw.githubusercontent.com/${this.githubRepo}/main/web/infrastructure/data/index.json`;
         
         try {
             let response = await fetchWithRetry(primaryUrl, {}, 'данные статей');
             if (!response.ok && isEnglish) {
-                // Try alternative EN filename
                 response = await fetchWithRetry(altEnUrl, {}, 'данные статей');
                 if (!response.ok) {
-                    // Fallback to RU if EN missing
-                    response = await fetchWithRetry(fallbackUrl, {}, 'данные статей');
+                    response = await fetchWithRetry(enPlainUrl, {}, 'данные статей');
+                    if (!response.ok) {
+                        response = await fetchWithRetry(ruFallbackUrl, {}, 'данные статей');
+                    }
                 }
             }
+
             const data = await response.json();
-            
             if (!data.years || !Array.isArray(data.years)) {
                 throw new Error('Invalid data format: years array is missing');
             }
-            
             return data;
         } catch (error) {
             throw new Error(`Failed to fetch research data: ${error.message}`);
@@ -62,9 +69,15 @@ export class GitHubDataSource {
             isEnglish = /(?:-|_)en\.html$/i.test(path);
         } catch (e) { /* no-op: default to RU */ }
 
-        const preferred = isEnglish ? 'review-en.md' : 'review.md';
-        const altEn = 'review_en.md';
-        const reviewUrl = `${this.baseUrl}/${yearNumber}/${weekId}/${preferred}`;
+        // Select branch by language: EN → main-en; otherwise use configured branch
+        const branch = isEnglish ? 'main-en' : this.githubBranch;
+        const langBase = `https://raw.githubusercontent.com/${this.githubRepo}/${branch}`;
+
+        // In EN branch we store unified filenames: review.md
+        const preferred = 'review.md';
+        const altEn = 'review-en.md';
+        const altEn2 = 'review_en.md';
+        const preferredUrl = `${langBase}/${yearNumber}/${weekId}/${preferred}`;
 
         // Helper to fetch with descriptive context
         const load = async (url, label) => {
@@ -76,25 +89,25 @@ export class GitHubDataSource {
             return text;
         };
 
-        // Try preferred language first; on failure, try alternate EN name then fallback to RU version
+        // Try preferred name first; on EN pages also try legacy EN names within EN branch;
+        // finally fallback to RU main branch review.md
         try {
-            return await load(reviewUrl, `статья "${yearNumber}/${weekId}"`);
+            return await load(preferredUrl, `статья "${yearNumber}/${weekId}"`);
         } catch (firstError) {
             if (isEnglish) {
-                // Try alternative EN filename
-                const altEnUrl = `${this.baseUrl}/${yearNumber}/${weekId}/${altEn}`;
+                // Try legacy EN filenames inside EN branch
                 try {
-                    return await load(altEnUrl, `статья "${yearNumber}/${weekId}"`);
-                } catch (secondError) {
-                    // Fallback to RU if both EN variants not available
-                    const fallbackUrl = `${this.baseUrl}/${yearNumber}/${weekId}/review.md`;
+                    return await load(`${langBase}/${yearNumber}/${weekId}/${altEn}`, `статья "${yearNumber}/${weekId}"`);
+                } catch (_) {
                     try {
-                        return await load(fallbackUrl, `статья "${yearNumber}/${weekId}"`);
-                    } catch (fallbackError) {
-                        throw fallbackError;
-                    }
+                        return await load(`${langBase}/${yearNumber}/${weekId}/${altEn2}`, `статья "${yearNumber}/${weekId}"`);
+                    } catch (_) { /* continue to RU fallback */ }
                 }
+                // Fallback to RU branch main
+                const ruUrl = `https://raw.githubusercontent.com/${this.githubRepo}/main/${yearNumber}/${weekId}/review.md`;
+                return await load(ruUrl, `статья "${yearNumber}/${weekId}"`);
             }
+            // Non-EN: rethrow original error
             throw firstError;
         }
     }
