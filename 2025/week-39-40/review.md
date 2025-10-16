@@ -1,429 +1,418 @@
-# От GPT-2 к gpt-oss: анализ достижений архитектуры
+# From GPT-2 to gpt-oss: An Analysis of Architectural Advancements
 
-> И как они выглядят на фоне Qwen3
+> And how they stack up against Qwen3
 
----
+On August 5, 2025, OpenAI released new open-weight LLMs: gpt-oss-120b and gpt-oss-20b—the first fully open models since the release of GPT-2 in 2019. And yes, thanks to some clever optimizations, you can run them locally (but more on that later).
 
-### **TWRB_FM 📻**
+This is the first time since GPT-2 that OpenAI has shared a large, fully open model. Early GPT models demonstrated how transformer architecture scales. Then, the release of ChatGPT in 2022 brought these models into the mainstream, showcasing their practical utility for writing, knowledge retrieval (and later, programming). Now, the company has shared the long-awaited model weights, and the architecture contains several interesting details.
 
-<audio controls>
-  <source src="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/raw/refs/heads/develop/2025/week-39-40/TWRB_FM.mp3" type="audio/mpeg">
-  Ваш браузер не поддерживает аудиоэлемент.
-</audio>
+I spent the past few days studying the code and technical reports to distill the most compelling insights. (Just a few days after this, OpenAI also announced GPT-5—I'll briefly touch on it in the context of gpt-oss models at the end of the article.)
 
----
+Below is a brief overview of what this article covers. For convenient navigation, I recommend using the table of contents on the left side of the article page.
 
-5 августа, 2025 года OpenAI выпустила новые модели LLM с открытым весом: gpt-oss-120b и gpt-oss-20b — первые полностью открытые модели с момента выхода GPT-2 в 2019 году. И да, благодаря некоторым умным оптимизациям, их можно запускать локально (но об этом чуть позже).
+- Architecture comparison with GPT-2  
+- MXFP4 optimization enabling gpt-oss models to run on a single GPU  
+- Width vs. depth trade-offs (gpt-oss vs. Qwen3)  
+- Attention biases and "sinks"  
+- Benchmarks and comparison with GPT-5  
 
-Это первый раз с момента выпуска GPT-2, когда OpenAI делится крупной полностью открытой моделью. Ранние модели GPT показали, как масштабируется архитектура трансформеров. Затем выпуск ChatGPT в 2022 году сделал эти модели мейнстримом, продемонстрировав их практическую пользу для задач письма, получения знаний (а позже и программирования). Теперь же компания поделилась долгожданными весами модели, и архитектура содержит несколько интересных деталей.
+I hope you find this article helpful!
 
-Я провёл последние несколько дней, изучая код и технические отчёты, чтобы обобщить самые интересные подробности. (Спустя всего несколько дней после этого OpenAI также анонсировала GPT-5 — я кратко затрону её в контексте моделей gpt-oss в конце статьи.)
+## 1. Model Architecture Overview
 
-Ниже — краткий обзор того, о чём пойдёт речь в статье. Для удобной навигации рекомендую использовать оглавление слева на странице статьи.
+Before delving into detailed architecture comparisons, let's begin with an overview of the two models—`gpt-oss-20b` and `gpt-oss-120b`—shown in Figure 1 below.
 
-- Сравнение архитектуры моделей с GPT-2  
-- Оптимизация MXFP4, позволяющая разместить модели gpt-oss на одной видеокарте  
-- Компромиссы между шириной и глубиной (gpt-oss vs Qwen3)  
-- Внимание, смещения и «поглотители» (attention bias and sinks)  
-- Бенчмарки и сравнение с GPT-5  
+![Two gpt-oss models side by side](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-01.png)
 
-Надеюсь, вы найдёте эту статью полезной!
+> Figure 1: Two gpt-oss models side by side.
 
-## 1. Обзор архитектуры модели
+If you've previously seen schematics of modern LLMs or read my earlier article "A Grand Architecture Comparison," you may notice that at first glance, there's nothing fundamentally new or unusual here.
 
-Прежде чем подробно обсуждать архитектуру, начнём с обзора двух моделей — `gpt-oss-20b` и `gpt-oss-120b`, показанных на Рисунке 1 ниже.
+This isn't surprising: leading LLM developers typically use the same base architecture, making only minor refinements. This is my personal hypothesis, but I believe the reasons are:
 
-![Две модели gpt-oss рядом](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-01.png)
+- Significant personnel rotation occurs between labs.
+- We still haven't found anything better than the transformer architecture. While state space models and text diffusion models exist, to my knowledge, no one has demonstrated they perform as well as transformers at this scale. (Most comparisons I've found focus solely on benchmark scores. It remains unclear how well these models handle real-world multi-step writing and programming tasks. At the time of writing, the highest-ranked non-fully-transformer model on LM Arena—Jamba, a hybrid transformer and state space model—is ranked 96th. *NOTE: I was kindly pointed out that there is a higher-ranked hybrid model—Hunyuan-TurboS at 22nd place.*)
+- Most improvements are likely achieved through data and fine-tuning algorithms, not radical architectural changes.
 
-> Рисунок 1: Две модели gpt-oss рядом.
+Nevertheless, their design choices contain many interesting aspects. Some are shown in the figure above (others aren't, but we'll discuss them later). In the remainder of this article, I'll sequentially highlight these features and compare them with other architectures.
 
-Если вы раньше видели схемы современных LLM или читали мою предыдущую статью «Большое сравнение архитектур», вы можете заметить, что на первый взгляд здесь нет ничего принципиально нового или необычного.
+I also want to emphasize that I am in no way affiliated with OpenAI. My information is based solely on studying the published model code and technical reports. If you want to learn how to run these models locally, the best place to start is OpenAI's official model pages on the Hugging Face Hub:
 
-Это неудивительно: ведущие разработчики LLM, как правило, используют одну и ту же базовую архитектуру, внося лишь небольшие доработки. Это моё личное предположение, но, думаю, причины в следующем:
+- https://huggingface.co/openai/gpt-oss-20b  
+- https://huggingface.co/openai/gpt-oss-120b  
 
-- Между лабораториями происходит значительная ротация сотрудников.
-- Мы до сих пор не нашли ничего лучше архитектуры трансформера. Хотя существуют state space models и модели диффузии текста, насколько мне известно, никто не доказал, что они работают так же хорошо, как трансформеры, на данном масштабе. (Большинство сравнений, которые я нашёл, сосредоточены только на результатах бенчмарков. До сих пор неясно, насколько хорошо эти модели справляются с реальными многоходовыми задачами письма и программирования. На момент написания статьи самая высокорейтинговая неполностью-трансформерная модель на LM Arena — Jamba, гибрид трансформера и state space модели, занимает 96-е место. *ПРИМЕЧАНИЕ: мне любезно указали, что существует более высокорейтинговая гибридная модель — Hunyuan-TurboS на 22-м месте.*)
-- Большая часть улучшений, скорее всего, достигается за счёт данных и тонкой настройки алгоритмов, а не за счёт кардинальных изменений архитектуры.
-
-Тем не менее, в их выборе дизайна есть множество интересных аспектов. Некоторые из них показаны на рисунке выше (другие — нет, но мы обсудим их позже). В оставшейся части статьи я поочерёдно выделю эти особенности и сравню их с другими архитектурами.
-
-Также хочу отметить, что я никоим образом не связан с OpenAI. Моя информация основана исключительно на изучении опубликованного кода модели и технических отчётов. Если вы хотите узнать, как использовать эти модели локально, лучшее место для начала — официальные страницы моделей OpenAI на Hugging Face Hub:
-
-- https://huggingface.co/openai/gpt-oss-20b
-- https://huggingface.co/openai/gpt-oss-120b
-
-Модель на 20 млрд параметров (`gpt-oss-20b`) может работать на потребительской видеокарте с 16 ГБ ОЗУ. Модель на 120 млрд параметров (`gpt-oss-120b`) может работать на одной карте NVIDIA H100 с 80 ГБ ОЗУ или на более новом оборудовании. Я вернусь к этому позже, поскольку есть несколько важных оговорок.
+The 20-billion-parameter model (`gpt-oss-20b`) can run on a consumer GPU with 16 GB VRAM. The 120-billion-parameter model (`gpt-oss-120b`) can run on a single NVIDIA H100 GPU with 80 GB VRAM or newer hardware. I'll return to this later, as there are several important caveats.
 
 ---
 
-## 2. Наследие GPT-2
+## 2. The Legacy of GPT-2
 
-Прежде чем углубиться в сравнение gpt-oss с более современными архитектурами, давайте совершим путешествие во времени и сравним ее бок о бок с GPT-2 (Рисунок 2), чтобы наглядно увидеть, какой путь был пройден.
+Before diving into comparisons with modern architectures, let’s take a journey back in time and compare gpt-oss side-by-side with GPT-2 (Figure 2) to vividly see the journey taken.
 
-![Сравнение архитектур gpt-oss-20b и GPT-2 XL 1.5B](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-02.jpg)
+![Comparison of gpt-oss-20b and GPT-2 XL 1.5B architectures](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-02.jpg)
 
-> Рисунок 2: Сравнение архитектур gpt-oss-20b и GPT-2 XL 1.5B.
+> Figure 2: Comparison of gpt-oss-20b and GPT-2 XL 1.5B architectures.
 
-И gpt-oss, и GPT-2 — это LLM, использующие только декодер и построенные на архитектуре трансформера, представленной в знаменитой статье «Attention Is All You Need» (2017). За прошедшие годы многие детали этой архитектуры эволюционировали.
+Both gpt-oss and GPT-2 are LLMs using only the decoder and built on the transformer architecture introduced in the seminal paper "Attention Is All You Need" (2017). Over the years, many details of this architecture have evolved.
 
-Впрочем, эти изменения не являются уникальными для gpt-oss. Как мы увидим далее, они встречаются во многих других современных языковых моделях. Поскольку я уже подробно обсуждал многие из этих аспектов в предыдущей статье «Большое сравнение архитектур», я постараюсь быть краткими и сосредоточиться на ключевых моментах.
+However, these changes are not unique to gpt-oss. As we'll see later, they are common across many modern language models. Since I've already discussed many of these aspects in my previous article "A Grand Architecture Comparison," I'll aim to be concise and focus on key points.
 
-### 2.1 Отказ от Dropout
+### 2.1 Abandonment of Dropout
 
-Dropout (2012) — это классический метод предотвращения переобучения, который случайным образом «отключает» (то есть обнуляет) часть активаций слоя или оценок внимания (Рисунок 3) во время обучения. Однако в современных больших языковых моделях dropout используется крайне редко, и большинство моделей, вышедших после GPT-2, от него отказались.
+Dropout (2012) is a classic method for preventing overfitting that randomly "turns off" (i.e., zeros out) parts of layer activations or attention scores (Figure 3) during training. However, in modern large language models, dropout is rarely used, and most models released after GPT-2 have abandoned it.
 
-![Иллюстрация применения dropout к матрице оценок внимания](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-03.png)
+![Illustration of dropout applied to attention score matrix](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-03.png)
 
-> Рисунок 3: Иллюстрация применения dropout к матрице оценок внимания.
+> Figure 3: Illustration of dropout applied to attention score matrix.
 
-Можно предположить, что изначально dropout был использован в GPT-2 как наследие оригинальной архитектуры трансформера. Исследователи, скорее всего, заметили, что он не дает реального улучшения производительности LLM (я наблюдал то же самое в своих небольших экспериментах по воспроизведению GPT-2). Это связано с тем, что LLM обычно обучаются всего за одну эпоху на огромных наборах данных, в отличие от режимов обучения в сотни эпох, для которых dropout изначально был создан. Поскольку LLM видят каждый токен только один раз за всё обучение, риск переобучения невелик.
+One might assume dropout was initially used in GPT-2 as an inheritance from the original transformer architecture. Researchers likely noticed it provided no real performance improvement for LLMs (I observed the same in my small GPT-2 reproduction experiments). This is because LLMs are typically trained for just one epoch on massive datasets, unlike the hundreds of epochs for which dropout was originally designed. Since LLMs see each token only once during training, the risk of overfitting is low.
 
-Что интересно, хотя dropout много лет игнорировался при проектировании архитектур LLM, я нашел исследовательскую статью 2025 года с экспериментами на относительно небольших моделях (Pythia 1.4B), которая подтверждает, что в условиях обучения в одну эпоху dropout приводит к ухудшению итогового качества модели.
+Interestingly, although dropout has been largely ignored in LLM architecture design for years, I found a 2025 research paper with experiments on relatively small models (Pythia 1.4B) confirming that under one-epoch training, dropout degrades final model quality.
 
-### 2.2 RoPE заменяет абсолютные позиционные эмбеддинги
+### 2.2 RoPE Replaces Absolute Positional Embeddings
 
-В трансформерных LLM позиционное кодирование необходимо из-за механизма внимания. По умолчанию attention рассматривает входные токены так, как если бы они не имели порядка. В оригинальной архитектуре GPT эту проблему решали абсолютные позиционные эмбеддинги: к вектору токена добавлялся изученный вектор, соответствующий его позиции в последовательности (Рисунок 4).
+In transformer LLMs, positional encoding is necessary due to the attention mechanism. By default, attention treats input tokens as if they have no order. In the original GPT architecture, this problem was solved with absolute positional embeddings: a learned vector corresponding to the token's position in the sequence was added to the token vector (Figure 4).
 
-![Иллюстрация абсолютных позиционных эмбеддингов](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-04.jpg)
+![Illustration of absolute positional embeddings](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-04.jpg)
 
-> Рисунок 4: Иллюстрация абсолютных позиционных эмбеддингов.
+> Figure 4: Illustration of absolute positional embeddings.
 
-RoPE (Rotary Position Embedding) предложила другой подход: вместо добавления позиционной информации в виде отдельных векторов, она кодирует позицию путем вращения векторов запроса и ключа, которое зависит от позиции каждого токена. (Идея RoPE элегантна, но ее объяснение — тема сложная, которую я планирую подробно разобрать отдельно.)
+RoPE (Rotary Position Embedding) proposed a different approach: instead of adding positional information as separate vectors, it encodes position by rotating the query and key vectors, with the rotation depending on each token's position. (The idea behind RoPE is elegant, but explaining it is complex—I plan to break it down separately.)
 
-Впервые представленные в 2021 году, RoPE получили широкое распространение с выходом оригинальной модели Llama в 2023 году и с тех пор стали стандартом для современных LLM.
+First introduced in 2021, RoPE gained widespread adoption with the release of the original Llama model in 2023 and has since become standard for modern LLMs.
 
-> ⚓ [Пример программного кода реализации RoPE](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/main/2025/week-39-40/experiments/domain/positional_encoding/rope.py)
+> ⚓ [Example code implementation of RoPE](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/main/2025/week-39-40/experiments/domain/positional_encoding/rope.py)
 
-### 2.3 Swish/SwiGLU заменяет GELU
+### 2.3 Swish/SwiGLU Replaces GELU
 
-Ранние архитектуры GPT использовали активационную функцию GELU. Почему теперь используют Swish вместо GELU? Swish (также известная как сигмоидный линейный блок, SiLU) считается вычислительно немного дешевле, и, на мой взгляд, в этом и заключается вся причина. В зависимости от того, на какую статью вы посмотрите, вы обнаружите, что одна функция немного лучше другой с точки зрения производительности моделирования. На мой взгляд, эти небольшие различия, вероятно, лежат в пределах стандартной погрешности, и конкретный результат будет сильно зависеть от тонкой настройки гиперпараметров.
+Early GPT architectures used the activation function GELU. Why use Swish instead of GELU now? Swish (also known as the Sigmoid Linear Unit, SiLU) is computationally slightly cheaper, and in my view, that's the entire reason. Depending on which paper you read, you'll find one function slightly better than the other in terms of modeling performance. In my opinion, these small differences likely fall within standard error margins, and the specific result will heavily depend on hyperparameter fine-tuning.
 
-Активационные функции были горячей темой для споров, пока сообщество глубокого обучения более десяти лет назад в основном не остановилось на ReLU. С тех пор исследователи предлагали и пробовали множество вариантов, похожих на ReLU, но с более гладкими кривыми; GELU и Swish (Рисунок 5) — это те из них, что прижились.
+Activation functions were a hot topic for debate until the deep learning community largely settled on ReLU over a decade ago. Since then, researchers have proposed and tested many variants similar to ReLU but with smoother curves; GELU and Swish (Figure 5) are among those that stuck.
 
-![Сравнение функций активации Swish и GELU — более гладких версий ReLU](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-05.jpg)
+![Comparison of Swish and GELU activation functions—smoother versions of ReLU](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-05.jpg)
 
-> Рисунок 5: Сравнение функций активации Swish и GELU — более гладких версий ReLU.
+> Figure 5: Comparison of Swish and GELU activation functions—smoother versions of ReLU.
 
-Ранние архитектуры GPT использовали GELU, которая определяется как
+Early GPT architectures used GELU, defined as:
 
 $$
 \frac{x}{2} \cdot \left[1 + \text{erf}\left(\frac{x}{\sqrt{2}}\right)\right]
 $$ 
 
-Здесь $\text{erf}$ (от англ. *error function* — функция ошибок) — это интеграл от гауссовой функции, вычисляемый с помощью полиномиальных приближений, что делает его вычислительно более затратным, чем более простые функции, например, сигмоиду, используемую в Swish ($x * sigmoid(x)$).
+Here, $\text{erf}$ (from English *error function*) is the integral of the Gaussian function, computed via polynomial approximations, making it computationally more expensive than simpler functions like the sigmoid used in Swish ($x * \text{sigmoid}(x)$).
 
-На практике Swish вычислительно немного дешевле GELU, и это, вероятно, основная причина, по которой она заменила GELU в большинстве новых моделей. В зависимости от статьи, одна из функций может оказаться несколько лучше с точки зрения качества модели. Но я бы сказал, что эти улучшения часто находятся в пределах погрешности, а победитель будет сильно зависеть от настройки гиперпараметров.
+In practice, Swish is slightly cheaper to compute than GELU, and this is likely the main reason it replaced GELU in most new models. Depending on the paper, one function may appear slightly better in modeling quality. But I would say these improvements often fall within error margins, and the winner will heavily depend on hyperparameter tuning.
 
-Swish используется в большинстве современных архитектур. Однако GELU не полностью забыта; например, модели Google Gemma по-прежнему используют GELU.
+Swish is used in most modern architectures. However, GELU is not entirely forgotten; for example, Google's Gemma models still use GELU.
 
-Однако более значимое изменение заключается в том, что сам feed-forward модуль (небольшая многослойная сеть) заменен на его «воротируемый» аналог — GLU (Gated Linear Unit), предложенный в статье 2020 года. Конкретно, 2 полносвязных слоя заменяются на 3, которые используются, как показано на Рисунке 6 ниже.
+However, a more significant change is that the feed-forward module (a small multi-layer network) has been replaced by its "gated" variant—GLU (Gated Linear Unit), proposed in a 2020 paper. Specifically, two fully connected layers are replaced with three, as shown in Figure 6 below.
 
-![Сравнение обычного feed-forward слоя с его воротируемыми аналогами SwiGLU и GEGLU](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-06.jpg)
+![Comparison of a standard feed-forward layer with its gated variants SwiGLU and GEGLU](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-06.jpg)
 
-> Рисунок 6: Сравнение обычного feed-forward слоя с его воротируемыми аналогами SwiGLU и GEGLU.
+> Figure 6: Comparison of a standard feed-forward layer with its gated variants SwiGLU and GEGLU.
 
-На первый взгляд может показаться, что варианты GEGLU/SwiGLU лучше обычных слоев просто потому, что в них больше параметров из-за дополнительного слоя. Но это обманчиво, потому что на практике весовые матрицы $W$ и $V$ в SwiGLU/GEGLU обычно выбираются в два раза меньше, чем матрица $W_1$ в традиционном feed-forward слое.
+At first glance, SwiGLU/GEGLU variants may seem better than standard layers simply because they have more parameters due to the additional layer. But this is misleading because in practice, the weight matrices $W$ and $V$ in SwiGLU/GEGLU are usually chosen to be half the size of the matrix $W_1$ in the traditional feed-forward layer.
 
-Чтобы проиллюстрировать это лучше, рассмотрим конкретные реализации в коде:
+To illustrate this better, consider concrete code implementations:
 
-![Обычный feed-forward модуль (сверху) и вариант SwiGLU (снизу) рядом](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-07.jpg)
+![Standard feed-forward module (top) and SwiGLU variant (bottom) side by side](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-07.jpg)
 
-> Рисунок 7: Обычный feed-forward модуль (сверху) и вариант SwiGLU (снизу) рядом. Обратите внимание, что функция Swish реализована как «silu» в PyTorch.
+> Figure 7: Standard feed-forward module (top) and SwiGLU variant (bottom) side by side. Note that the Swish function is implemented as "silu" in PyTorch.
 
-Предположим, размерность эмбеддинга равна 1024. В случае обычного feed-forward слоя:
-*   `fc1`: 1024 × 4096 = 4 194 304 параметра
-*   `fc2`: 4096 × 1024 = 4 194 304 параметра
-*   Итого: 8 388 608 параметров.
+Suppose the embedding dimension is 1024. For a standard feed-forward layer:
+*   `fc1`: 1024 × 4096 = 4,194,304 parameters
+*   `fc2`: 4096 × 1024 = 4,194,304 parameters
+*   Total: 8,388,608 parameters.
 
-Для варианта GLU:
-*   `fc1`: 1024 × 1024 = 1 048 576 параметров
-*   `fc2`: 1024 × 1024 = 1 048 576 параметров
-*   `fc3`: 1024 × 1024 = 1 048 576 параметров
-*   Итого: 3 × 1 048 576 = 3 145 728 параметров.
+For the GLU variant:
+*   `fc1`: 1024 × 1024 = 1,048,576 parameters
+*   `fc2`: 1024 × 1024 = 1,048,576 parameters
+*   `fc3`: 1024 × 1024 = 1,048,576 parameters
+*   Total: 3 × 1,048,576 = 3,145,728 parameters.
 
-Таким образом, использование вариантов GLU в итоге приводит к *меньшему* общему количеству параметров, при этом они еще и показывают лучшую производительность. Причина этого в том, что эти варианты обеспечивают дополнительное мультипликативное взаимодействие, что повышает выразительную способность сети (по той же причине глубокие и узкие сети могут превзойти широкие и мелкие при условии качественного обучения).
+Thus, using GLU variants ultimately results in *fewer* total parameters while still demonstrating better performance. The reason is that these variants provide additional multiplicative interactions, increasing the network's expressiveness (for the same reason deep and narrow networks can outperform wide and shallow ones with quality training).
 
-> ⚓ [Пример программного кода реализации SwiGLU](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/main/2025/week-39-40/experiments/domain/activations/swiglu.py)
+> ⚓ [Example code implementation of SwiGLU](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/main/2025/week-39-40/experiments/domain/activations/swiglu.py)
 
-### 2.4 Mixture-of-Experts вместо единого модуля FeedForward
+### 2.4 Mixture-of-Experts Instead of a Single FeedForward Module
 
-Помимо обновления модуля feed-forward до SwiGLU, о чём шла речь в предыдущем разделе, в gpt-oss единый feed-forward модуль заменяется на несколько таких модулей, при этом на каждом шаге генерации токена используется лишь подмножество из них. Такой подход известен как «смесь экспертов» (Mixture-of-Experts, MoE) и проиллюстрирован на Рисунке 8 ниже.
+In addition to updating the feed-forward module to SwiGLU, as discussed in the previous section, gpt-oss replaces the single feed-forward module with multiple such modules, using only a subset for each token generation step. This approach is known as Mixture-of-Experts (MoE) and is illustrated in Figure 8 below.
 
-![Модуль feed-forward заменяется на модуль «смеси экспертов» (MoE)](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-08.png)
+![Feed-forward module replaced with a Mixture-of-Experts (MoE) module](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-08.png)
 
-> Рисунок 8: Модуль feed-forward заменяется на модуль «смеси экспертов» (MoE).
+> Figure 8: Feed-forward module replaced with a Mixture-of-Experts (MoE) module.
 
-Таким образом, замена одного feed-forward модуля на несколько (как это реализовано в архитектуре MoE) существенно увеличивает общее количество параметров модели. Однако ключевая хитрость заключается в том, что не все «эксперты» задействуются («активируются») для каждого токена. Вместо этого специальный маршрутизатор (router) выбирает лишь небольшое подмножество экспертов для каждого конкретного токена.
+Thus, replacing a single feed-forward module with multiple ones (as implemented in the MoE architecture) significantly increases the model's total number of parameters. However, the key trick is that not all "experts" are activated (used) for each token. Instead, a special router selects only a small subset of experts for each specific token.
 
-Поскольку одновременно активны лишь несколько экспертов, модули MoE часто называют разреженными (sparse), в отличие от плотных (dense) модулей, которые всегда используют полный набор параметров. При этом большое общее количество параметров, обеспечиваемое архитектурой MoE, повышает ёмкость языковой модели, позволяя ей усваивать больше знаний в процессе обучения. В то же время разреженность сохраняет эффективность вывода (inference), поскольку не все параметры задействуются одновременно.
+Since only a few experts are active simultaneously, MoE modules are often called sparse, in contrast to dense modules that always use the full set of parameters. While the large total parameter count enabled by the MoE architecture enhances the language model's capacity to absorb more knowledge during training, sparsity preserves inference efficiency because not all parameters are activated simultaneously.
 
-(Интересный факт: в большинстве моделей MoE веса экспертов составляют более 90 % от общего числа параметров модели.)
+(An interesting fact: In most MoE models, expert weights constitute over 90% of the model's total parameters.)
 
-> ⚓ [Пример программного кода реализации Mixture-of-Experts](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/tree/main/2025/week-39-40/experiments/domain/moe)
+> ⚓ [Example code implementation of Mixture-of-Experts](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/tree/main/2025/week-39-40/experiments/domain/moe)
 
-### 2.5 Grouped Query Attention вместо Multi-Head Attention
+### 2.5 Grouped Query Attention Instead of Multi-Head Attention
 
-Как упоминалось в моих предыдущих статьях, в последние годы Grouped Query Attention (GQA, «групповое внимание по запросам») стало более эффективной с точки зрения вычислений и количества параметров альтернативой классическому Multi-Head Attention (MHA, «многоголовому вниманию»).
+As mentioned in my previous articles, Grouped Query Attention (GQA) has become a more computationally and parameter-efficient alternative to classical Multi-Head Attention (MHA) in recent years.
 
-В MHA каждая «голова» имеет собственные проекции ключей и значений. GQA снижает потребление памяти за счёт объединения нескольких голов в группы, которые совместно используют одни и те же проекции ключей и значений.
+In MHA, each "head" has its own key and value projections. GQA reduces memory consumption by grouping multiple heads together to share the same key and value projections.
 
-Например, как показано на Рисунке 9, если у нас есть 2 группы ключей и значений и 4 головы внимания, то головы 1 и 2 могут использовать одну и ту же пару ключ–значение, а головы 3 и 4 — другую. Такая группировка уменьшает общее количество вычислений для ключей и значений, что приводит к снижению объёма памяти и повышению эффективности без заметного ухудшения качества модели, согласно аблационным исследованиям.
+For example, as shown in Figure 9, if we have 2 key-value groups and 4 attention heads, heads 1 and 2 can share one key-value pair, while heads 3 and 4 share another. This grouping reduces the total number of key and value computations, leading to lower memory usage and improved efficiency without noticeable degradation in model quality, according to ablation studies.
 
-![Сравнение MHA и GQA](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-09.png)
+![Comparison of MHA and GQA](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-09.png)
 
-> Рисунок 9: Сравнение MHA и GQA. Здесь размер группы равен 2, где пара «ключ-значение» используется совместно двумя запросами.
+> Figure 9: Comparison of MHA and GQA. Here, the group size is 2, where a key-value pair is shared by two queries.
 
-Таким образом, основная идея GQA — сократить количество «голов» ключей и значений, заставив несколько голов запросов делить одни и те же ключи и значения. Это (1) уменьшает общее число параметров модели и (2) снижает потребление пропускной способности памяти при выводе, поскольку в кэше KV-пар (ключ–значение) хранится и извлекается меньше данных.
+Thus, the core idea of GQA is to reduce the number of key and value heads by having multiple query heads share the same keys and values. This (1) reduces the model's total parameter count and (2) lowers memory bandwidth consumption during inference, since fewer key-value (KV) pairs are stored and retrieved.
 
-(Если вам интересно, как GQA выглядит в коде, см. моё руководство по преобразованию GPT-2 в Llama 3 — там приведена версия без KV-кэша, а также мой вариант с KV-кэшем.)
+(If you're curious how GQA looks in code, see my guide converting GPT-2 to Llama 3—it includes a version without KV cache and my version with KV cache.)
 
-Хотя GQA в первую очередь служит инструментом повышения вычислительной эффективности по сравнению с MHA, аблационные исследования (например, в оригинальной статье про GQA и в статье про Llama 2) показывают, что по качеству моделирования она сопоставима со стандартным MHA.
+Although GQA primarily serves as a tool for improving computational efficiency compared to MHA, ablation studies (e.g., in the original GQA paper and the Llama 2 paper) show that it is comparable to standard MHA in modeling quality.
 
-> ⚓ [Пример программного кода реализации Grouped Query Attention](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/main/2025/week-39-40/experiments/domain/attention/gqa.py)
+> ⚓ [Example code implementation of Grouped Query Attention](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/main/2025/week-39-40/experiments/domain/attention/gqa.py)
 
-### 2.6 Внимание с подвижным окном (Sliding Window Attention)
+### 2.6 Sliding Window Attention
 
-Внимание с подвижным окном (Рисунок 10 ниже) впервые было предложено в статье LongFormer (2020) и позже получило широкое распространение благодаря Mistral. Примечательно, что в gpt-oss оно применяется в каждом втором слое. Можно рассматривать его как вариант многоголового внимания (а в данном случае — Grouped Query Attention), в котором контекст внимания ограничен небольшим окном, что снижает как объём памяти, так и вычислительные затраты.
+Sliding window attention (Figure 10 below) was first proposed in the LongFormer paper (2020) and later gained widespread adoption thanks to Mistral. Notably, in gpt-oss, it is applied in every second layer. It can be viewed as a variant of multi-head attention (in this case, Grouped Query Attention) where the attention context is limited to a small window, reducing both memory and computational costs.
 
-![Сравнение обычного внимания (слева) и внимания с подвижным окном (справа)](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-10.jpg)
+![Comparison of standard attention (left) and sliding window attention (right)](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-10.jpg)
 
-> Рисунок 10: Сравнение обычного внимания (слева) и внимания с подвижным окном (справа).
+> Figure 10: Comparison of standard attention (left) and sliding window attention (right).
 
-Конкретно, gpt-oss чередует слои GQA с полным доступом ко всему контексту и слои GQA с подвижным окном, ограниченным 128 токенами.
+Specifically, gpt-oss alternates between layers of GQA with full context access and layers of GQA with a sliding window limited to 128 tokens.
 
-Как я уже обсуждал в предыдущей статье, Gemma 2 (2024) использовала аналогичное соотношение 1:1. А Gemma 3, вышедшая ранее в этом году, пошла ещё дальше и перешла на соотношение 5:1 — то есть только один слой с полным вниманием приходится на каждые пять слоёв с локальным (оконным) вниманием.
+As I discussed in my previous article, Gemma 2 (2024) used a similar 1:1 ratio. Gemma 3, released earlier this year, went even further and switched to a 5:1 ratio—meaning only one layer with full attention per five layers with local (windowed) attention.
 
-Согласно аблационным исследованиям в рамках проекта Gemma, использование внимания с подвижным окном практически не влияет на качество моделирования, как показано на рисунке ниже. Стоит отметить, что размер окна в Gemma 2 составлял 4096 токенов, а в Gemma 3 был уменьшен до 1024. В gpt-oss же окно составляет всего 128 токенов — что удивительно мало.
+According to ablation studies within the Gemma project, using sliding window attention has virtually no impact on modeling quality, as shown in the figure below. Note that the window size in Gemma 2 was 4096 tokens, and in Gemma 3, it was reduced to 1024. In gpt-oss, the window is only 128 tokens—surprisingly small.
 
-И в качестве интересного факта: в официальной анонсирующей статье отмечается, что внимание с подвижным окном, похоже, уже использовалось в GPT-3:
+As an interesting fact: the official announcement paper notes that sliding window attention appears to have been used in GPT-3:
 
-> «Модели используют чередующиеся плотные и локально-полосатые разреженные паттерны внимания, аналогичные GPT-3».
+> “The models use alternating dense and locally-sparse sparse attention patterns, similar to GPT-3.”
 
-Кто бы мог подумать! Я перечитал оригинальную статью про GPT-3, и там действительно упоминалось:
+Who would have thought! I reread the original GPT-3 paper, and it indeed mentions:
 
-> «Мы используем ту же модель и архитектуру, что и в GPT-2 [RWC+19], включая модифицированную инициализацию, предварительную нормализацию и обратимую токенизацию, описанные в той работе, за исключением того, что в слоях трансформера мы применяем чередующиеся плотные и локально-полосатые разреженные паттерны внимания, аналогичные Sparse Transformer [CGRS19].»
+> “We use the same model and architecture as in GPT-2 [RWC+19], including the modified initialization, pre-normalization, and reversible tokenization described in that work, except that in the transformer layers we apply alternating dense and locally-sparse sparse attention patterns, similar to Sparse Transformer [CGRS19].”
 
-### 2.7 RMSNorm вместо LayerNorm
+### 2.7 RMSNorm Instead of LayerNorm
 
-Наконец, последнее небольшое улучшение по сравнению с GPT-2 — замена LayerNorm (2016) на RMSNorm (2019), что стало общей тенденцией в последние годы.
+Finally, the last minor improvement compared to GPT-2 is replacing LayerNorm (2016) with RMSNorm (2019), which has become a general trend in recent years.
 
-Подобно замене GELU на Swish и SwiGLU, RMSNorm — это ещё одно небольшое, но разумное улучшение эффективности. RMSNorm, как и LayerNorm, предназначен для нормализации активаций слоя, как показано на Рисунке 11 ниже.
+Similar to replacing GELU with Swish and SwiGLU, RMSNorm is another small but sensible efficiency improvement. RMSNorm, like LayerNorm, is designed to normalize layer activations, as shown in Figure 11 below.
 
-Возможно, вы помните, что не так давно стандартом де-факто была BatchNorm. Однако она утратила популярность, главным образом потому, что её сложно эффективно распараллеливать (из-за необходимости вычислять статистики по батчу — среднее и дисперсию) и она плохо работает при малых размерах батчей.
+Perhaps you recall that not long ago, BatchNorm was the de facto standard. However, it lost popularity primarily because it is difficult to efficiently parallelize (due to the need to compute batch statistics—mean and variance) and performs poorly with small batch sizes.
 
-![Сравнение LayerNorm (слева) и RMSNorm (справа) на примере небольшого линейного слоя](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-11.jpg)
+![Comparison of LayerNorm (left) and RMSNorm (right) on a small linear layer](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-11.jpg)
 
-> Рисунок 11: Сравнение LayerNorm (слева) и RMSNorm (справа) на примере небольшого линейного слоя.
+> Figure 11: Comparison of LayerNorm (left) and RMSNorm (right) on a small linear layer.
 
-Как видно на Рисунке 11, и LayerNorm, и RMSNorm масштабируют выходы слоя, приводя их к разумному диапазону значений.
+As seen in Figure 11, both LayerNorm and RMSNorm scale layer outputs to a reasonable range of values.
 
-LayerNorm вычитает среднее значение и делит на стандартное отклонение, чтобы выходы слоя имели нулевое среднее и единичную дисперсию (дисперсия = 1, стандартное отклонение = 1).
+LayerNorm subtracts the mean and divides by the standard deviation so that layer outputs have zero mean and unit variance (variance = 1, standard deviation = 1).
 
-RMSNorm делит входы на корень из среднего квадрата (root-mean-square). Это масштабирует активации до сопоставимой величины, но не принуждает их к нулевому среднему или единичной дисперсии. В приведённом примере среднее значение равно 0.77, а дисперсия — 0.41.
+RMSNorm divides inputs by the root-mean-square. This scales activations to a comparable magnitude but does not force them to zero mean or unit variance. In the example above, the mean is 0.77 and the variance is 0.41.
 
-Обе нормализации стабилизируют масштаб активаций и улучшают обучаемость, однако RMSNorm чаще предпочтителен в крупномасштабных LLM, потому что он дешевле в вычислениях. В отличие от LayerNorm, RMSNorm не содержит смещающего (bias) члена и заменяет дорогие операции вычисления среднего и дисперсии на одну операцию вычисления среднеквадратичного значения. Это сокращает количество межпризнаковых редукций с двух до одной, что снижает коммуникационные накладные расходы на GPU и повышает эффективность обучения.
+Both normalizations stabilize activation scales and improve trainability, but RMSNorm is often preferred in large-scale LLMs because it is cheaper to compute. Unlike LayerNorm, RMSNorm has no bias term and replaces expensive mean and variance calculations with a single root-mean-square computation. This reduces the number of inter-feature reductions from two to one, lowering GPU communication overhead and improving training efficiency.
 
-На Рисунке 12 показано, как это выглядит в коде:
+Figure 12 shows how this looks in code:
 
-![Реализации LayerNorm и RMSNorm в коде](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-12.jpg)
+![Implementations of LayerNorm and RMSNorm in code](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-12.jpg)
 
-> Рисунок 12: Реализации LayerNorm и RMSNorm в коде, демонстрирующие, что RMSNorm вычислительно проще.
+> Figure 12: Implementations of LayerNorm and RMSNorm in code, demonstrating that RMSNorm is computationally simpler.
 
-> ⚓ [Пример программного кода реализации RMSNorm](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/main/2025/week-39-40/experiments/domain/normalization/rmsnorm.py)
+> ⚓ [Example code implementation of RMSNorm](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/main/2025/week-39-40/experiments/domain/normalization/rmsnorm.py)
 
-### 2.8 Наследие GPT-2
+### 2.8 The Legacy of GPT-2
 
-Я по-прежнему считаю, что GPT-2 — отличная архитектура для начинающих, изучающих LLM. Она достаточно проста, чтобы не запутаться в слоях оптимизационных ухищрений, но при этом достаточно сложна, чтобы дать прочное понимание того, как работают современные трансформерные модели.
+I still believe GPT-2 is an excellent architecture for beginners learning about LLMs. It is simple enough to avoid getting lost in layers of optimization tricks yet complex enough to provide a solid understanding of how modern transformer models work.
 
-Начав с GPT-2, вы сможете сосредоточиться на фундаментальных концепциях (механизмы внимания, позиционные эмбеддинги, нормализация и общий пайплайн обучения), не перегружаясь дополнительными функциями и доработками, характерными для более новых архитектур.
+Starting with GPT-2 allows you to focus on fundamental concepts (attention mechanisms, positional embeddings, normalization, and the overall training pipeline) without being overwhelmed by additional features and refinements characteristic of newer architectures.
 
-Более того, я считаю, что стоит потратить время на изучение и даже самостоятельную реализацию GPT-2 *до* того, как начинать наслаивать на неё более современные изменения. Вы не только легче поймёте эти нововведения, но и, скорее всего, будете больше их ценить — ведь у вас появится чёткое понимание тех ограничений или проблем, которые они призваны решить.
+Moreover, I believe it's worthwhile to spend time studying and even implementing GPT-2 yourself *before* layering on more modern changes. You won't only understand these innovations more easily but are likely to appreciate them more—you'll have a clear understanding of the limitations or problems they aim to solve.
 
-Например, взяв за основу свой код GPT-2, я недавно реализовал с нуля архитектуру Qwen3, которая, как окажется далее, очень похожа на gpt-oss. Это подводит нас к следующей теме: сравнению gpt-oss с более современной архитектурой.
+For example, building on my GPT-2 codebase, I recently implemented Qwen3 from scratch, which, as we'll see, is very similar to gpt-oss. This leads us to the next topic: comparing gpt-oss with a more modern architecture.
 
 ---
 
-## 3. Сравнение gpt-oss с современной архитектурой (Qwen3)
+## 3. Comparing gpt-oss with a Modern Architecture (Qwen3)
 
-Теперь, когда мы проследили эволюцию от GPT-2 до GPT OSS, можно перейти к следующему шагу и сравнить GPT OSS с более современной архитектурой — Qwen3, выпущенной тремя месяцами ранее, в мае 2025 года.
+Now that we've traced the evolution from GPT-2 to GPT OSS, we can move to the next step and compare GPT OSS with a more modern architecture—Qwen3, released three months earlier in May 2025.
 
-Причина, по которой я выбрал именно Qwen3, заключается в том, что на момент написания это одна из лучших моделей с открытыми весами. Кроме того, одна из MoE-моделей Qwen3 в целом сопоставима по размеру обучаемых параметров с gpt-oss.
+The reason I chose Qwen3 is that, at the time of writing, it is one of the best open-weight models available. Moreover, one of Qwen3's MoE models is broadly comparable in size to gpt-oss.
 
-На Рисунке 13 ниже показано сравнение gpt-oss-20b и модели Qwen3 сопоставимого размера.
+Figure 13 below shows a comparison between gpt-oss-20b and a comparable-sized Qwen3 model.
 
-![Модели gpt-oss и Qwen3 сопоставимого размера рядом](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-13.png)
+![gpt-oss and Qwen3 models of comparable size side by side](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-13.png)
 
-> Рисунок 13: Модели gpt-oss и Qwen3 сопоставимого размера рядом.
+> Figure 13: gpt-oss and Qwen3 models of comparable size side by side.
 
-Как видно, gpt-oss-20B и Qwen3-30B-A3B очень похожи по компонентам архитектуры. Основное различие (помимо размерностей) заключается в том, что gpt-oss использует внимание с подвижным окном, о чём уже говорилось в разделе 2.6 (на рисунке это не показано), тогда как Qwen3 такого механизма не применяет.
+As seen, gpt-oss-20B and Qwen3-30B-A3B are very similar in architectural components. The main difference (aside from dimensions) is that gpt-oss uses sliding window attention, as discussed in Section 2.6 (not shown in the figure), whereas Qwen3 does not employ this mechanism.
 
-Далее мы рассмотрим наиболее примечательные детали по порядку.
+We'll now examine the most notable details in order.
 
-### 3.1 Ширина против глубины
+### 3.1 Width vs. Depth
 
-Если внимательно сравнить обе модели, станет ясно, что Qwen3 — гораздо более глубокая архитектура: у неё 48 трансформерных блоков вместо 24 (Рисунок 14).
+A careful comparison of both models reveals that Qwen3 is a significantly deeper architecture: it has 48 transformer blocks compared to 24 in gpt-oss-20b (Figure 14).
 
-![У Qwen3 вдвое больше трансформерных блоков, чем у gpt-oss-20b](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-14.png)
+![Qwen3 has twice as many transformer blocks as gpt-oss-20b](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-14.png)
 
-> Рисунок 14: У Qwen3 вдвое больше трансформерных блоков, чем у gpt-oss-20b.
+> Figure 14: Qwen3 has twice as many transformer blocks as gpt-oss-20b.
 
-С другой стороны, gpt-oss — гораздо более широкая архитектура:
+Conversely, gpt-oss is a much wider architecture:
 
-- Размерность эмбеддинга: 2880 вместо 2048  
-- Промежуточная размерность проекции «экспертов» (feed-forward): также 2880 вместо 768  
+- Embedding dimension: 2880 vs. 2048
+- Intermediate projection dimension of the experts (feed-forward): also 2880 vs. 768
 
-Стоит также отметить, что gpt-oss использует вдвое больше голов внимания, хотя это напрямую не увеличивает ширину модели — ширина определяется размерностью эмбеддинга.
+It is also worth noting that gpt-oss uses twice as many attention heads, although this does not directly increase model width—width is determined by the embedding dimension.
 
-Даёт ли один из подходов преимущество при фиксированном количестве параметров? Как правило, более глубокие модели обладают большей гибкостью, но их сложнее обучать из-за проблем нестабильности — взрывающихся и исчезающих градиентов (с которыми борются RMSNorm и skip-соединения).
+Does one approach offer an advantage at a fixed parameter count? Generally, deeper models possess greater flexibility but are harder to train due to instability issues—exploding and vanishing gradients—which are mitigated by RMSNorm and skip connections.
 
-Более широкие архитектуры выигрывают в скорости генерации (больше токенов в секунду) благодаря лучшей параллелизации, но ценой более высокого потребления памяти.
+Wider architectures benefit from faster generation speed (more tokens per second) due to better parallelization, at the cost of higher memory consumption.
 
-Что касается качества моделирования, то, к сожалению, я не знаю хороших «яблоко-к-яблоку» сравнений (где размер модели и обучающие данные строго фиксированы), кроме аблационного исследования в статье про Gemma 2 (Таблица 9). Там для архитектуры с 9 млрд параметров более широкая конфигурация оказалась немного лучше глубокой: по среднему значению на 4 бенчмарках широкая модель набрала 52.0 балла против 50.8 у глубокой.
+Regarding modeling quality, unfortunately, I am unaware of any good "apple-to-apple" comparisons (where model size and training data are strictly fixed) except for an ablation study in the Gemma 2 paper (Table 9). There, for a 9B-parameter architecture, the wider configuration slightly outperformed the deeper one: on average across four benchmarks, the wide model scored 52.0 versus 50.8 for the deep model.
 
-### 3.2 Немного крупных экспертов против множества мелких
+### 3.2 A Few Large Experts vs. Many Small Ones
 
-Как показано на Рисунке 14 выше, примечательно, что у gpt-oss удивительно мало экспертов (всего 32 вместо 128), и при этом активируется лишь 4 из них на токен (вместо 8). Однако каждый из этих экспертов значительно крупнее, чем у Qwen3.
+As shown in Figure 14 above, it is notable that gpt-oss has surprisingly few experts (only 32 instead of 128), and only 4 are activated per token (instead of 8). However, each of these experts is significantly larger than those in Qwen3.
 
-Это интересно, потому что последние тенденции указывают на пользу от большего числа мелких экспертов. Такое изменение при фиксированном общем числе параметров хорошо иллюстрирует Рисунок 15 из статьи DeepSeekMoE.
+This is interesting because recent trends indicate benefits from a greater number of smaller experts. This change, at a fixed total parameter count, is well illustrated by Figure 15 from the DeepSeekMoE paper.
 
-![Аннотированный рисунок из статьи DeepSeekMoE](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-15.jpg)
+![Annotated figure from the DeepSeekMoE paper](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-15.jpg)
 
-> Рисунок 15: Аннотированный рисунок из статьи «DeepSeekMoE: Towards Ultimate Expert Specialization in Mixture-of-Experts Language Models», https://arxiv.org/abs/2401.06066
+> Figure 15: Annotated figure from "DeepSeekMoE: Towards Ultimate Expert Specialization in Mixture-of-Experts Language Models", https://arxiv.org/abs/2401.06066
 
-Стоит отметить, что, в отличие от моделей DeepSeek, ни gpt-oss, ни Qwen3 не используют общих (shared) экспертов.
+It should be noted that, unlike DeepSeek models, neither gpt-oss nor Qwen3 use shared experts.
 
-Справедливости ради, небольшое число экспертов в gpt-oss может быть побочным эффектом её размера в 20 млрд параметров. Если взглянуть на модель в 120 млрд (Рисунок 16 ниже), видно, что количество экспертов (и трансформерных блоков) действительно увеличили, сохранив всё остальное без изменений.
+To be fair, the small number of experts in gpt-oss may be a side effect of its 20B parameter size. Looking at the 120B model (Figure 16 below), we see that the number of experts (and transformer blocks) has indeed been increased, while everything else remains unchanged.
 
-![Две архитектуры gpt-oss рядом](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-16.png)
+![Two gpt-oss architectures side by side](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-16.png)
 
-> Рисунок 16: Две архитектуры gpt-oss рядом: в более крупной модели 120B масштабируются только число трансформерных блоков и число экспертов.
+> Figure 16: Two gpt-oss architectures side by side: in the larger 120B model, only the number of transformer blocks and experts are scaled.
 
-Наиболее скучное объяснение такой схожести моделей 20B и 120B, вероятно, в том, что основное внимание уделялось модели 120B, а 20B получили простым укорочением (меньше блоков) и сокращением числа экспертов — ведь именно в них сосредоточена основная масса параметров. Можно также предположить, что они начали обучать 120B-модель, а затем «отрезали» часть блоков и экспертов для дообучения (вместо инициализации с нуля).
+The most mundane explanation for this similarity between the 20B and 120B models is likely that primary focus was on the 120B model, and the 20B version was obtained by simply shortening (fewer blocks) and reducing the number of experts—since these components contain the bulk of the parameters. One might also speculate that they began training the 120B model and then "cut off" portions of blocks and experts for fine-tuning (rather than initializing from scratch).
 
-В любом случае, крайне необычно масштабировать *только* эти два компонента. Например, если посмотреть на MoE-модели Qwen3 разных размеров (Рисунок 17 ниже), видно, что они масштабируются более пропорционально по множеству параметров.
+In any case, scaling *only* these two components is highly unusual. For example, examining MoE models of various sizes in Qwen3 (Figure 17 below), it is clear they are scaled more proportionally across parameters.
 
-![Архитектурные различия между различными моделями Qwen3](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-17.jpg)
+![Architectural differences among various Qwen3 models](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-17.jpg)
 
-> Рисунок 17: Архитектурные различия между различными моделями Qwen3.
+> Figure 17: Architectural differences among various Qwen3 models.
 
-### 3.3 Смещения внимания и «поглотители»
+### 3.3 Attention Biases and "Sinks"
 
-И gpt-oss, и Qwen3 используют Grouped Query Attention. Основное отличие — в том, что gpt-oss ограничивает длину контекста с помощью внимания с подвижным окном в каждом втором слое, как уже упоминалось.
+Both gpt-oss and Qwen3 utilize Grouped Query Attention. The primary difference is that gpt-oss limits context length using sliding window attention in every second layer, as previously mentioned.
 
-Однако меня привлёк ещё один интересный нюанс: похоже, что gpt-oss использует смещения (bias) в весах внимания, как показано на рисунке ниже.
+However, another interesting nuance caught my attention: it appears that gpt-oss employs bias terms in its attention weights, as shown in the figure below.
 
-![Модели gpt-oss используют bias-единицы в слоях внимания](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-18.png)
+![gpt-oss models use bias units in attention layers](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-18.png)
 
-> Рисунок 18: Модели gpt-oss используют bias-единицы в слоях внимания. См. пример кода здесь.
+> Figure 18: gpt-oss models use bias units in attention layers. See code example here.
 
-Я не видел таких смещений с времён GPT-2, и они обычно считаются избыточными. Действительно, в недавней статье математически показано, что это верно как минимум для проекции ключей (k_proj). Более того, эмпирические результаты демонстрируют почти нулевую разницу между моделями со смещениями и без (см. Рисунок 19 ниже).
+I have not encountered such biases since the GPT-2 era, and they are generally considered redundant. Indeed, a recent paper mathematically demonstrates this is at least true for the key projection (k_proj). Moreover, empirical results show nearly zero difference in performance between models with and without biases (see Figure 19 below).
 
-![Таблица из статьи, показывающая среднюю тестовую ошибку при обучении моделей с и без bias-единиц](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-19.jpg)
+![Table from a paper showing average test error when training models with and without bias units](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-19.jpg)
 
-> Рисунок 19: Таблица из https://arxiv.org/pdf/2302.08626, показывающая среднюю тестовую ошибку при обучении моделей с и без bias-единиц.
+> Figure 19: Table from https://arxiv.org/pdf/2302.08626, showing average test error when training models with and without bias units.
 
-Ещё одна деталь, которую вы могли заметить на скриншоте кода (Рисунок 18) — определение «поглотителей» (sinks). В общем случае attention sinks — это специальные токены в начале последовательности, к которым всегда применяется внимание, чтобы стабилизировать его работу, особенно в сценариях с длинным контекстом. Если контекст становится очень длинным, такой токен в начале всё ещё остаётся в фокусе внимания и может обучиться хранить полезную общую информацию обо всей последовательности. (Эта идея впервые была предложена в статье «Efficient Streaming Language Models with Attention Sinks».)
+Another detail you may have noticed in the code screenshot (Figure 18) is the definition of "sinks." In general, attention sinks are special tokens at the beginning of a sequence to which attention is always applied to stabilize its operation, particularly in long-context scenarios. When the context becomes very long, a token at the beginning remains in the attention focus and can learn to store useful general information about the entire sequence. (This idea was first proposed in the paper "Efficient Streaming Language Models with Attention Sinks.")
 
-В реализации gpt-oss attention sinks — это не реальные токены во входной последовательности. Вместо этого это обучаемые bias-логиты, добавляемые к оценкам внимания для каждой головы (Рисунок 20). Цель та же, но без изменения токенизированного входа.
+In gpt-oss's implementation, attention sinks are not real tokens in the input sequence. Instead, they are learnable bias logits added to the attention scores for each head (Figure 20). The goal is the same, but without altering the tokenized input.
 
-![Использование attention sinks в gpt-oss](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-20.jpg)
+![Use of attention sinks in gpt-oss](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-20.jpg)
 
-> Рисунок 20: Использование attention sinks в gpt-oss; основано на коде Hugging Face здесь.
+> Figure 20: Use of attention sinks in gpt-oss; based on Hugging Face code here.
 
-### 3.4 Лицензия
+### 3.4 License
 
-Наконец, как и Qwen3, модели gpt-oss распространяются под открытой лицензией Apache 2.0 — это замечательно (это та же лицензия, которую я предпочитаю для своих собственных open-source проектов). Это означает, что модели можно использовать для дистилляции в другие модели или в коммерческих продуктах без ограничений.
+Finally, like Qwen3, the gpt-oss models are released under the open Apache 2.0 license—this is excellent (it's the same license I prefer for my own open-source projects). This means the models can be used for distillation into other models or in commercial products without restrictions.
 
-**Открытые веса vs. открытый исходный код.** Этот вопрос обсуждается годами, но стоит уточнить, чтобы избежать путаницы вокруг данного релиза. Некоторые разработчики моделей публикуют только веса и код для инференса (например, Llama, Gemma, gpt-oss), тогда как другие (например, OLMo) выпускают всё — включая код обучения, датасеты и веса, что соответствует строгому определению «открытого исходного кода».
+**Open Weights vs. Open Source Code.** This question has been debated for years, but it is worth clarifying to avoid confusion around this release. Some model developers release only weights and inference code (e.g., Llama, Gemma, gpt-oss), while others (e.g., OLMo) release everything—including training code, datasets, and weights—meeting the strict definition of "open source code."
 
-По этому строгому критерию gpt-oss — модель с открытыми весами (как и Qwen3), поскольку включает веса и код инференса, но не код обучения и не датасеты. Однако в индустрии эта терминология используется несогласованно.
+By this strict criterion, gpt-oss is a model with open weights (like Qwen3), as it includes weights and inference code but not training code or datasets. However, industry terminology is inconsistent.
 
-Я предполагаю, что «oss» в «gpt-oss» означает «open source software»; однако меня приятно удивило, что сама OpenAI в своём официальном анонсе чётко называет gpt-oss моделью с открытыми весами.
+I assume "oss" in "gpt-oss" stands for "open source software"; however, I was pleasantly surprised that OpenAI itself, in its official announcement, clearly refers to gpt-oss as an open-weight model.
 
 ---
 
-## 4. Прочие интересные детали
+## 4. Other Interesting Details
 
-Хотя предыдущие разделы описали эволюцию архитектуры с момента GPT-2 и обсудили её сходства с Qwen3 (и большинством других современных моделей), есть ещё несколько важных нюансов, о которых я ещё не упомянул. Они не совсем вписываются в предыдущие разделы, но заслуживают внимания.
+While the previous sections described the evolution of the architecture since GPT-2 and discussed its similarities with Qwen3 (and most other modern models), there are several important nuances I have not yet mentioned. They don't quite fit into the previous sections but deserve attention.
 
-### 4.1 Обзор обучения
+### 4.1 Training Overview
 
-К сожалению, информации о размерах обучающих наборов и алгоритмах почти нет. Ниже я собрал самые интересные фрагменты из отчёта в model card (1) и анонсирующего поста (2):
+Unfortunately, information about dataset sizes and training algorithms is scarce. Below I have compiled the most interesting fragments from the model card (1) and the announcing post (2):
 
-> Модели gpt-oss обучались с использованием наших самых передовых методов предобучения и постобучения [...] (1)  
-> [...] обучение заняло 2.1 млн часов на GPU H100, причём gpt-oss-20b потребовала почти в 10 раз меньше. (1)  
-> [...] включая этап обучения с учителем и этап обучения с подкреплением с высокими вычислительными затратами [...] (2)  
-> Мы обучали модели на преимущественно англоязычном текстовом датасете с акцентом на STEM, программирование и общие знания. (2)
+> The gpt-oss models were trained using our most advanced pretraining and post-training methods [...] (1)  
+> [...] training took 2.1 million hours on H100 GPUs, with gpt-oss-20b requiring nearly 10 times less. (1)  
+> [...] including supervised learning and high-cost reinforcement learning stages [...] (2)  
+> We trained the models on a predominantly English text dataset with an emphasis on STEM, programming, and general knowledge. (2)
 
-Таким образом, мы знаем, что gpt-oss — это модели, ориентированные на рассуждения. Объём вычислений — 2.1 млн часов на H100 — примерно сопоставим с 2.788 млн часов на H800, затраченных на обучение модели DeepSeek V3, которая почти в 5.6 раза крупнее. К сожалению, данных о времени обучения Qwen3 пока нет.
+Thus, we know gpt-oss are reasoning-oriented models. The computational volume—2.1 million H100 hours—is roughly comparable to the 2.788 million H800 hours spent training DeepSeek V3, which is nearly 5.6 times larger. Unfortunately, data on Qwen3's training time is currently unavailable.
 
-Интересно, что в оценку времени обучения gpt-oss включены как обучение с учителем для следования инструкциям, так и обучение с подкреплением для рассуждений, тогда как DeepSeek V3 — это лишь предобученная базовая модель, на основе которой отдельно обучалась DeepSeek R1.
+Interestingly, the training time estimate for gpt-oss includes both supervised learning for instruction following and reinforcement learning for reasoning, whereas DeepSeek V3 is merely a pre-trained base model upon which DeepSeek R1 was separately trained.
 
-### 4.2 Уровни рассуждений
+### 4.2 Reasoning Levels
 
-Как уже упоминалось, gpt-oss — это модели, ориентированные на рассуждения. Но особенно интересно то, что они обучены так, что пользователи могут легко управлять степенью рассуждений прямо во время инференса.
+As mentioned, gpt-oss are reasoning-oriented models. But particularly interesting is that they are trained such that users can easily control the degree of reasoning directly during inference.
 
-Конкретно, модели gpt-oss могут получать инструкции вида «Reasoning effort: low/medium/high» («Уровень рассуждений: низкий/средний/высокий») в системном промпте, что напрямую влияет на длину и точность ответа, как показано на Рисунке 21.
+Specifically, gpt-oss models can receive instructions like "Reasoning effort: low/medium/high" in the system prompt, which directly affects the length and precision of the response, as shown in Figure 21.
 
-![Длина и качество ответов моделей gpt-oss при разных уровнях рассуждений](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-21.jpg)
+![Length and quality of gpt-oss model responses at different reasoning levels](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-21.jpg)
 
-> Рисунок 21: Длина и качество ответов моделей gpt-oss при разных уровнях рассуждений (аннотированный рисунок из model card).
+> Figure 21: Length and quality of gpt-oss model responses at different reasoning levels (annotated figure from model card).
 
-Такая гибкость полезна, поскольку позволяет балансировать между стоимостью, вычислениями и точностью. Например, если задача простая — ответить на прямой вопрос или исправить опечатку — можно пропустить развёрнутые рассуждения. Это экономит время и ресурсы, избегая излишне длинных ответов и многословных цепочек рассуждений.
+This flexibility is useful as it allows balancing cost, computation, and accuracy. For example, if the task is simple—answering a direct question or correcting a typo—extended reasoning can be skipped. This saves time and resources, avoiding overly long answers and verbose reasoning chains.
 
-Немного досадно, что OpenAI, в отличие от Qwen3 или OLMo, не выпустила базовые модели *до* этапа обучения с подкреплением для рассуждений. Базовые модели особенно ценны для исследователей, работающих над методами рассуждений (поэтому сейчас я предпочитаю использовать Qwen3 Base). Вероятно, решение OpenAI было продиктовано промышленными и production-сценариями, а не исследовательскими потребностями.
+It is somewhat unfortunate that, unlike Qwen3 or OLMo, OpenAI did not release base models *before* the reinforcement learning stage for reasoning. Base models are especially valuable for researchers working on reasoning methods (which is why I currently prefer using Qwen3 Base). Presumably, OpenAI's decision was driven by industrial and production scenarios rather than research needs.
 
-Заметим, что оригинальные модели Qwen3 также имели переключатель для включения/отключения режима рассуждений (через параметр `enable_thinking=True/False` в токенизаторе, который просто добавлял теги `<think></think>` для отключения рассуждений). Однако команда Qwen3 обновила свои модели за последние недели и отказалась от гибридного подхода в пользу специализированных вариантов: Instruct / Thinking / Coder.
+Note that the original Qwen3 models also had a switch to enable/disable reasoning mode (via the `enable_thinking=True/False` parameter in the tokenizer, which simply added `think` tags to disable reasoning). However, the Qwen3 team recently updated their models and abandoned the hybrid approach in favor of specialized variants: Instruct / Thinking / Coder.
 
-Причина в том, что гибридный режим показывал худшую производительность по сравнению с отдельными моделями:
+The reason is that the hybrid mode showed inferior performance compared to separate models:
 
-> После обсуждения с сообществом и размышлений мы решили отказаться от гибридного режима рассуждений. Теперь мы будем обучать модели Instruct и Thinking отдельно, чтобы достичь наилучшего качества. Источник
+> After discussion with the community and reflection, we decided to abandon the hybrid reasoning mode. We will now train Instruct and Thinking models separately to achieve the best quality. Source
 
-### 4.3 Оптимизация MXFP4: небольшая, но важная деталь
+### 4.3 MXFP4 Optimization: A Small but Important Detail
 
-Одним из интересных сюрпризов стало то, что OpenAI выпустила модели gpt-oss с квантованием MoE-экспертов в формате MXFP4.
+One interesting surprise was that OpenAI released the gpt-oss models with MoE expert quantization in MXFP4 format.
 
-Раньше форматы квантования были нишевой темой, актуальной в основном для мобильного и встраиваемого ИИ, но всё изменилось с ростом размеров моделей. В данном случае оптимизация MXFP4 позволяет запускать модель на одном GPU.
+Previously, quantization formats were a niche topic relevant mainly to mobile and embedded AI, but everything changed with the growth of model sizes. In this case, MXFP4 optimization enables running the model on a single GPU.
 
-Вот как это выглядит на практике:
+Here's how it looks in practice:
 
-- Крупная модель (120B) помещается на один GPU с 80 ГБ памяти (H100 или новее). Это не потребительское железо, но арендовать машину с одним H100 гораздо дешевле, чем с несколькими. Плюс не нужно заботиться о распределении модели по GPU и накладных расходах на коммуникацию. Приятно, что поддержка AMD MI300X доступна с самого начала!
-- Меньшая модель (20B) умещается даже в 16 ГБ видеопамяти; правда, для этого требуется GPU серии RTX 50 или новее, поддерживающий MXFP4. (Примечание: недавно вышел патч, добавивший поддержку и для старых карт, например, RTX 4090.)
+- The large model (120B) fits on a single 80GB GPU (H100 or newer). This is not consumer hardware, but renting a machine with a single H100 is much cheaper than one with multiple GPUs. Plus, there's no need to worry about model distribution across GPUs and communication overhead. It's pleasant that AMD MI300X support is available from the start!
+- The smaller model (20B) fits even within 16GB of VRAM; however, this requires an RTX 50-series or newer GPU supporting MXFP4. (Note: a recent patch added support for older cards like the RTX 4090.)
 
-Отметим, что модели также будут работать и на старом оборудовании, но без MXFP4, и тогда потребление RAM будет значительно выше. Без MXFP4-оптимизации модели в формате bfloat16 займут около 48 ГБ (gpt-oss-20b) и 240 ГБ (gpt-oss-120b).
+It should be noted that the models will still work on older hardware without MXFP4, but with significantly higher RAM consumption. Without MXFP4 optimization, the models in bfloat16 format would require approximately 48 GB (gpt-oss-20b) and 240 GB (gpt-oss-120b).
 
-Кстати, я спокойно запускаю gpt-oss-20b на своём Mac Mini через Ollama. Она использует около 13.5 ГБ памяти — вполне разумный объём.
+Incidentally, I smoothly run gpt-oss-20b on my Mac Mini via Ollama. It uses about 13.5 GB of memory—quite reasonable.
 
-### 4.4 Бенчмарки
+### 4.4 Benchmarks
 
-Модели ещё слишком новые для независимых бенчмарков. Проверив лидерборд LM Arena, я обнаружил, что gpt-oss там пока не представлена. Таким образом, Qwen3-Instruct остаётся на данный момент лучшей моделью с открытыми весами по мнению пользователей LM Arena (Рисунок 22).
+The models are still too new for independent benchmarks. Checking the LM Arena leaderboard, I found that gpt-oss is not yet represented. Thus, Qwen3-Instruct remains the best open-weight model according to LM Arena users (Figure 22).
 
-![Текущее состояние лидерборда LM Arena](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-22.png)
+![Current state of the LM Arena leaderboard](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-22.png)
 
-> Рисунок 22: Текущее состояние лидерборда LM Arena (на 8 августа 2025 года).
+> Figure 22: Current state of the LM Arena leaderboard (as of August 8, 2025).
 
-Однако, согласно бенчмаркам рассуждений из анонсирующего поста gpt-oss, эти модели сопоставимы как с проприетарными моделями OpenAI, так и с Qwen3 (Рисунок 23).
+However, according to reasoning benchmarks from the gpt-oss announcement post, these models are comparable to both proprietary OpenAI models and Qwen3 (Figure 23).
 
-![Основные графики бенчмарков из официального анонса gpt-oss](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-23.png)
+![Main benchmark charts from the official gpt-oss announcement](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-23.png)
 
-> Рисунок 23: Основные графики бенчмарков взяты из официального анонса gpt-oss. Данные для gpt-oss-120b без инструментов — из официальной статьи model card, а цифры Qwen3 — из официального репозитория Qwen3.
+> Figure 23: Main benchmark charts taken from the official gpt-oss announcement. Data for gpt-oss-120b without tools is from the official model card, and Qwen3 figures are from the official Qwen3 repository.
 
-Однако стоит учитывать, что gpt-oss-120b почти вдвое меньше модели Qwen3 A235B-A22B-Thinking-2507 и при этом запускается на одном GPU.
+However, it should be noted that gpt-oss-120b is nearly half the size of the Qwen3 A235B-A22B-Thinking-2507 model and yet runs on a single GPU.
 
-Производительность в бенчмарках, впрочем, не всегда отражает реальную удобство использования. За несколько дней ограниченного тестирования я обнаружил, что gpt-oss весьма компетентна. Тем не менее, как и другие, я заметил у неё относительно высокую склонность к галлюцинациям (этот момент также упомянут в её model card).
+Benchmark performance, however, does not always reflect real-world usability. After a few days of limited testing, I found gpt-oss to be quite competent. Nevertheless, as with others, I noticed its relatively high tendency toward hallucinations (a point also mentioned in its model card).
 
-Возможно, это связано с сильным акцентом на задачи рассуждений — математику, головоломки, код, — что могло привести к некоторому «забыванию общей информации». Однако, поскольку gpt-oss изначально создавалась с учётом использования инструментов, это ограничение со временем может стать менее значимым. Интеграция инструментов в open-source LLM всё ещё на ранней стадии, но по мере её развития я ожидаю, что модели всё чаще будут обращаться к внешним источникам (например, поисковикам) при ответах на фактологические вопросы.
+This may be related to the strong focus on reasoning tasks—math, puzzles, code—which may have led to some "forgetting" of general knowledge. However, since gpt-oss was originally designed with tool use in mind, this limitation may become less significant over time. Tool integration in open-source LLMs is still in its early stages, but as it develops, I expect models will increasingly rely on external sources (e.g., search engines) when answering factual questions.
 
-Если это произойдёт, логичнее будет делать ставку на способность к рассуждениям, а не на запоминание. Это похоже на обучение в школе (или в жизни вообще), где навыки решения задач часто важнее заучивания фактов.
+If this happens, it will be more logical to prioritize reasoning ability over memorization. This resembles education (or life itself), where problem-solving skills are often more important than rote memorization.
 
 ---
 
-## 5. gpt-oss и GPT-5
+## 5. gpt-oss and GPT-5
 
-У OpenAI выдалась насыщенная неделя: вскоре после выпуска gpt-oss компания представила долгожданную модель GPT-5. Релиз GPT-5 оказался любопытным. И если я должен сказать об этом что-то одно, то меня по-настоящему удивило, насколько хороши их open-source модели по сравнению с их же лучшим коммерческим продуктом — если судить по бенчмаркам (Рисунок 24).
+OpenAI had a busy week: shortly after releasing gpt-oss, the company unveiled the long-awaited GPT-5 model. The release of GPT-5 was intriguing. And if I must say one thing about it, I was genuinely surprised by how good their open-source models are compared to their own best commercial product—judging by the benchmarks (Figure 24).
 
-![Основные графики бенчмарков из официального анонса GPT-5](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-24.jpg)
+![Main benchmark charts from the official GPT-5 announcement](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-39-40/assets/Figure-24.jpg)
 
-> Рисунок 24: Основные графики бенчмарков взяты из официального анонса GPT-5. Данные gpt-oss — из статьи model card и анонса, цифры Qwen3 — из официального репозитория Qwen3-Coder.
+> Figure 24: Main benchmark charts taken from the official GPT-5 announcement. gpt-oss data is from the model card and announcement; Qwen3 figures are from the official Qwen3-Coder repository.
 
-В целом, несмотря на то, что некоторые называли релиз переоценённым, я рад, что у нас появился новый набор действительно сильных моделей с открытыми весами, которые не так уж сильно отстают от лучших проприетарных аналогов. Конечно, бенчмарки часто не отражают реального использования, и пока ещё слишком рано делать выводы на основе ограниченного опыта. Но я считаю, что сейчас отличное время для тех, кто любит работать с моделями с открытыми весами — локально или в частных инфраструктурах.
+Overall, despite some calling the release overhyped, I am pleased that we now have a new set of genuinely strong open-weight models that are not so far behind the best proprietary counterparts. Of course, benchmarks often don't reflect real-world usage, and it is still too early to draw conclusions based on limited experience. But I believe now is an excellent time for those who enjoy working with open-weight models—locally or in private infrastructures.

@@ -1,263 +1,263 @@
-# EEG→Text: воспроизводимый конвейер восстановления семантики внутренней речи из сигналов ЭЭГ (обзорная версия)
+# EEG→Text: A Reproducible Pipeline for Recovering the Semantics of Inner Speech from EEG Signals (Review Version)
 
-**Автор(ы):** *Вербецкий Эдуард Игоревич*
+**Author(s):** *Verbatsev Eduard Igorevich*
 
-**Аффилиация:** *Московский авиационный института (национальный исследовательский университет)*
+**Affiliation:** *Moscow Aviation Institute (National Research University)*
 
-**Контакт:** *verbasik@gmail.com*
+**Contact:** *verbasik@gmail.com*
 
-**Версия препринта:** v1 (обзорная)
-
----
-
-## Аннотация
-
-Мы представляем воспроизводимый end‑to‑end конвейер «EEG → Текст» для исследования внутренней речи в парадигмах *read* и *imagine*. Конвейер стандартизует предобработку (очистка артефактов, референс, ICA‑автомаркировка, адаптивная вейвлет‑фильтрация, нормализация), вводит явные контракты данных и поддерживает многоцелевое обучение энкодера ЭЭГ (CNN+Transformer) с векторной квантизацией и вспомогательными головами (грубые семантические категории, домен *read/imagine*, реконструкция сигнала). Мы формализуем задачу как retrieval по фиксированному словарю фраз и параллельную классификацию категорий/домена, описываем протоколы оценки (within‑session, cross‑session, cross‑subject), меры против утечек, набор метрик (Top‑k, MRR, macro‑F1/BA, калибровка доверия) и структуру «репро‑пакета» для воспроизводимости результатов. Предварительные эксперименты указывают на потенциал VQ и многоцелевой оптимизации к стабилизации и интерпретируемости представлений; в следующих версиях планируется систематическое сравнение с сильными бейзлайнами и перенос между сессиями и субъектами.
+**Preprint Version:** v1 (Review)
 
 ---
 
-## 1. Введение и мотивация
+## Abstract
 
-Восстановление семантики внутренней речи по неинвазивным сигналам мозга — ключевая задача для BCI‑систем, когнитивной нейронауки и мультимодальных интерфейсов. В отличие от инвазивных методов, ЭЭГ безопасна и доступна, но страдает низким отношением сигнал/шум и межсубъектной вариабельностью. Мы предлагаем практичный конвейер от сырых EDF‑файлов до инференса модели, ориентированный на воспроизводимость, стандартизованные форматы и прозрачную оценку.
-
-**Вклад работы (summary):**
-
-1. Формализуем постановку «EEG→Text retrieval» по фиксированному словарю фраз с параллельной классификацией грубых категорий и домена (*read/imagine*).
-2. Описываем стандартизованный пайплайн предобработки с anti‑leakage практиками.
-3. Представляем архитектуру энкодера ЭЭГ (CNN+Transformer) с VQ и многоцелевой оптимизацией (контрастивная + классификационные + реконструкция).
-4. Фиксируем протоколы оценки (within / cross‑session / cross‑subject), метрики и статистические тесты.
-5. Публикуем «репро‑пакет»: код, конфиги, фиксированные версии и чекпоинты (структура и инструкции).
+We present a reproducible end-to-end "EEG → Text" pipeline for investigating inner speech in *read* and *imagine* paradigms. The pipeline standardizes preprocessing (artifact cleaning, referencing, ICA auto-labeling, adaptive wavelet filtering, normalization), introduces explicit data contracts, and supports multi-task training of an EEG encoder (CNN+Transformer) with vector quantization and auxiliary heads (coarse semantic categories, *read/imagine* domain, signal reconstruction). We formalize the task as retrieval over a fixed phrase dictionary and parallel classification of categories/domain, describe evaluation protocols (within-session, cross-session, cross-subject), anti-leakage measures, a set of metrics (Top-k, MRR, macro-F1/BA, confidence calibration), and a "repro-package" structure for result reproducibility. Preliminary experiments indicate the potential of VQ and multi-task optimization for stabilizing and interpreting representations; subsequent versions will include systematic comparison with strong baselines and cross-session/subj transfer.
 
 ---
 
-## 2. Связанные работы (обзорно)
+## 1. Introduction and Motivation
 
-Исследования по декодированию «внутренней речи» из ЭЭГ можно условно разделить на три направления. Первое — классическая линия работ по распознаванию мысленно произносимых единиц: слогов, букв, слов и коротких команд. Эти исследования демонстрируют, что даже на бюджетных, малоканальных системах возможно выделить устойчивые паттерны, однако точность сильно зависит от количества классов, протокола и межсубъектной вариативности. Например, показано, что на задачах воображаемых команд с 8‑канальной гарнитурой рекуррентные модели (LSTM‑RNN) достигают высокой точности при четырёхклассовой постановке, тогда как многоклассовые сценарии (≈10–13 классов) по естественным причинам приводят к падению метрик, оставаясь при этом статистически выше случайного уровня. Параллельно развивается линия «по‑буквенного» декодирования, в которой ЭЭГ‑паттерны рукописных букв комбинируются с языковыми моделями: такой раздельный подход «минимальные единицы → языковая коррекция» показывает жизнеспособность свободного ввода, но пока опирается на сильную поддержку со стороны LLM на втором этапе.
+Recovering the semantics of inner speech from non-invasive brain signals is a key challenge for BCI systems, cognitive neuroscience, and multimodal interfaces. Unlike invasive methods, EEG is safe and accessible but suffers from low signal-to-noise ratio and inter-subject variability. We propose a practical pipeline, from raw EDF files to model inference, focused on reproducibility, standardized formats, and transparent evaluation.
 
-Второе направление — выравнивание мозговых и текстовых представлений и открытые словари (open‑vocabulary) для EEG→Text. Здесь формулировка часто смещается от жёсткой классификации к retrieval/ранжированию или генерации на основе предварительно обученных языковых моделей. Ряд работ используют двухэтапные архитектуры: специализированный модуль для извлечения EEG‑признаков (сверточно‑рекуррентные/трансформерные слои) и языковой модуль (BART, и др.), дополненный стадией «до‑ или пост‑редактирования» генерации крупной моделью (GPT‑подобной) для повышения беглости и семантической согласованности. На корпусах чтения предложений (например, ZuCo v1.0/v2.0) такие системы сообщают прирост по BLEU/ROUGE и BERTScore относительно более ранних подходов, что поддерживает перспективность открытого словаря и семантико‑ориентированных метрик в оценке.
+**Contributions (summary):**
 
-Третья линия — дискретизация скрытых представлений и векторная квантизация (VQ) в биосигналах. Дискретные коды позволяют стабилизировать латентное пространство, упростить семантическое сопоставление и ввести интерпретируемые «единицы» (коды) для анализа. Практика показывает, что полезно контролировать «живость» кодбука (перплексию, распределение частот, предотвращение коллапса) и сочетать VQ с задачами, которые привязывают коды к осмысленным целям (классификация, реконструкция, контрастивное выравнивание). В контексте EEG→Text это открывает путь к более устойчивым и переносимым признакам, особенно при доменной вариативности (read/imagine).
-
-С позиции предлагаемой работы наш вклад комплементарен указанным направлениям. Мы опираемся на практику retrieval‑формулировки и замороженные текстовые эмбеддинги для семантического якорения, расширяем архитектуру многоцелевыми головами и доменно‑адверсарной регуляризацией, а также используем VQ для дискретизации и анализа представлений (перплексия, частоты кодов). Такой дизайн соединяет сильные стороны «классических» декодеров, открытого словаря и дискретных латентных пространств при сохранении воспроизводимости и строгого анти‑утечечного протокола.
-
----
-
-## 3. Постановка задачи и границы применимости
-
-Пусть $x\in\mathbb{R}^{C\times T}$ — отрезок ЭЭГ ($C$ каналов, $T$ отсчётов). Требуется:
-
-* (a) **Retrieval** по словарю фраз $\mathcal{Y}=\{y_1,\dots,y_N\}$: найти топ‑$k$ кандидатов по счёту $s(f_\theta(x), g(y))$;
-* (b) **классификация** грубой семантической категории $c\in\{1,\dots,K\}$;
-* (c) **классификация домена** $d\in\{\text{read},\text{imagine}\}$.
-
-Здесь $f_\theta$ — энкодер ЭЭГ. $g(\cdot)$ — замороженное текстовое отображение фразы в векторное пространство (используется **только** на стороне индекса/оценки сходства, см. anti‑leakage). Фиксируем **корпус фраз** и карту $\texttt{phrase}\to\texttt{coarse}$ до начала обучения и оценки.
-
-**Сценарии оценки:**
-
-* **within‑session:** обучение/оценка в рамках одной сессии субъекта (разные триалы);
-* **cross‑session:** обучение в одной сессии, оценка — в другой сессии того же субъекта;
-* **cross‑subject:** leave‑one‑subject‑out (LOSO) и/или адаптация ≤5% данных субъекта.
-
-**Ограничения:** не рассматриваем OOD‑фразы вне словаря, синтез аудио/текста и онлайновую адаптацию в v1.
+1. Formalize the "EEG→Text retrieval" task over a fixed phrase dictionary with parallel classification of coarse categories and domain (*read/imagine*).
+2. Describe a standardized preprocessing pipeline with anti-leakage practices.
+3. Present an EEG encoder architecture (CNN+Transformer) with VQ and multi-task optimization (contrastive + classification + reconstruction).
+4. Fix evaluation protocols (within / cross-session / cross-subject), metrics, and statistical tests.
+5. Publish a "repro-package": code, configs, fixed versions, and checkpoints (structure and instructions).
 
 ---
 
-## 4. Данные и предобработка
+## 2. Related Work (Overview)
 
-В качестве исходного материала используются сырые записи ЭЭГ в формате EDF с аппаратными метками событий и привязкой каждой эпохи к конкретной фразе. Для унификации обработки мы фиксируем частоту дискретизации на уровне 500 Гц, используем согласованный монтаж и стабилизируем перечень рабочих каналов после исключения артефактных и вспомогательных (например, EOG). В каждом файле дополнительно сохраняется служебная метаинформация: идентификаторы субъекта, сессии и прогона, упорядоченный список имён каналов, хэш-сигнатура монтажа, сведения о «плохих» каналах, если таковые выявлены на этапе сбора.
+Research on decoding "inner speech" from EEG can be broadly categorized into three directions. First, classical work on recognizing mentally articulated units: syllables, letters, words, and short commands. These studies demonstrate that even on budget, low-channel systems, stable patterns can be extracted; however, accuracy heavily depends on the number of classes, protocol, and inter-subject variability. For instance, recurrent models (LSTM-RNN) achieve high accuracy on four-class imagined command tasks with an 8-channel headset, while multi-class scenarios (~10–13 classes) using natural language inevitably degrade metrics, remaining statistically above chance. Parallelly, "letter-by-letter" decoding is advancing, where EEG patterns of handwritten letters are combined with language models: this modular "minimal units → language correction" approach shows viability for free input but currently relies heavily on strong LLM support in the second stage.
 
-Предобработка выстраивается как последовательный конвейер, цель которого — повысить отношение сигнал/шум и обеспечить воспроизводимость дальнейших шагов обучения. Сначала применяется полосовая фильтрация с пропусканием диапазона 0.5–50 Гц, затем подавляются сетевые гармоники на частоте 50 или 60 Гц и их кратные. Чтобы снять систематические смещения и аномальные электроды, используется пакет PREP: выполняется ре-референс, детектируются шумные каналы (включая RANSAC‑интерполяции), а решения по исправлению фиксируются. Все параметры PREP обучаются строго на обучающем подмножестве данных текущего фолда и затем неизменными воспроизводятся на валидации и тесте.
+The second direction involves aligning brain and text representations and open-vocabulary approaches for EEG→Text. Here, the formulation often shifts from hard classification to retrieval/ranking or generation based on pre-trained language models. Several works use two-stage architectures: a specialized module for EEG feature extraction (convolutional-recurrent/transformer layers) and a language module (BART, etc.), augmented with a pre- or post-editing stage using a large model (GPT-like) to enhance fluency and semantic coherence. On sentence-reading corpora (e.g., ZuCo v1.0/v2.0), such systems report improvements in BLEU/ROUGE and BERTScore over earlier approaches, supporting the promise of open-vocabulary and semantic-oriented metrics in evaluation.
 
-Разметка событий извлекается из аппаратного канала триггера и сопоставляется со списком фраз, после чего записи сегментируются в два непересекающихся окна: для домена read — от 0 до 5 секунд и для домена imagine — от 5 до 8.3 секунд. Базовая коррекция не применяется, а использование пост‑событийной информации вне заданного окна исключается. Для очистки выбросов и восстановления испорченных проб применяем AutoReject: пороги оцениваются только на обучающих эпохах, журналы и параметры порогов сохраняются, к остальным разбиениям применяется чистая трансформация без подгонки.
+The third line concerns discretization of latent representations and vector quantization (VQ) in biosignals. Discrete codes stabilize the latent space, simplify semantic matching, and introduce interpretable "units" (codes) for analysis. Practice shows it is beneficial to control codebook "vitality" (perplexity, frequency distribution, preventing collapse) and combine VQ with tasks that anchor codes to meaningful goals (classification, reconstruction, contrastive alignment). In the context of EEG→Text, this opens a path to more robust and transferable features, especially under domain variability (*read/imagine*).
 
-Следующий этап — независимые компоненты. Мы обучаем ICA на обучающем подмножестве (при необходимости раздельно для read и imagine), автоматически маркируем компоненты с помощью IClabel и исключаем не‑мозговые источники (мигания, ЭМГ и т. п.). В артефакты предобработки сохраняются матрицы смешивания и обратного преобразования, список исключённых компонент и полный журнал решений. Далее на валидации и тесте используется ровно то же преобразование без переобучения. Для повышения качества сигнала поверх этого применяется адаптивная вейвлет‑фильтрация (семейство Добеши, мягкий трешолдинг), причём выбор семейства и уровня разложения фиксируется по обучающему множеству и протоколируется для воспроизводимости.
-
-Нормализация выполняется в одном из двух режимов. В локальном режиме каждая эпоха масштабируется по каналам с использованием собственных средних и стандартных отклонений, что является детерминированной процедурой без обучения на тесте. В глобальном режиме статистики по каналам оцениваются на обучении текущего фолда, сериализуются и затем применяются неизменно к валидационным и тестовым данным. При необходимости используется робастная версия с межквартильным размахом. На всех шагах формируются отчёты контроля качества: доля интерполированных каналов, остаточная сетевая мощность, распределения канал‑специфических средних и дисперсий, число исключённых компонент ICA, параметры вейвлет‑фильтрации. Все артефакты снабжаются хэшами и версиями библиотек.
-
-Наконец, сводное правило контроля утечек: любые операции, параметры которых оцениваются по данным (PREP, AutoReject, ICA, глобальная нормализация, выбор параметров вейвлет‑фильтрации), обучаются исключительно на train внутри фолда и далее применяются как неизменяемые преобразования. Сегментация эпох жёстко ограничена заданными интервалами, что исключает появление информации из будущего относительно центра события.
+From the perspective of our work, our contribution is complementary to these directions. We build upon retrieval-style formulation and frozen text embeddings for semantic anchoring, extend the architecture with multi-task heads and domain-adversarial regularization, and use VQ for discretization and representation analysis (perplexity, code frequencies). This design unites the strengths of "classical" decoders, open-vocabulary approaches, and discrete latent spaces while preserving reproducibility and a strict anti-leakage protocol.
 
 ---
 
-## 5. Сборка датасета и контракты данных
+## 3. Problem Formulation and Scope
 
-Сборка датасета подчиняется принципу «контрактов данных», позволяющему однозначно восстанавливать и проверять состояние каждого примера. Для каждой эпохи формируется машинно‑читаемый манифест, в котором фиксируются идентификаторы субъекта, сессии и прогона, порядковый номер эпохи, домен (read или imagine), исходная фраза и её категориальная метка, границы окна по времени, частота дискретизации, упорядоченный список каналов и хэш монтажа, а также ссылки на все артефакты предобработки (решения PREP, параметры AutoReject, файлы ICA, состояние нормализатора, параметры вейвлет‑фильтра). Помимо этого, манифест содержит хэш полезной нагрузки (например, SHA‑256 массива признаков), версию кода и временную метку создания, что позволяет воспроизводить эксперименты и проверять целостность выгрузок.
+Let $x\in\mathbb{R}^{C\times T}$ be an EEG segment ($C$ channels, $T$ samples). The goal is to:
 
-Мы поддерживаем два комплементарных формата хранения. Формат FIF используется как эталонное представление эпох с полным набором метаданных, параллельно для обучения сохраняются компактные контейнеры в PKL, HDF5 или Parquet с тензорами признаков (float32) и ссылками на артефакты. Каталожная структура единообразна для всех субъектов и сессий: отдельные директории отведены под эталонные эпохи, итоговые пакеты для обучения, артефакты предобработки, производные признаки и журналы контроля качества.
+* (a) **Retrieval** over a phrase dictionary $\mathcal{Y}=\{y_1,\dots,y_N\}$: find top-$k$ candidates by score $s(f_\theta(x), g(y))$;
+* (b) **Classify** coarse semantic category $c\in\{1,\dots,K\}$;
+* (c) **Classify** domain $d\in\{\text{read},\text{imagine}\}$.
 
-Привязка фраз к эпохам осуществляется строго до обучения модели и опирается на статичную карту сопоставления «фраза → грубая категория», снабжённую собственным хэшем. Допускаются два режима соответствия: точное совпадение после нормализации строки и высокопороговое нестрогое совпадение (fuzzy). Использование семантического поиска по эмбеддингам как инструмента «доделки» разметки по умолчанию отключено, поскольку вносит в метки модельные предположения. Если такой режим всё же применяется для исследовательского анализа, каждое соответствие помечается пониженной уверенностью и либо исключается из обучающей выборки, либо анализируется отдельно с оценкой доли шумных меток и их влияния на итоговые метрики.
+Here, $f_\theta$ is the EEG encoder. $g(\cdot)$ is a frozen text mapping of a phrase into a vector space (used **only** on the index/evaluation similarity side, see anti-leakage). We fix the **phrase corpus** and map $\texttt{phrase}\to\texttt{coarse}$ before training and evaluation.
 
-Для сценариев разбиения на обучающие, валидационные и тестовые множества мы предоставляем явные списки индексов эпох для within‑session, cross‑session и cross‑subject (LOSO), а также связанный набор артефактов, обученных на обучающем подмножестве. Структура таких описаний может храниться в файлах split.yaml, где помимо индексов указываются пути к сериализованным решениям PREP, AutoReject и ICA, состоянию нормализатора и параметрам вейвлет‑фильтра. Загрузка датасета сопровождается автоматической верификацией совместимости: проверяются число и порядок каналов, хэш монтажа, хэш карты меток, режим нормализации и границы временного окна. При несовпадениях применяется строгая политика отказа либо заранее задокументированная процедура адаптации.
+**Evaluation scenarios:**
 
-Для удобства обучения глубинных моделей дополнительно поддерживается экспорт в формат, совместимый с PyTorch: для каждого домена хранится последовательность тензоров (C, T), список словарей меток (включая текст фразы, идентификатор категории и степень уверенности) и исходные длины до возможного паддинга, а в разделе метаданных фиксируются частота дискретизации, число каналов, хэш монтажа, маска каналов, режим нормализации, хэши состояний и версия кода. Все артефакты и манифесты снабжаются контрольными суммами и версионностью, а к каждому релизу датасета прилагается краткий журнал изменений и проверочные хэши контрольных подвыборок.
+* **within-session:** training/evaluation within one subject session (different trials);
+* **cross-session:** training in one session, evaluation in another session of the same subject;
+* **cross-subject:** leave-one-subject-out (LOSO) and/or adaptation with ≤5% subject data.
+
+**Constraints:** We do not consider OOD phrases outside the dictionary, audio/text synthesis, or online adaptation in v1.
 
 ---
 
-## 6. Модель и обучение (обзорно)
+## 4. Data and Preprocessing
 
-Архитектура модели следует принципу «локально‑частотное извлечение → временная агрегация → дискретизация представлений → многоцелевой семантический супервайзинг». Входной сегмент ЭЭГ $x \in \mathbb{R}^{C \times T}$ сначала проходит через сверточный стем, который извлекает локально‑частотные и краткосрочные временные признаки и понижает размерность по времени. Далее эти карты подаются на трансформер‑энкодер, моделирующий дальнодействующие зависимости самовниманием. Полученное агрегированное представление проецируется в семантическое пространство размерности $d=768$ и подвергается векторной квантизации: используется кодбук из $M=256$ векторов, обновляемый по схеме EMA с мягкой дискретизацией через Gumbel‑Softmax. В первых $W=5$ эпохах применяется warm‑up (дискретизация отключена), затем включается аннилирование температуры по закону $\tau_t = \max\{\tau_{\min}, \tau_0 \cdot \gamma^t\}$ (типично $\tau_0=0.05$, $\gamma=0.95$, $\tau_{\min}=0.01$). Квантизованное представление $z_q$ служит единым узлом согласования всех целевых задач.
+Raw EEG recordings in EDF format with hardware event markers and epoch-to-phrase alignment are used as source material. For unified processing, we fix the sampling rate at 500 Hz, use a consistent montage, and stabilize the list of working channels after excluding artifact-prone and auxiliary (e.g., EOG) channels. Each file additionally preserves metadata: subject, session, and run identifiers; ordered list of channel names; montage hash; information on "bad" channels if identified during acquisition.
 
-Поверх $z_q$ обучаются вспомогательные головы. Классификатор грубых семантических категорий реализован многослойным перцептроном с dropout и оптимизируется по перекрёстной энтропии. Доменный классификатор (read/imagine) подключается адверсариально через операцию реверса градиента: в прямом ходе он предсказывает домен, а в обратном «штрафует» энкодер за доменно‑специфичные признаки, продвигая их к инвариантности. Реконструктор сигнала восстанавливает исходный $x$ из $z_q$ и выступает как регуляризатор сохранения низкоуровневой информации. Дополнительно используется семантический декодер на базе Transformer, который напрямую аппроксимирует замороженные текстовые эмбеддинги $v_{\text{text}} = g(y)$ из $z_q$. Это устраняет разрыв «кодбук → семантика» и стабилизирует выравнивание пространств. На промежуточных уровнях (после CNN и после Transformer) включён иерархический семантический супервизор, формирующий вспомогательные проекции и ошибки, что эмпирически улучшает обучаемость и структурированность скрытых представлений.
+Preprocessing is structured as a sequential pipeline aiming to enhance signal-to-noise ratio and ensure reproducibility of subsequent learning steps. First, a bandpass filter (0.5–50 Hz) is applied, followed by notch filtering at 50 or 60 Hz and harmonics. To remove systematic offsets and anomalous electrodes, PREP is used: re-referencing is performed, noisy channels are detected (including RANSAC interpolations), and correction decisions are fixed. All PREP parameters are trained strictly on the training subset of the current fold and then applied unchanged to validation and test.
 
-Обучение формулируется как многокритериальная оптимизация. Базовая часть — контрастивная NT‑Xent‑потеря между $z_q$ и $v_{\text{text}}$:
+Event labels are extracted from the hardware trigger channel and matched against the phrase list, after which recordings are segmented into two non-overlapping windows: for *read* domain — 0 to 5 seconds; for *imagine* domain — 5 to 8.3 seconds. No baseline correction is applied, and use of post-event information outside the designated window is excluded. For outlier cleaning and corrupted trial recovery, AutoReject is applied: thresholds are evaluated only on training epochs, logs and threshold parameters are saved, and a pure transformation is applied to other splits without fitting.
+
+The next step is Independent Component Analysis. We train ICA on the training subset (separately for *read* and *imagine* if needed), automatically label components using IClabel, and exclude non-brain sources (blinks, EMG, etc.). Preprocessing artifacts preserve mixing and inverse transformation matrices, the list of excluded components, and a full decision log. On validation and test, the exact same transformation is applied without retraining. To enhance signal quality, adaptive wavelet filtering (Daubechies family, soft thresholding) is applied on top; the choice of family and decomposition level is fixed based on the training set and documented for reproducibility.
+
+Normalization is performed in one of two modes. In local mode, each epoch is scaled per channel using its own mean and standard deviation, a deterministic procedure without test-time learning. In global mode, channel-wise statistics are estimated on the training subset of the current fold, serialized, and then applied unchanged to validation and test data. Where needed, a robust version using interquartile range is used. At all steps, quality control reports are generated: fraction of interpolated channels, residual powerline noise, distributions of channel-specific means and variances, number of excluded ICA components, wavelet filter parameters. All artifacts are labeled with hashes and library versions.
+
+Finally, the overarching anti-leakage rule: any operations with parameters estimated from data (PREP, AutoReject, ICA, global normalization, wavelet filter parameter selection) are trained exclusively on the train set within each fold and then applied as immutable transformations. Epoch segmentation is strictly limited to designated intervals, preventing future information leakage relative to event center.
+
+---
+
+## 5. Dataset Assembly and Data Contracts
+
+Dataset assembly follows the principle of "data contracts," enabling unambiguous reconstruction and verification of each example's state. For each epoch, a machine-readable manifest is generated, recording subject, session, and run identifiers; epoch ordinal number; domain (*read* or *imagine*); original phrase and its categorical label; time window boundaries; sampling rate; ordered channel list and montage hash; and links to all preprocessing artifacts (PREP decisions, AutoReject parameters, ICA files, normalizer state, wavelet parameters). Additionally, the manifest contains a hash of the payload (e.g., SHA-256 of the feature array), code version, and creation timestamp, enabling experiment reproduction and data integrity verification.
+
+We support two complementary storage formats. The FIF format serves as the canonical representation of epochs with full metadata; parallelly, compact containers in PKL, HDF5, or Parquet with feature tensors (float32) and artifact links are saved for training. The directory structure is uniform across all subjects and sessions: separate directories are reserved for canonical epochs, final training packages, preprocessing artifacts, derived features, and quality control logs.
+
+Phrase-to-epoch alignment is strictly established before model training and relies on a static mapping "phrase → coarse category," equipped with its own hash. Two matching modes are allowed: exact match after string normalization and high-threshold fuzzy matching. Semantic search using embeddings as a "label refinement" tool is disabled by default, as it introduces model assumptions into labels. If this mode is used for exploratory analysis, each match is flagged with reduced confidence and either excluded from training or analyzed separately with assessment of noise label fraction and impact on final metrics.
+
+For train/validation/test split scenarios, we provide explicit lists of epoch indices for within-session, cross-session, and cross-subject (LOSO), along with associated artifacts trained on the training subset. The structure of these descriptions can be stored in `split.yaml` files, where, besides indices, paths to serialized PREP, AutoReject, and ICA solutions, normalizer state, and wavelet parameters are specified. Dataset loading is accompanied by automatic compatibility verification: channel count and order, montage hash, label map hash, normalization mode, and time window boundaries are checked. On mismatch, a strict rejection policy or a pre-documented adaptation procedure is applied.
+
+For convenience in training deep models, export to a PyTorch-compatible format is additionally supported: for each domain, a sequence of tensors (C, T), a list of label dictionaries (including phrase text, category ID, and confidence), and original lengths before padding are stored; in the metadata section, sampling rate, channel count, montage hash, channel mask, normalization mode, state hashes, and code version are fixed. All artifacts and manifests are equipped with checksums and versioning, and each dataset release includes a brief changelog and verification hashes for control subsets.
+
+---
+
+## 6. Model and Training (Overview)
+
+The model architecture follows the principle of "local-frequency extraction → temporal aggregation → representation discretization → multi-task semantic supervision." The input EEG segment $x \in \mathbb{R}^{C \times T}$ first passes through a convolutional stem, extracting local-frequency and short-term temporal features and reducing time dimensionality. These maps are then fed into a transformer encoder, modeling long-range dependencies via self-attention. The aggregated representation is projected into a 768-dimensional semantic space and subjected to vector quantization: a codebook of $M=256$ vectors is used, updated via EMA scheme with soft discretization through Gumbel-Softmax. During the first $W=5$ epochs, warm-up is applied (discretization disabled), then temperature annealing is activated following $\tau_t = \max\{\tau_{\min}, \tau_0 \cdot \gamma^t\}$ (typically $\tau_0=0.05$, $\gamma=0.95$, $\tau_{\min}=0.01$). The quantized representation $z_q$ serves as the single fusion point for all target tasks.
+
+Auxiliary heads are built on top of $z_q$. The coarse semantic category classifier is implemented as a multi-layer perceptron with dropout and optimized via cross-entropy. The domain classifier (*read/imagine*) is connected adversarially via gradient reversal: during forward pass, it predicts domain; during backward pass, it "penalizes" the encoder for domain-specific features, promoting invariance. The signal reconstructor restores the original $x$ from $z_q$ and acts as a regularizer preserving low-level information. Additionally, a semantic decoder based on Transformer directly approximates frozen text embeddings $v_{\text{text}} = g(y)$ from $z_q$. This eliminates the "codebook → semantics" gap and stabilizes space alignment. On intermediate levels (after CNN and after Transformer), a hierarchical semantic supervisor is included, generating auxiliary projections and losses, empirically improving learnability and structuredness of hidden representations.
+
+Training is formulated as a multi-criteria optimization. The core component is the contrastive NT-Xent loss between $z_q$ and $v_{\text{text}}$:
 
 $$
 L_{\text{NTX}}(i) = -\log\left( \frac{\exp(\text{sim}(z_i, v_i)/\tau)}{\sum_{j \neq i} \exp(\text{sim}(z_i, v_j)/\tau)} \right),
 $$
 
-где $\text{sim}(u,v) = \cos(u,v)$. 
+where $\text{sim}(u,v) = \cos(u,v)$.
 
-Наряду с «жёсткой» версией используется soft‑вариант, учитывающий семантические близости между фразами: положительные веса распределяются между парафразами и близкими формулировками, что снижает штраф за разумные подстановки. Векторная квантизация оптимизируется стандартным слагаемым с «обязательством» (commitment):
+Alongside the "hard" version, a soft variant is used, accounting for semantic similarities between phrases: positive weights are distributed among paraphrases and close formulations, reducing penalty for reasonable substitutions. Vector quantization is optimized with the standard commitment loss:
 
 $$
 L_{\text{VQ}} = \| \text{sg}[z] - e \|_2^2 + \beta \cdot \| z - \text{sg}[e] \|_2^2
 $$
 
-($e$ — ближайший вектор кодбука, $\text{sg}$ — остановка градиента, $\beta \approx 0.25$). 
+($e$ — closest codebook vector, $\text{sg}$ — stop gradient, $\beta \approx 0.25$).
 
-Для предотвращения коллапса кодбука добавляется регуляризация по энтропии распределения использования кодов (эквивалент поощрению высокой перплексии). Метрическое обучение усиливается триплет‑потерей с semi‑hard negative mining и отступом $m=0.3$, а структуризация семантики — перекрёстной энтропией по coarse‑классам. Доменно‑инвариантное обучение реализовано через адверсарное слагаемое с реверсом градиента, а сохранность информации о сигнале обеспечивается MSE‑реконструкцией. Наконец, прямое семантическое принуждение выполняется через декодер:
+To prevent codebook collapse, entropy regularization of code usage distribution is added (equivalent to encouraging high perplexity). Metric learning is enhanced by triplet loss with semi-hard negative mining and margin $m=0.3$, and semantic structuring is enforced by cross-entropy on coarse classes. Domain-invariant learning is implemented via adversarial loss with gradient reversal, and signal information preservation is ensured by MSE reconstruction. Finally, direct semantic forcing is performed via the decoder:
 
 $$
 L_{\text{sem}} = \alpha \cdot \| D(z_q) - v_{\text{text}} \|_2^2 + (1 - \alpha) \cdot (1 - \cos(D(z_q), v_{\text{text}})).
 $$
 
-Итоговая функция потерь имеет вид
+The overall loss function is:
 
 $$
 L = \lambda_{\text{NTX}} \cdot L_{\text{NTX}} + \lambda_{\text{sem}} \cdot L_{\text{sem}} + \lambda_{\text{trip}} \cdot L_{\text{triplet}} + \lambda_{\text{coarse}} \cdot L_{\text{coarse}} + \lambda_{\text{dom}} \cdot L_{\text{domain}} + \lambda_{\text{rec}} \cdot \| \hat{x} - x \|_2^2 + \lambda_{\text{VQ}} \cdot L_{\text{VQ}} + \lambda_{\text{ent}} \cdot L_{\text{entropy}} + \lambda_{\text{aux}} \cdot L_{\text{aux}},
 $$
 
-где весовые коэффициенты подбираются на валидации. Оптимизация выполняется AdamW с клиппингом нормы градиента.
+where weights are tuned on validation. Optimization uses AdamW with gradient norm clipping.
 
-Важной практической деталью является способ работы с текстовыми целями. Текстовый энкодер $g(\cdot)$ заморожен и используется только для получения эталонных эмбеддингов фраз. Для повышения устойчивости к формулировкам и синонимии в обучении и особенно при оценке применяется парафразирование: для каждой фразы генерируется набор близких выражений, их эмбеддинги усредняются, формируя «эталон‑ансамбль». Инференс сводится к косинусному сопоставлению нормированных $z_q$ с нормированными эталонными векторами всего словаря, top‑k кандидаты определяются ранжированием по сходству. Такая схема, совместно с доменно‑адверсарной регуляризацией и иерархической супервизией, обеспечивает устойчивое выравнивание «мозг → текст» и улучшает переносимость между доменами read и imagine.
-
----
-
-## 7. Инференс и калибровка доверия
-
-На этапе инференса латентный вектор преобразуется в L2-нормированный эмбеддинг и сравнивается с заранее подготовленными, также нормированными эталонными векторами фраз из словаря. В качестве меры близости используется косинусное сходство (эквивалентно скалярному произведению в нормированном пространстве). Эталонные векторы хранятся в индексе приближённого ближайшего соседа (например, FAISS): для точных поисков применяется плоский индекс по скалярному произведению, для ускорения — иерархические (IVF с настраиваемыми параметрами nlist/nprobe) или графовые (HNSW) структуры. Все версии индекса фиксируются и подписываются хэшами, что обеспечивает воспроизводимость.
-
-Выдача формируется как упорядоченный набор top‑k кандидатов с их исходными оценками сходства. Пост‑обработка включает дедупликацию парафраз (если словарь содержит варианты одной и той же фразы), правила разрешения «ничьих» (например, предпочтение более частых или более коротких формулировок), а также опциональный доменный приор: когда доменная голова (read/imagine) даёт высокую уверенность, ранжирование может проводиться в под‑индексе соответствующего домена. Для устойчивости к формулировкам применяется ансамблирование эталонов: каждой фразе соответствует набор парафраз, эмбеддинги которых усредняются, что уменьшает чувствительность к синонимии и пунктуации.
-
-Калибровка доверия проводится отдельно для retrieval и для классификаций (coarse и домен). Для retrieval оценки сходства трактуются как пред‑логиты и пропускаются через температурное масштабирование: вероятности получаются softmax от логитов, делённых на положительную температуру. Параметр температуры подбирается только на валидационном множестве, оптимизируя отрицательное правдоподобие или Brier‑потерю. Альтернативой служит изотоническая регрессия (монотонная, непараметрическая калибровка). Для классовых задач при выраженной несбалансированности допустимо класс‑специфическое температурное масштабирование. Качество калибровки оценивается по ожидаемой калибровочной ошибке (ECE) с разбиением интервала уверенности на бины, дополнительно приводятся Brier‑скор и «reliability‑кривые» (accuracy vs. confidence) до и после калибровки. Доверительные интервалы для ECE и Brier оцениваются бутстрэпом по эпизодам (95% CI).
-
-Для отсечения малонадежных ответов и маршрутизации «на человека» вычисляются стандартные меры неопределённости: максимум предсказанной вероятности, энтропия распределения, разница между первым и вторым кандидатом (margin), а также плотность поддержки среди ближайших соседей (сколько кандидатов превосходят порог сходства). На их основе реализуется стратегия «отказа» (abstain) с порогами, настроенными по кривым риск‑покрытие. В расширенном режиме поддерживаются конформные предсказательные множества: на валидации оценивается шкала невключения, а на тесте возвращается минимальный набор фраз с заданным гарантированным покрытием (1−α) при контролируемой ширине.
-
-С инженерной стороны инференс реализован батчево, поддерживает смешанную точность и кэширование эмбеддингов для повторяющихся окон, а также «быстрый проход» с малым k и агрессивными параметрами индекса для предварительного ранжирования с последующим доранжированием в точном режиме. Параметры калибровки и версии индексов строго версионируются, процедуры подгонки калибровки никогда не используют тестовые данные, что зафиксировано в журналах экспериментов и обеспечивает строгую воспроизводимость.
+A key practical detail is handling textual targets. The text encoder $g(\cdot)$ is frozen and used only to obtain reference phrase embeddings. To enhance robustness to formulations and synonyms, during training and especially evaluation, paraphrasing is applied: for each phrase, a set of close expressions is generated, their embeddings averaged, forming a "reference ensemble." Inference reduces to cosine similarity comparison between normalized $z_q$ and normalized reference vectors of the entire dictionary; top-k candidates are determined by ranking by similarity. This scheme, combined with domain-adversarial regularization and hierarchical supervision, ensures stable "brain → text" alignment and improves transferability between *read* and *imagine* domains.
 
 ---
 
-## 8. Протокол оценки и метрики
+## 7. Inference and Confidence Calibration
 
-Оценивание проводится в трёх сценариях: within‑session, cross‑session и cross‑subject (LOSO). Во всех случаях любые обучаемые элементы предобработки (PREP, AutoReject, ICA, параметры глобальной нормализации, выбор параметров вейвлет‑фильтрации) настраиваются строго на обучающем подмножестве каждого фолда и затем неизменно применяются к валидации и тесту. Для каждого сценария мы фиксируем списки индексов эпох и версионируемый набор артефактов предобработки. Отчётность включает контрольные суммы, версии зависимостей и протокол воспроизводимости.
+During inference, the latent vector is transformed into an L2-normalized embedding and compared with precomputed, also normalized, reference phrase vectors from the dictionary. As a similarity measure, cosine similarity is used (equivalent to dot product in normalized space). Reference vectors are stored in an approximate nearest neighbor index (e.g., FAISS): for exact searches, a flat index by dot product is used; for speed, hierarchical (IVF with adjustable nlist/nprobe) or graph-based (HNSW) structures are employed. All index versions are fixed and signed with hashes, ensuring reproducibility.
 
-### Retrieval 
+Output is formed as an ordered set of top-k candidates with their raw similarity scores. Post-processing includes deduplication of paraphrases (if the dictionary contains variants of the same phrase), tie-breaking rules (e.g., preference for more frequent or shorter formulations), and an optional domain priority: when the domain head (*read/imagine*) yields high confidence, ranking can be performed within the sub-index of the corresponding domain. For robustness to formulations, ensemble reference is applied: each phrase corresponds to a set of paraphrases, whose embeddings are averaged, reducing sensitivity to synonyms and punctuation.
 
-Сопоставление «ЭЭГ → фраза» формулируется как ранжирование словаря ($|Y|$ кандидатов). Базовые метрики включают: 
+Confidence calibration is performed separately for retrieval and classification (coarse and domain). For retrieval, similarity scores are treated as pre-logits and passed through temperature scaling: probabilities are obtained via softmax of logits divided by a positive temperature. Temperature parameter is tuned solely on the validation set, optimizing negative log-likelihood or Brier loss. An alternative is isotonic regression (monotonic, non-parametric calibration). For class-imbalanced classification, class-specific temperature scaling is permitted. Calibration quality is evaluated by Expected Calibration Error (ECE) with interval binning; additionally, Brier score and "reliability curves" (accuracy vs. confidence) before and after calibration are reported. Confidence intervals for ECE and Brier are estimated via bootstrap over episodes (95% CI).
 
-1. Top‑k Accuracy — доля примеров, у которых истинная фраза попала в топ‑k; 
-2. MRR (mean reciprocal rank) — среднее обратного ранга; 
-3. Recall@k — доля истинных фраз, извлечённых среди первых k кандидатов; 
-4. nDCG@k — нормированная discounted cumulative gain с логарифмическим затуханием по позиции (когда есть релевантные парафразы). 
+For rejecting low-confidence responses and routing to human, standard uncertainty measures are computed: maximum predicted probability, entropy of distribution, difference between first and second candidate (margin), and support density among nearest neighbors (how many candidates exceed the similarity threshold). Based on these, an "abstain" strategy is implemented with thresholds tuned on risk-coverage curves. In extended mode, conformal predictive sets are supported: on validation, a non-inclusion scale is estimated; on test, the minimal set of phrases with guaranteed coverage (1−α) and controlled width is returned.
 
-Для всех ранжировочных метрик приводятся двусторонние 95% доверительные интервалы, оцененные бутстрэпом по эпизодам (≥10 000 перезапусков) с перцентилизацией или BCa‑коррекцией.
-
-### Классификация
-
-Для предсказаний грубых категорий и домена (read/imagine) отчёт включает accuracy, macro‑F1 (усреднение по классам) и balanced accuracy (среднее по чувствительности классов), а также матрицы ошибок. При дисбалансе классов мы добавляем macro‑precision/recall и отчёт по класс‑специфическим показателям.
-
-### Калибровка 
-
-Качество доверительных оценок проверяется по ECE/ACE и Brier‑скор (до/после калибровки температурой или изотоникой). Приводятся reliability‑кривые и, для retrieval, графики зависимости точности от порога уверенности (risk–coverage). Параметры калибровки подбираются исключительно на валидации.
-
-### Сравнительный анализ и статистика 
-
-Для проверки превосходства над случайным ранжированием используется пермутационный тест (перестановки ответов внутри запроса). Сравнение моделей и абляций проводится двусторонним пермутационным тестом по разницам метрик с контролем FDR (Бенджамини–Хохберг). В отчётах указываем число перестановок, p‑значения и скорректированные пороги.
-
-### Бейзлайны
-
-Рассматриваются: 
-
-- (a) Random (равновероятное ранжирование словаря); 
-- (b) полосовые признаки + линейная модель/логрег (энергии диапазонов δ/θ/α/β/γ и их отношения); 
-- (c) EEGNet и ShallowFBCSPNet; 
-- (d) Наш стек без VQ (контрастивный энкодер без дискретизации); 
-- (e) полный вариант (CNN→Transformer→VQ + многоцелевые головы). 
-
-Все бейзлайны обучаются по тем же сплитам и протоколам, гиперпараметры подбираются на валидации с одинаковыми бюджетами.
-
-### Абляции 
-
-Оцениваются вклад компонентов: −VQ, −Recon, −AuxHeads, −Contrastive, а также опционально −AdvDomain и −SemDecoder. Для каждой абляции приводятся метрики retrieval/классификации и показатели калибровки с CI.
-
-### Минимальный набор показателей в текущей версии (v1) 
-
-На домене imagine модель демонстрирует Top‑5 Accuracy = 0.8288 и MRR = 0.6340, для coarse‑классификации зафиксирована Accuracy = 1.0000 на текущем валидируемом подмножестве. Средние косинусные сходства: $cos(z_q, v_{text})=0.5836$, $cos(\hat v_{text}, v_{text})=0.7279$, $cos(z_q, \hat v_{text})=0.7205$. 
-
-> Примечание: остальные заявленные метрики (Top‑1/10, Recall@k, nDCG@k, macro‑F1/BA, ECE/ACE, Brier, пермутационные тесты и бутстрэп‑CI по всем сплитам) будут добавлены в $v_{n+1}$ после полного прогона оценок на фиксированных сплитах и бейзлайнах.
+On the engineering side, inference is batched, supports mixed precision, caches embeddings for repeated windows, and features a "fast pass" with small k and aggressive index parameters for preliminary ranking followed by refined ranking in exact mode. Calibration parameters and index versions are strictly versioned; calibration fitting procedures never use test data, as documented in experiment logs, ensuring strict reproducibility.
 
 ---
 
-## 9. Результаты (предварительно, обзорно)
+## 8. Evaluation Protocol and Metrics
 
-В текущей обзорной версии мы фокусируемся на качественных иллюстрациях и репрезентативных численных примерах, откладывая полный свод метрик до финальной версии. На эмбеддинговом уровне наблюдается согласование пространств: среднее косинусное сходство между квантизованными представлениями ЭЭГ и эталонными текстовыми векторами достигает ~0.584, а предсказанные семантические векторы декодера демонстрируют ещё более высокое согласование с эталоном (~0.728), что указывает на корректность направления обучения и пользу вспомогательного семантического декодирования. На домене imagine модель показывает Top‑5 Accuracy ≈ 0.829 и MRR ≈ 0.634 по текущему подмножеству, что подтверждает способность ранжировать релевантные фразы среди ближайших соседей словаря.
+Evaluation is conducted in three scenarios: within-session, cross-session, and cross-subject (LOSO). In all cases, any trainable preprocessing elements (PREP, AutoReject, ICA, global normalization parameters, wavelet filter parameter selection) are tuned strictly on the training subset of each fold and then applied unchanged to validation and test. For each scenario, we fix lists of epoch indices and versioned sets of preprocessing artifacts. Reporting includes checksums, dependency versions, and reproducibility protocol.
 
-Дискретизация представлений через кодбук выявляет умеренную, но не предельную «живость» кодов: используется ~16% записей кодбука (41/256), среднее число обращений к коду ~31.3, что отражает как неоднородность частот, так и наличие доминантных паттернов. Визуализация распределения частот по кодам и перплексии, а также проекций $z_q$ и текстовых векторов (t‑SNE/UMAP) показывает частичное кластерирование по coarse‑категориям и доменам, вместе с тем наблюдаются области перекрытия, где помогает доменно‑адверсарная регуляризация.
+### Retrieval
 
-Вспомогательные классификаторы демонстрируют высокую точность на coarse‑уровне и устойчивые предсказания домена, что позволяет использовать их как приор в ранжировании. Reliability‑кривые после температурной калибровки становятся ближе к диагонали, а Brier‑показатели снижаются (полные значения будут добавлены в финальной версии). Мы также приводим примеры top‑k‑выдач с комментариями об ошибках «парафразной близости», когда истинная фраза и ближайший кандидат семантически эквивалентны при различной формулировке, такие случаи мотивируют использование nDCG@k и soft‑контрастивного обучения.
+"EEG → Phrase" matching is formulated as ranking over the dictionary ($|Y|$ candidates). Base metrics include:
 
-Наконец, мы включаем иллюстрации: 
-1. Распределение частот кодов и перплексии кодбука; 
-2. Двумерные проекции эмбеддингов $z_q$, $\hat v_{text}$ и $v_text$; 
-3. Примеры ранжирования с указанием косинусных сходств; 
-4. Матрицы ошибок для coarse/домена; 
-5. Reliability‑кривые до/после калибровки. 
+1. Top-k Accuracy — fraction of examples where the true phrase appears in top-k;
+2. MRR (mean reciprocal rank) — average of inverse ranks;
+3. Recall@k — fraction of true phrases retrieved among the first k candidates;
+4. nDCG@k — normalized discounted cumulative gain with logarithmic decay by position (when relevant paraphrases exist).
 
-> Примечание: в финальной версии будут опубликованы полные таблицы по всем сплитам (within‑/cross‑session, LOSO) с 95% доверительными интервалами, сравнения с бейзлайнами и результаты абляционных исследований, а также пермутационные p‑значения для ключевых сравнений.
+For all ranking metrics, two-sided 95% confidence intervals are provided, estimated via bootstrap over episodes (≥10,000 resamplings) with percentile or BCa correction.
 
----
+### Classification
 
-## 10. Воспроизводимость и пакет артефактов
+For coarse category and domain (*read/imagine*) predictions, reporting includes accuracy, macro-F1 (class-average), and balanced accuracy (average of class sensitivities), as well as error matrices. For class imbalance, macro-precision/recall and class-specific reports are added.
 
-* **Окружение:** `conda env.yml` или `Dockerfile`, фиксация версий/seed, `requirements.txt`.
-* **Конфигурации:** Hydra‑конфиги (`configs/`), `Makefile`/`invoke` для сценариев.
-* **Данные:** скрипты загрузки/валидации, манифест и хэши словаря фраз/маппинга.
-* **Обучение/оценка:** `train.py`, `eval.py`, `ablation.py`, `baseline.py`.
-* **Индексация:** скрипт сборки индекса кандидатов; фиксация версий текстового энкодера.
-* **Логи/артефакты:** DVC (`dvc.yaml`) или эквивалент, чекпоинты, конфиги, отчёты.
-* **MODEL\_CARD.md:** назначение, ограничения, риски, области применения.
+### Calibration
 
----
+Quality of confidence estimates is assessed via ECE/ACE and Brier score (before/after calibration by temperature or isotonic). Reliability curves are shown, and for retrieval, accuracy vs. confidence thresholds (risk–coverage) are plotted. Calibration parameters are tuned exclusively on validation.
 
-## 11. Ограничения
+### Comparative Analysis and Statistics
 
-* Небольшое количество субъектов и вариативность межсубъектного переноса.
-* Возможный шум в разметке фраз, отсутствие OOD‑оценки.
-* Отсутствие онлайн‑адаптации и real‑time экспериментов в v1.
+To test superiority over random ranking, a permutation test (permutations of answers within query) is used. Model and ablation comparisons are conducted via two-sided permutation test on metric differences with FDR control (Benjamini-Hochberg). Reports specify number of permutations, p-values, and corrected thresholds.
 
----
+### Baselines
 
-## 12. Практическая ценность и применения
+Considered:
 
-Воспроизводимый каркас полезен для исследований внутренней речи, прототипирования BCI‑интерфейсов, а также как компонент мультимодальных систем «мозг↔компьютер». Единые контракты данных и стандартизованные шаги обработки упрощают сравнение моделей и накопление результатов.
+- (a) Random (uniform ranking of dictionary);
+- (b) Band features + linear model/logreg (energies of δ/θ/α/β/γ bands and ratios);
+- (c) EEGNet and ShallowFBCSPNet;
+- (d) Our stack without VQ (contrastive encoder without discretization);
+- (e) Full variant (CNN→Transformer→VQ + multi-task heads).
 
----
+All baselines are trained on the same splits and protocols; hyperparameters are tuned on validation with identical budgets.
 
-## 13. Заключение и планы
+### Ablations
 
-Мы представили системный конвейер «EEG→Text» с акцентом на воспроизводимость и прозрачную оценку. В ближайших версиях: 
+Component contributions are evaluated: −VQ, −Recon, −AuxHeads, −Contrastive, optionally −AdvDomain and −SemDecoder. For each ablation, retrieval/classification metrics and calibration scores with CI are reported.
 
-1. Полные таблицы результатов со статистикой и CI; 
-2. Cильные бейзлайны и абляции; 
-3. Перенос между сессиями и субъектами; 
-4. Расширенная калибровка доверия и VQ‑диагностика.
+### Minimum Metric Set in Current Version (v1)
+
+On the *imagine* domain, the model shows Top-5 Accuracy = 0.8288 and MRR = 0.6340; for coarse classification, Accuracy = 1.0000 is fixed on the current validation subset. Mean cosine similarities: $cos(z_q, v_{text})=0.5836$, $cos(\hat v_{text}, v_{text})=0.7279$, $cos(z_q, \hat v_{text})=0.7205$.
+
+> Note: All other stated metrics (Top-1/10, Recall@k, nDCG@k, macro-F1/BA, ECE/ACE, Brier, permutation tests, bootstrap-CI across all splits) will be added in $v_{n+1}$ after full evaluation runs on fixed splits and baselines.
 
 ---
 
-## Благодарности
+## 9. Results (Preliminary, Overview)
 
-*Здесь — благодарности коллегам, лаборатории и участникам сбора данных.*
+In this review version, we focus on qualitative illustrations and representative numerical examples, deferring full metric summaries to the final version. At the embedding level, space alignment is observed: the mean cosine similarity between quantized EEG representations and reference text vectors reaches ~0.584, while predicted semantic vectors from the decoder show even higher alignment with the reference (~0.728), indicating correct learning direction and benefit of auxiliary semantic decoding. On the *imagine* domain, the model achieves Top-5 Accuracy ≈ 0.829 and MRR ≈ 0.634 on the current subset, confirming its ability to rank relevant phrases among dictionary neighbors.
 
-## Ссылки
+Discretization via codebook reveals moderate, but not extreme, code "vitality": ~16% of codebook entries are used (41/256), average code usage ~31.3, reflecting both frequency heterogeneity and presence of dominant patterns. Visualization of code frequency distributions and perplexity, and projections of $z_q$ and text vectors (t-SNE/UMAP), show partial clustering by coarse categories and domains, yet overlapping regions are observed where domain-adversarial regularization helps.
+
+Auxiliary classifiers show high accuracy on coarse level and stable domain predictions, enabling their use as priors in ranking. Reliability curves after temperature calibration move closer to the diagonal, and Brier scores decrease (full values will be added in the final version). We also include examples of top-k outputs with commentary on "paraphrase proximity" errors, where the true phrase and top candidate are semantically equivalent despite different wording; such cases motivate use of nDCG@k and soft-contrastive learning.
+
+Finally, we include illustrations:
+1. Code frequency distribution and codebook perplexity;
+2. 2D projections of embeddings $z_q$, $\hat v_{text}$, and $v_text$;
+3. Example rankings with cosine similarities;
+4. Error matrices for coarse/domain;
+5. Reliability curves before/after calibration.
+
+> Note: In the final version, full tables across all splits (within-/cross-session, LOSO) with 95% confidence intervals, comparisons with baselines, and ablation study results, as well as permutation p-values for key comparisons, will be published.
+
+---
+
+## 10. Reproducibility and Artifact Package
+
+* **Environment:** `conda env.yml` or `Dockerfile`, version/seed fixation, `requirements.txt`.
+* **Configurations:** Hydra configs (`configs/`), `Makefile`/`invoke` for scripts.
+* **Data:** Loading/validation scripts, manifest and hashes of phrase dictionary/mapping.
+* **Training/Evaluation:** `train.py`, `eval.py`, `ablation.py`, `baseline.py`.
+* **Indexing:** Candidate index building script; fixed versions of text encoder.
+* **Logs/Artifacts:** DVC (`dvc.yaml`) or equivalent, checkpoints, configs, reports.
+* **MODEL_CARD.md:** Purpose, limitations, risks, applications.
+
+---
+
+## 11. Limitations
+
+* Small number of subjects and variability in inter-subject transfer.
+* Possible noise in phrase labeling, absence of OOD evaluation.
+* No online adaptation or real-time experiments in v1.
+
+---
+
+## 12. Practical Value and Applications
+
+The reproducible framework is useful for inner speech research, BCI interface prototyping, and as a component of multimodal "brain↔computer" systems. Unified data contracts and standardized processing steps simplify model comparison and result accumulation.
+
+---
+
+## 13. Conclusion and Plans
+
+We present a systematic "EEG→Text" pipeline with emphasis on reproducibility and transparent evaluation. In upcoming versions:
+
+1. Full result tables with statistics and CI;
+2. Strong baselines and ablations;
+3. Cross-session and cross-subject transfer;
+4. Extended confidence calibration and VQ diagnostics.
+
+---
+
+## Acknowledgments
+
+*Here — acknowledgments to colleagues, lab, and data contributors.*
+
+## References
 
 - [Lee et al., 2020] Neural Decoding of Imagined Speech and Visual Imagery as Intuitive Paradigms for BCI Communication. IEEE TNSRE 28(12):2647–2659.
 - [Abdulghani et al., 2023] Imagined Speech Classification Using EEG and Deep Learning. MDPI Bioengineering 10(6):649.
@@ -268,21 +268,21 @@ $$
 
 ---
 
-### Приложение A. Anti‑leakage чек‑лист
+### Appendix A. Anti-leakage Checklist
 
-* Fit всех предобработчиков/скейлеров/ICA/вейвлет‑порогов — **только на train per‑fold**.
-* Гиперпараметры подбираются на **validation**, не на test.
-* Текстовый энкодер для индекса/разметки **не обучается** на ваших данных и не совпадает с используемым в модели; при совпадении — удалить семантический fallback.
-* Индекс и словарь фраз фиксируются до обучения (хэшируются).
-* Проверка time‑leak: строгое временное окно инференса, без доступа к пост‑событийным сигналам.
+* Fit all preprocessors/scalers/ICA/wavelet thresholds — **only on train per-fold**.
+* Hyperparameters tuned on **validation**, not test.
+* Text encoder for index/labeling **not trained** on your data and distinct from model's; if same — remove semantic fallback.
+* Index and phrase dictionary fixed before training (hashed).
+* Time-leak check: strict inference time window, no access to post-event signals.
 
-### Приложение B. Диагностика VQ
+### Appendix B. VQ Diagnostics
 
-* Перплексия и «живость» кодов, частотные распределения.
-* Влияние размера кодбука и $\beta$ на качество и интерпретацию.
-* Примеры паттернов кодов, связанных с coarse/доменом.
+* Perplexity and code "vitality", frequency distributions.
+* Impact of codebook size and $\beta$ on quality and interpretability.
+* Examples of code patterns linked to coarse/domain.
 
-### Приложение C. Структура «репро‑пакета» (пример)
+### Appendix C. "Repro-package" Structure (Example)
 
 ```
 repo/
@@ -300,12 +300,12 @@ repo/
   ├─ MODEL_CARD.md  README.md  LICENSE
 ```
 
-### Приложение D. Карточка модели (MODEL\_CARD.md, краткий шаблон)
+### Appendix D. Model Card (MODEL_CARD.md, Short Template)
 
-**Назначение.** Retrieval по словарю фраз и классификация coarse/домена из ЭЭГ.
-**Данные.** Источник, протокол сборки, согласия.
-**Обучение.** Архитектура, лоссы, гиперпараметры.
-**Оценка.** Сплиты, метрики, CI.
-**Ограничения.** Области, где модель ненадёжна.
-**Этика и риск.** Конфиденциальность, допустимые применения.
-**Контакты.** Поддержка и связь.
+**Purpose.** Retrieval over phrase dictionary and classification of coarse/domain from EEG.
+**Data.** Source, acquisition protocol, consents.
+**Training.** Architecture, losses, hyperparameters.
+**Evaluation.** Splits, metrics, CI.
+**Limitations.** Domains where model is unreliable.
+**Ethics and Risk.** Privacy, permissible applications.
+**Contact.** Support and connection.

@@ -1,61 +1,61 @@
-# EEG→Text: воспроизводимый конвейер восстановления семантики внутренней речи из сигналов ЭЭГ 🧠📝
+# EEG→Text: A Reproducible Pipeline for Recovering the Semantics of Inner Speech from EEG Signals 🧠📝
 
-[![Telegram Channel](https://img.shields.io/badge/Telegram-TheWeeklyBrief-blue)](https://t.me/TheWeeklyBrief)
+## 📝 Description
 
-## 📝 Описание
+✍️ I am preparing a preprint for arXiv — the foundation of my master's thesis: **EEG→Text** — a reproducible end-to-end pipeline for recovering the semantics of inner speech from EEG signals. The system standardizes signal preprocessing, enforces explicit data contracts, and employs multi-task training of an EEG encoder with vector quantization. The project formalizes the task as retrieval over a fixed phrase dictionary with parallel classification of semantic categories and domain (*read/imagine*).
 
-✍️ Готовлю Preprint для arXiv — основу моей магистерской работы: **EEG→Text** — воспроизводимый end-to-end конвейер для восстановления семантики внутренней речи из сигналов ЭЭГ. Система стандартизирует предобработку сигналов, вводит четкие контракты данных и использует многоцелевое обучение энкодера ЭЭГ с векторной квантизацией. Проект формализует задачу как retrieval по фиксированному словарю фраз с параллельной классификацией семантических категорий и домена (read/imagine).
+- **Goal**: Learn to recover meaning from EEG signals — predict phrases, coarse semantic categories, and domain (*read/imagine*)
+- **Format**: A practical, reproducible pipeline from raw EDF files to inference on a trained model
 
-- Цель: научиться по сигналам ЭЭГ восстанавливать смысл — предсказывать фразы, грубые семантические категории и домен (read/imagine)
-- Формат: практичный, воспроизводимый конвейер от сырых EDF-файлов до инференса на обученной модели
+## 🔍 Key Features
 
-## 🔍 Ключевые особенности
+- **Standardized preprocessing**: Noise and artifact suppression, referencing, automated cleaning and ICA, adaptive wavelet filtering, and normalization
+- **Explicit data contracts**: Format validation, channel alignment, phrase-to-epoch binding, category mapping
+- **Multi-task training**: Contrastive brain-text alignment, category classification, *read/imagine* domain classification, signal reconstruction
+- **Vector quantization**: Discretization of representations to stabilize the latent space
+- **Rigorous evaluation protocols**: within-session, cross-session, cross-subject with anti-leakage measures
+- **Reproducibility**: Fixed versions, checkpoints, configs, and a "repro-package"
 
-- **Стандартизованная предобработка**: подавление шума и артефактов, референс, автоматическая чистка и ICA, адаптивная вейвлет-фильтрация и нормализация
-- **Четкие контракты данных**: валидация форматов, выравнивание каналов, привязка фраз к эпохам, маппинг к категориям
-- **Многоцелевое обучение**: контрастивное выравнивание "мозг↔текст", классификация категорий, домена read/imagine, реконструкция сигнала
-- **Векторная квантизация**: дискретизация представлений для стабилизации латентного пространства
-- **Строгие протоколы оценки**: within-session, cross-session, cross-subject с мерами против утечек данных
-- **Воспроизводимость**: фиксированные версии, чекпоинты, конфиги и "репро-пакет"
+## 📈 Results and Impact
 
-## 📈 Результаты и эффекты
+- **Retrieval**: Top-5 Accuracy = 0.8288 and MRR = 0.6340 on the *imagine* domain
+- **Classification**: Accuracy = 1.0000 for coarse categories on the validation subset
+- **Space alignment**: Cosine similarity between EEG and text vectors ~0.584
+- **Discretization**: ~16% of codebook entries used (41/256), reflecting the presence of dominant patterns
 
-- **Retrieval**: Top-5 Accuracy = 0.8288 и MRR = 0.6340 на домене imagine
-- **Классификация**: Accuracy = 1.0000 для coarse-категорий на валидируемом подмножестве
-- **Согласование пространств**: косинусное сходство между ЭЭГ и текстовыми векторами ~0.584
-- **Дискретизация**: используется ~16% записей кодбука (41/256), что отражает наличие доминантных паттернов
+## 🧠 Pipeline Overview (Briefly)
 
-## 🧠 Как устроен пайплайн (кратко)
+- **EEG preprocessing**: Noise filtering, referencing, ICA, automated artifact labeling, wavelet filtering
+- **Dataset assembly**: Format validation, normalization, phrase-to-epoch binding, category mapping
+- **Model architecture**: CNN+Transformer encoder with vector quantization and multi-task heads
+- **Training**: Contrastive, classification, and reconstruction losses with domain-adversarial regularization
+- **Inference**: Cosine similarity matching against reference vectors, top-k ranking, confidence calibration
 
-- **Предобработка EEG**: фильтрация шума, референс, ICA, автоматическая маркировка артефактов, вейвлет-фильтрация
-- **Сборка датасета**: валидация форматов, нормализация, привязка фраз к эпохам, маппинг к категориям
-- **Архитектура модели**: CNN+Transformer энкодер с векторной квантизацией и многоцелевыми головами
-- **Обучение**: контрастивные, классификационные и реконструкционные потери с доменно-адверсарной регуляризацией
-- **Инференс**: косинусное сопоставление с эталонными векторами, top-k ранжирование, калибровка доверия
+## 🌟 Practical Applications
 
-## 🌟 Практические применения
+- **BCI interfaces**: Foundation for non-invasive "brain-computer" interfaces
+- **Cognitive neuroscience**: Investigation of inner speech and semantic representations
+- **Multimodal systems**: Component for "brain↔computer" systems
+- **Standardization**: Unified contracts and formats for research in the field
 
-- **BCI-интерфейсы**: основа для неинвазивных интерфейсов "мозг-компьютер"
-- **Когнитивная нейронаука**: исследование внутренней речи и семантических представлений
-- **Мультимодальные системы**: компонент для систем "мозг↔компьютер"
-- **Стандартизация**: единые контракты и форматы для исследований в области
-
-## 🔗 Ссылки
-
-- Обзор недели: [review](https://verbasik.github.io/Weekly-arXiv-ML-AI-Research-Review/#2025/week-38)
-
-## 📜 Цитирование
+## 📜 Citation
 
 ```bibtex
 @misc{verbasik2025eegtotext,
-  title        = {EEG→Text: воспроизводимый конвейер восстановления семантики внутренней речи из сигналов ЭЭГ},
-  author       = {Вербецкий, Эдуард Игоревич},
+  title        = {EEG→Text: A Reproducible Pipeline for Recovering the Semantics of Inner Speech from EEG Signals},
+  author       = {Verbatsev, Eduard Igorevich},
   year         = {2025},
-  howpublished = {Препринт},
+  howpublished = {Preprint},
   url          = {https://verbasik.github.io/Weekly-arXiv-ML-AI-Research-Review/#2025/week-38}
 }
 ```
 
 ---
 
-<p align="center">Исследуйте вместе с нами 🚀</p>
+<div align="center">
+
+**Explore with us 🚀**
+
+⭐ Star this repository if you found it helpful
+
+</div>

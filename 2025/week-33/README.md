@@ -1,28 +1,26 @@
-[![Telegram Channel](https://img.shields.io/badge/Telegram-TheWeeklyBrief-blue)](https://t.me/TheWeeklyBrief) 
+# 🔥 Deep Dive into Google ADK in #AgentsUnderHood!
 
-# 🔥 Рразбор Google ADK в #AgentsUnderHood! 
+## 🚀 What’s in store for this episode?
 
-## 🚀 Что вас ждет в этом выпуске?
+### **Architectural Constructor**
+We break down Google ADK’s modular system piece by piece:
+- How interchangeable services (Memory, Tools, Artifacts) work
+- Hierarchical multi-agent systems vs flat chains
+- State management via `MemoryService`
 
-### **Архитектурный конструктор**
-Разбираем модульную систему Google ADK по косточкам:
-- Как работают взаимозаменяемые сервисы (Memory, Tools, Artifacts)
-- Иерархическая мультиагентность vs плоские цепочки
-- Управление состоянием через `MemoryService`
-
-### **Битва фреймворков**
-Сравниваем с OpenAI Agents SDK и LangChain по 7 ключевым критериям:
+### **Framework Battle**
+We compare against OpenAI Agents SDK and LangChain across 7 key criteria:
 ```python
-# Пример теста производительности 
+# Performance test example 
 adk_time = test_execution(GoogleADK_agent)
 openai_time = test_execution(OpenAI_agent)
-print(f"ADK быстрее на {openai_time/adk_time:.1f}x!")
+print(f"ADK is {openai_time/adk_time:.1f}x faster!")
 ```
 
-### 💻 **Бонус: Автокоммитер**
-Готовый инструмент для генерации идеальных commit-сообщений:
+### 💻 **Bonus: Auto-Committer**
+A ready-to-use tool for generating ideal commit messages:
 ```bash
-# Пример использования (уже в репозитории!)
+# Usage example (already in the repository!)
 commit -yes
 ```
 

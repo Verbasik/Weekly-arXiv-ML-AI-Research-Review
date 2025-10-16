@@ -1,35 +1,24 @@
-# Schema Guided Reasoning: метод структурированного рассуждения AI
+# Schema Guided Reasoning: A Structured AI Reasoning Method
 
----
+## Introduction
 
-### **TWRB_FM 📻**
+In early February 2025, the research **Schema-Guided Scene-Graph Reasoning based on Multi-Agent Large Language Model System** [arXiv:2502.03450](https://arxiv.org/abs/2502.03450) was published, introducing SG² (Schema-Guided Scene-Graph Reasoning). This work proposed an innovative approach to leveraging SGR for spatial reasoning through multi-agent systems, significantly improving accuracy and reducing hallucinations in scene graph processing tasks. This study became a catalyst for discussion, as it not only introduced a novel methodology but also demonstrated practical advantages of SGR in complex domains such as robotics and virtual environments.
 
-<audio controls>
-  <source src="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/raw/refs/heads/develop/2025/week-36/TWRB_FM.mp3" type="audio/mpeg">
-  Ваш браузер не поддерживает аудиоэлемент.
-</audio>
+**Schema Guided Reasoning (SGR) is a new structured prompting technique that uses predefined typed schemas to guide large language models through explicit reasoning workflows, improving accuracy by 5–10% and ensuring 95% reproducibility of results**. Unlike traditional approaches such as Chain-of-Thought, SGR encodes expert cognitive processes directly into inference via JSON Schema and Pydantic validation. This approach is critical for enterprise applications requiring maximum reliability, auditability, and quality control of AI reasoning. SGR has evolved from classical formal logic methods through modern schema-oriented approaches, becoming the most widely adopted pattern in production AI products. The technology is particularly effective for compensating for the limitations of local models with smaller cognitive capacities.
 
----
+## Theoretical Foundations and Conceptual Architecture
 
-## Введение
+### Fundamental Principles of SGR
 
-В начале февраля 2025 года было опубликовано исследование **Schema-Guided Scene-Graph Reasoning based on Multi-Agent Large Language Model System** [arXiv:2502.03450](https://arxiv.org/abs/2502.03450), которое представило SG² (Schema-Guided Scene-Graph Reasoning). Это работа предложила инновационный подход к использованию SGR для пространственного reasoning с помощью мульти-агентных систем, что значительно улучшило точность и снизило hallucinations в задачах, связанных с обработкой графов сцен. Данное исследование стало катализатором обсуждений, так оно не только предложило новую методику, но и показало практические преимущества SGR в сложных domains, таких как robotics и виртуальные среды.
+**The formal definition of Schema Guided Reasoning includes a structured technique using predefined schemas via Structured Output to guide large language models through explicit reasoning workflows**. In the context of multi-agent systems, SGR expands to SG² (Schema-Guided Scene-Graph reasoning)—an iterative, schema-driven reasoning structure where the schema optimizes reasoning processes and directs collaboration between modules.
 
-**Schema Guided Reasoning (SGR) представляет собой новую технику структурированного промптинга, которая использует предопределенные типизированные схемы для направления больших языковых моделей через явные рабочие процессы рассуждения, повышая точность на 5-10% и обеспечивая 95% воспроизводимость результатов**. В отличие от традиционных подходов вроде Chain-of-Thought, SGR кодирует экспертные когнитивные процессы непосредственно в инференцию через JSON Schema и Pydantic валидацию. Этот подход критически важен для enterprise-приложений, где требуется максимальная надежность, аудируемость и контроль качества рассуждений AI системы. SGR эволюционировал из классических формальных методов логики через современные схемо-ориентированные подходы, став наиболее широко применяемым паттерном в production AI продуктах. Технология особенно эффективна для компенсации ограничений локальных моделей с меньшими когнитивными способностями.
+**The theoretical roots of SGR trace back to classical formal logic and schema theory**. A schema in logical context represents a complex system consisting of a template text with placeholders and additional conditions defining rules for filling them to obtain specific instances. Modern SGR inherits from formal logic the principles of structured inference and uses schemas as metalanguage constructs for specifying inference rules.
 
-## Теоретические основы и концептуальная архитектура
+**Pragmatic reasoning schemas proposed by Cheng and Holyoak in 1985 became the cognitive foundation for modern SGR**. These generalized sets of rules include resolution schemas (regulating action conditions), causal schemas (cause-effect relationships), and proof schemas (structuring evidential reasoning).
 
-### Фундаментальные принципы SGR
+### Architectural Components of SGR Systems
 
-**Формальное определение Schema Guided Reasoning включает структурированную технику, использующую предопределенные схемы через Structured Output для направления больших языковых моделей через явные рабочие процессы рассуждения**. В контексте мульти-агентных систем SGR расширяется до SG² (Schema-Guided Scene-Graph reasoning) - итеративной схемо-управляемой структуры рассуждения, где схема служит для оптимизации процессов рассуждения и направления сотрудничества между модулями.
-
-**Теоретические корни SGR уходят в классическую формальную логику и теорию схем**. Схема в логическом контексте представляет сложную систему, состоящую из шаблона-текста с заполнителями и дополнительного условия, определяющего правила заполнения для получения конкретных экземпляров. Современный SGR наследует от формальной логики принципы структурированного вывода и использует схемы как метаязыковые конструкты для спецификации правил вывода.
-
-**Прагматические схемы рассуждения, предложенные Cheng и Holyoak в 1985 году, стали когнитивной основой для современного SGR**. Эти обобщенные наборы правил включают схемы разрешения (регулирование условий действий), каузальные схемы (причинно-следственные отношения) и схемы доказательства (структурирование доказательных рассуждений).
-
-### Архитектурные компоненты SGR систем
-
-**SGR система состоит из четырех основных архитектурных слоев: схемы (Pydantic структуры), валидации (контроль типов), инференса (управление LLM) и диспетчеризации (выполнение функций)**. Ядром системы служит центральная схема управления, например:
+**An SGR system consists of four core architectural layers: schemas (Pydantic structures), validation (type control), inference (LLM orchestration), and dispatching (function execution)**. The system’s core is a central control schema, for example:
 
 ```python
 class NextStep(BaseModel):
@@ -39,29 +28,29 @@ class NextStep(BaseModel):
     function: Union[Tool1, Tool2, Tool3]
 ```
 
-**SGR реализует три основных паттерна рассуждения**: Cascade (каскадное следование предопределенным шагам), Routing (явный выбор одного пути из многих) и Cycle (принудительное повторение шагов рассуждения). Каждый паттерн решает специфические задачи структурирования мыслительного процесса AI.
+**SGR implements three primary reasoning patterns**: Cascade (sequential adherence to predefined steps), Routing (explicit selection of one path from many), and Cycle (forced repetition of reasoning steps). Each pattern addresses specific tasks in structuring the AI thought process.
 
-## Сравнительный анализ методов рассуждения
+## Comparative Analysis of Reasoning Methods
 
-| **Характеристика** | **SGR** | **Chain-of-Thought** | **ReAct** | **Tree of Thoughts** | **Plan-and-Solve** |
+| **Characteristic** | **SGR** | **Chain-of-Thought** | **ReAct** | **Tree of Thoughts** | **Plan-and-Solve** |
 |-------------------|---------|---------------------|-----------|---------------------|-------------------|
-| **Воспроизводимость** | **95%+** | 70-85% | 60-80% | 50-70% | 75-85% |
-| **Структурированность** | Принудительная через схемы | Добровольная через промпты | Цикличная через наблюдения | Древовидная через ветвление | Двухфазная через планирование |
-| **Контроль качества** | Схемы + валидация | Промпт-дизайн | Зависит от инструментов | Эвристическая оценка | Структурированное планирование |
-| **GSM8K Performance** | **85-92%** | 40-58% (zero-shot) | 65-75% | 74% | 78-82% |
-| **Техническая сложность** | 5/10 | 2/10 | 6/10 | 9/10 | 3/10 |
+| **Reproducibility** | **95%+** | 70–85% | 60–80% | 50–70% | 75–85% |
+| **Structuredness** | Enforced via schemas | Voluntary via prompts | Cyclical via observations | Tree-based via branching | Two-phase via planning |
+| **Quality Control** | Schemas + validation | Prompt design | Tool-dependent | Heuristic evaluation | Structured planning |
+| **GSM8K Performance** | **85–92%** | 40–58% (zero-shot) | 65–75% | 74% | 78–82% |
+| **Technical Complexity** | 5/10 | 2/10 | 6/10 | 9/10 | 3/10 |
 
-**SGR превосходит альтернативы по ключевым метрикам надежности и контролируемости**. В сравнении с Chain-of-Thought, SGR обеспечивает структурные гарантии через принудительное декодирование вместо полагания на добровольное следование промптам. **ReAct превосходит SGR в интерактивности и доступе к актуальным данным, но уступает в стабильности и предсказуемости результатов**. Tree of Thoughts обеспечивает исследование альтернативных путей решения, но за счет экспоненциальной вычислительной сложности и высокой стоимости.
+**SGR outperforms alternatives on key metrics of reliability and controllability**. Compared to Chain-of-Thought, SGR provides structural guarantees through enforced decoding rather than relying on voluntary prompt adherence. **ReAct surpasses SGR in interactivity and access to real-time data but lags in stability and result predictability**. Tree of Thoughts explores alternative solution paths but at the cost of exponential computational complexity and high expense.
 
-### Конкретные преимущества SGR над конкурентами
+### Specific Advantages of SGR Over Competitors
 
-**SGR гарантирует структурную целостность каждого шага рассуждения через типизированные схемы, в то время как CoT полагается на неопределенные промпты**. Эта разница критична для enterprise-приложений, где необходимы аудируемость и compliance. **Self-Taught Reasoner требует итеративного fine-tuning, тогда как SGR обеспечивает немедленную применимость с контролируемым качеством**. Plan-and-Solve превосходит в универсальности, но SGR обеспечивает более глубокий контроль через структурные ограничения.
+**SGR guarantees structural integrity at every reasoning step through typed schemas, whereas CoT relies on ambiguous prompts**. This distinction is critical for enterprise applications requiring auditability and compliance. **Self-Taught Reasoner requires iterative fine-tuning, while SGR provides immediate applicability with controlled quality**. Plan-and-Solve excels in versatility, but SGR offers deeper control through structural constraints.
 
-## Технические детали реализации и интеграции
+## Technical Implementation Details and Integration
 
-### Pydantic схемы и механизмы валидации
+### Pydantic Schemas and Validation Mechanisms
 
-**Pydantic обеспечивает многоуровневую валидацию SGR схем: синтаксическую (структура данных), семантическую (содержание) и контекстуальную (соответствие условиям)**. Современные реализации используют constrained decoding через Context-Free Grammar (CFG) для ограниченного декодирования, что обеспечивает динамическое маскирование токенов во время сэмплинга.
+**Pydantic enables multi-level validation of SGR schemas: syntactic (data structure), semantic (content), and contextual (condition compliance)**. Modern implementations use constrained decoding via Context-Free Grammar (CFG) for restricted decoding, ensuring dynamic token masking during sampling.
 
 ```python
 class ComplianceAnalysis(BaseModel):
@@ -77,23 +66,23 @@ class ComplianceAnalysis(BaseModel):
         return v
 ```
 
-### Интеграция с языковыми моделями
+### Integration with Language Models
 
-**OpenAI Structured Outputs стал стандартом de facto для SGR реализации, поддерживая автоматическую генерацию JSON Schema из Pydantic моделей**. Альтернативные платформы включают Mistral Custom Structured Output, Google Gemini (ограниченная поддержка) и локальные engines вроде Ollama, vLLM с TensorRT-LLM.
+**OpenAI Structured Outputs has become the de facto standard for SGR implementation, supporting automatic JSON Schema generation from Pydantic models**. Alternative platforms include Mistral Custom Structured Output, Google Gemini (limited support), and local engines such as Ollama and vLLM with TensorRT-LLM.
 
-**Inference engines используют различные backends для структурированного декодирования**: xgrammar, guidance, Outlines, XGrammar и llguidance для SGLang, что обеспечивает широкую совместимость с локальными моделями. Это критически важно для enterprise deployment, где требуется контроль над данными и инфраструктурой.
+**Inference engines utilize diverse backends for structured decoding**: xgrammar, guidance, Outlines, XGrammar, and llguidance for SGLang, ensuring broad compatibility with local models. This is critical for enterprise deployment, where control over data and infrastructure is required.
 
-## Практические применения и производственные случаи
+## Practical Applications and Production Use Cases
 
-### Отраслевые реализации SGR
+### Industry Implementations of SGR
 
-**Производственные применения SGR охватывают множество отраслей с впечатляющими количественными результатами**. В производстве и строительстве SGR используется для извлечения информации из многоязычных документов с интеграцией Visual LLM. **Финтех компании применяют SGR для точного парсинга регуляций и анализа compliance пробелов по определенным чек-листам**.
+**Production applications of SGR span multiple industries with impressive quantitative results**. In manufacturing and construction, SGR is used for extracting information from multilingual documents with Visual LLM integration. **Fintech companies apply SGR for precise parsing of regulations and compliance gap analysis against defined checklists**.
 
-**Microsoft Azure Agent Factory демонстрирует enterprise масштабирование SGR**: Fujitsu сократил время производства на 67% через специализированных агентов для анализа данных и создания документов, ContraForce автоматизировал 80% расследований инцидентов безопасности. **McKinsey QuantumBlack зафиксировал снижение затрат на 95% и ускорение в 50x при создании контента, плюс 10x сокращение затрат для виртуальных банковских агентов**.
+**Microsoft Azure Agent Factory demonstrates enterprise-scale SGR adoption**: Fujitsu reduced production time by 67% through specialized agents for data analysis and document generation; ContraForce automated 80% of security incident investigations. **McKinsey QuantumBlack recorded a 95% cost reduction and 50x acceleration in content creation, plus a 10x cost reduction for virtual banking agents**.
 
-### Ключевые библиотеки и экосистема
+### Key Libraries and Ecosystem
 
-**Instructor лидирует в экосистеме SGR с 3+ миллионами скачиваний в месяц, 11k звезд GitHub и поддержкой 15+ LLM провайдеров**. Библиотека обеспечивает автоматические повторы при валидации, стриминг частичных ответов и многоязычную поддержку (Python, TypeScript, Ruby, Go, Elixir, Rust).
+**Instructor leads the SGR ecosystem with 3+ million monthly downloads, 11k GitHub stars, and support for 15+ LLM providers**. The library provides automatic retries on validation, streaming partial responses, and multilingual support (Python, TypeScript, Ruby, Go, Elixir, Rust).
 
 ```python
 import instructor
@@ -110,30 +99,30 @@ result = client.chat.completions.create(
 )
 ```
 
-**LangChain и Pydantic AI обеспечивают enterprise-готовые решения для комплексных SGR workflows**. LangChain предоставляет with_structured_output API для интеграции с существующими цепочками, тогда как Pydantic AI фокусируется на типизированных агентах с встроенной валидацией.
+**LangChain and Pydantic AI provide enterprise-ready solutions for complex SGR workflows**. LangChain offers the `with_structured_output` API for integration with existing chains, while Pydantic AI focuses on typed agents with built-in validation.
 
-## Адаптивное планирование и мульти-агентные системы
+## Adaptive Planning and Multi-Agent Systems
 
-**SGR революционизирует мульти-агентные системы через схемо-управляемую координацию**. SG² фреймворк демонстрирует итеративную структуру с Reasoner модулем (абстрактное планирование) и Retriever модулем (извлечение информации), где схема scene graph направляет сотрудничество между компонентами.
+**SGR revolutionizes multi-agent systems through schema-driven coordination**. The SG² framework demonstrates an iterative structure with a Reasoner module (abstract planning) and a Retriever module (information extraction), where the scene graph schema directs collaboration between components.
 
-**Адаптивное планирование в SGR обеспечивает dynamic reasoning через структурированные схемы оценки ситуации, анализа рисков и выбора следующих действий**. Это критично для автономных систем, где требуется реагирование на изменяющиеся условия при сохранении структурированности рассуждения.
+**Adaptive planning in SGR enables dynamic reasoning through structured schemas for situation assessment, risk analysis, and next-action selection**. This is critical for autonomous systems requiring responsiveness to changing conditions while preserving reasoning structure.
 
-## Будущие направления и технологические тренды
+## Future Directions and Technological Trends
 
-### Открытые исследовательские вопросы
+### Open Research Questions
 
-**Ключевые направления развития SGR включают формальную семантику для мульти-модальных схем, автоматическое обучение схем из данных и композиционность схем в различных доменах знаний**. Верификация корректности сложных схем рассуждения остается открытой проблемой, требующей развития формальных методов.
+**Key development directions for SGR include formal semantics for multimodal schemas, automatic schema learning from data, and schema composition across knowledge domains**. Verification of correctness for complex reasoning schemas remains an open problem requiring advancement in formal methods.
 
-**Теоретические принципы SGR основаны на структурной индукции (композиционное построение из простых схем), семантической прозрачности (явное представление каждого шага), прагматической адаптивности (настройка под домены) и вычислительной эффективности**. Эти принципы формируют основу для будущих расширений технологии.
+**The theoretical principles of SGR are grounded in structural induction (compositional construction from simple schemas), semantic transparency (explicit representation of each step), pragmatic adaptability (domain-specific tuning), and computational efficiency**. These principles form the foundation for future technology extensions.
 
-### Рекомендации по внедрению
+### Implementation Recommendations
 
-**Оптимальная стратегия внедрения SGR включает поэтапный подход: начало с простых Cascade паттернов, постепенное усложнение, test-driven разработка схем, инкрементальное развертывание от pilot к production**. Мониторинг качества через structured outputs и комбинирование паттернов для комплексных use cases обеспечивают успешное масштабирование.
+**The optimal SGR implementation strategy involves a phased approach: start with simple Cascade patterns, gradually increase complexity, develop schemas using test-driven development, and incrementally deploy from pilot to production**. Monitoring quality via structured outputs and combining patterns for complex use cases ensures successful scaling.
 
-## Заключение
+## Conclusion
 
-Schema Guided Reasoning представляет фундаментальный сдвиг в подходе к рассуждениям AI систем, переходя от неструктурированных промптов к формализованным схемам рассуждения. **SGR обеспечивает уникальную комбинацию высокой точности (5-10% улучшение), максимальной воспроизводимости (95%+) и полной аудируемости, что критично для enterprise-приложений**. Технология успешно решает ключевые проблемы production AI систем: непредсказуемость результатов, сложность отладки и отсутствие гарантий качества.
+Schema Guided Reasoning represents a fundamental shift in AI reasoning, moving from unstructured prompts to formalized reasoning schemas. **SGR delivers a unique combination of high accuracy (5–10% improvement), maximum reproducibility (95%+), and full auditability—critical for enterprise applications**. The technology successfully addresses key challenges in production AI systems: unpredictable results, difficult debugging, and lack of quality guarantees.
 
-**Сравнительный анализ демонстрирует явное превосходство SGR в задачах, требующих структурированного контроля и надежности**, при сохранении конкурентной производительности с альтернативными методами. Богатая экосистема инструментов, от Instructor до enterprise фреймворков, обеспечивает готовность технологии для широкого внедрения.
+**Comparative analysis demonstrates clear superiority of SGR in tasks requiring structured control and reliability**, while maintaining competitive performance against alternative methods. A rich ecosystem of tools—from Instructor to enterprise frameworks—ensures the technology is ready for broad adoption.
 
-**Будущее SGR связано с развитием более сложных схем рассуждения, автоматическим обучением структур из данных и интеграцией с мульти-модальными AI системами**. Технология становится стандартным подходом для создания надежных, прозрачных и масштабируемых AI решений в критически важных приложениях.
+**The future of SGR lies in developing more complex reasoning schemas, automatic learning of structures from data, and integration with multimodal AI systems**. The technology is becoming the standard approach for building reliable, transparent, and scalable AI solutions in mission-critical applications.

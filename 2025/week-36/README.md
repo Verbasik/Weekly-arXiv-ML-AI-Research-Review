@@ -1,57 +1,49 @@
-# Schema Guided Reasoning (SGR) и SG²: структурированные рассуждения и мультиагентные сцены 🚀
+# Schema Guided Reasoning (SGR) and SG²: Structured Reasoning and Multi-Agent Scenes 🚀
 
 [![arXiv](https://img.shields.io/badge/arXiv-2502.03450-b31b1b.svg)](https://arxiv.org/abs/2502.03450)
-[![Telegram Channel](https://img.shields.io/badge/Telegram-TheWeeklyBrief-blue)](https://t.me/TheWeeklyBrief)
 
-## 📝 Описание
+## 📝 Description
 
-На этой неделе рассматриваем подход **Schema Guided Reasoning (SGR)** — метод структурированного промптинга, который направляет рассуждения LLM через типизированные схемы и явные рабочие процессы. Также разбираем расширение для пространственного рассуждения — **SG² (Schema-Guided Scene-Graph Reasoning)**, многоагентный фреймворк «рассуждай-пока-извлекаешь» для задач по графам сцены. Подходы демонстрируют прирост точности на 5–10% и достигают 95%+ воспроизводимости, одновременно снижая галлюцинации за счёт валидации схем и программного извлечения фактов.
+This week we examine **Schema Guided Reasoning (SGR)** — a structured prompting method that guides LLM reasoning through typed schemas and explicit workflows. We also dissect its extension for spatial reasoning — **SG² (Schema-Guided Scene-Graph Reasoning)**, a multi-agent "reason-while-retrieve" framework for scene graph tasks. These approaches demonstrate a 5–10% accuracy gain and achieve 95%+ reproducibility while reducing hallucinations through schema validation and programmatic fact extraction.
 
-## 🔍 Ключевые особенности
+## 🔍 Key Features
 
-- **Структурированные выводы**: типизированные схемы (JSON Schema / Pydantic) обеспечивают контроль формата и смысла ответа.
-- **Три паттерна рассуждения**: Cascade, Routing, Cycle — для разных типов задач и контроля шага рассуждений.
-- **Constrained decoding**: CFG/grammar-ограничения для безопасной генерации, автоматические повторы при валидации.
-- **Мультиагентная архитектура SG²**: разделение на модуль рассуждений и модуль извлечения с программным доступом к графу.
-- **Программное извлечение**: генерация Python-кода для обхода scene-graph вместо жёстких API.
-- **Снижение галлюцинаций**: разделение контекста и схема-навигация уменьшают отвлечения и ошибочные выводы.
-- **Совместимость**: OpenAI Structured Outputs, Instructor, LangChain, Pydantic AI, локальные бэкенды (xgrammar/Outlines/etc.).
+- **Structured outputs**: Typed schemas (JSON Schema / Pydantic) enforce format and semantic integrity of responses.
+- **Three reasoning patterns**: Cascade, Routing, Cycle — for different task types and control over reasoning steps.
+- **Constrained decoding**: CFG/grammar restrictions for safe generation, automatic retries upon validation.
+- **Multi-agent SG² architecture**: Separation into a Reasoning module and a Retrieval module with programmatic graph access.
+- **Programmatic retrieval**: Generation of Python code for scene-graph traversal instead of rigid APIs.
+- **Reduced hallucinations**: Context separation and schema-guided navigation minimize distractions and erroneous conclusions.
+- **Compatibility**: OpenAI Structured Outputs, Instructor, LangChain, Pydantic AI, local backends (xgrammar/Outlines/etc.).
 
-## 📈 Результаты и сравнения
+## 📈 Results and Comparisons
 
-| Характеристика | SGR | CoT | ReAct | ToT | Plan-and-Solve |
+| Characteristic | SGR | CoT | ReAct | ToT | Plan-and-Solve |
 |---|---|---|---|---|---|
-| Воспроизводимость | 95%+ | 70–85% | 60–80% | 50–70% | 75–85% |
-| Структурированность | Жёсткая (схемы) | Свободная (промпт) | Цикличная | Деревья | Двухфазная |
-| GSM8K (ориентир) | 85–92% | 40–58% | 65–75% | ~74% | 78–82% |
-| Тех. сложность | 5/10 | 2/10 | 6/10 | 9/10 | 3/10 |
+| Reproducibility | 95%+ | 70–85% | 60–80% | 50–70% | 75–85% |
+| Structuredness | Strict (schemas) | Freeform (prompt) | Cyclical | Trees | Two-phase |
+| GSM8K (benchmark) | 85–92% | 40–58% | 65–75% | ~74% | 78–82% |
+| Technical complexity | 5/10 | 2/10 | 6/10 | 9/10 | 3/10 |
 
-В экспериментах SG² превосходит базы: в BabyAI достигает до **98%** в числовых задачах (против ~86% у ReAct), в планировании — **96–97%**. Даже с малыми моделями (например, Phi4‑14B) сохраняется преимущество: **~60%** против <30% у базовых подходов.
+In experiments, SG² outperforms baselines: achieving up to **98%** in numerical tasks in BabyAI (vs. ~86% for ReAct) and **96–97%** in planning. Even with small models (e.g., Phi4‑14B), it retains an advantage: **~60%** vs. <30% for baseline approaches.
 
-## 🧠 Архитектура SG² кратко
+## 🧠 SG² Architecture Briefly
 
-- **Планировщик задач**: формирует запросы к извлечению, координирует ход решения.
-- **Вызов инструментов/кодоген**: генерирует исполняемый Python для обхода графа сцены.
-- **Верификатор**: проверяет, что извлечённые факты удовлетворяют запросу/схеме.
-- **Сцена как схема**: типы узлов, атрибуты и рёбра направляют и рассуждение, и извлечение.
+- **Task Planner**: Formulates retrieval queries and coordinates solution flow.
+- **Tool Caller / Code Generator**: Generates executable Python code for scene graph traversal.
+- **Verifier**: Ensures retrieved facts satisfy the query/schema requirements.
+- **Scene as schema**: Node types, attributes, and edges guide both reasoning and retrieval.
 
 ![](assets/Image-01.png)
 ![](assets/Image-02.png)
 
-## 🌟 Практические применения
+## 🌟 Practical Applications
 
-- Пространственное планирование и навигация (робототехника, VirtualHome, симуляции).
-- Извлечение структурированных фактов из сложных сред и больших графов.
-- Enterprise‑кейсы: аудируемые пайплайны reasoning с контролем качества, соответствие требованиям compliance.
+- Spatial planning and navigation (robotics, VirtualHome, simulations).
+- Extraction of structured facts from complex environments and large graphs.
+- Enterprise use cases: Auditable reasoning pipelines with quality control and compliance adherence.
 
-## 🔗 Ссылки
-
-- Обзор недели: ![review](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-37/review.md)
-- Краткое резюме: [`summary.md`](https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/blob/develop/2025/week-36/summary.md)
-- Публикация: [arXiv:2502.03450](https://arxiv.org/abs/2502.03450)
-- Инструменты: Instructor, OpenAI Structured Outputs, LangChain, Pydantic AI
-
-## 📜 Цитирование
+## 📜 Citation
 
 ```bibtex
 @misc{sgr_scene_graph_2025,
@@ -65,6 +57,10 @@
 
 ---
 
-<p align="center">Исследуйте вместе с нами 🚀</p>
+<div align="center">
 
+**Explore with us 🚀**
 
+⭐ Star this repository if you found it helpful
+
+</div>

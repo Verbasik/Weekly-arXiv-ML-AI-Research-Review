@@ -1,92 +1,81 @@
-# Математические основы DeepConf: улучшение рассуждений через оценку уверенности
+# Mathematical Foundations of DeepConf: Enhancing Reasoning through Confidence Estimation
 
----
+## Conceptual Basis of DeepConf
 
-### **TWRB_FM 📻**
+Deep Think with Confidence (DeepConf) is a simple yet effective method that **eliminates the need for repeated generation of full reasoning chains** through an elegant use of the model's internal confidence signals. The method significantly improves both reasoning efficiency and computational performance of large language models during inference.
 
-<audio controls>
-  <source src="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/raw/refs/heads/develop/2025/week-37/TWRB_FM.mp3" type="audio/mpeg">
-  Ваш браузер не поддерживает аудиоэлемент.
-</audio>
+The fundamental distinction of DeepConf from classical parallel thinking approaches lies in its ability to **dynamically filter low-quality reasoning traces** both during (online) and after (offline) generation, without requiring additional model training or hyperparameter tuning.
 
----
+## Confidence Metrics as Reasoning Quality Signals
 
-## Концептуальная основа DeepConf
+![Figure 5: DeepConf with parallel thinking rejects low-confidence reasoning traces during generation to achieve higher reasoning performance while using significantly fewer generated tokens.](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-37/assets/Image-05.png)
 
-Deep Think with Confidence (DeepConf) представляет собой простой, но эффективный метод, **устраняющий необходимость в повторной генерации полных цепочек рассуждений** через элегантное использование внутренних сигналов уверенности модели. Метод существенно повышает как эффективность рассуждений, так и вычислительную производительность больших языковых моделей в тестовом режиме.
+![Figure 6: Measuring confidence and confident reasoning in offline mode.](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-37/assets/Image-06.png)
 
-Принципиальное отличие DeepConf от классических подходов к параллельному мышлению (parallel thinking) заключается в его способности **динамически фильтровать низкокачественные трассы рассуждений** как во время (онлайн), так и после (офлайн) генерации, без необходимости в дополнительном обучении модели или настройке гиперпараметров.
+The foundation of DeepConf lies in the use of various confidence metrics extracted from the model's next-token probability distribution. Formally, the following key metrics can be identified:
 
-## Метрики уверенности в качестве сигнала качества рассуждений
-
-![Рисунок 5: DeepConf с параллельным мышлением отклоняет трассировки рассуждений с низкой уверенностью во время генерации, чтобы достичь более высокой производительности рассуждений, используя при этом значительно меньше сгенерированных токенов.](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-37/assets/Image-05.png)
-
-![Рисунок 6: Измерение уверенности и уверенное мышление в офлайн-режиме.](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-37/assets/Image-06.png)
-
-Основу DeepConf составляет использование различных метрик уверенности, извлекаемых из распределения следующих токенов модели. Формально, можно выделить следующие ключевые метрики:
-
-### 1. Энтропия токена
+### 1. Token Entropy
 
 $$H_i = -\sum_{j} P_i(j) \log P_i(j)$$
 
 <details> 
-    <summary><em><strong>пояснение переменных</strong></em></summary>
+    <summary><em><strong>Variable explanations</strong></em></summary>
 
-где:
-- **$H_i$** — энтропия распределения вероятностей токенов на позиции $i$.
-- **$P_i(j)$** — вероятность $j$-го токена из словаря в позиции $i$.
+where:
+- **$H_i$** — entropy of the token probability distribution at position $i$.
+- **$P_i(j)$** — probability of the $j$-th token from the vocabulary at position $i$.
 
 ---
 
-  📐 База логарифма
+  📐 Logarithm Base
 
-  Варианты и интерпретация:
+  Variants and interpretation:
 
-  1. Натуральный логарифм (ln):
-    - Формула: $H_i = -\sum_{j} P_i(j) \ln P_i(j)$
-    - Единицы измерения: наты
-    - Контекст: термодинамика/физическая интерпретация
-  2. Логарифм по основанию 2 (log₂):
-    - Формула: $H_i = -\sum_{j} P_i(j) \log_2 P_i(j)$
-    - Единицы измерения: биты
-    - Плюс: прямая сопоставимость с информационными мерами (Шеннон)
+  1. Natural logarithm (ln):
+    - Formula: $H_i = -\sum_{j} P_i(j) \ln P_i(j)$
+    - Units: nats
+    - Context: Thermodynamics/physical interpretation
+  2. Logarithm base 2 (log₂):
+    - Formula: $H_i = -\sum_{j} P_i(j) \log_2 P_i(j)$
+    - Units: bits
+    - Advantage: Direct comparability with Shannon information measures
 
-  Рекомендация: log₂ — для совместимости с метриками на битах и сравнений с уверенностью на log₂.
+  Recommendation: log₂ — for compatibility with bit-based metrics and confidence comparisons.
 
-  🧮 Охват словаря
+  🧮 Vocabulary Coverage
 
-  Варианты вычисления:
-  - Полный словарь: точная энтропия, учитывает весь «хвост» распределения.
-  - Аппроксимация top-K: считаем по top-K с нормировкой $\tilde{P}_i(j) = \frac{P_i(j)}{\sum_{k \in \text{top-K}} P_i(k)}$.
+  Calculation variants:
+  - Full vocabulary: exact entropy, accounts for the entire distribution tail.
+  - Top-K approximation: compute using top-K with normalization $\tilde{P}_i(j) = \frac{P_i(j)}{\sum_{k \in \text{top-K}} P_i(k)}$.
 
   Trade-offs:
-| **Полный словарь**              | **Top-K аппроксимация**            |
-|---------------------------------|------------------------------------|
-| 🎯 Точно, чувствительно к хвосту | ⚡ Быстрее, не требует полного softmax |
-| 🧵 Выше чувствительность к шуму   | 🛡️ Более робастно к малым вероятностям |
-| ⏳ Дороже вычислительно          | 📦 Простая реализация в проде       |
+| **Full vocabulary**              | **Top-K approximation**            |
+|----------------------------------|------------------------------------|
+| 🎯 Accurate, sensitive to tail   | ⚡ Faster, no full softmax required |
+| 🧵 Higher sensitivity to noise   | 🛡️ More robust to low probabilities |
+| ⏳ Computationally expensive     | 📦 Simple production implementation |
 
-  ⚠️ Epsilon (численная устойчивость)
+  ⚠️ Epsilon (Numerical Stability)
 
-  Проблема: $\log(0) = -\infty$ при нулевой вероятности.
+  Problem: $\log(0) = -\infty$ for zero probability.
 
-  Решение: $\log(\max(P_i(j), \epsilon))$ с малым $\epsilon$.
+  Solution: $\log(\max(P_i(j), \epsilon))$ with small $\epsilon$.
 
-  Типичные значения:
-  - eps=1e-12: минимальное влияние
-  - eps=1e-8: стандарт для PyTorch
-  - eps=1e-6: чуть агрессивнее, лучше при грубых аппроксимациях
+  Typical values:
+  - eps=1e-12: Minimal impact
+  - eps=1e-8: Standard for PyTorch
+  - eps=1e-6: Slightly more aggressive, better for coarse approximations
 
   ★ Insight ─────────────────────────────────────
 
-  Энтропия измеряет «общую неопределённость» распределения; полезна как глобальный индикатор сложности шага рассуждений. На задачах с длинным хвостом разница между полной и top-K энтропией может быть существенной — учитывайте это при сравнении моделей.
+  Entropy measures the "overall uncertainty" of the distribution; useful as a global indicator of reasoning step complexity. On tasks with long tails, the difference between full and top-K entropy can be substantial — account for this when comparing models.
   ─────────────────────────────────────────────────
 
-  🎯 Рекомендации для старта:
+  🎯 Starter recommendations:
 
-  1. log₂ (биты) для совместимости с другими метриками
-  2. Полный словарь, если доступен; иначе top-50 с нормировкой
-  3. eps=1e-8 для устойчивости
+  1. log₂ (bits) for compatibility with other metrics
+  2. Full vocabulary if available; otherwise top-50 with normalization
+  3. eps=1e-8 for stability
 
 ---
 
@@ -94,211 +83,205 @@ $$H_i = -\sum_{j} P_i(j) \log P_i(j)$$
 
 ---
 
-Энтропия распределения $P$ — это мера его **неопределённости**. Чем ниже энтропия, тем более "сконцентрировано" распределение вероятностей и тем увереннее модель в своём предсказании. Высокая энтропия означает, что вероятностная масса "размазана" по многим токенам, что указывает на неуверенность модели.
+The entropy of distribution $P$ is a measure of its **uncertainty**. Lower entropy indicates a more "concentrated" probability distribution and higher model confidence. High entropy means the probability mass is "spread out" across many tokens, indicating low model confidence.
 
-Например, рассмотрим предсказание следующего токена в контексте:
-- **Контекст:** `"Теорема Пифагора гласит, что в прямоугольном треугольнике сумма квадратов ___"`
-- **Возможные токены:** `"катетов"` (0.9), `"гипотенузы"` (0.05), `"сторон"` (0.05)
+For example, consider predicting the next token in the context:
+- **Context:** `"The Pythagorean theorem states that in a right triangle, the sum of the squares of ___"`
+- **Possible tokens:** `"legs"` (0.9), `"hypotenuse"` (0.05), `"sides"` (0.05)
 
-Энтропия будет низкой ($H_i \approx 0.47$), указывая на высокую уверенность модели. Если же распределение близко к равномерному, например, `"катетов"` (0.4), `"гипотенузы"` (0.3), `"сторон"` (0.3), энтропия будет высокой ($H_i \approx 1.57$), что говорит о низкой уверенности модели.
+Entropy will be low ($H_i \approx 0.47$), indicating high model confidence. If the distribution is close to uniform, e.g., `"legs"` (0.4), `"hypotenuse"` (0.3), `"sides"` (0.3), entropy will be high ($H_i \approx 1.57$), indicating low model confidence.
 
-### 2. Уверенность токена
+### 2. Token Confidence
 
 $$C_i = -\frac{1}{k}\sum_{j=1}^{k} \log P_i(j)$$
 
 <details> 
-    <summary><em><strong>пояснение переменных</strong></em></summary>
+    <summary><em><strong>Variable explanations</strong></em></summary>
 
-где:
-- **$C_i$** — уверенность модели при генерации токена на позиции $i$.
-- **$k$** — количество рассматриваемых топ-токенов.
-- **$P_i(j)$** — вероятность $j$-го топ-токена из словаря.
+where:
+- **$C_i$** — model confidence at generating the token at position $i$.
+- **$k$** — number of top tokens considered.
+- **$P_i(j)$** — probability of the $j$-th top token from the vocabulary.
 
 ---
 
-  🔢 Параметр k (количество топ-токенов)
+  🔢 Parameter $k$ (number of top tokens)
 
-  Что делает: Определяет, сколько наиболее вероятных токенов учитывать в формуле $C_i = -\frac{1}{k}\sum_{j=1}^{k} \log
-  P_i(j)$
+  What it does: Determines how many of the most probable tokens are included in the formula $C_i = -\frac{1}{k}\sum_{j=1}^{k} \log P_i(j)$.
 
-  Влияние на результат:
-  - k=5: Фокус только на топ-5 токенах → высокая чувствительность к доминирующим вариантам
-  - k=10: Баланс между точностью и устойчивостью → рекомендуется для старта
-  - k=20: Включает больше альтернатив → менее чувствительна к шуму, но может включать малозначимые токены
+  Impact on results:
+  - k=5: Focus only on top-5 tokens → high sensitivity to dominant candidates
+  - k=10: Balance between accuracy and robustness → recommended for starters
+  - k=20: Includes more alternatives → less sensitive to noise, but may include insignificant tokens
 
   Trade-offs:
-| **Малое `k` (например, 5)**       | **Большое `k` (например, 20)**     |
-|-----------------------------------|------------------------------------|
-| 🔍 Высокая чувствительность       | 🛡️ Устойчивость к шуму             |
-| 🎯 Фокус на топ-выборах           | 🌐 Учет большего числа альтернатив |
-| ⚡ Быстрые вычисления              | ⏳ Вычисления медленнее            |
+| **Small `k` (e.g., 5)**         | **Large `k` (e.g., 20)**          |
+|----------------------------------|-----------------------------------|
+| 🔍 High sensitivity              | 🛡️ Robust to noise                |
+| 🎯 Focused on top choices        | 🌐 Accounts for more alternatives |
+| ⚡ Fast computation              | ⏳ Slower computation             |
 
-  📐 База логарифма
+  📐 Logarithm Base
 
-  Варианты и интерпретация:
+  Variants and interpretation:
 
-  1. Натуральный логарифм (ln):
-    - Формула: $C_i = -\frac{1}{k}\sum_{j=1}^{k} \ln P_i(j)$
-    - Единицы измерения: наты (natural units)
-    - Связь с информационной теорией: энергия/термодинамика
-  2. Логарифм по основанию 2 (log₂):
-    - Формула: $C_i = -\frac{1}{k}\sum_{j=1}^{k} \log_2 P_i(j)$
-    - Единицы измерения: биты
-    - Преимущество: Прямое сравнение с энтропией Шеннона!
+  1. Natural logarithm (ln):
+    - Formula: $C_i = -\frac{1}{k}\sum_{j=1}^{k} \ln P_i(j)$
+    - Units: nats (natural units)
+    - Connection to information theory: Energy/thermodynamics
+  2. Logarithm base 2 (log₂):
+    - Formula: $C_i = -\frac{1}{k}\sum_{j=1}^{k} \log_2 P_i(j)$
+    - Units: bits
+    - Advantage: Direct comparability with Shannon entropy!
 
-  Рекомендация: log₂ для лучшего сравнения с энтропией
+  Recommendation: log₂ for better comparability with entropy.
 
-  ⚠️ Epsilon (numerical stability)
+  ⚠️ Epsilon (Numerical Stability)
 
-  Проблема: $\log(0) = -\infty$ когда токен имеет нулевую вероятность
+  Problem: $\log(0) = -\infty$ when a token has zero probability.
 
-  Решение: $\log(\max(P_i, \epsilon))$ где $\epsilon$ — малое число
+  Solution: $\log(\max(P_i, \epsilon))$ where $\epsilon$ is a small number.
 
-  Типичные значения:
-  - eps=1e-12: Очень консервативно, минимальное влияние
-  - eps=1e-8: Стандартно для PyTorch вычислений
-  - eps=1e-6: Более агрессивная защита
+  Typical values:
+  - eps=1e-12: Very conservative, minimal impact
+  - eps=1e-8: Standard for PyTorch computations
+  - eps=1e-6: More aggressive protection
 
   ★ Insight ─────────────────────────────────────
   
-  Связь с энтропией: Если использовать log₂, то уверенность и энтропия будут в одних единицах (биты), что упростит
-  сравнительный анализ. Энтропия показывает "общую неопределенность", а уверенность — "локальную решительность" модели.
+  Relationship to entropy: If using log₂, both confidence and entropy will be in the same units (bits), simplifying comparative analysis. Entropy shows "overall uncertainty," while confidence reflects the model's "decisiveness" among top alternatives.
 
-  k=10 — золотая середина: достаточно для захвата основных альтернатив, но не включает шумовые токены из длинного хвоста.
+  k=10 — the sweet spot: sufficient to capture main alternatives without including noise from the long tail.
   ─────────────────────────────────────────────────
 
-  🎯 Мои рекомендации для старта:
+  🎯 My starter recommendations:
 
-  1. k=10 (баланс точности и производительности)
-  2. log₂ (сравнимость с энтропией в битах)
-  3. eps=1e-8 (стандартная защита PyTorch)
+  1. k=10 (balance of accuracy and performance)
+  2. log₂ (comparability with entropy in bits)
+  3. eps=1e-8 (standard PyTorch protection)
 
-  Обоснование: Эти параметры дадут интерпретируемые результаты, сравнимые с энтропией, и покроют основные случаи без
-  избыточной сложности.
+  Rationale: These parameters yield interpretable results comparable to entropy and cover core cases without excessive complexity.
 
 ---
 
 </details>
 
-Уверенность токена — это отрицательное среднее логарифмических вероятностей топ-$k$ токенов. Этот показатель количественно определяет, насколько модель уверена в своём предсказании. Высокое значение $C_i$ соответствует пиковым распределениям и большей уверенности модели, в то время как низкое значение указывает на неопределённость в предсказании токена.
+Token confidence is the negative average of the logarithmic probabilities of the top-$k$ tokens. This metric quantitatively defines how confident the model is in its prediction. A high value of $C_i$ corresponds to peaked distributions and greater model confidence, while a low value indicates uncertainty in the token prediction.
 
-Важное отличие от энтропии заключается в том, что уверенность токена учитывает только топ-$k$ наиболее вероятных токенов, игнорируя "хвост" распределения. Это делает метрику более устойчивой к шуму в маловероятных токенах и лучше отражает "решительность" модели в выборе между наиболее вероятными альтернативами.
+A key distinction from entropy is that token confidence considers only the top-$k$ most probable tokens, ignoring the distribution tail. This makes the metric more robust to noise in low-probability tokens and better reflects the model's "decisiveness" when choosing among the most likely alternatives.
 
-### 3. Групповая уверенность
+### 3. Group Confidence
 
 $$C_{G_i} = \frac{1}{|G_i|} \sum_{t \in G_i} C_t$$
 
 <details> 
-    <summary><em><strong>пояснение переменных</strong></em></summary>
+    <summary><em><strong>Variable explanations</strong></em></summary>
 
-где:
-- **$C_{G_i}$** — уверенность группы токенов $G_i$.
-- **$G_i$** — группа токенов, состоящая из $n$ предыдущих токенов с перекрывающимися соседними окнами.
-- **$|G_i|$** — количество токенов в группе $G_i$.
-- **$C_t$** — уверенность токена $t$.
+where:
+- **$C_{G_i}$** — confidence of token group $G_i$.
+- **$G_i$** — group of tokens consisting of $n$ previous tokens with overlapping sliding windows.
+- **$|G_i|$** — number of tokens in group $G_i$.
+- **$C_t$** — confidence of token $t$.
 
 ---
 
-  🪟 Длина окна `n` и шаг `s`
+  🪟 Window length `n` and step `s`
 
-  Что делает: задаёт локальность и степень сглаживания сигнала.
+  What it does: Defines locality and degree of signal smoothing.
 
-  Влияние на результат:
-  - Малое `n` (например, 32–128): высокая локальная чувствительность, больше флуктуаций
-  - Среднее `n` (512–2048): баланс локальности и устойчивости → рекомендуемо
-  - Большое `n` (4096+): сильное сглаживание, хуже ловит краткие «провалы» уверенности
+  Impact on results:
+  - Small `n` (e.g., 32–128): High local sensitivity, more fluctuations
+  - Medium `n` (512–2048): Balance of locality and robustness → recommended
+  - Large `n` (4096+): Strong smoothing, worse at detecting brief confidence dips
 
-  Шаг окна `s`:
-  - Мелкий шаг (например, 1–16): точное слежение, дороже вычислительно
-  - Крупный шаг (например, n/2): быстрее, но грубее оценка
+  Window step `s`:
+  - Fine step (e.g., 1–16): Precise tracking, computationally expensive
+  - Coarse step (e.g., n/2): Faster, but coarser estimation
 
-  Trade-offs (окно):
-| **Малое `n`**                   | **Большое `n`**                     |
-|---------------------------------|-------------------------------------|
-| 🔍 Реагирует на короткие сбои   | 🛡️ Устойчиво к шуму                 |
-| 🎯 Лучше для раннего останова   | 🌐 Теряет локальные детали           |
-| ⚡ Быстро пересчитывается       | ⏳ Дороже, больше перекрытий         |
+  Trade-offs (window):
+| **Small `n`**                   | **Large `n`**                     |
+|---------------------------------|-----------------------------------|
+| 🔍 Responds to short dips       | 🛡️ Resistant to noise             |
+| 🎯 Better for early stopping    | 🌐 Loses local details            |
+| ⚡ Fast to recalculate           | ⏳ More expensive, more overlap   |
 
-  🧮 Агрегатор по окну
+  🧮 Window Aggregator
 
-  Варианты: mean (по умолчанию), median, trimmed-mean (обрезанное среднее, например 10%).
+  Options: mean (default), median, trimmed-mean (e.g., 10%).
 
-  - Mean: чувствителен к выбросам, хорош для раннего обнаружения проблем
-  - Median: робастнее, но менее чувствителен
-  - Trimmed-mean: компромисс между mean и median
+  - Mean: Sensitive to outliers, good for early problem detection
+  - Median: More robust, less sensitive
+  - Trimmed-mean: Compromise between mean and median
 
-  🔗 Наследуемые параметры
+  🔗 Inherited parameters
 
-  - `k`, база лога, `eps` — те же, что у $C_t$ (раздел 2)
+  - `k`, log base, `eps` — same as for $C_t$ (Section 2)
 
   ★ Insight ─────────────────────────────────────
 
-  Групповая уверенность переводит «точечную решительность» модели в локализованный контекст рассуждений и особенно полезна для онлайн-остановов: краткий «забуксовал — останови» вместо ожидания конца трассы.
-
+  Group confidence translates the model's "pointwise decisiveness" into localized reasoning context and is especially useful for online stopping: a brief "stall — stop" signal instead of waiting for the trace to complete.
   ─────────────────────────────────────────────────
 
-  🎯 Рекомендации для старта:
+  🎯 Starter recommendations:
 
-  1. Окно n=2048, шаг s=128–256
-  2. Агрегатор: mean; при шумных трассах — trimmed-mean 10%
-  3. Наследовать k=10, log₂, eps=1e-8
+  1. Window n=2048, step s=128–256
+  2. Aggregator: mean; for noisy traces — trimmed-mean 10%
+  3. Inherit k=10, log₂, eps=1e-8
 
 ---
 
 </details>
 
----
+Group confidence provides a more localized and smoothed signal by averaging token confidence across overlapping reasoning intervals. This approach enables the identification of problematic segments in the reasoning chain where the model becomes less confident.
 
-Групповая уверенность предоставляет более локализованный и сглаженный сигнал путём усреднения уверенности токенов по перекрывающимся промежуткам рассуждения. Этот подход позволяет выявлять проблемные участки в цепочке рассуждений, где модель становится менее уверенной.
+For example, if the model begins to hesitate and generates phrases like "wait, let me check," or "no, I made a mistake," group confidence in this segment drops sharply. This is a more reliable indicator of reasoning issues than the average confidence across the entire trace, which may be diluted by highly confident segments elsewhere.
 
-Например, если модель начинает сомневаться и генерировать фразы типа "подождите, давайте проверим", "нет, я ошибся", групповая уверенность в этом сегменте резко падает. Это более надежный индикатор проблем в рассуждении, чем средняя уверенность по всей трассе, которая может быть размыта высокоуверенными сегментами в других частях.
-
-### 4. Уверенность нижних 10% групп
+### 4. Bottom-10% Group Confidence
 
 $$C_{\text{bottom-10}}(t) = \frac{1}{|G_b|} \sum_{G_j \in G_b} C_{G_j}$$
 
 <details> 
-    <summary><em><strong>пояснение переменных</strong></em></summary>
+    <summary><em><strong>Variable explanations</strong></em></summary>
 
-где:
-- **$C_{\text{bottom-10}}(t)$** — метрика, учитывающая только наименее уверенные группы токенов.
-- **$G_b$** — множество групп с наименьшими 10% значений уверенности в трассе.
-- **$|G_b|$** — количество групп в $G_b$.
+where:
+- **$C_{\text{bottom-10}}(t)$** — metric considering only the least confident token groups.
+- **$G_b$** — set of groups with the lowest 10% confidence values in the trace.
+- **$|G_b|$** — number of groups in $G_b$.
 
 ---
 
-  📉 Доля нижних групп `p`
+  📉 Bottom group fraction `p`
 
-  Что делает: определяет, какую часть «слабых» окон учитывать (обычно 10%).
+  What it does: Determines what proportion of "weak" windows to consider (typically 10%).
 
-  Влияние на результат:
-  - Малое `p` (5%): сильный фокус на экстремальных сбоях, высокая чувствительность
-  - Среднее `p` (10%): баланс между чувствительностью и устойчивостью → рекомендуемо
-  - Большое `p` (20–30%): устойчивее, но может размывать сигнал проблем
+  Impact on results:
+  - Small `p` (5%): Strong focus on extreme dips, high sensitivity
+  - Medium `p` (10%): Balance between sensitivity and robustness → recommended
+  - Large `p` (20–30%): More robust, but may blur problem signals
 
-  🧮 Агрегатор по нижним группам
+  🧮 Aggregator over bottom groups
 
-  Варианты: mean (по умолчанию), median по нижним `p%`.
-  - Mean: лучше выявляет общую «слабость» проблемного участка
-  - Median: робастнее к единичным выбросам
+  Options: mean (default), median over bottom `p%`.
+  - Mean: better captures overall "weakness" of problematic segment
+  - Median: more robust to single outliers
 
   Trade-offs:
-| **Малое `p`**                   | **Большое `p`**                     |
+| **Small `p`**                   | **Large `p`**                     |
 |---------------------------------|-------------------------------------|
-| 🔍 Ловит критические провалы    | 🛡️ Стабилен к случайным шумам       |
-| 🎯 Хорош для раннего отсечения  | 🌐 Может «пересреднить» слабость     |
-| ⚠️ Риск ложных срабатываний     | ⏳ Хуже детектирует краткие сбои     |
+| 🔍 Captures critical dips       | 🛡️ Resistant to random noise       |
+| 🎯 Good for early cutoff        | 🌐 May "average out" weakness      |
+| ⚠️ Higher risk of false alarms  | ⏳ Poorer at detecting brief dips  |
 
   ★ Insight ─────────────────────────────────────
 
-  «Цепь прочна настолько, насколько прочна её слабейшая часть». Усреднение по нижним `p%` даёт стабильный компромисс между «min» и «средним по всем».
+  "A chain is as strong as its weakest link." Averaging over the bottom `p%` provides a stable compromise between "min" and "mean over all."
   ─────────────────────────────────────────────────
 
-  🎯 Рекомендации для старта:
+  🎯 Starter recommendations:
 
   1. p=10%
-  2. Агрегатор: mean по нижним группам
-  3. Окно групп: n=2048, шаг s=128–256
+  2. Aggregator: mean over bottom groups
+  3. Group window: n=2048, step s=128–256
 
 ---
 
@@ -306,51 +289,51 @@ $$C_{\text{bottom-10}}(t) = \frac{1}{|G_b|} \sum_{G_j \in G_b} C_{G_j}$$
 
 ---
 
-Уверенность нижних 10% групп фокусируется на наиболее проблемных сегментах рассуждения. Исследователи обнаружили, что качество рассуждения часто определяется его самыми слабыми звеньями — небольшими участками, где модель теряет уверенность или допускает ошибки.
+Bottom-10% group confidence focuses on the most problematic segments of reasoning. Researchers found that reasoning quality is often determined by its weakest links — small segments where the model loses confidence or makes errors.
 
-Эта метрика вычисляет среднюю уверенность только для 10% наименее уверенных групп в трассе. Таким образом, даже если большая часть рассуждения выглядит уверенной, но есть критический момент, где модель начинает "плутать" или колебаться, эта метрика это зафиксирует.
+This metric computes the average confidence only for the 10% least confident groups in the trace. Thus, even if most of the reasoning appears confident, a critical moment where the model begins to "wander" or vacillate will be captured by this metric.
 
-### 5. Уверенность наименее уверенной группы
+### 5. Least Confident Group Confidence
 
 $$C_{\text{least}}(t) = \min_{G_j \in G} C_{G_j}$$
 
 <details> 
-    <summary><em><strong>пояснение переменных</strong></em></summary>
+    <summary><em><strong>Variable explanations</strong></em></summary>
 
-где:
-- **$C_{\text{least}}(t)$** — уверенность наименее уверенной группы токенов в трассе.
-- **$G$** — множество всех групп токенов в трассе рассуждения.
+where:
+- **$C_{\text{least}}(t)$** — confidence of the least confident token group in the trace.
+- **$G$** — set of all token groups in the reasoning trace.
 
 ---
 
-  🔻 Выбор «минимума» и сглаживание
+  🔻 Min selection and smoothing
 
-  Варианты:
-  - Жёсткий min: максимальная чувствительность к локальным сбоям
-  - Soft-min: среднее по нижним `k_min` окнам (например, 3–5) — снижает влияние одиночных выбросов
-  - Quantile: использовать `q`-перцентиль (например, 2–5%) вместо строгого минимума
+  Variants:
+  - Hard min: maximum sensitivity to local failures
+  - Soft-min: mean over bottom `k_min` windows (e.g., 3–5) — reduces impact of single outliers
+  - Quantile: use `q`-th percentile (e.g., 2–5%) instead of strict minimum
 
   Trade-offs:
-| **Жёсткий min**                 | **Soft-min / Quantile**             |
+| **Hard min**                    | **Soft-min / Quantile**             |
 |---------------------------------|-------------------------------------|
-| 🔍 Максимальная чувствительность | 🛡️ Робастность к единичным всплескам |
-| 🎯 Ранее срабатывание стопа     | 🌐 Более стабильный ранжир трасс     |
-| ⚠️ Больше ложных остановов      | ⏳ Чуть дороже вычислительно         |
+| 🔍 Maximum sensitivity          | 🛡️ Robust to single spikes         |
+| 🎯 Earlier stopping trigger     | 🌐 More stable trace ranking       |
+| ⚠️ More false stops             | ⏳ Slightly more computationally expensive |
 
-  🔗 Наследуемые параметры
-  - Окно групп n, шаг s, k/log₂/eps для $C_t$
+  🔗 Inherited parameters
+  - Group window n, step s, k/log₂/eps for $C_t$
 
   ★ Insight ─────────────────────────────────────
 
-  На онлайн-останове «минимум группы» даёт лучшую корреляцию с качеством трассы, но мягкие варианты (soft-min) снижают ложные срабатывания без заметной потери чувствительности.
+  For online stopping, "group minimum" achieves the best correlation with trace quality, but soft variants (soft-min) reduce false stops without notable loss of sensitivity.
   
   ─────────────────────────────────────────────────
 
-  🎯 Рекомендации для старта:
+  🎯 Starter recommendations:
 
-  1. Soft-min по нижним k_min=3 окнам
-  2. Окно n=2048, шаг s=128–256
-  3. Наследовать k=10, log₂, eps=1e-8
+  1. Soft-min over bottom k_min=3 windows
+  2. Group window n=2048, step s=128–256
+  3. Inherit k=10, log₂, eps=1e-8
 
 ---
 
@@ -358,54 +341,54 @@ $$C_{\text{least}}(t) = \min_{G_j \in G} C_{G_j}$$
 
 ---
 
-Уверенность наименее уверенной группы — это экстремальный случай метрики "нижних 10%", учитывающий только абсолютный минимум уверенности во всей трассе рассуждения. Эта метрика исходит из предположения, что качество рассуждения может быть не лучше качества его самого слабого звена.
+Least confident group confidence is the extreme case of the "bottom-10%" metric, considering only the absolute minimum confidence across the entire reasoning trace. This metric assumes that reasoning quality cannot exceed the quality of its weakest link.
 
-Использование минимума вместо среднего делает эту метрику особенно чувствительной к локальным падениям уверенности, что позволяет эффективно идентифицировать трассы с критическими ошибками рассуждения. Именно эта метрика оказалась наиболее эффективной для раннего останова в онлайн-режиме DeepConf.
+Using the minimum instead of the mean makes this metric especially sensitive to local confidence drops, enabling effective identification of traces with critical reasoning errors. This metric proved most effective for early stopping in DeepConf's online mode.
 
-### 6. Уверенность хвоста
+### 6. Tail Confidence
 
 $$C_{\text{tail}}(t) = \frac{1}{|T_{\text{tail}}|} \sum_{t \in T_{\text{tail}}} C_t$$
 
 <details> 
-    <summary><em><strong>пояснение переменных</strong></em></summary>
+    <summary><em><strong>Variable explanations</strong></em></summary>
 
-где:
-- **$C_{\text{tail}}(t)$** — средняя уверенность последних токенов трассы.
-- **$T_{\text{tail}}$** — фиксированное количество токенов в конце последовательности (например, 2048).
+where:
+- **$C_{\text{tail}}(t)$** — average confidence of the final tokens in the trace.
+- **$T_{\text{tail}}$** — fixed number of tokens at the end of the sequence (e.g., 2048).
 
 ---
 
-  🦺 Длина хвоста `L`
+  🦺 Tail length `L`
 
-  Что делает: определяет, насколько «конец рассуждения» влияет на метрику.
+  What it does: Determines how much the "end of reasoning" influences the metric.
 
-  Влияние на результат:
-  - Малое `L` (128–512): чувствительнее к финальным сбоям, выше дисперсия
-  - Среднее `L` (1024–2048): баланс чувствительности и устойчивости → рекомендуемо
-  - Большое `L` (4096+): сглаживает хвост, но «разбавляет» финальные сигналы
+  Impact on results:
+  - Small `L` (128–512): More sensitive to final failures, higher variance
+  - Medium `L` (1024–2048): Balance of sensitivity and robustness → recommended
+  - Large `L` (4096+): Smoothes tail, but dilutes final signals
 
-  🧾 Обработка специальных токенов
+  🧾 Special token handling
 
-  - Исключать `eos`/стоп-токены из хвоста
-  - Для неполных трасс: берём доступные `min(L, len)` токены
+  - Exclude `eos`/stop tokens from tail
+  - For incomplete traces: use available `min(L, len)` tokens
 
   Trade-offs:
-| **Малое `L`**                   | **Большое `L`**                     |
+| **Small `L`**                   | **Large `L`**                     |
 |---------------------------------|-------------------------------------|
-| 🔍 Ловит финальные ошибки       | 🛡️ Устойчивее к шуму                 |
-| 🎯 Полезно при онлайн-останове  | 🌐 Меньше чувствительность к концовкам |
-| ⚠️ Выше риск колебаний          | ⏳ Дороже при больших L              |
+| 🔍 Captures final errors        | 🛡️ More robust to noise            |
+| 🎯 Useful for online stopping   | 🌐 Less sensitive to endings       |
+| ⚠️ Higher risk of fluctuations  | ⏳ More expensive for large L      |
 
   ★ Insight ─────────────────────────────────────
 
-  Финальные шаги часто критичны в математике. «Хвостовая уверенность» — целевая метрика для контроля качества завершения рассуждения.
+  Final steps are often critical in mathematics. "Tail confidence" is a targeted metric for controlling the quality of reasoning completion.
   ─────────────────────────────────────────────────
 
-  🎯 Рекомендации для старта:
+  🎯 Starter recommendations:
 
   1. L=2048
-  2. Исключать `eos`/stop
-  3. Наследовать k=10, log₂, eps=1e-8
+  2. Exclude `eos`/stop
+  3. Inherit k=10, log₂, eps=1e-8
 
 ---
 
@@ -413,65 +396,65 @@ $$C_{\text{tail}}(t) = \frac{1}{|T_{\text{tail}}|} \sum_{t \in T_{\text{tail}}} 
 
 ---
 
-Уверенность хвоста оценивает надежность рассуждения, фокусируясь на его заключительной части. Эта метрика мотивирована наблюдением, что качество рассуждения часто ухудшается к концу длинных цепочек мысли, а заключительные шаги критически важны для правильных выводов.
+Tail confidence evaluates reasoning reliability by focusing on its concluding portion. This metric is motivated by the observation that reasoning quality often degrades toward the end of long thought chains, and final steps are crucial for correct conclusions.
 
-В математических рассуждениях окончательный ответ и заключительные шаги особенно важны: трассы, которые начинаются сильно, но заканчиваются слабо, могут привести к неверным результатам, несмотря на многообещающие промежуточные рассуждения.
+In mathematical reasoning, the final answer and concluding steps are especially critical: traces that start strongly but end weakly may lead to incorrect results despite promising intermediate reasoning.
 
-## Алгоритм DeepConf: офлайн и онлайн режимы
+## DeepConf Algorithm: Offline and Online Modes
 
-DeepConf работает в двух основных режимах: офлайн и онлайн. В офлайн режиме все трассы рассуждений уже сгенерированы, а в онлайн режиме DeepConf может динамически прерывать генерацию низкокачественных трасс.
+DeepConf operates in two primary modes: offline and online. In offline mode, all reasoning traces are already generated; in online mode, DeepConf can dynamically interrupt the generation of low-quality traces.
 
-### Офлайн режим (Offline Thinking with Confidence)
+### Offline Mode (Offline Thinking with Confidence)
 
-1. **Голосование с учетом уверенности (Confidence-Weighted Majority Voting):**
+1. **Confidence-Weighted Majority Voting:**
 
-Вместо равного учета всех трасс, каждый итоговый ответ взвешивается уверенностью соответствующей трассы:
+Instead of equal weighting of all traces, each final answer is weighted by the confidence of its corresponding trace:
 
 $$V(a) = \sum_{t \in T} C_t \cdot I(\text{answer}(t) = a)$$
 
 <details> 
-    <summary><em><strong>пояснение переменных</strong></em></summary>
+    <summary><em><strong>Variable explanations</strong></em></summary>
 
-где:
-- **$V(a)$** — взвешенное количество голосов за ответ $a$.
-- **$T$** — множество всех сгенерированных трасс.
-- **$C_t$** — уверенность трассы $t$, вычисленная с помощью одной из метрик уверенности.
-- **$I(\text{answer}(t) = a)$** — индикаторная функция, равная 1, если ответ трассы $t$ совпадает с $a$, и 0 в противном случае.
+where:
+- **$V(a)$** — weighted count of votes for answer $a$.
+- **$T$** — set of all generated traces.
+- **$C_t$** — trace confidence, computed using one of the confidence metrics.
+- **$I(\text{answer}(t) = a)$** — indicator function, equal to 1 if trace $t$'s answer matches $a$, and 0 otherwise.
 
 ---
 
-  ⚖️ Функция весов `w = f(C_t)`
+  ⚖️ Weight function `w = f(C_t)`
 
-  Варианты трансформации:
-  - Линейно: `w = C_t` (база)
-  - Температура: `w = exp(C_t / T)` с `T∈[2,8]` — усиливает разницу между уверенными/неуверенными трассами
-  - Ограничение: `w = clip(C_t, a, b)` — обрезает экстремальные значения
+  Transformation options:
+  - Linear: `w = C_t` (baseline)
+  - Temperature: `w = exp(C_t / T)` with `T∈[2,8]` — amplifies differences between confident/unconfident traces
+  - Clipping: `w = clip(C_t, a, b)` — truncates extreme values
 
-  🧮 Нормализация весов
+  🧮 Weight normalization
 
-  - По-трассам: `w ← w / mean(w)` для стабилизации масштаба
-  - По-ответам: нормализовать суммы в пределах ответа для сравнимости
+  - Per-trace: `w ← w / mean(w)` to stabilize scale
+  - Per-answer: normalize sums within answer space for comparability
 
-  🤝 Разрешение ничьих
+  🤝 Tie-breaking
 
-  - При равных весах: выбирать ответ с меньшей энтропией хвоста или с большей медианной групповой уверенностью
+  - When weights are equal: choose answer with lower tail entropy or higher median group confidence
 
   Trade-offs:
-| **Линейные веса**               | **Температурное усиление**          |
+| **Linear weights**              | **Temperature amplification**       |
 |---------------------------------|-------------------------------------|
-| 🛡️ Стабильнее на шуме           | 🎯 Лучше выделяет сильные трассы    |
-| 🌐 Меньше риска переусиления    | ⚠️ Чувствительно к выбору `T`       |
+| 🛡️ More stable on noise         | 🎯 Better isolates strong traces   |
+| 🌐 Lower risk of over-amplification | ⚠️ Sensitive to choice of `T`      |
 
   ★ Insight ─────────────────────────────────────
 
-  Преобразование весов через soft-амплификацию (exp/температура) может заметно улучшить консенсус на смежных ответах, но требует калибровки на валидации.
+  Transforming weights via soft amplification (exp/temperature) can significantly improve consensus on adjacent answers, but requires calibration on validation data.
   ─────────────────────────────────────────────────
 
-  🎯 Рекомендации для старта:
+  🎯 Starter recommendations:
 
-  1. `w = C_t` (без трансформаций)
-  2. Ничьи — по меньшей энтропии хвоста
-  3. При сильном разбросе: `clip(C_t, p5, p95)`
+  1. `w = C_t` (no transformation)
+  2. Ties — resolve by lower tail entropy
+  3. With strong spread: `clip(C_t, p5, p95)`
 
 ---
 
@@ -527,57 +510,55 @@ $$\hat{a} = \arg\max_a V(a)$$
 
 </details>
 
----
+Confidence filtering enables focusing solely on the most reliable traces while excluding potentially erroneous or convoluted reasoning. DeepConf incorporates two primary filtering strategies:
 
-Фильтрация по уверенности позволяет сосредоточиться только на наиболее надежных трассах, исключая потенциально ошибочные или запутанные рассуждения. В DeepConf предусмотрены две основные стратегии фильтрации:
+- **DeepConf-high (top-90%)**: A conservative approach that discards only the 10% least confident traces. This ensures a good balance between accuracy and reasoning diversity.
 
-- **DeepConf-high (top-90%)**: консервативный подход, который отбрасывает только 10% наименее уверенных трасс. Это обеспечивает хорошую сбалансированность между точностью и разнообразием рассуждений.
+- **DeepConf-low (top-10%)**: An aggressive approach that retains only the 10% most confident traces. This often yields the highest accuracy gains but may occasionally reduce precision due to excessive concentration on a limited set of reasoning traces.
 
-- **DeepConf-low (top-10%)**: агрессивный подход, который сохраняет только 10% наиболее уверенных трасс. Это может давать наибольший прирост точности в большинстве случаев, но иногда может приводить к потере точности из-за чрезмерной концентрации на ограниченном наборе рассуждений.
+### Online Mode (Online Thinking with Confidence)
 
-### Онлайн режим (Online Thinking with Confidence)
+In online mode, DeepConf uses least-confident group confidence to dynamically interrupt generation:
 
-В онлайн режиме DeepConf использует уверенность наименее уверенной группы для динамического прерывания генерации:
-
-1. **Разминка (Offline Warmup):**
-   - Генерируется $N_{init}$ (например, 16) полных трасс рассуждений.
-   - Устанавливается порог останова $s$ на основе перцентиля уверенности:
+1. **Warmup (Offline Warmup):**
+   - Generate $N_{init}$ (e.g., 16) full reasoning traces.
+   - Set the stopping threshold $s$ based on the percentile of confidence:
    
    $$s = \text{Percentile}_{100-\eta}(\{C_t : t \in T_{warmup}\})$$
 
 <details> 
-    <summary><em><strong>пояснение переменных</strong></em></summary>
+    <summary><em><strong>Variable explanations</strong></em></summary>
 
-где:
-- **$s$** — пороговое значение для останова генерации.
-- **$\eta$** — процент трасс, который мы хотим сохранить (например, 10% или 90%).
-- **$T_{warmup}$** — множество всех трасс разминки.
-- **$C_t$** — уверенность трассы $t$.
+where:
+- **$s$** — threshold value for stopping generation.
+- **$\eta$** — percentage of traces we wish to retain (e.g., 10% or 90%).
+- **$T_{warmup}$** — set of all warmup traces.
+- **$C_t$** — confidence of trace $t$.
 
 ---
 
-  🔧 Параметры разминки
+  🔧 Warmup parameters
 
-  - `N_init` (число трасс): 8–32; больше — стабильнее порог, дольше разгон
-  - `η` (перцентиль отбора): 10% для DeepConf-low, 90% для DeepConf-high
-  - Обновление `s`: статично (по разминке) или адаптивно (скользящее окно по мере генерации)
+  - `N_init` (number of traces): 8–32; more → more stable threshold, longer warmup
+  - `η` (selection percentile): 10% for DeepConf-low, 90% for DeepConf-high
+  - `s` update: static (based on warmup) or adaptive (sliding window during generation)
 
   Trade-offs:
-| **Малый `N_init`**              | **Большой `N_init`**                |
+| **Small `N_init`**              | **Large `N_init`**                |
 |---------------------------------|-------------------------------------|
-| ⚡ Быстрый старт                 | 🛡️ Стабильный порог                 |
-| ⚠️ Риск смещения порога         | ⏳ Дороже по времени                |
+| ⚡ Fast startup                 | 🛡️ Stable threshold               |
+| ⚠️ Risk of threshold bias      | ⏳ More time-consuming             |
 
   ★ Insight ─────────────────────────────────────
 
-  Адаптивное обновление `s` по скользящему окну снижает риск «переобучения к стартовым трассам» на длинных задачах.
+  Adaptive `s` updates via sliding window reduce the risk of "overfitting" to initial traces on long tasks.
   ─────────────────────────────────────────────────
 
-  🎯 Рекомендации для старта:
+  🎯 Starter recommendations:
 
   1. `N_init=16`, `η=10%/90%`
-  2. `s` фиксировать по разминке; включить адаптацию на длинных промптах
-  3. Порог вычислять по метрике «soft-min группы»
+  2. Fix `s` from warmup; enable adaptation for long prompts
+  3. Compute threshold using "soft-min group" metric
 
 ---
 
@@ -585,50 +566,50 @@ $$\hat{a} = \arg\max_a V(a)$$
 
 ---
 
-Фаза разминки необходима для определения порога останова на основе распределения уверенности на конкретной задаче. Для каждого нового запроса DeepConf сначала генерирует небольшое количество полных трасс рассуждений, чтобы "понять", какой уровень уверенности является типичным для данной задачи.
+The warmup phase is necessary to determine the stopping threshold based on the confidence distribution for a specific task. For each new query, DeepConf first generates a small number of full reasoning traces to "understand" what level of confidence is typical for that task.
 
-Для DeepConf-low порог устанавливается как 90-й перцентиль (отсекаются трассы ниже этого уровня), а для DeepConf-high — как 10-й перцентиль (сохраняются почти все трассы, кроме самых неуверенных).
+For DeepConf-low, the threshold is set at the 90th percentile (traces below this level are discarded); for DeepConf-high, it is set at the 10th percentile (nearly all traces are retained, except the least confident).
 
-2. **Адаптивная выборка (Adaptive Sampling):**
-   - При генерации новой трассы, если групповая уверенность $C_{G_i}$ падает ниже порога $s$, генерация останавливается.
-   - DeepConf динамически регулирует количество генерируемых трасс на основе сложности задачи, оцениваемой коэффициентом консенсуса:
+2. **Adaptive Sampling:**
+   - During generation of a new trace, if group confidence $C_{G_i}$ falls below threshold $s$, generation is halted.
+   - DeepConf dynamically adjusts the number of generated traces based on task complexity, assessed via the consensus coefficient:
    
    $$\beta = \frac{V(\hat{a})}{\sum_a V(a)}$$
 
 <details> 
-    <summary><em><strong>пояснение переменных</strong></em></summary>
+    <summary><em><strong>Variable explanations</strong></em></summary>
 
-где:
-- **$\beta$** — коэффициент консенсуса.
-- **$V(\hat{a})$** — взвешенное количество голосов за наиболее популярный ответ.
-- **$\sum_a V(a)$** — общее количество взвешенных голосов.
+where:
+- **$\beta$** — consensus coefficient.
+- **$V(\hat{a})$** — weighted count of votes for the most popular answer.
+- **$\sum_a V(a)$** — total weighted votes.
 
 ---
 
-  🚦 Онлайн-контроль генерации
+  🚦 Online generation control
 
-  Параметры:
-  - Окно для $C_{G_i}$: n=2048, шаг s=128–256
-  - «Терпение» (patience): останавливать после `m` подряд окон ниже `s` (например, m=2–3)
-  - Порог консенсуса `τ`: 0.9–0.98, выше — раньше стоп при согласии
-  - Бюджет `B`: максимум трасс (например, 256/512)
+  Parameters:
+  - Window for $C_{G_i}$: n=2048, step s=128–256
+  - "Patience": halt after `m` consecutive windows below `s` (e.g., m=2–3)
+  - Consensus threshold `τ`: 0.9–0.98; higher → earlier stop on agreement
+  - Budget `B`: maximum traces (e.g., 256/512)
 
   Trade-offs:
-| **Низкий `τ`/малый `m`**        | **Высокий `τ`/большой `m`**        |
+| **Low `τ`/small `m`**           | **High `τ`/large `m`**            |
 |---------------------------------|-------------------------------------|
-| 🎯 Раннее завершение            | 🛡️ Выше уверенность в ответе       |
-| ⚡ Экономит токены              | ⏳ Дольше достижение консенсуса     |
+| 🎯 Early termination            | 🛡️ Higher answer confidence       |
+| ⚡ Saves tokens                  | ⏳ Longer to reach consensus       |
 
   ★ Insight ─────────────────────────────────────
 
-  Комбинация «soft-min по окнам + patience» существенно снижает ложные останавливания без потери выигрыша по токенам.
+  Combining "soft-min over windows + patience" significantly reduces false stops without sacrificing token savings.
   ─────────────────────────────────────────────────
 
-  🎯 Рекомендации для старта:
+  🎯 Starter recommendations:
 
   1. `n=2048, s=128–256, m=2`
   2. `τ=0.95`, `B=512`
-  3. Стоп по падению ниже `s` и достаточном консенсусе
+  3. Stop on confidence drop below `s` and sufficient consensus
 
 ---
 
@@ -636,108 +617,108 @@ $$\hat{a} = \arg\max_a V(a)$$
 
 ---
 
-В процессе онлайн-генерации DeepConf отслеживает групповую уверенность модели в скользящем окне (обычно 2048 токенов). Если уверенность падает ниже установленного порога, это свидетельствует о том, что модель начала "сомневаться" в своем рассуждении, и генерация этой трассы преждевременно прерывается.
+During online generation, DeepConf monitors the model's group confidence within a sliding window (typically 2048 tokens). If confidence falls below the established threshold, it indicates the model has begun to "hesitate" in its reasoning, and generation of that trace is prematurely halted.
 
-Это существенно экономит вычислительные ресурсы, так как нет необходимости генерировать полностью трассы, которые, скорее всего, будут отфильтрованы на этапе взвешенного голосования.
+This significantly conserves computational resources by avoiding the generation of full traces that would likely be filtered out during weighted voting.
 
-3. **Остановка генерации:**
-   - Если $\beta \geq \tau$ (где $\tau$ — порог консенсуса, например, 0.95), генерация новых трасс прекращается.
-   - В противном случае, генерация продолжается до достижения фиксированного бюджета $B$.
+3. **Generation Termination:**
+   - If $\beta \geq \tau$ (where $\tau$ is the consensus threshold, e.g., 0.95), generation of new traces ceases.
+   - Otherwise, generation continues until the fixed budget $B$ is reached.
 
-Адаптивный останов генерации на основе консенсуса позволяет DeepConf завершать работу раньше, если модель достигла высокого согласия относительно итогового ответа. Это особенно полезно для простых задач, где нет необходимости генерировать все $B$ трасс.
+Adaptive termination based on consensus allows DeepConf to conclude early if the model achieves high agreement on the final answer. This is especially beneficial for simple tasks where generating all $B$ traces is unnecessary.
 
-## Конкретный пример работы DeepConf
+## Concrete Example of DeepConf in Action
 
-Рассмотрим, как DeepConf работает на примере решения математической задачи:
+Consider how DeepConf operates on a mathematical problem:
 
-### Сценарий для примера
+### Scenario for Example
 
-* **Задача:** "Найдите количество целочисленных решений (x, y) с 1≤ x, y ≤ 100, где x² + y² = z² для некоторого положительного целого z."
-* **Размер группы:** $G = 512$ трасс рассуждений.
-* **Метрика уверенности:** Групповая уверенность с окном 2048 токенов.
-* **Модель:** Большая языковая модель (например, GPT-OSS-120B).
+* **Task:** "Find the number of integer solutions (x, y) with 1 ≤ x, y ≤ 100, where x² + y² = z² for some positive integer z."
+* **Group size:** $G = 512$ reasoning traces.
+* **Confidence metric:** Group confidence with a 2048-token window.
+* **Model:** Large language model (e.g., GPT-OSS-120B).
 
 <details> 
-    <summary><em><strong>пример работы DeepConf</strong></em></summary>
+    <summary><em><strong>Example: How DeepConf works "under the hood"</strong></em></summary>
 
-### Пример: Как работает DeepConf "под капотом"
+### Example: How DeepConf Operates Internally
 
-#### **Шаг 1: Генерация начальных трасс и вычисление порога (Offline Warmup)**
+#### **Step 1: Generate initial traces and compute threshold (Offline Warmup)**
 
-DeepConf генерирует $N_{init} = 16$ полных трасс рассуждений. Для каждой трассы вычисляется групповая уверенность с окном 2048 токенов. Предположим, значения уверенности колеблются в диапазоне от 11 до 18.
+DeepConf generates $N_{init} = 16$ full reasoning traces. For each trace, group confidence with a 2048-token window is computed. Assume confidence values range from 11 to 18.
 
-Для DeepConf-low (топ-10%):
-- Вычисляется 90-й перцентиль: $s_{low} = 16.5$
+For DeepConf-low (top-10%):
+- The 90th percentile is computed: $s_{low} = 16.5$
 
-Для DeepConf-high (топ-90%):
-- Вычисляется 10-й перцентиль: $s_{high} = 12.8$
+For DeepConf-high (top-90%):
+- The 10th percentile is computed: $s_{high} = 12.8$
 
-#### **Шаг 2: Онлайн генерация с ранним останавливанием**
+#### **Step 2: Online generation with early stopping**
 
-Начинается генерация новых трасс. Рассмотрим три примера:
+Generation of new traces begins. Consider three examples:
 
-**Трасса 1:**
+**Trace 1:**
 ```
-Рассмотрим задачу пошагово. Шаг 1: Уравнение x² + y² = z² представляет пифагоровы тройки.
-Все примитивные тройки можно сгенерировать с помощью формулы x = m² - n², y = 2mn, z = m² + n²...
-```
-
-Пока уверенность этой трассы остается высокой (например, $C_{G_i} \approx 17.3 > s_{low}$), генерация продолжается до конца.
-
-**Трасса 2:**
-```
-Рассмотрим задачу пошагово. Шаг 1: Уравнение x² + y² = z² представляет пифагоровы тройки.
-Все примитивные... Подождите, мне нужно проверить результаты... Я должен перепроверить шаг 1... 
+Consider the problem step-by-step. Step 1: The equation x² + y² = z² represents Pythagorean triples.
+All primitive triples can be generated using the formula x = m² - n², y = 2mn, z = m² + n²...
 ```
 
-На этом моменте групповая уверенность падает ($C_{G_i} \approx 11.5 < s_{low}$), и DeepConf-low останавливает генерацию этой трассы.
+As confidence remains high (e.g., $C_{G_i} \approx 17.3 > s_{low}$), generation continues to completion.
 
-**Трасса 3:**
+**Trace 2:**
 ```
-Рассмотрим задачу пошагово. Шаг 1: Мы ищем решения уравнения x² + y² = z²...
+Consider the problem step-by-step. Step 1: The equation x² + y² = z² represents Pythagorean triples.
+All primitive... Wait, I need to verify the results... I must recheck step 1... 
 ```
 
-Уверенность этой трассы ($C_{G_i} \approx 13.5$) выше порога DeepConf-high ($s_{high} = 12.8$), но ниже порога DeepConf-low ($s_{low} = 16.5$). Поэтому DeepConf-high продолжит генерацию, а DeepConf-low остановит.
+At this point, group confidence drops ($C_{G_i} \approx 11.5 < s_{low}$), and DeepConf-low halts generation of this trace.
 
-#### **Шаг 3: Взвешенное голосование с фильтрацией**
+**Trace 3:**
+```
+Consider the problem step-by-step. Step 1: We are seeking solutions to the equation x² + y² = z²...
+```
 
-После генерации достаточного количества трасс (или достижения высокого консенсуса) DeepConf выполняет взвешенное голосование с фильтрацией:
+The confidence of this trace ($C_{G_i} \approx 13.5$) exceeds DeepConf-high’s threshold ($s_{high} = 12.8$) but falls below DeepConf-low’s threshold ($s_{low} = 16.5$). Thus, DeepConf-high continues, while DeepConf-low stops.
 
-1. Отбираются трассы на основе выбранной стратегии (топ-10% или топ-90% по уверенности).
-2. Для каждого уникального ответа (например, "109") вычисляется взвешенная сумма голосов.
-3. Выбирается ответ с наибольшим весом.
+#### **Step 3: Confidence-weighted voting with filtering**
 
-Например, если ответ "109" получил наибольший вес $V(109) = 17$, то он выбирается как итоговый ответ.
+After generating sufficient traces (or achieving high consensus), DeepConf performs confidence-weighted voting with filtering:
 
-#### **Шаг 4: Сравнение с базовыми методами**
+1. Traces are filtered based on the chosen strategy (top-10% or top-90% by confidence).
+2. For each unique answer (e.g., "109"), a weighted vote sum is computed.
+3. The answer with the highest weight is selected.
 
-В отличие от обычного мажоритарного голосования, DeepConf достигает:
+For example, if answer "109" receives the highest weight $V(109) = 17$, it is selected as the final answer.
 
-1. Лучшей точности: 99.9% vs 97.0% (cons@512) на AIME 2025 с моделью GPT-OSS-120B.
-2. Меньшего количества токенов: сокращение на 84.7% для DeepConf-low и на 56.0% для DeepConf-high.
+#### **Step 4: Comparison with baseline methods**
 
-Это происходит благодаря способности DeepConf эффективно отфильтровывать низкокачественные трассы рассуждений и концентрироваться на наиболее уверенных.
+Compared to standard majority voting, DeepConf achieves:
+
+1. Higher accuracy: 99.9% vs. 97.0% (cons@512) on AIME 2025 with GPT-OSS-120B.
+2. Fewer tokens: 84.7% reduction for DeepConf-low and 56.0% for DeepConf-high.
+
+This occurs because DeepConf effectively filters low-quality reasoning traces and concentrates on the most confident ones.
 
 </details>
 
 ---
 
-## Основные преимущества метода DeepConf
+## Key Advantages of DeepConf
 
-1. **Вычислительная эффективность**: DeepConf сокращает количество генерируемых токенов на 43-85% (DeepConf-low) и 18-59% (DeepConf-high) при сохранении или улучшении точности по сравнению с мажоритарным голосованием.
+1. **Computational Efficiency**: DeepConf reduces generated tokens by 43–85% (DeepConf-low) and 18–59% (DeepConf-high) while maintaining or improving accuracy compared to majority voting.
 
-2. **Улучшенная точность**: На сложных задачах, таких как AIME 2025, DeepConf@512 достигает до 99.9% точности по сравнению с 97.0% для обычного мажоритарного голосования и 91.8% для одиночного прохода.
+2. **Improved Accuracy**: On complex tasks like AIME 2025, DeepConf@512 achieves up to 99.9% accuracy versus 97.0% for standard majority voting and 91.8% for single-pass generation.
 
-3. **Простота интеграции**: DeepConf не требует дополнительного обучения модели или настройки гиперпараметров и может быть интегрирован в существующие фреймворки обслуживания.
+3. **Simple Integration**: DeepConf requires no additional model training or hyperparameter tuning and can be integrated into existing LLM serving frameworks.
 
-4. **Гибкость**: Метод предлагает два режима работы (офлайн и онлайн) и различные стратегии фильтрации (DeepConf-low и DeepConf-high), позволяющие настраивать компромисс между точностью и эффективностью.
+4. **Flexibility**: The method offers two operational modes (offline and online) and multiple filtering strategies (DeepConf-low and DeepConf-high), enabling customization of the accuracy-efficiency trade-off.
 
-## Практическая реализация
+## Practical Implementation
 
-DeepConf можно реализовать с минимальными изменениями в стандартных библиотеках для обслуживания больших языковых моделей, таких как vLLM. Необходимые модификации включают:
+DeepConf can be implemented with minimal modifications to standard LLM serving libraries such as vLLM. Required changes include:
 
-1. Расширение обработчика логарифмов вероятностей для вычисления и поддержки скользящего окна уверенности.
-2. Добавление проверки условия раннего останова на основе уверенности.
-3. Реализацию фильтрации и взвешенного голосования для итогового ответа.
+1. Extending the log-probability handler to compute and maintain a sliding window of confidence.
+2. Adding an early-stopping condition based on confidence.
+3. Implementing filtering and weighted voting for the final answer.
 
-Эти изменения могут быть интегрированы в API обслуживания моделей, обеспечивая эффективное применение DeepConf в производственных системах.
+These changes can be integrated into model serving APIs, enabling efficient deployment of DeepConf in production systems.

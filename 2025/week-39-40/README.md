@@ -1,77 +1,75 @@
-# GPT-OSS: первые открытые модели OpenAI с GPT-2 🚀
+# GPT-OSS: OpenAI's First Open Models Since GPT-2 🚀
 
 [![OpenAI](https://img.shields.io/badge/OpenAI-GPT--OSS-green)](https://openai.com/index/introducing-gpt-oss/)
 [![Hugging Face](https://img.shields.io/badge/Hugging%20Face-Models-blue)](https://huggingface.co/openai)
-[![Telegram Channel](https://img.shields.io/badge/Telegram-TheWeeklyBrief-blue)](https://t.me/TheWeeklyBrief)
 
-## 📝 Описание
+## 📝 Description
 
-На этой неделе разбираем релиз **GPT-OSS** — первых полностью открытых моделей OpenAI с момента GPT-2 в 2019 году. Две модели: `gpt-oss-20b` и `gpt-oss-120b` представляют собой современные LLM с архитектурой MoE (Mixture of Experts), оптимизированные для рассуждений и способные работать на одном GPU благодаря квантованию MXFP4.
+This week we examine the release of **GPT-OSS** — OpenAI’s first fully open models since GPT-2 in 2019. Two models, `gpt-oss-20b` and `gpt-oss-120b`, are modern LLMs with a Mixture-of-Experts (MoE) architecture, optimized for reasoning and capable of running on a single GPU thanks to MXFP4 quantization.
 
-## 🔍 Ключевые особенности
+## 🔍 Key Features
 
-- **Открытые веса**: первые полностью открытые модели OpenAI за 6 лет с лицензией Apache 2.0
-- **Архитектура MoE**: 32 эксперта с активацией 4 на токен (20B) и 128 экспертов с активацией 8 (120B)
-- **Оптимизация MXFP4**: модель 120B помещается на один H100 (80GB), 20B — на RTX 50xx (16GB)
-- **Гибкие уровни рассуждений**: управление через параметр "Reasoning effort: low/medium/high"
-- **Современная архитектура**: RoPE, RMSNorm, SwiGLU, Grouped Query Attention, Sliding Window Attention
-- **Специализация на рассуждениях**: обучение с акцентом на STEM, программирование и математику
+- **Open weights**: First fully open models from OpenAI in six years under the Apache 2.0 license
+- **MoE architecture**: 32 experts with 4 activated per token (20B) and 128 experts with 8 activated (120B)
+- **MXFP4 optimization**: The 120B model fits on a single H100 (80GB); the 20B model runs on an RTX 50xx (16GB)
+- **Configurable reasoning effort**: Control via the parameter "Reasoning effort: low/medium/high"
+- **Modern architecture**: RoPE, RMSNorm, SwiGLU, Grouped Query Attention, Sliding Window Attention
+- **Reasoning specialization**: Trained with emphasis on STEM, programming, and mathematics
 
-## 📈 Результаты и производительность
+## 📈 Results and Performance
 
-- **Размеры моделей**: 20B и 120B параметров с эффективным квантованием
-- **Память**: 13.5GB для 20B на Mac Mini, 80GB для 120B на H100
-- **Время обучения**: 2.1 млн часов на H100 (включая SFT и RLHF)
-- **Бенчмарки**: сопоставимая производительность с Qwen3 и проприетарными моделями OpenAI
-- **Скорость генерации**: высокая благодаря широкой архитектуре и оптимизациям
+- **Model sizes**: 20B and 120B parameters with efficient quantization
+- **Memory usage**: 13.5GB for the 20B model on a Mac Mini; 80GB for the 120B model on an H100
+- **Training time**: 2.1 million H100 hours (including SFT and RLHF)
+- **Benchmark performance**: Comparable to Qwen3 and proprietary OpenAI models
+- **Generation speed**: High, due to the wide architecture and optimizations
 
 ![](assets/Figure-01.png)
 ![](assets/Figure-02.jpg)
 
-## 🧠 Архитектурная эволюция от GPT-2
+## 🧠 Architectural Evolution from GPT-2
 
-### Основные изменения:
-- **Отказ от Dropout**: не нужен при обучении в одну эпоху на больших данных
-- **RoPE вместо абсолютных позиций**: более эффективное позиционное кодирование
-- **SwiGLU активации**: замена GELU на более вычислительно эффективную функцию
-- **RMSNorm**: замена LayerNorm для лучшей стабильности обучения
-- **Grouped Query Attention**: снижение потребления памяти при сохранении качества
-- **Sliding Window Attention**: ограничение контекста до 128 токенов в каждом втором слое
+### Key Changes:
+- **Dropout removal**: Unnecessary under single-epoch training on massive datasets
+- **RoPE instead of absolute positions**: More efficient positional encoding
+- **SwiGLU activations**: Replacement of GELU with a more computationally efficient function
+- **RMSNorm**: Replacement of LayerNorm for improved training stability
+- **Grouped Query Attention**: Reduced memory consumption without sacrificing quality
+- **Sliding Window Attention**: Context limited to 128 tokens in every second layer
 
 ![](assets/Figure-05.jpg)
 ![](assets/Figure-06.jpg)
 
-## 🆚 Сравнение с современными архитектурами
+## 🆚 Comparison with Modern Architectures
 
 ### GPT-OSS vs Qwen3:
-- **Ширина vs глубина**: GPT-OSS шире (2880 dim), Qwen3 глубже (48 слоев vs 24)
-- **MoE конфигурация**: GPT-OSS использует меньше, но крупнее экспертов
-- **Внимание**: GPT-OSS с sliding window, Qwen3 — полное внимание
-- **Лицензия**: обе под Apache 2.0, но Qwen3 предоставляет базовые модели
+- **Width vs depth**: GPT-OSS is wider (2880 dim); Qwen3 is deeper (48 layers vs 24)
+- **MoE configuration**: GPT-OSS uses fewer but larger experts
+- **Attention**: GPT-OSS employs sliding window; Qwen3 uses full attention
+- **License**: Both under Apache 2.0, but Qwen3 provides base models
 
-### Технические преимущества:
-- **Attention sinks**: обучаемые bias-логиты для стабилизации длинных контекстов
-- **Bias в attention**: необычное для современных моделей решение
-- **Масштабирование**: только глубина и количество экспертов при переходе 20B→120B
+### Technical Advantages:
+- **Attention sinks**: Learnable bias logits to stabilize long contexts
+- **Attention bias**: An unusual feature in modern models
+- **Scaling**: Only depth and number of experts change when moving from 20B to 120B
 
 ![](assets/Figure-13.png)
 ![](assets/Figure-14.png)
 
-## 🌟 Практические применения
+## 🌟 Practical Applications
 
-- **Локальный запуск**: модели работают на потребительском железе благодаря MXFP4
-- **Рассуждения**: встроенная поддержка различных уровней сложности рассуждений
-- **Исследования**: открытые веса для экспериментов и дистилляции
-- **Коммерческое использование**: лицензия Apache 2.0 без ограничений
-- **Интеграция с инструментами**: оптимизация для работы с внешними API
+- **Local deployment**: Models run on consumer hardware thanks to MXFP4
+- **Reasoning**: Built-in support for varying levels of reasoning complexity
+- **Research**: Open weights enable experimentation and distillation
+- **Commercial use**: Apache 2.0 license with no restrictions
+- **Tool integration**: Optimized for working with external APIs
 
-## 🔗 Ссылки
+## 🔗 Links
 
-- Обзор недели: [review](https://verbasik.github.io/Weekly-arXiv-ML-AI-Research-Review/#2025/week-39-40)
-- Модели на Hugging Face: [gpt-oss-20b](https://huggingface.co/openai/gpt-oss-20b) | [gpt-oss-120b](https://huggingface.co/openai/gpt-oss-120b)
-- Официальный анонс: [OpenAI Blog](https://openai.com/index/introducing-gpt-oss/)
+- Models on Hugging Face: [gpt-oss-20b](https://huggingface.co/openai/gpt-oss-20b) | [gpt-oss-120b](https://huggingface.co/openai/gpt-oss-120b)
+- Official announcement: [OpenAI Blog](https://openai.com/index/introducing-gpt-oss/)
 
-## 📜 Цитирование
+## 📜 Citation
 
 ```bibtex
 @misc{openai2025gptoss,
@@ -86,8 +84,8 @@
 
 <div align="center">
 
-**Исследуйте вместе с нами 🚀**
+**Explore with us 🚀**
 
-⭐ Поставьте звездочку этому репозиторию, если он оказался вам полезен
+⭐ Star this repository if you found it helpful
 
 </div>

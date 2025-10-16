@@ -1,89 +1,87 @@
 # Deep Think with Confidence
 
-## Предпосылки и мотивация
+## Background and Motivation
 
-Большие языковые модели (БЯМ) продемонстрировали выдающиеся возможности в сложных задачах рассуждения, но достижение высокой точности часто требует генерации сотен или тысяч цепочек рассуждений с помощью таких методов, как самосогласованность с голосованием по большинству. Хотя этот подход "параллельного мышления" эффективен, он страдает от значительных вычислительных затрат и убывающей отдачи – иногда требуя 100 миллионов дополнительных токенов для скромного улучшения точности на 14% в сложных задачах, таких как AIME 2025.
+Large Language Models (LLMs) have demonstrated remarkable capabilities in complex reasoning tasks, but achieving high accuracy often requires generating hundreds or thousands of reasoning chains using methods such as self-consistency with majority voting. Although this "parallel thinking" approach is effective, it suffers from substantial computational costs and diminishing returns—sometimes requiring 100 million additional tokens for a modest 14% accuracy improvement on challenging tasks like AIME 2025.
 
-![Рисунок 1: Сравнение точности на AIME 2025, показывающее превосходную производительность DeepConf для различных размеров моделей, причем некоторые достигают почти идеальной точности (99,9% для GPT-OSS-120B).](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-37/assets/Image-01.png)
+![Figure 1: Accuracy comparison on AIME 2025, showing DeepConf's superior performance across various model sizes, with some achieving nearly perfect accuracy (99.9% for GPT-OSS-120B).](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-37/assets/Image-01.png)
 
-Основная проблема заключается в том, что все цепочки рассуждений рассматриваются одинаково при голосовании по большинству, несмотря на то, что БЯМ естественным образом производят цепочки разного качества. Предыдущие подходы пытались использовать глобальные меры уверенности, рассчитанные после полной генерации цепочки, но эти методы не могут уловить локальные колебания рассуждений или обеспечить раннее прекращение низкокачественных путей.
+The core issue lies in the fact that all reasoning chains are treated equally during majority voting, despite LLMs naturally producing chains of varying quality. Previous approaches attempted to use global confidence measures computed after full chain generation, but these methods cannot capture local fluctuations in reasoning or enable early termination of low-quality paths.
 
-## Основная методология
+## Core Methodology
 
-Deep Think with Confidence (DeepConf) решает эти ограничения с помощью сложной системы измерения уверенности, которая работает на нескольких уровнях детализации:
+Deep Think with Confidence (DeepConf) addresses these limitations through a sophisticated confidence measurement system operating at multiple levels of granularity:
 
-Локальные метрики уверенности: вместо того чтобы полагаться на глобальные средние значения, DeepConf вводит несколько целевых мер уверенности:
+**Local confidence metrics**: Instead of relying on global averages, DeepConf introduces several targeted confidence measures:
 
-- **Групповая уверенность**: рассчитывается по скользящим окнам токенов (обычно 1024-2048 токенов) для сглаживания индивидуальных колебаний токенов.
-- **Групповая уверенность нижних 10%**: фокусируется на наиболее проблемных сегментах в цепочке.
-- **Минимальная групповая уверенность**: идентифицирует единственный наименее уверенный шаг рассуждения.
-- **Уверенность в хвосте**: оценивает надежность финальных шагов рассуждения.
+- **Group confidence**: Computed over sliding token windows (typically 1024–2048 tokens) to smooth individual token fluctuations.
+- **Bottom-10% group confidence**: Focuses on the most problematic segments within a chain.
+- **Least group confidence**: Identifies the single least confident reasoning step.
+- **Tail confidence**: Evaluates the reliability of the final reasoning steps.
 
-Математическая основа использует уверенность токена, определяемую как:
+The mathematical foundation uses token confidence, defined as:
 
 $$C_i = -\frac{1}{k}\sum_{j=1}^{k} \log P_{\theta}(t_j^{(i)} | x, t_{<i})$$
 
-где $P_{\theta}$ представляет предсказанную моделью вероятность для $j$-го наиболее вероятного токена в позиции $i$.
+where $P_{\theta}$ represents the model's predicted probability for the $j$-th most probable token at position $i$.
 
-**Два режима работы**: DeepConf работает как в автономной, так и в онлайн-конфигурациях:
+**Two operational modes**: DeepConf operates in both offline and online configurations:
 
-**Автономный режим**: использует взвешенное по уверенности голосование по большинству с фильтрацией, сохраняя только верхние η процентов цепочек на основе оценок уверенности до агрегации.
+**Offline mode**: Uses confidence-weighted majority voting with filtering, retaining only the top η percent of chains based on confidence scores prior to aggregation.
 
-**Онлайн-режим**: реализует раннюю остановку в реальном времени с использованием динамически калиброванных порогов. Система генерирует начальный набор цепочек для "разогрева", чтобы установить пороги остановки, затем прерывает новые цепочки, чья групповая уверенность падает ниже этого порога.
+**Online mode**: Implements real-time early stopping using dynamically calibrated thresholds. The system generates an initial set of chains for "warmup" to establish stopping thresholds, then terminates new chains whose group confidence falls below this threshold.
 
-## Ключевые технические инновации
+## Key Technical Innovations
 
-Эффективность метода обусловлена несколькими техническими инновациями:
+The method's effectiveness stems from several technical innovations:
 
-**Динамическая калибровка порога:** для онлайн-генерации DeepConf использует начальную фазу "разогрева" с небольшим набором трасс (обычно 16) для установления порогов уверенности, специфичных для проблемы. Этот адаптивный подход гарантирует, что критерии остановки калибруются в соответствии со сложностью каждой проблемы.
+**Dynamic threshold calibration**: For online generation, DeepConf employs a brief "warmup" phase with a small set of traces (typically 16) to establish problem-specific confidence thresholds. This adaptive approach ensures stopping criteria are calibrated to each problem's complexity.
 
-**Взвешенная по уверенности агрегация:** вместо простого голосования по большинству DeepConf взвешивает каждый ответ по его связанной уверенности трассы, отдавая приоритет ответам из более надежных путей рассуждений.
+**Confidence-weighted aggregation**: Rather than simple majority voting, DeepConf weights each answer by its associated chain confidence, prioritizing responses from more reliable reasoning paths.
 
-**Адаптивное обнаружение консенсуса:** система отслеживает силу консенсуса во время генерации, останавливаясь при достижении достаточного согласия среди высокоуверенных трасс, что дополнительно снижает вычислительные требования.
+**Adaptive consensus detection**: The system monitors consensus strength during generation and halts when sufficient agreement is reached among high-confidence traces, further reducing computational demands.
 
-## Экспериментальные результаты и производительность
+## Experimental Results and Performance
 
-DeepConf демонстрирует существенные улучшения по нескольким параметрам:
+DeepConf demonstrates substantial improvements across multiple metrics:
 
-![Рисунок 2: Сравнение количества токенов на AIME 2025, показывающее значительное сокращение вычислительных требований — до 84,7% для GPT-OSS-120B при сохранении превосходной точности.](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-37/assets/Image-02.png)
+![Figure 2: Token count comparison on AIME 2025, showing significant reduction in computational requirements—up to 84.7% for GPT-OSS-120B while maintaining superior accuracy.](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-37/assets/Image-02.png)
 
-**Повышение точности:** в сложных тестах на математическое рассуждение (AIME 2024/2025, BRUMO25, HMMT25) DeepConf постоянно превосходит стандартное голосование большинством. Среди заметных достижений:
+**Improved accuracy**: On challenging mathematical reasoning benchmarks (AIME 2024/2025, BRUMO25, HMMT25), DeepConf consistently outperforms standard majority voting. Notable achievements include:
 
-- GPT-OSS-120B достигает 99,9% точности на AIME 2025 (по сравнению с 97,0% для стандартного голосования большинством)
-- DeepSeek-8B улучшает результат с 82,3% до 87,4% на AIME 2025
-- Последовательный прирост для моделей с размером от 8B до 120B параметров
+- GPT-OSS-120B achieves 99.9% accuracy on AIME 2025 (vs. 97.0% for standard majority voting)
+- DeepSeek-8B improves from 82.3% to 87.4% on AIME 2025
+- Consistent gains across models ranging from 8B to 120B parameters
 
-**Вычислительная эффективность**: онлайн-варианты обеспечивают значительное сокращение токенов:
+**Computational efficiency**: Online variants achieve significant token reductions:
 
-- DeepConf-low: сокращение токенов на 43-84,7% с агрессивной ранней остановкой
-- DeepConf-high: сокращение токенов на 18-59% с консервативной остановкой
+- DeepConf-low: 43–84.7% token reduction with aggressive early stopping
+- DeepConf-high: 18–59% token reduction with conservative stopping
 
-![Рисунок 3: Компромиссы между эффективностью и точностью в различных бенчмарках, демонстрирующие, что варианты DeepConf стабильно достигают лучшей точности при меньших вычислительных ресурсах по сравнению со стандартным голосованием большинством.](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-37/assets/Image-03.png)
+![Figure 3: Trade-offs between efficiency and accuracy across benchmarks, demonstrating that DeepConf variants consistently achieve higher accuracy with fewer computational resources compared to standard majority voting.](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-37/assets/Image-03.png)
 
-## Анализ сигнала уверенности
+## Confidence Signal Analysis
 
-Исследование предоставляет подробный анализ того, почему локальные меры уверенности превосходят глобальные:
+The study provides a detailed analysis of why local confidence measures outperform global ones:
 
-![Рисунок 4: Распределение средних показателей уверенности для правильных (зеленый) и неправильных (оранжевый) трассировок рассуждений, показывающее четкое разделение, которое позволяет эффективно фильтровать.](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-37/assets/Image-04.png)
+![Figure 4: Distribution of average confidence scores for correct (green) and incorrect (orange) reasoning traces, showing clear separation enabling effective filtering.](https://raw.githubusercontent.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/refs/heads/develop/2025/week-37/assets/Image-04.png)
 
-Гистограммы показывают, что различные метрики уверенности обеспечивают различную степень разделения между правильными и неправильными трассировками. Нижние 10% Групповой Уверенности и Хвостовая Уверенность демонстрируют особенно сильную дискриминационную способность, объясняя их эффективность в процессе фильтрации.
+Histograms reveal that different confidence metrics provide varying degrees of separation between correct and incorrect traces. Bottom-10% Group Confidence and Tail Confidence demonstrate particularly strong discriminative power, explaining their effectiveness in filtering.
 
-## Практическая реализация и масштабируемость
+## Practical Implementation and Scalability
 
-При разработке DeepConf приоритет отдавался практическому развертыванию:
+DeepConf was designed with practical deployment as a priority:
 
-- **Интеграция с фреймворками**: метод не требует обучения модели или настройки гиперпараметров, что делает его сразу совместимым с существующими фреймворками для обслуживания LLM.
-- **Широкая совместимость моделей**: оценка на различных моделях с открытым исходным кодом (DeepSeek, Qwen, серия GPT-OSS) демонстрирует общую применимость за пределами конкретных архитектур.
-- **Работа в реальном времени**: способность онлайн-режима принимать решения о завершении во время генерации, а не после ее завершения, обеспечивает реальную экономию вычислительных ресурсов в производственных средах.
+- **Framework integration**: The method requires no model training or hyperparameter tuning, making it immediately compatible with existing LLM serving frameworks.
+- **Broad model compatibility**: Evaluation across various open-source models (DeepSeek, Qwen, GPT-OSS series) demonstrates generalizability beyond specific architectures.
+- **Real-time operation**: The online mode's ability to make termination decisions during generation—rather than after completion—ensures tangible computational savings in production environments.
 
-## Значимость и влияние
+## Significance and Impact
 
-Эта работа решает критическое узкое место в развертывании передовых систем рассуждений на основе LLM в масштабе. Одновременно повышая точность и снижая вычислительные требования, DeepConf делает сложные возможности рассуждений более доступными для практических применений.
+This work addresses a critical bottleneck in scaling advanced LLM-based reasoning systems. By simultaneously improving accuracy and reducing computational requirements, DeepConf makes complex reasoning capabilities more accessible for practical applications.
 
-Успех метода в использовании внутренних сигналов уверенности модели также расширяет наше понимание количественной оценки неопределенности LLM. Открытие того, что локальные, детальные меры уверенности превосходят глобальные агрегации, имеет более широкие последствия для безопасности и надежности ИИ.
+The method's success in leveraging internal model confidence signals also advances our understanding of quantifying LLM uncertainty. The discovery that local, fine-grained confidence measures outperform global aggregations has broader implications for AI safety and reliability.
 
-Кроме того, существенное повышение эффективности (сокращение токенов до 84,7%) при сохранении или улучшении точности представляет собой значительный шаг к устойчивому развертыванию ИИ, что особенно важно, поскольку задачи рассуждений становятся все более сложными и требовательными к вычислительным ресурсам.
+Moreover, the substantial efficiency gains (up to 84.7% token reduction) while maintaining or improving accuracy represent a significant step toward sustainable AI deployment, particularly as reasoning tasks become increasingly complex and computationally demanding.
 
-Исследование демонстрирует, что интеллектуальная фильтрация и динамические стратегии завершения могут изменить компромисс между эффективностью и точностью в рассуждениях LLM, переходя от подхода грубой силы генерации большего количества трасс к более сложным системам вывода, учитывающим уверенность.
-
-
+The study demonstrates that intelligent filtering and dynamic termination strategies can transform the accuracy-efficiency trade-off in LLM reasoning, moving beyond brute-force generation of more traces toward more sophisticated, confidence-aware inference systems.
