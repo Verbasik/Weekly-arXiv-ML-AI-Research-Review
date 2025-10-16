@@ -106,7 +106,74 @@ class MoETransformerBlock(nn.Module):
         # - Почему мы заменяем FFN на MoE Layer?
         # - Как balance_loss влияет на обучение модели?
         # - Что произойдёт, если не добавлять balance_loss к общему loss?
-        pass
+        # pass
+
+        # --- Валидация параметров -------------------------------------------------
+        assert (
+            isinstance(hidden_size, int) and hidden_size > 0
+        ), "hidden_size должен быть положительным целым числом"
+        assert (
+            isinstance(num_query_groups, int) and num_query_groups > 0
+        ), "num_query_groups должен быть положительным целым числом"
+        assert (
+            isinstance(num_attention_heads, int) and num_attention_heads > 0
+        ), "num_attention_heads должен быть положительным целым числом"
+
+        # MoE специфичные проверки
+        assert (
+            isinstance(num_experts, int) and num_experts > 0
+        ), "num_experts должен быть положительным целым числом"
+        assert (
+            top_k > 0 and top_k <= num_experts
+        ), "top_k должен быть > 0 и <= num_experts"
+
+        # Ключевая проверка для GQA архитектуры:
+        assert (
+            num_attention_heads % num_query_groups == 0
+        ), (
+            "num_attention_heads должен делиться на num_query_groups для "
+            "корректной работы GQA"
+        )
+        # Проверка делимости hidden_size на число голов
+        # Тензор скрытого состояния должен равномерно делиться на число голов
+        assert (
+            hidden_size % num_attention_heads == 0
+        ), "hidden_size должен делиться на num_attention_heads"
+
+        # Проверка intermediate_size если указан
+        if intermediate_size is not None:
+            assert (
+                isinstance(intermediate_size, int) and intermediate_size > 0
+            ), "intermediate_size должен быть положительным целым числом"
+
+        # --- Инициализация атрибутов ----------------------------------------------
+        self.hidden_size         = hidden_size
+        self.num_query_groups    = num_query_groups
+        self.num_attention_heads = num_attention_heads
+        self.num_experts         = num_experts
+        self.top_k               = top_k
+        self.intermediate_size = (
+            intermediate_size if intermediate_size is not None else 4 * hidden_size
+        )
+        self.expert_dropout    = expert_dropout
+        self.balance_loss_coef = balance_loss_coef
+
+        # --- Компоненты нормализации и подблоков ----------------------------------
+        self.attention_norm = RMSNorm(hidden_size)
+        self.attention = GroupedQueryAttention(
+            hidden_size=hidden_size,
+            num_query_groups=num_query_groups,
+            num_attention_heads=num_attention_heads,
+        )
+        self.ffn_norm  = RMSNorm(hidden_size)
+        self.moe_layer = SimpleMoELayer(
+            hidden_size = hidden_size,
+            num_experts = num_experts,
+            top_k = top_k,
+            intermediate_size = self.intermediate_size,
+            expert_dropout = expert_dropout,
+            balance_loss_coef = balance_loss_coef
+        )
 
 
     def forward(
@@ -167,4 +234,54 @@ class MoETransformerBlock(nn.Module):
         # - Почему balance_loss возвращается вместе с hidden_states?
         # - Как будет собираться balance_loss от всех слоёв модели?
         # - Чем отличается forward от обычного TransformerBlock?
-        pass
+        # pass
+
+        # ──────────────────────────────────────────────────────────────────────────
+        # ПЕРВЫЙ RESIDUAL BLOCK: Self-Attention (GQA)
+        # ──────────────────────────────────────────────────────────────────────────
+
+        # Сохраняем вход для остаточной связи, что бы потом прибавить к выходу блока
+        # p.s. Помогает сохранить информацию о входном тензоре (векторах), чтобы не терять её.
+        residual_1 = hidden_states
+
+        # Нормализуем входной тензор
+        normed = self.attention_norm(hidden_states)
+
+        # Вызываем модуль группового внимания. Он может вернуть:
+        # - только выход (Tensor), либо
+        # - кортеж (att_output, present_key_value, attn_weights).
+        att_output = self.attention(
+            hidden_states=normed,
+            attention_mask=attention_mask,
+            position_ids=position_ids,
+            past_key_value=past_key_value,
+            output_attentions=output_attentions,
+            use_cache=use_cache,
+        )
+
+        if isinstance(att_output, tuple):
+            att_output, present_key_value, attn_weights = att_output
+        else:
+            present_key_value = None
+            attn_weights = None
+
+        # Первая residual-связь: складываем вход и выход подблока.
+        hidden_states = att_output + residual_1
+
+        # ──────────────────────────────────────────────────────────────────────────
+        # ВТОРОЙ RESIDUAL BLOCK: MoE Feed-Forward
+        # ──────────────────────────────────────────────────────────────────────────
+
+        residual_2 = hidden_states
+
+        # Нормализуем перед MoE по тем же причинам, что и перед вниманием.
+        normed = self.ffn_norm(hidden_states)
+        # Применяем MoE слой вместо обычного FFN.
+        ffn_output, balance_loss = self.moe_layer(hidden_states=normed, training=training)
+        # Вторая residual-связь.
+        hidden_states = ffn_output + residual_2
+
+        if use_cache or output_attentions:
+            return hidden_states, balance_loss, present_key_value, attn_weights
+
+        return hidden_states, balance_loss
