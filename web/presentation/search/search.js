@@ -32,7 +32,8 @@
   function getConfig() {
     // Fallbacks for repo/branch
     const repo = 'Verbasik/Weekly-arXiv-ML-AI-Research-Review';
-    const branch = 'develop';
+    // Select branch dynamically by language: EN → main-en; otherwise keep existing default
+    const branch = isEnglishPage() ? 'main-en' : 'develop';
     return { repo, branch };
   }
 
@@ -49,14 +50,18 @@
     const en = isEnglishPage();
     const primary = `https://raw.githubusercontent.com/${repo}/${branch}/web/infrastructure/data/${en ? 'index-en.json' : 'index.json'}`;
     const altEn = `https://raw.githubusercontent.com/${repo}/${branch}/web/infrastructure/data/index_en.json`;
-    const fallback = `https://raw.githubusercontent.com/${repo}/${branch}/web/infrastructure/data/index.json`;
+    const enPlain = `https://raw.githubusercontent.com/${repo}/${branch}/web/infrastructure/data/index.json`;
+    const ruFallback = `https://raw.githubusercontent.com/${repo}/main/web/infrastructure/data/index.json`;
 
     let resp = await fetch(primary, { cache: 'no-store' });
     if (!resp.ok && en) {
-      // Try alternative EN name, then fallback to RU
+      // Try alternative EN name, then plain EN index.json, then fallback to RU main
       resp = await fetch(altEn, { cache: 'no-store' });
       if (!resp.ok) {
-        resp = await fetch(fallback, { cache: 'no-store' });
+        resp = await fetch(enPlain, { cache: 'no-store' });
+        if (!resp.ok) {
+          resp = await fetch(ruFallback, { cache: 'no-store' });
+        }
       }
     }
     if (!resp.ok) throw new Error(`Index fetch failed: ${resp.status}`);

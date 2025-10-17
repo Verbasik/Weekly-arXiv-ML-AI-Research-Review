@@ -38,15 +38,22 @@ export class AgentsDataSource {
         } catch (error) {
             console.warn('Failed to load agents config, using defaults:', error);
             // Fallback конфигурация
+            const isEnglish = (() => {
+                try {
+                    const path = (typeof window !== 'undefined' && window.location && window.location.pathname) ? window.location.pathname : '';
+                    return /(?:-|_)en\.html$/i.test(path);
+                } catch (e) { return false; }
+            })();
+            const branch = isEnglish ? 'main-en' : this.githubBranch;
             this.config = {
                 github: {
                     repo: this.githubRepo,
-                    branch: this.githubBranch
+                    branch
                 },
                 urls: {
-                    paper_base: `https://raw.githubusercontent.com/${this.githubRepo}/${this.githubBranch}/{code_path}/README.md`,
-                    notebook_base: `https://github.com/${this.githubRepo}/tree/${this.githubBranch}/{notebook_path}`,
-                    code_base: `https://github.com/${this.githubRepo}/tree/${this.githubBranch}/{code_path}`
+                    paper_base: `https://raw.githubusercontent.com/${this.githubRepo}/${branch}/{code_path}/README.md`,
+                    notebook_base: `https://github.com/${this.githubRepo}/tree/${branch}/{notebook_path}`,
+                    code_base: `https://github.com/${this.githubRepo}/tree/${branch}/{code_path}`
                 },
                 buttons: {
                     paper: {
@@ -95,8 +102,20 @@ export class AgentsDataSource {
      */
     async fetchData() {
         try {
-            // Сначала пробуем загрузить удаленно
-            const response = await fetch(`https://raw.githubusercontent.com/${this.githubRepo}/${this.githubBranch}/web/infrastructure/data/agents-index.json`);
+            // Выбираем ветку по языку страницы
+            const isEnglish = (() => {
+                try {
+                    const path = (typeof window !== 'undefined' && window.location && window.location.pathname) ? window.location.pathname : '';
+                    return /(?:-|_)en\.html$/i.test(path);
+                } catch (e) { return false; }
+            })();
+            const branch = isEnglish ? 'main-en' : this.githubBranch;
+            // Сначала пробуем загрузить удаленно из выбранной ветки
+            let response = await fetch(`https://raw.githubusercontent.com/${this.githubRepo}/${branch}/web/infrastructure/data/agents-index.json`);
+            if (!response.ok && isEnglish) {
+                // Крайний fallback: RU ветка main
+                response = await fetch(`https://raw.githubusercontent.com/${this.githubRepo}/main/web/infrastructure/data/agents-index.json`);
+            }
             
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -140,8 +159,20 @@ export class AgentsDataSource {
      */
     async fetchMarkdown(projectId) {
         try {
+            // Выбираем ветку по языку страницы
+            const isEnglish = (() => {
+                try {
+                    const path = (typeof window !== 'undefined' && window.location && window.location.pathname) ? window.location.pathname : '';
+                    return /(?:-|_)en\.html$/i.test(path);
+                } catch (e) { return false; }
+            })();
+            const branch = isEnglish ? 'main-en' : this.githubBranch;
             // Сначала пробуем удаленно
-            const response = await fetch(`https://raw.githubusercontent.com/${this.githubRepo}/${this.githubBranch}/agents-under-hood/${projectId}/review.md`);
+            let response = await fetch(`https://raw.githubusercontent.com/${this.githubRepo}/${branch}/agents-under-hood/${projectId}/review.md`);
+            if (!response.ok && isEnglish) {
+                // Крайний fallback: RU ветка main
+                response = await fetch(`https://raw.githubusercontent.com/${this.githubRepo}/main/agents-under-hood/${projectId}/review.md`);
+            }
             
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);

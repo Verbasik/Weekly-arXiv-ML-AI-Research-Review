@@ -260,9 +260,15 @@
         import { AgentsController } from './application/AgentsController.js';
         
         // Конфигурация приложения
+        function isEnglishPage() {
+            try {
+                const path = (typeof window !== 'undefined' && window.location && window.location.pathname) ? window.location.pathname : '';
+                return /(?:-|_)en\.html$/i.test(path);
+            } catch (e) { return false; }
+        }
         const config = {
             githubRepo: 'Verbasik/Weekly-arXiv-ML-AI-Research-Review',
-            githubBranch: 'develop'
+            githubBranch: isEnglishPage() ? 'main-en' : 'main'
         };
         
         // Инициализация приложения
