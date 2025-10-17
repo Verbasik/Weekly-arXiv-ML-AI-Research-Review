@@ -1386,13 +1386,25 @@ nav .nav-stack {
 /* ------------------------------------------------------------ */
 @media (max-width: 768px) {
   .hero-card {
-    /* Reserve space on the right for the sprite so badges/text don't overlap */
-    padding-right: calc(var(--pixel-space-3) + 128px) !important;
+    /* Stack content vertically and center the title + brain */
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: var(--pixel-space-2);
+    /* Reserve a bit of space for the sprite if present */
+    padding-right: var(--pixel-space-2) !important;
+    text-align: center;
+  }
+  /* Ensure inner flex rows center too */
+  .hero-card .pixel-flex,
+  .hero-card .pixel-flex-center {
+    justify-content: center !important;
   }
 }
 @media (max-width: 480px) {
   .hero-card {
-    padding-right: calc(var(--pixel-space-2) + 112px) !important;
+    padding-right: var(--pixel-space-2) !important;
   }
 }
 
@@ -1419,4 +1431,19 @@ nav .nav-stack {
   /* Toggle label switching */
   nav .nav-stack.collapsed .nav-toggle .label-expanded { display: none; }
   nav .nav-stack:not(.collapsed) .nav-toggle .label-collapsed { display: none; }
+}
+
+/* ------------------------------------------------------------ */
+/* Mobile: hide heavy sidebar blocks to reduce clutter          */
+/* ------------------------------------------------------------ */
+@media (max-width: 768px) {
+  .sidebar-layout > aside { display: none !important; }
+}
+
+/* ------------------------------------------------------------ */
+/* Prevent text cutoff/overflow on narrow screens               */
+/* ------------------------------------------------------------ */
+@media (max-width: 768px) {
+  .pixel-container, main, .content, .pixel-card, section { max-width: 100%; overflow-x: hidden; }
+  .pixel-card, .week-card, .reading-article { word-break: break-word; overflow-wrap: anywhere; }
 }
