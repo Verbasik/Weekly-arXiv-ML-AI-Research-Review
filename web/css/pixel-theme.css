@@ -1310,3 +1310,73 @@ nav .nav-stack {
         padding: 0 var(--pixel-space-2);
     }
 }
+
+/* ------------------------------------------------------------ */
+/* Mobile/Tablet navigation stacking for consistent layout       */
+/* ------------------------------------------------------------ */
+
+/* Phones: single-column nav, full-width controls */
+@media (max-width: 768px) {
+  /* Make nav actions a predictable single-column grid */
+  nav .nav-actions {
+    display: grid !important;
+    grid-template-columns: 1fr;
+    gap: var(--pixel-space-2);
+  }
+
+  /* All buttons stretch to full width and centered label */
+  nav .nav-actions .pixel-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Dropdown (Years) occupies full width; content inline below */
+  nav .nav-actions .pixel-dropdown,
+  nav .nav-actions .pixel-dropdown .pixel-dropdown-btn {
+    width: 100%;
+  }
+  nav .nav-actions .pixel-dropdown-content {
+    position: static;
+    width: 100%;
+    left: 0;
+    right: 0;
+    margin-top: var(--px-unit-half);
+  }
+
+  /* Language switch behaves like a 2-segment control */
+  .nav-lang-inline {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--px-unit);
+    width: 100%;
+  }
+  .nav-lang-inline .pixel-badge,
+  .nav-lang-inline .pixel-btn {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+
+  /* Search suggestions span container width on phones */
+  .nav-search .search-suggestions {
+    left: 0;
+    right: 0;
+  }
+
+  /* Slightly increase vertical rhythm in nav card */
+  nav .nav-stack { gap: var(--pixel-space-2) !important; }
+}
+
+/* Tablets: two-column nav with wide items spanning a row */
+@media (min-width: 769px) and (max-width: 992px) {
+  nav .nav-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--pixel-space-2);
+  }
+  /* Make prominent items span full row */
+  nav .nav-actions .pixel-btn[href*="atlas-wrapper"],
+  nav .nav-actions .pixel-dropdown {
+    grid-column: 1 / -1;
+  }
+}
