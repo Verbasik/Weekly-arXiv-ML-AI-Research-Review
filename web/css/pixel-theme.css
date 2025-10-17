@@ -1392,8 +1392,9 @@ nav .nav-stack {
     align-items: center !important;
     justify-content: center !important;
     gap: var(--pixel-space-2);
-    /* Reserve a bit of space for the sprite if present */
+    /* Reserve space for sprite at the bottom */
     padding-right: var(--pixel-space-2) !important;
+    padding-bottom: 112px !important;
     text-align: center;
   }
   /* Ensure inner flex rows center too */
@@ -1401,10 +1402,18 @@ nav .nav-stack {
   .hero-card .pixel-flex-center {
     justify-content: center !important;
   }
+  /* Shrink and anchor sprite to bottom-right to avoid overlap */
+  .hero-card .sprite-right {
+    width: 96px;
+    height: 96px;
+    right: 8px;
+    bottom: 8px;
+  }
 }
 @media (max-width: 480px) {
   .hero-card {
     padding-right: var(--pixel-space-2) !important;
+    padding-bottom: 100px !important;
   }
 }
 
@@ -1446,4 +1455,27 @@ nav .nav-stack {
 @media (max-width: 768px) {
   .pixel-container, main, .content, .pixel-card, section { max-width: 100%; overflow-x: hidden; }
   .pixel-card, .week-card, .reading-article { word-break: break-word; overflow-wrap: anywhere; }
+}
+
+/* ------------------------------------------------------------ */
+/* Welcome section: fit stat cards/buttons within screen        */
+/* ------------------------------------------------------------ */
+@media (max-width: 768px) {
+  /* Reduce hero heading sizes slightly for phones */
+  #home h1 { font-size: calc(var(--pixel-font-2xl) + 2px) !important; }
+  #home h2 { font-size: var(--pixel-font-lg) !important; }
+
+  /* Stats row wraps and each card takes ~45% width */
+  #home .pixel-flex.pixel-flex-center.pixel-gap-4 { flex-wrap: wrap; gap: var(--pixel-space-2); }
+  #home .pixel-flex.pixel-flex-center.pixel-gap-4 .pixel-card { flex: 1 1 45%; min-width: 140px; }
+
+  /* Action buttons wrap and can stretch */
+  #home .pixel-flex.pixel-flex-center.pixel-gap-3 { flex-wrap: wrap; gap: var(--pixel-space-2); }
+  #home .pixel-flex.pixel-flex-center.pixel-gap-3 .pixel-btn { flex: 1 1 48%; min-width: 160px; }
+}
+
+@media (max-width: 480px) {
+  /* On small phones make blocks full width */
+  #home .pixel-flex.pixel-flex-center.pixel-gap-4 .pixel-card { flex: 1 1 100%; min-width: 0; }
+  #home .pixel-flex.pixel-flex-center.pixel-gap-3 .pixel-btn { flex: 1 1 100%; min-width: 0; }
 }
