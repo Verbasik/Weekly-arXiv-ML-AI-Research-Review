@@ -1479,3 +1479,20 @@ nav .nav-stack {
   #home .pixel-flex.pixel-flex-center.pixel-gap-4 .pixel-card { flex: 1 1 100%; min-width: 0; }
   #home .pixel-flex.pixel-flex-center.pixel-gap-3 .pixel-btn { flex: 1 1 100%; min-width: 0; }
 }
+
+/* ------------------------------------------------------------ */
+/* Mobile: hide the big "WELCOME TO" hero card in #home         */
+/* (keeps objectives and below visible)                         */
+/* ------------------------------------------------------------ */
+@media (max-width: 768px) {
+  /* Keep the first accent card visible, but simplify its contents */
+  #home > .pixel-card.pixel-card--accent.pixel-text-center:first-of-type { display: block !important; }
+  /* Hide big headings to save space */
+  #home > .pixel-card.pixel-card--accent.pixel-text-center:first-of-type h1,
+  #home > .pixel-card.pixel-card--accent.pixel-text-center:first-of-type h2 { display: none !important; }
+  /* Hide stats row (LEVEL / PAPERS / YEARS) */
+  #home > .pixel-card.pixel-card--accent.pixel-text-center:first-of-type .pixel-flex.pixel-flex-center.pixel-gap-4 { display: none !important; }
+  /* Keep only the action buttons; make them comfortable */
+  #home > .pixel-card.pixel-card--accent.pixel-text-center:first-of-type .pixel-flex.pixel-flex-center.pixel-gap-3 { margin: 0 !important; gap: var(--pixel-space-2); }
+  #home > .pixel-card.pixel-card--accent.pixel-text-center:first-of-type .pixel-flex.pixel-flex-center.pixel-gap-3 .pixel-btn { width: 100%; max-width: 420px; }
+}
