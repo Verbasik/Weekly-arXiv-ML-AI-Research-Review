@@ -7,7 +7,18 @@
 [![Open Source](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://opensource.org/)
 [![Telegram Channel](https://img.shields.io/badge/Telegram-TheWeeklyBrief-blue)](https://t.me/TheWeeklyBrief)
 
-[![RU](https://img.shields.io/badge/lang-RU-blue)](README.md) [![EN](https://img.shields.io/badge/lang-EN-black)](docs/README-en.md)
+<p align="center">
+  <a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/tree/main" title="Переключиться на ветку main (RU)">
+    <img src="https://img.shields.io/badge/%F0%9F%87%B7%F0%9F%87%BA%20RU-main-blue?style=for-the-badge" alt="RU | main" />
+  </a>
+  &nbsp;
+  <a href="https://github.com/Verbasik/Weekly-arXiv-ML-AI-Research-Review/tree/main-en" title="Switch to main-en branch (EN)">
+    <img src="https://img.shields.io/badge/%F0%9F%87%AC%F0%9F%87%A7%20EN-main--en-black?style=for-the-badge" alt="EN | main-en" />
+  </a>
+  <br/>
+  <sub>Нажмите, чтобы открыть соответствующую ветку репозитория</sub>
+  
+</p>
 
 ## 📚 О проекте
 
