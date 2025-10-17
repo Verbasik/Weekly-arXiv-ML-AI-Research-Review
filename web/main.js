@@ -78,4 +78,43 @@ window.addEventListener('load', function() {
 window.ResearchApp = {
     initialize: initializeApplication,
     config: APP_CONFIG
-}; 
+};
+
+// ------------------------------
+// Helpers: Mobile Nav Curtain
+// ------------------------------
+function initMobileNavCurtain() {
+    try {
+        const navStack = document.querySelector('nav .nav-stack');
+        if (!navStack) return;
+
+        const isMobile = window.matchMedia('(max-width: 768px)').matches;
+        const existing = navStack.querySelector('.nav-toggle');
+
+        if (!isMobile) {
+            if (existing) existing.remove();
+            navStack.classList.remove('collapsed');
+            return;
+        }
+
+        if (!existing) {
+            const btn = document.createElement('button');
+            btn.className = 'pixel-btn pixel-btn--primary pixel-btn--sm nav-toggle';
+            btn.innerHTML = '<span class="label-collapsed">▼ Menu</span><span class="label-expanded">▲ Close</span>';
+            navStack.insertBefore(btn, navStack.firstChild);
+            // Start collapsed to save vertical space
+            navStack.classList.add('collapsed');
+            btn.addEventListener('click', () => navStack.classList.toggle('collapsed'));
+        }
+    } catch (e) {
+        // non-fatal
+    }
+}
+
+// Attach on lifecycle and viewport changes
+document.addEventListener('DOMContentLoaded', initMobileNavCurtain);
+window.addEventListener('load', initMobileNavCurtain);
+window.addEventListener('resize', () => {
+    clearTimeout(window.__navCurtainTimer);
+    window.__navCurtainTimer = setTimeout(initMobileNavCurtain, 150);
+});

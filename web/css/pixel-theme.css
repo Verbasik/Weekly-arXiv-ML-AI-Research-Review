@@ -1380,3 +1380,43 @@ nav .nav-stack {
     grid-column: 1 / -1;
   }
 }
+
+/* ------------------------------------------------------------ */
+/* Hero card: avoid overlapping sprite and badges on phones     */
+/* ------------------------------------------------------------ */
+@media (max-width: 768px) {
+  .hero-card {
+    /* Reserve space on the right for the sprite so badges/text don't overlap */
+    padding-right: calc(var(--pixel-space-3) + 128px) !important;
+  }
+}
+@media (max-width: 480px) {
+  .hero-card {
+    padding-right: calc(var(--pixel-space-2) + 112px) !important;
+  }
+}
+
+/* Ensure sprite stays behind interactive badges if overlap still occurs */
+.hero-card .sprite { z-index: 1; }
+.hero-card .pixel-badge, .hero-card .pixel-flex-center { position: relative; z-index: 2; }
+
+/* ------------------------------------------------------------ */
+/* Collapsible nav card (mobile curtain)                        */
+/* ------------------------------------------------------------ */
+@media (max-width: 768px) {
+  nav .nav-toggle {
+    display: inline-flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    margin-top: var(--pixel-space-1);
+  }
+
+  /* When collapsed, hide actions/search to save vertical space */
+  nav .nav-stack.collapsed .nav-actions,
+  nav .nav-stack.collapsed .nav-search { display: none !important; }
+
+  /* Toggle label switching */
+  nav .nav-stack.collapsed .nav-toggle .label-expanded { display: none; }
+  nav .nav-stack:not(.collapsed) .nav-toggle .label-collapsed { display: none; }
+}
